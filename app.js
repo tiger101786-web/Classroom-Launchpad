@@ -1834,7 +1834,7 @@ function startColtRunGame() {
     return sprite;
   });
   const sceneOneVideo = document.createElement("video");
-  if (!isGitHubPagesHost) sceneOneVideo.src = "assets/colt-run-bg-01.mp4?v=20260707-scene1-replace";
+  sceneOneVideo.src = "assets/colt-run-bg-01.mp4?v=20260709-scene1-sixsec";
   sceneOneVideo.muted = true;
   sceneOneVideo.loop = true;
   sceneOneVideo.playsInline = true;
