@@ -1840,7 +1840,7 @@ function startColtRunGame() {
   sceneOneVideo.playsInline = true;
   sceneOneVideo.preload = "auto";
   const sceneTwoVideo = document.createElement("video");
-  if (!isGitHubPagesHost) sceneTwoVideo.src = "assets/colt-run-bg-02.mp4?v=20260707-scene2-replace";
+  sceneTwoVideo.src = "assets/colt-run-bg-02.mp4?v=20260709-scene2-sixsec";
   sceneTwoVideo.muted = true;
   sceneTwoVideo.loop = true;
   sceneTwoVideo.playsInline = true;
