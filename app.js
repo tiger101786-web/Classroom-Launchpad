@@ -1865,7 +1865,7 @@ function startColtRunGame() {
   sceneFiveVideo.preload = "auto";
   const animatedBackgroundVideos = [sceneOneVideo, sceneTwoVideo, sceneThreeVideo, sceneFourVideo, sceneFiveVideo];
   const coinSprite = new Image();
-  coinSprite.src = "assets/colt-run-coin.png?v=20260702-coin";
+  coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
   const coinVideo = document.createElement("video");
   coinVideo.src = "assets/colt-run-coin-spin.mp4?v=20260704-coin2";
   coinVideo.muted = true;
@@ -3807,15 +3807,6 @@ function startColtRunGame() {
       ctx.restore();
       return;
     }
-    const gradient = ctx.createLinearGradient(x, platform.y, x, platform.y + platform.h);
-    gradient.addColorStop(0, "#7b0b31");
-    gradient.addColorStop(0.5, "#2a2a2f");
-    gradient.addColorStop(1, "#55585a");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(x, platform.y, platform.w, platform.h);
-    ctx.strokeStyle = "#d9dde0";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, platform.y + 1, platform.w - 2, platform.h - 2);
   };
 
   const drawLavaRock = rock => {
@@ -3877,14 +3868,6 @@ function startColtRunGame() {
         ctx.shadowBlur = 12;
         ctx.drawImage(coinSprite, x - coinSize / 2, coin.y - coinSize / 2, coinSize, coinSize);
         ctx.restore();
-      } else {
-        ctx.fillStyle = "#f4dbe4";
-        ctx.strokeStyle = "#7b0b31";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(x, coin.y, 13, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
       }
     });
     const flagX = flag.x - cameraX;
