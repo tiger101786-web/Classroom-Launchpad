@@ -1143,7 +1143,7 @@ function renderHome() {
         <source src="assets/hero-panel-bg.mp4" type="video/mp4">
       </video>
       <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/hero-panel-bg.mp4" type="video/mp4">
+        <source src="assets/hero-panel-bg-mobile.mp4?v=20260710-mobile-bg1" type="video/mp4">
       </video>
       ${pageHeader(
         "Classroom Launchpad",
