@@ -1672,6 +1672,13 @@ function renderColtRun() {
       <div class="colt-run-stage">
         <canvas id="coltRunCanvas" class="colt-run-canvas" width="960" height="540" tabindex="0" aria-label="Colt Run platform game"></canvas>
         <button class="colt-run-fullscreen-toggle" type="button" data-colt-run="fullscreen">Exit Fullscreen</button>
+        <div class="colt-run-touch" aria-label="Touch controls">
+          <div class="colt-run-touch-move" aria-label="Move">
+            <button class="colt-run-touch-btn" type="button" data-colt-key="left" aria-label="Move left">←</button>
+            <button class="colt-run-touch-btn" type="button" data-colt-key="right" aria-label="Move right">→</button>
+          </div>
+          <button class="colt-run-touch-btn colt-run-touch-jump" type="button" data-colt-key="jump" aria-label="Jump">Jump</button>
+        </div>
       </div>
       <div class="colt-run-footer">
         <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
@@ -1697,11 +1704,6 @@ function renderColtRun() {
             </div>
           </form>
         </section>
-      </div>
-      <div class="colt-run-touch" aria-label="Touch controls">
-        <button type="button" data-colt-key="left">←</button>
-        <button type="button" data-colt-key="right">→</button>
-        <button type="button" data-colt-key="jump">Jump</button>
       </div>
     </section>
   `;
@@ -4105,25 +4107,35 @@ function startColtRunGame() {
     const key = button.dataset.coltKey;
     const down = event => {
       event.preventDefault();
+      button.setPointerCapture?.(event.pointerId);
       setKey(key, true);
     };
     const up = event => {
       event.preventDefault();
+      button.releasePointerCapture?.(event.pointerId);
       setKey(key, false);
     };
     button.addEventListener("pointerdown", down);
     button.addEventListener("pointerup", up);
     button.addEventListener("pointerleave", up);
+    button.addEventListener("pointercancel", up);
     return () => {
       button.removeEventListener("pointerdown", down);
       button.removeEventListener("pointerup", up);
       button.removeEventListener("pointerleave", up);
+      button.removeEventListener("pointercancel", up);
     };
   };
   const touchCleanups = Array.from(document.querySelectorAll("[data-colt-key]")).map(bindTouchButton);
+  const clearTouchKeys = () => {
+    keys.left = false;
+    keys.right = false;
+    keys.jump = false;
+  };
 
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
+  window.addEventListener("blur", clearTouchKeys);
   document.addEventListener("fullscreenchange", updateFullscreenButton);
   app.addEventListener("click", onButtonClick);
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
@@ -4134,6 +4146,7 @@ function startColtRunGame() {
       cancelAnimationFrame(animationId);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", clearTouchKeys);
       document.removeEventListener("fullscreenchange", updateFullscreenButton);
       app.removeEventListener("click", onButtonClick);
       if (leaderboardForm) leaderboardForm.removeEventListener("submit", onLeaderboardSubmit);
