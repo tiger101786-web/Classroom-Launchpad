@@ -1142,6 +1142,9 @@ function renderHome() {
       <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
         <source src="assets/hero-panel-bg.mp4" type="video/mp4">
       </video>
+      <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
+        <source src="assets/hero-panel-bg.mp4" type="video/mp4">
+      </video>
       ${pageHeader(
         "Classroom Launchpad",
         "Choose a teacher-approved activity or resource below.",

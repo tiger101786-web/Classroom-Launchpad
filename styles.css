@@ -95,6 +95,10 @@ button {
   pointer-events: none;
 }
 
+.hero-colt-mobile-video {
+  display: none;
+}
+
 .hero-panel::before {
   content: "";
   position: absolute;
@@ -2697,6 +2701,35 @@ body[data-theme="night"] .class-timer-badge {
   .hero-bg-video {
     display: block;
     object-position: 24% center;
+  }
+
+  .hero-panel::after {
+    z-index: 2;
+  }
+
+  body[data-theme="night"] .hero-panel::after {
+    background: linear-gradient(180deg, rgba(30, 30, 34, 0.72) 0%, rgba(30, 30, 34, 0.54) 46%, rgba(30, 30, 34, 0.62) 100%);
+  }
+
+  .hero-panel > * {
+    z-index: 3;
+  }
+
+  .hero-panel > .hero-bg-video {
+    z-index: 0;
+  }
+
+  .hero-panel > .hero-colt-mobile-video {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    display: block;
+    width: min(128%, 620px);
+    height: auto;
+    transform: translate(-50%, -50%);
+    opacity: 0.72;
+    pointer-events: none;
   }
 
   .school-logo-frame {
