@@ -1778,10 +1778,10 @@ function startColtRunGame() {
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const platformSprites = Array.from({ length: 21 }, (_, index) => {
     const sprite = new Image();
-    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260707-platforms7`;
+    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260709-platforms8`;
     return sprite;
   });
-  const platformSurfaceRatios = [0.24, 0.27, 0.16, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.16, 0.18, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22];
+  const platformSurfaceRatios = [0.24, 0.27, 0.16, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22];
   const lavaRockSprites = Array.from({ length: 10 }, (_, index) => {
     const sprite = new Image();
     sprite.src = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`;
