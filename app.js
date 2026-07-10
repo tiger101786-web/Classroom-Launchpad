@@ -1694,7 +1694,7 @@ function renderColtRun() {
         <section class="colt-run-leaderboard-panel" aria-label="Colt Run leaderboard">
           <div class="colt-run-leaderboard-header">
             <h3>Coin Leaderboard</h3>
-            <button class="outline-btn" type="button" data-colt-run="closeLeaderboard">Close</button>
+            <button class="outline-btn colt-run-leaderboard-back" type="button" data-colt-run="closeLeaderboard">Close</button>
           </div>
           <div id="coltRunLeaderboardBody" class="colt-run-leaderboard-body"></div>
           <form id="coltRunLeaderboardForm" class="colt-run-name-form" hidden>
@@ -2036,8 +2036,8 @@ function startColtRunGame() {
     if (leaderboardForm) leaderboardForm.hidden = !pendingLeaderboardEntry;
     const closeButton = leaderboardPanel ? leaderboardPanel.querySelector('[data-colt-run="closeLeaderboard"]') : null;
     if (closeButton) {
-      closeButton.disabled = !!pendingLeaderboardEntry;
-      closeButton.textContent = pendingLeaderboardEntry ? "Save First" : "Close";
+      closeButton.disabled = false;
+      closeButton.textContent = pendingLeaderboardEntry ? "Back" : "Close";
     }
   };
   const openLeaderboard = () => {
@@ -2051,7 +2051,13 @@ function startColtRunGame() {
     }
   };
   const closeLeaderboard = () => {
-    if (!leaderboardPanel || pendingLeaderboardEntry) return;
+    if (!leaderboardPanel) return;
+    if (pendingLeaderboardEntry) {
+      pendingLeaderboardEntry = null;
+      if (leaderboardNameInput) leaderboardNameInput.value = "";
+      if (leaderboardForm) leaderboardForm.hidden = true;
+      statusNode.textContent = "Leaderboard name skipped. Press R or Enter to start again.";
+    }
     if (leaderboardOpenedAt && !won && !lost) {
       levelStart += performance.now() - leaderboardOpenedAt;
     }

@@ -2072,6 +2072,10 @@ body[data-theme="night"] .colt-run-stats span {
   color: #ffd58a;
 }
 
+.colt-run-leaderboard-back {
+  min-width: 86px;
+}
+
 .colt-run-leaderboard-list {
   display: grid;
   gap: 8px;
