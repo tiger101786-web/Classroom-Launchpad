@@ -2695,7 +2695,8 @@ body[data-theme="night"] .class-timer-badge {
   }
 
   .hero-bg-video {
-    object-position: 36% center;
+    display: block;
+    object-position: 24% center;
   }
 
   .school-logo-frame {
