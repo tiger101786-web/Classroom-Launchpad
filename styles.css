@@ -2694,6 +2694,10 @@ body[data-theme="night"] .class-timer-badge {
     border-radius: 14px;
   }
 
+  .hero-bg-video {
+    object-position: 36% center;
+  }
+
   .school-logo-frame {
     width: min(360px, 100%);
     margin-bottom: 10px;
