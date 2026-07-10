@@ -1673,9 +1673,10 @@ function renderColtRun() {
         <canvas id="coltRunCanvas" class="colt-run-canvas" width="960" height="540" tabindex="0" aria-label="Colt Run platform game"></canvas>
         <button class="colt-run-fullscreen-toggle" type="button" data-colt-run="fullscreen">Exit Fullscreen</button>
         <div class="colt-run-touch" aria-label="Touch controls">
-          <div class="colt-run-touch-move" aria-label="Move">
-            <button class="colt-run-touch-btn" type="button" data-colt-key="left" aria-label="Move left">←</button>
-            <button class="colt-run-touch-btn" type="button" data-colt-key="right" aria-label="Move right">→</button>
+          <div class="colt-run-joystick" data-colt-joystick aria-label="Move" role="application">
+            <div class="colt-run-joystick-ring">
+              <div class="colt-run-joystick-knob"></div>
+            </div>
           </div>
           <button class="colt-run-touch-btn colt-run-touch-jump" type="button" data-colt-key="jump" aria-label="Jump">Jump</button>
         </div>
@@ -4126,11 +4127,78 @@ function startColtRunGame() {
       button.removeEventListener("pointercancel", up);
     };
   };
-  const touchCleanups = Array.from(document.querySelectorAll("[data-colt-key]")).map(bindTouchButton);
+  const bindTouchJoystick = joystick => {
+    let activePointerId = null;
+    const resetJoystick = () => {
+      keys.left = false;
+      keys.right = false;
+      joystick.style.setProperty("--stick-x", "0px");
+      joystick.style.setProperty("--stick-y", "0px");
+      joystick.classList.remove("is-active");
+    };
+    const updateJoystick = event => {
+      const rect = joystick.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const maxDistance = rect.width * 0.28;
+      const rawX = event.clientX - centerX;
+      const rawY = event.clientY - centerY;
+      const distance = Math.hypot(rawX, rawY);
+      const scale = distance > maxDistance ? maxDistance / distance : 1;
+      const x = rawX * scale;
+      const y = rawY * scale;
+      const deadZone = rect.width * 0.12;
+      joystick.style.setProperty("--stick-x", `${x}px`);
+      joystick.style.setProperty("--stick-y", `${y}px`);
+      keys.left = x < -deadZone;
+      keys.right = x > deadZone;
+    };
+    const down = event => {
+      event.preventDefault();
+      activePointerId = event.pointerId;
+      joystick.setPointerCapture?.(event.pointerId);
+      joystick.classList.add("is-active");
+      updateJoystick(event);
+    };
+    const move = event => {
+      if (activePointerId !== event.pointerId) return;
+      event.preventDefault();
+      updateJoystick(event);
+    };
+    const up = event => {
+      if (activePointerId !== event.pointerId) return;
+      event.preventDefault();
+      joystick.releasePointerCapture?.(event.pointerId);
+      activePointerId = null;
+      resetJoystick();
+    };
+    joystick.addEventListener("pointerdown", down);
+    joystick.addEventListener("pointermove", move);
+    joystick.addEventListener("pointerup", up);
+    joystick.addEventListener("pointercancel", up);
+    joystick.addEventListener("lostpointercapture", up);
+    return () => {
+      joystick.removeEventListener("pointerdown", down);
+      joystick.removeEventListener("pointermove", move);
+      joystick.removeEventListener("pointerup", up);
+      joystick.removeEventListener("pointercancel", up);
+      joystick.removeEventListener("lostpointercapture", up);
+      resetJoystick();
+    };
+  };
+  const touchCleanups = [
+    ...Array.from(document.querySelectorAll("[data-colt-key]")).map(bindTouchButton),
+    ...Array.from(document.querySelectorAll("[data-colt-joystick]")).map(bindTouchJoystick)
+  ];
   const clearTouchKeys = () => {
     keys.left = false;
     keys.right = false;
     keys.jump = false;
+    document.querySelectorAll("[data-colt-joystick]").forEach(joystick => {
+      joystick.style.setProperty("--stick-x", "0px");
+      joystick.style.setProperty("--stick-y", "0px");
+      joystick.classList.remove("is-active");
+    });
   };
 
   document.addEventListener("keydown", onKeyDown);
