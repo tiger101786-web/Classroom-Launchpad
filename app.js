@@ -1793,8 +1793,14 @@ function startColtRunGame() {
     sprite.src = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`;
     return sprite;
   });
-  const lavaRockShowerSprite = new Image();
-  lavaRockShowerSprite.src = "assets/colt-run-lava-rock-shower-01.png?v=20260707-shower1";
+  const lavaRockShowerSprites = [
+    "assets/colt-run-lava-rock-shower-01.png?v=20260707-shower1",
+    "assets/colt-run-lava-rock-shower-02.png?v=20260711-shower2"
+  ].map(src => {
+    const sprite = new Image();
+    sprite.src = src;
+    return sprite;
+  });
   const lavaRockVideoSpecial = document.createElement("video");
   lavaRockVideoSpecial.src = "assets/colt-run-lava-rock-video-special-01.mp4?v=20260707-video-special1";
   lavaRockVideoSpecial.muted = true;
@@ -1820,15 +1826,32 @@ function startColtRunGame() {
     { coreX: 0.32, coreY: 0.68, rx: 0.21, ry: 0.2 }
   ];
   const lavaRockShowerHitProfiles = [
-    { coreX: 0.16, coreY: 0.45, rx: 0.045, ry: 0.045 },
-    { coreX: 0.33, coreY: 0.25, rx: 0.055, ry: 0.055 },
-    { coreX: 0.50, coreY: 0.33, rx: 0.065, ry: 0.085 },
-    { coreX: 0.84, coreY: 0.23, rx: 0.045, ry: 0.04 },
-    { coreX: 0.13, coreY: 0.72, rx: 0.12, ry: 0.12 },
-    { coreX: 0.54, coreY: 0.59, rx: 0.09, ry: 0.09 },
-    { coreX: 0.75, coreY: 0.58, rx: 0.065, ry: 0.065 },
-    { coreX: 0.49, coreY: 0.82, rx: 0.07, ry: 0.07 },
-    { coreX: 0.78, coreY: 0.83, rx: 0.055, ry: 0.055 }
+    [
+      { coreX: 0.16, coreY: 0.45, rx: 0.045, ry: 0.045 },
+      { coreX: 0.33, coreY: 0.25, rx: 0.055, ry: 0.055 },
+      { coreX: 0.50, coreY: 0.33, rx: 0.065, ry: 0.085 },
+      { coreX: 0.84, coreY: 0.23, rx: 0.045, ry: 0.04 },
+      { coreX: 0.13, coreY: 0.72, rx: 0.12, ry: 0.12 },
+      { coreX: 0.54, coreY: 0.59, rx: 0.09, ry: 0.09 },
+      { coreX: 0.75, coreY: 0.58, rx: 0.065, ry: 0.065 },
+      { coreX: 0.49, coreY: 0.82, rx: 0.07, ry: 0.07 },
+      { coreX: 0.78, coreY: 0.83, rx: 0.055, ry: 0.055 }
+    ],
+    [
+      { coreX: 0.336, coreY: 0.294, rx: 0.07, ry: 0.09 },
+      { coreX: 0.595, coreY: 0.74, rx: 0.065, ry: 0.09 },
+      { coreX: 0.814, coreY: 0.75, rx: 0.06, ry: 0.08 },
+      { coreX: 0.681, coreY: 0.398, rx: 0.05, ry: 0.085 },
+      { coreX: 0.29, coreY: 0.755, rx: 0.04, ry: 0.065 },
+      { coreX: 0.066, coreY: 0.545, rx: 0.035, ry: 0.055 },
+      { coreX: 0.134, coreY: 0.246, rx: 0.03, ry: 0.052 },
+      { coreX: 0.612, coreY: 0.351, rx: 0.043, ry: 0.05 },
+      { coreX: 0.165, coreY: 0.666, rx: 0.03, ry: 0.045 },
+      { coreX: 0.487, coreY: 0.541, rx: 0.028, ry: 0.05 },
+      { coreX: 0.397, coreY: 0.925, rx: 0.03, ry: 0.045 },
+      { coreX: 0.588, coreY: 0.182, rx: 0.026, ry: 0.04 },
+      { coreX: 0.834, coreY: 0.514, rx: 0.024, ry: 0.04 }
+    ]
   ];
   const lavaRockVideoSpecialHitProfiles = [
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
@@ -3449,7 +3472,8 @@ function startColtRunGame() {
 
   const getLavaRockSprite = rock => {
     if (rock.videoSpecial) return getTransparentLavaRockVideoFrame();
-    return rock.shower ? lavaRockShowerSprite : lavaRockSprites[rock.rockType % lavaRockSprites.length];
+    if (rock.shower) return lavaRockShowerSprites[(rock.showerType || 0) % lavaRockShowerSprites.length];
+    return lavaRockSprites[rock.rockType % lavaRockSprites.length];
   };
 
   const getLavaRockDrawBox = rock => {
@@ -3490,7 +3514,8 @@ function startColtRunGame() {
     }
     if (!rock.shower) return [getLavaRockCoreHitbox(rock)];
     const box = getLavaRockDrawBox(rock);
-    return lavaRockShowerHitProfiles.map(profile => ({
+    const showerProfiles = lavaRockShowerHitProfiles[(rock.showerType || 0) % lavaRockShowerHitProfiles.length] || lavaRockShowerHitProfiles[0];
+    return showerProfiles.map(profile => ({
       x: box.x + box.w * profile.coreX,
       y: box.y + box.h * profile.coreY,
       rx: box.w * profile.rx,
@@ -3546,19 +3571,23 @@ function startColtRunGame() {
     });
   };
 
-  const spawnLavaRockShower = now => {
+  const spawnLavaRockShower = (now, showerType = 0) => {
     const difficulty = Math.min(level, 8);
-    const size = Math.min(canvas.width * 0.52, 430 + difficulty * 8);
-    const minX = Math.max(cameraX + canvas.width * 0.08, player.x + 140);
-    const maxX = cameraX + canvas.width * 0.48;
+    const isWideShower = showerType === 1;
+    const size = isWideShower
+      ? Math.min(canvas.width * 0.72, 620 + difficulty * 12)
+      : Math.min(canvas.width * 0.52, 430 + difficulty * 8);
+    const minX = Math.max(cameraX + canvas.width * (isWideShower ? 0.02 : 0.08), player.x + 120);
+    const maxX = cameraX + canvas.width * (isWideShower ? 0.32 : 0.48);
     const x = minX + Math.random() * Math.max(1, maxX - minX);
     fallingLavaRocks.push({
       shower: true,
+      showerType,
       x,
       y: -size * (1.05 + Math.random() * 0.2),
       size,
-      vx: -0.62 - Math.random() * 0.24,
-      vy: 2.85 + difficulty * 0.08 + Math.random() * 0.28,
+      vx: (isWideShower ? -0.72 : -0.62) - Math.random() * 0.24,
+      vy: (isWideShower ? 2.65 : 2.85) + difficulty * 0.08 + Math.random() * 0.28,
       rockType: 0,
       spin: 0,
       angle: (Math.random() - 0.5) * 0.035,
@@ -3614,8 +3643,9 @@ function startColtRunGame() {
     if (now >= nextLavaRockShowerAt) {
       const specialAlreadyActive = fallingLavaRocks.some(rock => rock.shower || rock.videoSpecial);
       if (!specialAlreadyActive && fallingLavaRocks.length <= maxActiveRocks - 2) {
-        if (Math.random() < 0.5) spawnLavaRockVideoSpecial(now);
-        else spawnLavaRockShower(now);
+        const specialChoice = Math.floor(Math.random() * 3);
+        if (specialChoice === 0) spawnLavaRockVideoSpecial(now);
+        else spawnLavaRockShower(now, specialChoice - 1);
       }
       scheduleNextLavaRockShower(now);
     }
