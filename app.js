@@ -1687,6 +1687,10 @@ function renderColtRun() {
       <div class="colt-run-footer">
         <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
         <div class="colt-run-actions">
+          <div class="colt-run-volume" aria-label="Music volume">
+            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn music off">🔊</button>
+            <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Music volume">
+          </div>
           <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
@@ -1735,13 +1739,21 @@ function startColtRunGame() {
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
+  const musicVolumeSlider = document.getElementById("coltRunMusicVolume");
+  const musicToggleButton = document.getElementById("coltRunMusicToggle");
+  const musicVolumeStorageKey = "coltRunMusicVolumeV1";
   const musicTracks = [
     "assets/colt-run-dark-descent.mp3?v=20260713-audio1",
     "assets/colt-run-dark-descent-extended.mp3?v=20260713-audio1"
   ];
   const musicAudio = new Audio();
   musicAudio.preload = "auto";
-  musicAudio.volume = 0.42;
+  const storedMusicVolume = Number(localStorage.getItem(musicVolumeStorageKey));
+  let musicVolume = Number.isFinite(storedMusicVolume) ? Math.max(0, Math.min(1, storedMusicVolume)) : 0.42;
+  let lastAudibleMusicVolume = musicVolume > 0 ? musicVolume : 0.42;
+  let musicMuted = musicVolume <= 0;
+  musicAudio.volume = musicMuted ? 0 : musicVolume;
+  musicAudio.muted = musicMuted;
   let musicTrackIndex = 0;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
@@ -2123,6 +2135,7 @@ function startColtRunGame() {
     musicAudio.load();
   };
   const playColtRunMusic = () => {
+    if (musicMuted || musicVolume <= 0) return;
     if (!musicAudio.src) loadMusicTrack();
     musicAudio.play().catch(() => {});
   };
@@ -2131,7 +2144,54 @@ function startColtRunGame() {
     loadMusicTrack();
     playColtRunMusic();
   };
+  const updateMusicVolumeUi = () => {
+    const activeVolume = musicMuted ? 0 : musicVolume;
+    const percent = Math.round(activeVolume * 100);
+    if (musicVolumeSlider) {
+      musicVolumeSlider.value = String(percent);
+      musicVolumeSlider.style.setProperty("--volume", `${percent}%`);
+    }
+    if (musicToggleButton) {
+      musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔈" : "🔊";
+      musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn music on" : "Turn music off");
+      musicToggleButton.classList.toggle("is-muted", percent <= 0);
+    }
+  };
+  const applyMusicVolume = (persist = true) => {
+    musicAudio.volume = musicMuted ? 0 : musicVolume;
+    musicAudio.muted = musicMuted;
+    if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
+    updateMusicVolumeUi();
+  };
+  const setMusicVolumeFromSlider = value => {
+    const nextVolume = Math.max(0, Math.min(1, Number(value) / 100 || 0));
+    musicVolume = nextVolume;
+    musicMuted = nextVolume <= 0;
+    if (nextVolume > 0) lastAudibleMusicVolume = nextVolume;
+    applyMusicVolume();
+    if (musicMuted) musicAudio.pause();
+    else playColtRunMusic();
+  };
+  const toggleMusic = () => {
+    if (musicMuted || musicVolume <= 0) {
+      musicMuted = false;
+      musicVolume = lastAudibleMusicVolume || 0.42;
+      applyMusicVolume();
+      playColtRunMusic();
+    } else {
+      musicMuted = true;
+      applyMusicVolume();
+      musicAudio.pause();
+    }
+  };
+  const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
+  const onMusicVolumePointerDown = () => playColtRunMusic();
   musicAudio.addEventListener("ended", onMusicTrackEnded);
+  applyMusicVolume(false);
+  if (musicVolumeSlider) {
+    musicVolumeSlider.addEventListener("input", onMusicVolumeInput);
+    musicVolumeSlider.addEventListener("pointerdown", onMusicVolumePointerDown);
+  }
 
   const keepCoinVideoPlaying = () => {
     if (!coinVideo.paused) return;
@@ -4096,6 +4156,7 @@ function startColtRunGame() {
   };
   const onKeyDown = event => {
     if (event.target instanceof HTMLElement && event.target.closest("#coltRunLeaderboardForm")) return;
+    if (event.target instanceof HTMLElement && event.target.closest(".colt-run-volume")) return;
     playColtRunMusic();
     if (event.code === "Enter") {
       event.preventDefault();
@@ -4122,6 +4183,7 @@ function startColtRunGame() {
     setKey(key, true);
   };
   const onKeyUp = event => {
+    if (event.target instanceof HTMLElement && event.target.closest(".colt-run-volume")) return;
     const key = keyMap[event.code];
     if (!key) return;
     event.preventDefault();
@@ -4130,6 +4192,10 @@ function startColtRunGame() {
   const onButtonClick = event => {
     const button = event.target.closest("[data-colt-run]");
     if (!button) return;
+    if (button.dataset.coltRun === "musicToggle") {
+      toggleMusic();
+      return;
+    }
     playColtRunMusic();
     if (button.dataset.coltRun === "fullscreen") toggleFullscreen();
     if (button.dataset.coltRun === "leaderboard") openLeaderboard();
@@ -4283,6 +4349,10 @@ function startColtRunGame() {
       document.removeEventListener("fullscreenchange", updateFullscreenButton);
       app.removeEventListener("click", onButtonClick);
       if (leaderboardForm) leaderboardForm.removeEventListener("submit", onLeaderboardSubmit);
+      if (musicVolumeSlider) {
+        musicVolumeSlider.removeEventListener("input", onMusicVolumeInput);
+        musicVolumeSlider.removeEventListener("pointerdown", onMusicVolumePointerDown);
+      }
       touchCleanups.forEach(cleanup => cleanup());
       deathVideo.pause();
       lavaRockVideoSpecial.pause();
