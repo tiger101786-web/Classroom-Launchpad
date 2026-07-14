@@ -1751,8 +1751,13 @@ function startColtRunGame() {
   const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience1");
   ambientAudio.preload = "auto";
   ambientAudio.loop = true;
-  const musicLayerVolume = 0.35;
+  const musicLayerVolume = 0.12;
   const ambientLayerVolume = 1;
+  const ambientBoostGain = 5.5;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  let ambientAudioContext = null;
+  let ambientGainNode = null;
+  let ambientSourceNode = null;
   const storedMusicVolume = Number(localStorage.getItem(musicVolumeStorageKey));
   let musicVolume = Number.isFinite(storedMusicVolume) ? Math.max(0, Math.min(1, storedMusicVolume)) : 0.42;
   let lastAudibleMusicVolume = musicVolume > 0 ? musicVolume : 0.42;
@@ -2141,8 +2146,30 @@ function startColtRunGame() {
     musicAudio.src = musicTracks[musicTrackIndex];
     musicAudio.load();
   };
+  const setupAmbientBoost = () => {
+    if (!AudioContextClass || ambientSourceNode) return;
+    try {
+      ambientAudioContext = new AudioContextClass();
+      ambientSourceNode = ambientAudioContext.createMediaElementSource(ambientAudio);
+      ambientGainNode = ambientAudioContext.createGain();
+      ambientGainNode.gain.value = musicMuted ? 0 : ambientBoostGain;
+      ambientSourceNode.connect(ambientGainNode);
+      ambientGainNode.connect(ambientAudioContext.destination);
+    } catch {
+      ambientAudioContext = null;
+      ambientGainNode = null;
+      ambientSourceNode = null;
+    }
+  };
+  const applyAmbientBoost = () => {
+    if (ambientGainNode) ambientGainNode.gain.value = musicMuted ? 0 : ambientBoostGain;
+  };
   const playColtRunMusic = () => {
     if (musicMuted || musicVolume <= 0) return;
+    setupAmbientBoost();
+    if (ambientAudioContext && ambientAudioContext.state === "suspended") {
+      ambientAudioContext.resume().catch(() => {});
+    }
     if (!musicAudio.src) loadMusicTrack();
     musicAudio.play().catch(() => {});
     ambientAudio.play().catch(() => {});
@@ -2170,6 +2197,7 @@ function startColtRunGame() {
     musicAudio.muted = musicMuted;
     ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
     ambientAudio.muted = musicMuted;
+    applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
   };
@@ -4375,6 +4403,7 @@ function startColtRunGame() {
       musicAudio.removeEventListener("ended", onMusicTrackEnded);
       musicAudio.src = "";
       ambientAudio.src = "";
+      if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
   };
