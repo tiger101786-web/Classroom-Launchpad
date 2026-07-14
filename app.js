@@ -1735,6 +1735,14 @@ function startColtRunGame() {
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
+  const musicTracks = [
+    "assets/colt-run-dark-descent.mp3?v=20260713-audio1",
+    "assets/colt-run-dark-descent-extended.mp3?v=20260713-audio1"
+  ];
+  const musicAudio = new Audio();
+  musicAudio.preload = "auto";
+  musicAudio.volume = 0.42;
+  let musicTrackIndex = 0;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let level = 1;
@@ -2109,6 +2117,21 @@ function startColtRunGame() {
     if (leaderboardNameInput) leaderboardNameInput.value = "";
   };
   leaderboard = loadLeaderboard();
+
+  const loadMusicTrack = () => {
+    musicAudio.src = musicTracks[musicTrackIndex];
+    musicAudio.load();
+  };
+  const playColtRunMusic = () => {
+    if (!musicAudio.src) loadMusicTrack();
+    musicAudio.play().catch(() => {});
+  };
+  const onMusicTrackEnded = () => {
+    musicTrackIndex = (musicTrackIndex + 1) % musicTracks.length;
+    loadMusicTrack();
+    playColtRunMusic();
+  };
+  musicAudio.addEventListener("ended", onMusicTrackEnded);
 
   const keepCoinVideoPlaying = () => {
     if (!coinVideo.paused) return;
@@ -4073,6 +4096,7 @@ function startColtRunGame() {
   };
   const onKeyDown = event => {
     if (event.target instanceof HTMLElement && event.target.closest("#coltRunLeaderboardForm")) return;
+    playColtRunMusic();
     if (event.code === "Enter") {
       event.preventDefault();
       if (won) nextLevel();
@@ -4106,6 +4130,7 @@ function startColtRunGame() {
   const onButtonClick = event => {
     const button = event.target.closest("[data-colt-run]");
     if (!button) return;
+    playColtRunMusic();
     if (button.dataset.coltRun === "fullscreen") toggleFullscreen();
     if (button.dataset.coltRun === "leaderboard") openLeaderboard();
     if (button.dataset.coltRun === "closeLeaderboard") closeLeaderboard();
@@ -4247,6 +4272,7 @@ function startColtRunGame() {
   app.addEventListener("click", onButtonClick);
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
   resetLevel(true);
+  playColtRunMusic();
   update();
   coltRunGame = {
     stop() {
@@ -4260,6 +4286,9 @@ function startColtRunGame() {
       touchCleanups.forEach(cleanup => cleanup());
       deathVideo.pause();
       lavaRockVideoSpecial.pause();
+      musicAudio.pause();
+      musicAudio.removeEventListener("ended", onMusicTrackEnded);
+      musicAudio.src = "";
       if (isFullscreen()) document.exitFullscreen?.();
     }
   };
