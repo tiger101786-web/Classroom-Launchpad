@@ -1748,11 +1748,8 @@ function startColtRunGame() {
   const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
   runningAudio.preload = "auto";
   runningAudio.loop = true;
-  const jumpAudio = new Audio("assets/colt-run-jump-audio.mp3?v=20260714-jump1");
-  jumpAudio.preload = "auto";
   const ambientLayerVolume = 1;
   const runningLayerVolume = 0.9;
-  const jumpLayerVolume = 0.95;
   const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
@@ -1766,8 +1763,6 @@ function startColtRunGame() {
   ambientAudio.muted = musicMuted;
   runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   runningAudio.muted = musicMuted;
-  jumpAudio.volume = musicMuted ? 0 : musicVolume * jumpLayerVolume;
-  jumpAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let level = 1;
@@ -2175,13 +2170,6 @@ function startColtRunGame() {
       runningAudio.currentTime = 0;
     } catch {}
   };
-  const playJumpAudio = () => {
-    if (musicMuted || musicVolume <= 0) return;
-    try {
-      jumpAudio.currentTime = 0;
-    } catch {}
-    jumpAudio.play().catch(() => {});
-  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
@@ -2208,8 +2196,6 @@ function startColtRunGame() {
     ambientAudio.muted = musicMuted;
     runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     runningAudio.muted = musicMuted;
-    jumpAudio.volume = musicMuted ? 0 : musicVolume * jumpLayerVolume;
-    jumpAudio.muted = musicMuted;
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -2223,7 +2209,6 @@ function startColtRunGame() {
     if (musicMuted) {
       ambientAudio.pause();
       stopRunningAudio();
-      jumpAudio.pause();
     }
     else playColtRunAudio();
   };
@@ -2238,7 +2223,6 @@ function startColtRunGame() {
       applyMusicVolume();
       ambientAudio.pause();
       stopRunningAudio();
-      jumpAudio.pause();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -4210,7 +4194,6 @@ function startColtRunGame() {
     if (name === "jump" && value && !wasPressed && player.grounded && !won && !lost) {
       playColtRunAudio();
       stopRunningAudio();
-      playJumpAudio();
     }
     keys[name] = value;
   };
@@ -4427,10 +4410,8 @@ function startColtRunGame() {
       lavaRockVideoSpecial.pause();
       ambientAudio.pause();
       stopRunningAudio();
-      jumpAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
-      jumpAudio.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
