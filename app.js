@@ -1687,9 +1687,9 @@ function renderColtRun() {
       <div class="colt-run-footer">
         <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
         <div class="colt-run-actions">
-          <div class="colt-run-volume" aria-label="Music volume">
-            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn music off">🔊</button>
-            <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Music volume">
+          <div class="colt-run-volume" aria-label="Game audio volume">
+            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off">🔊</button>
+            <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Game audio volume">
           </div>
           <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
@@ -1748,12 +1748,19 @@ function startColtRunGame() {
   ];
   const musicAudio = new Audio();
   musicAudio.preload = "auto";
+  const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience1");
+  ambientAudio.preload = "auto";
+  ambientAudio.loop = true;
+  const musicLayerVolume = 0.78;
+  const ambientLayerVolume = 0.32;
   const storedMusicVolume = Number(localStorage.getItem(musicVolumeStorageKey));
   let musicVolume = Number.isFinite(storedMusicVolume) ? Math.max(0, Math.min(1, storedMusicVolume)) : 0.42;
   let lastAudibleMusicVolume = musicVolume > 0 ? musicVolume : 0.42;
   let musicMuted = musicVolume <= 0;
-  musicAudio.volume = musicMuted ? 0 : musicVolume;
+  musicAudio.volume = musicMuted ? 0 : musicVolume * musicLayerVolume;
   musicAudio.muted = musicMuted;
+  ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
+  ambientAudio.muted = musicMuted;
   let musicTrackIndex = 0;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
@@ -2138,6 +2145,7 @@ function startColtRunGame() {
     if (musicMuted || musicVolume <= 0) return;
     if (!musicAudio.src) loadMusicTrack();
     musicAudio.play().catch(() => {});
+    ambientAudio.play().catch(() => {});
   };
   const onMusicTrackEnded = () => {
     musicTrackIndex = (musicTrackIndex + 1) % musicTracks.length;
@@ -2153,13 +2161,15 @@ function startColtRunGame() {
     }
     if (musicToggleButton) {
       musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔈" : "🔊";
-      musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn music on" : "Turn music off");
+      musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn game audio on" : "Turn game audio off");
       musicToggleButton.classList.toggle("is-muted", percent <= 0);
     }
   };
   const applyMusicVolume = (persist = true) => {
-    musicAudio.volume = musicMuted ? 0 : musicVolume;
+    musicAudio.volume = musicMuted ? 0 : musicVolume * musicLayerVolume;
     musicAudio.muted = musicMuted;
+    ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
+    ambientAudio.muted = musicMuted;
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
   };
@@ -2169,7 +2179,10 @@ function startColtRunGame() {
     musicMuted = nextVolume <= 0;
     if (nextVolume > 0) lastAudibleMusicVolume = nextVolume;
     applyMusicVolume();
-    if (musicMuted) musicAudio.pause();
+    if (musicMuted) {
+      musicAudio.pause();
+      ambientAudio.pause();
+    }
     else playColtRunMusic();
   };
   const toggleMusic = () => {
@@ -2182,6 +2195,7 @@ function startColtRunGame() {
       musicMuted = true;
       applyMusicVolume();
       musicAudio.pause();
+      ambientAudio.pause();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -4357,8 +4371,10 @@ function startColtRunGame() {
       deathVideo.pause();
       lavaRockVideoSpecial.pause();
       musicAudio.pause();
+      ambientAudio.pause();
       musicAudio.removeEventListener("ended", onMusicTrackEnded);
       musicAudio.src = "";
+      ambientAudio.src = "";
       if (isFullscreen()) document.exitFullscreen?.();
     }
   };
