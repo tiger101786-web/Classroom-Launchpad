@@ -1751,8 +1751,8 @@ function startColtRunGame() {
   const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience1");
   ambientAudio.preload = "auto";
   ambientAudio.loop = true;
-  const musicLayerVolume = 0.66;
-  const ambientLayerVolume = 0.68;
+  const musicLayerVolume = 0.35;
+  const ambientLayerVolume = 1;
   const storedMusicVolume = Number(localStorage.getItem(musicVolumeStorageKey));
   let musicVolume = Number.isFinite(storedMusicVolume) ? Math.max(0, Math.min(1, storedMusicVolume)) : 0.42;
   let lastAudibleMusicVolume = musicVolume > 0 ? musicVolume : 0.42;
