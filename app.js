@@ -1751,9 +1751,9 @@ function startColtRunGame() {
   const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience1");
   ambientAudio.preload = "auto";
   ambientAudio.loop = true;
-  const musicLayerVolume = 0.12;
+  const musicLayerVolume = 0.36;
   const ambientLayerVolume = 1;
-  const ambientBoostGain = 5.5;
+  const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
   let ambientGainNode = null;
