@@ -1742,7 +1742,7 @@ function startColtRunGame() {
   const musicVolumeSlider = document.getElementById("coltRunMusicVolume");
   const musicToggleButton = document.getElementById("coltRunMusicToggle");
   const musicVolumeStorageKey = "coltRunMusicVolumeV1";
-  const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience1");
+  const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless");
   ambientAudio.preload = "auto";
   ambientAudio.loop = true;
   const ambientLayerVolume = 1;
