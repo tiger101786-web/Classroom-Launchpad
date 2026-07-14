@@ -1745,7 +1745,11 @@ function startColtRunGame() {
   const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless");
   ambientAudio.preload = "auto";
   ambientAudio.loop = true;
+  const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
+  runningAudio.preload = "auto";
+  runningAudio.loop = true;
   const ambientLayerVolume = 1;
+  const runningLayerVolume = 0.9;
   const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
@@ -1757,6 +1761,8 @@ function startColtRunGame() {
   let musicMuted = musicVolume <= 0;
   ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
   ambientAudio.muted = musicMuted;
+  runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
+  runningAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let level = 1;
@@ -2158,6 +2164,20 @@ function startColtRunGame() {
     }
     ambientAudio.play().catch(() => {});
   };
+  const stopRunningAudio = () => {
+    runningAudio.pause();
+    try {
+      runningAudio.currentTime = 0;
+    } catch {}
+  };
+  const syncRunningAudio = () => {
+    const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
+    if (shouldRunAudio) {
+      if (runningAudio.paused) runningAudio.play().catch(() => {});
+    } else if (!runningAudio.paused) {
+      stopRunningAudio();
+    }
+  };
   const updateMusicVolumeUi = () => {
     const activeVolume = musicMuted ? 0 : musicVolume;
     const percent = Math.round(activeVolume * 100);
@@ -2174,6 +2194,8 @@ function startColtRunGame() {
   const applyMusicVolume = (persist = true) => {
     ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
     ambientAudio.muted = musicMuted;
+    runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
+    runningAudio.muted = musicMuted;
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -2186,6 +2208,7 @@ function startColtRunGame() {
     applyMusicVolume();
     if (musicMuted) {
       ambientAudio.pause();
+      stopRunningAudio();
     }
     else playColtRunAudio();
   };
@@ -2199,6 +2222,7 @@ function startColtRunGame() {
       musicMuted = true;
       applyMusicVolume();
       ambientAudio.pause();
+      stopRunningAudio();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -3522,6 +3546,7 @@ function startColtRunGame() {
     player.vy = 0;
     player.grounded = false;
     player.state = "death";
+    stopRunningAudio();
     deathStartedAt = performance.now();
     deathX = player.x;
     deathFallStartY = Math.min(player.y, canvas.height - player.h + 6);
@@ -3793,6 +3818,7 @@ function startColtRunGame() {
     deathY = 0;
     deathFallStartY = 0;
     fallingLavaRocks = [];
+    stopRunningAudio();
     nextLavaRockAt = performance.now() + 1400;
     nextForwardLavaRockAt = performance.now() + 900;
     nextLavaRockShowerAt = performance.now() + 3200 + Math.random() * 1800;
@@ -4141,6 +4167,7 @@ function startColtRunGame() {
         player.vy = 0;
         player.grounded = true;
         player.state = "idle";
+        stopRunningAudio();
         scoreNode.textContent = score;
         if (nextLevelButton) nextLevelButton.disabled = false;
         statusNode.textContent = "You reached the finish flag. Press Enter or Next Level to keep your coins going.";
@@ -4150,7 +4177,9 @@ function startColtRunGame() {
       }
       cameraX = Math.max(0, player.x - 230);
       timeNode.textContent = remainingSeconds.toFixed(1);
+      syncRunningAudio();
     } else if (lost) {
+      stopRunningAudio();
       updateColtDeath(now);
       if (coltDeathHasFallen()) finishRunAfterDeath();
     }
@@ -4373,7 +4402,9 @@ function startColtRunGame() {
       deathVideo.pause();
       lavaRockVideoSpecial.pause();
       ambientAudio.pause();
+      stopRunningAudio();
       ambientAudio.src = "";
+      runningAudio.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
