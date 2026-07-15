@@ -1748,14 +1748,14 @@ function startColtRunGame() {
   const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
   runningAudio.preload = "auto";
   runningAudio.loop = true;
-  const jumpAudio = new Audio("assets/colt-run-jump-audio.mp3?v=20260714-jump-fast1");
+  const jumpAudio = new Audio("assets/colt-run-jump-audio.mp3?v=20260714-jump-fade5");
   jumpAudio.preload = "auto";
   const ambientLayerVolume = 1;
   const runningLayerVolume = 0.9;
   const jumpLayerVolume = 1;
   const ambientBoostGain = 3.6;
   const jumpBoostGain = 7.5;
-  const jumpAudioSrc = "assets/colt-run-jump-audio.mp3?v=20260714-jump-fast1";
+  const jumpAudioSrc = "assets/colt-run-jump-audio.mp3?v=20260714-jump-fade5";
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
   let ambientGainNode = null;
