@@ -1669,6 +1669,7 @@ function renderColtRun() {
             <button type="button" data-colt-run="difficulty" data-difficulty="easy">Easy</button>
             <button type="button" data-colt-run="difficulty" data-difficulty="medium">Medium</button>
             <button type="button" data-colt-run="difficulty" data-difficulty="hard">Hard</button>
+            <button type="button" data-colt-run="difficulty" data-difficulty="veryHard">Very Hard</button>
           </div>
         </div>
         <div class="colt-run-stats" aria-label="Game stats">
@@ -1784,6 +1785,19 @@ function startColtRunGame() {
       doubleDropMultiplier: 1.45,
       maxDrops: 3,
       forwardCooldown: 560
+    },
+    veryHard: {
+      label: "Very Hard",
+      platformGapScale: 1.2,
+      platformGapBonus: 28,
+      rockIntervalMultiplier: 0.52,
+      showerIntervalMultiplier: 0.64,
+      rockSpeedMultiplier: 1.38,
+      activeRockBonus: 4,
+      maxActiveRocks: 11,
+      doubleDropMultiplier: 1.8,
+      maxDrops: 3,
+      forwardCooldown: 440
     }
   };
   const difficultyModeNames = Object.keys(difficultyModes);
