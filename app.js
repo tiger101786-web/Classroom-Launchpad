@@ -1848,6 +1848,7 @@ function startColtRunGame() {
   let pendingLeaderboardEntry = null;
   let leaderboard = [];
   let leaderboardOpenedAt = 0;
+  let activeLeaderboardMode = difficultyMode;
   let platforms = [];
   let coins = [];
   let fallingLavaRocks = [];
@@ -2129,6 +2130,14 @@ function startColtRunGame() {
     (Number(a.seconds) || 0) - (Number(b.seconds) || 0) ||
     String(a.createdAt || "").localeCompare(String(b.createdAt || ""))
   );
+  const normalizeDifficultyMode = mode => difficultyModeNames.includes(mode) ? mode : "medium";
+  const getLeaderboardRows = mode => {
+    const activeMode = normalizeDifficultyMode(mode);
+    return leaderboard
+      .filter(entry => entry.difficulty === activeMode)
+      .sort(compareLeaderboardEntries)
+      .slice(0, 10);
+  };
   const normalizeLeaderboard = entries => {
     if (!Array.isArray(entries)) return [];
     return entries
@@ -2136,11 +2145,14 @@ function startColtRunGame() {
         name: cleanLeaderboardName(entry.name),
         coins: Math.max(0, Math.round(Number(entry.coins) || 0)),
         seconds: Math.max(0, Math.round(Number(entry.seconds) || 0)),
+        difficulty: normalizeDifficultyMode(entry.difficulty),
         createdAt: String(entry.createdAt || new Date().toISOString())
       }))
       .filter(entry => entry.coins > 0)
-      .sort(compareLeaderboardEntries)
-      .slice(0, 10);
+      .sort((a, b) => (
+        normalizeDifficultyMode(a.difficulty).localeCompare(normalizeDifficultyMode(b.difficulty)) ||
+        compareLeaderboardEntries(a, b)
+      ));
   };
   const loadLeaderboard = () => {
     try {
@@ -2152,22 +2164,43 @@ function startColtRunGame() {
   const saveLeaderboard = () => {
     localStorage.setItem(leaderboardStorageKey, JSON.stringify(normalizeLeaderboard(leaderboard)));
   };
-  const leaderboardQualifies = (coins, seconds) => {
+  const leaderboardQualifies = (coins, seconds, mode = difficultyMode) => {
     if (coins <= 0) return false;
-    const candidate = { coins, seconds, createdAt: new Date().toISOString() };
-    return normalizeLeaderboard([...leaderboard, candidate]).some(entry => (
+    const activeMode = normalizeDifficultyMode(mode);
+    const candidate = { coins, seconds, difficulty: activeMode, createdAt: new Date().toISOString() };
+    return normalizeLeaderboard([...leaderboard, candidate])
+      .filter(entry => entry.difficulty === activeMode)
+      .sort(compareLeaderboardEntries)
+      .slice(0, 10)
+      .some(entry => (
       entry.coins === candidate.coins &&
       entry.seconds === candidate.seconds &&
+      entry.difficulty === candidate.difficulty &&
       entry.createdAt === candidate.createdAt
     ));
   };
   const renderLeaderboardList = () => {
     if (!leaderboardBody) return;
-    const rows = normalizeLeaderboard(leaderboard);
+    activeLeaderboardMode = normalizeDifficultyMode(activeLeaderboardMode);
+    const rows = getLeaderboardRows(activeLeaderboardMode);
+    const modeLabel = difficultyModes[activeLeaderboardMode].label;
+    const tabs = difficultyModeNames.map(mode => `
+      <button
+        type="button"
+        data-colt-run="leaderboardMode"
+        data-leaderboard-mode="${mode}"
+        class="${mode === activeLeaderboardMode ? "is-active" : ""}"
+        aria-pressed="${mode === activeLeaderboardMode ? "true" : "false"}"
+      >${difficultyModes[mode].label}</button>
+    `).join("");
     if (!rows.length) {
-      leaderboardBody.innerHTML = `<p class="colt-run-leaderboard-empty">No coin runs yet.</p>`;
+      leaderboardBody.innerHTML = `
+        <div class="colt-run-leaderboard-tabs" role="group" aria-label="Leaderboard difficulty">${tabs}</div>
+        <p class="colt-run-leaderboard-empty">No ${modeLabel} coin runs yet.</p>
+      `;
     } else {
       leaderboardBody.innerHTML = `
+        <div class="colt-run-leaderboard-tabs" role="group" aria-label="Leaderboard difficulty">${tabs}</div>
         <ol class="colt-run-leaderboard-list">
           ${rows.map(entry => `
             <li>
@@ -2188,6 +2221,7 @@ function startColtRunGame() {
   };
   const openLeaderboard = () => {
     if (!leaderboardPanel) return;
+    activeLeaderboardMode = normalizeDifficultyMode(pendingLeaderboardEntry?.difficulty || difficultyMode);
     renderLeaderboardList();
     if (leaderboardPanel.hidden) leaderboardOpenedAt = performance.now();
     leaderboardPanel.hidden = false;
@@ -2213,19 +2247,22 @@ function startColtRunGame() {
   };
   const savePendingLeaderboardEntry = name => {
     if (!pendingLeaderboardEntry) return;
+    const entryMode = normalizeDifficultyMode(pendingLeaderboardEntry.difficulty);
     leaderboard = normalizeLeaderboard([
       ...leaderboard,
       {
         name: cleanLeaderboardName(name),
         coins: pendingLeaderboardEntry.coins,
         seconds: pendingLeaderboardEntry.seconds,
+        difficulty: entryMode,
         createdAt: new Date().toISOString()
       }
     ]);
     pendingLeaderboardEntry = null;
+    activeLeaderboardMode = entryMode;
     saveLeaderboard();
     renderLeaderboardList();
-    statusNode.textContent = "Leaderboard saved. Press R or Enter to start again.";
+    statusNode.textContent = `Leaderboard saved to ${difficultyModes[entryMode].label}. Press R or Enter to start again.`;
     if (leaderboardNameInput) leaderboardNameInput.value = "";
   };
   leaderboard = loadLeaderboard();
@@ -3681,11 +3718,12 @@ function startColtRunGame() {
     deathLeaderboardHandled = true;
     const finalCoins = score;
     const finalSeconds = Math.max(1, Math.round(runTimeBankSeconds + Math.max(0, (deathStartedAt - levelStart) / 1000)));
+    const finalDifficulty = normalizeDifficultyMode(difficultyMode);
     score = 0;
     scoreNode.textContent = score;
-    if (leaderboardQualifies(finalCoins, finalSeconds)) {
-      pendingLeaderboardEntry = { coins: finalCoins, seconds: finalSeconds };
-      statusNode.textContent = `Top 10 run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Enter your name.`;
+    if (leaderboardQualifies(finalCoins, finalSeconds, finalDifficulty)) {
+      pendingLeaderboardEntry = { coins: finalCoins, seconds: finalSeconds, difficulty: finalDifficulty };
+      statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Enter your name.`;
       openLeaderboard();
     } else {
       statusNode.textContent = "The Colt lost all coins. Press R or Enter to start again.";
@@ -4372,6 +4410,11 @@ function startColtRunGame() {
     }
     if (button.dataset.coltRun === "difficulty") {
       setDifficultyMode(button.dataset.difficulty);
+      return;
+    }
+    if (button.dataset.coltRun === "leaderboardMode") {
+      activeLeaderboardMode = normalizeDifficultyMode(button.dataset.leaderboardMode);
+      renderLeaderboardList();
       return;
     }
     playColtRunAudio();

@@ -2215,6 +2215,37 @@ body[data-theme="night"] .colt-run-volume {
   min-width: 86px;
 }
 
+.colt-run-leaderboard-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.colt-run-leaderboard-tabs button {
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 1px solid rgba(249, 168, 37, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f9e7d0;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.colt-run-leaderboard-tabs button:hover,
+.colt-run-leaderboard-tabs button:focus-visible {
+  border-color: rgba(255, 213, 138, 0.7);
+  background: rgba(249, 168, 37, 0.18);
+  outline: none;
+}
+
+.colt-run-leaderboard-tabs button.is-active {
+  border-color: #ffd58a;
+  background: #ffd58a;
+  color: #32180d;
+}
+
 .colt-run-leaderboard-list {
   display: grid;
   gap: 8px;
@@ -2947,6 +2978,10 @@ body[data-theme="night"] .class-timer-badge {
 
   .colt-run-volume {
     width: 100%;
+  }
+
+  .colt-run-leaderboard-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .colt-run-stage {
