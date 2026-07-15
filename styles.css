@@ -1903,6 +1903,45 @@ body[data-theme="night"] .colt-run-shell:fullscreen {
   font-weight: 800;
 }
 
+.colt-run-difficulty {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.colt-run-difficulty button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--blue-dark);
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(86, 7, 32, 0.1);
+}
+
+.colt-run-difficulty button:hover,
+.colt-run-difficulty button:focus-visible {
+  background: var(--blue-soft);
+  outline: none;
+}
+
+.colt-run-difficulty button.is-active {
+  border-color: rgba(123, 11, 49, 0.56);
+  background: #7b0b31;
+  color: #ffffff;
+}
+
+body[data-theme="night"] .colt-run-difficulty button {
+  background: rgba(30, 30, 34, 0.92);
+}
+
+body[data-theme="night"] .colt-run-difficulty button.is-active {
+  background: #d45a39;
+  color: #161616;
+}
+
 .colt-run-stats {
   display: flex;
   flex-wrap: wrap;
@@ -2892,6 +2931,14 @@ body[data-theme="night"] .class-timer-badge {
 
   .colt-run-stats {
     justify-content: flex-start;
+  }
+
+  .colt-run-difficulty {
+    width: 100%;
+  }
+
+  .colt-run-difficulty button {
+    flex: 1 1 88px;
   }
 
   .colt-run-actions {

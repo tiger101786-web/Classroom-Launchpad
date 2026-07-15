@@ -1665,6 +1665,11 @@ function renderColtRun() {
           <span class="feature-kicker">Logic Games</span>
           <h2>Colt Run</h2>
           <p>Reach the finish flag before time runs out.</p>
+          <div class="colt-run-difficulty" role="group" aria-label="Difficulty">
+            <button type="button" data-colt-run="difficulty" data-difficulty="easy">Easy</button>
+            <button type="button" data-colt-run="difficulty" data-difficulty="medium">Medium</button>
+            <button type="button" data-colt-run="difficulty" data-difficulty="hard">Hard</button>
+          </div>
         </div>
         <div class="colt-run-stats" aria-label="Game stats">
           <span>Level <strong id="coltRunLevel">1</strong></span>
@@ -1739,6 +1744,52 @@ function startColtRunGame() {
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
+  const difficultyStorageKey = "coltRunDifficultyV1";
+  const difficultyModes = {
+    easy: {
+      label: "Easy",
+      platformGapScale: 0.86,
+      platformGapBonus: -14,
+      rockIntervalMultiplier: 1.36,
+      showerIntervalMultiplier: 1.28,
+      rockSpeedMultiplier: 0.78,
+      activeRockBonus: -1,
+      maxActiveRocks: 5,
+      doubleDropMultiplier: 0.55,
+      maxDrops: 1,
+      forwardCooldown: 920
+    },
+    medium: {
+      label: "Medium",
+      platformGapScale: 1,
+      platformGapBonus: 0,
+      rockIntervalMultiplier: 1,
+      showerIntervalMultiplier: 1,
+      rockSpeedMultiplier: 1,
+      activeRockBonus: 0,
+      maxActiveRocks: 7,
+      doubleDropMultiplier: 1,
+      maxDrops: 2,
+      forwardCooldown: 720
+    },
+    hard: {
+      label: "Hard",
+      platformGapScale: 1.14,
+      platformGapBonus: 18,
+      rockIntervalMultiplier: 0.68,
+      showerIntervalMultiplier: 0.78,
+      rockSpeedMultiplier: 1.22,
+      activeRockBonus: 2,
+      maxActiveRocks: 9,
+      doubleDropMultiplier: 1.45,
+      maxDrops: 3,
+      forwardCooldown: 560
+    }
+  };
+  const difficultyModeNames = Object.keys(difficultyModes);
+  const storedDifficultyMode = localStorage.getItem(difficultyStorageKey);
+  let difficultyMode = difficultyModeNames.includes(storedDifficultyMode) ? storedDifficultyMode : "medium";
+  const difficultyButtons = shell ? Array.from(shell.querySelectorAll("[data-difficulty]")) : [];
   const musicVolumeSlider = document.getElementById("coltRunMusicVolume");
   const musicToggleButton = document.getElementById("coltRunMusicToggle");
   const musicVolumeStorageKey = "coltRunMusicVolumeV1";
@@ -1800,6 +1851,28 @@ function startColtRunGame() {
   let currentStartingPlatformSprite = 0;
   let lastStartingPlatformSprite = -1;
   let startingPlatformDeck = [];
+  const getDifficultySettings = () => difficultyModes[difficultyMode] || difficultyModes.medium;
+  const updateDifficultyButtons = () => {
+    difficultyButtons.forEach(button => {
+      const selected = button.dataset.difficulty === difficultyMode;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+  };
+  const setDifficultyMode = mode => {
+    if (!difficultyModes[mode]) return;
+    if (difficultyMode === mode) {
+      statusNode.textContent = `${difficultyModes[mode].label} mode is already selected.`;
+      canvas.focus({ preventScroll: true });
+      return;
+    }
+    difficultyMode = mode;
+    localStorage.setItem(difficultyStorageKey, difficultyMode);
+    updateDifficultyButtons();
+    level = 1;
+    resetLevel(true);
+    statusNode.textContent = `${difficultyModes[mode].label} mode selected. Reach the flag before time runs out.`;
+  };
   const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, facing: 1, state: "idle", jumpPrepUntil: 0 };
   const coltSprites = {
     idle: new Image(),
@@ -3522,6 +3595,7 @@ function startColtRunGame() {
 
   const generateLevel = () => {
     const random = seededRandom(levelSeed + level * 971);
+    const mode = getDifficultySettings();
     const targetX = Math.min(2600 + level * 320, 5000);
     let lastPlatformSprite = currentStartingPlatformSprite;
     const choosePlatformSprite = width => {
@@ -3542,8 +3616,8 @@ function startColtRunGame() {
       const width = 175 + random() * 115;
       const nextY = Math.max(275, Math.min(438, y + (random() - 0.48) * (88 + difficulty * 4)));
       const upwardDelta = Math.max(0, y - nextY);
-      const desiredGap = 92 + difficulty * 2 + random() * (56 + difficulty * 4);
-      const fairGapLimit = Math.max(102, maxFairPlatformGap - upwardDelta * upwardGapPenalty);
+      const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale;
+      const fairGapLimit = Math.max(96, maxFairPlatformGap + mode.platformGapBonus - upwardDelta * upwardGapPenalty);
       const gap = Math.min(desiredGap, fairGapLimit);
       y = nextY;
       x += gap;
@@ -3674,18 +3748,29 @@ function startColtRunGame() {
 
   const scheduleNextLavaRock = now => {
     const difficulty = Math.min(level, 8);
-    const interval = Math.max(lavaRockMinInterval, lavaRockBaseInterval - difficulty * 70);
-    nextLavaRockAt = now + interval + Math.random() * (540 - difficulty * 24);
+    const mode = getDifficultySettings();
+    const interval = Math.max(
+      lavaRockMinInterval * mode.rockIntervalMultiplier,
+      (lavaRockBaseInterval - difficulty * 70) * mode.rockIntervalMultiplier
+    );
+    const jitter = Math.max(140, (540 - difficulty * 24) * mode.rockIntervalMultiplier);
+    nextLavaRockAt = now + interval + Math.random() * jitter;
   };
 
   const scheduleNextLavaRockShower = now => {
     const difficulty = Math.min(level, 8);
-    const interval = Math.max(lavaRockShowerMinInterval, lavaRockShowerBaseInterval - difficulty * 260);
-    nextLavaRockShowerAt = now + interval + Math.random() * 2600;
+    const mode = getDifficultySettings();
+    const interval = Math.max(
+      lavaRockShowerMinInterval * mode.showerIntervalMultiplier,
+      (lavaRockShowerBaseInterval - difficulty * 260) * mode.showerIntervalMultiplier
+    );
+    nextLavaRockShowerAt = now + interval + Math.random() * (2600 * mode.showerIntervalMultiplier);
   };
 
   const spawnLavaRock = (now, xHint = null, forwardSpawn = false) => {
     const difficulty = Math.min(level, 8);
+    const mode = getDifficultySettings();
+    const speed = mode.rockSpeedMultiplier;
     const rockType = Math.floor(Math.random() * lavaRockSprites.length);
     const baseSize = 116 + Math.random() * 32 + difficulty * 2;
     const size = baseSize * (lavaRockSizeMultipliers[rockType] || 1);
@@ -3703,8 +3788,8 @@ function startColtRunGame() {
       x,
       y: -size * (1.35 + Math.random() * 0.45),
       size,
-      vx: -0.78 - Math.random() * 0.54,
-      vy: 3.45 + difficulty * 0.13 + Math.random() * 0.72,
+      vx: (-0.78 - Math.random() * 0.54) * speed,
+      vy: (3.45 + difficulty * 0.13 + Math.random() * 0.72) * speed,
       rockType,
       spin: (Math.random() - 0.5) * 0.08,
       angle: (Math.random() - 0.5) * 0.12,
@@ -3714,6 +3799,8 @@ function startColtRunGame() {
 
   const spawnLavaRockShower = (now, showerType = 0) => {
     const difficulty = Math.min(level, 8);
+    const mode = getDifficultySettings();
+    const speed = mode.rockSpeedMultiplier;
     const isWideShower = showerType === 1;
     const size = isWideShower
       ? Math.min(canvas.width * 0.72, 620 + difficulty * 12)
@@ -3727,8 +3814,8 @@ function startColtRunGame() {
       x,
       y: -size * (1.05 + Math.random() * 0.2),
       size,
-      vx: (isWideShower ? -0.72 : -0.62) - Math.random() * 0.24,
-      vy: (isWideShower ? 2.65 : 2.85) + difficulty * 0.08 + Math.random() * 0.28,
+      vx: ((isWideShower ? -0.72 : -0.62) - Math.random() * 0.24) * speed,
+      vy: ((isWideShower ? 2.65 : 2.85) + difficulty * 0.08 + Math.random() * 0.28) * speed,
       rockType: 0,
       spin: 0,
       angle: (Math.random() - 0.5) * 0.035,
@@ -3738,6 +3825,8 @@ function startColtRunGame() {
 
   const spawnLavaRockVideoSpecial = now => {
     const difficulty = Math.min(level, 8);
+    const mode = getDifficultySettings();
+    const speed = mode.rockSpeedMultiplier;
     const size = Math.min(canvas.width * 0.52, 430 + difficulty * 8);
     const minX = Math.max(cameraX + canvas.width * 0.08, player.x + 140);
     const maxX = cameraX + canvas.width * 0.48;
@@ -3752,8 +3841,8 @@ function startColtRunGame() {
       x,
       y: -size * (1.05 + Math.random() * 0.2),
       size,
-      vx: -0.62 - Math.random() * 0.24,
-      vy: 2.85 + difficulty * 0.08 + Math.random() * 0.28,
+      vx: (-0.62 - Math.random() * 0.24) * speed,
+      vy: (2.85 + difficulty * 0.08 + Math.random() * 0.28) * speed,
       rockType: 0,
       spin: 0,
       angle: (Math.random() - 0.5) * 0.035,
@@ -3763,14 +3852,15 @@ function startColtRunGame() {
 
   const updateLavaRocks = now => {
     const difficulty = Math.min(level, 8);
-    const maxActiveRocks = Math.min(7, 3 + Math.floor(difficulty / 2));
+    const mode = getDifficultySettings();
+    const maxActiveRocks = Math.max(1, Math.min(mode.maxActiveRocks, 3 + Math.floor(difficulty / 2) + mode.activeRockBonus));
     if (!nextLavaRockAt) scheduleNextLavaRock(now + 500);
     if (!nextLavaRockShowerAt) scheduleNextLavaRockShower(now + 4200);
     if (now >= nextLavaRockAt) {
       const openSlots = maxActiveRocks - fallingLavaRocks.length;
       if (openSlots > 0) {
-        const doubleDropChance = 0.2 + difficulty * 0.025;
-        const drops = openSlots > 1 && Math.random() < doubleDropChance ? 2 : 1;
+        const doubleDropChance = Math.min(0.82, (0.2 + difficulty * 0.025) * mode.doubleDropMultiplier);
+        const drops = openSlots > 1 && Math.random() < doubleDropChance ? Math.min(openSlots, mode.maxDrops) : 1;
         const firstX = cameraX + canvas.width * 0.38 + Math.random() * Math.max(1, canvas.width * 0.68);
         for (let dropIndex = 0; dropIndex < drops; dropIndex += 1) {
           const spacing = 210 + Math.random() * 160;
@@ -3799,7 +3889,7 @@ function startColtRunGame() {
     });
     if (!hasForwardCoverage && player.vx > moveSpeed * 0.65 && fallingLavaRocks.length < maxActiveRocks && now >= nextForwardLavaRockAt) {
       spawnLavaRock(now, player.x + 230 + Math.random() * 260, true);
-      nextForwardLavaRockAt = now + 720;
+      nextForwardLavaRockAt = now + mode.forwardCooldown;
     }
     fallingLavaRocks = fallingLavaRocks.filter(rock => {
       rock.x += rock.vx;
@@ -3836,9 +3926,10 @@ function startColtRunGame() {
     deathFallStartY = 0;
     fallingLavaRocks = [];
     stopRunningAudio();
-    nextLavaRockAt = performance.now() + 1400;
-    nextForwardLavaRockAt = performance.now() + 900;
-    nextLavaRockShowerAt = performance.now() + 3200 + Math.random() * 1800;
+    const mode = getDifficultySettings();
+    nextLavaRockAt = performance.now() + 1400 * mode.rockIntervalMultiplier;
+    nextForwardLavaRockAt = performance.now() + mode.forwardCooldown;
+    nextLavaRockShowerAt = performance.now() + (3200 + Math.random() * 1800) * mode.showerIntervalMultiplier;
     deathVideo.pause();
     lavaRockVideoSpecial.pause();
     lavaRockVideoFrameStamp = -1;
@@ -4265,6 +4356,10 @@ function startColtRunGame() {
       toggleMusic();
       return;
     }
+    if (button.dataset.coltRun === "difficulty") {
+      setDifficultyMode(button.dataset.difficulty);
+      return;
+    }
     playColtRunAudio();
     if (button.dataset.coltRun === "fullscreen") toggleFullscreen();
     if (button.dataset.coltRun === "leaderboard") openLeaderboard();
@@ -4406,6 +4501,7 @@ function startColtRunGame() {
   document.addEventListener("fullscreenchange", updateFullscreenButton);
   app.addEventListener("click", onButtonClick);
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
+  updateDifficultyButtons();
   resetLevel(true);
   playColtRunAudio();
   update();
