@@ -1658,7 +1658,7 @@ function emptyCard(message) {
 
 function renderColtRun() {
   return `
-    ${pageHeader("Colt Run", "", true)}
+    ${categoryTopbar()}
     <section class="colt-run-shell" aria-label="Colt Run game">
       <div class="colt-run-topline">
         <div>
