@@ -1815,12 +1815,9 @@ function startColtRunGame() {
   runningAudio.loop = true;
   const rockDeathAudio = new Audio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
   rockDeathAudio.preload = "auto";
-  const specialLavaRockAudio = new Audio("assets/colt-run-lava-rock-video-special-01.mp4?v=20260707-video-special1");
-  specialLavaRockAudio.preload = "auto";
   const ambientLayerVolume = 1;
   const runningLayerVolume = 0.9;
   const rockDeathLayerVolume = 1;
-  const specialLavaRockLayerVolume = 1;
   const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
@@ -1836,8 +1833,6 @@ function startColtRunGame() {
   runningAudio.muted = musicMuted;
   rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
   rockDeathAudio.muted = musicMuted;
-  specialLavaRockAudio.volume = musicMuted ? 0 : musicVolume * specialLavaRockLayerVolume;
-  specialLavaRockAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let level = 1;
@@ -2311,14 +2306,6 @@ function startColtRunGame() {
     } catch {}
     rockDeathAudio.play().catch(() => {});
   };
-  const playSpecialLavaRockAudio = () => {
-    if (musicMuted || musicVolume <= 0) return;
-    try {
-      specialLavaRockAudio.pause();
-      specialLavaRockAudio.currentTime = 0;
-    } catch {}
-    specialLavaRockAudio.play().catch(() => {});
-  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
@@ -2347,8 +2334,6 @@ function startColtRunGame() {
     runningAudio.muted = musicMuted;
     rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
     rockDeathAudio.muted = musicMuted;
-    specialLavaRockAudio.volume = musicMuted ? 0 : musicVolume * specialLavaRockLayerVolume;
-    specialLavaRockAudio.muted = musicMuted;
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -2363,7 +2348,6 @@ function startColtRunGame() {
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
-      specialLavaRockAudio.pause();
     }
     else playColtRunAudio();
   };
@@ -2379,7 +2363,6 @@ function startColtRunGame() {
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
-      specialLavaRockAudio.pause();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -3905,7 +3888,6 @@ function startColtRunGame() {
       lavaRockVideoFrameStamp = -1;
     } catch {}
     keepLavaRockVideoSpecialPlaying();
-    playSpecialLavaRockAudio();
     fallingLavaRocks.push({
       videoSpecial: true,
       x,
@@ -4002,7 +3984,6 @@ function startColtRunGame() {
     nextLavaRockShowerAt = performance.now() + (3200 + Math.random() * 1800) * mode.showerIntervalMultiplier;
     deathVideo.pause();
     lavaRockVideoSpecial.pause();
-    specialLavaRockAudio.pause();
     lavaRockVideoFrameStamp = -1;
     levelStart = performance.now();
     levelDurationSeconds = getLevelDurationSeconds();
@@ -4600,11 +4581,9 @@ function startColtRunGame() {
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
-      specialLavaRockAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
       rockDeathAudio.src = "";
-      specialLavaRockAudio.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
