@@ -1922,18 +1922,28 @@ function startColtRunGame() {
     sprite.src = src;
     return sprite;
   });
-  const lavaRockVideoSpecial = document.createElement("video");
-  lavaRockVideoSpecial.src = "assets/colt-run-lava-rock-video-special-01.mp4?v=20260707-video-special1";
-  lavaRockVideoSpecial.muted = true;
-  lavaRockVideoSpecial.loop = true;
-  lavaRockVideoSpecial.playsInline = true;
-  lavaRockVideoSpecial.preload = "auto";
+  const lavaRockVideoSpecialSources = [
+    "assets/colt-run-lava-rock-video-special-01.mp4?v=20260707-video-special1",
+    "assets/colt-run-lava-rock-video-special-02.mp4?v=20260715-video-special2"
+  ];
+  const lavaRockVideoSpecials = lavaRockVideoSpecialSources.map(src => {
+    const video = document.createElement("video");
+    video.src = src;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    return video;
+  });
   const lavaRockVideoFrameSize = 260;
   const lavaRockVideoFrameCanvas = document.createElement("canvas");
   lavaRockVideoFrameCanvas.width = lavaRockVideoFrameSize;
   lavaRockVideoFrameCanvas.height = lavaRockVideoFrameSize;
   const lavaRockVideoFrameContext = lavaRockVideoFrameCanvas.getContext("2d", { willReadFrequently: true });
+  const lavaRockVideoCropCanvas = document.createElement("canvas");
+  const lavaRockVideoCropContext = lavaRockVideoCropCanvas.getContext("2d");
   let lavaRockVideoFrameStamp = -1;
+  let lavaRockVideoFrameSource = -1;
   const lavaRockHitProfiles = [
     { coreX: 0.35, coreY: 0.71, rx: 0.18, ry: 0.18 },
     { coreX: 0.37, coreY: 0.59, rx: 0.22, ry: 0.24 },
@@ -2409,10 +2419,16 @@ function startColtRunGame() {
   };
   deathVideo.addEventListener("canplay", keepDeathVideoPlaying);
 
-  const keepLavaRockVideoSpecialPlaying = () => {
-    if (!lavaRockVideoSpecial.paused) return;
-    lavaRockVideoSpecial.play().catch(() => {});
+  const getLavaRockVideoSpecial = index => lavaRockVideoSpecials[index] || lavaRockVideoSpecials[0];
+
+  const keepLavaRockVideoSpecialPlaying = (index = 0) => {
+    const video = getLavaRockVideoSpecial(index);
+    if (!video || !video.paused) return;
+    video.play().catch(() => {});
   };
+  lavaRockVideoSpecials.forEach((video, index) => {
+    video.addEventListener("canplay", () => keepLavaRockVideoSpecialPlaying(index));
+  });
 
   const keepBackgroundVideoPlaying = video => {
     if (!video || !video.paused) return;
@@ -3490,12 +3506,13 @@ function startColtRunGame() {
     return deathFrameCanvas;
   };
 
-  const getTransparentLavaRockVideoFrame = () => {
-    if (lavaRockVideoSpecial.readyState < 2 || !lavaRockVideoFrameContext) return null;
-    const frameStamp = Math.floor(lavaRockVideoSpecial.currentTime * 30);
-    if (frameStamp === lavaRockVideoFrameStamp) return lavaRockVideoFrameCanvas;
-    const sourceW = lavaRockVideoSpecial.videoWidth || lavaRockVideoFrameSize;
-    const sourceH = lavaRockVideoSpecial.videoHeight || lavaRockVideoFrameSize;
+  const getTransparentLavaRockVideoFrame = (index = 0) => {
+    const video = getLavaRockVideoSpecial(index);
+    if (!video || video.readyState < 2 || !lavaRockVideoFrameContext) return null;
+    const frameStamp = Math.floor(video.currentTime * 30);
+    if (frameStamp === lavaRockVideoFrameStamp && lavaRockVideoFrameSource === index) return lavaRockVideoFrameCanvas;
+    const sourceW = video.videoWidth || lavaRockVideoFrameSize;
+    const sourceH = video.videoHeight || lavaRockVideoFrameSize;
     const sourceRatio = sourceW / sourceH;
     let drawW = lavaRockVideoFrameSize;
     let drawH = lavaRockVideoFrameSize;
@@ -3511,7 +3528,7 @@ function startColtRunGame() {
     let frame;
     try {
       lavaRockVideoFrameContext.clearRect(0, 0, lavaRockVideoFrameSize, lavaRockVideoFrameSize);
-      lavaRockVideoFrameContext.drawImage(lavaRockVideoSpecial, drawX, drawY, drawW, drawH);
+      lavaRockVideoFrameContext.drawImage(video, drawX, drawY, drawW, drawH);
       frame = lavaRockVideoFrameContext.getImageData(0, 0, lavaRockVideoFrameSize, lavaRockVideoFrameSize);
     } catch {
       return null;
@@ -3597,7 +3614,43 @@ function startColtRunGame() {
       if (edgeFade < 1) pixels[alphaIndex] = Math.round(pixels[alphaIndex] * edgeFade);
     }
     lavaRockVideoFrameContext.putImageData(frame, 0, 0);
+    if (lavaRockVideoCropContext) {
+      let minX = lavaRockVideoFrameSize;
+      let minY = lavaRockVideoFrameSize;
+      let maxX = 0;
+      let maxY = 0;
+      for (let pixelIndex = 0; pixelIndex < lavaRockVideoFrameSize * lavaRockVideoFrameSize; pixelIndex += 1) {
+        if (pixels[pixelIndex * 4 + 3] < 18) continue;
+        const x = pixelIndex % lavaRockVideoFrameSize;
+        const y = Math.floor(pixelIndex / lavaRockVideoFrameSize);
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+      if (maxX > minX && maxY > minY) {
+        const padding = 5;
+        const cropX = Math.max(0, minX - padding);
+        const cropY = Math.max(0, minY - padding);
+        const cropMaxX = Math.min(lavaRockVideoFrameSize - 1, maxX + padding);
+        const cropMaxY = Math.min(lavaRockVideoFrameSize - 1, maxY + padding);
+        const cropW = cropMaxX - cropX + 1;
+        const cropH = cropMaxY - cropY + 1;
+        lavaRockVideoCropCanvas.width = cropW;
+        lavaRockVideoCropCanvas.height = cropH;
+        lavaRockVideoCropContext.clearRect(0, 0, cropW, cropH);
+        lavaRockVideoCropContext.putImageData(lavaRockVideoFrameContext.getImageData(cropX, cropY, cropW, cropH), 0, 0);
+        const fitScale = Math.min(lavaRockVideoFrameSize / cropW, lavaRockVideoFrameSize / cropH);
+        const fitW = cropW * fitScale;
+        const fitH = cropH * fitScale;
+        const fitX = (lavaRockVideoFrameSize - fitW) / 2;
+        const fitY = (lavaRockVideoFrameSize - fitH) / 2;
+        lavaRockVideoFrameContext.clearRect(0, 0, lavaRockVideoFrameSize, lavaRockVideoFrameSize);
+        lavaRockVideoFrameContext.drawImage(lavaRockVideoCropCanvas, fitX, fitY, fitW, fitH);
+      }
+    }
     lavaRockVideoFrameStamp = frameStamp;
+    lavaRockVideoFrameSource = index;
     return lavaRockVideoFrameCanvas;
   };
 
@@ -3738,7 +3791,7 @@ function startColtRunGame() {
   });
 
   const getLavaRockSprite = rock => {
-    if (rock.videoSpecial) return getTransparentLavaRockVideoFrame();
+    if (rock.videoSpecial) return getTransparentLavaRockVideoFrame(rock.videoSpecialIndex || 0);
     if (rock.shower) return lavaRockShowerSprites[(rock.showerType || 0) % lavaRockShowerSprites.length];
     return lavaRockSprites[rock.rockType % lavaRockSprites.length];
   };
@@ -3875,21 +3928,25 @@ function startColtRunGame() {
     });
   };
 
-  const spawnLavaRockVideoSpecial = now => {
+  const spawnLavaRockVideoSpecial = (now, specialIndex = 0) => {
     const difficulty = Math.min(level, 8);
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
+    const videoSpecialIndex = Math.max(0, Math.min(lavaRockVideoSpecials.length - 1, specialIndex));
     const size = Math.min(canvas.width * 0.52, 430 + difficulty * 8);
     const minX = Math.max(cameraX + canvas.width * 0.08, player.x + 140);
     const maxX = cameraX + canvas.width * 0.48;
     const x = minX + Math.random() * Math.max(1, maxX - minX);
+    const video = getLavaRockVideoSpecial(videoSpecialIndex);
     try {
-      lavaRockVideoSpecial.currentTime = 0;
+      video.currentTime = 0;
       lavaRockVideoFrameStamp = -1;
+      lavaRockVideoFrameSource = -1;
     } catch {}
-    keepLavaRockVideoSpecialPlaying();
+    keepLavaRockVideoSpecialPlaying(videoSpecialIndex);
     fallingLavaRocks.push({
       videoSpecial: true,
+      videoSpecialIndex,
       x,
       y: -size * (1.05 + Math.random() * 0.2),
       size,
@@ -3926,9 +3983,9 @@ function startColtRunGame() {
     if (now >= nextLavaRockShowerAt) {
       const specialAlreadyActive = fallingLavaRocks.some(rock => rock.shower || rock.videoSpecial);
       if (!specialAlreadyActive && fallingLavaRocks.length <= maxActiveRocks - 2) {
-        const specialChoice = Math.floor(Math.random() * 3);
-        if (specialChoice === 0) spawnLavaRockVideoSpecial(now);
-        else spawnLavaRockShower(now, specialChoice - 1);
+        const specialChoice = Math.floor(Math.random() * (lavaRockVideoSpecials.length + 2));
+        if (specialChoice < lavaRockVideoSpecials.length) spawnLavaRockVideoSpecial(now, specialChoice);
+        else spawnLavaRockShower(now, specialChoice - lavaRockVideoSpecials.length);
       }
       scheduleNextLavaRockShower(now);
     }
@@ -3983,8 +4040,9 @@ function startColtRunGame() {
     nextForwardLavaRockAt = performance.now() + mode.forwardCooldown;
     nextLavaRockShowerAt = performance.now() + (3200 + Math.random() * 1800) * mode.showerIntervalMultiplier;
     deathVideo.pause();
-    lavaRockVideoSpecial.pause();
+    lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
+    lavaRockVideoFrameSource = -1;
     levelStart = performance.now();
     levelDurationSeconds = getLevelDurationSeconds();
     statusNode.textContent = "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
@@ -4147,7 +4205,7 @@ function startColtRunGame() {
     ctx.shadowColor = "rgba(255, 78, 18, 0.45)";
     ctx.shadowBlur = 16;
     if (rock.videoSpecial && sprite) {
-      keepLavaRockVideoSpecialPlaying();
+      keepLavaRockVideoSpecialPlaying(rock.videoSpecialIndex || 0);
       ctx.drawImage(sprite, -box.w / 2, -box.h / 2, box.w, box.h);
     } else if (sprite && sprite.complete && sprite.naturalWidth) {
       ctx.drawImage(sprite, -box.w / 2, -box.h / 2, box.w, box.h);
@@ -4577,13 +4635,16 @@ function startColtRunGame() {
       }
       touchCleanups.forEach(cleanup => cleanup());
       deathVideo.pause();
-      lavaRockVideoSpecial.pause();
+      lavaRockVideoSpecials.forEach(video => video.pause());
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
       rockDeathAudio.src = "";
+      lavaRockVideoSpecials.forEach(video => {
+        video.src = "";
+      });
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
