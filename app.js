@@ -1748,8 +1748,11 @@ function startColtRunGame() {
   const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
   runningAudio.preload = "auto";
   runningAudio.loop = true;
+  const rockDeathAudio = new Audio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
+  rockDeathAudio.preload = "auto";
   const ambientLayerVolume = 1;
   const runningLayerVolume = 0.9;
+  const rockDeathLayerVolume = 1;
   const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
@@ -1763,6 +1766,8 @@ function startColtRunGame() {
   ambientAudio.muted = musicMuted;
   runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   runningAudio.muted = musicMuted;
+  rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
+  rockDeathAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let level = 1;
@@ -2170,6 +2175,13 @@ function startColtRunGame() {
       runningAudio.currentTime = 0;
     } catch {}
   };
+  const playRockDeathAudio = () => {
+    if (musicMuted || musicVolume <= 0) return;
+    try {
+      rockDeathAudio.currentTime = 0;
+    } catch {}
+    rockDeathAudio.play().catch(() => {});
+  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
@@ -2196,6 +2208,8 @@ function startColtRunGame() {
     ambientAudio.muted = musicMuted;
     runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     runningAudio.muted = musicMuted;
+    rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
+    rockDeathAudio.muted = musicMuted;
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -2209,6 +2223,7 @@ function startColtRunGame() {
     if (musicMuted) {
       ambientAudio.pause();
       stopRunningAudio();
+      rockDeathAudio.pause();
     }
     else playColtRunAudio();
   };
@@ -2223,6 +2238,7 @@ function startColtRunGame() {
       applyMusicVolume();
       ambientAudio.pause();
       stopRunningAudio();
+      rockDeathAudio.pause();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -3539,7 +3555,7 @@ function startColtRunGame() {
     flag = { x: last.x + last.w - 34, y: last.y - 86 };
   };
 
-  const triggerColtDeath = message => {
+  const triggerColtDeath = (message, options = {}) => {
     if (lost) return;
     lost = true;
     player.vx = 0;
@@ -3556,6 +3572,7 @@ function startColtRunGame() {
       deathVideo.currentTime = 0;
     } catch {}
     deathVideo.play().catch(() => {});
+    if (options.rockHit) playRockDeathAudio();
     statusNode.textContent = message;
   };
 
@@ -4152,7 +4169,7 @@ function startColtRunGame() {
         const coltHitbox = getColtHazardHitbox();
         for (const rock of fallingLavaRocks) {
           if (getLavaRockCoreHitboxes(rock).some(hitbox => ellipseHitsRect(hitbox, coltHitbox))) {
-            triggerColtDeath("The Colt was hit by a lava rock. Restart and try again.");
+            triggerColtDeath("The Colt was hit by a lava rock. Restart and try again.", { rockHit: true });
             break;
           }
         }
@@ -4410,8 +4427,10 @@ function startColtRunGame() {
       lavaRockVideoSpecial.pause();
       ambientAudio.pause();
       stopRunningAudio();
+      rockDeathAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
+      rockDeathAudio.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
