@@ -1679,6 +1679,21 @@ function renderColtRun() {
         </div>
       </div>
       <div class="colt-run-stage">
+        <div id="coltRunCharacterSelect" class="colt-run-character-select" aria-label="Choose character">
+          <div class="colt-run-character-panel">
+            <h3>Choose Your Runner</h3>
+            <div class="colt-run-character-grid">
+              <button type="button" data-colt-run="character" data-character="colt">
+                <canvas id="coltRunSelectColt" width="180" height="130" aria-hidden="true"></canvas>
+                <span>Colt</span>
+              </button>
+              <button type="button" data-colt-run="character" data-character="mrNieves">
+                <canvas id="coltRunSelectMrNieves" width="180" height="130" aria-hidden="true"></canvas>
+                <span>Mr. Nieves</span>
+              </button>
+            </div>
+          </div>
+        </div>
         <canvas id="coltRunCanvas" class="colt-run-canvas" width="960" height="540" tabindex="0" aria-label="Colt Run platform game"></canvas>
         <button class="colt-run-fullscreen-toggle" type="button" data-colt-run="fullscreen">Exit Fullscreen</button>
         <div class="colt-run-touch" aria-label="Touch controls">
@@ -1698,6 +1713,7 @@ function renderColtRun() {
             <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Game audio volume">
           </div>
           <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
+          <button class="outline-btn" type="button" data-colt-run="characterSelect">Character</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
           <button id="coltRunNextLevel" class="primary-btn" type="button" data-colt-run="new" disabled>Next Level</button>
@@ -1745,6 +1761,18 @@ function startColtRunGame() {
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
+  const characterSelectPanel = document.getElementById("coltRunCharacterSelect");
+  const characterButtons = shell ? Array.from(shell.querySelectorAll("[data-character]")) : [];
+  const selectColtCanvas = document.getElementById("coltRunSelectColt");
+  const selectMrNievesCanvas = document.getElementById("coltRunSelectMrNieves");
+  const characterStorageKey = "coltRunCharacterV1";
+  const characterNames = {
+    colt: "Colt",
+    mrNieves: "Mr. Nieves"
+  };
+  let selectedCharacter = localStorage.getItem(characterStorageKey);
+  if (!characterNames[selectedCharacter]) selectedCharacter = "colt";
+  let characterSelectOpen = true;
   const difficultyStorageKey = "coltRunDifficultyV1";
   const difficultyModes = {
     easy: {
@@ -1887,6 +1915,33 @@ function startColtRunGame() {
     level = 1;
     resetLevel(true);
     statusNode.textContent = `${difficultyModes[mode].label} mode selected. Reach the flag before time runs out.`;
+  };
+  const updateCharacterButtons = () => {
+    characterButtons.forEach(button => {
+      const selected = button.dataset.character === selectedCharacter;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+  };
+  const openCharacterSelect = () => {
+    characterSelectOpen = true;
+    if (characterSelectPanel) characterSelectPanel.hidden = false;
+    updateCharacterButtons();
+    stopRunningAudio();
+  };
+  const closeCharacterSelect = () => {
+    characterSelectOpen = false;
+    if (characterSelectPanel) characterSelectPanel.hidden = true;
+    canvas.focus({ preventScroll: true });
+  };
+  const setCharacter = character => {
+    if (!characterNames[character]) return;
+    selectedCharacter = character;
+    localStorage.setItem(characterStorageKey, selectedCharacter);
+    updateCharacterButtons();
+    resetLevel(true);
+    closeCharacterSelect();
+    statusNode.textContent = `${characterNames[selectedCharacter]} selected. Reach the flag before time runs out.`;
   };
   const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, facing: 1, state: "idle", jumpPrepUntil: 0 };
   const coltSprites = {
@@ -2056,6 +2111,20 @@ function startColtRunGame() {
   leapVideo.loop = true;
   leapVideo.playsInline = true;
   leapVideo.preload = "auto";
+  const mrNievesIdleVideo = document.createElement("video");
+  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-mr-nieves1";
+  mrNievesIdleVideo.muted = true;
+  mrNievesIdleVideo.loop = true;
+  mrNievesIdleVideo.playsInline = true;
+  mrNievesIdleVideo.preload = "auto";
+  const mrNievesRunVideo = document.createElement("video");
+  mrNievesRunVideo.src = "assets/colt-run-mr-nieves-run.mp4?v=20260716-mr-nieves1";
+  mrNievesRunVideo.muted = true;
+  mrNievesRunVideo.loop = true;
+  mrNievesRunVideo.playsInline = true;
+  mrNievesRunVideo.preload = "auto";
+  const mrNievesJumpImage = new Image();
+  mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.png?v=20260716-mr-nieves1";
   const deathVideo = document.createElement("video");
   deathVideo.src = "assets/colt-run-death.mp4?v=20260706-death";
   deathVideo.muted = true;
@@ -2104,6 +2173,15 @@ function startColtRunGame() {
   const leapCropContext = leapCropCanvas.getContext("2d");
   let leapFrameStamp = -1;
   let leapStableCrop = null;
+  const mrNievesFrameWidth = 220;
+  const mrNievesFrameHeight = 150;
+  const mrNievesFrameCanvas = document.createElement("canvas");
+  mrNievesFrameCanvas.width = mrNievesFrameWidth;
+  mrNievesFrameCanvas.height = mrNievesFrameHeight;
+  const mrNievesFrameContext = mrNievesFrameCanvas.getContext("2d", { willReadFrequently: true });
+  const mrNievesCropCanvas = document.createElement("canvas");
+  const mrNievesCropContext = mrNievesCropCanvas.getContext("2d");
+  let mrNievesFrameStamp = "";
   const deathFrameWidth = 230;
   const deathFrameHeight = 170;
   const deathFrameCanvas = document.createElement("canvas");
@@ -2413,6 +2491,18 @@ function startColtRunGame() {
   };
   leapVideo.addEventListener("canplay", keepLeapVideoPlaying);
 
+  const keepMrNievesIdleVideoPlaying = () => {
+    if (!mrNievesIdleVideo.paused) return;
+    mrNievesIdleVideo.play().catch(() => {});
+  };
+  mrNievesIdleVideo.addEventListener("canplay", keepMrNievesIdleVideoPlaying);
+
+  const keepMrNievesRunVideoPlaying = () => {
+    if (!mrNievesRunVideo.paused) return;
+    mrNievesRunVideo.play().catch(() => {});
+  };
+  mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
+
   const keepDeathVideoPlaying = () => {
     if (!deathVideo.paused) return;
     deathVideo.play().catch(() => {});
@@ -2568,6 +2658,144 @@ function startColtRunGame() {
     flagFrameContext.putImageData(frame, 0, 0);
     flagFrameStamp = frameStamp;
     return flagFrameCanvas;
+  };
+
+  const getTransparentMrNievesFrame = state => {
+    const isRun = state === "run";
+    const isJump = state === "jumpPrep" || state === "leap";
+    const source = isRun ? mrNievesRunVideo : isJump ? mrNievesJumpImage : mrNievesIdleVideo;
+    const isImage = source instanceof HTMLImageElement;
+    if (!mrNievesFrameContext || !mrNievesCropContext) return null;
+    if (isImage) {
+      if (!source.complete || !source.naturalWidth) return null;
+    } else if (source.readyState < 2) {
+      return null;
+    }
+    const frameStamp = isImage ? `${state}:image:${source.naturalWidth}` : `${state}:video:${Math.floor(source.currentTime * 30)}`;
+    if (frameStamp === mrNievesFrameStamp) return mrNievesFrameCanvas;
+    const sourceW = isImage ? source.naturalWidth : source.videoWidth || mrNievesFrameWidth;
+    const sourceH = isImage ? source.naturalHeight : source.videoHeight || mrNievesFrameHeight;
+    const sourceRatio = sourceW / sourceH;
+    const targetRatio = mrNievesFrameWidth / mrNievesFrameHeight;
+    let drawW = mrNievesFrameWidth;
+    let drawH = mrNievesFrameHeight;
+    let drawX = 0;
+    let drawY = 0;
+    if (sourceRatio > targetRatio) {
+      drawH = mrNievesFrameWidth / sourceRatio;
+      drawY = (mrNievesFrameHeight - drawH) / 2;
+    } else if (sourceRatio < targetRatio) {
+      drawW = mrNievesFrameHeight * sourceRatio;
+      drawX = (mrNievesFrameWidth - drawW) / 2;
+    }
+    mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
+    mrNievesFrameContext.drawImage(source, drawX, drawY, drawW, drawH);
+    const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
+    const pixels = frame.data;
+    const isBlackBackdrop = pixelIndex => {
+      const offset = pixelIndex * 4;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const brightest = Math.max(red, green, blue);
+      const average = (red + green + blue) / 3;
+      return average < 28 && brightest < 40;
+    };
+    const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
+    const queue = [];
+    const addPixel = (x, y) => {
+      if (x < 0 || x >= mrNievesFrameWidth || y < 0 || y >= mrNievesFrameHeight) return;
+      const pixelIndex = y * mrNievesFrameWidth + x;
+      if (transparent[pixelIndex] || !isBlackBackdrop(pixelIndex)) return;
+      transparent[pixelIndex] = 1;
+      queue.push(pixelIndex);
+    };
+    for (let x = 0; x < mrNievesFrameWidth; x += 1) {
+      addPixel(x, 0);
+      addPixel(x, mrNievesFrameHeight - 1);
+    }
+    for (let y = 0; y < mrNievesFrameHeight; y += 1) {
+      addPixel(0, y);
+      addPixel(mrNievesFrameWidth - 1, y);
+    }
+    while (queue.length) {
+      const pixelIndex = queue.pop();
+      const x = pixelIndex % mrNievesFrameWidth;
+      const y = Math.floor(pixelIndex / mrNievesFrameWidth);
+      addPixel(x - 1, y);
+      addPixel(x + 1, y);
+      addPixel(x, y - 1);
+      addPixel(x, y + 1);
+    }
+    for (let pixelIndex = 0; pixelIndex < transparent.length; pixelIndex += 1) {
+      if (transparent[pixelIndex]) pixels[pixelIndex * 4 + 3] = 0;
+    }
+    for (let pass = 0; pass < 2; pass += 1) {
+      const toFade = [];
+      for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
+        const alphaIndex = pixelIndex * 4 + 3;
+        if (pixels[alphaIndex] < 16 || !isBlackBackdrop(pixelIndex)) continue;
+        const x = pixelIndex % mrNievesFrameWidth;
+        const y = Math.floor(pixelIndex / mrNievesFrameWidth);
+        let touchesTransparent = false;
+        for (let dy = -1; dy <= 1 && !touchesTransparent; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nextX = x + dx;
+            const nextY = y + dy;
+            if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) {
+              touchesTransparent = true;
+              break;
+            }
+            if (pixels[(nextY * mrNievesFrameWidth + nextX) * 4 + 3] < 16) {
+              touchesTransparent = true;
+              break;
+            }
+          }
+        }
+        if (touchesTransparent) toFade.push(pixelIndex);
+      }
+      toFade.forEach(pixelIndex => {
+        pixels[pixelIndex * 4 + 3] = Math.max(0, pixels[pixelIndex * 4 + 3] - 130);
+      });
+    }
+    mrNievesFrameContext.putImageData(frame, 0, 0);
+    let minX = mrNievesFrameWidth;
+    let minY = mrNievesFrameHeight;
+    let maxX = 0;
+    let maxY = 0;
+    for (let pixelIndex = 0; pixelIndex < pixels.length; pixelIndex += 4) {
+      if (pixels[pixelIndex + 3] < 18) continue;
+      const point = pixelIndex / 4;
+      const x = point % mrNievesFrameWidth;
+      const y = Math.floor(point / mrNievesFrameWidth);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+    if (maxX > minX && maxY > minY) {
+      const padding = 4;
+      const cropX = Math.max(0, minX - padding);
+      const cropY = Math.max(0, minY - padding);
+      const cropMaxX = Math.min(mrNievesFrameWidth - 1, maxX + padding);
+      const cropMaxY = Math.min(mrNievesFrameHeight - 1, maxY + padding);
+      const cropW = cropMaxX - cropX + 1;
+      const cropH = cropMaxY - cropY + 1;
+      mrNievesCropCanvas.width = cropW;
+      mrNievesCropCanvas.height = cropH;
+      mrNievesCropContext.clearRect(0, 0, cropW, cropH);
+      mrNievesCropContext.putImageData(mrNievesFrameContext.getImageData(cropX, cropY, cropW, cropH), 0, 0);
+      const fitScale = Math.min(mrNievesFrameWidth / cropW, mrNievesFrameHeight / cropH);
+      const fitW = cropW * fitScale;
+      const fitH = cropH * fitScale;
+      const fitX = (mrNievesFrameWidth - fitW) / 2;
+      const fitY = mrNievesFrameHeight - fitH;
+      mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
+      mrNievesFrameContext.drawImage(mrNievesCropCanvas, fitX, fitY, fitW, fitH);
+    }
+    mrNievesFrameStamp = frameStamp;
+    return mrNievesFrameCanvas;
   };
 
   const getTransparentIdleFrame = () => {
@@ -4064,18 +4292,22 @@ function startColtRunGame() {
   };
 
   const drawDeathColt = () => {
-    const drawW = 178 * deathColtDrawScale;
-    const drawH = 132 * deathColtDrawScale;
+    const isMrNieves = selectedCharacter === "mrNieves";
+    const drawW = (isMrNieves ? 146 : 178) * deathColtDrawScale;
+    const drawH = (isMrNieves ? 122 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
     const y = Math.round(deathY + player.h - drawH + 8);
-    const deathFrame = getTransparentDeathFrame();
+    const deathFrame = isMrNieves ? null : getTransparentDeathFrame();
+    const mrNievesDeathFrame = isMrNieves ? getTransparentMrNievesFrame("leap") : null;
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
     ctx.shadowColor = "rgba(0, 0, 0, 0.44)";
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 8;
-    if (deathFrame) {
+    if (mrNievesDeathFrame) {
+      ctx.drawImage(mrNievesDeathFrame, -drawW / 2, 0, drawW, drawH);
+    } else if (deathFrame) {
       keepDeathVideoPlaying();
       ctx.drawImage(deathFrame, -drawW / 2, 0, drawW, drawH);
     } else if (coltSprites.leap.complete && coltSprites.leap.naturalWidth) {
@@ -4097,8 +4329,13 @@ function startColtRunGame() {
     const sprite = player.state === "run"
       ? runFrames[runFrame]
       : coltSprites[player.state] || coltSprites.idle;
-    const drawW = player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const isMrNieves = selectedCharacter === "mrNieves";
+    const drawW = isMrNieves
+      ? player.state === "run" ? 136 : player.state === "leap" || player.state === "jumpPrep" ? 146 : 128
+      : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves
+      ? player.state === "run" ? 112 : player.state === "leap" || player.state === "jumpPrep" ? 122 : 116
+      : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + 8);
     ctx.save();
@@ -4107,10 +4344,15 @@ function startColtRunGame() {
     ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 8;
-    const idleFrame = player.state === "idle" ? getTransparentIdleFrame() : null;
-    const runningFrame = player.state === "run" ? getTransparentRunFrame() : null;
-    const leapFrame = player.state === "leap" ? getTransparentLeapFrame() : null;
-    if (idleFrame) {
+    const mrNievesFrame = isMrNieves ? getTransparentMrNievesFrame(player.state) : null;
+    const idleFrame = !isMrNieves && player.state === "idle" ? getTransparentIdleFrame() : null;
+    const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
+    const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
+    if (mrNievesFrame) {
+      if (player.state === "run") keepMrNievesRunVideoPlaying();
+      else if (player.state === "idle") keepMrNievesIdleVideoPlaying();
+      ctx.drawImage(mrNievesFrame, -drawW / 2, 0, drawW, drawH);
+    } else if (idleFrame) {
       keepIdleVideoPlaying();
       ctx.drawImage(idleFrame, -drawW / 2, 0, drawW, drawH);
     } else if (runningFrame) {
@@ -4126,6 +4368,28 @@ function startColtRunGame() {
       ctx.fillRect(-player.w / 2, drawH - player.h, player.w, player.h);
     }
     ctx.restore();
+  };
+
+  const drawSelectPreview = (previewCanvas, frame, width, height) => {
+    if (!previewCanvas || !frame) return;
+    const previewContext = previewCanvas.getContext("2d");
+    if (!previewContext) return;
+    previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    previewContext.save();
+    previewContext.translate(previewCanvas.width / 2, previewCanvas.height - 8);
+    previewContext.shadowColor = "rgba(0, 0, 0, 0.34)";
+    previewContext.shadowBlur = 10;
+    previewContext.shadowOffsetY = 6;
+    previewContext.drawImage(frame, -width / 2, -height, width, height);
+    previewContext.restore();
+  };
+
+  const drawCharacterSelectPreviews = () => {
+    if (!characterSelectOpen) return;
+    keepIdleVideoPlaying();
+    keepMrNievesIdleVideoPlaying();
+    drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesFrame("idle"), 104, 108);
   };
 
   const drawCoverImage = image => {
@@ -4291,6 +4555,7 @@ function startColtRunGame() {
     }
     fallingLavaRocks.forEach(drawLavaRock);
     drawColt();
+    drawCharacterSelectPreviews();
     if (won || coltDeathHasFallen()) {
       ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
       ctx.fillRect(0, 0, w, h);
@@ -4306,6 +4571,11 @@ function startColtRunGame() {
   const update = () => {
     const now = performance.now();
     if (leaderboardPanel && !leaderboardPanel.hidden && !pendingLeaderboardEntry && !won && !lost) {
+      draw();
+      animationId = requestAnimationFrame(update);
+      return;
+    }
+    if (characterSelectOpen) {
       draw();
       animationId = requestAnimationFrame(update);
       return;
@@ -4432,6 +4702,7 @@ function startColtRunGame() {
   const onKeyDown = event => {
     if (event.target instanceof HTMLElement && event.target.closest("#coltRunLeaderboardForm")) return;
     if (event.target instanceof HTMLElement && event.target.closest(".colt-run-volume")) return;
+    if (characterSelectOpen) return;
     playColtRunAudio();
     if (event.code === "Enter") {
       event.preventDefault();
@@ -4478,6 +4749,14 @@ function startColtRunGame() {
     if (button.dataset.coltRun === "leaderboardMode") {
       activeLeaderboardMode = normalizeDifficultyMode(button.dataset.leaderboardMode);
       renderLeaderboardList();
+      return;
+    }
+    if (button.dataset.coltRun === "characterSelect") {
+      openCharacterSelect();
+      return;
+    }
+    if (button.dataset.coltRun === "character") {
+      setCharacter(button.dataset.character);
       return;
     }
     playColtRunAudio();
@@ -4622,8 +4901,9 @@ function startColtRunGame() {
   app.addEventListener("click", onButtonClick);
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
   updateDifficultyButtons();
+  updateCharacterButtons();
   resetLevel(true);
-  playColtRunAudio();
+  openCharacterSelect();
   update();
   coltRunGame = {
     stop() {
@@ -4641,12 +4921,16 @@ function startColtRunGame() {
       touchCleanups.forEach(cleanup => cleanup());
       deathVideo.pause();
       lavaRockVideoSpecials.forEach(video => video.pause());
+      mrNievesIdleVideo.pause();
+      mrNievesRunVideo.pause();
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
       rockDeathAudio.src = "";
+      mrNievesIdleVideo.src = "";
+      mrNievesRunVideo.src = "";
       lavaRockVideoSpecials.forEach(video => {
         video.src = "";
       });
