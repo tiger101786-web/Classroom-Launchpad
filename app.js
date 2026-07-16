@@ -2751,21 +2751,29 @@ function startColtRunGame() {
     const bodyMaxX = hasTorsoAnchor ? Math.min(mrNievesFrameWidth - 1, anchorMaxX + (isRun ? 46 : 36)) : mrNievesFrameWidth * 0.72;
     const bodyMinY = hasTorsoAnchor ? Math.max(0, anchorMinY - 10) : mrNievesFrameHeight * 0.06;
     const bodyMaxY = Math.min(floorCutY, hasTorsoAnchor ? anchorMaxY + (isJump ? 86 : 94) : mrNievesFrameHeight - 4);
-    const legMinX = hasTorsoAnchor ? Math.max(0, anchorMinX - (isRun ? 28 : 20)) : bodyMinX;
-    const legMaxX = hasTorsoAnchor ? Math.min(mrNievesFrameWidth - 1, anchorMaxX + (isRun ? 30 : 22)) : bodyMaxX;
+    const bodyCenterX = hasTorsoAnchor ? (anchorMinX + anchorMaxX) / 2 : mrNievesFrameWidth / 2;
+    const lowerBodyStartY = hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36;
+    const hipEndY = lowerBodyStartY + (isRun ? 26 : 22);
+    const legSpread = isRun ? 8 : 0;
     const isInBodyArea = stats =>
       stats.x >= bodyMinX &&
       stats.x <= bodyMaxX &&
       stats.y >= bodyMinY &&
       stats.y <= bodyMaxY;
+    const isLegShape = stats => {
+      if (stats.y < lowerBodyStartY || stats.y > floorCutY) return false;
+      if (stats.y <= hipEndY) {
+        return stats.x >= bodyCenterX - 28 - legSpread && stats.x <= bodyCenterX + 28 + legSpread;
+      }
+      const leftLeg = stats.x >= bodyCenterX - 27 - legSpread && stats.x <= bodyCenterX - 3 + legSpread;
+      const rightLeg = stats.x >= bodyCenterX + 1 - legSpread && stats.x <= bodyCenterX + 27 + legSpread;
+      return leftLeg || rightLeg;
+    };
     const isLowerBodyArea = stats =>
-      stats.x >= legMinX &&
-      stats.x <= legMaxX &&
-      stats.y >= (hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36) &&
-      stats.y <= floorCutY;
+      isLegShape(stats);
     const isFootArea = stats =>
-      stats.x >= legMinX - 12 &&
-      stats.x <= legMaxX + 14 &&
+      stats.x >= bodyCenterX - 36 - legSpread &&
+      stats.x <= bodyCenterX + 38 + legSpread &&
       stats.y >= Math.max(bodyMinY, floorCutY - 18) &&
       stats.y <= floorCutY;
     const isTorsoHighlight = stats =>
@@ -2834,7 +2842,7 @@ function startColtRunGame() {
     for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
       if (pixels[pixelIndex * 4 + 3] < 16) continue;
       const stats = getMrNievesPixelStats(pixelIndex);
-      const protectedNeutralDetail = isLowerBodyArea(stats) || isTorsoHighlight(stats) || isShoeHighlight(stats);
+      const protectedNeutralDetail = (isLowerBodyArea(stats) && isPantsPixel(stats)) || isTorsoHighlight(stats) || isShoeHighlight(stats);
       const grayHaze = !protectedNeutralDetail && stats.average > 58 && stats.average < 150 && stats.chroma < 72;
       if (grayHaze) pixels[pixelIndex * 4 + 3] = 0;
     }
@@ -2969,6 +2977,34 @@ function startColtRunGame() {
       const fitY = mrNievesFrameHeight - fitH;
       mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
       mrNievesFrameContext.drawImage(mrNievesCropCanvas, fitX, fitY, fitW, fitH);
+      const finalFrame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
+      const finalPixels = finalFrame.data;
+      for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
+        const offset = pixelIndex * 4;
+        if (finalPixels[offset + 3] < 16) continue;
+        const x = pixelIndex % mrNievesFrameWidth;
+        const y = Math.floor(pixelIndex / mrNievesFrameWidth);
+        const red = finalPixels[offset];
+        const green = finalPixels[offset + 1];
+        const blue = finalPixels[offset + 2];
+        const brightest = Math.max(red, green, blue);
+        const darkest = Math.min(red, green, blue);
+        const average = (red + green + blue) / 3;
+        const chroma = brightest - darkest;
+        const redClothing = red > 72 && green < 96 && blue < 116 && red > green * 1.12 && red > blue * 1.02;
+        const skin = red > 116 && green > 44 && green < 154 && blue < 126 && red > green * 1.12;
+        const shirtText = y > 32 && y < 67 && x > 88 && x < 132 && average > 116 && chroma < 100;
+        const leftLeg = y > 66 && y < 136 && x > 82 && x < 109 && average > 22 && average < 188 && chroma < 136;
+        const rightLeg = y > 66 && y < 136 && x > 111 && x < 139 && average > 22 && average < 188 && chroma < 136;
+        const shoe = y > 124 && y < 144 && x > 75 && x < 145 && (redClothing || (average > 100 && average < 220 && chroma < 82));
+        const bottomBar = y > 124 && !shoe && average > 48 && average < 192 && chroma < 96;
+        const neckHaze = y > 18 && y < 54 && x > 103 && x < 143 && !skin && !redClothing && average > 72 && chroma < 92;
+        const sideHaze = !leftLeg && !rightLeg && !shirtText && !skin && !redClothing && average > 78 && average < 184 && chroma < 88;
+        if (bottomBar || neckHaze || sideHaze) {
+          finalPixels[offset + 3] = 0;
+        }
+      }
+      mrNievesFrameContext.putImageData(finalFrame, 0, 0);
     }
     mrNievesFrameStamp = frameStamp;
     return mrNievesFrameCanvas;
