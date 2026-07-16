@@ -2776,18 +2776,37 @@ function startColtRunGame() {
     };
     const seenCharacter = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const visiblePixel = pixelIndex => pixels[pixelIndex * 4 + 3] >= 16;
+    const components = [];
+    let anchorMinX = mrNievesFrameWidth;
+    let anchorMinY = mrNievesFrameHeight;
+    let anchorMaxX = 0;
+    let anchorMaxY = 0;
     for (let pixelIndex = 0; pixelIndex < seenCharacter.length; pixelIndex += 1) {
       if (seenCharacter[pixelIndex] || !visiblePixel(pixelIndex)) continue;
       const component = [];
       const queue = [pixelIndex];
       let anchorPixels = 0;
+      let minComponentX = mrNievesFrameWidth;
+      let minComponentY = mrNievesFrameHeight;
+      let maxComponentX = 0;
+      let maxComponentY = 0;
       seenCharacter[pixelIndex] = 1;
       while (queue.length) {
         const current = queue.pop();
         component.push(current);
-        if (isCharacterAnchorPixel(current)) anchorPixels += 1;
         const x = current % mrNievesFrameWidth;
         const y = Math.floor(current / mrNievesFrameWidth);
+        minComponentX = Math.min(minComponentX, x);
+        minComponentY = Math.min(minComponentY, y);
+        maxComponentX = Math.max(maxComponentX, x);
+        maxComponentY = Math.max(maxComponentY, y);
+        if (isCharacterAnchorPixel(current)) {
+          anchorPixels += 1;
+          anchorMinX = Math.min(anchorMinX, x);
+          anchorMinY = Math.min(anchorMinY, y);
+          anchorMaxX = Math.max(anchorMaxX, x);
+          anchorMaxY = Math.max(anchorMaxY, y);
+        }
         [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([nextX, nextY]) => {
           if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) return;
           const next = nextY * mrNievesFrameWidth + nextX;
@@ -2796,13 +2815,30 @@ function startColtRunGame() {
           queue.push(next);
         });
       }
-      const keepComponent = anchorPixels >= 10 && (component.length > 18 || anchorPixels >= 4);
-      if (!keepComponent) {
-        component.forEach(index => {
-          pixels[index * 4 + 3] = 0;
-        });
-      }
+      components.push({
+        pixels: component,
+        anchors: anchorPixels,
+        minX: minComponentX,
+        minY: minComponentY,
+        maxX: maxComponentX,
+        maxY: maxComponentY
+      });
     }
+    const hasAnchorBounds = anchorMaxX > anchorMinX && anchorMaxY > anchorMinY;
+    components.forEach(component => {
+      const inBodyColumn = hasAnchorBounds &&
+        component.maxX >= anchorMinX - 34 &&
+        component.minX <= anchorMaxX + 34;
+      const underTorso = hasAnchorBounds &&
+        component.maxY >= anchorMinY - 4 &&
+        component.minY <= anchorMaxY + 74;
+      const substantialLowerPiece = component.pixels.length >= 8 && inBodyColumn && underTorso;
+      const keepComponent = component.anchors >= 4 || substantialLowerPiece;
+      if (keepComponent) return;
+      component.pixels.forEach(index => {
+        pixels[index * 4 + 3] = 0;
+      });
+    });
     mrNievesFrameContext.putImageData(frame, 0, 0);
     let minX = mrNievesFrameWidth;
     let minY = mrNievesFrameHeight;
