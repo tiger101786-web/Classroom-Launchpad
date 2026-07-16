@@ -2721,10 +2721,10 @@ function startColtRunGame() {
       stats.red > stats.blue * 1.04;
     const isPantsPixel = stats =>
       stats.average > 24 &&
-      stats.average < 184 &&
-      stats.chroma < 128 &&
-      stats.blue >= stats.red - 58 &&
-      stats.green >= stats.red - 58;
+      stats.average < 212 &&
+      stats.chroma < 158 &&
+      stats.blue >= stats.red - 72 &&
+      stats.green >= stats.red - 72;
     const torsoAnchors = [];
     let anchorMinX = mrNievesFrameWidth;
     let anchorMinY = mrNievesFrameHeight;
@@ -2754,8 +2754,8 @@ function startColtRunGame() {
     const bodyCenterX = hasTorsoAnchor ? (anchorMinX + anchorMaxX) / 2 : mrNievesFrameWidth / 2;
     const lowerBodyStartY = hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36;
     const hipEndY = lowerBodyStartY + (isRun ? 26 : 22);
-    const legSpread = isRun ? 10 : 2;
-    const leftLegExtra = isRun ? 12 : 9;
+    const legSpread = isRun ? 16 : 10;
+    const leftLegExtra = isRun ? 18 : 16;
     const isInBodyArea = stats =>
       stats.x >= bodyMinX &&
       stats.x <= bodyMaxX &&
@@ -2764,10 +2764,10 @@ function startColtRunGame() {
     const isLegShape = stats => {
       if (stats.y < lowerBodyStartY || stats.y > floorCutY) return false;
       if (stats.y <= hipEndY) {
-        return stats.x >= bodyCenterX - 32 - legSpread && stats.x <= bodyCenterX + 29 + legSpread;
+        return stats.x >= bodyCenterX - 38 - legSpread && stats.x <= bodyCenterX + 36 + legSpread;
       }
-      const leftLeg = stats.x >= bodyCenterX - 30 - legSpread - leftLegExtra && stats.x <= bodyCenterX - 1 + legSpread;
-      const rightLeg = stats.x >= bodyCenterX + 1 - legSpread && stats.x <= bodyCenterX + 27 + legSpread;
+      const leftLeg = stats.x >= bodyCenterX - 38 - legSpread - leftLegExtra && stats.x <= bodyCenterX + 4 + legSpread;
+      const rightLeg = stats.x >= bodyCenterX - 6 - legSpread && stats.x <= bodyCenterX + 38 + legSpread;
       return leftLeg || rightLeg;
     };
     const isLowerBodyArea = stats =>
@@ -2797,7 +2797,7 @@ function startColtRunGame() {
     const isBackdropPixel = pixelIndex => {
       const stats = getMrNievesPixelStats(pixelIndex);
       const protectedPaleDetail = isTorsoHighlight(stats) || isShoeHighlight(stats);
-      const whiteHaze = !protectedPaleDetail && stats.average > 148 && stats.chroma < 96;
+      const whiteHaze = !protectedPaleDetail && stats.average > 206 && stats.chroma < 74;
       if (whiteHaze) return true;
       if (isMrNievesColorPixel(pixelIndex)) return false;
       const blackBackdrop = stats.average < 56 && stats.brightest < 82;
@@ -2841,7 +2841,7 @@ function startColtRunGame() {
     for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
       if (pixels[pixelIndex * 4 + 3] < 16) continue;
       const stats = getMrNievesPixelStats(pixelIndex);
-      const protectedNeutralDetail = (isLowerBodyArea(stats) && isPantsPixel(stats)) || isTorsoHighlight(stats) || isShoeHighlight(stats);
+      const protectedNeutralDetail = isInBodyArea(stats) || isLowerBodyArea(stats) || isTorsoHighlight(stats) || isShoeHighlight(stats);
       const grayHaze = !protectedNeutralDetail && stats.average > 58 && stats.average < 150 && stats.chroma < 72;
       if (grayHaze) pixels[pixelIndex * 4 + 3] = 0;
     }
@@ -2849,7 +2849,7 @@ function startColtRunGame() {
       if (pixels[pixelIndex * 4 + 3] < 16) continue;
       const stats = getMrNievesPixelStats(pixelIndex);
       const belowShoes = stats.y > floorCutY;
-      const floorShadow = stats.y >= floorCutY - 2 && stats.average < 150 && stats.chroma < 76 && !isShirtOrShoePixel(stats) && !isShoeHighlight(stats);
+      const floorShadow = stats.y >= floorCutY - 1 && stats.average < 150 && stats.chroma < 76 && !isShirtOrShoePixel(stats) && !isShoeHighlight(stats);
       if (belowShoes || floorShadow) pixels[pixelIndex * 4 + 3] = 0;
     }
     for (let pass = 0; pass < 2; pass += 1) {
@@ -2992,17 +2992,20 @@ function startColtRunGame() {
         const chroma = brightest - darkest;
         const redClothing = red > 72 && green < 96 && blue < 116 && red > green * 1.12 && red > blue * 1.02;
         const skin = red > 116 && green > 44 && green < 154 && blue < 126 && red > green * 1.12;
-        const shirtText = y > 32 && y < 67 && x > 86 && x < 134 && average > 116 && chroma < 100;
-        const leftLeg = y > 62 && y < 138 && x > 70 && x < 113 && average > 18 && average < 194 && chroma < 144;
-        const rightLeg = y > 62 && y < 138 && x > 106 && x < 143 && average > 18 && average < 194 && chroma < 144;
+        const shirtText = y > 30 && y < 78 && x > 80 && x < 142 && average > 108 && chroma < 124;
+        const torsoZone = y > 26 && y < 94 && x > 58 && x < 158;
+        const headNeckZone = y > 0 && y < 48 && x > 86 && x < 153;
+        const leftLeg = y > 58 && y < 142 && x > 58 && x < 116 && average > 16 && average < 218 && chroma < 166;
+        const rightLeg = y > 58 && y < 142 && x > 98 && x < 154 && average > 16 && average < 218 && chroma < 166;
         const pants = leftLeg || rightLeg;
-        const shoe = y > 122 && y < 144 && x > 72 && x < 148 && redClothing;
-        const bottomBar = y > 121 && !shoe && (
-          (!pants && average > 38 && average < 216 && chroma < 118) ||
-          (average > 92 && average < 224 && chroma < 108)
+        const shoe = y > 120 && y < 146 && x > 62 && x < 158 && redClothing;
+        const fullCharacter = skin || redClothing || shirtText || pants || shoe || (torsoZone && average > 28 && average < 236 && chroma > 10);
+        const bottomBar = y > 121 && !shoe && !pants && (
+          (!pants && average > 38 && average < 236 && chroma < 128) ||
+          (average > 118 && average < 238 && chroma < 118)
         );
-        const neckHaze = y > 12 && y < 62 && x > 96 && x < 150 && !skin && !redClothing && average > 54 && chroma < 108;
-        const sideHaze = !leftLeg && !rightLeg && !shirtText && !skin && !redClothing && average > 78 && average < 184 && chroma < 88;
+        const neckHaze = headNeckZone && !skin && !redClothing && !shirtText && average > 54 && chroma < 118;
+        const sideHaze = !fullCharacter && average > 72 && average < 212 && chroma < 112;
         if (bottomBar || neckHaze || sideHaze) {
           finalPixels[offset + 3] = 0;
         }
