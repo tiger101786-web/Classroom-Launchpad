@@ -2726,8 +2726,8 @@ function startColtRunGame() {
       stats.red > stats.blue * 1.04;
     const isPantsPixel = stats =>
       stats.average > 28 &&
-      stats.average < 172 &&
-      stats.chroma < 118 &&
+      stats.average < 146 &&
+      stats.chroma < 106 &&
       stats.blue >= stats.red - 44 &&
       stats.green >= stats.red - 44;
     const torsoAnchors = [];
@@ -2761,22 +2761,29 @@ function startColtRunGame() {
       isInBodyArea(stats) && stats.y >= (hasTorsoAnchor ? anchorMaxY + 24 : mrNievesFrameHeight * 0.7);
     const isTorsoHighlight = stats =>
       hasTorsoAnchor &&
-      stats.x >= anchorMinX - 8 &&
-      stats.x <= anchorMaxX + 8 &&
-      stats.y >= anchorMinY &&
-      stats.y <= anchorMaxY + 10 &&
+      stats.x >= anchorMinX + (anchorMaxX - anchorMinX) * 0.22 &&
+      stats.x <= anchorMaxX - (anchorMaxX - anchorMinX) * 0.22 &&
+      stats.y >= anchorMinY + (anchorMaxY - anchorMinY) * 0.22 &&
+      stats.y <= anchorMinY + (anchorMaxY - anchorMinY) * 0.55 &&
       stats.average > 112 &&
       stats.average < 238 &&
       stats.chroma < 94;
+    const isShoeHighlight = stats =>
+      isFootArea(stats) &&
+      stats.average > 108 &&
+      stats.average < 220 &&
+      stats.chroma < 72;
     const isMrNievesColorPixel = pixelIndex => {
       const stats = getMrNievesPixelStats(pixelIndex);
-      const shoeHighlight = isFootArea(stats) && stats.average > 108 && stats.average < 232 && stats.chroma < 88;
       const lowerBody = isLowerBodyArea(stats) && isPantsPixel(stats);
-      return isSkinPixel(stats) || isShirtOrShoePixel(stats) || lowerBody || shoeHighlight || isTorsoHighlight(stats);
+      return isSkinPixel(stats) || isShirtOrShoePixel(stats) || lowerBody || isShoeHighlight(stats) || isTorsoHighlight(stats);
     };
     const isBackdropPixel = pixelIndex => {
-      if (isMrNievesColorPixel(pixelIndex)) return false;
       const stats = getMrNievesPixelStats(pixelIndex);
+      const protectedPaleDetail = isTorsoHighlight(stats) || isShoeHighlight(stats);
+      const whiteHaze = !protectedPaleDetail && stats.average > 118 && stats.chroma < 92;
+      if (whiteHaze) return true;
+      if (isMrNievesColorPixel(pixelIndex)) return false;
       const blackBackdrop = stats.average < 56 && stats.brightest < 82;
       const lightCheckerBackdrop = stats.average > 132 && stats.chroma < 96;
       const paleEdgeNoise = stats.average > 112 && stats.chroma < 52;
