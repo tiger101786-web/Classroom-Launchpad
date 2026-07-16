@@ -1,4 +1,4 @@
-﻿const categories = [
+const categories = [
   "Typing Practice",
   "Social Studies & Science",
   "Computer Skills",
@@ -33,13 +33,13 @@ const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
 
 const categoryIcons = {
-  "Typing Practice": "⌨",
-  "Social Studies & Science": "🌎",
-  "Computer Skills": "💻",
-  "Review Games": "★",
-  "Logic Games": "◆",
-  "Creative Projects": "✎",
-  "Class Videos": "▶"
+  "Typing Practice": "?",
+  "Social Studies & Science": "??",
+  "Computer Skills": "??",
+  "Review Games": "?",
+  "Logic Games": "?",
+  "Creative Projects": "?",
+  "Class Videos": "?"
 };
 
 function makeId() {
@@ -1114,7 +1114,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
   return `
     <div class="topbar">
       <div class="title-group">
-        ${back ? `<button class="back-btn" data-action="back">← Back</button>` : ""}
+        ${back ? `<button class="back-btn" data-action="back">? Back</button>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source src="assets/st-cletus-logo.mp4?v=20260702" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         <h1>${escapeHtml(title)}</h1>
@@ -1128,7 +1128,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
 function categoryTopbar() {
   return `
     <div class="topbar category-topbar">
-      <button class="back-btn" data-action="back">← Back</button>
+      <button class="back-btn" data-action="back">? Back</button>
       <div class="header-actions">
         <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
       </div>
@@ -1152,7 +1152,7 @@ function renderHome() {
         `<div class="header-actions">
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
           <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
-          <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
+          <button class="icon-btn" title="Teacher Mode" data-action="teacher">?</button>
         </div>`
       )}
       <section class="home-feature">
@@ -1177,7 +1177,7 @@ function renderHomeDefault() {
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
           <source src="assets/daily-launch-bg.mp4" type="video/mp4">
         </video>
-        <div class="daily-launch-icon" aria-hidden="true">✓</div>
+        <div class="daily-launch-icon" aria-hidden="true">?</div>
         <div class="daily-launch-copy">
           <span class="feature-kicker">Start Here</span>
           <h2>Today's Launch</h2>
@@ -1646,7 +1646,7 @@ function renderStudentLink(link) {
       <p class="instruction">${escapeHtml(link.instruction)}</p>
       <p class="meta">${escapeHtml(link.category)}</p>
       <div class="actions">
-        <button class="primary-btn" data-action="${isColtRun ? "openColtRun" : "open"}" ${isColtRun ? "" : `data-url="${escapeHtml(link.url)}"`}>${isColtRun ? "▶ Play Game" : "↗ Open Site"}</button>
+        <button class="primary-btn" data-action="${isColtRun ? "openColtRun" : "open"}" ${isColtRun ? "" : `data-url="${escapeHtml(link.url)}"`}>${isColtRun ? "? Play Game" : "? Open Site"}</button>
       </div>
     </article>
   `;
@@ -1687,9 +1687,9 @@ function renderColtRun() {
                 <canvas id="coltRunSelectColt" width="180" height="130" aria-hidden="true"></canvas>
                 <span>Colt</span>
               </button>
-              <button type="button" data-colt-run="character" data-character="mrNieves">
-                <canvas id="coltRunSelectMrNieves" width="180" height="130" aria-hidden="true"></canvas>
-                <span>Mr. Nieves</span>
+              <button type="button" class="is-placeholder" disabled aria-disabled="true">
+                <span class="colt-run-character-empty" aria-hidden="true"></span>
+                <span>Coming Soon</span>
               </button>
             </div>
           </div>
@@ -1709,10 +1709,10 @@ function renderColtRun() {
         <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
         <div class="colt-run-actions">
           <div class="colt-run-volume" aria-label="Game audio volume">
-            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off">🔊</button>
+            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off">??</button>
             <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Game audio volume">
           </div>
-          <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
+          <button class="outline-btn" type="button" data-colt-run="fullscreen">? Fullscreen</button>
           <button class="outline-btn" type="button" data-colt-run="characterSelect">Character</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
@@ -1764,11 +1764,9 @@ function startColtRunGame() {
   const characterSelectPanel = document.getElementById("coltRunCharacterSelect");
   const characterButtons = shell ? Array.from(shell.querySelectorAll("[data-character]")) : [];
   const selectColtCanvas = document.getElementById("coltRunSelectColt");
-  const selectMrNievesCanvas = document.getElementById("coltRunSelectMrNieves");
   const characterStorageKey = "coltRunCharacterV1";
   const characterNames = {
-    colt: "Colt",
-    mrNieves: "Mr. Nieves"
+    colt: "Colt"
   };
   let selectedCharacter = localStorage.getItem(characterStorageKey);
   if (!characterNames[selectedCharacter]) selectedCharacter = "colt";
@@ -2111,20 +2109,6 @@ function startColtRunGame() {
   leapVideo.loop = true;
   leapVideo.playsInline = true;
   leapVideo.preload = "auto";
-  const mrNievesIdleVideo = document.createElement("video");
-  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-mr-nieves-trans-idle";
-  mrNievesIdleVideo.muted = true;
-  mrNievesIdleVideo.loop = true;
-  mrNievesIdleVideo.playsInline = true;
-  mrNievesIdleVideo.preload = "auto";
-  const mrNievesRunVideo = document.createElement("video");
-  mrNievesRunVideo.src = "assets/colt-run-mr-nieves-run.mp4?v=20260716-mr-nieves1";
-  mrNievesRunVideo.muted = true;
-  mrNievesRunVideo.loop = true;
-  mrNievesRunVideo.playsInline = true;
-  mrNievesRunVideo.preload = "auto";
-  const mrNievesJumpImage = new Image();
-  mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.png?v=20260716-mr-nieves1";
   const deathVideo = document.createElement("video");
   deathVideo.src = "assets/colt-run-death.mp4?v=20260706-death";
   deathVideo.muted = true;
@@ -2173,15 +2157,6 @@ function startColtRunGame() {
   const leapCropContext = leapCropCanvas.getContext("2d");
   let leapFrameStamp = -1;
   let leapStableCrop = null;
-  const mrNievesFrameWidth = 220;
-  const mrNievesFrameHeight = 150;
-  const mrNievesFrameCanvas = document.createElement("canvas");
-  mrNievesFrameCanvas.width = mrNievesFrameWidth;
-  mrNievesFrameCanvas.height = mrNievesFrameHeight;
-  const mrNievesFrameContext = mrNievesFrameCanvas.getContext("2d", { willReadFrequently: true });
-  const mrNievesCropCanvas = document.createElement("canvas");
-  const mrNievesCropContext = mrNievesCropCanvas.getContext("2d");
-  let mrNievesFrameStamp = "";
   const deathFrameWidth = 230;
   const deathFrameHeight = 170;
   const deathFrameCanvas = document.createElement("canvas");
@@ -2410,7 +2385,7 @@ function startColtRunGame() {
       musicVolumeSlider.style.setProperty("--volume", `${percent}%`);
     }
     if (musicToggleButton) {
-      musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔈" : "🔊";
+      musicToggleButton.textContent = percent <= 0 ? "??" : percent < 45 ? "??" : "??";
       musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn game audio on" : "Turn game audio off");
       musicToggleButton.classList.toggle("is-muted", percent <= 0);
     }
@@ -2490,18 +2465,6 @@ function startColtRunGame() {
     leapVideo.play().catch(() => {});
   };
   leapVideo.addEventListener("canplay", keepLeapVideoPlaying);
-
-  const keepMrNievesIdleVideoPlaying = () => {
-    if (!mrNievesIdleVideo.paused) return;
-    mrNievesIdleVideo.play().catch(() => {});
-  };
-  mrNievesIdleVideo.addEventListener("canplay", keepMrNievesIdleVideoPlaying);
-
-  const keepMrNievesRunVideoPlaying = () => {
-    if (!mrNievesRunVideo.paused) return;
-    mrNievesRunVideo.play().catch(() => {});
-  };
-  mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
 
   const keepDeathVideoPlaying = () => {
     if (!deathVideo.paused) return;
@@ -2658,362 +2621,6 @@ function startColtRunGame() {
     flagFrameContext.putImageData(frame, 0, 0);
     flagFrameStamp = frameStamp;
     return flagFrameCanvas;
-  };
-
-  const getTransparentMrNievesFrame = state => {
-    const isRun = state === "run";
-    const isJump = state === "jumpPrep" || state === "leap";
-    const cropKey = isRun ? "run" : isJump ? "jump" : "idle";
-    const source = isRun ? mrNievesRunVideo : isJump ? mrNievesJumpImage : mrNievesIdleVideo;
-    const isImage = source instanceof HTMLImageElement;
-    if (!mrNievesFrameContext || !mrNievesCropContext) return null;
-    if (isImage) {
-      if (!source.complete || !source.naturalWidth) return null;
-    } else if (source.readyState < 2) {
-      return null;
-    }
-    const frameStamp = isImage ? `${cropKey}:image:${source.naturalWidth}` : `${cropKey}:video:${Math.floor(source.currentTime * 30)}`;
-    if (frameStamp === mrNievesFrameStamp) return mrNievesFrameCanvas;
-    const sourceW = isImage ? source.naturalWidth : source.videoWidth || mrNievesFrameWidth;
-    const sourceH = isImage ? source.naturalHeight : source.videoHeight || mrNievesFrameHeight;
-    const sourceRatio = sourceW / sourceH;
-    const targetRatio = mrNievesFrameWidth / mrNievesFrameHeight;
-    let drawW = mrNievesFrameWidth;
-    let drawH = mrNievesFrameHeight;
-    let drawX = 0;
-    let drawY = 0;
-    if (sourceRatio > targetRatio) {
-      drawH = mrNievesFrameWidth / sourceRatio;
-      drawY = (mrNievesFrameHeight - drawH) / 2;
-    } else if (sourceRatio < targetRatio) {
-      drawW = mrNievesFrameHeight * sourceRatio;
-      drawX = (mrNievesFrameWidth - drawW) / 2;
-    }
-    mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
-    mrNievesFrameContext.drawImage(source, drawX, drawY, drawW, drawH);
-    const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
-    const pixels = frame.data;
-    const getMrNievesPixelStats = pixelIndex => {
-      const offset = pixelIndex * 4;
-      const red = pixels[offset];
-      const green = pixels[offset + 1];
-      const blue = pixels[offset + 2];
-      const brightest = Math.max(red, green, blue);
-      const darkest = Math.min(red, green, blue);
-      const average = (red + green + blue) / 3;
-      const chroma = brightest - darkest;
-      const x = pixelIndex % mrNievesFrameWidth;
-      const y = Math.floor(pixelIndex / mrNievesFrameWidth);
-      return { red, green, blue, brightest, darkest, average, chroma, x, y };
-    };
-    const isSkinPixel = stats =>
-      stats.red > 116 &&
-      stats.green > 44 &&
-      stats.green < 154 &&
-      stats.blue < 126 &&
-      stats.red > stats.green * 1.12 &&
-      stats.green > stats.blue * 0.94;
-    const isShirtOrShoePixel = stats =>
-      stats.red > 72 &&
-      stats.green < 92 &&
-      stats.blue < 112 &&
-      stats.red > stats.green * 1.16 &&
-      stats.red > stats.blue * 1.04;
-    const isPantsPixel = stats =>
-      stats.average > 24 &&
-      stats.average < 212 &&
-      stats.chroma < 158 &&
-      stats.blue >= stats.red - 72 &&
-      stats.green >= stats.red - 72;
-    const torsoAnchors = [];
-    let anchorMinX = mrNievesFrameWidth;
-    let anchorMinY = mrNievesFrameHeight;
-    let anchorMaxX = 0;
-    let anchorMaxY = 0;
-    let shoeMaxY = 0;
-    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-      const stats = getMrNievesPixelStats(pixelIndex);
-      const redPixel = isShirtOrShoePixel(stats);
-      if (redPixel && stats.y > mrNievesFrameHeight * 0.48) {
-        shoeMaxY = Math.max(shoeMaxY, stats.y);
-      }
-      const upperAnchorPixel = (isSkinPixel(stats) || redPixel) && stats.y < mrNievesFrameHeight * 0.8;
-      if (!upperAnchorPixel) continue;
-      torsoAnchors.push(pixelIndex);
-      anchorMinX = Math.min(anchorMinX, stats.x);
-      anchorMinY = Math.min(anchorMinY, stats.y);
-      anchorMaxX = Math.max(anchorMaxX, stats.x);
-      anchorMaxY = Math.max(anchorMaxY, stats.y);
-    }
-    const hasTorsoAnchor = torsoAnchors.length > 12 && anchorMaxX > anchorMinX && anchorMaxY > anchorMinY;
-    const floorCutY = shoeMaxY ? Math.min(mrNievesFrameHeight - 1, shoeMaxY + 3) : mrNievesFrameHeight - 4;
-    const bodyMinX = hasTorsoAnchor ? Math.max(0, anchorMinX - (isRun ? 42 : 34)) : mrNievesFrameWidth * 0.28;
-    const bodyMaxX = hasTorsoAnchor ? Math.min(mrNievesFrameWidth - 1, anchorMaxX + (isRun ? 46 : 36)) : mrNievesFrameWidth * 0.72;
-    const bodyMinY = hasTorsoAnchor ? Math.max(0, anchorMinY - 10) : mrNievesFrameHeight * 0.06;
-    const bodyMaxY = Math.min(floorCutY, hasTorsoAnchor ? anchorMaxY + (isJump ? 86 : 94) : mrNievesFrameHeight - 4);
-    const bodyCenterX = hasTorsoAnchor ? (anchorMinX + anchorMaxX) / 2 : mrNievesFrameWidth / 2;
-    const lowerBodyStartY = hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36;
-    const hipEndY = lowerBodyStartY + (isRun ? 26 : 22);
-    const legSpread = isRun ? 16 : 10;
-    const leftLegExtra = isRun ? 18 : 16;
-    const isInBodyArea = stats =>
-      stats.x >= bodyMinX &&
-      stats.x <= bodyMaxX &&
-      stats.y >= bodyMinY &&
-      stats.y <= bodyMaxY;
-    const isLegShape = stats => {
-      if (stats.y < lowerBodyStartY || stats.y > floorCutY) return false;
-      if (stats.y <= hipEndY) {
-        return stats.x >= bodyCenterX - 38 - legSpread && stats.x <= bodyCenterX + 36 + legSpread;
-      }
-      const leftLeg = stats.x >= bodyCenterX - 38 - legSpread - leftLegExtra && stats.x <= bodyCenterX + 4 + legSpread;
-      const rightLeg = stats.x >= bodyCenterX - 6 - legSpread && stats.x <= bodyCenterX + 38 + legSpread;
-      return leftLeg || rightLeg;
-    };
-    const isLowerBodyArea = stats =>
-      isLegShape(stats);
-    const isFootArea = stats =>
-      stats.x >= bodyCenterX - 36 - legSpread &&
-      stats.x <= bodyCenterX + 38 + legSpread &&
-      stats.y >= Math.max(bodyMinY, floorCutY - 18) &&
-      stats.y <= floorCutY;
-    const isTorsoHighlight = stats =>
-      hasTorsoAnchor &&
-      stats.x >= anchorMinX + (anchorMaxX - anchorMinX) * 0.22 &&
-      stats.x <= anchorMaxX - (anchorMaxX - anchorMinX) * 0.22 &&
-      stats.y >= anchorMinY + (anchorMaxY - anchorMinY) * 0.22 &&
-      stats.y <= anchorMinY + (anchorMaxY - anchorMinY) * 0.55 &&
-      stats.average > 112 &&
-      stats.average < 238 &&
-      stats.chroma < 94;
-    const isShoeHighlight = stats =>
-      isFootArea(stats) &&
-      isShirtOrShoePixel(stats);
-    const isMrNievesColorPixel = pixelIndex => {
-      const stats = getMrNievesPixelStats(pixelIndex);
-      const lowerBody = isLowerBodyArea(stats) && isPantsPixel(stats);
-      return isSkinPixel(stats) || isShirtOrShoePixel(stats) || lowerBody || isShoeHighlight(stats) || isTorsoHighlight(stats);
-    };
-    const isBackdropPixel = pixelIndex => {
-      const stats = getMrNievesPixelStats(pixelIndex);
-      const protectedPaleDetail = isTorsoHighlight(stats) || isShoeHighlight(stats);
-      const whiteHaze = !protectedPaleDetail && stats.average > 206 && stats.chroma < 74;
-      if (whiteHaze) return true;
-      if (isMrNievesColorPixel(pixelIndex)) return false;
-      const blackBackdrop = stats.average < 56 && stats.brightest < 82;
-      const lightCheckerBackdrop = stats.average > 132 && stats.chroma < 96;
-      const paleEdgeNoise = stats.average > 122 && stats.chroma < 46;
-      return blackBackdrop || lightCheckerBackdrop || paleEdgeNoise;
-    };
-    const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
-    const queue = [];
-    const addPixel = (x, y) => {
-      if (x < 0 || x >= mrNievesFrameWidth || y < 0 || y >= mrNievesFrameHeight) return;
-      const pixelIndex = y * mrNievesFrameWidth + x;
-      if (transparent[pixelIndex] || !isBackdropPixel(pixelIndex)) return;
-      transparent[pixelIndex] = 1;
-      queue.push(pixelIndex);
-    };
-    for (let x = 0; x < mrNievesFrameWidth; x += 1) {
-      addPixel(x, 0);
-      addPixel(x, mrNievesFrameHeight - 1);
-    }
-    for (let y = 0; y < mrNievesFrameHeight; y += 1) {
-      addPixel(0, y);
-      addPixel(mrNievesFrameWidth - 1, y);
-    }
-    while (queue.length) {
-      const pixelIndex = queue.pop();
-      const x = pixelIndex % mrNievesFrameWidth;
-      const y = Math.floor(pixelIndex / mrNievesFrameWidth);
-      addPixel(x - 1, y);
-      addPixel(x + 1, y);
-      addPixel(x, y - 1);
-      addPixel(x, y + 1);
-    }
-    for (let pixelIndex = 0; pixelIndex < transparent.length; pixelIndex += 1) {
-      if (transparent[pixelIndex]) pixels[pixelIndex * 4 + 3] = 0;
-    }
-    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-      if (pixels[pixelIndex * 4 + 3] < 16) continue;
-      if (isBackdropPixel(pixelIndex)) pixels[pixelIndex * 4 + 3] = 0;
-    }
-    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-      if (pixels[pixelIndex * 4 + 3] < 16) continue;
-      const stats = getMrNievesPixelStats(pixelIndex);
-      const protectedNeutralDetail = isInBodyArea(stats) || isLowerBodyArea(stats) || isTorsoHighlight(stats) || isShoeHighlight(stats);
-      const grayHaze = !protectedNeutralDetail && stats.average > 58 && stats.average < 150 && stats.chroma < 72;
-      if (grayHaze) pixels[pixelIndex * 4 + 3] = 0;
-    }
-    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-      if (pixels[pixelIndex * 4 + 3] < 16) continue;
-      const stats = getMrNievesPixelStats(pixelIndex);
-      const belowShoes = stats.y > floorCutY;
-      const floorShadow = stats.y >= floorCutY - 1 && stats.average < 150 && stats.chroma < 76 && !isShirtOrShoePixel(stats) && !isShoeHighlight(stats);
-      if (belowShoes || floorShadow) pixels[pixelIndex * 4 + 3] = 0;
-    }
-    for (let pass = 0; pass < 2; pass += 1) {
-      const toFade = [];
-      for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-        const alphaIndex = pixelIndex * 4 + 3;
-        if (pixels[alphaIndex] < 16 || !isBackdropPixel(pixelIndex)) continue;
-        const x = pixelIndex % mrNievesFrameWidth;
-        const y = Math.floor(pixelIndex / mrNievesFrameWidth);
-        let touchesTransparent = false;
-        for (let dy = -1; dy <= 1 && !touchesTransparent; dy += 1) {
-          for (let dx = -1; dx <= 1; dx += 1) {
-            if (!dx && !dy) continue;
-            const nextX = x + dx;
-            const nextY = y + dy;
-            if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) {
-              touchesTransparent = true;
-              break;
-            }
-            if (pixels[(nextY * mrNievesFrameWidth + nextX) * 4 + 3] < 16) {
-              touchesTransparent = true;
-              break;
-            }
-          }
-        }
-        if (touchesTransparent) toFade.push(pixelIndex);
-      }
-      toFade.forEach(pixelIndex => {
-        pixels[pixelIndex * 4 + 3] = Math.max(0, pixels[pixelIndex * 4 + 3] - 130);
-      });
-    }
-    const isCharacterAnchorPixel = pixelIndex => {
-      if (pixels[pixelIndex * 4 + 3] < 16) return false;
-      return isMrNievesColorPixel(pixelIndex);
-    };
-    const seenCharacter = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
-    const visiblePixel = pixelIndex => pixels[pixelIndex * 4 + 3] >= 16;
-    const components = [];
-    for (let pixelIndex = 0; pixelIndex < seenCharacter.length; pixelIndex += 1) {
-      if (seenCharacter[pixelIndex] || !visiblePixel(pixelIndex)) continue;
-      const component = [];
-      const queue = [pixelIndex];
-      let anchorPixels = 0;
-      let minComponentX = mrNievesFrameWidth;
-      let minComponentY = mrNievesFrameHeight;
-      let maxComponentX = 0;
-      let maxComponentY = 0;
-      seenCharacter[pixelIndex] = 1;
-      while (queue.length) {
-        const current = queue.pop();
-        component.push(current);
-        const x = current % mrNievesFrameWidth;
-        const y = Math.floor(current / mrNievesFrameWidth);
-        minComponentX = Math.min(minComponentX, x);
-        minComponentY = Math.min(minComponentY, y);
-        maxComponentX = Math.max(maxComponentX, x);
-        maxComponentY = Math.max(maxComponentY, y);
-        if (isCharacterAnchorPixel(current)) {
-          anchorPixels += 1;
-        }
-        [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([nextX, nextY]) => {
-          if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) return;
-          const next = nextY * mrNievesFrameWidth + nextX;
-          if (seenCharacter[next] || !visiblePixel(next)) return;
-          seenCharacter[next] = 1;
-          queue.push(next);
-        });
-      }
-      components.push({
-        pixels: component,
-        anchors: anchorPixels,
-        minX: minComponentX,
-        minY: minComponentY,
-        maxX: maxComponentX,
-        maxY: maxComponentY
-      });
-    }
-    components.forEach(component => {
-      const inBodyColumn = component.maxX >= bodyMinX && component.minX <= bodyMaxX;
-      const inBodyHeight = component.maxY >= bodyMinY && component.minY <= bodyMaxY + 8;
-      const substantialLowerPiece = component.anchors >= 1 && component.pixels.length >= 5 && inBodyColumn && inBodyHeight;
-      const keepComponent = component.anchors >= 1 || substantialLowerPiece;
-      if (keepComponent) return;
-      component.pixels.forEach(index => {
-        pixels[index * 4 + 3] = 0;
-      });
-    });
-    mrNievesFrameContext.putImageData(frame, 0, 0);
-    let minX = mrNievesFrameWidth;
-    let minY = mrNievesFrameHeight;
-    let maxX = 0;
-    let maxY = 0;
-    for (let pixelIndex = 0; pixelIndex < pixels.length; pixelIndex += 4) {
-      if (pixels[pixelIndex + 3] < 18) continue;
-      const point = pixelIndex / 4;
-      const x = point % mrNievesFrameWidth;
-      const y = Math.floor(point / mrNievesFrameWidth);
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x);
-      maxY = Math.max(maxY, y);
-    }
-    if (maxX > minX && maxY > minY) {
-      const fixedCrops = {
-        idle: { minX: 58, minY: 2, maxX: 164, maxY: 147 },
-        run: { minX: 32, minY: 2, maxX: 188, maxY: 147 },
-        jump: { minX: 30, minY: 2, maxX: 190, maxY: 147 }
-      };
-      const crop = fixedCrops[cropKey] || fixedCrops.idle;
-      const cropX = crop.minX;
-      const cropY = crop.minY;
-      const cropMaxX = crop.maxX;
-      const cropMaxY = crop.maxY;
-      const cropW = cropMaxX - cropX + 1;
-      const cropH = cropMaxY - cropY + 1;
-      mrNievesCropCanvas.width = cropW;
-      mrNievesCropCanvas.height = cropH;
-      mrNievesCropContext.clearRect(0, 0, cropW, cropH);
-      mrNievesCropContext.putImageData(mrNievesFrameContext.getImageData(cropX, cropY, cropW, cropH), 0, 0);
-      const fitScale = Math.min(mrNievesFrameWidth / cropW, mrNievesFrameHeight / cropH);
-      const fitW = cropW * fitScale;
-      const fitH = cropH * fitScale;
-      const fitX = (mrNievesFrameWidth - fitW) / 2;
-      const fitY = mrNievesFrameHeight - fitH;
-      mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
-      mrNievesFrameContext.drawImage(mrNievesCropCanvas, fitX, fitY, fitW, fitH);
-      const finalFrame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
-      const finalPixels = finalFrame.data;
-      for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
-        const offset = pixelIndex * 4;
-        if (finalPixels[offset + 3] < 16) continue;
-        const x = pixelIndex % mrNievesFrameWidth;
-        const y = Math.floor(pixelIndex / mrNievesFrameWidth);
-        const red = finalPixels[offset];
-        const green = finalPixels[offset + 1];
-        const blue = finalPixels[offset + 2];
-        const brightest = Math.max(red, green, blue);
-        const darkest = Math.min(red, green, blue);
-        const average = (red + green + blue) / 3;
-        const chroma = brightest - darkest;
-        const redClothing = red > 72 && green < 96 && blue < 116 && red > green * 1.12 && red > blue * 1.02;
-        const skin = red > 116 && green > 44 && green < 154 && blue < 126 && red > green * 1.12;
-        const shirtText = y > 30 && y < 78 && x > 80 && x < 142 && average > 108 && chroma < 124;
-        const torsoZone = y > 26 && y < 94 && x > 58 && x < 158;
-        const headNeckZone = y > 0 && y < 48 && x > 86 && x < 153;
-        const leftLeg = y > 58 && y < 142 && x > 58 && x < 116 && average > 16 && average < 218 && chroma < 166;
-        const rightLeg = y > 58 && y < 142 && x > 98 && x < 154 && average > 16 && average < 218 && chroma < 166;
-        const pants = leftLeg || rightLeg;
-        const shoe = y > 120 && y < 146 && x > 62 && x < 158 && redClothing;
-        const fullCharacter = skin || redClothing || shirtText || pants || shoe || (torsoZone && average > 28 && average < 236 && chroma > 10);
-        const bottomBar = y > 121 && !shoe && !pants && (
-          (!pants && average > 38 && average < 236 && chroma < 128) ||
-          (average > 118 && average < 238 && chroma < 118)
-        );
-        const neckHaze = headNeckZone && !skin && !redClothing && !shirtText && average > 54 && chroma < 118;
-        const sideHaze = !fullCharacter && average > 72 && average < 212 && chroma < 112;
-        if (bottomBar || neckHaze || sideHaze) {
-          finalPixels[offset + 3] = 0;
-        }
-      }
-      mrNievesFrameContext.putImageData(finalFrame, 0, 0);
-    }
-    mrNievesFrameStamp = frameStamp;
-    return mrNievesFrameCanvas;
   };
 
   const getTransparentIdleFrame = () => {
@@ -4510,22 +4117,18 @@ function startColtRunGame() {
   };
 
   const drawDeathColt = () => {
-    const isMrNieves = selectedCharacter === "mrNieves";
-    const drawW = (isMrNieves ? 146 : 178) * deathColtDrawScale;
-    const drawH = (isMrNieves ? 122 : 132) * deathColtDrawScale;
+    const drawW = 178 * deathColtDrawScale;
+    const drawH = 132 * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
     const y = Math.round(deathY + player.h - drawH + 8);
-    const deathFrame = isMrNieves ? null : getTransparentDeathFrame();
-    const mrNievesDeathFrame = isMrNieves ? getTransparentMrNievesFrame("leap") : null;
+    const deathFrame = getTransparentDeathFrame();
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
     ctx.shadowColor = "rgba(0, 0, 0, 0.44)";
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 8;
-    if (mrNievesDeathFrame) {
-      ctx.drawImage(mrNievesDeathFrame, -drawW / 2, 0, drawW, drawH);
-    } else if (deathFrame) {
+    if (deathFrame) {
       keepDeathVideoPlaying();
       ctx.drawImage(deathFrame, -drawW / 2, 0, drawW, drawH);
     } else if (coltSprites.leap.complete && coltSprites.leap.naturalWidth) {
@@ -4547,13 +4150,8 @@ function startColtRunGame() {
     const sprite = player.state === "run"
       ? runFrames[runFrame]
       : coltSprites[player.state] || coltSprites.idle;
-    const isMrNieves = selectedCharacter === "mrNieves";
-    const drawW = isMrNieves
-      ? player.state === "run" ? 158 : player.state === "leap" || player.state === "jumpPrep" ? 170 : 150
-      : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves
-      ? player.state === "run" ? 130 : player.state === "leap" || player.state === "jumpPrep" ? 142 : 136
-      : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const drawW = player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + 8);
     ctx.save();
@@ -4562,15 +4160,10 @@ function startColtRunGame() {
     ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 8;
-    const mrNievesFrame = isMrNieves ? getTransparentMrNievesFrame(player.state) : null;
-    const idleFrame = !isMrNieves && player.state === "idle" ? getTransparentIdleFrame() : null;
-    const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
-    const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
-    if (mrNievesFrame) {
-      if (player.state === "run") keepMrNievesRunVideoPlaying();
-      else if (player.state === "idle") keepMrNievesIdleVideoPlaying();
-      ctx.drawImage(mrNievesFrame, -drawW / 2, 0, drawW, drawH);
-    } else if (idleFrame) {
+    const idleFrame = player.state === "idle" ? getTransparentIdleFrame() : null;
+    const runningFrame = player.state === "run" ? getTransparentRunFrame() : null;
+    const leapFrame = player.state === "leap" ? getTransparentLeapFrame() : null;
+    if (idleFrame) {
       keepIdleVideoPlaying();
       ctx.drawImage(idleFrame, -drawW / 2, 0, drawW, drawH);
     } else if (runningFrame) {
@@ -4605,9 +4198,7 @@ function startColtRunGame() {
   const drawCharacterSelectPreviews = () => {
     if (!characterSelectOpen) return;
     keepIdleVideoPlaying();
-    keepMrNievesIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesFrame("idle"), 132, 122);
   };
 
   const drawCoverImage = image => {
@@ -4998,7 +4589,7 @@ function startColtRunGame() {
   const isFullscreen = () => document.fullscreenElement === stage;
   const updateFullscreenButton = () => {
     fullscreenButtons.forEach(button => {
-      button.textContent = isFullscreen() ? "Exit Fullscreen" : "⛶ Fullscreen";
+      button.textContent = isFullscreen() ? "Exit Fullscreen" : "? Fullscreen";
     });
     if (isFullscreen()) canvas.focus({ preventScroll: true });
   };
@@ -5139,16 +4730,12 @@ function startColtRunGame() {
       touchCleanups.forEach(cleanup => cleanup());
       deathVideo.pause();
       lavaRockVideoSpecials.forEach(video => video.pause());
-      mrNievesIdleVideo.pause();
-      mrNievesRunVideo.pause();
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
       rockDeathAudio.src = "";
-      mrNievesIdleVideo.src = "";
-      mrNievesRunVideo.src = "";
       lavaRockVideoSpecials.forEach(video => {
         video.src = "";
       });
@@ -5179,9 +4766,9 @@ function renderDashboard() {
   return `
     ${pageHeader("Teacher Dashboard", "", true)}
     <section class="dashboard-actions">
-      <button class="primary-btn" data-action="add">＋ Add Website</button>
-      <button class="outline-btn" data-action="changePin">🔒 Change PIN</button>
-      <button class="outline-btn" data-action="reset">↺ Reset Sample Links</button>
+      <button class="primary-btn" data-action="add">+ Add Website</button>
+      <button class="outline-btn" data-action="changePin">?? Change PIN</button>
+      <button class="outline-btn" data-action="reset">? Reset Sample Links</button>
     </section>
     <section class="form-card daily-launch-editor">
       <div>
@@ -5210,8 +4797,8 @@ function renderDashboard() {
                 </select>
               </div>
               <div class="editor-tool-group">
-                <button type="button" data-editor-command="undo" title="Undo">↶</button>
-                <button type="button" data-editor-command="redo" title="Redo">↷</button>
+                <button type="button" data-editor-command="undo" title="Undo">?</button>
+                <button type="button" data-editor-command="redo" title="Redo">?</button>
               </div>
               <div class="editor-tool-group">
                 <button type="button" data-editor-command="bold" title="Bold"><b>B</b></button>
@@ -5245,9 +4832,9 @@ function renderDashboard() {
                 <button type="button" data-editor-command="insertOrderedList" title="Numbered list">1.</button>
               </div>
               <div class="editor-tool-group">
-                <button type="button" data-editor-command="justifyLeft" title="Align left">☰</button>
-                <button type="button" data-editor-command="justifyCenter" title="Align center">≡</button>
-                <button type="button" data-editor-command="justifyRight" title="Align right">☷</button>
+                <button type="button" data-editor-command="justifyLeft" title="Align left">?</button>
+                <button type="button" data-editor-command="justifyCenter" title="Align center">=</button>
+                <button type="button" data-editor-command="justifyRight" title="Align right">?</button>
               </div>
             </div>
             <div id="dailyLaunchMessage" class="mini-editor-surface" contenteditable="true" role="textbox" aria-multiline="true">${sanitizeLaunchHtml(dailyLaunch.message)}</div>
@@ -5402,7 +4989,7 @@ function renderTeacherLink(link) {
         <span class="switch"><input type="checkbox" data-action="toggleActive" data-id="${link.id}" ${link.active ? "checked" : ""}><span class="slider"></span></span>
       </label>
       <div class="actions">
-        <button class="primary-btn" data-action="edit" data-id="${link.id}">✎ Edit</button>
+        <button class="primary-btn" data-action="edit" data-id="${link.id}">? Edit</button>
         <button class="danger-btn" data-action="delete" data-id="${link.id}">Delete</button>
       </div>
     </article>
