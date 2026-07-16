@@ -2182,6 +2182,11 @@ function startColtRunGame() {
   const mrNievesCropCanvas = document.createElement("canvas");
   const mrNievesCropContext = mrNievesCropCanvas.getContext("2d");
   let mrNievesFrameStamp = "";
+  const mrNievesStableCrops = {
+    idle: null,
+    run: null,
+    jump: null
+  };
   const deathFrameWidth = 230;
   const deathFrameHeight = 170;
   const deathFrameCanvas = document.createElement("canvas");
@@ -2663,6 +2668,7 @@ function startColtRunGame() {
   const getTransparentMrNievesFrame = state => {
     const isRun = state === "run";
     const isJump = state === "jumpPrep" || state === "leap";
+    const cropKey = isRun ? "run" : isJump ? "jump" : "idle";
     const source = isRun ? mrNievesRunVideo : isJump ? mrNievesJumpImage : mrNievesIdleVideo;
     const isImage = source instanceof HTMLImageElement;
     if (!mrNievesFrameContext || !mrNievesCropContext) return null;
@@ -2671,7 +2677,7 @@ function startColtRunGame() {
     } else if (source.readyState < 2) {
       return null;
     }
-    const frameStamp = isImage ? `${state}:image:${source.naturalWidth}` : `${state}:video:${Math.floor(source.currentTime * 30)}`;
+    const frameStamp = isImage ? `${cropKey}:image:${source.naturalWidth}` : `${cropKey}:video:${Math.floor(source.currentTime * 30)}`;
     if (frameStamp === mrNievesFrameStamp) return mrNievesFrameCanvas;
     const sourceW = isImage ? source.naturalWidth : source.videoWidth || mrNievesFrameWidth;
     const sourceH = isImage ? source.naturalHeight : source.videoHeight || mrNievesFrameHeight;
@@ -2692,7 +2698,7 @@ function startColtRunGame() {
     mrNievesFrameContext.drawImage(source, drawX, drawY, drawW, drawH);
     const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
     const pixels = frame.data;
-    const isMrNievesColorPixel = pixelIndex => {
+    const getMrNievesPixelStats = pixelIndex => {
       const offset = pixelIndex * 4;
       const red = pixels[offset];
       const green = pixels[offset + 1];
@@ -2703,25 +2709,78 @@ function startColtRunGame() {
       const chroma = brightest - darkest;
       const x = pixelIndex % mrNievesFrameWidth;
       const y = Math.floor(pixelIndex / mrNievesFrameWidth);
-      const skin = red > 126 && green > 56 && green < 142 && blue < 116 && red > green * 1.18 && green > blue * 1.05;
-      const shirtOrShoes = red > 82 && green < 82 && blue < 104 && red > green * 1.24 && red > blue * 1.12;
-      const centerLowerBody = x > mrNievesFrameWidth * 0.33 && x < mrNievesFrameWidth * 0.67 && y > mrNievesFrameHeight * 0.38;
-      const pants = centerLowerBody && average > 38 && average < 154 && chroma < 86 && blue >= red - 28 && green >= red - 24;
-      return skin || shirtOrShoes || pants;
+      return { red, green, blue, brightest, darkest, average, chroma, x, y };
+    };
+    const isSkinPixel = stats =>
+      stats.red > 116 &&
+      stats.green > 44 &&
+      stats.green < 154 &&
+      stats.blue < 126 &&
+      stats.red > stats.green * 1.12 &&
+      stats.green > stats.blue * 0.94;
+    const isShirtOrShoePixel = stats =>
+      stats.red > 72 &&
+      stats.green < 92 &&
+      stats.blue < 112 &&
+      stats.red > stats.green * 1.16 &&
+      stats.red > stats.blue * 1.04;
+    const isPantsPixel = stats =>
+      stats.average > 28 &&
+      stats.average < 172 &&
+      stats.chroma < 118 &&
+      stats.blue >= stats.red - 44 &&
+      stats.green >= stats.red - 44;
+    const torsoAnchors = [];
+    let anchorMinX = mrNievesFrameWidth;
+    let anchorMinY = mrNievesFrameHeight;
+    let anchorMaxX = 0;
+    let anchorMaxY = 0;
+    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
+      const stats = getMrNievesPixelStats(pixelIndex);
+      const anchorPixel = isSkinPixel(stats) || isShirtOrShoePixel(stats);
+      if (!anchorPixel) continue;
+      torsoAnchors.push(pixelIndex);
+      anchorMinX = Math.min(anchorMinX, stats.x);
+      anchorMinY = Math.min(anchorMinY, stats.y);
+      anchorMaxX = Math.max(anchorMaxX, stats.x);
+      anchorMaxY = Math.max(anchorMaxY, stats.y);
+    }
+    const hasTorsoAnchor = torsoAnchors.length > 12 && anchorMaxX > anchorMinX && anchorMaxY > anchorMinY;
+    const bodyMinX = hasTorsoAnchor ? Math.max(0, anchorMinX - (isRun ? 58 : 46)) : mrNievesFrameWidth * 0.22;
+    const bodyMaxX = hasTorsoAnchor ? Math.min(mrNievesFrameWidth - 1, anchorMaxX + (isRun ? 62 : 50)) : mrNievesFrameWidth * 0.78;
+    const bodyMinY = hasTorsoAnchor ? Math.max(0, anchorMinY - 10) : mrNievesFrameHeight * 0.06;
+    const bodyMaxY = hasTorsoAnchor ? Math.min(mrNievesFrameHeight - 1, anchorMaxY + (isJump ? 88 : 96)) : mrNievesFrameHeight - 4;
+    const isInBodyArea = stats =>
+      stats.x >= bodyMinX &&
+      stats.x <= bodyMaxX &&
+      stats.y >= bodyMinY &&
+      stats.y <= bodyMaxY;
+    const isLowerBodyArea = stats =>
+      isInBodyArea(stats) && stats.y >= (hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36);
+    const isFootArea = stats =>
+      isInBodyArea(stats) && stats.y >= (hasTorsoAnchor ? anchorMaxY + 24 : mrNievesFrameHeight * 0.7);
+    const isTorsoHighlight = stats =>
+      hasTorsoAnchor &&
+      stats.x >= anchorMinX - 8 &&
+      stats.x <= anchorMaxX + 8 &&
+      stats.y >= anchorMinY &&
+      stats.y <= anchorMaxY + 10 &&
+      stats.average > 112 &&
+      stats.average < 238 &&
+      stats.chroma < 94;
+    const isMrNievesColorPixel = pixelIndex => {
+      const stats = getMrNievesPixelStats(pixelIndex);
+      const shoeHighlight = isFootArea(stats) && stats.average > 108 && stats.average < 232 && stats.chroma < 88;
+      const lowerBody = isLowerBodyArea(stats) && isPantsPixel(stats);
+      return isSkinPixel(stats) || isShirtOrShoePixel(stats) || lowerBody || shoeHighlight || isTorsoHighlight(stats);
     };
     const isBackdropPixel = pixelIndex => {
       if (isMrNievesColorPixel(pixelIndex)) return false;
-      const offset = pixelIndex * 4;
-      const red = pixels[offset];
-      const green = pixels[offset + 1];
-      const blue = pixels[offset + 2];
-      const brightest = Math.max(red, green, blue);
-      const darkest = Math.min(red, green, blue);
-      const average = (red + green + blue) / 3;
-      const chroma = brightest - darkest;
-      const blackBackdrop = average < 54 && brightest < 76;
-      const lightCheckerBackdrop = average > 154 && chroma < 86;
-      return blackBackdrop || lightCheckerBackdrop;
+      const stats = getMrNievesPixelStats(pixelIndex);
+      const blackBackdrop = stats.average < 56 && stats.brightest < 82;
+      const lightCheckerBackdrop = stats.average > 132 && stats.chroma < 96;
+      const paleEdgeNoise = stats.average > 112 && stats.chroma < 52;
+      return blackBackdrop || lightCheckerBackdrop || paleEdgeNoise;
     };
     const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const queue = [];
@@ -2751,6 +2810,10 @@ function startColtRunGame() {
     }
     for (let pixelIndex = 0; pixelIndex < transparent.length; pixelIndex += 1) {
       if (transparent[pixelIndex]) pixels[pixelIndex * 4 + 3] = 0;
+    }
+    for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
+      if (pixels[pixelIndex * 4 + 3] < 16) continue;
+      if (isBackdropPixel(pixelIndex)) pixels[pixelIndex * 4 + 3] = 0;
     }
     for (let pass = 0; pass < 2; pass += 1) {
       const toFade = [];
@@ -2788,10 +2851,6 @@ function startColtRunGame() {
     const seenCharacter = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const visiblePixel = pixelIndex => pixels[pixelIndex * 4 + 3] >= 16;
     const components = [];
-    let anchorMinX = mrNievesFrameWidth;
-    let anchorMinY = mrNievesFrameHeight;
-    let anchorMaxX = 0;
-    let anchorMaxY = 0;
     for (let pixelIndex = 0; pixelIndex < seenCharacter.length; pixelIndex += 1) {
       if (seenCharacter[pixelIndex] || !visiblePixel(pixelIndex)) continue;
       const component = [];
@@ -2813,10 +2872,6 @@ function startColtRunGame() {
         maxComponentY = Math.max(maxComponentY, y);
         if (isCharacterAnchorPixel(current)) {
           anchorPixels += 1;
-          anchorMinX = Math.min(anchorMinX, x);
-          anchorMinY = Math.min(anchorMinY, y);
-          anchorMaxX = Math.max(anchorMaxX, x);
-          anchorMaxY = Math.max(anchorMaxY, y);
         }
         [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([nextX, nextY]) => {
           if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) return;
@@ -2835,16 +2890,11 @@ function startColtRunGame() {
         maxY: maxComponentY
       });
     }
-    const hasAnchorBounds = anchorMaxX > anchorMinX && anchorMaxY > anchorMinY;
     components.forEach(component => {
-      const inBodyColumn = hasAnchorBounds &&
-        component.maxX >= anchorMinX - 34 &&
-        component.minX <= anchorMaxX + 34;
-      const underTorso = hasAnchorBounds &&
-        component.maxY >= anchorMinY - 4 &&
-        component.minY <= anchorMaxY + 74;
-      const substantialLowerPiece = component.pixels.length >= 8 && inBodyColumn && underTorso;
-      const keepComponent = component.anchors >= 4 || substantialLowerPiece;
+      const inBodyColumn = component.maxX >= bodyMinX && component.minX <= bodyMaxX;
+      const inBodyHeight = component.maxY >= bodyMinY && component.minY <= bodyMaxY + 8;
+      const substantialLowerPiece = component.anchors >= 1 && component.pixels.length >= 5 && inBodyColumn && inBodyHeight;
+      const keepComponent = component.anchors >= 1 || substantialLowerPiece;
       if (keepComponent) return;
       component.pixels.forEach(index => {
         pixels[index * 4 + 3] = 0;
@@ -2867,10 +2917,26 @@ function startColtRunGame() {
     }
     if (maxX > minX && maxY > minY) {
       const padding = 4;
-      const cropX = Math.max(0, minX - padding);
-      const cropY = Math.max(0, minY - padding);
-      const cropMaxX = Math.min(mrNievesFrameWidth - 1, maxX + padding);
-      const cropMaxY = Math.min(mrNievesFrameHeight - 1, maxY + padding);
+      const nextCrop = {
+        minX: Math.max(0, minX - padding),
+        minY: Math.max(0, minY - padding),
+        maxX: Math.min(mrNievesFrameWidth - 1, maxX + padding),
+        maxY: Math.min(mrNievesFrameHeight - 1, maxY + padding)
+      };
+      const stableCrop = mrNievesStableCrops[cropKey];
+      if (stableCrop) {
+        stableCrop.minX = Math.min(stableCrop.minX, nextCrop.minX);
+        stableCrop.minY = Math.min(stableCrop.minY, nextCrop.minY);
+        stableCrop.maxX = Math.max(stableCrop.maxX, nextCrop.maxX);
+        stableCrop.maxY = Math.max(stableCrop.maxY, nextCrop.maxY);
+      } else {
+        mrNievesStableCrops[cropKey] = { ...nextCrop };
+      }
+      const crop = mrNievesStableCrops[cropKey];
+      const cropX = crop.minX;
+      const cropY = crop.minY;
+      const cropMaxX = crop.maxX;
+      const cropMaxY = crop.maxY;
       const cropW = cropMaxX - cropX + 1;
       const cropH = cropMaxY - cropY + 1;
       mrNievesCropCanvas.width = cropW;
