@@ -33,13 +33,13 @@ const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
 
 const categoryIcons = {
-  "Typing Practice": "?",
-  "Social Studies & Science": "??",
-  "Computer Skills": "??",
-  "Review Games": "?",
-  "Logic Games": "?",
-  "Creative Projects": "?",
-  "Class Videos": "?"
+  "Typing Practice": "⌨",
+  "Social Studies & Science": "🌎",
+  "Computer Skills": "💻",
+  "Review Games": "★",
+  "Logic Games": "◆",
+  "Creative Projects": "✎",
+  "Class Videos": "▶"
 };
 
 function makeId() {
@@ -1114,7 +1114,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
   return `
     <div class="topbar">
       <div class="title-group">
-        ${back ? `<button class="back-btn" data-action="back">? Back</button>` : ""}
+        ${back ? `<button class="back-btn" data-action="back">← Back</button>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source src="assets/st-cletus-logo.mp4?v=20260702" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         <h1>${escapeHtml(title)}</h1>
@@ -1128,7 +1128,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
 function categoryTopbar() {
   return `
     <div class="topbar category-topbar">
-      <button class="back-btn" data-action="back">? Back</button>
+      <button class="back-btn" data-action="back">← Back</button>
       <div class="header-actions">
         <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
       </div>
@@ -1152,7 +1152,7 @@ function renderHome() {
         `<div class="header-actions">
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
           <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
-          <button class="icon-btn" title="Teacher Mode" data-action="teacher">?</button>
+          <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
         </div>`
       )}
       <section class="home-feature">
@@ -1177,7 +1177,7 @@ function renderHomeDefault() {
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
           <source src="assets/daily-launch-bg.mp4" type="video/mp4">
         </video>
-        <div class="daily-launch-icon" aria-hidden="true">?</div>
+        <div class="daily-launch-icon" aria-hidden="true">✓</div>
         <div class="daily-launch-copy">
           <span class="feature-kicker">Start Here</span>
           <h2>Today's Launch</h2>
@@ -1646,7 +1646,7 @@ function renderStudentLink(link) {
       <p class="instruction">${escapeHtml(link.instruction)}</p>
       <p class="meta">${escapeHtml(link.category)}</p>
       <div class="actions">
-        <button class="primary-btn" data-action="${isColtRun ? "openColtRun" : "open"}" ${isColtRun ? "" : `data-url="${escapeHtml(link.url)}"`}>${isColtRun ? "? Play Game" : "? Open Site"}</button>
+        <button class="primary-btn" data-action="${isColtRun ? "openColtRun" : "open"}" ${isColtRun ? "" : `data-url="${escapeHtml(link.url)}"`}>${isColtRun ? "▶ Play Game" : "↗ Open Site"}</button>
       </div>
     </article>
   `;
@@ -1709,10 +1709,10 @@ function renderColtRun() {
         <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
         <div class="colt-run-actions">
           <div class="colt-run-volume" aria-label="Game audio volume">
-            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off">??</button>
+            <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off">🔊</button>
             <input id="coltRunMusicVolume" class="colt-run-volume-slider" type="range" min="0" max="100" step="1" value="42" aria-label="Game audio volume">
           </div>
-          <button class="outline-btn" type="button" data-colt-run="fullscreen">? Fullscreen</button>
+          <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
           <button class="outline-btn" type="button" data-colt-run="characterSelect">Character</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
@@ -2385,7 +2385,7 @@ function startColtRunGame() {
       musicVolumeSlider.style.setProperty("--volume", `${percent}%`);
     }
     if (musicToggleButton) {
-      musicToggleButton.textContent = percent <= 0 ? "??" : percent < 45 ? "??" : "??";
+      musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔈" : "🔊";
       musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn game audio on" : "Turn game audio off");
       musicToggleButton.classList.toggle("is-muted", percent <= 0);
     }
@@ -4589,7 +4589,7 @@ function startColtRunGame() {
   const isFullscreen = () => document.fullscreenElement === stage;
   const updateFullscreenButton = () => {
     fullscreenButtons.forEach(button => {
-      button.textContent = isFullscreen() ? "Exit Fullscreen" : "? Fullscreen";
+      button.textContent = isFullscreen() ? "Exit Fullscreen" : "⛶ Fullscreen";
     });
     if (isFullscreen()) canvas.focus({ preventScroll: true });
   };
@@ -4767,8 +4767,8 @@ function renderDashboard() {
     ${pageHeader("Teacher Dashboard", "", true)}
     <section class="dashboard-actions">
       <button class="primary-btn" data-action="add">+ Add Website</button>
-      <button class="outline-btn" data-action="changePin">?? Change PIN</button>
-      <button class="outline-btn" data-action="reset">? Reset Sample Links</button>
+      <button class="outline-btn" data-action="changePin">🔒 Change PIN</button>
+      <button class="outline-btn" data-action="reset">↺ Reset Sample Links</button>
     </section>
     <section class="form-card daily-launch-editor">
       <div>
@@ -4797,8 +4797,8 @@ function renderDashboard() {
                 </select>
               </div>
               <div class="editor-tool-group">
-                <button type="button" data-editor-command="undo" title="Undo">?</button>
-                <button type="button" data-editor-command="redo" title="Redo">?</button>
+                <button type="button" data-editor-command="undo" title="Undo">↶</button>
+                <button type="button" data-editor-command="redo" title="Redo">↷</button>
               </div>
               <div class="editor-tool-group">
                 <button type="button" data-editor-command="bold" title="Bold"><b>B</b></button>
@@ -4832,9 +4832,9 @@ function renderDashboard() {
                 <button type="button" data-editor-command="insertOrderedList" title="Numbered list">1.</button>
               </div>
               <div class="editor-tool-group">
-                <button type="button" data-editor-command="justifyLeft" title="Align left">?</button>
-                <button type="button" data-editor-command="justifyCenter" title="Align center">=</button>
-                <button type="button" data-editor-command="justifyRight" title="Align right">?</button>
+                <button type="button" data-editor-command="justifyLeft" title="Align left">☰</button>
+                <button type="button" data-editor-command="justifyCenter" title="Align center">≡</button>
+                <button type="button" data-editor-command="justifyRight" title="Align right">☷</button>
               </div>
             </div>
             <div id="dailyLaunchMessage" class="mini-editor-surface" contenteditable="true" role="textbox" aria-multiline="true">${sanitizeLaunchHtml(dailyLaunch.message)}</div>
@@ -4989,7 +4989,7 @@ function renderTeacherLink(link) {
         <span class="switch"><input type="checkbox" data-action="toggleActive" data-id="${link.id}" ${link.active ? "checked" : ""}><span class="slider"></span></span>
       </label>
       <div class="actions">
-        <button class="primary-btn" data-action="edit" data-id="${link.id}">? Edit</button>
+        <button class="primary-btn" data-action="edit" data-id="${link.id}">✎ Edit</button>
         <button class="danger-btn" data-action="delete" data-id="${link.id}">Delete</button>
       </div>
     </article>

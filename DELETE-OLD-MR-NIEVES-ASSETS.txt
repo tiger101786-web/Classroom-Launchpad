@@ -1,4 +1,4 @@
-﻿Delete these old Colt Run Mr. Nieves character files from your GitHub repo:
+﻿Delete these old Colt Run Mr. Nieves character files from your GitHub repo if they are still there:
 
 assets/colt-run-mr-nieves-idle.mp4
 assets/colt-run-mr-nieves-run.mp4
