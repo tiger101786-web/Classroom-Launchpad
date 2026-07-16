@@ -2692,21 +2692,25 @@ function startColtRunGame() {
     mrNievesFrameContext.drawImage(source, drawX, drawY, drawW, drawH);
     const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
     const pixels = frame.data;
-    const isBlackBackdrop = pixelIndex => {
+    const isBackdropPixel = pixelIndex => {
       const offset = pixelIndex * 4;
       const red = pixels[offset];
       const green = pixels[offset + 1];
       const blue = pixels[offset + 2];
       const brightest = Math.max(red, green, blue);
+      const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
-      return average < 28 && brightest < 40;
+      const chroma = brightest - darkest;
+      const blackBackdrop = average < 34 && brightest < 50;
+      const lightCheckerBackdrop = average > 166 && chroma < 72;
+      return blackBackdrop || lightCheckerBackdrop;
     };
     const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const queue = [];
     const addPixel = (x, y) => {
       if (x < 0 || x >= mrNievesFrameWidth || y < 0 || y >= mrNievesFrameHeight) return;
       const pixelIndex = y * mrNievesFrameWidth + x;
-      if (transparent[pixelIndex] || !isBlackBackdrop(pixelIndex)) return;
+      if (transparent[pixelIndex] || !isBackdropPixel(pixelIndex)) return;
       transparent[pixelIndex] = 1;
       queue.push(pixelIndex);
     };
@@ -2734,7 +2738,7 @@ function startColtRunGame() {
       const toFade = [];
       for (let pixelIndex = 0; pixelIndex < mrNievesFrameWidth * mrNievesFrameHeight; pixelIndex += 1) {
         const alphaIndex = pixelIndex * 4 + 3;
-        if (pixels[alphaIndex] < 16 || !isBlackBackdrop(pixelIndex)) continue;
+        if (pixels[alphaIndex] < 16 || !isBackdropPixel(pixelIndex)) continue;
         const x = pixelIndex % mrNievesFrameWidth;
         const y = Math.floor(pixelIndex / mrNievesFrameWidth);
         let touchesTransparent = false;
@@ -4331,10 +4335,10 @@ function startColtRunGame() {
       : coltSprites[player.state] || coltSprites.idle;
     const isMrNieves = selectedCharacter === "mrNieves";
     const drawW = isMrNieves
-      ? player.state === "run" ? 136 : player.state === "leap" || player.state === "jumpPrep" ? 146 : 128
+      ? player.state === "run" ? 158 : player.state === "leap" || player.state === "jumpPrep" ? 170 : 150
       : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
     const drawH = isMrNieves
-      ? player.state === "run" ? 112 : player.state === "leap" || player.state === "jumpPrep" ? 122 : 116
+      ? player.state === "run" ? 130 : player.state === "leap" || player.state === "jumpPrep" ? 142 : 136
       : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + 8);
@@ -4389,7 +4393,7 @@ function startColtRunGame() {
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesFrame("idle"), 104, 108);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesFrame("idle"), 132, 122);
   };
 
   const drawCoverImage = image => {
