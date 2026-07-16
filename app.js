@@ -3601,14 +3601,16 @@ function startColtRunGame() {
         pixels[pixelIndex * 4 + 3] = Math.max(0, pixels[pixelIndex * 4 + 3] - 96);
       });
     }
-    const tailTopFeather = lavaRockVideoFrameSize * (index === 1 ? 0.42 : 0.2);
-    const tailRightFeather = lavaRockVideoFrameSize * (index === 1 ? 0.36 : 0.16);
-    const tailCornerFeather = lavaRockVideoFrameSize * (index === 1 ? 0.58 : 0.32);
+    const tailTopFeather = lavaRockVideoFrameSize * (index === 1 ? 0.32 : 0.2);
+    const tailRightFeather = lavaRockVideoFrameSize * (index === 1 ? 0.3 : 0.16);
+    const tailCornerFeather = lavaRockVideoFrameSize * (index === 1 ? 0.5 : 0.32);
     for (let pixelIndex = 0; pixelIndex < lavaRockVideoFrameSize * lavaRockVideoFrameSize; pixelIndex += 1) {
       const alphaIndex = pixelIndex * 4 + 3;
       if (pixels[alphaIndex] < 16) continue;
       const x = pixelIndex % lavaRockVideoFrameSize;
       const y = Math.floor(pixelIndex / lavaRockVideoFrameSize);
+      const isSecondSpecialTrail = index === 1 && x > lavaRockVideoFrameSize * 0.54 && y < lavaRockVideoFrameSize * 0.58;
+      if (index === 1 && !isSecondSpecialTrail) continue;
       const topFade = Math.max(0, Math.min(1, y / tailTopFeather));
       const rightFade = Math.max(0, Math.min(1, (lavaRockVideoFrameSize - 1 - x) / tailRightFeather));
       const topRightDistance = Math.hypot(lavaRockVideoFrameSize - 1 - x, y);
