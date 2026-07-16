@@ -2692,7 +2692,25 @@ function startColtRunGame() {
     mrNievesFrameContext.drawImage(source, drawX, drawY, drawW, drawH);
     const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
     const pixels = frame.data;
+    const isMrNievesColorPixel = pixelIndex => {
+      const offset = pixelIndex * 4;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const brightest = Math.max(red, green, blue);
+      const darkest = Math.min(red, green, blue);
+      const average = (red + green + blue) / 3;
+      const chroma = brightest - darkest;
+      const x = pixelIndex % mrNievesFrameWidth;
+      const y = Math.floor(pixelIndex / mrNievesFrameWidth);
+      const skin = red > 126 && green > 56 && green < 142 && blue < 116 && red > green * 1.18 && green > blue * 1.05;
+      const shirtOrShoes = red > 82 && green < 82 && blue < 104 && red > green * 1.24 && red > blue * 1.12;
+      const centerLowerBody = x > mrNievesFrameWidth * 0.33 && x < mrNievesFrameWidth * 0.67 && y > mrNievesFrameHeight * 0.38;
+      const pants = centerLowerBody && average > 38 && average < 154 && chroma < 86 && blue >= red - 28 && green >= red - 24;
+      return skin || shirtOrShoes || pants;
+    };
     const isBackdropPixel = pixelIndex => {
+      if (isMrNievesColorPixel(pixelIndex)) return false;
       const offset = pixelIndex * 4;
       const red = pixels[offset];
       const green = pixels[offset + 1];
@@ -2765,14 +2783,7 @@ function startColtRunGame() {
     }
     const isCharacterAnchorPixel = pixelIndex => {
       if (pixels[pixelIndex * 4 + 3] < 16) return false;
-      const offset = pixelIndex * 4;
-      const red = pixels[offset];
-      const green = pixels[offset + 1];
-      const blue = pixels[offset + 2];
-      const average = (red + green + blue) / 3;
-      const skin = red > 126 && green > 56 && green < 142 && blue < 116 && red > green * 1.18 && green > blue * 1.05;
-      const shirtOrShoes = red > 82 && green < 82 && blue < 104 && red > green * 1.24 && red > blue * 1.12;
-      return skin || shirtOrShoes;
+      return isMrNievesColorPixel(pixelIndex);
     };
     const seenCharacter = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const visiblePixel = pixelIndex => pixels[pixelIndex * 4 + 3] >= 16;
