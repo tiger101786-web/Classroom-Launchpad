@@ -2701,10 +2701,9 @@ function startColtRunGame() {
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
       const chroma = brightest - darkest;
-      const blackBackdrop = average < 62 && brightest < 82;
-      const lightCheckerBackdrop = average > 118 && chroma < 104;
-      const mutedNoiseBackdrop = average > 76 && chroma < 64;
-      return blackBackdrop || lightCheckerBackdrop || mutedNoiseBackdrop;
+      const blackBackdrop = average < 54 && brightest < 76;
+      const lightCheckerBackdrop = average > 154 && chroma < 86;
+      return blackBackdrop || lightCheckerBackdrop;
     };
     const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const queue = [];
