@@ -2754,7 +2754,8 @@ function startColtRunGame() {
     const bodyCenterX = hasTorsoAnchor ? (anchorMinX + anchorMaxX) / 2 : mrNievesFrameWidth / 2;
     const lowerBodyStartY = hasTorsoAnchor ? anchorMinY + (anchorMaxY - anchorMinY) * 0.34 : mrNievesFrameHeight * 0.36;
     const hipEndY = lowerBodyStartY + (isRun ? 26 : 22);
-    const legSpread = isRun ? 8 : 0;
+    const legSpread = isRun ? 10 : 2;
+    const leftLegExtra = isRun ? 12 : 9;
     const isInBodyArea = stats =>
       stats.x >= bodyMinX &&
       stats.x <= bodyMaxX &&
@@ -2763,9 +2764,9 @@ function startColtRunGame() {
     const isLegShape = stats => {
       if (stats.y < lowerBodyStartY || stats.y > floorCutY) return false;
       if (stats.y <= hipEndY) {
-        return stats.x >= bodyCenterX - 28 - legSpread && stats.x <= bodyCenterX + 28 + legSpread;
+        return stats.x >= bodyCenterX - 32 - legSpread && stats.x <= bodyCenterX + 29 + legSpread;
       }
-      const leftLeg = stats.x >= bodyCenterX - 27 - legSpread && stats.x <= bodyCenterX - 3 + legSpread;
+      const leftLeg = stats.x >= bodyCenterX - 30 - legSpread - leftLegExtra && stats.x <= bodyCenterX - 1 + legSpread;
       const rightLeg = stats.x >= bodyCenterX + 1 - legSpread && stats.x <= bodyCenterX + 27 + legSpread;
       return leftLeg || rightLeg;
     };
@@ -2787,9 +2788,7 @@ function startColtRunGame() {
       stats.chroma < 94;
     const isShoeHighlight = stats =>
       isFootArea(stats) &&
-      stats.average > 108 &&
-      stats.average < 220 &&
-      stats.chroma < 72;
+      isShirtOrShoePixel(stats);
     const isMrNievesColorPixel = pixelIndex => {
       const stats = getMrNievesPixelStats(pixelIndex);
       const lowerBody = isLowerBodyArea(stats) && isPantsPixel(stats);
@@ -2993,12 +2992,16 @@ function startColtRunGame() {
         const chroma = brightest - darkest;
         const redClothing = red > 72 && green < 96 && blue < 116 && red > green * 1.12 && red > blue * 1.02;
         const skin = red > 116 && green > 44 && green < 154 && blue < 126 && red > green * 1.12;
-        const shirtText = y > 32 && y < 67 && x > 88 && x < 132 && average > 116 && chroma < 100;
-        const leftLeg = y > 66 && y < 136 && x > 82 && x < 109 && average > 22 && average < 188 && chroma < 136;
-        const rightLeg = y > 66 && y < 136 && x > 111 && x < 139 && average > 22 && average < 188 && chroma < 136;
-        const shoe = y > 124 && y < 144 && x > 75 && x < 145 && (redClothing || (average > 100 && average < 220 && chroma < 82));
-        const bottomBar = y > 124 && !shoe && average > 48 && average < 192 && chroma < 96;
-        const neckHaze = y > 18 && y < 54 && x > 103 && x < 143 && !skin && !redClothing && average > 72 && chroma < 92;
+        const shirtText = y > 32 && y < 67 && x > 86 && x < 134 && average > 116 && chroma < 100;
+        const leftLeg = y > 62 && y < 138 && x > 70 && x < 113 && average > 18 && average < 194 && chroma < 144;
+        const rightLeg = y > 62 && y < 138 && x > 106 && x < 143 && average > 18 && average < 194 && chroma < 144;
+        const pants = leftLeg || rightLeg;
+        const shoe = y > 122 && y < 144 && x > 72 && x < 148 && redClothing;
+        const bottomBar = y > 121 && !shoe && (
+          (!pants && average > 38 && average < 216 && chroma < 118) ||
+          (average > 92 && average < 224 && chroma < 108)
+        );
+        const neckHaze = y > 12 && y < 62 && x > 96 && x < 150 && !skin && !redClothing && average > 54 && chroma < 108;
         const sideHaze = !leftLeg && !rightLeg && !shirtText && !skin && !redClothing && average > 78 && average < 184 && chroma < 88;
         if (bottomBar || neckHaze || sideHaze) {
           finalPixels[offset + 3] = 0;
