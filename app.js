@@ -2701,9 +2701,10 @@ function startColtRunGame() {
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
       const chroma = brightest - darkest;
-      const blackBackdrop = average < 34 && brightest < 50;
-      const lightCheckerBackdrop = average > 166 && chroma < 72;
-      return blackBackdrop || lightCheckerBackdrop;
+      const blackBackdrop = average < 62 && brightest < 82;
+      const lightCheckerBackdrop = average > 118 && chroma < 104;
+      const mutedNoiseBackdrop = average > 76 && chroma < 64;
+      return blackBackdrop || lightCheckerBackdrop || mutedNoiseBackdrop;
     };
     const transparent = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
     const queue = [];
@@ -2762,6 +2763,46 @@ function startColtRunGame() {
       toFade.forEach(pixelIndex => {
         pixels[pixelIndex * 4 + 3] = Math.max(0, pixels[pixelIndex * 4 + 3] - 130);
       });
+    }
+    const isCharacterAnchorPixel = pixelIndex => {
+      if (pixels[pixelIndex * 4 + 3] < 16) return false;
+      const offset = pixelIndex * 4;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const average = (red + green + blue) / 3;
+      const skin = red > 126 && green > 56 && green < 142 && blue < 116 && red > green * 1.18 && green > blue * 1.05;
+      const shirtOrShoes = red > 82 && green < 82 && blue < 104 && red > green * 1.24 && red > blue * 1.12;
+      return skin || shirtOrShoes;
+    };
+    const seenCharacter = new Uint8Array(mrNievesFrameWidth * mrNievesFrameHeight);
+    const visiblePixel = pixelIndex => pixels[pixelIndex * 4 + 3] >= 16;
+    for (let pixelIndex = 0; pixelIndex < seenCharacter.length; pixelIndex += 1) {
+      if (seenCharacter[pixelIndex] || !visiblePixel(pixelIndex)) continue;
+      const component = [];
+      const queue = [pixelIndex];
+      let anchorPixels = 0;
+      seenCharacter[pixelIndex] = 1;
+      while (queue.length) {
+        const current = queue.pop();
+        component.push(current);
+        if (isCharacterAnchorPixel(current)) anchorPixels += 1;
+        const x = current % mrNievesFrameWidth;
+        const y = Math.floor(current / mrNievesFrameWidth);
+        [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([nextX, nextY]) => {
+          if (nextX < 0 || nextX >= mrNievesFrameWidth || nextY < 0 || nextY >= mrNievesFrameHeight) return;
+          const next = nextY * mrNievesFrameWidth + nextX;
+          if (seenCharacter[next] || !visiblePixel(next)) return;
+          seenCharacter[next] = 1;
+          queue.push(next);
+        });
+      }
+      const keepComponent = anchorPixels >= 10 && (component.length > 18 || anchorPixels >= 4);
+      if (!keepComponent) {
+        component.forEach(index => {
+          pixels[index * 4 + 3] = 0;
+        });
+      }
     }
     mrNievesFrameContext.putImageData(frame, 0, 0);
     let minX = mrNievesFrameWidth;
