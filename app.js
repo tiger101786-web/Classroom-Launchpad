@@ -2112,7 +2112,7 @@ function startColtRunGame() {
   leapVideo.playsInline = true;
   leapVideo.preload = "auto";
   const mrNievesIdleVideo = document.createElement("video");
-  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-mr-nieves1";
+  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-mr-nieves-trans-idle";
   mrNievesIdleVideo.muted = true;
   mrNievesIdleVideo.loop = true;
   mrNievesIdleVideo.playsInline = true;
