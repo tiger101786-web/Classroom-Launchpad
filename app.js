@@ -1841,6 +1841,9 @@ function startColtRunGame() {
   const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
   runningAudio.preload = "auto";
   runningAudio.loop = true;
+  const mrNievesRunningAudio = new Audio("assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1");
+  mrNievesRunningAudio.preload = "auto";
+  mrNievesRunningAudio.loop = true;
   const rockDeathAudio = new Audio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
   rockDeathAudio.preload = "auto";
   const ambientLayerVolume = 1;
@@ -1859,6 +1862,8 @@ function startColtRunGame() {
   ambientAudio.muted = musicMuted;
   runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   runningAudio.muted = musicMuted;
+  mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
+  mrNievesRunningAudio.muted = musicMuted;
   rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
   rockDeathAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
@@ -2402,8 +2407,10 @@ function startColtRunGame() {
   };
   const stopRunningAudio = () => {
     runningAudio.pause();
+    mrNievesRunningAudio.pause();
     try {
       runningAudio.currentTime = 0;
+      mrNievesRunningAudio.currentTime = 0;
     } catch {}
   };
   const playRockDeathAudio = () => {
@@ -2416,8 +2423,16 @@ function startColtRunGame() {
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
-      if (runningAudio.paused) runningAudio.play().catch(() => {});
-    } else if (!runningAudio.paused) {
+      const activeRunningAudio = selectedCharacter === "mrNieves" ? mrNievesRunningAudio : runningAudio;
+      const inactiveRunningAudio = selectedCharacter === "mrNieves" ? runningAudio : mrNievesRunningAudio;
+      if (!inactiveRunningAudio.paused) {
+        inactiveRunningAudio.pause();
+        try {
+          inactiveRunningAudio.currentTime = 0;
+        } catch {}
+      }
+      if (activeRunningAudio.paused) activeRunningAudio.play().catch(() => {});
+    } else if (!runningAudio.paused || !mrNievesRunningAudio.paused) {
       stopRunningAudio();
     }
   };
@@ -2439,6 +2454,8 @@ function startColtRunGame() {
     ambientAudio.muted = musicMuted;
     runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     runningAudio.muted = musicMuted;
+    mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
+    mrNievesRunningAudio.muted = musicMuted;
     rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
     rockDeathAudio.muted = musicMuted;
     applyAmbientBoost();
@@ -5021,6 +5038,7 @@ function startColtRunGame() {
       rockDeathAudio.pause();
       ambientAudio.src = "";
       runningAudio.src = "";
+      mrNievesRunningAudio.src = "";
       rockDeathAudio.src = "";
       mrNievesIdleVideo.src = "";
       mrNievesRunVideo.src = "";
