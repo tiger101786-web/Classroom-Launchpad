@@ -2112,7 +2112,7 @@ function startColtRunGame() {
   leapVideo.playsInline = true;
   leapVideo.preload = "auto";
   const mrNievesIdleVideo = document.createElement("video");
-  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake";
+  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake2";
   mrNievesIdleVideo.muted = true;
   mrNievesIdleVideo.loop = true;
   mrNievesIdleVideo.playsInline = true;
@@ -4310,8 +4310,8 @@ function startColtRunGame() {
 
   const drawDeathColt = () => {
     const isMrNieves = selectedCharacter === "mrNieves";
-    const drawW = (isMrNieves ? 134 : 178) * deathColtDrawScale;
-    const drawH = (isMrNieves ? 184 : 132) * deathColtDrawScale;
+    const drawW = (isMrNieves ? 138 : 178) * deathColtDrawScale;
+    const drawH = (isMrNieves ? 166 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
     const y = Math.round(deathY + player.h - drawH + 8);
     const deathFrame = isMrNieves ? getTransparentMrNievesIdleFrame() : getTransparentDeathFrame();
@@ -4345,8 +4345,8 @@ function startColtRunGame() {
       ? runFrames[runFrame]
       : coltSprites[player.state] || coltSprites.idle;
     const isMrNieves = selectedCharacter === "mrNieves";
-    const drawW = isMrNieves ? 134 : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves ? 184 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const drawW = isMrNieves ? 138 : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves ? 166 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + 8);
     ctx.save();
@@ -4380,13 +4380,13 @@ function startColtRunGame() {
     ctx.restore();
   };
 
-  const drawSelectPreview = (previewCanvas, frame, width, height) => {
+  const drawSelectPreview = (previewCanvas, frame, width, height, bottomPadding = 8) => {
     if (!previewCanvas || !frame) return;
     const previewContext = previewCanvas.getContext("2d");
     if (!previewContext) return;
     previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewContext.save();
-    previewContext.translate(previewCanvas.width / 2, previewCanvas.height - 8);
+    previewContext.translate(previewCanvas.width / 2, previewCanvas.height - bottomPadding);
     previewContext.shadowColor = "rgba(0, 0, 0, 0.34)";
     previewContext.shadowBlur = 10;
     previewContext.shadowOffsetY = 6;
@@ -4399,7 +4399,7 @@ function startColtRunGame() {
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 124, 148);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 116, 132, 14);
   };
 
   const drawCoverImage = image => {
