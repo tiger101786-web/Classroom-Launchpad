@@ -2661,9 +2661,10 @@ function startColtRunGame() {
       const brightest = Math.max(red, green, blue);
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
+      const greenBackdrop = green > 105 && green > red * 1.35 && green > blue * 1.35;
       const paleBackdrop = average > 150 && brightest - darkest < 118;
       const whiteBackdrop = average > 214 && brightest - darkest < 70;
-      return paleBackdrop || whiteBackdrop;
+      return greenBackdrop || paleBackdrop || whiteBackdrop;
     };
     const transparent = new Uint8Array(flagFrameSize * flagFrameSize);
     const queue = [];
@@ -2699,11 +2700,12 @@ function startColtRunGame() {
       const brightest = Math.max(red, green, blue);
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
+      const greenBackdrop = green > 105 && green > red * 1.35 && green > blue * 1.35;
       const lowColorRange = brightest - darkest < 112;
       const protectEmblem = x > 45 && x < 78 && y > 40 && y < 82;
       const protectFlag = red > green * 1.12 && red > blue * 1.08 && red > 68;
       const protectDarkPole = average < 82 && darkest < 64;
-      if (transparent[pixelIndex] || (!protectEmblem && !protectFlag && !protectDarkPole && average > 136 && lowColorRange)) {
+      if (transparent[pixelIndex] || greenBackdrop || (!protectEmblem && !protectFlag && !protectDarkPole && average > 136 && lowColorRange)) {
         pixels[offset + 3] = 0;
       }
     }
@@ -4682,12 +4684,12 @@ function startColtRunGame() {
     const transparentFlagFrame = getTransparentFlagFrame();
     if (transparentFlagFrame) {
       keepFlagVideoPlaying();
-      const flagDrawW = 108;
-      const flagDrawH = 94;
+      const flagDrawW = 138;
+      const flagDrawH = 128;
       ctx.save();
       ctx.shadowColor = "rgba(255, 82, 21, 0.45)";
       ctx.shadowBlur = 16;
-      ctx.drawImage(transparentFlagFrame, flagX - 26, flag.y - 8, flagDrawW, flagDrawH);
+      ctx.drawImage(transparentFlagFrame, flagX - 36, flag.y - 30, flagDrawW, flagDrawH);
       ctx.restore();
     } else {
       ctx.strokeStyle = "#f4f2f3";
