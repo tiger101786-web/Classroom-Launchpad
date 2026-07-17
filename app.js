@@ -4371,8 +4371,9 @@ function startColtRunGame() {
       : coltSprites[player.state] || coltSprites.idle;
     const isMrNieves = selectedCharacter === "mrNieves";
     const mrNievesIsJumping = isMrNieves && (player.state === "leap" || player.state === "jumpPrep");
-    const drawW = isMrNieves ? (mrNievesIsJumping ? 178 : 138) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves ? (mrNievesIsJumping ? 160 : 166) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const mrNievesIsRunning = isMrNieves && player.state === "run";
+    const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsRunning ? 128 : 138) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsRunning ? 154 : 166) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 22 : 8));
     ctx.save();
@@ -4381,7 +4382,6 @@ function startColtRunGame() {
     ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 8;
-    const mrNievesIsRunning = isMrNieves && player.state === "run";
     const mrNievesFrame = isMrNieves
       ? (mrNievesIsJumping ? getTransparentMrNievesJumpFrame() || getTransparentMrNievesIdleFrame() : mrNievesIsRunning ? getTransparentMrNievesRunFrame() || getTransparentMrNievesIdleFrame() : getTransparentMrNievesIdleFrame())
       : null;
