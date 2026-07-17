@@ -2117,6 +2117,12 @@ function startColtRunGame() {
   mrNievesIdleVideo.loop = true;
   mrNievesIdleVideo.playsInline = true;
   mrNievesIdleVideo.preload = "auto";
+  const mrNievesRunVideo = document.createElement("video");
+  mrNievesRunVideo.src = "assets/colt-run-mr-nieves-run.mp4?v=20260716-run-remake1";
+  mrNievesRunVideo.muted = true;
+  mrNievesRunVideo.loop = true;
+  mrNievesRunVideo.playsInline = true;
+  mrNievesRunVideo.preload = "auto";
   const deathVideo = document.createElement("video");
   deathVideo.src = "assets/colt-run-death.mp4?v=20260706-death";
   deathVideo.muted = true;
@@ -2173,8 +2179,11 @@ function startColtRunGame() {
   const mrNievesFrameContext = mrNievesFrameCanvas.getContext("2d", { willReadFrequently: true });
   const mrNievesCropCanvas = document.createElement("canvas");
   const mrNievesCropContext = mrNievesCropCanvas.getContext("2d", { willReadFrequently: true });
-  let mrNievesFrameStamp = -1;
-  let mrNievesStableCrop = null;
+  const mrNievesFrameStates = {
+    idle: { stamp: -1, crop: null },
+    run: { stamp: -1, crop: null }
+  };
+  let mrNievesActiveFrameState = "";
   const deathFrameWidth = 230;
   const deathFrameHeight = 170;
   const deathFrameCanvas = document.createElement("canvas");
@@ -2489,6 +2498,12 @@ function startColtRunGame() {
     mrNievesIdleVideo.play().catch(() => {});
   };
   mrNievesIdleVideo.addEventListener("canplay", keepMrNievesIdleVideoPlaying);
+
+  const keepMrNievesRunVideoPlaying = () => {
+    if (!mrNievesRunVideo.paused) return;
+    mrNievesRunVideo.play().catch(() => {});
+  };
+  mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
 
   const keepDeathVideoPlaying = () => {
     if (!deathVideo.paused) return;
@@ -3327,12 +3342,13 @@ function startColtRunGame() {
     return leapFrameCanvas;
   };
 
-  const getTransparentMrNievesIdleFrame = () => {
-    if (mrNievesIdleVideo.readyState < 2 || !mrNievesFrameContext || !mrNievesCropContext) return null;
-    const frameStamp = Math.floor(mrNievesIdleVideo.currentTime * 30);
-    if (frameStamp === mrNievesFrameStamp) return mrNievesFrameCanvas;
-    const sourceW = mrNievesIdleVideo.videoWidth || mrNievesFrameWidth;
-    const sourceH = mrNievesIdleVideo.videoHeight || mrNievesFrameHeight;
+  const getTransparentMrNievesFrame = (sourceVideo, frameStateKey) => {
+    if (sourceVideo.readyState < 2 || !mrNievesFrameContext || !mrNievesCropContext) return null;
+    const frameState = mrNievesFrameStates[frameStateKey] || mrNievesFrameStates.idle;
+    const frameStamp = Math.floor(sourceVideo.currentTime * 30);
+    if (frameStamp === frameState.stamp && mrNievesActiveFrameState === frameStateKey) return mrNievesFrameCanvas;
+    const sourceW = sourceVideo.videoWidth || mrNievesFrameWidth;
+    const sourceH = sourceVideo.videoHeight || mrNievesFrameHeight;
     const sourceRatio = sourceW / sourceH;
     const targetRatio = mrNievesFrameWidth / mrNievesFrameHeight;
     let drawW = mrNievesFrameWidth;
@@ -3347,7 +3363,7 @@ function startColtRunGame() {
       drawX = (mrNievesFrameWidth - drawW) / 2;
     }
     mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
-    mrNievesFrameContext.drawImage(mrNievesIdleVideo, drawX, drawY, drawW, drawH);
+    mrNievesFrameContext.drawImage(sourceVideo, drawX, drawY, drawW, drawH);
     const frame = mrNievesFrameContext.getImageData(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
     const pixels = frame.data;
     const getPixel = index => {
@@ -3470,20 +3486,20 @@ function startColtRunGame() {
         maxX: Math.min(mrNievesFrameWidth - 1, maxX + padding),
         maxY: Math.min(mrNievesFrameHeight - 1, maxY + padding)
       };
-      if (mrNievesStableCrop) {
-        mrNievesStableCrop.minX = Math.min(mrNievesStableCrop.minX, nextCrop.minX);
-        mrNievesStableCrop.minY = Math.min(mrNievesStableCrop.minY, nextCrop.minY);
-        mrNievesStableCrop.maxX = Math.max(mrNievesStableCrop.maxX, nextCrop.maxX);
-        mrNievesStableCrop.maxY = Math.max(mrNievesStableCrop.maxY, nextCrop.maxY);
+      if (frameState.crop) {
+        frameState.crop.minX = Math.min(frameState.crop.minX, nextCrop.minX);
+        frameState.crop.minY = Math.min(frameState.crop.minY, nextCrop.minY);
+        frameState.crop.maxX = Math.max(frameState.crop.maxX, nextCrop.maxX);
+        frameState.crop.maxY = Math.max(frameState.crop.maxY, nextCrop.maxY);
       } else {
-        mrNievesStableCrop = { ...nextCrop };
+        frameState.crop = { ...nextCrop };
       }
-      const cropW = mrNievesStableCrop.maxX - mrNievesStableCrop.minX + 1;
-      const cropH = mrNievesStableCrop.maxY - mrNievesStableCrop.minY + 1;
+      const cropW = frameState.crop.maxX - frameState.crop.minX + 1;
+      const cropH = frameState.crop.maxY - frameState.crop.minY + 1;
       mrNievesCropCanvas.width = cropW;
       mrNievesCropCanvas.height = cropH;
       mrNievesCropContext.clearRect(0, 0, cropW, cropH);
-      mrNievesCropContext.drawImage(mrNievesFrameCanvas, mrNievesStableCrop.minX, mrNievesStableCrop.minY, cropW, cropH, 0, 0, cropW, cropH);
+      mrNievesCropContext.drawImage(mrNievesFrameCanvas, frameState.crop.minX, frameState.crop.minY, cropW, cropH, 0, 0, cropW, cropH);
       const fitScale = Math.min(mrNievesFrameWidth / cropW, mrNievesFrameHeight / cropH);
       const fitW = cropW * fitScale;
       const fitH = cropH * fitScale;
@@ -3492,9 +3508,12 @@ function startColtRunGame() {
       mrNievesFrameContext.clearRect(0, 0, mrNievesFrameWidth, mrNievesFrameHeight);
       mrNievesFrameContext.drawImage(mrNievesCropCanvas, fitX, fitY, fitW, fitH);
     }
-    mrNievesFrameStamp = frameStamp;
+    frameState.stamp = frameStamp;
+    mrNievesActiveFrameState = frameStateKey;
     return mrNievesFrameCanvas;
   };
+  const getTransparentMrNievesIdleFrame = () => getTransparentMrNievesFrame(mrNievesIdleVideo, "idle");
+  const getTransparentMrNievesRunFrame = () => getTransparentMrNievesFrame(mrNievesRunVideo, "run");
   const getTransparentDeathFrame = () => {
     if (deathVideo.readyState < 2 || !deathFrameContext) return null;
     const frameStamp = Math.floor(deathVideo.currentTime * 30);
@@ -4313,7 +4332,7 @@ function startColtRunGame() {
     const drawW = (isMrNieves ? 138 : 178) * deathColtDrawScale;
     const drawH = (isMrNieves ? 166 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
-    const y = Math.round(deathY + player.h - drawH + 8);
+    const y = Math.round(deathY + player.h - drawH + (isMrNieves ? 22 : 8));
     const deathFrame = isMrNieves ? getTransparentMrNievesIdleFrame() : getTransparentDeathFrame();
     ctx.save();
     ctx.translate(x, y);
@@ -4348,19 +4367,23 @@ function startColtRunGame() {
     const drawW = isMrNieves ? 138 : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
     const drawH = isMrNieves ? 166 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + 8);
+    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 22 : 8));
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
     ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 8;
-    const mrNievesFrame = isMrNieves ? getTransparentMrNievesIdleFrame() : null;
+    const mrNievesIsRunning = isMrNieves && player.state === "run";
+    const mrNievesFrame = isMrNieves
+      ? (mrNievesIsRunning ? getTransparentMrNievesRunFrame() || getTransparentMrNievesIdleFrame() : getTransparentMrNievesIdleFrame())
+      : null;
     const idleFrame = !isMrNieves && player.state === "idle" ? getTransparentIdleFrame() : null;
     const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
     const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
     if (mrNievesFrame) {
-      keepMrNievesIdleVideoPlaying();
+      if (mrNievesIsRunning && mrNievesRunVideo.readyState >= 2) keepMrNievesRunVideoPlaying();
+      else keepMrNievesIdleVideoPlaying();
       ctx.drawImage(mrNievesFrame, -drawW / 2, 0, drawW, drawH);
     } else if (idleFrame) {
       keepIdleVideoPlaying();
@@ -4399,7 +4422,7 @@ function startColtRunGame() {
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 116, 132, 14);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 116, 132, 4);
   };
 
   const drawCoverImage = image => {
@@ -4932,6 +4955,7 @@ function startColtRunGame() {
       deathVideo.pause();
       lavaRockVideoSpecials.forEach(video => video.pause());
       mrNievesIdleVideo.pause();
+      mrNievesRunVideo.pause();
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
@@ -4939,6 +4963,7 @@ function startColtRunGame() {
       runningAudio.src = "";
       rockDeathAudio.src = "";
       mrNievesIdleVideo.src = "";
+      mrNievesRunVideo.src = "";
       lavaRockVideoSpecials.forEach(video => {
         video.src = "";
       });
