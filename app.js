@@ -1943,7 +1943,7 @@ function startColtRunGame() {
     closeCharacterSelect();
     statusNode.textContent = `${characterNames[selectedCharacter]} selected. Reach the flag before time runs out.`;
   };
-  const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, facing: 1, state: "idle", jumpPrepUntil: 0 };
+  const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 };
   const coltSprites = {
     idle: new Image(),
     run: new Image(),
@@ -4306,7 +4306,7 @@ function startColtRunGame() {
       chooseStartingPlatformSprite();
     }
     generateLevel();
-    Object.assign(player, { x: 48, y: 300, vx: 0, vy: 0, grounded: false, facing: 1, state: "idle", jumpPrepUntil: 0 });
+    Object.assign(player, { x: 48, y: 300, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 });
     cameraX = 0;
     if (!keepRun) {
       score = 0;
@@ -4373,6 +4373,23 @@ function startColtRunGame() {
     ctx.restore();
   };
 
+  const getMrNievesPlatformVisualOffset = () => {
+    if (!player.grounded || !player.groundPlatform) return 0;
+    const platform = player.groundPlatform;
+    const spriteIndex = platform.sprite % platformSprites.length;
+    const footX = player.x + player.w / 2;
+    const drawW = Math.max(platform.w + 72, platform.w * 1.22);
+    const imageLeft = platform.x - (drawW - platform.w) / 2;
+    const localX = Math.max(0, Math.min(1, (footX - imageLeft) / drawW));
+    if (spriteIndex === 8) return 6;
+    if (spriteIndex === 14) {
+      if (localX < 0.35) return 4;
+      if (localX > 0.82) return -12;
+      return 4 + ((localX - 0.35) / 0.47) * -16;
+    }
+    return 0;
+  };
+
   const drawColt = () => {
     if (lost) {
       drawDeathColt();
@@ -4390,7 +4407,7 @@ function startColtRunGame() {
     const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 150 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
     const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsInAir ? 140 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 : 8));
+    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : 8));
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
@@ -4668,6 +4685,7 @@ function startColtRunGame() {
       player.y += player.vy;
       player.x = Math.max(0, player.x);
       player.grounded = false;
+      player.groundPlatform = null;
       platforms.forEach(platform => {
         const withinX = player.x + player.w > platform.x && player.x < platform.x + platform.w;
         const wasAbove = player.y + player.h - player.vy <= platform.y;
@@ -4676,6 +4694,7 @@ function startColtRunGame() {
           player.y = platform.y - player.h;
           player.vy = 0;
           player.grounded = true;
+          player.groundPlatform = platform;
         }
       });
       if (player.grounded) {
