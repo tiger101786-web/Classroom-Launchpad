@@ -4375,7 +4375,7 @@ function startColtRunGame() {
     const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
     const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 22 : 8));
+    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 : 8));
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
