@@ -2123,6 +2123,12 @@ function startColtRunGame() {
   mrNievesRunVideo.loop = true;
   mrNievesRunVideo.playsInline = true;
   mrNievesRunVideo.preload = "auto";
+  const mrNievesInAirVideo = document.createElement("video");
+  mrNievesInAirVideo.src = "assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1";
+  mrNievesInAirVideo.muted = true;
+  mrNievesInAirVideo.loop = true;
+  mrNievesInAirVideo.playsInline = true;
+  mrNievesInAirVideo.preload = "auto";
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
   const deathVideo = document.createElement("video");
@@ -2184,7 +2190,8 @@ function startColtRunGame() {
   const mrNievesFrameStates = {
     idle: { stamp: -1, crop: null },
     run: { stamp: -1, crop: null },
-    jump: { stamp: -1, crop: null }
+    jump: { stamp: -1, crop: null },
+    inAir: { stamp: -1, crop: null }
   };
   let mrNievesActiveFrameState = "";
   const deathFrameWidth = 230;
@@ -2507,6 +2514,12 @@ function startColtRunGame() {
     mrNievesRunVideo.play().catch(() => {});
   };
   mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
+
+  const keepMrNievesInAirVideoPlaying = () => {
+    if (!mrNievesInAirVideo.paused) return;
+    mrNievesInAirVideo.play().catch(() => {});
+  };
+  mrNievesInAirVideo.addEventListener("canplay", keepMrNievesInAirVideoPlaying);
 
   const keepDeathVideoPlaying = () => {
     if (!deathVideo.paused) return;
@@ -3520,6 +3533,7 @@ function startColtRunGame() {
   const getTransparentMrNievesIdleFrame = () => getTransparentMrNievesFrame(mrNievesIdleVideo, "idle");
   const getTransparentMrNievesRunFrame = () => getTransparentMrNievesFrame(mrNievesRunVideo, "run");
   const getTransparentMrNievesJumpFrame = () => getTransparentMrNievesFrame(mrNievesJumpImage, "jump");
+  const getTransparentMrNievesInAirFrame = () => getTransparentMrNievesFrame(mrNievesInAirVideo, "inAir");
   const getTransparentDeathFrame = () => {
     if (deathVideo.readyState < 2 || !deathFrameContext) return null;
     const frameStamp = Math.floor(deathVideo.currentTime * 30);
@@ -4370,10 +4384,12 @@ function startColtRunGame() {
       ? runFrames[runFrame]
       : coltSprites[player.state] || coltSprites.idle;
     const isMrNieves = selectedCharacter === "mrNieves";
-    const mrNievesIsJumping = isMrNieves && (player.state === "leap" || player.state === "jumpPrep");
+    const mrNievesIsJumping = isMrNieves && player.state === "jumpPrep";
+    const mrNievesIsInAir = isMrNieves && player.state === "leap";
     const mrNievesIsRunning = isMrNieves && player.state === "run";
-    const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const mrNievesIsAirborne = mrNievesIsJumping || mrNievesIsInAir;
+    const drawW = isMrNieves ? (mrNievesIsAirborne ? 154 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves ? (mrNievesIsAirborne ? 142 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 : 8));
     ctx.save();
@@ -4383,13 +4399,14 @@ function startColtRunGame() {
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 8;
     const mrNievesFrame = isMrNieves
-      ? (mrNievesIsJumping ? getTransparentMrNievesJumpFrame() || getTransparentMrNievesIdleFrame() : mrNievesIsRunning ? getTransparentMrNievesRunFrame() || getTransparentMrNievesIdleFrame() : getTransparentMrNievesIdleFrame())
+      ? (mrNievesIsJumping ? getTransparentMrNievesJumpFrame() || getTransparentMrNievesIdleFrame() : mrNievesIsInAir ? getTransparentMrNievesInAirFrame() || getTransparentMrNievesJumpFrame() || getTransparentMrNievesIdleFrame() : mrNievesIsRunning ? getTransparentMrNievesRunFrame() || getTransparentMrNievesIdleFrame() : getTransparentMrNievesIdleFrame())
       : null;
     const idleFrame = !isMrNieves && player.state === "idle" ? getTransparentIdleFrame() : null;
     const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
     const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
     if (mrNievesFrame) {
-      if (mrNievesIsRunning && mrNievesRunVideo.readyState >= 2) keepMrNievesRunVideoPlaying();
+      if (mrNievesIsInAir && mrNievesInAirVideo.readyState >= 2) keepMrNievesInAirVideoPlaying();
+      else if (mrNievesIsRunning && mrNievesRunVideo.readyState >= 2) keepMrNievesRunVideoPlaying();
       else keepMrNievesIdleVideoPlaying();
       ctx.drawImage(mrNievesFrame, -drawW / 2, 0, drawW, drawH);
     } else if (idleFrame) {
@@ -4963,6 +4980,7 @@ function startColtRunGame() {
       lavaRockVideoSpecials.forEach(video => video.pause());
       mrNievesIdleVideo.pause();
       mrNievesRunVideo.pause();
+      mrNievesInAirVideo.pause();
       ambientAudio.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
@@ -4971,6 +4989,7 @@ function startColtRunGame() {
       rockDeathAudio.src = "";
       mrNievesIdleVideo.src = "";
       mrNievesRunVideo.src = "";
+      mrNievesInAirVideo.src = "";
       mrNievesJumpImage.src = "";
       lavaRockVideoSpecials.forEach(video => {
         video.src = "";
