@@ -4387,9 +4387,8 @@ function startColtRunGame() {
     const mrNievesIsJumping = isMrNieves && player.state === "jumpPrep";
     const mrNievesIsInAir = isMrNieves && player.state === "leap";
     const mrNievesIsRunning = isMrNieves && player.state === "run";
-    const mrNievesIsAirborne = mrNievesIsJumping || mrNievesIsInAir;
-    const drawW = isMrNieves ? (mrNievesIsAirborne ? 154 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves ? (mrNievesIsAirborne ? 142 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 136 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsInAir ? 126 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 : 8));
     ctx.save();
