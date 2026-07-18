@@ -2093,7 +2093,7 @@ function startColtRunGame() {
   coinVideo.playsInline = true;
   coinVideo.preload = "auto";
   const flagVideo = document.createElement("video");
-  flagVideo.src = "assets/colt-run-flag.mp4?v=20260717-flag-replace1";
+  flagVideo.src = "assets/colt-run-flag.mp4?v=20260704-flagblow";
   flagVideo.muted = true;
   flagVideo.loop = true;
   flagVideo.playsInline = true;
@@ -2159,10 +2159,7 @@ function startColtRunGame() {
   flagFrameCanvas.width = flagFrameSize;
   flagFrameCanvas.height = flagFrameSize;
   const flagFrameContext = flagFrameCanvas.getContext("2d", { willReadFrequently: true });
-  const flagCropCanvas = document.createElement("canvas");
-  const flagCropContext = flagCropCanvas.getContext("2d", { willReadFrequently: true });
   let flagFrameStamp = -1;
-  let flagStableCrop = null;
   const idleFrameWidth = 180;
   const idleFrameHeight = 122;
   const idleFrameCanvas = document.createElement("canvas");
@@ -2637,20 +2634,19 @@ function startColtRunGame() {
     const sourceW = flagVideo.videoWidth || flagFrameSize;
     const sourceH = flagVideo.videoHeight || flagFrameSize;
     const sourceRatio = sourceW / sourceH;
-    const targetRatio = 1;
-    let drawW = flagFrameSize;
-    let drawH = flagFrameSize;
-    let drawX = 0;
-    let drawY = 0;
-    if (sourceRatio > targetRatio) {
-      drawH = flagFrameSize / sourceRatio;
-      drawY = (flagFrameSize - drawH) / 2;
-    } else if (sourceRatio < targetRatio) {
-      drawW = flagFrameSize * sourceRatio;
-      drawX = (flagFrameSize - drawW) / 2;
+    let sx = 0;
+    let sy = 0;
+    let sw = sourceW;
+    let sh = sourceH;
+    if (sourceRatio > 1) {
+      sw = sourceH;
+      sx = (sourceW - sw) / 2;
+    } else if (sourceRatio < 1) {
+      sh = sourceW;
+      sy = (sourceH - sh) / 2;
     }
     flagFrameContext.clearRect(0, 0, flagFrameSize, flagFrameSize);
-    flagFrameContext.drawImage(flagVideo, drawX, drawY, drawW, drawH);
+    flagFrameContext.drawImage(flagVideo, sx, sy, sw, sh, 0, 0, flagFrameSize, flagFrameSize);
     const frame = flagFrameContext.getImageData(0, 0, flagFrameSize, flagFrameSize);
     const pixels = frame.data;
     const isBackgroundPixel = pixelIndex => {
@@ -2661,10 +2657,9 @@ function startColtRunGame() {
       const brightest = Math.max(red, green, blue);
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
-      const greenBackdrop = green > 105 && green > red * 1.35 && green > blue * 1.35;
       const paleBackdrop = average > 150 && brightest - darkest < 118;
       const whiteBackdrop = average > 214 && brightest - darkest < 70;
-      return greenBackdrop || paleBackdrop || whiteBackdrop;
+      return paleBackdrop || whiteBackdrop;
     };
     const transparent = new Uint8Array(flagFrameSize * flagFrameSize);
     const queue = [];
@@ -2700,60 +2695,15 @@ function startColtRunGame() {
       const brightest = Math.max(red, green, blue);
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
-      const greenBackdrop = green > 105 && green > red * 1.35 && green > blue * 1.35;
       const lowColorRange = brightest - darkest < 112;
       const protectEmblem = x > 45 && x < 78 && y > 40 && y < 82;
       const protectFlag = red > green * 1.12 && red > blue * 1.08 && red > 68;
       const protectDarkPole = average < 82 && darkest < 64;
-      if (transparent[pixelIndex] || greenBackdrop || (!protectEmblem && !protectFlag && !protectDarkPole && average > 136 && lowColorRange)) {
+      if (transparent[pixelIndex] || (!protectEmblem && !protectFlag && !protectDarkPole && average > 136 && lowColorRange)) {
         pixels[offset + 3] = 0;
       }
     }
     flagFrameContext.putImageData(frame, 0, 0);
-    let minX = flagFrameSize;
-    let minY = flagFrameSize;
-    let maxX = 0;
-    let maxY = 0;
-    for (let offset = 0; offset < pixels.length; offset += 4) {
-      if (pixels[offset + 3] < 16) continue;
-      const pixelIndex = offset / 4;
-      const x = pixelIndex % flagFrameSize;
-      const y = Math.floor(pixelIndex / flagFrameSize);
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x);
-      maxY = Math.max(maxY, y);
-    }
-    if (maxX > minX && maxY > minY && flagCropContext) {
-      const padding = 3;
-      const nextCrop = {
-        minX: Math.max(0, minX - padding),
-        minY: Math.max(0, minY - padding),
-        maxX: Math.min(flagFrameSize - 1, maxX + padding),
-        maxY: Math.min(flagFrameSize - 1, maxY + padding)
-      };
-      if (flagStableCrop) {
-        flagStableCrop.minX = Math.min(flagStableCrop.minX, nextCrop.minX);
-        flagStableCrop.minY = Math.min(flagStableCrop.minY, nextCrop.minY);
-        flagStableCrop.maxX = Math.max(flagStableCrop.maxX, nextCrop.maxX);
-        flagStableCrop.maxY = Math.max(flagStableCrop.maxY, nextCrop.maxY);
-      } else {
-        flagStableCrop = { ...nextCrop };
-      }
-      const cropW = flagStableCrop.maxX - flagStableCrop.minX + 1;
-      const cropH = flagStableCrop.maxY - flagStableCrop.minY + 1;
-      flagCropCanvas.width = cropW;
-      flagCropCanvas.height = cropH;
-      flagCropContext.clearRect(0, 0, cropW, cropH);
-      flagCropContext.drawImage(flagFrameCanvas, flagStableCrop.minX, flagStableCrop.minY, cropW, cropH, 0, 0, cropW, cropH);
-      const fitScale = Math.min(flagFrameSize / cropW, flagFrameSize / cropH);
-      const fitW = cropW * fitScale;
-      const fitH = cropH * fitScale;
-      const fitX = (flagFrameSize - fitW) / 2;
-      const fitY = flagFrameSize - fitH;
-      flagFrameContext.clearRect(0, 0, flagFrameSize, flagFrameSize);
-      flagFrameContext.drawImage(flagCropCanvas, fitX, fitY, fitW, fitH);
-    }
     flagFrameStamp = frameStamp;
     return flagFrameCanvas;
   };
@@ -4684,12 +4634,12 @@ function startColtRunGame() {
     const transparentFlagFrame = getTransparentFlagFrame();
     if (transparentFlagFrame) {
       keepFlagVideoPlaying();
-      const flagDrawW = 138;
-      const flagDrawH = 128;
+      const flagDrawW = 108;
+      const flagDrawH = 94;
       ctx.save();
       ctx.shadowColor = "rgba(255, 82, 21, 0.45)";
       ctx.shadowBlur = 16;
-      ctx.drawImage(transparentFlagFrame, flagX - 36, flag.y - 30, flagDrawW, flagDrawH);
+      ctx.drawImage(transparentFlagFrame, flagX - 26, flag.y - 8, flagDrawW, flagDrawH);
       ctx.restore();
     } else {
       ctx.strokeStyle = "#f4f2f3";
