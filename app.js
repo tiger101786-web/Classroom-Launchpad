@@ -32,6 +32,61 @@ const DEFAULT_RANDOM_ACTIVITY_SETTINGS = {
 const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
 
+let deferredVideoObserver = null;
+
+function isPreferredResponsiveVideo(video) {
+  const mobileLayout = window.matchMedia("(max-width: 720px)").matches;
+  if (video.classList.contains("hero-bg-video")) return !mobileLayout;
+  if (video.classList.contains("hero-colt-mobile-video")) return mobileLayout;
+  return true;
+}
+
+function loadDeferredVideo(video) {
+  if (!video || video.dataset.videoLoaded === "true" || !isPreferredResponsiveVideo(video)) return;
+  const sources = Array.from(video.querySelectorAll("source[data-src]"));
+  if (!sources.length) return;
+  sources.forEach(source => {
+    source.src = source.dataset.src;
+  });
+  video.dataset.videoLoaded = "true";
+  video.preload = "metadata";
+  video.load();
+  if (video.autoplay) video.play().catch(() => {});
+}
+
+function observeDeferredVideos(root = document) {
+  const videos = Array.from(root.querySelectorAll("video")).filter(video => video.querySelector("source[data-src]"));
+  if (!videos.length) return;
+  if (!("IntersectionObserver" in window)) {
+    videos.forEach(loadDeferredVideo);
+    return;
+  }
+  if (!deferredVideoObserver) {
+    deferredVideoObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        if (!isPreferredResponsiveVideo(entry.target)) return;
+        loadDeferredVideo(entry.target);
+        deferredVideoObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "80px 0px", threshold: 0.01 });
+  }
+  videos.forEach(video => deferredVideoObserver.observe(video));
+}
+
+function refreshResponsiveVideos() {
+  document.querySelectorAll(".hero-bg-video, .hero-colt-mobile-video").forEach(video => {
+    if (isPreferredResponsiveVideo(video)) {
+      const rect = video.getBoundingClientRect();
+      if (rect.bottom >= -80 && rect.top <= window.innerHeight + 80) loadDeferredVideo(video);
+    } else if (!video.paused) {
+      video.pause();
+    }
+  });
+}
+
+window.addEventListener("resize", refreshResponsiveVideos, { passive: true });
+
 const categoryIcons = {
   "Typing Practice": "⌨",
   "Social Studies & Science": "🌎",
@@ -1115,7 +1170,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
     <div class="topbar">
       <div class="title-group">
         ${back ? `<button class="back-btn" data-action="back"> Back</button>` : ""}
-        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source src="assets/st-cletus-logo.mp4?v=20260702" type="video/mp4"></video></span>` : ""}
+        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260702" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         <h1>${escapeHtml(title)}</h1>
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
@@ -1140,10 +1195,10 @@ function renderHome() {
   return `
     <section class="hero-panel">
       <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/hero-panel-bg.mp4" type="video/mp4">
+        <source data-src="assets/hero-panel-bg.mp4" type="video/mp4">
       </video>
       <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/hero-panel-bg-mobile.mp4?v=20260710-mobile-bg2" type="video/mp4">
+        <source data-src="assets/hero-panel-bg-mobile.mp4?v=20260710-mobile-bg2" type="video/mp4">
       </video>
       ${pageHeader(
         "Classroom Launchpad",
@@ -1160,7 +1215,7 @@ function renderHome() {
           <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
         </div>
         <video class="school-photo" autoplay muted loop playsinline aria-label="Mr. Nieves with the St. Cletus Colts mascot">
-          <source src="assets/mr-nieves-colts.mp4" type="video/mp4">
+          <source data-src="assets/mr-nieves-colts.mp4" type="video/mp4">
         </video>
       </section>
     </section>
@@ -1175,7 +1230,7 @@ function renderHomeDefault() {
     <section class="launch-row" aria-label="Launch tools">
       <section class="daily-launch-card" aria-label="Today's Launch">
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
-          <source src="assets/daily-launch-bg.mp4" type="video/mp4">
+          <source data-src="assets/daily-launch-bg.mp4" type="video/mp4">
         </video>
         <div class="daily-launch-icon" aria-hidden="true">✓</div>
         <div class="daily-launch-copy">
@@ -1200,7 +1255,7 @@ function renderHomeDefault() {
         </div>
         <figure class="expectations-colt">
           <video autoplay muted loop playsinline aria-label="Animated Colts horse graphic">
-            <source src="assets/expectations-colt.mp4" type="video/mp4">
+            <source data-src="assets/expectations-colt.mp4" type="video/mp4">
           </video>
         </figure>
         <section class="calendar-card" aria-label="Current date and time">
@@ -1226,7 +1281,7 @@ function renderRandomActivityCard() {
   return `
     <section id="randomActivityCard" class="random-activity-card ${locked ? "is-locked" : ""}" aria-label="Random Activity">
       <video class="random-activity-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/random-activity-bg.mp4" type="video/mp4">
+        <source data-src="assets/random-activity-bg.mp4" type="video/mp4">
       </video>
       <span class="feature-kicker">Student Choice</span>
       <h2>Random Activity</h2>
@@ -1268,13 +1323,13 @@ function renderColtCornerPreview() {
         <button class="primary-btn colt-corner-open" data-action="openColtCorner">Open Colt Corner</button>
         <figure class="colt-corner-banner">
           <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
-            <source src="assets/colt-corner-join-herd.mp4" type="video/mp4">
+            <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
           </video>
         </figure>
       </div>
       <figure class="colt-corner-graphic">
         <video autoplay muted loop playsinline aria-label="Animated Colt Corner message board logo">
-          <source src="assets/colt-corner-message-board.mp4" type="video/mp4">
+          <source data-src="assets/colt-corner-message-board.mp4" type="video/mp4">
         </video>
       </figure>
     </section>
@@ -1290,7 +1345,7 @@ function renderStudentWebsiteRequest() {
         <p>Send Mr. Nieves a website idea to review before it is added.</p>
         <figure class="request-spirit">
           <video autoplay muted loop playsinline aria-label="Animated Colts school spirit graphic">
-            <source src="assets/request-spirit.mp4" type="video/mp4">
+            <source data-src="assets/request-spirit.mp4" type="video/mp4">
           </video>
         </figure>
       </div>
@@ -1335,7 +1390,7 @@ function renderColtCorner() {
         </section>
         <figure class="colt-corner-graphic">
           <video autoplay muted loop playsinline aria-label="Animated Colt Corner message board logo">
-            <source src="assets/colt-corner-message-board.mp4" type="video/mp4">
+            <source data-src="assets/colt-corner-message-board.mp4" type="video/mp4">
           </video>
         </figure>
       </div>
@@ -1360,7 +1415,7 @@ function renderColtCorner() {
         <p id="threadStatus" class="request-message" aria-live="polite"></p>
         <figure class="colt-corner-banner thread-form-banner">
           <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
-            <source src="assets/colt-corner-join-herd.mp4" type="video/mp4">
+            <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
           </video>
         </figure>
       </form>
@@ -1461,7 +1516,7 @@ function categoryCard(category) {
   return `
     <button class="category-card" data-action="category" data-category="${escapeHtml(category)}">
       <video class="category-card-bg" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/category-pane-bg.mp4" type="video/mp4">
+        <source data-src="assets/category-pane-bg.mp4" type="video/mp4">
       </video>
       <span class="card-icon">${categoryIcons[category] || "•"}</span>
       <span class="category-copy">
@@ -1503,7 +1558,7 @@ function renderCategory(category) {
       </section>
       <aside class="section-colts-art ${category === "Creative Projects" ? "creative-projects-colts-art" : ""}" aria-label="St. Cletus Colts graphic">
         <video autoplay muted loop playsinline aria-label="Animated St. Cletus Colts logo">
-          <source src="${sectionColtsLogo}" type="video/mp4">
+          <source data-src="${sectionColtsLogo}" type="video/mp4">
         </video>
       </aside>
     </section>
@@ -1519,11 +1574,11 @@ function renderTypingFeature() {
         <p>Accuracy • Speed • Focus</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Typing practice animation">
-        <source src="assets/typing-practice-feature.mp4" type="video/mp4">
+        <source data-src="assets/typing-practice-feature.mp4" type="video/mp4">
       </video>
       <figure class="typing-keyboard-art">
         <video autoplay muted loop playsinline aria-label="Illuminated keyboard animation">
-          <source src="assets/typing-keyboard-art.mp4" type="video/mp4">
+          <source data-src="assets/typing-keyboard-art.mp4" type="video/mp4">
         </video>
       </figure>
     </section>
@@ -1534,7 +1589,7 @@ function renderSocialScienceFeature() {
   return `
     <section class="category-feature social-science-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/social-studies-science-background.mp4" type="video/mp4">
+        <source data-src="assets/social-studies-science-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Explore Lab</span>
@@ -1542,7 +1597,7 @@ function renderSocialScienceFeature() {
         <p>Maps • Nature • Discovery</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Social studies and science animation">
-        <source src="assets/social-studies-science-feature.mp4" type="video/mp4">
+        <source data-src="assets/social-studies-science-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1552,7 +1607,7 @@ function renderComputerSkillsFeature() {
   return `
     <section class="category-feature computer-skills-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/computer-skills-background.mp4" type="video/mp4">
+        <source data-src="assets/computer-skills-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Tech Lab</span>
@@ -1560,7 +1615,7 @@ function renderComputerSkillsFeature() {
         <p>Safety • Design • Digital Tools</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Computer skills animation">
-        <source src="assets/computer-skills-feature.mp4" type="video/mp4">
+        <source data-src="assets/computer-skills-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1570,7 +1625,7 @@ function renderReviewGamesFeature() {
   return `
     <section class="category-feature review-games-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/review-games-background.mp4" type="video/mp4">
+        <source data-src="assets/review-games-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Game Lab</span>
@@ -1578,7 +1633,7 @@ function renderReviewGamesFeature() {
         <p>Practice • Recall • Challenge</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Review games animation">
-        <source src="assets/review-games-feature.mp4" type="video/mp4">
+        <source data-src="assets/review-games-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1588,7 +1643,7 @@ function renderLogicGamesFeature() {
   return `
     <section class="category-feature logic-games-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/logic-games-background.mp4" type="video/mp4">
+        <source data-src="assets/logic-games-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Logic Lab</span>
@@ -1596,7 +1651,7 @@ function renderLogicGamesFeature() {
         <p>Puzzles • Strategy • Problem Solving</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Logic games animation">
-        <source src="assets/logic-games-feature.mp4" type="video/mp4">
+        <source data-src="assets/logic-games-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1606,7 +1661,7 @@ function renderCreativeProjectsFeature() {
   return `
     <section class="category-feature creative-projects-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/creative-projects-background.mp4" type="video/mp4">
+        <source data-src="assets/creative-projects-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Creation Studio</span>
@@ -1614,7 +1669,7 @@ function renderCreativeProjectsFeature() {
         <p>Design • Build • Share</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Creative projects animation">
-        <source src="assets/creative-projects-feature.mp4" type="video/mp4">
+        <source data-src="assets/creative-projects-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1624,7 +1679,7 @@ function renderClassVideosFeature() {
   return `
     <section class="category-feature class-videos-feature">
       <video class="feature-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/class-videos-background.mp4" type="video/mp4">
+        <source data-src="assets/class-videos-background.mp4" type="video/mp4">
       </video>
       <div class="feature-copy">
         <span class="feature-kicker">Video Library</span>
@@ -1632,7 +1687,7 @@ function renderClassVideosFeature() {
         <p>Watch • Learn • Reflect</p>
       </div>
       <video class="feature-media" autoplay muted loop playsinline aria-label="Class videos animation">
-        <source src="assets/class-videos-feature.mp4" type="video/mp4">
+        <source data-src="assets/class-videos-feature.mp4" type="video/mp4">
       </video>
     </section>
   `;
@@ -1835,17 +1890,42 @@ function startColtRunGame() {
   const musicVolumeSlider = document.getElementById("coltRunMusicVolume");
   const musicToggleButton = document.getElementById("coltRunMusicToggle");
   const musicVolumeStorageKey = "coltRunMusicVolumeV1";
-  const ambientAudio = new Audio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless");
-  ambientAudio.preload = "auto";
-  ambientAudio.loop = true;
-  const runningAudio = new Audio("assets/colt-run-running-audio.mp3?v=20260714-running1");
-  runningAudio.preload = "auto";
-  runningAudio.loop = true;
-  const mrNievesRunningAudio = new Audio("assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1");
-  mrNievesRunningAudio.preload = "auto";
-  mrNievesRunningAudio.loop = true;
-  const rockDeathAudio = new Audio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
-  rockDeathAudio.preload = "auto";
+  const ensureMediaSource = (media, preload = "auto") => {
+    if (!media || media.getAttribute("src")) return media;
+    const src = media.dataset.src;
+    if (!src) return media;
+    media.preload = preload;
+    media.src = src;
+    media.load();
+    return media;
+  };
+  const releaseMediaSource = media => {
+    if (!media) return;
+    media.pause();
+    media.removeAttribute("src");
+    media.load();
+  };
+  const createDeferredAudio = (src, loop = false) => {
+    const audio = new Audio();
+    audio.dataset.src = src;
+    audio.preload = "none";
+    audio.loop = loop;
+    return audio;
+  };
+  const createDeferredVideo = src => {
+    const video = document.createElement("video");
+    video.dataset.src = src;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "none";
+    return video;
+  };
+  const mrNievesRunMediaSource = "assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1";
+  const ambientAudio = createDeferredAudio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless", true);
+  const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260714-running1", true);
+  const mrNievesRunningAudio = createDeferredAudio(mrNievesRunMediaSource, true);
+  const rockDeathAudio = createDeferredAudio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
   const ambientLayerVolume = 1;
   const runningLayerVolume = 0.9;
   const rockDeathLayerVolume = 1;
@@ -1944,6 +2024,7 @@ function startColtRunGame() {
     selectedCharacter = character;
     localStorage.setItem(characterStorageKey, selectedCharacter);
     updateCharacterButtons();
+    ensureCharacterMedia(selectedCharacter);
     resetLevel(true);
     closeCharacterSelect();
     statusNode.textContent = `${characterNames[selectedCharacter]} selected. Reach the flag before time runs out.`;
@@ -1964,11 +2045,17 @@ function startColtRunGame() {
   coltSprites.jumpPrep.src = "assets/colt-run-jump-prep.png?v=20260702-clean";
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
-  const platformSprites = Array.from({ length: 22 }, (_, index) => {
-    const sprite = new Image();
-    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260718-platform07-replace1`;
+  const platformAssetVersions = Array.from({ length: 22 }, () => "20260718-platform07-replace1");
+  const platformSpriteSources = platformAssetVersions.map((version, index) => (
+    `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
+  ));
+  const platformSprites = platformSpriteSources.map(() => new Image());
+  const ensurePlatformSprite = index => {
+    const spriteIndex = Math.abs(index) % platformSprites.length;
+    const sprite = platformSprites[spriteIndex];
+    if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
-  });
+  };
   const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22, 0.18];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
@@ -1994,32 +2081,32 @@ function startColtRunGame() {
     const surfaceRatio = profile.leftSurfaceRatio + (profile.rightSurfaceRatio - profile.leftSurfaceRatio) * localX;
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSprites = Array.from({ length: 10 }, (_, index) => {
-    const sprite = new Image();
-    sprite.src = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`;
+  const lavaRockSpriteSources = Array.from({ length: 10 }, (_, index) => (
+    `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
+  ));
+  const lavaRockSprites = lavaRockSpriteSources.map(() => new Image());
+  const ensureLavaRockSprite = index => {
+    const spriteIndex = Math.abs(index) % lavaRockSprites.length;
+    const sprite = lavaRockSprites[spriteIndex];
+    if (!sprite.getAttribute("src")) sprite.src = lavaRockSpriteSources[spriteIndex];
     return sprite;
-  });
-  const lavaRockShowerSprites = [
+  };
+  const lavaRockShowerSpriteSources = [
     "assets/colt-run-lava-rock-shower-01.png?v=20260707-shower1",
     "assets/colt-run-lava-rock-shower-02.png?v=20260711-shower2"
-  ].map(src => {
-    const sprite = new Image();
-    sprite.src = src;
+  ];
+  const lavaRockShowerSprites = lavaRockShowerSpriteSources.map(() => new Image());
+  const ensureLavaRockShowerSprite = index => {
+    const spriteIndex = Math.abs(index) % lavaRockShowerSprites.length;
+    const sprite = lavaRockShowerSprites[spriteIndex];
+    if (!sprite.getAttribute("src")) sprite.src = lavaRockShowerSpriteSources[spriteIndex];
     return sprite;
-  });
+  };
   const lavaRockVideoSpecialSources = [
     "assets/colt-run-lava-rock-video-special-01.mp4?v=20260707-video-special1",
     "assets/colt-run-lava-rock-video-special-02.mp4?v=20260715-video-special2"
   ];
-  const lavaRockVideoSpecials = lavaRockVideoSpecialSources.map(src => {
-    const video = document.createElement("video");
-    video.src = src;
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = "auto";
-    return video;
-  });
+  const lavaRockVideoSpecials = lavaRockVideoSpecialSources.map(createDeferredVideo);
   const lavaRockVideoFrameSize = 260;
   const lavaRockVideoFrameCanvas = document.createElement("canvas");
   lavaRockVideoFrameCanvas.width = lavaRockVideoFrameSize;
@@ -2073,106 +2160,54 @@ function startColtRunGame() {
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
   const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9];
-  const backgroundSprites = Array.from({ length: 5 }, (_, index) => {
-    const sprite = new Image();
-    sprite.src = `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260702-backgrounds`;
+  const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
+    `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260702-backgrounds`
+  ));
+  const backgroundSprites = backgroundSpriteSources.map(() => new Image());
+  const ensureBackgroundSprite = index => {
+    const spriteIndex = Math.abs(index) % backgroundSprites.length;
+    const sprite = backgroundSprites[spriteIndex];
+    if (!sprite.getAttribute("src")) sprite.src = backgroundSpriteSources[spriteIndex];
     return sprite;
-  });
-  const sceneOneVideo = document.createElement("video");
-  sceneOneVideo.src = "assets/colt-run-bg-01.mp4?v=20260709-scene1-sixsec";
-  sceneOneVideo.muted = true;
-  sceneOneVideo.loop = true;
-  sceneOneVideo.playsInline = true;
-  sceneOneVideo.preload = "auto";
-  const sceneTwoVideo = document.createElement("video");
-  sceneTwoVideo.src = "assets/colt-run-bg-02.mp4?v=20260709-scene2-sixsec";
-  sceneTwoVideo.muted = true;
-  sceneTwoVideo.loop = true;
-  sceneTwoVideo.playsInline = true;
-  sceneTwoVideo.preload = "auto";
-  const sceneThreeVideo = document.createElement("video");
-  sceneThreeVideo.src = "assets/colt-run-bg-03.mp4?v=20260709-scene3-sixsec";
-  sceneThreeVideo.muted = true;
-  sceneThreeVideo.loop = true;
-  sceneThreeVideo.playsInline = true;
-  sceneThreeVideo.preload = "auto";
-  const sceneFourVideo = document.createElement("video");
-  sceneFourVideo.src = "assets/colt-run-bg-04.mp4?v=20260709-scene4-sixsec";
-  sceneFourVideo.muted = true;
-  sceneFourVideo.loop = true;
-  sceneFourVideo.playsInline = true;
-  sceneFourVideo.preload = "auto";
-  const sceneFiveVideo = document.createElement("video");
-  sceneFiveVideo.src = "assets/colt-run-bg-05.mp4?v=20260704-scene5";
-  sceneFiveVideo.muted = true;
-  sceneFiveVideo.loop = true;
-  sceneFiveVideo.playsInline = true;
-  sceneFiveVideo.preload = "auto";
-  const animatedBackgroundVideos = [sceneOneVideo, sceneTwoVideo, sceneThreeVideo, sceneFourVideo, sceneFiveVideo];
+  };
+  const animatedBackgroundVideos = [
+    "assets/colt-run-bg-01.mp4?v=20260709-scene1-sixsec",
+    "assets/colt-run-bg-02.mp4?v=20260709-scene2-sixsec",
+    "assets/colt-run-bg-03.mp4?v=20260709-scene3-sixsec",
+    "assets/colt-run-bg-04.mp4?v=20260709-scene4-sixsec",
+    "assets/colt-run-bg-05.mp4?v=20260704-scene5"
+  ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
-  const coinVideo = document.createElement("video");
-  coinVideo.src = "assets/colt-run-coin-spin.mp4?v=20260704-coin2";
-  coinVideo.muted = true;
-  coinVideo.loop = true;
-  coinVideo.playsInline = true;
-  coinVideo.preload = "auto";
-  const flagVideo = document.createElement("video");
-  flagVideo.src = "assets/colt-run-flag.mp4?v=20260704-flagblow";
-  flagVideo.muted = true;
-  flagVideo.loop = true;
-  flagVideo.playsInline = true;
-  flagVideo.preload = "auto";
-  const idleVideo = document.createElement("video");
-  idleVideo.src = "assets/colt-run-idle.mp4?v=20260703-idle";
-  idleVideo.muted = true;
-  idleVideo.loop = true;
-  idleVideo.playsInline = true;
-  idleVideo.preload = "auto";
-  const runVideo = document.createElement("video");
-  runVideo.src = "assets/colt-run-run.mp4?v=20260704-best-run";
-  runVideo.muted = true;
-  runVideo.loop = true;
-  runVideo.playsInline = true;
-  runVideo.preload = "auto";
-  const leapVideo = document.createElement("video");
-  leapVideo.src = "assets/colt-run-leap.mp4?v=20260704-best2-leap";
-  leapVideo.muted = true;
-  leapVideo.loop = true;
-  leapVideo.playsInline = true;
-  leapVideo.preload = "auto";
-  const mrNievesIdleVideo = document.createElement("video");
-  mrNievesIdleVideo.src = "assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake2";
-  mrNievesIdleVideo.muted = true;
-  mrNievesIdleVideo.loop = true;
-  mrNievesIdleVideo.playsInline = true;
-  mrNievesIdleVideo.preload = "auto";
-  const mrNievesRunVideo = document.createElement("video");
-  mrNievesRunVideo.src = "assets/colt-run-mr-nieves-run.mp4?v=20260716-run-remake1";
-  mrNievesRunVideo.muted = true;
-  mrNievesRunVideo.loop = true;
-  mrNievesRunVideo.playsInline = true;
-  mrNievesRunVideo.preload = "auto";
-  const mrNievesInAirVideo = document.createElement("video");
-  mrNievesInAirVideo.src = "assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1";
-  mrNievesInAirVideo.muted = true;
-  mrNievesInAirVideo.loop = true;
-  mrNievesInAirVideo.playsInline = true;
-  mrNievesInAirVideo.preload = "auto";
-  const mrNievesCelebrationVideo = document.createElement("video");
-  mrNievesCelebrationVideo.src = "assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1";
-  mrNievesCelebrationVideo.muted = true;
-  mrNievesCelebrationVideo.loop = true;
-  mrNievesCelebrationVideo.playsInline = true;
-  mrNievesCelebrationVideo.preload = "auto";
+  const coinVideo = createDeferredVideo("assets/colt-run-coin-spin.mp4?v=20260704-coin2");
+  const flagVideo = createDeferredVideo("assets/colt-run-flag.mp4?v=20260704-flagblow");
+  const idleVideo = createDeferredVideo("assets/colt-run-idle.mp4?v=20260703-idle");
+  const runVideo = createDeferredVideo("assets/colt-run-run.mp4?v=20260704-best-run");
+  const leapVideo = createDeferredVideo("assets/colt-run-leap.mp4?v=20260704-best2-leap");
+  const mrNievesIdleVideo = createDeferredVideo("assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake2");
+  const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
+  const mrNievesInAirVideo = createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1");
+  const mrNievesCelebrationVideo = createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1");
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
-  const deathVideo = document.createElement("video");
-  deathVideo.src = "assets/colt-run-death.mp4?v=20260706-death";
-  deathVideo.muted = true;
-  deathVideo.loop = true;
-  deathVideo.playsInline = true;
-  deathVideo.preload = "auto";
+  const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
+  const ensureCharacterMedia = character => {
+    if (character === "mrNieves") {
+      ensureMediaSource(mrNievesIdleVideo);
+      ensureMediaSource(mrNievesRunVideo);
+      ensureMediaSource(mrNievesInAirVideo);
+      return;
+    }
+    ensureMediaSource(idleVideo);
+    ensureMediaSource(runVideo);
+    ensureMediaSource(leapVideo);
+  };
+  const stagedMediaTimers = [];
+  const scheduleMediaLoad = (media, delay) => {
+    const timer = window.setTimeout(() => ensureMediaSource(media, "metadata"), delay);
+    stagedMediaTimers.push(timer);
+  };
+  let animatedBackgroundReadyAt = Number.POSITIVE_INFINITY;
   const coinFrameSize = 96;
   const coinFrameCanvas = document.createElement("canvas");
   coinFrameCanvas.width = coinFrameSize;
@@ -2424,6 +2459,7 @@ function startColtRunGame() {
   };
   const playColtRunAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
+    ensureMediaSource(ambientAudio);
     setupAmbientBoost();
     if (ambientAudioContext && ambientAudioContext.state === "suspended") {
       ambientAudioContext.resume().catch(() => {});
@@ -2440,6 +2476,7 @@ function startColtRunGame() {
   };
   const playRockDeathAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
+    ensureMediaSource(rockDeathAudio);
     try {
       rockDeathAudio.currentTime = 0;
     } catch {}
@@ -2450,6 +2487,7 @@ function startColtRunGame() {
     if (shouldRunAudio) {
       const activeRunningAudio = selectedCharacter === "mrNieves" ? mrNievesRunningAudio : runningAudio;
       const inactiveRunningAudio = selectedCharacter === "mrNieves" ? runningAudio : mrNievesRunningAudio;
+      ensureMediaSource(activeRunningAudio);
       if (!inactiveRunningAudio.paused) {
         inactiveRunningAudio.pause();
         try {
@@ -2523,60 +2561,70 @@ function startColtRunGame() {
   }
 
   const keepCoinVideoPlaying = () => {
+    ensureMediaSource(coinVideo, "metadata");
     if (!coinVideo.paused) return;
     coinVideo.play().catch(() => {});
   };
   coinVideo.addEventListener("canplay", keepCoinVideoPlaying);
 
   const keepFlagVideoPlaying = () => {
+    ensureMediaSource(flagVideo, "metadata");
     if (!flagVideo.paused) return;
     flagVideo.play().catch(() => {});
   };
   flagVideo.addEventListener("canplay", keepFlagVideoPlaying);
 
   const keepIdleVideoPlaying = () => {
+    ensureMediaSource(idleVideo);
     if (!idleVideo.paused) return;
     idleVideo.play().catch(() => {});
   };
   idleVideo.addEventListener("canplay", keepIdleVideoPlaying);
 
   const keepRunVideoPlaying = () => {
+    ensureMediaSource(runVideo);
     if (!runVideo.paused) return;
     runVideo.play().catch(() => {});
   };
   runVideo.addEventListener("canplay", keepRunVideoPlaying);
 
   const keepLeapVideoPlaying = () => {
+    ensureMediaSource(leapVideo);
     if (!leapVideo.paused) return;
     leapVideo.play().catch(() => {});
   };
   leapVideo.addEventListener("canplay", keepLeapVideoPlaying);
 
   const keepMrNievesIdleVideoPlaying = () => {
+    ensureMediaSource(mrNievesIdleVideo);
     if (!mrNievesIdleVideo.paused) return;
     mrNievesIdleVideo.play().catch(() => {});
   };
   mrNievesIdleVideo.addEventListener("canplay", keepMrNievesIdleVideoPlaying);
 
   const keepMrNievesRunVideoPlaying = () => {
+    ensureMediaSource(mrNievesRunVideo);
     if (!mrNievesRunVideo.paused) return;
     mrNievesRunVideo.play().catch(() => {});
   };
   mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
 
   const keepMrNievesInAirVideoPlaying = () => {
+    ensureMediaSource(mrNievesInAirVideo);
     if (!mrNievesInAirVideo.paused) return;
     mrNievesInAirVideo.play().catch(() => {});
   };
   mrNievesInAirVideo.addEventListener("canplay", keepMrNievesInAirVideoPlaying);
 
   const keepMrNievesCelebrationVideoPlaying = () => {
+    ensureMediaSource(mrNievesCelebrationVideo);
     if (!mrNievesCelebrationVideo.paused) return;
     mrNievesCelebrationVideo.play().catch(() => {});
   };
   mrNievesCelebrationVideo.addEventListener("canplay", keepMrNievesCelebrationVideoPlaying);
 
   const keepDeathVideoPlaying = () => {
+    ensureMediaSource(deathVideo);
     if (!deathVideo.paused) return;
     deathVideo.play().catch(() => {});
   };
@@ -2586,6 +2634,7 @@ function startColtRunGame() {
 
   const keepLavaRockVideoSpecialPlaying = (index = 0) => {
     const video = getLavaRockVideoSpecial(index);
+    ensureMediaSource(video);
     if (!video || !video.paused) return;
     video.play().catch(() => {});
   };
@@ -2594,6 +2643,7 @@ function startColtRunGame() {
   });
 
   const keepBackgroundVideoPlaying = video => {
+    ensureMediaSource(video, "metadata");
     if (!video || !video.paused) return;
     video.play().catch(() => {});
   };
@@ -4082,6 +4132,7 @@ function startColtRunGame() {
     }
     const last = platforms[platforms.length - 1];
     flag = { x: last.x + last.w - 34, y: last.y - 86 };
+    [...new Set(platforms.map(platform => platform.sprite))].forEach(ensurePlatformSprite);
   };
 
   const triggerColtDeath = (message, options = {}) => {
@@ -4097,10 +4148,11 @@ function startColtRunGame() {
     deathFallStartY = Math.min(player.y, canvas.height - player.h + 6);
     deathY = deathFallStartY;
     deathFrameStamp = -1;
+    ensureMediaSource(deathVideo);
     try {
       deathVideo.currentTime = 0;
     } catch {}
-    deathVideo.play().catch(() => {});
+    keepDeathVideoPlaying();
     if (options.rockHit) playRockDeathAudio();
     statusNode.textContent = message;
   };
@@ -4143,8 +4195,8 @@ function startColtRunGame() {
 
   const getLavaRockSprite = rock => {
     if (rock.videoSpecial) return getTransparentLavaRockVideoFrame(rock.videoSpecialIndex || 0);
-    if (rock.shower) return lavaRockShowerSprites[(rock.showerType || 0) % lavaRockShowerSprites.length];
-    return lavaRockSprites[rock.rockType % lavaRockSprites.length];
+    if (rock.shower) return ensureLavaRockShowerSprite(rock.showerType || 0);
+    return ensureLavaRockSprite(rock.rockType);
   };
 
   const getLavaRockDrawBox = rock => {
@@ -4228,6 +4280,7 @@ function startColtRunGame() {
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
     const rockType = Math.floor(Math.random() * lavaRockSprites.length);
+    ensureLavaRockSprite(rockType);
     const baseSize = 116 + Math.random() * 32 + difficulty * 2;
     const size = baseSize * (lavaRockSizeMultipliers[rockType] || 1);
     const minX = forwardSpawn ? Math.max(cameraX + canvas.width * 0.48, player.x + 170) : cameraX + 54;
@@ -4258,6 +4311,7 @@ function startColtRunGame() {
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
     const isWideShower = showerType === 1;
+    ensureLavaRockShowerSprite(showerType);
     const size = isWideShower
       ? Math.min(canvas.width * 0.72, 620 + difficulty * 12)
       : Math.min(canvas.width * 0.52, 430 + difficulty * 8);
@@ -4289,6 +4343,7 @@ function startColtRunGame() {
     const maxX = cameraX + canvas.width * 0.48;
     const x = minX + Math.random() * Math.max(1, maxX - minX);
     const video = getLavaRockVideoSpecial(videoSpecialIndex);
+    ensureMediaSource(video);
     try {
       video.currentTime = 0;
       lavaRockVideoFrameStamp = -1;
@@ -4367,6 +4422,8 @@ function startColtRunGame() {
       chooseLevelBackground();
       chooseStartingPlatformSprite();
     }
+    ensureBackgroundSprite(currentBackgroundIndex);
+    animatedBackgroundReadyAt = performance.now() + 1200;
     generateLevel();
     Object.assign(player, { x: 48, y: 300, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 });
     cameraX = 0;
@@ -4558,10 +4615,11 @@ function startColtRunGame() {
   const drawLevelBackground = () => {
     const w = canvas.width;
     const h = canvas.height;
-    const background = backgroundSprites[currentBackgroundIndex];
+    const background = ensureBackgroundSprite(currentBackgroundIndex);
     const animatedBackground = animatedBackgroundVideos[currentBackgroundIndex];
-    if (animatedBackground) keepBackgroundVideoPlaying(animatedBackground);
-    const backgroundDrawn = animatedBackground
+    const useAnimatedBackground = animatedBackground && performance.now() >= animatedBackgroundReadyAt;
+    if (useAnimatedBackground) keepBackgroundVideoPlaying(animatedBackground);
+    const backgroundDrawn = useAnimatedBackground
       ? drawCoverVideo(animatedBackground) || drawCoverImage(background)
       : drawCoverImage(background);
     if (backgroundDrawn) {
@@ -5045,6 +5103,10 @@ function startColtRunGame() {
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
   updateDifficultyButtons();
   updateCharacterButtons();
+  ensureMediaSource(idleVideo);
+  ensureMediaSource(mrNievesIdleVideo);
+  scheduleMediaLoad(coinVideo, 1800);
+  scheduleMediaLoad(flagVideo, 2600);
   resetLevel(true);
   openCharacterSelect();
   update();
@@ -5062,27 +5124,27 @@ function startColtRunGame() {
         musicVolumeSlider.removeEventListener("pointerdown", onMusicVolumePointerDown);
       }
       touchCleanups.forEach(cleanup => cleanup());
-      deathVideo.pause();
-      lavaRockVideoSpecials.forEach(video => video.pause());
-      mrNievesIdleVideo.pause();
-      mrNievesRunVideo.pause();
-      mrNievesInAirVideo.pause();
-      mrNievesCelebrationVideo.pause();
-      ambientAudio.pause();
+      stagedMediaTimers.forEach(timer => window.clearTimeout(timer));
       stopRunningAudio();
-      rockDeathAudio.pause();
-      ambientAudio.src = "";
-      runningAudio.src = "";
-      mrNievesRunningAudio.src = "";
-      rockDeathAudio.src = "";
-      mrNievesIdleVideo.src = "";
-      mrNievesRunVideo.src = "";
-      mrNievesInAirVideo.src = "";
-      mrNievesCelebrationVideo.src = "";
+      [
+        ambientAudio,
+        runningAudio,
+        mrNievesRunningAudio,
+        rockDeathAudio,
+        coinVideo,
+        flagVideo,
+        idleVideo,
+        runVideo,
+        leapVideo,
+        mrNievesIdleVideo,
+        mrNievesRunVideo,
+        mrNievesInAirVideo,
+        mrNievesCelebrationVideo,
+        deathVideo,
+        ...lavaRockVideoSpecials,
+        ...animatedBackgroundVideos
+      ].forEach(releaseMediaSource);
       mrNievesJumpImage.src = "";
-      lavaRockVideoSpecials.forEach(video => {
-        video.src = "";
-      });
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
@@ -5428,6 +5490,7 @@ function render() {
   if (screen.name === "changePin") html = renderChangePin();
   app.innerHTML = html + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
+  observeDeferredVideos(app);
 }
 
 function attachScreenHandlers() {
@@ -5436,6 +5499,7 @@ function attachScreenHandlers() {
     search.addEventListener("input", event => {
       const body = document.getElementById("homeBody");
       body.innerHTML = event.target.value.trim() ? renderSearchResults(event.target.value) : renderHomeDefault();
+      observeDeferredVideos(body);
       attachStudentRequestForm();
       attachThreadForm();
       attachReplyForm();
@@ -5795,6 +5859,7 @@ app.addEventListener("click", event => {
     randomActivity = pickRandomActivity();
     const card = document.getElementById("randomActivityCard");
     if (card) card.outerHTML = renderRandomActivityCard();
+    observeDeferredVideos(app);
   }
   if (action === "openColtCorner") setScreen({ name: "coltCorner" });
   if (action === "openColtRun") setScreen({ name: "coltRun" });
