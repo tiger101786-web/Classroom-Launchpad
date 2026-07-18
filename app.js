@@ -2049,6 +2049,7 @@ function startColtRunGame() {
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[4] = "20260718-platform05-replace1";
   platformAssetVersions[8] = "20260718-platform09-replace1";
+  platformAssetVersions[14] = "20260718-platform15-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
