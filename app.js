@@ -1970,6 +1970,30 @@ function startColtRunGame() {
     return sprite;
   });
   const platformSurfaceRatios = [0.24, 0.27, 0.16, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22, 0.18];
+  const platformCollisionProfiles = {
+    0: { offsetY: 10 },
+    7: { leftSurfaceRatio: 0.43, rightSurfaceRatio: 0.08 }
+  };
+
+  const getPlatformDrawSize = platform => {
+    const spriteIndex = platform.sprite % platformSprites.length;
+    const sprite = platformSprites[spriteIndex];
+    const drawW = spriteIndex === smallPlatformSpriteIndex ? Math.max(platform.w + 28, platform.w * 1.14) : Math.max(platform.w + 72, platform.w * 1.22);
+    const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
+    const drawH = spriteIndex === smallPlatformSpriteIndex ? Math.max(54, Math.min(112, drawW * naturalRatio)) : Math.max(82, Math.min(190, drawW * naturalRatio));
+    return { drawW, drawH };
+  };
+
+  const getPlatformSurfaceY = (platform, footX) => {
+    const spriteIndex = platform.sprite % platformSprites.length;
+    const profile = platformCollisionProfiles[spriteIndex];
+    if (!profile) return platform.y;
+    if (Number.isFinite(profile.offsetY)) return platform.y + profile.offsetY;
+    const { drawH } = getPlatformDrawSize(platform);
+    const localX = Math.max(0, Math.min(1, (footX - platform.x) / platform.w));
+    const surfaceRatio = profile.leftSurfaceRatio + (profile.rightSurfaceRatio - profile.leftSurfaceRatio) * localX;
+    return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
+  };
   const lavaRockSprites = Array.from({ length: 10 }, (_, index) => {
     const sprite = new Image();
     sprite.src = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`;
@@ -4561,9 +4585,7 @@ function startColtRunGame() {
     const sprite = platformSprites[spriteIndex];
     const surfaceRatio = platformSurfaceRatios[spriteIndex] || 0.22;
     const x = platform.x - cameraX;
-    const drawW = spriteIndex === smallPlatformSpriteIndex ? Math.max(platform.w + 28, platform.w * 1.14) : Math.max(platform.w + 72, platform.w * 1.22);
-    const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
-    const drawH = spriteIndex === smallPlatformSpriteIndex ? Math.max(54, Math.min(112, drawW * naturalRatio)) : Math.max(82, Math.min(190, drawW * naturalRatio));
+    const { drawW, drawH } = getPlatformDrawSize(platform);
     const drawX = Math.round(x - (drawW - platform.w) / 2);
     const drawY = Math.round(platform.y - drawH * surfaceRatio);
     if (sprite.complete && sprite.naturalWidth) {
@@ -4725,14 +4747,19 @@ function startColtRunGame() {
       player.x += player.vx;
       player.y += player.vy;
       player.x = Math.max(0, player.x);
+      const previousGroundPlatform = player.groundPlatform;
       player.grounded = false;
       player.groundPlatform = null;
       platforms.forEach(platform => {
+        const spriteIndex = platform.sprite % platformSprites.length;
         const withinX = player.x + player.w > platform.x && player.x < platform.x + platform.w;
-        const wasAbove = player.y + player.h - player.vy <= platform.y;
-        const hitTop = player.y + player.h >= platform.y && player.y + player.h <= platform.y + platform.h + 12;
+        const footX = Math.max(platform.x, Math.min(platform.x + platform.w, player.x + player.w / 2));
+        const surfaceY = getPlatformSurfaceY(platform, footX);
+        const stayedOnPlatform = spriteIndex === 7 && wasGrounded && previousGroundPlatform === platform;
+        const wasAbove = player.y + player.h - player.vy <= surfaceY + (stayedOnPlatform ? 12 : 0);
+        const hitTop = player.y + player.h >= surfaceY - (stayedOnPlatform ? 12 : 0) && player.y + player.h <= surfaceY + platform.h + 12;
         if (withinX && wasAbove && hitTop && player.vy >= 0) {
-          player.y = platform.y - player.h;
+          player.y = surfaceY - player.h;
           player.vy = 0;
           player.grounded = true;
           player.groundPlatform = platform;
