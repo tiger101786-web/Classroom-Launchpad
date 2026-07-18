@@ -1966,7 +1966,7 @@ function startColtRunGame() {
   const smallPlatformSpriteIndex = 21;
   const platformSprites = Array.from({ length: 22 }, (_, index) => {
     const sprite = new Image();
-    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260718-platform03-replace1`;
+    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260718-platform07-replace1`;
     return sprite;
   });
   const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22, 0.18];
