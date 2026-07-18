@@ -1966,7 +1966,7 @@ function startColtRunGame() {
   const smallPlatformSpriteIndex = 21;
   const platformSprites = Array.from({ length: 22 }, (_, index) => {
     const sprite = new Image();
-    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260717-platform22-small1`;
+    sprite.src = `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=20260718-platform22-green1`;
     return sprite;
   });
   const platformSurfaceRatios = [0.24, 0.27, 0.16, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22, 0.18];
@@ -4042,9 +4042,9 @@ function startColtRunGame() {
     let y = 430;
     while (x < targetX) {
       const difficulty = Math.min(level, 8);
-      const smallPlatformChance = difficultyMode === "veryHard" ? 0.42 : difficultyMode === "hard" ? 0.1 : 0;
+      const smallPlatformChance = difficultyMode === "veryHard" ? 0.55 : difficultyMode === "hard" ? 0.12 : 0;
       const useSmallPlatform = lastPlatformSprite !== smallPlatformSpriteIndex && random() < smallPlatformChance;
-      const width = useSmallPlatform ? 92 + random() * 30 : 175 + random() * 115;
+      const width = useSmallPlatform ? 72 + random() * 22 : 175 + random() * 115;
       const nextY = Math.max(275, Math.min(438, y + (random() - 0.48) * (88 + difficulty * 4)));
       const upwardDelta = Math.max(0, y - nextY);
       const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale;
@@ -4416,7 +4416,7 @@ function startColtRunGame() {
     const platform = player.groundPlatform;
     const spriteIndex = platform.sprite % platformSprites.length;
     const footX = player.x + player.w / 2;
-    const drawW = Math.max(platform.w + 72, platform.w * 1.22);
+    const drawW = spriteIndex === smallPlatformSpriteIndex ? Math.max(platform.w + 28, platform.w * 1.14) : Math.max(platform.w + 72, platform.w * 1.22);
     const imageLeft = platform.x - (drawW - platform.w) / 2;
     const localX = Math.max(0, Math.min(1, (footX - imageLeft) / drawW));
     if (spriteIndex === 8) return 6;
@@ -4557,12 +4557,13 @@ function startColtRunGame() {
   };
 
   const drawPlatform = platform => {
-    const sprite = platformSprites[platform.sprite % platformSprites.length];
-    const surfaceRatio = platformSurfaceRatios[platform.sprite % platformSurfaceRatios.length] || 0.22;
+    const spriteIndex = platform.sprite % platformSprites.length;
+    const sprite = platformSprites[spriteIndex];
+    const surfaceRatio = platformSurfaceRatios[spriteIndex] || 0.22;
     const x = platform.x - cameraX;
-    const drawW = Math.max(platform.w + 72, platform.w * 1.22);
+    const drawW = spriteIndex === smallPlatformSpriteIndex ? Math.max(platform.w + 28, platform.w * 1.14) : Math.max(platform.w + 72, platform.w * 1.22);
     const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
-    const drawH = Math.max(82, Math.min(190, drawW * naturalRatio));
+    const drawH = spriteIndex === smallPlatformSpriteIndex ? Math.max(54, Math.min(112, drawW * naturalRatio)) : Math.max(82, Math.min(190, drawW * naturalRatio));
     const drawX = Math.round(x - (drawW - platform.w) / 2);
     const drawY = Math.round(platform.y - drawH * surfaceRatio);
     if (sprite.complete && sprite.naturalWidth) {
