@@ -2634,19 +2634,19 @@ function startColtRunGame() {
     const sourceW = flagVideo.videoWidth || flagFrameSize;
     const sourceH = flagVideo.videoHeight || flagFrameSize;
     const sourceRatio = sourceW / sourceH;
-    let sx = 0;
-    let sy = 0;
-    let sw = sourceW;
-    let sh = sourceH;
+    let drawW = flagFrameSize;
+    let drawH = flagFrameSize;
+    let drawX = 0;
+    let drawY = 0;
     if (sourceRatio > 1) {
-      sw = sourceH;
-      sx = (sourceW - sw) / 2;
+      drawH = flagFrameSize / sourceRatio;
+      drawY = (flagFrameSize - drawH) / 2;
     } else if (sourceRatio < 1) {
-      sh = sourceW;
-      sy = (sourceH - sh) / 2;
+      drawW = flagFrameSize * sourceRatio;
+      drawX = (flagFrameSize - drawW) / 2;
     }
     flagFrameContext.clearRect(0, 0, flagFrameSize, flagFrameSize);
-    flagFrameContext.drawImage(flagVideo, sx, sy, sw, sh, 0, 0, flagFrameSize, flagFrameSize);
+    flagFrameContext.drawImage(flagVideo, drawX, drawY, drawW, drawH);
     const frame = flagFrameContext.getImageData(0, 0, flagFrameSize, flagFrameSize);
     const pixels = frame.data;
     const isBackgroundPixel = pixelIndex => {
@@ -4634,12 +4634,12 @@ function startColtRunGame() {
     const transparentFlagFrame = getTransparentFlagFrame();
     if (transparentFlagFrame) {
       keepFlagVideoPlaying();
-      const flagDrawW = 108;
-      const flagDrawH = 94;
+      const flagDrawW = 118;
+      const flagDrawH = 132;
       ctx.save();
       ctx.shadowColor = "rgba(255, 82, 21, 0.45)";
       ctx.shadowBlur = 16;
-      ctx.drawImage(transparentFlagFrame, flagX - 26, flag.y + 18, flagDrawW, flagDrawH);
+      ctx.drawImage(transparentFlagFrame, flagX - 31, flag.y - 20, flagDrawW, flagDrawH);
       ctx.restore();
     } else {
       ctx.strokeStyle = "#f4f2f3";
