@@ -2046,6 +2046,7 @@ function startColtRunGame() {
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
   const platformAssetVersions = Array.from({ length: 22 }, () => "20260718-platform07-replace1");
+  platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[4] = "20260718-platform05-replace1";
   platformAssetVersions[8] = "20260718-platform09-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
