@@ -4639,7 +4639,7 @@ function startColtRunGame() {
       ctx.save();
       ctx.shadowColor = "rgba(255, 82, 21, 0.45)";
       ctx.shadowBlur = 16;
-      ctx.drawImage(transparentFlagFrame, flagX - 26, flag.y - 8, flagDrawW, flagDrawH);
+      ctx.drawImage(transparentFlagFrame, flagX - 26, flag.y + 2, flagDrawW, flagDrawH);
       ctx.restore();
     } else {
       ctx.strokeStyle = "#f4f2f3";
