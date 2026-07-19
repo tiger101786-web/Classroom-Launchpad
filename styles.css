@@ -2014,6 +2014,8 @@ body[data-theme="night"] .colt-run-stats span {
 }
 
 .colt-run-character-grid button {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 8px;
   justify-items: center;
@@ -2024,6 +2026,34 @@ body[data-theme="night"] .colt-run-stats span {
   background: rgba(255, 255, 255, 0.08);
   color: #f9e7d0;
   font-weight: 900;
+  overflow: hidden;
+}
+
+.colt-run-character-grid button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(180deg, rgba(10, 7, 9, 0.12), rgba(10, 7, 9, 0.2) 64%, rgba(10, 7, 9, 0.74)),
+    var(--colt-run-character-card-bg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.colt-run-character-grid button[data-character="colt"] {
+  --colt-run-character-card-bg: url("assets/colt-run-character-select-colt-bg.png?v=20260719-character-card-backgrounds1");
+}
+
+.colt-run-character-grid button[data-character="mrNieves"] {
+  --colt-run-character-card-bg: url("assets/colt-run-character-select-mr-nieves-bg.png?v=20260719-character-card-backgrounds1");
+}
+
+.colt-run-character-grid button > * {
+  position: relative;
+  z-index: 1;
 }
 
 .colt-run-character-grid button:hover,
