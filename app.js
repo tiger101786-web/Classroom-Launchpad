@@ -2051,6 +2051,7 @@ function startColtRunGame() {
   platformAssetVersions[3] = "20260718-platform04-replace1";
   platformAssetVersions[4] = "20260718-platform05-replace1";
   platformAssetVersions[8] = "20260718-platform09-replace1";
+  platformAssetVersions[12] = "20260718-platform13-replace1";
   platformAssetVersions[13] = "20260718-platform14-replace1";
   platformAssetVersions[14] = "20260718-platform15-replace1";
   platformAssetVersions[17] = "20260718-platform18-replace1";
