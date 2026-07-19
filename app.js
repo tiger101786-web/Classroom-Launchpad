@@ -2207,6 +2207,7 @@ function startColtRunGame() {
       ensureMediaSource(mrNievesIdleVideo);
       ensureMediaSource(mrNievesRunVideo);
       ensureMediaSource(mrNievesInAirVideo);
+      ensureMediaSource(mrNievesCelebrationVideo, "metadata");
       return;
     }
     ensureMediaSource(idleVideo);
@@ -2518,7 +2519,7 @@ function startColtRunGame() {
       musicVolumeSlider.style.setProperty("--volume", `${percent}%`);
     }
     if (musicToggleButton) {
-      musicToggleButton.textContent = percent <= 0 ? "" : percent < 45 ? "" : "";
+      musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔉" : "🔊";
       musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn game audio on" : "Turn game audio off");
       musicToggleButton.classList.toggle("is-muted", percent <= 0);
     }
@@ -4873,6 +4874,11 @@ function startColtRunGame() {
         player.vy = 0;
         player.grounded = true;
         player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";
+        if (selectedCharacter === "mrNieves") {
+          ensureMediaSource(mrNievesCelebrationVideo);
+          if (mrNievesCelebrationVideo.readyState >= 1) mrNievesCelebrationVideo.currentTime = 0;
+          keepMrNievesCelebrationVideoPlaying();
+        }
         stopRunningAudio();
         scoreNode.textContent = score;
         if (nextLevelButton) nextLevelButton.disabled = false;
