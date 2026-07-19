@@ -2172,7 +2172,7 @@ function startColtRunGame() {
   ];
   const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9];
   const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
-    `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260702-backgrounds`
+    `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
   ));
   const backgroundSprites = backgroundSpriteSources.map(() => new Image());
   const ensureBackgroundSprite = index => {
