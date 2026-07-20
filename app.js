@@ -2092,7 +2092,7 @@ function startColtRunGame() {
   platformAssetVersions[14] = "20260718-platform15-replace1";
   platformAssetVersions[15] = "20260719-platform16-replace1";
   platformAssetVersions[16] = "20260720-platform17-glowing-crest1";
-  platformAssetVersions[17] = "20260718-platform18-replace1";
+  platformAssetVersions[17] = "20260720-platform18-colored-crest1";
   platformAssetVersions[19] = "20260720-platform20-colored-fallback1";
   platformAssetVersions[20] = "20260718-platform21-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
@@ -4197,7 +4197,7 @@ function startColtRunGame() {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 18];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18];
       const islandPlatforms = [1, 2, 3, 4, 5, 8, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
