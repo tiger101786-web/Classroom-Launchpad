@@ -41,6 +41,7 @@ const mimeTypes = {
   ".gif": "image/gif",
   ".mp4": "video/mp4",
   ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };

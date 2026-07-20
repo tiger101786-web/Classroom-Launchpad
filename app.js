@@ -1934,6 +1934,11 @@ function startColtRunGame() {
       id: "battle-theme-a",
       source: "assets/colt-run-game-music-battle-theme-a.mp3?v=20260720-two-track-playlist1",
       gain: 0.83
+    },
+    {
+      id: "epic-boss-battle",
+      source: "assets/colt-run-game-music-epic-boss-battle.wav?v=20260720-three-track-playlist1",
+      gain: 0.5
     }
   ];
   const inGameMusic = createDeferredAudio("");
