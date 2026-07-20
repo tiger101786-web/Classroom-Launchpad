@@ -2093,11 +2093,13 @@ function startColtRunGame() {
   platformAssetVersions[15] = "20260719-platform16-replace1";
   platformAssetVersions[16] = "20260720-platform17-glowing-crest1";
   platformAssetVersions[17] = "20260718-platform18-replace1";
+  platformAssetVersions[19] = "20260720-platform20-colored-fallback1";
   platformAssetVersions[20] = "20260718-platform21-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
   const platformSprites = platformSpriteSources.map(() => new Image());
+  const retiredPlatformSpriteIndexes = new Set([19]);
   const ensurePlatformSprite = index => {
     const spriteIndex = Math.abs(index) % platformSprites.length;
     const sprite = platformSprites[spriteIndex];
@@ -4167,7 +4169,9 @@ function startColtRunGame() {
   };
 
   const shuffleStartingPlatformDeck = () => {
-    startingPlatformDeck = platformSprites.map((_, index) => index).filter(index => index !== smallPlatformSpriteIndex);
+    startingPlatformDeck = platformSprites
+      .map((_, index) => index)
+      .filter(index => index !== smallPlatformSpriteIndex && !retiredPlatformSpriteIndexes.has(index));
     for (let index = startingPlatformDeck.length - 1; index > 0; index -= 1) {
       const swapIndex = Math.floor(Math.random() * (index + 1));
       [startingPlatformDeck[index], startingPlatformDeck[swapIndex]] = [startingPlatformDeck[swapIndex], startingPlatformDeck[index]];
@@ -4193,10 +4197,11 @@ function startColtRunGame() {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 18, 19];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 18];
       const islandPlatforms = [1, 2, 3, 4, 5, 8, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
-      const availableChoices = choices.length > 1 ? choices.filter(choice => choice !== lastPlatformSprite) : choices;
+      const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
+      const availableChoices = activeChoices.length > 1 ? activeChoices.filter(choice => choice !== lastPlatformSprite) : activeChoices;
       const sprite = availableChoices[Math.floor(random() * availableChoices.length)];
       lastPlatformSprite = sprite;
       return sprite;
