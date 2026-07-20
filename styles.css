@@ -1862,6 +1862,8 @@ body[data-theme="night"] .feature-media {
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
+  padding: 0;
+  border: 0;
 }
 
 .colt-run-shell:fullscreen .colt-run-canvas {

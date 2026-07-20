@@ -1749,7 +1749,7 @@ function renderColtRun() {
             </div>
           </div>
         </div>
-        <canvas id="coltRunCanvas" class="colt-run-canvas" width="960" height="540" tabindex="0" aria-label="Colt Run platform game"></canvas>
+        <canvas id="coltRunCanvas" class="colt-run-canvas" width="1280" height="720" tabindex="0" aria-label="Colt Run platform game"></canvas>
         <button class="colt-run-fullscreen-toggle" type="button" data-colt-run="fullscreen">Exit Fullscreen</button>
         <div class="colt-run-touch" aria-label="Touch controls">
           <div class="colt-run-joystick" data-colt-joystick aria-label="Move" role="application">
@@ -1808,6 +1808,13 @@ function startColtRunGame() {
   const fullscreenTarget = shell || stage;
   const fullscreenButtons = shell ? Array.from(shell.querySelectorAll('[data-colt-run="fullscreen"]')) : [];
   const ctx = canvas.getContext("2d");
+  const gameViewportWidth = 960;
+  const gameViewportHeight = 540;
+  const renderScaleX = canvas.width / gameViewportWidth;
+  const renderScaleY = canvas.height / gameViewportHeight;
+  ctx.setTransform(renderScaleX, 0, 0, renderScaleY, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
   const levelNode = document.getElementById("coltRunLevel");
   const timeNode = document.getElementById("coltRunTime");
   const scoreNode = document.getElementById("coltRunScore");
@@ -4248,7 +4255,7 @@ function startColtRunGame() {
     stopRunningAudio();
     deathStartedAt = performance.now();
     deathX = player.x;
-    deathFallStartY = Math.min(player.y, canvas.height - player.h + 6);
+    deathFallStartY = Math.min(player.y, gameViewportHeight - player.h + 6);
     deathY = deathFallStartY;
     deathFrameStamp = -1;
     ensureMediaSource(deathVideo);
@@ -4269,7 +4276,7 @@ function startColtRunGame() {
 
   const coltDeathHasFallen = () => {
     if (!lost || !deathStartedAt) return false;
-    return deathY > canvas.height + 70 || performance.now() - deathStartedAt > 1600;
+    return deathY > gameViewportHeight + 70 || performance.now() - deathStartedAt > 1600;
   };
 
   const finishRunAfterDeath = () => {
@@ -4386,8 +4393,8 @@ function startColtRunGame() {
     ensureLavaRockSprite(rockType);
     const baseSize = 116 + Math.random() * 32 + difficulty * 2;
     const size = baseSize * (lavaRockSizeMultipliers[rockType] || 1);
-    const minX = forwardSpawn ? Math.max(cameraX + canvas.width * 0.48, player.x + 170) : cameraX + 54;
-    const maxX = forwardSpawn ? cameraX + canvas.width + 260 - size : cameraX + canvas.width - size - 36;
+    const minX = forwardSpawn ? Math.max(cameraX + gameViewportWidth * 0.48, player.x + 170) : cameraX + 54;
+    const maxX = forwardSpawn ? cameraX + gameViewportWidth + 260 - size : cameraX + gameViewportWidth - size - 36;
     let x = Number.isFinite(xHint) ? xHint : minX + Math.random() * Math.max(1, maxX - minX);
     x = Math.max(minX, Math.min(maxX, x));
     const playerCenter = player.x + player.w / 2;
@@ -4416,10 +4423,10 @@ function startColtRunGame() {
     const isWideShower = showerType === 1;
     ensureLavaRockShowerSprite(showerType);
     const size = isWideShower
-      ? Math.min(canvas.width * 0.72, 620 + difficulty * 12)
-      : Math.min(canvas.width * 0.52, 430 + difficulty * 8);
-    const minX = Math.max(cameraX + canvas.width * (isWideShower ? 0.02 : 0.08), player.x + 120);
-    const maxX = cameraX + canvas.width * (isWideShower ? 0.32 : 0.48);
+      ? Math.min(gameViewportWidth * 0.72, 620 + difficulty * 12)
+      : Math.min(gameViewportWidth * 0.52, 430 + difficulty * 8);
+    const minX = Math.max(cameraX + gameViewportWidth * (isWideShower ? 0.02 : 0.08), player.x + 120);
+    const maxX = cameraX + gameViewportWidth * (isWideShower ? 0.32 : 0.48);
     const x = minX + Math.random() * Math.max(1, maxX - minX);
     fallingLavaRocks.push({
       shower: true,
@@ -4441,9 +4448,9 @@ function startColtRunGame() {
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
     const videoSpecialIndex = Math.max(0, Math.min(lavaRockVideoSpecials.length - 1, specialIndex));
-    const size = Math.min(canvas.width * 0.52, 430 + difficulty * 8);
-    const minX = Math.max(cameraX + canvas.width * 0.08, player.x + 140);
-    const maxX = cameraX + canvas.width * 0.48;
+    const size = Math.min(gameViewportWidth * 0.52, 430 + difficulty * 8);
+    const minX = Math.max(cameraX + gameViewportWidth * 0.08, player.x + 140);
+    const maxX = cameraX + gameViewportWidth * 0.48;
     const x = minX + Math.random() * Math.max(1, maxX - minX);
     const video = getLavaRockVideoSpecial(videoSpecialIndex);
     ensureMediaSource(video);
@@ -4479,7 +4486,7 @@ function startColtRunGame() {
       if (openSlots > 0) {
         const doubleDropChance = Math.min(0.82, (0.2 + difficulty * 0.025) * mode.doubleDropMultiplier);
         const drops = openSlots > 1 && Math.random() < doubleDropChance ? Math.min(openSlots, mode.maxDrops) : 1;
-        const firstX = cameraX + canvas.width * 0.38 + Math.random() * Math.max(1, canvas.width * 0.68);
+        const firstX = cameraX + gameViewportWidth * 0.38 + Math.random() * Math.max(1, gameViewportWidth * 0.68);
         for (let dropIndex = 0; dropIndex < drops; dropIndex += 1) {
           const spacing = 210 + Math.random() * 160;
           const direction = Math.random() < 0.5 ? -1 : 1;
@@ -4501,8 +4508,8 @@ function startColtRunGame() {
     const hasForwardCoverage = fallingLavaRocks.some(rock => {
       return getLavaRockCoreHitboxes(rock).some(hitbox => (
         hitbox.x > player.x + player.w &&
-        hitbox.x < cameraX + canvas.width + 180 &&
-        hitbox.y < canvas.height * 0.74
+        hitbox.x < cameraX + gameViewportWidth + 180 &&
+        hitbox.y < gameViewportHeight * 0.74
       ));
     });
     if (!hasForwardCoverage && player.vx > moveSpeed * 0.65 && fallingLavaRocks.length < maxActiveRocks && now >= nextForwardLavaRockAt) {
@@ -4515,7 +4522,7 @@ function startColtRunGame() {
       rock.angle += rock.spin * 0.08;
       const box = getLavaRockDrawBox(rock);
       const screenX = box.x - cameraX;
-      return box.y < canvas.height + box.h + 80 && screenX > -box.w - 220 && screenX < canvas.width + 360;
+      return box.y < gameViewportHeight + box.h + 80 && screenX > -box.w - 220 && screenX < gameViewportWidth + 360;
     });
   };
 
@@ -4690,8 +4697,8 @@ function startColtRunGame() {
   };
 
   const drawCoverImage = image => {
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = gameViewportWidth;
+    const h = gameViewportHeight;
     if (!image.complete || !image.naturalWidth) return false;
     const scale = Math.max(w / image.naturalWidth, h / image.naturalHeight);
     const drawW = image.naturalWidth * scale;
@@ -4703,8 +4710,8 @@ function startColtRunGame() {
   };
 
   const drawCoverVideo = video => {
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = gameViewportWidth;
+    const h = gameViewportHeight;
     if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) return false;
     const scale = Math.max(w / video.videoWidth, h / video.videoHeight);
     const drawW = video.videoWidth * scale;
@@ -4716,8 +4723,8 @@ function startColtRunGame() {
   };
 
   const drawLevelBackground = () => {
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = gameViewportWidth;
+    const h = gameViewportHeight;
     const background = ensureBackgroundSprite(currentBackgroundIndex);
     const animatedBackground = animatedBackgroundVideos[currentBackgroundIndex];
     const useAnimatedBackground = animatedBackground && performance.now() >= animatedBackgroundReadyAt;
@@ -4764,7 +4771,7 @@ function startColtRunGame() {
     const sprite = getLavaRockSprite(rock);
     const box = getLavaRockDrawBox(rock);
     const screenX = box.x - cameraX;
-    if (screenX > canvas.width + 260 || screenX + box.w < -220 || box.y > canvas.height + 160) return;
+    if (screenX > gameViewportWidth + 260 || screenX + box.w < -220 || box.y > gameViewportHeight + 160) return;
     ctx.save();
     ctx.translate(screenX + box.w / 2, box.y + box.h / 2);
     ctx.rotate(rock.angle);
@@ -4789,8 +4796,8 @@ function startColtRunGame() {
   };
 
   const draw = () => {
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = gameViewportWidth;
+    const h = gameViewportHeight;
     drawLevelBackground();
     platforms.forEach(platform => {
       const x = platform.x - cameraX;
@@ -4975,7 +4982,7 @@ function startColtRunGame() {
         if (nextLevelButton) nextLevelButton.disabled = false;
         statusNode.textContent = "You reached the finish flag. Press Enter or Next Level to keep your coins going.";
       }
-      if (!lost && player.y > canvas.height - 36) {
+      if (!lost && player.y > gameViewportHeight - 36) {
         triggerColtDeath("The Colt fell. Restart and try a new route.");
       }
       cameraX = Math.max(0, player.x - 230);
