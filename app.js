@@ -2081,6 +2081,7 @@ function startColtRunGame() {
   platformAssetVersions[12] = "20260718-platform13-replace1";
   platformAssetVersions[13] = "20260718-platform14-replace1";
   platformAssetVersions[14] = "20260718-platform15-replace1";
+  platformAssetVersions[15] = "20260719-platform16-replace1";
   platformAssetVersions[17] = "20260718-platform18-replace1";
   platformAssetVersions[20] = "20260718-platform21-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
