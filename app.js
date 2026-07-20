@@ -4820,7 +4820,7 @@ function startColtRunGame() {
       ctx.stroke();
     }
     fallingLavaRocks.forEach(drawLavaRock);
-    drawColt();
+    if (!initialCharacterSelectionPending) drawColt();
     drawCharacterSelectPreviews();
     if (won || coltDeathHasFallen()) {
       ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
