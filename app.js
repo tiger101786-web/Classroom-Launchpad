@@ -1761,7 +1761,7 @@ function renderColtRun() {
         </div>
       </div>
       <div class="colt-run-footer">
-        <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.</p>
+        <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Press B to return to the Launchpad.</p>
         <div class="colt-run-actions">
           <div class="colt-run-volume" aria-label="Game audio volume">
             <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off"></button>
@@ -1772,6 +1772,7 @@ function renderColtRun() {
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
           <button id="coltRunNextLevel" class="primary-btn" type="button" data-colt-run="new" disabled>Next Level</button>
+          <button class="outline-btn" type="button" data-colt-run="back" aria-keyshortcuts="B">Back (B)</button>
         </div>
       </div>
       <div id="coltRunLeaderboard" class="colt-run-leaderboard" hidden>
@@ -1804,6 +1805,7 @@ function startColtRunGame() {
   if (!canvas) return;
   const shell = canvas.closest(".colt-run-shell");
   const stage = canvas.closest(".colt-run-stage");
+  const fullscreenTarget = shell || stage;
   const fullscreenButtons = shell ? Array.from(shell.querySelectorAll('[data-colt-run="fullscreen"]')) : [];
   const ctx = canvas.getContext("2d");
   const levelNode = document.getElementById("coltRunLevel");
@@ -5007,8 +5009,12 @@ function startColtRunGame() {
     Space: "jump"
   };
   const onKeyDown = event => {
-    if (event.target instanceof HTMLElement && event.target.closest("#coltRunLeaderboardForm")) return;
-    if (event.target instanceof HTMLElement && event.target.closest(".colt-run-volume")) return;
+    if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
+    if (event.code === "KeyB") {
+      event.preventDefault();
+      setScreen({ name: "home" });
+      return;
+    }
     if (characterSelectOpen) return;
     playColtRunAudio();
     if (event.code === "Enter") {
@@ -5066,6 +5072,10 @@ function startColtRunGame() {
       setCharacter(button.dataset.character);
       return;
     }
+    if (button.dataset.coltRun === "back") {
+      setScreen({ name: "home" });
+      return;
+    }
     playColtRunAudio();
     if (button.dataset.coltRun === "fullscreen") toggleFullscreen();
     if (button.dataset.coltRun === "leaderboard") openLeaderboard();
@@ -5084,7 +5094,7 @@ function startColtRunGame() {
     savePendingLeaderboardEntry(leaderboardNameInput ? leaderboardNameInput.value : "");
     canvas.focus({ preventScroll: true });
   };
-  const isFullscreen = () => document.fullscreenElement === stage;
+  const isFullscreen = () => document.fullscreenElement === fullscreenTarget;
   const updateFullscreenButton = () => {
     fullscreenButtons.forEach(button => {
       button.textContent = isFullscreen() ? "Exit Fullscreen" : "⛶ Fullscreen";
@@ -5092,12 +5102,12 @@ function startColtRunGame() {
     if (isFullscreen()) canvas.focus({ preventScroll: true });
   };
   const toggleFullscreen = () => {
-    if (!stage || !document.fullscreenEnabled) return;
+    if (!fullscreenTarget || !document.fullscreenEnabled) return;
     if (isFullscreen()) {
       document.exitFullscreen?.();
       return;
     }
-    stage.requestFullscreen?.().then(() => {
+    fullscreenTarget.requestFullscreen?.().then(() => {
       canvas.focus({ preventScroll: true });
       updateFullscreenButton();
     }).catch(() => {
