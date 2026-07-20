@@ -1924,7 +1924,21 @@ function startColtRunGame() {
   };
   const mrNievesRunMediaSource = "assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1";
   const ambientAudio = createDeferredAudio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless", true);
-  const inGameMusic = createDeferredAudio("assets/colt-run-game-music-test.ogg?v=20260719-game-music-test1", true);
+  const inGameMusicTracks = [
+    {
+      id: "caestus",
+      source: "assets/colt-run-game-music-test.ogg?v=20260720-two-track-playlist1",
+      gain: 1
+    },
+    {
+      id: "battle-theme-a",
+      source: "assets/colt-run-game-music-battle-theme-a.mp3?v=20260720-two-track-playlist1",
+      gain: 0.83
+    }
+  ];
+  const inGameMusic = createDeferredAudio("");
+  const lastInGameMusicTrackStorageKey = "coltRunLastInGameMusicTrackV1";
+  let currentInGameMusicTrack = null;
   const characterSelectMusic = createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true);
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260714-running1", true);
   const mrNievesRunningAudio = createDeferredAudio(mrNievesRunMediaSource, true);
@@ -1939,7 +1953,8 @@ function startColtRunGame() {
   let ambientAudioContext = null;
   let ambientGainNode = null;
   let ambientSourceNode = null;
-  const storedMusicVolume = Number(localStorage.getItem(musicVolumeStorageKey));
+  const storedMusicVolumeValue = localStorage.getItem(musicVolumeStorageKey);
+  const storedMusicVolume = storedMusicVolumeValue === null ? Number.NaN : Number(storedMusicVolumeValue);
   let musicVolume = Number.isFinite(storedMusicVolume) ? Math.max(0, Math.min(1, storedMusicVolume)) : 0.42;
   let lastAudibleMusicVolume = musicVolume > 0 ? musicVolume : 0.42;
   let musicMuted = musicVolume <= 0;
@@ -2491,6 +2506,34 @@ function startColtRunGame() {
   const applyAmbientBoost = () => {
     if (ambientGainNode) ambientGainNode.gain.value = musicMuted ? 0 : ambientBoostGain;
   };
+  const applyInGameMusicVolume = () => {
+    const trackGain = currentInGameMusicTrack ? currentInGameMusicTrack.gain : 1;
+    inGameMusic.volume = musicMuted ? 0 : Math.min(1, musicVolume * inGameMusicLayerVolume * trackGain);
+    inGameMusic.muted = musicMuted;
+  };
+  const chooseNextInGameMusic = () => {
+    const previousTrackId = currentInGameMusicTrack
+      ? currentInGameMusicTrack.id
+      : localStorage.getItem(lastInGameMusicTrackStorageKey);
+    const nonRepeatingChoices = inGameMusicTracks.filter(track => track.id !== previousTrackId);
+    const choices = nonRepeatingChoices.length ? nonRepeatingChoices : inGameMusicTracks;
+    currentInGameMusicTrack = choices[Math.floor(Math.random() * choices.length)];
+    localStorage.setItem(lastInGameMusicTrackStorageKey, currentInGameMusicTrack.id);
+    inGameMusic.pause();
+    inGameMusic.removeAttribute("src");
+    inGameMusic.dataset.src = currentInGameMusicTrack.source;
+    ensureMediaSource(inGameMusic);
+    applyInGameMusicVolume();
+  };
+  const playInGameMusic = (advance = false) => {
+    if (musicMuted || musicVolume <= 0) return;
+    if (advance || inGameMusic.ended || !currentInGameMusicTrack || !inGameMusic.getAttribute("src")) {
+      chooseNextInGameMusic();
+    }
+    inGameMusic.play().catch(() => {});
+  };
+  const onInGameMusicEnded = () => playInGameMusic(true);
+  inGameMusic.addEventListener("ended", onInGameMusicEnded);
   const playColtRunAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
     if (initialCharacterSelectionPending && characterSelectOpen) {
@@ -2500,13 +2543,12 @@ function startColtRunGame() {
       return;
     }
     ensureMediaSource(ambientAudio);
-    ensureMediaSource(inGameMusic);
     setupAmbientBoost();
     if (ambientAudioContext && ambientAudioContext.state === "suspended") {
       ambientAudioContext.resume().catch(() => {});
     }
     ambientAudio.play().catch(() => {});
-    inGameMusic.play().catch(() => {});
+    playInGameMusic();
   };
   const stopRunningAudio = () => {
     runningAudio.pause();
@@ -2557,8 +2599,7 @@ function startColtRunGame() {
   const applyMusicVolume = (persist = true) => {
     ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
     ambientAudio.muted = musicMuted;
-    inGameMusic.volume = musicMuted ? 0 : musicVolume * inGameMusicLayerVolume;
-    inGameMusic.muted = musicMuted;
+    applyInGameMusicVolume();
     characterSelectMusic.volume = musicMuted ? 0 : musicVolume * characterSelectMusicLayerVolume;
     characterSelectMusic.muted = musicMuted;
     runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
@@ -5181,6 +5222,7 @@ function startColtRunGame() {
       touchCleanups.forEach(cleanup => cleanup());
       stagedMediaTimers.forEach(timer => window.clearTimeout(timer));
       stopRunningAudio();
+      inGameMusic.removeEventListener("ended", onInGameMusicEnded);
       [
         ambientAudio,
         inGameMusic,
