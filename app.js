@@ -1924,7 +1924,7 @@ function startColtRunGame() {
   };
   const mrNievesRunMediaSource = "assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1";
   const ambientAudio = createDeferredAudio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless", true);
-  const inGameMusic = createDeferredAudio("assets/colt-run-game-music-test.ogg?v=20260719-caestus-loop1", true);
+  const inGameMusic = createDeferredAudio("assets/colt-run-game-music-test.ogg?v=20260719-game-music-test1", true);
   const characterSelectMusic = createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true);
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260714-running1", true);
   const mrNievesRunningAudio = createDeferredAudio(mrNievesRunMediaSource, true);
@@ -2490,11 +2490,6 @@ function startColtRunGame() {
   const applyAmbientBoost = () => {
     if (ambientGainNode) ambientGainNode.gain.value = musicMuted ? 0 : ambientBoostGain;
   };
-  const playInGameMusic = () => {
-    if (musicMuted || musicVolume <= 0) return;
-    ensureMediaSource(inGameMusic);
-    inGameMusic.play().catch(() => {});
-  };
   const playColtRunAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
     if (initialCharacterSelectionPending && characterSelectOpen) {
@@ -2504,12 +2499,13 @@ function startColtRunGame() {
       return;
     }
     ensureMediaSource(ambientAudio);
+    ensureMediaSource(inGameMusic);
     setupAmbientBoost();
     if (ambientAudioContext && ambientAudioContext.state === "suspended") {
       ambientAudioContext.resume().catch(() => {});
     }
     ambientAudio.play().catch(() => {});
-    playInGameMusic();
+    inGameMusic.play().catch(() => {});
   };
   const stopRunningAudio = () => {
     runningAudio.pause();
