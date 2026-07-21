@@ -2097,7 +2097,7 @@ function startColtRunGame() {
   coltSprites.jumpPrep.src = "assets/colt-run-jump-prep.png?v=20260702-clean";
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
-  const platformAssetVersions = Array.from({ length: 25 }, () => "20260718-platform07-replace1");
+  const platformAssetVersions = Array.from({ length: 26 }, () => "20260718-platform07-replace1");
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
@@ -2119,6 +2119,7 @@ function startColtRunGame() {
   platformAssetVersions[22] = "20260721-platform23-new1";
   platformAssetVersions[23] = "20260721-platform24-new1";
   platformAssetVersions[24] = "20260721-platform25-new1";
+  platformAssetVersions[25] = "20260721-platform26-new1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2130,13 +2131,14 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
     22: { surfacePoints: [[0, 0.285], [0.2, 0.32], [0.5, 0.41], [0.8, 0.48], [1, 0.50]] },
     23: { surfacePoints: [[0, 0.28], [0.62, 0.28], [0.72, 0.245], [0.85, 0.17], [1, 0.17]] },
-    24: { surfacePoints: [[0, 0.16], [0.35, 0.17], [0.45, 0.23], [0.58, 0.40], [0.70, 0.48], [1, 0.48]] }
+    24: { surfacePoints: [[0, 0.16], [0.35, 0.17], [0.45, 0.23], [0.58, 0.40], [0.70, 0.48], [1, 0.48]] },
+    25: { surfacePoints: [[0, 0.38], [0.35, 0.38], [0.43, 0.36], [0.68, 0.18], [0.75, 0.17], [1, 0.17]] }
   };
 
   const getPlatformDrawSize = platform => {
@@ -4258,7 +4260,7 @@ function startColtRunGame() {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25];
       const islandPlatforms = [1, 2, 3, 4, 5, 8, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
