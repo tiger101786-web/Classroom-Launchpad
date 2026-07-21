@@ -2152,9 +2152,12 @@ function startColtRunGame() {
     const surfaceRatio = profile.leftSurfaceRatio + (profile.rightSurfaceRatio - profile.leftSurfaceRatio) * localX;
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 10 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 13 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
+  lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
+  lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
+  lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
   const lavaRockSprites = lavaRockSpriteSources.map(() => new Image());
   const ensureLavaRockSprite = index => {
     const spriteIndex = Math.abs(index) % lavaRockSprites.length;
@@ -2164,7 +2167,8 @@ function startColtRunGame() {
   };
   const lavaRockShowerSpriteSources = [
     "assets/colt-run-lava-rock-shower-01.png?v=20260707-shower1",
-    "assets/colt-run-lava-rock-shower-02.png?v=20260711-shower2"
+    "assets/colt-run-lava-rock-shower-02.png?v=20260711-shower2",
+    "assets/colt-run-lava-rock-shower-03.png?v=20260721-meteor-shower1"
   ];
   const lavaRockShowerSprites = lavaRockShowerSpriteSources.map(() => new Image());
   const ensureLavaRockShowerSprite = index => {
@@ -2197,7 +2201,10 @@ function startColtRunGame() {
     { coreX: 0.34, coreY: 0.62, rx: 0.24, ry: 0.22 },
     { coreX: 0.34, coreY: 0.63, rx: 0.24, ry: 0.22 },
     { coreX: 0.38, coreY: 0.67, rx: 0.18, ry: 0.19 },
-    { coreX: 0.32, coreY: 0.68, rx: 0.21, ry: 0.2 }
+    { coreX: 0.32, coreY: 0.68, rx: 0.21, ry: 0.2 },
+    { coreX: 0.34, coreY: 0.67, rx: 0.25, ry: 0.25 },
+    { coreX: 0.16, coreY: 0.78, rx: 0.14, ry: 0.19 },
+    { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 }
   ];
   const lavaRockShowerHitProfiles = [
     [
@@ -2225,12 +2232,28 @@ function startColtRunGame() {
       { coreX: 0.397, coreY: 0.925, rx: 0.03, ry: 0.045 },
       { coreX: 0.588, coreY: 0.182, rx: 0.026, ry: 0.04 },
       { coreX: 0.834, coreY: 0.514, rx: 0.024, ry: 0.04 }
+    ],
+    [
+      { coreX: 0.081, coreY: 0.214, rx: 0.055, ry: 0.07 },
+      { coreX: 0.381, coreY: 0.259, rx: 0.06, ry: 0.07 },
+      { coreX: 0.649, coreY: 0.18, rx: 0.035, ry: 0.045 },
+      { coreX: 0.76, coreY: 0.35, rx: 0.05, ry: 0.07 },
+      { coreX: 0.132, coreY: 0.511, rx: 0.035, ry: 0.05 },
+      { coreX: 0.424, coreY: 0.54, rx: 0.075, ry: 0.11 },
+      { coreX: 0.875, coreY: 0.496, rx: 0.04, ry: 0.055 },
+      { coreX: 0.593, coreY: 0.578, rx: 0.025, ry: 0.035 },
+      { coreX: 0.20, coreY: 0.699, rx: 0.04, ry: 0.055 },
+      { coreX: 0.021, coreY: 0.946, rx: 0.03, ry: 0.04 },
+      { coreX: 0.278, coreY: 0.936, rx: 0.045, ry: 0.06 },
+      { coreX: 0.532, coreY: 0.901, rx: 0.07, ry: 0.095 },
+      { coreX: 0.655, coreY: 0.975, rx: 0.02, ry: 0.03 },
+      { coreX: 0.823, coreY: 0.827, rx: 0.09, ry: 0.12 }
     ]
   ];
   const lavaRockVideoSpecialHitProfiles = [
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
-  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9];
+  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9];
   const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
     `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
   ));
@@ -4427,7 +4450,7 @@ function startColtRunGame() {
     const difficulty = Math.min(level, 8);
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
-    const isWideShower = showerType === 1;
+    const isWideShower = showerType !== 0;
     ensureLavaRockShowerSprite(showerType);
     const size = isWideShower
       ? Math.min(gameViewportWidth * 0.72, 620 + difficulty * 12)
@@ -4506,7 +4529,7 @@ function startColtRunGame() {
     if (now >= nextLavaRockShowerAt) {
       const specialAlreadyActive = fallingLavaRocks.some(rock => rock.shower || rock.videoSpecial);
       if (!specialAlreadyActive && fallingLavaRocks.length <= maxActiveRocks - 2) {
-        const specialChoice = Math.floor(Math.random() * (lavaRockVideoSpecials.length + 2));
+        const specialChoice = Math.floor(Math.random() * (lavaRockVideoSpecials.length + lavaRockShowerSprites.length));
         if (specialChoice < lavaRockVideoSpecials.length) spawnLavaRockVideoSpecial(now, specialChoice);
         else spawnLavaRockShower(now, specialChoice - lavaRockVideoSpecials.length);
       }
