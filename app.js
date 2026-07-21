@@ -2107,20 +2107,21 @@ function startColtRunGame() {
   platformAssetVersions[15] = "20260719-platform16-replace1";
   platformAssetVersions[16] = "20260720-platform17-glowing-crest1";
   platformAssetVersions[17] = "20260720-platform18-colored-crest1";
+  platformAssetVersions[18] = "20260720-platform19-colored-fallback1";
   platformAssetVersions[19] = "20260720-platform20-colored-fallback1";
   platformAssetVersions[20] = "20260718-platform21-replace1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
   const platformSprites = platformSpriteSources.map(() => new Image());
-  const retiredPlatformSpriteIndexes = new Set([19]);
+  const retiredPlatformSpriteIndexes = new Set([18, 19]);
   const ensurePlatformSprite = index => {
     const spriteIndex = Math.abs(index) % platformSprites.length;
     const sprite = platformSprites[spriteIndex];
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.47, 0.50, 0.22, 0.18];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.43, rightSurfaceRatio: 0.08 }
