@@ -2964,15 +2964,16 @@ function startColtRunGame() {
       const darkest = Math.min(red, green, blue);
       const average = (red + green + blue) / 3;
       const chroma = brightest - darkest;
-      const vividColtRed = red > 86 && red > green * 1.5 && red > blue * 1.4 && chroma > 54;
-      const redHighlight = red > 150 && red > green * 1.2 && red > blue * 1.16 && chroma > 58;
-      const blackOutline = average < 37 && darkest < 27;
+      const vividColtRed = red > 66 && red > green * 1.6 && red > blue * 1.4 && chroma > 50;
+      const deepColtRed = red > 38 && red > green * 1.9 && red > blue * 1.6 && chroma > 34;
+      const redHighlight = red > 120 && red > green * 1.35 && red > blue * 1.25;
+      const blackOutline = average < 34 && darkest < 22 && chroma < 26;
       const silverHoof = average > 54 && average < 170 && chroma < 54 && green >= red - 18 && blue >= red - 12;
-      const muddyBrown = average > 30 && average < 178 && red >= green - 5 && red >= blue - 5 && chroma < 78;
-      const mutedGray = average > 42 && average < 190 && chroma < 52;
-      return !vividColtRed && !redHighlight && !blackOutline && !silverHoof && (muddyBrown || mutedGray);
+      const muddyBrown = average > 16 && average < 188 && red >= green * 1.08 && red >= blue * 1.12 && chroma < 88;
+      const mutedGray = average > 20 && average < 170 && chroma < 45;
+      return !vividColtRed && !deepColtRed && !redHighlight && !blackOutline && !silverHoof && (muddyBrown || mutedGray);
     };
-    for (let pass = 0; pass < 6; pass += 1) {
+    for (let pass = 0; pass < 12; pass += 1) {
       const toClear = [];
       for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
         if (!isResidualBackdrop(pixelIndex)) continue;
