@@ -2977,9 +2977,9 @@ function startColtRunGame() {
       const vividColtRed = red > 66 && red > green * 1.6 && red > blue * 1.4 && chroma > 50;
       const deepColtRed = red > 38 && red > green * 1.9 && red > blue * 1.6 && chroma > 34;
       const redHighlight = red > 120 && red > green * 1.35 && red > blue * 1.25;
-      const blackOutline = average < 34 && darkest < 22 && chroma < 26;
+      const blackOutline = average < 20 || (average < 34 && darkest < 24 && chroma < 12);
       const silverHoof = average > 54 && average < 170 && chroma < 54 && green >= red - 18 && blue >= red - 12;
-      const muddyBrown = average > 16 && average < 188 && red >= green * 1.08 && red >= blue * 1.12 && chroma < 88;
+      const muddyBrown = average > 12 && average < 188 && red >= green * 1.08 && red >= blue * 1.12 && chroma < 88;
       const mutedGray = average > 20 && average < 170 && chroma < 45;
       return !vividColtRed && !deepColtRed && !redHighlight && !blackOutline && !silverHoof && (muddyBrown || mutedGray);
     };
@@ -3005,7 +3005,20 @@ function startColtRunGame() {
       }
       if (!toClear.length) break;
       toClear.forEach(index => {
-        pixels[index * 4 + 3] = 0;
+        const offset = index * 4;
+        const red = pixels[offset];
+        const green = pixels[offset + 1];
+        const blue = pixels[offset + 2];
+        const average = (red + green + blue) / 3;
+        const chroma = Math.max(red, green, blue) - Math.min(red, green, blue);
+        const darkWarmOutline = average < 46 && red > green && red > blue && chroma < 48;
+        if (darkWarmOutline) {
+          pixels[offset] = 0;
+          pixels[offset + 1] = 0;
+          pixels[offset + 2] = 0;
+        } else {
+          pixels[offset + 3] = 0;
+        }
       });
     }
   };
