@@ -2953,6 +2953,52 @@ function startColtRunGame() {
     return flagFrameCanvas;
   };
 
+  const cleanColtBackdropHalo = (pixels, width, height) => {
+    const isResidualBackdrop = pixelIndex => {
+      const offset = pixelIndex * 4;
+      if (pixels[offset + 3] < 16) return false;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const brightest = Math.max(red, green, blue);
+      const darkest = Math.min(red, green, blue);
+      const average = (red + green + blue) / 3;
+      const chroma = brightest - darkest;
+      const vividColtRed = red > 86 && red > green * 1.5 && red > blue * 1.4 && chroma > 54;
+      const redHighlight = red > 150 && red > green * 1.2 && red > blue * 1.16 && chroma > 58;
+      const blackOutline = average < 37 && darkest < 27;
+      const silverHoof = average > 54 && average < 170 && chroma < 54 && green >= red - 18 && blue >= red - 12;
+      const muddyBrown = average > 30 && average < 178 && red >= green - 5 && red >= blue - 5 && chroma < 78;
+      const mutedGray = average > 42 && average < 190 && chroma < 52;
+      return !vividColtRed && !redHighlight && !blackOutline && !silverHoof && (muddyBrown || mutedGray);
+    };
+    for (let pass = 0; pass < 6; pass += 1) {
+      const toClear = [];
+      for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
+        if (!isResidualBackdrop(pixelIndex)) continue;
+        const x = pixelIndex % width;
+        const y = Math.floor(pixelIndex / width);
+        let touchesTransparent = false;
+        for (let dy = -1; dy <= 1 && !touchesTransparent; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nextX = x + dx;
+            const nextY = y + dy;
+            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height || pixels[(nextY * width + nextX) * 4 + 3] < 16) {
+              touchesTransparent = true;
+              break;
+            }
+          }
+        }
+        if (touchesTransparent) toClear.push(pixelIndex);
+      }
+      if (!toClear.length) break;
+      toClear.forEach(index => {
+        pixels[index * 4 + 3] = 0;
+      });
+    }
+  };
+
   const getTransparentIdleFrame = () => {
     if (idleVideo.readyState < 2 || !idleFrameContext) return null;
     const frameStamp = Math.floor(idleVideo.currentTime * 30);
@@ -3086,6 +3132,7 @@ function startColtRunGame() {
         pixels[index * 4 + 3] = 0;
       });
     }
+    cleanColtBackdropHalo(pixels, idleFrameWidth, idleFrameHeight);
     idleFrameContext.putImageData(frame, 0, 0);
     let minX = idleFrameWidth;
     let minY = idleFrameHeight;
@@ -3308,6 +3355,7 @@ function startColtRunGame() {
         pixels[index * 4 + 3] = 0;
       });
     }
+    cleanColtBackdropHalo(pixels, runFrameWidth, runFrameHeight);
     runFrameContext.putImageData(frame, 0, 0);
     let minX = runFrameWidth;
     let minY = runFrameHeight;
@@ -3566,6 +3614,7 @@ function startColtRunGame() {
         });
       }
     }
+    cleanColtBackdropHalo(pixels, leapFrameWidth, leapFrameHeight);
     leapFrameContext.putImageData(frame, 0, 0);
     let minX = leapFrameWidth;
     let minY = leapFrameHeight;
@@ -4001,6 +4050,7 @@ function startColtRunGame() {
         pixels[index * 4 + 3] = 0;
       });
     }
+    cleanColtBackdropHalo(pixels, deathFrameWidth, deathFrameHeight);
     deathFrameContext.putImageData(frame, 0, 0);
     let minX = deathFrameWidth;
     let minY = deathFrameHeight;
