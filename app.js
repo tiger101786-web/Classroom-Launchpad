@@ -1952,7 +1952,7 @@ function startColtRunGame() {
     {
       id: "dark-descent",
       source: "assets/colt-run-game-music-dark-descent.mp3?v=20260721-four-track-playlist1",
-      gain: 0.7
+      gain: 0.9
     }
   ];
   const inGameMusic = createDeferredAudio("");
