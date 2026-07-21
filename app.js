@@ -2334,34 +2334,42 @@ function startColtRunGame() {
   flagFrameCanvas.height = flagFrameSize;
   const flagFrameContext = flagFrameCanvas.getContext("2d", { willReadFrequently: true });
   let flagFrameStamp = -1;
-  const idleFrameWidth = 180;
-  const idleFrameHeight = 122;
+  // Retain the Colt's source pixel-art detail through chroma keying and
+  // gameplay scaling instead of reducing each animation too early.
+  const idleFrameWidth = 270;
+  const idleFrameHeight = 183;
   const idleFrameCanvas = document.createElement("canvas");
   idleFrameCanvas.width = idleFrameWidth;
   idleFrameCanvas.height = idleFrameHeight;
   const idleFrameContext = idleFrameCanvas.getContext("2d", { willReadFrequently: true });
   const idleCropCanvas = document.createElement("canvas");
   const idleCropContext = idleCropCanvas.getContext("2d");
+  if (idleFrameContext) idleFrameContext.imageSmoothingEnabled = false;
+  if (idleCropContext) idleCropContext.imageSmoothingEnabled = false;
   let idleFrameStamp = -1;
   let idleStableCrop = null;
-  const runFrameWidth = 220;
-  const runFrameHeight = 128;
+  const runFrameWidth = 330;
+  const runFrameHeight = 192;
   const runFrameCanvas = document.createElement("canvas");
   runFrameCanvas.width = runFrameWidth;
   runFrameCanvas.height = runFrameHeight;
   const runFrameContext = runFrameCanvas.getContext("2d", { willReadFrequently: true });
   const runCropCanvas = document.createElement("canvas");
   const runCropContext = runCropCanvas.getContext("2d");
+  if (runFrameContext) runFrameContext.imageSmoothingEnabled = false;
+  if (runCropContext) runCropContext.imageSmoothingEnabled = false;
   let runFrameStamp = -1;
   let runStableCrop = null;
-  const leapFrameWidth = 220;
-  const leapFrameHeight = 150;
+  const leapFrameWidth = 330;
+  const leapFrameHeight = 225;
   const leapFrameCanvas = document.createElement("canvas");
   leapFrameCanvas.width = leapFrameWidth;
   leapFrameCanvas.height = leapFrameHeight;
   const leapFrameContext = leapFrameCanvas.getContext("2d", { willReadFrequently: true });
   const leapCropCanvas = document.createElement("canvas");
   const leapCropContext = leapCropCanvas.getContext("2d");
+  if (leapFrameContext) leapFrameContext.imageSmoothingEnabled = false;
+  if (leapCropContext) leapCropContext.imageSmoothingEnabled = false;
   let leapFrameStamp = -1;
   let leapStableCrop = null;
   // Preserve more of the source pixel-art detail before the character is
@@ -2384,14 +2392,16 @@ function startColtRunGame() {
     celebration: { stamp: -1, crop: null }
   };
   let mrNievesActiveFrameState = "";
-  const deathFrameWidth = 230;
-  const deathFrameHeight = 170;
+  const deathFrameWidth = 345;
+  const deathFrameHeight = 255;
   const deathFrameCanvas = document.createElement("canvas");
   deathFrameCanvas.width = deathFrameWidth;
   deathFrameCanvas.height = deathFrameHeight;
   const deathFrameContext = deathFrameCanvas.getContext("2d", { willReadFrequently: true });
   const deathCropCanvas = document.createElement("canvas");
   const deathCropContext = deathCropCanvas.getContext("2d");
+  if (deathFrameContext) deathFrameContext.imageSmoothingEnabled = false;
+  if (deathCropContext) deathCropContext.imageSmoothingEnabled = false;
   let deathFrameStamp = -1;
   let deathStableCrop = null;
   const gravity = 0.72;
@@ -4692,6 +4702,7 @@ function startColtRunGame() {
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : 8));
     ctx.save();
+    if (!isMrNieves) ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);
     ctx.scale(player.facing, 1);
     ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
