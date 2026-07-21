@@ -1948,6 +1948,11 @@ function startColtRunGame() {
       id: "epic-boss-battle",
       source: "assets/colt-run-game-music-epic-boss-battle.wav?v=20260720-three-track-playlist1",
       gain: 0.5
+    },
+    {
+      id: "dark-descent",
+      source: "assets/colt-run-game-music-dark-descent.mp3?v=20260721-four-track-playlist1",
+      gain: 0.7
     }
   ];
   const inGameMusic = createDeferredAudio("");
