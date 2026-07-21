@@ -2964,7 +2964,7 @@ function startColtRunGame() {
   };
 
   const cleanColtBackdropHalo = (pixels, width, height) => {
-    const isResidualBackdrop = pixelIndex => {
+    const isProtectedColtPixel = pixelIndex => {
       const offset = pixelIndex * 4;
       if (pixels[offset + 3] < 16) return false;
       const red = pixels[offset];
@@ -2979,10 +2979,26 @@ function startColtRunGame() {
       const redHighlight = red > 120 && red > green * 1.35 && red > blue * 1.25;
       const blackOutline = average < 20 || (average < 34 && darkest < 24 && chroma < 12);
       const silverHoof = average > 54 && average < 170 && chroma < 54 && green >= red - 18 && blue >= red - 12;
+      return vividColtRed || deepColtRed || redHighlight || blackOutline || silverHoof;
+    };
+    const isResidualBackdrop = pixelIndex => {
+      const offset = pixelIndex * 4;
+      if (pixels[offset + 3] < 16 || isProtectedColtPixel(pixelIndex)) return false;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const brightest = Math.max(red, green, blue);
+      const darkest = Math.min(red, green, blue);
+      const average = (red + green + blue) / 3;
+      const chroma = brightest - darkest;
       const muddyBrown = average > 12 && average < 188 && red >= green * 1.08 && red >= blue * 1.12 && chroma < 88;
       const mutedGray = average > 20 && average < 170 && chroma < 45;
-      return !vividColtRed && !deepColtRed && !redHighlight && !blackOutline && !silverHoof && (muddyBrown || mutedGray);
+      return muddyBrown || mutedGray;
     };
+    const protectedPixels = new Uint8Array(width * height);
+    for (let pixelIndex = 0; pixelIndex < protectedPixels.length; pixelIndex += 1) {
+      if (isProtectedColtPixel(pixelIndex)) protectedPixels[pixelIndex] = 1;
+    }
     for (let pass = 0; pass < 12; pass += 1) {
       const toClear = [];
       for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
@@ -3021,6 +3037,36 @@ function startColtRunGame() {
         }
       });
     }
+    const interiorResiduals = [];
+    for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
+      if (!isResidualBackdrop(pixelIndex)) continue;
+      const x = pixelIndex % width;
+      const y = Math.floor(pixelIndex / width);
+      let nearColtBody = false;
+      for (let dy = -2; dy <= 2 && !nearColtBody; dy += 1) {
+        for (let dx = -2; dx <= 2; dx += 1) {
+          const nextX = x + dx;
+          const nextY = y + dy;
+          if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) continue;
+          if (protectedPixels[nextY * width + nextX]) {
+            nearColtBody = true;
+            break;
+          }
+        }
+      }
+      interiorResiduals.push({ pixelIndex, nearColtBody });
+    }
+    interiorResiduals.forEach(({ pixelIndex, nearColtBody }) => {
+      const offset = pixelIndex * 4;
+      const average = (pixels[offset] + pixels[offset + 1] + pixels[offset + 2]) / 3;
+      if (nearColtBody && average < 58) {
+        pixels[offset] = 0;
+        pixels[offset + 1] = 0;
+        pixels[offset + 2] = 0;
+      } else {
+        pixels[offset + 3] = 0;
+      }
+    });
   };
 
   const getTransparentIdleFrame = () => {
