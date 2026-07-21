@@ -2097,7 +2097,7 @@ function startColtRunGame() {
   coltSprites.jumpPrep.src = "assets/colt-run-jump-prep.png?v=20260702-clean";
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
-  const platformAssetVersions = Array.from({ length: 22 }, () => "20260718-platform07-replace1");
+  const platformAssetVersions = Array.from({ length: 25 }, () => "20260718-platform07-replace1");
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
@@ -2116,6 +2116,9 @@ function startColtRunGame() {
   platformAssetVersions[18] = "20260720-platform19-colored-fallback1";
   platformAssetVersions[19] = "20260720-platform20-colored-fallback1";
   platformAssetVersions[20] = "20260718-platform21-replace1";
+  platformAssetVersions[22] = "20260721-platform23-new1";
+  platformAssetVersions[23] = "20260721-platform24-new1";
+  platformAssetVersions[24] = "20260721-platform25-new1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2127,10 +2130,13 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
-    7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 }
+    7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
+    22: { surfacePoints: [[0, 0.285], [0.2, 0.32], [0.5, 0.41], [0.8, 0.48], [1, 0.50]] },
+    23: { surfacePoints: [[0, 0.28], [0.62, 0.28], [0.72, 0.245], [0.85, 0.17], [1, 0.17]] },
+    24: { surfacePoints: [[0, 0.16], [0.35, 0.17], [0.45, 0.23], [0.58, 0.40], [0.70, 0.48], [1, 0.48]] }
   };
 
   const getPlatformDrawSize = platform => {
@@ -2149,7 +2155,18 @@ function startColtRunGame() {
     if (Number.isFinite(profile.offsetY)) return platform.y + profile.offsetY;
     const { drawH } = getPlatformDrawSize(platform);
     const localX = Math.max(0, Math.min(1, (footX - platform.x) / platform.w));
-    const surfaceRatio = profile.leftSurfaceRatio + (profile.rightSurfaceRatio - profile.leftSurfaceRatio) * localX;
+    let surfaceRatio;
+    if (Array.isArray(profile.surfacePoints) && profile.surfacePoints.length > 1) {
+      let rightPointIndex = profile.surfacePoints.findIndex(point => point[0] >= localX);
+      if (rightPointIndex < 0) rightPointIndex = profile.surfacePoints.length - 1;
+      else if (rightPointIndex === 0) rightPointIndex = 1;
+      const leftPoint = profile.surfacePoints[rightPointIndex - 1];
+      const rightPoint = profile.surfacePoints[Math.min(rightPointIndex, profile.surfacePoints.length - 1)];
+      const segmentProgress = Math.max(0, Math.min(1, (localX - leftPoint[0]) / Math.max(0.001, rightPoint[0] - leftPoint[0])));
+      surfaceRatio = leftPoint[1] + (rightPoint[1] - leftPoint[1]) * segmentProgress;
+    } else {
+      surfaceRatio = profile.leftSurfaceRatio + (profile.rightSurfaceRatio - profile.leftSurfaceRatio) * localX;
+    }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
   const lavaRockSpriteSources = Array.from({ length: 13 }, (_, index) => (
@@ -4241,7 +4258,7 @@ function startColtRunGame() {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24];
       const islandPlatforms = [1, 2, 3, 4, 5, 8, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
@@ -4953,7 +4970,7 @@ function startColtRunGame() {
         const withinX = player.x + player.w > platform.x && player.x < platform.x + platform.w;
         const footX = Math.max(platform.x, Math.min(platform.x + platform.w, player.x + player.w / 2));
         const surfaceY = getPlatformSurfaceY(platform, footX);
-        const stayedOnPlatform = spriteIndex === 7 && wasGrounded && previousGroundPlatform === platform;
+        const stayedOnPlatform = Boolean(platformCollisionProfiles[spriteIndex]) && wasGrounded && previousGroundPlatform === platform;
         const wasAbove = player.y + player.h - player.vy <= surfaceY + (stayedOnPlatform ? 12 : 0);
         const hitTop = player.y + player.h >= surfaceY - (stayedOnPlatform ? 12 : 0) && player.y + player.h <= surfaceY + platform.h + 12;
         if (withinX && wasAbove && hitTop && player.vy >= 0) {
