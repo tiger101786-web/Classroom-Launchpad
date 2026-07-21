@@ -2097,6 +2097,7 @@ function startColtRunGame() {
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
   platformAssetVersions[4] = "20260718-platform05-replace1";
+  platformAssetVersions[7] = "20260721-platform08-incline1";
   platformAssetVersions[8] = "20260718-platform09-replace1";
   platformAssetVersions[9] = "20260719-platform10-replace1";
   platformAssetVersions[10] = "20260719-platform11-replace1";
@@ -2124,7 +2125,7 @@ function startColtRunGame() {
   const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
-    7: { leftSurfaceRatio: 0.43, rightSurfaceRatio: 0.08 }
+    7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 }
   };
 
   const getPlatformDrawSize = platform => {
