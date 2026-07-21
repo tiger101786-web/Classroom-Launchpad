@@ -1739,11 +1739,11 @@ function renderColtRun() {
             <h3>Choose Your Runner</h3>
             <div class="colt-run-character-grid">
               <button type="button" data-colt-run="character" data-character="colt">
-                <canvas id="coltRunSelectColt" width="180" height="130" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectColt" width="300" height="200" aria-hidden="true"></canvas>
                 <span>Colt</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrNieves">
-                <canvas id="coltRunSelectMrNieves" width="180" height="150" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectMrNieves" width="300" height="200" aria-hidden="true"></canvas>
                 <span>Mr. Nieves</span>
               </button>
             </div>
@@ -4722,8 +4722,8 @@ function startColtRunGame() {
     if (!characterSelectOpen) return;
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
-    drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 132, 96);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 116, 132, 4);
+    drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
   };
 
   const drawCoverImage = image => {
