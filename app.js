@@ -1869,7 +1869,16 @@ function startColtRunGame() {
       levelTimeMultiplier: 1,
       challengePlatformChance: 0.03,
       smallPlatformChance: 0,
-      platformWidthScale: 1
+      platformWidthScale: 1,
+      verticalVariationChance: 0.38,
+      verticalRiseMin: 14,
+      verticalRiseMax: 44,
+      verticalDropMin: 16,
+      verticalDropMax: 52,
+      largeDropChance: 0.04,
+      largeDropMin: 58,
+      largeDropMax: 72,
+      downwardGapReward: 0.2
     },
     medium: {
       label: "Medium",
@@ -1889,7 +1898,16 @@ function startColtRunGame() {
       levelTimeMultiplier: 1,
       challengePlatformChance: 0.06,
       smallPlatformChance: 0,
-      platformWidthScale: 1
+      platformWidthScale: 1,
+      verticalVariationChance: 0.56,
+      verticalRiseMin: 16,
+      verticalRiseMax: 56,
+      verticalDropMin: 18,
+      verticalDropMax: 70,
+      largeDropChance: 0.1,
+      largeDropMin: 72,
+      largeDropMax: 94,
+      downwardGapReward: 0.28
     },
     hard: {
       label: "Hard",
@@ -1909,7 +1927,16 @@ function startColtRunGame() {
       levelTimeMultiplier: 1,
       challengePlatformChance: 0.12,
       smallPlatformChance: 0.12,
-      platformWidthScale: 1
+      platformWidthScale: 1,
+      verticalVariationChance: 0.72,
+      verticalRiseMin: 18,
+      verticalRiseMax: 68,
+      verticalDropMin: 22,
+      verticalDropMax: 86,
+      largeDropChance: 0.18,
+      largeDropMin: 88,
+      largeDropMax: 116,
+      downwardGapReward: 0.34
     },
     veryHard: {
       label: "Very Hard",
@@ -1929,7 +1956,16 @@ function startColtRunGame() {
       levelTimeMultiplier: 1,
       challengePlatformChance: 0.44,
       smallPlatformChance: 0.55,
-      platformWidthScale: 1
+      platformWidthScale: 1,
+      verticalVariationChance: 0.86,
+      verticalRiseMin: 20,
+      verticalRiseMax: 80,
+      verticalDropMin: 26,
+      verticalDropMax: 104,
+      largeDropChance: 0.3,
+      largeDropMin: 102,
+      largeDropMax: 138,
+      downwardGapReward: 0.4
     },
     impossible: {
       label: "Impossible",
@@ -1949,7 +1985,16 @@ function startColtRunGame() {
       levelTimeMultiplier: 0.82,
       challengePlatformChance: 0.68,
       smallPlatformChance: 0.78,
-      platformWidthScale: 0.8
+      platformWidthScale: 0.8,
+      verticalVariationChance: 0.94,
+      verticalRiseMin: 22,
+      verticalRiseMax: 90,
+      verticalDropMin: 30,
+      verticalDropMax: 122,
+      largeDropChance: 0.42,
+      largeDropMin: 116,
+      largeDropMax: 156,
+      downwardGapReward: 0.46
     }
   };
   const difficultyModeNames = Object.keys(difficultyModes);
@@ -4504,6 +4549,9 @@ function startColtRunGame() {
     coins = [];
     let x = 280;
     let y = 430;
+    const minPlatformY = 258;
+    const maxPlatformY = 438;
+    const levelVerticalProgress = Math.min(1, Math.max(0, level - 1) / 7);
     while (x < targetX) {
       const difficulty = Math.min(level, 8);
       const challengePlatformChance = mode.challengePlatformChance;
@@ -4524,10 +4572,46 @@ function startColtRunGame() {
         : useSmallPlatform
           ? 72 + random() * 22
           : 175 + random() * 115) * mode.platformWidthScale;
-      const nextY = Math.max(275, Math.min(438, y + (random() - 0.48) * (88 + difficulty * 4)));
-      const upwardDelta = Math.max(0, y - nextY);
-      const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale;
-      const fairGapLimit = Math.max(96, maxFairPlatformGap + mode.platformGapBonus - upwardDelta * upwardGapPenalty);
+      let nextY = y;
+      const variationChance = Math.min(0.98, mode.verticalVariationChance + levelVerticalProgress * 0.08);
+      if (random() < variationChance) {
+        const availableRise = y - minPlatformY;
+        const availableDrop = maxPlatformY - y;
+        const largeDropChance = Math.min(0.72, mode.largeDropChance * (0.72 + levelVerticalProgress * 0.58));
+        const useLargeDrop = availableDrop >= mode.largeDropMin * 0.85 && random() < largeDropChance;
+        const downBias = y < 318 ? 0.72 : y > 400 ? 0.28 : 0.54;
+        let moveDown = useLargeDrop || random() < downBias;
+        if (availableDrop < mode.verticalDropMin * 0.75) moveDown = false;
+        if (availableRise < mode.verticalRiseMin * 0.75) moveDown = true;
+        const levelStepScale = 0.78 + levelVerticalProgress * 0.22;
+        if (moveDown) {
+          const minimumDrop = useLargeDrop ? mode.largeDropMin : mode.verticalDropMin;
+          const maximumDrop = useLargeDrop ? mode.largeDropMax : mode.verticalDropMax;
+          const drop = (minimumDrop + random() * (maximumDrop - minimumDrop)) * levelStepScale;
+          nextY = Math.min(maxPlatformY, y + drop);
+        } else {
+          const rise = (mode.verticalRiseMin + random() * (mode.verticalRiseMax - mode.verticalRiseMin)) * levelStepScale;
+          nextY = Math.max(minPlatformY, y - rise);
+        }
+        nextY = Math.round(nextY);
+      }
+      const verticalDelta = nextY - y;
+      const upwardDelta = Math.max(0, -verticalDelta);
+      const downwardDelta = Math.max(0, verticalDelta);
+      const dropSpacingBoost = downwardDelta * (0.08 + levelVerticalProgress * 0.04);
+      const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale + dropSpacingBoost;
+      const currentMoveSpeed = moveSpeed * mode.playerSpeedMultiplier;
+      const currentJumpPower = Math.abs(jumpPower * mode.jumpPowerMultiplier);
+      const currentGravity = gravity * mode.gravityMultiplier;
+      const jumpDiscriminant = Math.max(0, currentJumpPower * currentJumpPower + 2 * currentGravity * verticalDelta);
+      const landingFrames = (currentJumpPower + Math.sqrt(jumpDiscriminant)) / currentGravity;
+      const physicsGapLimit = currentMoveSpeed * landingFrames * 0.96;
+      const configuredGapLimit = maxFairPlatformGap
+        + mode.platformGapBonus
+        - upwardDelta * upwardGapPenalty
+        + downwardDelta * mode.downwardGapReward;
+      const landingWidthPenalty = useSmallPlatform ? 18 : challengePlatformIsTall ? 14 : challengePlatformSpriteIndex !== null ? 8 : 0;
+      const fairGapLimit = Math.max(84, Math.min(physicsGapLimit, configuredGapLimit) - landingWidthPenalty);
       const gap = Math.min(desiredGap, fairGapLimit);
       y = nextY;
       x += gap;
