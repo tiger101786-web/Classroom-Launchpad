@@ -4527,12 +4527,12 @@ function startColtRunGame() {
     const mode = getDifficultySettings();
     const targetX = Math.min(2600 + level * 320, 5000);
     let lastPlatformSprite = currentStartingPlatformSprite;
-    const choosePlatformSprite = (width, forceSmallPlatform = false, challengePlatformSpriteIndex = null) => {
-      if (forceSmallPlatform) {
+    const choosePlatformSprite = (width, forceSmallPlatform = false, challengePlatformSpriteIndex = null, reservedSprites = new Set()) => {
+      if (forceSmallPlatform && !reservedSprites.has(smallPlatformSpriteIndex)) {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      if (Number.isInteger(challengePlatformSpriteIndex)) {
+      if (Number.isInteger(challengePlatformSpriteIndex) && !reservedSprites.has(challengePlatformSpriteIndex)) {
         lastPlatformSprite = challengePlatformSpriteIndex;
         return challengePlatformSpriteIndex;
       }
@@ -4540,7 +4540,11 @@ function startColtRunGame() {
       const islandPlatforms = [1, 2, 3, 4, 5, horseHeadPlatformSpriteIndex, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
-      const availableChoices = activeChoices.length > 1 ? activeChoices.filter(choice => choice !== lastPlatformSprite) : activeChoices;
+      const allRegularPlatforms = [...new Set([...widePlatforms, ...islandPlatforms])]
+        .filter(choice => !retiredPlatformSpriteIndexes.has(choice));
+      const unseenChoices = activeChoices.filter(choice => !reservedSprites.has(choice));
+      const unseenAlternates = allRegularPlatforms.filter(choice => !reservedSprites.has(choice));
+      const availableChoices = unseenChoices.length ? unseenChoices : unseenAlternates;
       const sprite = availableChoices[Math.floor(random() * availableChoices.length)];
       lastPlatformSprite = sprite;
       return sprite;
@@ -4552,15 +4556,24 @@ function startColtRunGame() {
     const minPlatformY = 258;
     const maxPlatformY = 438;
     const levelVerticalProgress = Math.min(1, Math.max(0, level - 1) / 7);
+    const platformRepeatClearance = gameViewportWidth + 120;
     while (x < targetX) {
       const difficulty = Math.min(level, 8);
+      const reservedPlatformSprites = new Set(platforms
+        .filter(platform => x - (platform.x + platform.w) < platformRepeatClearance)
+        .map(platform => platform.sprite));
       const challengePlatformChance = mode.challengePlatformChance;
       let challengePlatformSpriteIndex = null;
       if (!challengePlatformSpriteIndexSet.has(lastPlatformSprite) && random() < challengePlatformChance) {
-        challengePlatformSpriteIndex = challengePlatformSpriteIndexes[Math.floor(random() * challengePlatformSpriteIndexes.length)];
+        const availableChallengePlatforms = challengePlatformSpriteIndexes.filter(sprite => !reservedPlatformSprites.has(sprite));
+        if (availableChallengePlatforms.length) {
+          challengePlatformSpriteIndex = availableChallengePlatforms[Math.floor(random() * availableChallengePlatforms.length)];
+        }
       }
       const smallPlatformChance = mode.smallPlatformChance;
-      const useSmallPlatform = challengePlatformSpriteIndex === null && lastPlatformSprite !== smallPlatformSpriteIndex && random() < smallPlatformChance;
+      const useSmallPlatform = challengePlatformSpriteIndex === null
+        && !reservedPlatformSprites.has(smallPlatformSpriteIndex)
+        && random() < smallPlatformChance;
       const challengePlatformIsTall = tallChallengePlatformSpriteIndexSet.has(challengePlatformSpriteIndex);
       const challengePlatformIsWide = challengePlatformSpriteIndex === 30;
       const width = (challengePlatformSpriteIndex !== null
@@ -4615,7 +4628,13 @@ function startColtRunGame() {
       const gap = Math.min(desiredGap, fairGapLimit);
       y = nextY;
       x += gap;
-      platforms.push({ x, y, w: width, h: 30, sprite: choosePlatformSprite(width, useSmallPlatform, challengePlatformSpriteIndex) });
+      platforms.push({
+        x,
+        y,
+        w: width,
+        h: 30,
+        sprite: choosePlatformSprite(width, useSmallPlatform, challengePlatformSpriteIndex, reservedPlatformSprites)
+      });
       if (random() > 0.35) coins.push({ x: x + width * 0.5, y: y - 44, taken: false });
       x += width;
     }
