@@ -2098,7 +2098,10 @@ function startColtRunGame() {
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
   const challengePillarSpriteIndex = 26;
-  const platformAssetVersions = Array.from({ length: 27 }, () => "20260718-platform07-replace1");
+  const challengePlatformSpriteIndexes = [challengePillarSpriteIndex, 27, 28, 29, 30];
+  const challengePlatformSpriteIndexSet = new Set(challengePlatformSpriteIndexes);
+  const tallChallengePlatformSpriteIndexSet = new Set([challengePillarSpriteIndex, 27]);
+  const platformAssetVersions = Array.from({ length: 31 }, () => "20260718-platform07-replace1");
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
@@ -2122,6 +2125,10 @@ function startColtRunGame() {
   platformAssetVersions[24] = "20260721-platform25-new1";
   platformAssetVersions[25] = "20260721-platform26-new1";
   platformAssetVersions[26] = "20260721-platform27-challenge1";
+  platformAssetVersions[27] = "20260721-platform28-challenge1";
+  platformAssetVersions[28] = "20260721-platform29-challenge1";
+  platformAssetVersions[29] = "20260721-platform30-challenge1";
+  platformAssetVersions[30] = "20260721-platform31-challenge1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2133,7 +2140,7 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.35, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.42, 0.49, 0.43];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
@@ -2148,14 +2155,16 @@ function startColtRunGame() {
     const sprite = platformSprites[spriteIndex];
     const drawW = spriteIndex === smallPlatformSpriteIndex
       ? Math.max(platform.w + 28, platform.w * 1.14)
-      : spriteIndex === challengePillarSpriteIndex
+      : challengePlatformSpriteIndexSet.has(spriteIndex)
         ? Math.max(platform.w + 36, platform.w * 1.18)
         : Math.max(platform.w + 72, platform.w * 1.22);
     const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
     const drawH = spriteIndex === smallPlatformSpriteIndex
       ? Math.max(54, Math.min(112, drawW * naturalRatio))
-      : spriteIndex === challengePillarSpriteIndex
+      : tallChallengePlatformSpriteIndexSet.has(spriteIndex)
         ? Math.max(132, Math.min(210, drawW * naturalRatio))
+        : challengePlatformSpriteIndexSet.has(spriteIndex)
+          ? Math.max(92, Math.min(175, drawW * naturalRatio))
         : Math.max(82, Math.min(190, drawW * naturalRatio));
     return { drawW, drawH };
   };
@@ -4368,7 +4377,7 @@ function startColtRunGame() {
   const shuffleStartingPlatformDeck = () => {
     startingPlatformDeck = platformSprites
       .map((_, index) => index)
-      .filter(index => index !== smallPlatformSpriteIndex && index !== challengePillarSpriteIndex && !retiredPlatformSpriteIndexes.has(index));
+      .filter(index => index !== smallPlatformSpriteIndex && !challengePlatformSpriteIndexSet.has(index) && !retiredPlatformSpriteIndexes.has(index));
     for (let index = startingPlatformDeck.length - 1; index > 0; index -= 1) {
       const swapIndex = Math.floor(Math.random() * (index + 1));
       [startingPlatformDeck[index], startingPlatformDeck[swapIndex]] = [startingPlatformDeck[swapIndex], startingPlatformDeck[index]];
@@ -4389,14 +4398,14 @@ function startColtRunGame() {
     const mode = getDifficultySettings();
     const targetX = Math.min(2600 + level * 320, 5000);
     let lastPlatformSprite = currentStartingPlatformSprite;
-    const choosePlatformSprite = (width, forceSmallPlatform = false, forceChallengePillar = false) => {
+    const choosePlatformSprite = (width, forceSmallPlatform = false, challengePlatformSpriteIndex = null) => {
       if (forceSmallPlatform) {
         lastPlatformSprite = smallPlatformSpriteIndex;
         return smallPlatformSpriteIndex;
       }
-      if (forceChallengePillar) {
-        lastPlatformSprite = challengePillarSpriteIndex;
-        return challengePillarSpriteIndex;
+      if (Number.isInteger(challengePlatformSpriteIndex)) {
+        lastPlatformSprite = challengePlatformSpriteIndex;
+        return challengePlatformSpriteIndex;
       }
       const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25];
       const islandPlatforms = [1, 2, 3, 4, 5, 8, 10, 11, 12, 14, 15, 20];
@@ -4413,11 +4422,24 @@ function startColtRunGame() {
     let y = 430;
     while (x < targetX) {
       const difficulty = Math.min(level, 8);
-      const challengePillarChance = difficultyMode === "veryHard" ? 0.34 : difficultyMode === "hard" ? 0.10 : difficultyMode === "medium" ? 0.05 : 0.03;
-      const useChallengePillar = lastPlatformSprite !== challengePillarSpriteIndex && random() < challengePillarChance;
+      const challengePlatformChance = difficultyMode === "veryHard" ? 0.44 : difficultyMode === "hard" ? 0.12 : difficultyMode === "medium" ? 0.06 : 0.03;
+      let challengePlatformSpriteIndex = null;
+      if (!challengePlatformSpriteIndexSet.has(lastPlatformSprite) && random() < challengePlatformChance) {
+        challengePlatformSpriteIndex = challengePlatformSpriteIndexes[Math.floor(random() * challengePlatformSpriteIndexes.length)];
+      }
       const smallPlatformChance = difficultyMode === "veryHard" ? 0.55 : difficultyMode === "hard" ? 0.12 : 0;
-      const useSmallPlatform = !useChallengePillar && lastPlatformSprite !== smallPlatformSpriteIndex && random() < smallPlatformChance;
-      const width = useChallengePillar ? 118 + random() * 32 : useSmallPlatform ? 72 + random() * 22 : 175 + random() * 115;
+      const useSmallPlatform = challengePlatformSpriteIndex === null && lastPlatformSprite !== smallPlatformSpriteIndex && random() < smallPlatformChance;
+      const challengePlatformIsTall = tallChallengePlatformSpriteIndexSet.has(challengePlatformSpriteIndex);
+      const challengePlatformIsWide = challengePlatformSpriteIndex === 30;
+      const width = challengePlatformSpriteIndex !== null
+        ? challengePlatformIsTall
+          ? 118 + random() * 32
+          : challengePlatformIsWide
+            ? 165 + random() * 50
+            : 138 + random() * 42
+        : useSmallPlatform
+          ? 72 + random() * 22
+          : 175 + random() * 115;
       const nextY = Math.max(275, Math.min(438, y + (random() - 0.48) * (88 + difficulty * 4)));
       const upwardDelta = Math.max(0, y - nextY);
       const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale;
@@ -4425,7 +4447,7 @@ function startColtRunGame() {
       const gap = Math.min(desiredGap, fairGapLimit);
       y = nextY;
       x += gap;
-      platforms.push({ x, y, w: width, h: 30, sprite: choosePlatformSprite(width, useSmallPlatform, useChallengePillar) });
+      platforms.push({ x, y, w: width, h: 30, sprite: choosePlatformSprite(width, useSmallPlatform, challengePlatformSpriteIndex) });
       if (random() > 0.35) coins.push({ x: x + width * 0.5, y: y - 44, taken: false });
       x += width;
     }
