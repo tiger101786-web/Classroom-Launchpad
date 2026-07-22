@@ -2012,6 +2012,16 @@ function startColtRunGame() {
       id: "battle-theme-1",
       source: "assets/colt-run-game-music-battle-theme-1.mp3?v=20260721-six-track-playlist1",
       gain: 1.36
+    },
+    {
+      id: "battle-theme-3",
+      source: "assets/colt-run-game-music-battle-theme-3.mp3?v=20260721-eight-track-playlist1",
+      gain: 1.04
+    },
+    {
+      id: "battle-theme-4",
+      source: "assets/colt-run-game-music-battle-theme-4.mp3?v=20260721-eight-track-playlist1",
+      gain: 1.28
     }
   ];
   const inGameMusic = createDeferredAudio("");
