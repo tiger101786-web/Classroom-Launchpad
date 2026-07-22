@@ -1957,12 +1957,12 @@ function startColtRunGame() {
     {
       id: "wasteland-showdown",
       source: "assets/colt-run-game-music-wasteland-showdown.mp3?v=20260721-six-track-playlist1",
-      gain: 0.8
+      gain: 0.92
     },
     {
       id: "battle-theme-1",
       source: "assets/colt-run-game-music-battle-theme-1.mp3?v=20260721-six-track-playlist1",
-      gain: 1.18
+      gain: 1.36
     }
   ];
   const inGameMusic = createDeferredAudio("");
