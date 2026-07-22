@@ -1953,6 +1953,16 @@ function startColtRunGame() {
       id: "dark-descent",
       source: "assets/colt-run-game-music-dark-descent.mp3?v=20260721-four-track-playlist1",
       gain: 0.9
+    },
+    {
+      id: "wasteland-showdown",
+      source: "assets/colt-run-game-music-wasteland-showdown.mp3?v=20260721-six-track-playlist1",
+      gain: 0.8
+    },
+    {
+      id: "battle-theme-1",
+      source: "assets/colt-run-game-music-battle-theme-1.mp3?v=20260721-six-track-playlist1",
+      gain: 1.18
     }
   ];
   const inGameMusic = createDeferredAudio("");
