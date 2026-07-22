@@ -2255,7 +2255,7 @@ function startColtRunGame() {
   platformAssetVersions[28] = "20260721-platform29-challenge1";
   platformAssetVersions[29] = "20260721-platform30-challenge1";
   platformAssetVersions[30] = "20260721-platform31-challenge1";
-  platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260721-platform32-dragon-head1";
+  platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260722-platform32-dragon-head2";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2321,12 +2321,13 @@ function startColtRunGame() {
     }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 13 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 14 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
   lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
+  lavaRockSpriteSources[13] = "assets/colt-run-lava-rock-14.png?v=20260722-horse-head1";
   const lavaRockSprites = lavaRockSpriteSources.map(() => new Image());
   const ensureLavaRockSprite = index => {
     const spriteIndex = Math.abs(index) % lavaRockSprites.length;
@@ -2373,6 +2374,7 @@ function startColtRunGame() {
     { coreX: 0.32, coreY: 0.68, rx: 0.21, ry: 0.2 },
     { coreX: 0.34, coreY: 0.67, rx: 0.25, ry: 0.25 },
     { coreX: 0.16, coreY: 0.78, rx: 0.14, ry: 0.19 },
+    { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 },
     { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 }
   ];
   const lavaRockShowerHitProfiles = [
@@ -2422,7 +2424,7 @@ function startColtRunGame() {
   const lavaRockVideoSpecialHitProfiles = [
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
-  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9];
+  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9];
   const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
     `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
   ));
