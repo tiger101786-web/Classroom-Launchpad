@@ -2016,7 +2016,7 @@ function startColtRunGame() {
     {
       id: "battle-theme-3",
       source: "assets/colt-run-game-music-battle-theme-3.mp3?v=20260721-eight-track-playlist1",
-      gain: 1.04
+      gain: 1.12
     },
     {
       id: "battle-theme-4",
@@ -2212,7 +2212,7 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.43, 0.54];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.25, 0.54];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
