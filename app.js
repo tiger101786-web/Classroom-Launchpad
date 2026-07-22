@@ -2389,11 +2389,11 @@ function startColtRunGame() {
     return sprite;
   };
   const animatedBackgroundVideos = [
-    "assets/colt-run-bg-01.mp4?v=20260709-scene1-sixsec",
-    "assets/colt-run-bg-02.mp4?v=20260709-scene2-sixsec",
-    "assets/colt-run-bg-03.mp4?v=20260709-scene3-sixsec",
-    "assets/colt-run-bg-04.mp4?v=20260709-scene4-sixsec",
-    "assets/colt-run-bg-05.mp4?v=20260704-scene5"
+    "assets/colt-run-bg-01.mp4?v=20260722-hd-video1",
+    "assets/colt-run-bg-02.mp4?v=20260722-hd-video1",
+    "assets/colt-run-bg-03.mp4?v=20260722-hd-video1",
+    "assets/colt-run-bg-04.mp4?v=20260722-hd-video1",
+    "assets/colt-run-bg-05.mp4?v=20260722-hd-video1"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
