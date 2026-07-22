@@ -1725,6 +1725,7 @@ function renderColtRun() {
             <button type="button" data-colt-run="difficulty" data-difficulty="medium">Medium</button>
             <button type="button" data-colt-run="difficulty" data-difficulty="hard">Hard</button>
             <button type="button" data-colt-run="difficulty" data-difficulty="veryHard">Very Hard</button>
+            <button type="button" data-colt-run="difficulty" data-difficulty="impossible">Impossible</button>
           </div>
         </div>
         <div class="colt-run-stats" aria-label="Game stats">
@@ -1851,7 +1852,14 @@ function startColtRunGame() {
       maxActiveRocks: 5,
       doubleDropMultiplier: 0.55,
       maxDrops: 1,
-      forwardCooldown: 920
+      forwardCooldown: 920,
+      playerSpeedMultiplier: 1,
+      jumpPowerMultiplier: 1,
+      gravityMultiplier: 1,
+      levelTimeMultiplier: 1,
+      challengePlatformChance: 0.03,
+      smallPlatformChance: 0,
+      platformWidthScale: 1
     },
     medium: {
       label: "Medium",
@@ -1864,7 +1872,14 @@ function startColtRunGame() {
       maxActiveRocks: 7,
       doubleDropMultiplier: 1,
       maxDrops: 2,
-      forwardCooldown: 720
+      forwardCooldown: 720,
+      playerSpeedMultiplier: 1,
+      jumpPowerMultiplier: 1,
+      gravityMultiplier: 1,
+      levelTimeMultiplier: 1,
+      challengePlatformChance: 0.06,
+      smallPlatformChance: 0,
+      platformWidthScale: 1
     },
     hard: {
       label: "Hard",
@@ -1877,7 +1892,14 @@ function startColtRunGame() {
       maxActiveRocks: 9,
       doubleDropMultiplier: 1.45,
       maxDrops: 3,
-      forwardCooldown: 560
+      forwardCooldown: 560,
+      playerSpeedMultiplier: 1,
+      jumpPowerMultiplier: 1,
+      gravityMultiplier: 1,
+      levelTimeMultiplier: 1,
+      challengePlatformChance: 0.12,
+      smallPlatformChance: 0.12,
+      platformWidthScale: 1
     },
     veryHard: {
       label: "Very Hard",
@@ -1890,7 +1912,34 @@ function startColtRunGame() {
       maxActiveRocks: 11,
       doubleDropMultiplier: 1.8,
       maxDrops: 3,
-      forwardCooldown: 440
+      forwardCooldown: 440,
+      playerSpeedMultiplier: 1,
+      jumpPowerMultiplier: 1,
+      gravityMultiplier: 1,
+      levelTimeMultiplier: 1,
+      challengePlatformChance: 0.44,
+      smallPlatformChance: 0.55,
+      platformWidthScale: 1
+    },
+    impossible: {
+      label: "Impossible",
+      platformGapScale: 1.34,
+      platformGapBonus: 52,
+      rockIntervalMultiplier: 0.34,
+      showerIntervalMultiplier: 0.42,
+      rockSpeedMultiplier: 1.68,
+      activeRockBonus: 8,
+      maxActiveRocks: 14,
+      doubleDropMultiplier: 2.4,
+      maxDrops: 4,
+      forwardCooldown: 280,
+      playerSpeedMultiplier: 1.28,
+      jumpPowerMultiplier: 1.16,
+      gravityMultiplier: 0.96,
+      levelTimeMultiplier: 0.82,
+      challengePlatformChance: 0.68,
+      smallPlatformChance: 0.78,
+      platformWidthScale: 0.8
     }
   };
   const difficultyModeNames = Object.keys(difficultyModes);
@@ -2446,7 +2495,10 @@ function startColtRunGame() {
   const lavaRockMinInterval = 780;
   const lavaRockShowerBaseInterval = 8200;
   const lavaRockShowerMinInterval = 5200;
-  const getLevelDurationSeconds = () => Math.min(105, 56 + level * 7);
+  const getLevelDurationSeconds = () => {
+    const baseDuration = Math.min(105, 56 + level * 7);
+    return Math.max(40, baseDuration * getDifficultySettings().levelTimeMultiplier);
+  };
   const cleanLeaderboardName = name => {
     const cleaned = String(name || "").replace(/[^\w .'-]/g, "").trim().slice(0, 16);
     return cleaned || "Colt";
@@ -4396,16 +4448,16 @@ function startColtRunGame() {
     let y = 430;
     while (x < targetX) {
       const difficulty = Math.min(level, 8);
-      const challengePlatformChance = difficultyMode === "veryHard" ? 0.44 : difficultyMode === "hard" ? 0.12 : difficultyMode === "medium" ? 0.06 : 0.03;
+      const challengePlatformChance = mode.challengePlatformChance;
       let challengePlatformSpriteIndex = null;
       if (!challengePlatformSpriteIndexSet.has(lastPlatformSprite) && random() < challengePlatformChance) {
         challengePlatformSpriteIndex = challengePlatformSpriteIndexes[Math.floor(random() * challengePlatformSpriteIndexes.length)];
       }
-      const smallPlatformChance = difficultyMode === "veryHard" ? 0.55 : difficultyMode === "hard" ? 0.12 : 0;
+      const smallPlatformChance = mode.smallPlatformChance;
       const useSmallPlatform = challengePlatformSpriteIndex === null && lastPlatformSprite !== smallPlatformSpriteIndex && random() < smallPlatformChance;
       const challengePlatformIsTall = tallChallengePlatformSpriteIndexSet.has(challengePlatformSpriteIndex);
       const challengePlatformIsWide = challengePlatformSpriteIndex === 30;
-      const width = challengePlatformSpriteIndex !== null
+      const width = (challengePlatformSpriteIndex !== null
         ? challengePlatformIsTall
           ? 118 + random() * 32
           : challengePlatformIsWide
@@ -4413,7 +4465,7 @@ function startColtRunGame() {
             : 138 + random() * 42
         : useSmallPlatform
           ? 72 + random() * 22
-          : 175 + random() * 115;
+          : 175 + random() * 115) * mode.platformWidthScale;
       const nextY = Math.max(275, Math.min(438, y + (random() - 0.48) * (88 + difficulty * 4)));
       const upwardDelta = Math.max(0, y - nextY);
       const desiredGap = (92 + difficulty * 2 + random() * (56 + difficulty * 4)) * mode.platformGapScale;
@@ -5070,6 +5122,10 @@ function startColtRunGame() {
       return;
     }
     if (!won && !lost) {
+      const mode = getDifficultySettings();
+      const currentMoveSpeed = moveSpeed * mode.playerSpeedMultiplier;
+      const currentJumpPower = jumpPower * mode.jumpPowerMultiplier;
+      const currentGravity = gravity * mode.gravityMultiplier;
       const elapsedSeconds = (now - levelStart) / 1000;
       const remainingSeconds = Math.max(0, levelDurationSeconds - elapsedSeconds);
       if (remainingSeconds <= 0) {
@@ -5082,21 +5138,21 @@ function startColtRunGame() {
       const wasGrounded = player.grounded;
       player.vx = 0;
       if (keys.left) {
-        player.vx = -moveSpeed;
+        player.vx = -currentMoveSpeed;
         player.facing = -1;
       }
       if (keys.right) {
-        player.vx = moveSpeed;
+        player.vx = currentMoveSpeed;
         player.facing = 1;
       }
       if (keys.jump && player.grounded) {
-        player.vy = jumpPower;
+        player.vy = currentJumpPower;
         player.grounded = false;
         player.state = "jumpPrep";
         player.jumpPrepUntil = now + 150;
         stopRunningAudio();
       }
-      player.vy += gravity;
+      player.vy += currentGravity;
       player.x += player.vx;
       player.y += player.vy;
       player.x = Math.max(0, player.x);
