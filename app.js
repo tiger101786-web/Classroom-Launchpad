@@ -2167,11 +2167,12 @@ function startColtRunGame() {
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
   const smallPlatformSpriteIndex = 21;
   const horseHeadPlatformSpriteIndex = 8;
+  const dragonHeadPlatformSpriteIndex = 31;
   const challengePillarSpriteIndex = 26;
   const challengePlatformSpriteIndexes = [challengePillarSpriteIndex, 27, 28, 29, 30];
   const challengePlatformSpriteIndexSet = new Set(challengePlatformSpriteIndexes);
   const tallChallengePlatformSpriteIndexSet = new Set([challengePillarSpriteIndex, 27]);
-  const platformAssetVersions = Array.from({ length: 31 }, () => "20260718-platform07-replace1");
+  const platformAssetVersions = Array.from({ length: 32 }, () => "20260718-platform07-replace1");
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
@@ -2199,6 +2200,7 @@ function startColtRunGame() {
   platformAssetVersions[28] = "20260721-platform29-challenge1";
   platformAssetVersions[29] = "20260721-platform30-challenge1";
   platformAssetVersions[30] = "20260721-platform31-challenge1";
+  platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260721-platform32-dragon-head1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2210,7 +2212,7 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.43];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.43, 0.54];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
@@ -2231,6 +2233,8 @@ function startColtRunGame() {
     const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
     const drawH = spriteIndex === smallPlatformSpriteIndex
       ? Math.max(54, Math.min(112, drawW * naturalRatio))
+      : spriteIndex === dragonHeadPlatformSpriteIndex
+        ? Math.max(150, Math.min(260, drawW * naturalRatio))
       : spriteIndex === horseHeadPlatformSpriteIndex
         ? Math.max(118, Math.min(230, drawW * naturalRatio))
       : tallChallengePlatformSpriteIndexSet.has(spriteIndex)
@@ -4443,7 +4447,7 @@ function startColtRunGame() {
         lastPlatformSprite = challengePlatformSpriteIndex;
         return challengePlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25, dragonHeadPlatformSpriteIndex];
       const islandPlatforms = [1, 2, 3, 4, 5, horseHeadPlatformSpriteIndex, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
