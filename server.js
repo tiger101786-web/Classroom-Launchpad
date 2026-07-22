@@ -4,14 +4,16 @@ const path = require("path");
 const os = require("os");
 
 const root = __dirname;
-const dataDir = path.join(root, "data");
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
 const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
 const port = Number(process.env.PORT || 8080);
+const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 
 const defaultDb = {
   threads: [],
   mutedStudents: [],
   websiteRequests: [],
+  leaderboards: [],
   dailyLaunch: {
     message: "Check the board for today's first task, then choose a teacher-approved activity or resource.",
     updatedAt: ""
@@ -29,6 +31,43 @@ const defaultDb = {
     updatedAt: ""
   }
 };
+
+function cleanLeaderboardName(name) {
+  const cleaned = String(name || "").replace(/[^\w .'-]/g, "").trim().slice(0, 16);
+  return cleaned || "Colt";
+}
+
+function compareLeaderboardEntries(a, b) {
+  return (Number(b.coins) || 0) - (Number(a.coins) || 0)
+    || (Number(a.seconds) || 0) - (Number(b.seconds) || 0)
+    || String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
+}
+
+function normalizeLeaderboards(entries) {
+  const normalized = (Array.isArray(entries) ? entries : [])
+    .map(entry => ({
+      name: cleanLeaderboardName(entry && entry.name),
+      coins: Math.max(0, Math.min(100000, Math.round(Number(entry && entry.coins) || 0))),
+      seconds: Math.max(0, Math.min(86400, Math.round(Number(entry && entry.seconds) || 0))),
+      difficulty: leaderboardDifficulties.has(entry && entry.difficulty) ? entry.difficulty : "medium",
+      createdAt: Number.isFinite(Date.parse(entry && entry.createdAt)) ? new Date(entry.createdAt).toISOString() : new Date().toISOString()
+    }))
+    .filter(entry => entry.coins > 0);
+  return Array.from(leaderboardDifficulties).flatMap(difficulty => normalized
+    .filter(entry => entry.difficulty === difficulty)
+    .sort(compareLeaderboardEntries)
+    .slice(0, 10));
+}
+
+function mergeLeaderboards(existing, incoming) {
+  const seen = new Set();
+  return normalizeLeaderboards([...normalizeLeaderboards(existing), ...normalizeLeaderboards(incoming)].filter(entry => {
+    const key = [entry.name.toLowerCase(), entry.coins, entry.seconds, entry.difficulty, entry.createdAt].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }));
+}
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -67,6 +106,7 @@ function writeDb(db) {
     threads: Array.isArray(db.threads) ? db.threads : [],
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
+    leaderboards: normalizeLeaderboards(db.leaderboards),
     dailyLaunch: db.dailyLaunch && typeof db.dailyLaunch === "object"
       ? {
           message: typeof db.dailyLaunch.message === "string" ? db.dailyLaunch.message : defaultDb.dailyLaunch.message,
@@ -128,8 +168,54 @@ function readBody(req) {
 }
 
 async function handleApi(req, res, pathname) {
+  if (req.method === "GET" && pathname === "/api/health") {
+    sendJson(res, 200, { ok: true });
+    return true;
+  }
+
   if (req.method === "GET" && pathname === "/api/state") {
     sendJson(res, 200, readDb());
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/leaderboards") {
+    sendJson(res, 200, { leaderboards: readDb().leaderboards });
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/leaderboards") {
+    try {
+      const body = await readBody(req);
+      const entry = body.entry && typeof body.entry === "object" ? body.entry : body;
+      const normalized = normalizeLeaderboards([{ ...entry, createdAt: new Date().toISOString() }]);
+      if (!normalized.length) {
+        sendJson(res, 400, { error: "A leaderboard entry must include at least one coin." });
+        return true;
+      }
+      const db = readDb();
+      db.leaderboards = mergeLeaderboards(db.leaderboards, normalized);
+      writeDb(db);
+      sendJson(res, 200, { ok: true, leaderboards: db.leaderboards });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/leaderboards/import") {
+    try {
+      const body = await readBody(req);
+      if (!Array.isArray(body.leaderboards)) {
+        sendJson(res, 400, { error: "leaderboards must be an array." });
+        return true;
+      }
+      const db = readDb();
+      db.leaderboards = mergeLeaderboards(db.leaderboards, body.leaderboards.slice(0, 100));
+      writeDb(db);
+      sendJson(res, 200, { ok: true, leaderboards: db.leaderboards });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

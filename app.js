@@ -296,6 +296,15 @@ const sharedBackend = {
   },
   saveRandomActivitySettings(settings) {
     return this.request("/api/random-activity", { method: "PUT", body: JSON.stringify({ randomActivity: settings }) });
+  },
+  loadLeaderboards() {
+    return this.request("/api/leaderboards");
+  },
+  submitLeaderboardEntry(entry) {
+    return this.request("/api/leaderboards", { method: "POST", body: JSON.stringify({ entry }) });
+  },
+  importLeaderboards(leaderboards) {
+    return this.request("/api/leaderboards/import", { method: "PUT", body: JSON.stringify({ leaderboards }) });
   }
 };
 
@@ -1826,6 +1835,7 @@ function startColtRunGame() {
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
+  const leaderboardMigrationKey = "coltRunSharedLeaderboardMigratedV1";
   const characterSelectPanel = document.getElementById("coltRunCharacterSelect");
   const characterButtons = shell ? Array.from(shell.querySelectorAll("[data-character]")) : [];
   const selectColtCanvas = document.getElementById("coltRunSelectColt");
@@ -2621,6 +2631,7 @@ function startColtRunGame() {
     if (!leaderboardPanel) return;
     activeLeaderboardMode = normalizeDifficultyMode(pendingLeaderboardEntry?.difficulty || difficultyMode);
     renderLeaderboardList();
+    syncSharedLeaderboard();
     if (leaderboardPanel.hidden) leaderboardOpenedAt = performance.now();
     leaderboardPanel.hidden = false;
     if (pendingLeaderboardEntry && leaderboardNameInput) {
@@ -2646,24 +2657,57 @@ function startColtRunGame() {
   const savePendingLeaderboardEntry = name => {
     if (!pendingLeaderboardEntry) return;
     const entryMode = normalizeDifficultyMode(pendingLeaderboardEntry.difficulty);
+    const entry = {
+      name: cleanLeaderboardName(name),
+      coins: pendingLeaderboardEntry.coins,
+      seconds: pendingLeaderboardEntry.seconds,
+      difficulty: entryMode,
+      createdAt: new Date().toISOString()
+    };
     leaderboard = normalizeLeaderboard([
       ...leaderboard,
-      {
-        name: cleanLeaderboardName(name),
-        coins: pendingLeaderboardEntry.coins,
-        seconds: pendingLeaderboardEntry.seconds,
-        difficulty: entryMode,
-        createdAt: new Date().toISOString()
-      }
+      entry
     ]);
     pendingLeaderboardEntry = null;
     activeLeaderboardMode = entryMode;
     saveLeaderboard();
     renderLeaderboardList();
-    statusNode.textContent = `Leaderboard saved to ${difficultyModes[entryMode].label}. Press R or Enter to start again.`;
+    statusNode.textContent = `Leaderboard saved to ${difficultyModes[entryMode].label}${sharedBackend.enabled ? " and shared with the class" : " on this device"}. Press R or Enter to start again.`;
+    if (sharedBackend.enabled) {
+      sharedBackend.submitLeaderboardEntry(entry).then(result => {
+        leaderboard = normalizeLeaderboard(result && result.leaderboards);
+        saveLeaderboard();
+        if (leaderboardPanel && !leaderboardPanel.hidden) renderLeaderboardList();
+      }).catch(() => {
+        statusNode.textContent = `Leaderboard saved on this device. Shared saving is temporarily unavailable.`;
+      });
+    }
     if (leaderboardNameInput) leaderboardNameInput.value = "";
   };
+  let leaderboardSyncPromise = null;
+  const syncSharedLeaderboard = () => {
+    if (!sharedBackend.enabled) return Promise.resolve(leaderboard);
+    if (leaderboardSyncPromise) return leaderboardSyncPromise;
+    const localEntries = loadLeaderboard();
+    const shouldImport = !localStorage.getItem(leaderboardMigrationKey) && localEntries.length > 0;
+    leaderboardSyncPromise = (shouldImport
+      ? sharedBackend.importLeaderboards(localEntries)
+      : sharedBackend.loadLeaderboards())
+      .then(result => {
+        leaderboard = normalizeLeaderboard(result && result.leaderboards);
+        saveLeaderboard();
+        localStorage.setItem(leaderboardMigrationKey, "true");
+        if (leaderboardPanel && !leaderboardPanel.hidden) renderLeaderboardList();
+        return leaderboard;
+      })
+      .catch(() => leaderboard)
+      .finally(() => {
+        leaderboardSyncPromise = null;
+      });
+    return leaderboardSyncPromise;
+  };
   leaderboard = loadLeaderboard();
+  syncSharedLeaderboard();
 
   const setupAmbientBoost = () => {
     if (!AudioContextClass || ambientSourceNode) return;

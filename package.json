@@ -1,0 +1,13 @@
+{
+  "name": "classroom-launchpad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Classroom Launchpad and Colt Run",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check app.js && node --check server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
