@@ -2151,7 +2151,7 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.42, 0.49, 0.43];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.42, 0.41, 0.43];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
