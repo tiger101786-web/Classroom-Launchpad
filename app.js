@@ -1825,6 +1825,20 @@ function startColtRunGame() {
   ctx.setTransform(renderScaleX, 0, 0, renderScaleY, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
+  const backgroundVignette = ctx.createRadialGradient(
+    gameViewportWidth * 0.5,
+    gameViewportHeight * 0.45,
+    gameViewportHeight * 0.12,
+    gameViewportWidth * 0.5,
+    gameViewportHeight * 0.45,
+    gameViewportHeight * 0.78
+  );
+  backgroundVignette.addColorStop(0, "rgba(0, 0, 0, 0)");
+  backgroundVignette.addColorStop(1, "rgba(0, 0, 0, 0.32)");
+  const fallbackSkyGradient = ctx.createLinearGradient(0, 0, 0, gameViewportHeight);
+  fallbackSkyGradient.addColorStop(0, "#101014");
+  fallbackSkyGradient.addColorStop(0.55, "#211017");
+  fallbackSkyGradient.addColorStop(1, "#08080a");
   const levelNode = document.getElementById("coltRunLevel");
   const timeNode = document.getElementById("coltRunTime");
   const scoreNode = document.getElementById("coltRunScore");
@@ -2115,6 +2129,8 @@ function startColtRunGame() {
   rockDeathAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
+  let lastRenderedTimeText = "";
+  let lastOverlayFrameAt = 0;
   let level = 1;
   let levelSeed = Date.now();
   let levelStart = performance.now();
@@ -2147,6 +2163,12 @@ function startColtRunGame() {
   let lastStartingPlatformSprite = -1;
   let startingPlatformDeck = [];
   const getDifficultySettings = () => difficultyModes[difficultyMode] || difficultyModes.medium;
+  const setTimeDisplay = value => {
+    const text = String(value);
+    if (text === lastRenderedTimeText) return;
+    lastRenderedTimeText = text;
+    timeNode.textContent = text;
+  };
   const updateDifficultyButtons = () => {
     difficultyButtons.forEach(button => {
       const selected = button.dataset.difficulty === difficultyMode;
@@ -2214,6 +2236,9 @@ function startColtRunGame() {
     jumpPrep: new Image(),
     leap: new Image()
   };
+  Object.values(coltSprites).forEach(image => {
+    image.decoding = "async";
+  });
   coltSprites.idle.src = "assets/colt-run-idle.png?v=20260702-legfix";
   coltSprites.run.src = "assets/colt-run-run.png?v=20260703-holefix";
   coltSprites.run2.src = "assets/colt-run-run-2.png?v=20260702-run2";
@@ -2259,7 +2284,11 @@ function startColtRunGame() {
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
-  const platformSprites = platformSpriteSources.map(() => new Image());
+  const platformSprites = platformSpriteSources.map(() => {
+    const image = new Image();
+    image.decoding = "async";
+    return image;
+  });
   const retiredPlatformSpriteIndexes = new Set([18, 19]);
   const ensurePlatformSprite = index => {
     const spriteIndex = Math.abs(index) % platformSprites.length;
@@ -2280,12 +2309,23 @@ function startColtRunGame() {
   const getPlatformDrawSize = platform => {
     const spriteIndex = platform.sprite % platformSprites.length;
     const sprite = platformSprites[spriteIndex];
+    const spriteReady = sprite.complete && sprite.naturalWidth;
+    if (
+      spriteReady &&
+      platform.drawSizeCache &&
+      platform.drawSizeCache.spriteIndex === spriteIndex &&
+      platform.drawSizeCache.width === platform.w &&
+      platform.drawSizeCache.naturalWidth === sprite.naturalWidth &&
+      platform.drawSizeCache.naturalHeight === sprite.naturalHeight
+    ) {
+      return platform.drawSizeCache;
+    }
     const drawW = spriteIndex === smallPlatformSpriteIndex
       ? Math.max(platform.w + 28, platform.w * 1.14)
       : challengePlatformSpriteIndexSet.has(spriteIndex)
         ? Math.max(platform.w + 36, platform.w * 1.18)
         : Math.max(platform.w + 72, platform.w * 1.22);
-    const naturalRatio = sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
+    const naturalRatio = spriteReady ? sprite.naturalHeight / sprite.naturalWidth : 0.48;
     const drawH = spriteIndex === smallPlatformSpriteIndex
       ? Math.max(54, Math.min(112, drawW * naturalRatio))
       : spriteIndex === dragonHeadPlatformSpriteIndex
@@ -2297,7 +2337,17 @@ function startColtRunGame() {
         : challengePlatformSpriteIndexSet.has(spriteIndex)
           ? Math.max(92, Math.min(175, drawW * naturalRatio))
         : Math.max(82, Math.min(190, drawW * naturalRatio));
-    return { drawW, drawH };
+    const drawSize = { drawW, drawH };
+    if (spriteReady) {
+      platform.drawSizeCache = {
+        ...drawSize,
+        spriteIndex,
+        width: platform.w,
+        naturalWidth: sprite.naturalWidth,
+        naturalHeight: sprite.naturalHeight
+      };
+    }
+    return drawSize;
   };
 
   const getPlatformSurfaceY = (platform, footX) => {
@@ -2328,7 +2378,11 @@ function startColtRunGame() {
   lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[13] = "assets/colt-run-lava-rock-14.png?v=20260722-horse-head1";
-  const lavaRockSprites = lavaRockSpriteSources.map(() => new Image());
+  const lavaRockSprites = lavaRockSpriteSources.map(() => {
+    const image = new Image();
+    image.decoding = "async";
+    return image;
+  });
   const ensureLavaRockSprite = index => {
     const spriteIndex = Math.abs(index) % lavaRockSprites.length;
     const sprite = lavaRockSprites[spriteIndex];
@@ -2340,7 +2394,11 @@ function startColtRunGame() {
     "assets/colt-run-lava-rock-shower-02.png?v=20260711-shower2",
     "assets/colt-run-lava-rock-shower-03.png?v=20260721-meteor-shower1"
   ];
-  const lavaRockShowerSprites = lavaRockShowerSpriteSources.map(() => new Image());
+  const lavaRockShowerSprites = lavaRockShowerSpriteSources.map(() => {
+    const image = new Image();
+    image.decoding = "async";
+    return image;
+  });
   const ensureLavaRockShowerSprite = index => {
     const spriteIndex = Math.abs(index) % lavaRockShowerSprites.length;
     const sprite = lavaRockShowerSprites[spriteIndex];
@@ -2424,11 +2482,16 @@ function startColtRunGame() {
   const lavaRockVideoSpecialHitProfiles = [
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
+  const lavaRockSingleHitProfiles = lavaRockHitProfiles.map(profile => [profile]);
   const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9];
   const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
     `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
   ));
-  const backgroundSprites = backgroundSpriteSources.map(() => new Image());
+  const backgroundSprites = backgroundSpriteSources.map(() => {
+    const image = new Image();
+    image.decoding = "async";
+    return image;
+  });
   const ensureBackgroundSprite = index => {
     const spriteIndex = Math.abs(index) % backgroundSprites.length;
     const sprite = backgroundSprites[spriteIndex];
@@ -2443,6 +2506,7 @@ function startColtRunGame() {
     "assets/colt-run-bg-05.mp4?v=20260722-hd-video1"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
+  coinSprite.decoding = "async";
   coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
   const coinVideo = createDeferredVideo("assets/colt-run-coin-spin.mp4?v=20260704-coin2");
   const flagVideo = createDeferredVideo("assets/colt-run-flag.mp4?v=20260704-flagblow");
@@ -2454,19 +2518,20 @@ function startColtRunGame() {
   const mrNievesInAirVideo = createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1");
   const mrNievesCelebrationVideo = createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1");
   const mrNievesJumpImage = new Image();
+  mrNievesJumpImage.decoding = "async";
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
   const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
   const ensureCharacterMedia = character => {
     if (character === "mrNieves") {
       ensureMediaSource(mrNievesIdleVideo);
-      ensureMediaSource(mrNievesRunVideo);
-      ensureMediaSource(mrNievesInAirVideo);
+      ensureMediaSource(mrNievesRunVideo, "metadata");
+      ensureMediaSource(mrNievesInAirVideo, "metadata");
       ensureMediaSource(mrNievesCelebrationVideo, "metadata");
       return;
     }
     ensureMediaSource(idleVideo);
-    ensureMediaSource(runVideo);
-    ensureMediaSource(leapVideo);
+    ensureMediaSource(runVideo, "metadata");
+    ensureMediaSource(leapVideo, "metadata");
   };
   const stagedMediaTimers = [];
   const scheduleMediaLoad = (media, delay) => {
@@ -2924,70 +2989,115 @@ function startColtRunGame() {
     if (!coinVideo.paused) return;
     coinVideo.play().catch(() => {});
   };
-  coinVideo.addEventListener("canplay", keepCoinVideoPlaying);
 
   const keepFlagVideoPlaying = () => {
     ensureMediaSource(flagVideo, "metadata");
     if (!flagVideo.paused) return;
     flagVideo.play().catch(() => {});
   };
-  flagVideo.addEventListener("canplay", keepFlagVideoPlaying);
 
   const keepIdleVideoPlaying = () => {
     ensureMediaSource(idleVideo);
     if (!idleVideo.paused) return;
     idleVideo.play().catch(() => {});
   };
-  idleVideo.addEventListener("canplay", keepIdleVideoPlaying);
 
   const keepRunVideoPlaying = () => {
     ensureMediaSource(runVideo);
     if (!runVideo.paused) return;
     runVideo.play().catch(() => {});
   };
-  runVideo.addEventListener("canplay", keepRunVideoPlaying);
 
   const keepLeapVideoPlaying = () => {
     ensureMediaSource(leapVideo);
     if (!leapVideo.paused) return;
     leapVideo.play().catch(() => {});
   };
-  leapVideo.addEventListener("canplay", keepLeapVideoPlaying);
 
   const keepMrNievesIdleVideoPlaying = () => {
     ensureMediaSource(mrNievesIdleVideo);
     if (!mrNievesIdleVideo.paused) return;
     mrNievesIdleVideo.play().catch(() => {});
   };
-  mrNievesIdleVideo.addEventListener("canplay", keepMrNievesIdleVideoPlaying);
 
   const keepMrNievesRunVideoPlaying = () => {
     ensureMediaSource(mrNievesRunVideo);
     if (!mrNievesRunVideo.paused) return;
     mrNievesRunVideo.play().catch(() => {});
   };
-  mrNievesRunVideo.addEventListener("canplay", keepMrNievesRunVideoPlaying);
 
   const keepMrNievesInAirVideoPlaying = () => {
     ensureMediaSource(mrNievesInAirVideo);
     if (!mrNievesInAirVideo.paused) return;
     mrNievesInAirVideo.play().catch(() => {});
   };
-  mrNievesInAirVideo.addEventListener("canplay", keepMrNievesInAirVideoPlaying);
 
   const keepMrNievesCelebrationVideoPlaying = () => {
     ensureMediaSource(mrNievesCelebrationVideo);
     if (!mrNievesCelebrationVideo.paused) return;
     mrNievesCelebrationVideo.play().catch(() => {});
   };
-  mrNievesCelebrationVideo.addEventListener("canplay", keepMrNievesCelebrationVideoPlaying);
 
   const keepDeathVideoPlaying = () => {
     ensureMediaSource(deathVideo);
     if (!deathVideo.paused) return;
     deathVideo.play().catch(() => {});
   };
-  deathVideo.addEventListener("canplay", keepDeathVideoPlaying);
+  const characterAnimationVideos = [
+    idleVideo,
+    runVideo,
+    leapVideo,
+    mrNievesIdleVideo,
+    mrNievesRunVideo,
+    mrNievesInAirVideo,
+    mrNievesCelebrationVideo,
+    deathVideo
+  ];
+  let characterPlaybackKey = "";
+  const syncCharacterVideoPlayback = (force = false) => {
+    let activeVideos = [];
+    let nextKey = "hidden";
+    if (!document.hidden) {
+      if (characterSelectOpen) {
+        nextKey = "character-select";
+        activeVideos = [idleVideo, mrNievesIdleVideo];
+      } else if (lost) {
+        nextKey = `death:${selectedCharacter}`;
+        activeVideos = [selectedCharacter === "mrNieves" ? mrNievesIdleVideo : deathVideo];
+      } else if (selectedCharacter === "mrNieves") {
+        nextKey = `mrNieves:${player.state}`;
+        if (player.state === "run") activeVideos = [mrNievesRunVideo];
+        else if (player.state === "leap") activeVideos = [mrNievesInAirVideo];
+        else if (player.state === "celebrate") activeVideos = [mrNievesCelebrationVideo];
+        else activeVideos = [mrNievesIdleVideo];
+      } else if (player.state === "run") {
+        nextKey = "colt:run";
+        activeVideos = [runVideo];
+      } else if (player.state === "leap") {
+        nextKey = "colt:leap";
+        activeVideos = [leapVideo];
+      } else if (player.state !== "jumpPrep") {
+        nextKey = "colt:idle";
+        activeVideos = [idleVideo];
+      } else {
+        nextKey = "colt:jump-prep";
+      }
+    }
+    if (!force && nextKey === characterPlaybackKey) return;
+    characterPlaybackKey = nextKey;
+    const activeVideoSet = new Set(activeVideos);
+    characterAnimationVideos.forEach(video => {
+      if (activeVideoSet.has(video)) {
+        ensureMediaSource(video);
+        if (video.paused) video.play().catch(() => {});
+      } else if (!video.paused) {
+        video.pause();
+      }
+    });
+  };
+  characterAnimationVideos.forEach(video => {
+    video.addEventListener("canplay", () => syncCharacterVideoPlayback(true));
+  });
 
   const getLavaRockVideoSpecial = index => lavaRockVideoSpecials[index] || lavaRockVideoSpecials[0];
 
@@ -2998,7 +3108,11 @@ function startColtRunGame() {
     video.play().catch(() => {});
   };
   lavaRockVideoSpecials.forEach((video, index) => {
-    video.addEventListener("canplay", () => keepLavaRockVideoSpecialPlaying(index));
+    video.addEventListener("canplay", () => {
+      if (!document.hidden && fallingLavaRocks.some(rock => rock.videoSpecial && rock.videoSpecialIndex === index)) {
+        keepLavaRockVideoSpecialPlaying(index);
+      }
+    });
   });
 
   const keepBackgroundVideoPlaying = video => {
@@ -3006,8 +3120,11 @@ function startColtRunGame() {
     if (!video || !video.paused) return;
     video.play().catch(() => {});
   };
-  animatedBackgroundVideos.forEach(video => {
-    video.addEventListener("canplay", () => keepBackgroundVideoPlaying(video));
+  animatedBackgroundVideos.forEach((video, index) => {
+    video.addEventListener("canplay", () => {
+      if (!document.hidden && index === currentBackgroundIndex) keepBackgroundVideoPlaying(video);
+      else if (!video.paused) video.pause();
+    });
   });
 
   const getTransparentCoinFrame = () => {
@@ -4710,58 +4827,67 @@ function startColtRunGame() {
   };
 
   const getLavaRockDrawBox = rock => {
-    const sprite = getLavaRockSprite(rock);
-    const ratio = rock.videoSpecial
-      ? 1
-      : sprite && sprite.complete && sprite.naturalWidth ? sprite.naturalHeight / sprite.naturalWidth : 1.18;
-    const drawW = rock.size;
-    const drawH = drawW * ratio;
-    return {
-      x: rock.x,
-      y: rock.y,
-      w: drawW,
-      h: drawH
-    };
-  };
-
-  const getLavaRockCoreHitbox = rock => {
-    const box = getLavaRockDrawBox(rock);
-    const profile = lavaRockHitProfiles[rock.rockType % lavaRockHitProfiles.length] || lavaRockHitProfiles[0];
-    return {
-      x: box.x + box.w * profile.coreX,
-      y: box.y + box.h * profile.coreY,
-      rx: box.w * profile.rx,
-      ry: box.h * profile.ry
-    };
-  };
-
-  const getLavaRockCoreHitboxes = rock => {
-    if (rock.videoSpecial) {
-      const box = getLavaRockDrawBox(rock);
-      return lavaRockVideoSpecialHitProfiles.map(profile => ({
-        x: box.x + box.w * profile.coreX,
-        y: box.y + box.h * profile.coreY,
-        rx: box.w * profile.rx,
-        ry: box.h * profile.ry
-      }));
+    let ratio = 1;
+    if (!rock.videoSpecial) {
+      const sprite = rock.shower
+        ? ensureLavaRockShowerSprite(rock.showerType || 0)
+        : ensureLavaRockSprite(rock.rockType);
+      const naturalWidth = sprite.complete ? sprite.naturalWidth : 0;
+      const naturalHeight = sprite.complete ? sprite.naturalHeight : 0;
+      if (rock.drawNaturalWidth !== naturalWidth || rock.drawNaturalHeight !== naturalHeight) {
+        rock.drawRatio = naturalWidth ? naturalHeight / naturalWidth : 1.18;
+        rock.drawNaturalWidth = naturalWidth;
+        rock.drawNaturalHeight = naturalHeight;
+      }
+      ratio = rock.drawRatio;
     }
-    if (!rock.shower) return [getLavaRockCoreHitbox(rock)];
-    const box = getLavaRockDrawBox(rock);
-    const showerProfiles = lavaRockShowerHitProfiles[(rock.showerType || 0) % lavaRockShowerHitProfiles.length] || lavaRockShowerHitProfiles[0];
-    return showerProfiles.map(profile => ({
-      x: box.x + box.w * profile.coreX,
-      y: box.y + box.h * profile.coreY,
-      rx: box.w * profile.rx,
-      ry: box.h * profile.ry
-    }));
+    const box = rock.drawBox || (rock.drawBox = { x: 0, y: 0, w: 0, h: 0 });
+    box.x = rock.x;
+    box.y = rock.y;
+    box.w = rock.size;
+    box.h = rock.size * ratio;
+    return box;
   };
 
-  const ellipseHitsRect = (ellipse, rect) => {
-    const closestX = Math.max(rect.left, Math.min(ellipse.x, rect.right));
-    const closestY = Math.max(rect.top, Math.min(ellipse.y, rect.bottom));
-    const normalizedX = (closestX - ellipse.x) / ellipse.rx;
-    const normalizedY = (closestY - ellipse.y) / ellipse.ry;
-    return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+  const getLavaRockProfiles = rock => {
+    if (rock.videoSpecial) return lavaRockVideoSpecialHitProfiles;
+    if (rock.shower) {
+      return lavaRockShowerHitProfiles[(rock.showerType || 0) % lavaRockShowerHitProfiles.length]
+        || lavaRockShowerHitProfiles[0];
+    }
+    return lavaRockSingleHitProfiles[rock.rockType % lavaRockSingleHitProfiles.length] || lavaRockSingleHitProfiles[0];
+  };
+
+  const lavaRockHitsRect = (rock, rect) => {
+    const box = getLavaRockDrawBox(rock);
+    const profiles = getLavaRockProfiles(rock);
+    for (const profile of profiles) {
+      const x = box.x + box.w * profile.coreX;
+      const y = box.y + box.h * profile.coreY;
+      const rx = box.w * profile.rx;
+      const ry = box.h * profile.ry;
+      const closestX = Math.max(rect.left, Math.min(x, rect.right));
+      const closestY = Math.max(rect.top, Math.min(y, rect.bottom));
+      const normalizedX = (closestX - x) / rx;
+      const normalizedY = (closestY - y) / ry;
+      if (normalizedX * normalizedX + normalizedY * normalizedY <= 1) return true;
+    }
+    return false;
+  };
+
+  const lavaRockHasForwardCoverage = rock => {
+    const box = getLavaRockDrawBox(rock);
+    const profiles = getLavaRockProfiles(rock);
+    for (const profile of profiles) {
+      const x = box.x + box.w * profile.coreX;
+      const y = box.y + box.h * profile.coreY;
+      if (
+        x > player.x + player.w &&
+        x < cameraX + gameViewportWidth + 180 &&
+        y < gameViewportHeight * 0.74
+      ) return true;
+    }
+    return false;
   };
 
   const scheduleNextLavaRock = now => {
@@ -4905,24 +5031,27 @@ function startColtRunGame() {
       }
       scheduleNextLavaRockShower(now);
     }
-    const hasForwardCoverage = fallingLavaRocks.some(rock => {
-      return getLavaRockCoreHitboxes(rock).some(hitbox => (
-        hitbox.x > player.x + player.w &&
-        hitbox.x < cameraX + gameViewportWidth + 180 &&
-        hitbox.y < gameViewportHeight * 0.74
-      ));
-    });
+    const hasForwardCoverage = fallingLavaRocks.some(lavaRockHasForwardCoverage);
     if (!hasForwardCoverage && player.vx > moveSpeed * 0.65 && fallingLavaRocks.length < maxActiveRocks && now >= nextForwardLavaRockAt) {
       spawnLavaRock(now, player.x + 230 + Math.random() * 260, true);
       nextForwardLavaRockAt = now + mode.forwardCooldown;
     }
-    fallingLavaRocks = fallingLavaRocks.filter(rock => {
+    let activeRockCount = 0;
+    for (const rock of fallingLavaRocks) {
       rock.x += rock.vx;
       rock.y += rock.vy;
       rock.angle += rock.spin * 0.08;
       const box = getLavaRockDrawBox(rock);
       const screenX = box.x - cameraX;
-      return box.y < gameViewportHeight + box.h + 80 && screenX > -box.w - 220 && screenX < gameViewportWidth + 360;
+      if (box.y < gameViewportHeight + box.h + 80 && screenX > -box.w - 220 && screenX < gameViewportWidth + 360) {
+        fallingLavaRocks[activeRockCount] = rock;
+        activeRockCount += 1;
+      }
+    }
+    fallingLavaRocks.length = activeRockCount;
+    lavaRockVideoSpecials.forEach((video, index) => {
+      const isActive = fallingLavaRocks.some(rock => rock.videoSpecial && rock.videoSpecialIndex === index);
+      if (!isActive && !video.paused) video.pause();
     });
   };
 
@@ -4934,6 +5063,9 @@ function startColtRunGame() {
     }
     ensureBackgroundSprite(currentBackgroundIndex);
     animatedBackgroundReadyAt = performance.now() + 1200;
+    animatedBackgroundVideos.forEach((video, index) => {
+      if (index !== currentBackgroundIndex && !video.paused) video.pause();
+    });
     generateLevel();
     Object.assign(player, { x: 48, y: 300, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 });
     cameraX = 0;
@@ -4966,7 +5098,7 @@ function startColtRunGame() {
     statusNode.textContent = "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
     levelNode.textContent = level;
     scoreNode.textContent = score;
-    timeNode.textContent = levelDurationSeconds.toFixed(1);
+    setTimeDisplay(levelDurationSeconds.toFixed(1));
     if (nextLevelButton) nextLevelButton.disabled = true;
     canvas.focus({ preventScroll: true });
   };
@@ -5096,29 +5228,36 @@ function startColtRunGame() {
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
   };
 
+  const coverDrawRectCache = new WeakMap();
+  const getCoverDrawRect = (media, sourceW, sourceH) => {
+    const cacheKey = `${gameViewportWidth}x${gameViewportHeight}:${sourceW}x${sourceH}`;
+    const cached = coverDrawRectCache.get(media);
+    if (cached && cached.key === cacheKey) return cached;
+    const scale = Math.max(gameViewportWidth / sourceW, gameViewportHeight / sourceH);
+    const drawW = sourceW * scale;
+    const drawH = sourceH * scale;
+    const rect = {
+      key: cacheKey,
+      x: (gameViewportWidth - drawW) / 2,
+      y: (gameViewportHeight - drawH) / 2,
+      w: drawW,
+      h: drawH
+    };
+    coverDrawRectCache.set(media, rect);
+    return rect;
+  };
+
   const drawCoverImage = image => {
-    const w = gameViewportWidth;
-    const h = gameViewportHeight;
     if (!image.complete || !image.naturalWidth) return false;
-    const scale = Math.max(w / image.naturalWidth, h / image.naturalHeight);
-    const drawW = image.naturalWidth * scale;
-    const drawH = image.naturalHeight * scale;
-    const drawX = (w - drawW) / 2;
-    const drawY = (h - drawH) / 2;
-    ctx.drawImage(image, drawX, drawY, drawW, drawH);
+    const rect = getCoverDrawRect(image, image.naturalWidth, image.naturalHeight);
+    ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
     return true;
   };
 
   const drawCoverVideo = video => {
-    const w = gameViewportWidth;
-    const h = gameViewportHeight;
     if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) return false;
-    const scale = Math.max(w / video.videoWidth, h / video.videoHeight);
-    const drawW = video.videoWidth * scale;
-    const drawH = video.videoHeight * scale;
-    const drawX = (w - drawW) / 2;
-    const drawY = (h - drawH) / 2;
-    ctx.drawImage(video, drawX, drawY, drawW, drawH);
+    const rect = getCoverDrawRect(video, video.videoWidth, video.videoHeight);
+    ctx.drawImage(video, rect.x, rect.y, rect.w, rect.h);
     return true;
   };
 
@@ -5133,18 +5272,11 @@ function startColtRunGame() {
       ? drawCoverVideo(animatedBackground) || drawCoverImage(background)
       : drawCoverImage(background);
     if (backgroundDrawn) {
-      const vignette = ctx.createRadialGradient(w * 0.5, h * 0.45, h * 0.12, w * 0.5, h * 0.45, h * 0.78);
-      vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
-      vignette.addColorStop(1, "rgba(0, 0, 0, 0.32)");
-      ctx.fillStyle = vignette;
+      ctx.fillStyle = backgroundVignette;
       ctx.fillRect(0, 0, w, h);
       return;
     }
-    const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, "#101014");
-    sky.addColorStop(0.55, "#211017");
-    sky.addColorStop(1, "#08080a");
-    ctx.fillStyle = sky;
+    ctx.fillStyle = fallbackSkyGradient;
     ctx.fillRect(0, 0, w, h);
   };
 
@@ -5198,20 +5330,23 @@ function startColtRunGame() {
   const draw = () => {
     const w = gameViewportWidth;
     const h = gameViewportHeight;
+    syncCharacterVideoPlayback();
     drawLevelBackground();
     platforms.forEach(platform => {
       const x = platform.x - cameraX;
       if (x > w + 160 || x + platform.w < -160) return;
       drawPlatform(platform);
     });
+    let hasVisibleCoin = false;
     coins.forEach(coin => {
       if (coin.taken) return;
       const x = coin.x - cameraX;
       if (x < -40 || x > w + 40) return;
+      hasVisibleCoin = true;
       const coinSize = 58;
+      keepCoinVideoPlaying();
       const transparentCoinFrame = getTransparentCoinFrame();
       if (transparentCoinFrame) {
-        keepCoinVideoPlaying();
         ctx.save();
         ctx.shadowColor = "rgba(255, 82, 21, 0.52)";
         ctx.shadowBlur = 12;
@@ -5228,9 +5363,13 @@ function startColtRunGame() {
         ctx.restore();
       }
     });
+    if (!hasVisibleCoin && !coinVideo.paused) coinVideo.pause();
     const flagX = flag.x - cameraX;
-    const transparentFlagFrame = getTransparentFlagFrame();
-    if (transparentFlagFrame) {
+    const flagIsVisible = flagX > -140 && flagX < w + 140;
+    if (flagIsVisible) keepFlagVideoPlaying();
+    else if (!flagVideo.paused) flagVideo.pause();
+    const transparentFlagFrame = flagIsVisible ? getTransparentFlagFrame() : null;
+    if (flagIsVisible && transparentFlagFrame) {
       keepFlagVideoPlaying();
       const flagDrawW = 118;
       const flagDrawH = 132;
@@ -5239,7 +5378,7 @@ function startColtRunGame() {
       ctx.shadowBlur = 16;
       ctx.drawImage(transparentFlagFrame, flagX - 31, flag.y - 38, flagDrawW, flagDrawH);
       ctx.restore();
-    } else {
+    } else if (flagIsVisible) {
       ctx.strokeStyle = "#f4f2f3";
       ctx.lineWidth = 5;
       ctx.beginPath();
@@ -5272,8 +5411,14 @@ function startColtRunGame() {
     }
   };
 
-  const update = () => {
-    const now = performance.now();
+  const update = frameNow => {
+    const now = Number.isFinite(frameNow) ? frameNow : performance.now();
+    const overlayOpen = characterSelectOpen || (leaderboardPanel && !leaderboardPanel.hidden);
+    if (overlayOpen && lastOverlayFrameAt && now - lastOverlayFrameAt < 1000 / 30) {
+      animationId = requestAnimationFrame(update);
+      return;
+    }
+    lastOverlayFrameAt = overlayOpen ? now : 0;
     if (leaderboardPanel && !leaderboardPanel.hidden && !pendingLeaderboardEntry && !won && !lost) {
       draw();
       animationId = requestAnimationFrame(update);
@@ -5293,7 +5438,7 @@ function startColtRunGame() {
       const remainingSeconds = Math.max(0, levelDurationSeconds - elapsedSeconds);
       if (remainingSeconds <= 0) {
         triggerColtDeath("Time ran out. Restart and try for the flag again.");
-        timeNode.textContent = "0.0";
+        setTimeDisplay("0.0");
         draw();
         animationId = requestAnimationFrame(update);
         return;
@@ -5325,6 +5470,7 @@ function startColtRunGame() {
       platforms.forEach(platform => {
         const spriteIndex = platform.sprite % platformSprites.length;
         const withinX = player.x + player.w > platform.x && player.x < platform.x + platform.w;
+        if (!withinX) return;
         const footX = Math.max(platform.x, Math.min(platform.x + platform.w, player.x + player.w / 2));
         const surfaceY = getPlatformSurfaceY(platform, footX);
         const stayedOnPlatform = Boolean(platformCollisionProfiles[spriteIndex]) && wasGrounded && previousGroundPlatform === platform;
@@ -5348,8 +5494,9 @@ function startColtRunGame() {
       coins.forEach(coin => {
         if (coin.taken) return;
         const dx = player.x + player.w / 2 - coin.x;
+        if (Math.abs(dx) >= 40) return;
         const dy = player.y + player.h / 2 - coin.y;
-        if (Math.hypot(dx, dy) < 40) {
+        if (dx * dx + dy * dy < 1600) {
           coin.taken = true;
           score += 10;
           scoreNode.textContent = score;
@@ -5359,7 +5506,7 @@ function startColtRunGame() {
       if (!lost) {
         const coltHitbox = getColtHazardHitbox();
         for (const rock of fallingLavaRocks) {
-          if (getLavaRockCoreHitboxes(rock).some(hitbox => ellipseHitsRect(hitbox, coltHitbox))) {
+          if (lavaRockHitsRect(rock, coltHitbox)) {
             triggerColtDeath("The Colt was hit by a lava rock. Restart and try again.", { rockHit: true });
             break;
           }
@@ -5390,7 +5537,7 @@ function startColtRunGame() {
         triggerColtDeath("The Colt fell. Restart and try a new route.");
       }
       cameraX = Math.max(0, player.x - 230);
-      timeNode.textContent = remainingSeconds.toFixed(1);
+      setTimeDisplay(remainingSeconds.toFixed(1));
       syncRunningAudio();
     } else if (lost) {
       stopRunningAudio();
@@ -5621,9 +5768,40 @@ function startColtRunGame() {
       joystick.classList.remove("is-active");
     });
   };
+  const gameplayVideos = [
+    coinVideo,
+    flagVideo,
+    ...characterAnimationVideos,
+    ...lavaRockVideoSpecials,
+    ...animatedBackgroundVideos
+  ];
+  let documentHiddenAt = 0;
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      documentHiddenAt = performance.now();
+      gameplayVideos.forEach(video => {
+        if (!video.paused) video.pause();
+      });
+      characterPlaybackKey = "";
+      return;
+    }
+    if (
+      documentHiddenAt &&
+      !won &&
+      !lost &&
+      !characterSelectOpen &&
+      (!leaderboardPanel || leaderboardPanel.hidden)
+    ) {
+      levelStart += performance.now() - documentHiddenAt;
+    }
+    documentHiddenAt = 0;
+    characterPlaybackKey = "";
+    syncCharacterVideoPlayback(true);
+  };
 
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
+  document.addEventListener("visibilitychange", onVisibilityChange);
   window.addEventListener("blur", clearTouchKeys);
   document.addEventListener("fullscreenchange", updateFullscreenButton);
   app.addEventListener("click", onButtonClick);
@@ -5642,6 +5820,7 @@ function startColtRunGame() {
       cancelAnimationFrame(animationId);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("blur", clearTouchKeys);
       document.removeEventListener("fullscreenchange", updateFullscreenButton);
       app.removeEventListener("click", onButtonClick);
