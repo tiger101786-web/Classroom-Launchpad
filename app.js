@@ -2049,6 +2049,29 @@ function startColtRunGame() {
     video.preload = "none";
     return video;
   };
+  const decodedVideoFrameVersions = new WeakMap();
+  const decodedVideoFrameCallbackIds = new WeakMap();
+  const trackDecodedVideoFrames = video => {
+    if (!video || typeof video.requestVideoFrameCallback !== "function" || decodedVideoFrameCallbackIds.has(video)) return;
+    const onVideoFrame = () => {
+      decodedVideoFrameVersions.set(video, (decodedVideoFrameVersions.get(video) || 0) + 1);
+      decodedVideoFrameCallbackIds.set(video, video.requestVideoFrameCallback(onVideoFrame));
+    };
+    decodedVideoFrameCallbackIds.set(video, video.requestVideoFrameCallback(onVideoFrame));
+  };
+  const stopTrackingDecodedVideoFrames = video => {
+    const callbackId = decodedVideoFrameCallbackIds.get(video);
+    if (callbackId === undefined || typeof video.cancelVideoFrameCallback !== "function") return;
+    video.cancelVideoFrameCallback(callbackId);
+    decodedVideoFrameCallbackIds.delete(video);
+  };
+  const getDecodedVideoFrameStamp = (video, fallbackFrameRate = 30) => {
+    if (typeof video.requestVideoFrameCallback === "function") {
+      trackDecodedVideoFrames(video);
+      return decodedVideoFrameVersions.get(video) || 0;
+    }
+    return Math.floor(video.currentTime * fallbackFrameRate);
+  };
   const mrNievesRunMediaSource = "assets/colt-run-mr-nieves-run.mp4?v=20260717-run-audio1";
   const ambientAudio = createDeferredAudio("assets/colt-run-world-ambience.mp3?v=20260714-ambience-seamless", true);
   const inGameMusicTracks = [
@@ -2131,6 +2154,7 @@ function startColtRunGame() {
   let animationId = 0;
   let lastRenderedTimeText = "";
   let lastOverlayFrameAt = 0;
+  let lastSimulationFrameAt = 0;
   let level = 1;
   let levelSeed = Date.now();
   let levelStart = performance.now();
@@ -3129,7 +3153,7 @@ function startColtRunGame() {
 
   const getTransparentCoinFrame = () => {
     if (coinVideo.readyState < 2 || !coinFrameContext) return null;
-    const frameStamp = Math.floor(coinVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(coinVideo);
     if (frameStamp === coinFrameStamp) return coinFrameCanvas;
     const sourceW = coinVideo.videoWidth || coinFrameSize;
     const sourceH = coinVideo.videoHeight || coinFrameSize;
@@ -3180,7 +3204,7 @@ function startColtRunGame() {
 
   const getTransparentFlagFrame = () => {
     if (flagVideo.readyState < 2 || !flagFrameContext) return null;
-    const frameStamp = Math.floor(flagVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(flagVideo);
     if (frameStamp === flagFrameStamp) return flagFrameCanvas;
     const sourceW = flagVideo.videoWidth || flagFrameSize;
     const sourceH = flagVideo.videoHeight || flagFrameSize;
@@ -3328,7 +3352,7 @@ function startColtRunGame() {
 
   const getTransparentIdleFrame = () => {
     if (idleVideo.readyState < 2 || !idleFrameContext) return null;
-    const frameStamp = Math.floor(idleVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(idleVideo);
     if (frameStamp === idleFrameStamp) return idleFrameCanvas;
     const sourceW = idleVideo.videoWidth || idleFrameWidth;
     const sourceH = idleVideo.videoHeight || idleFrameHeight;
@@ -3513,7 +3537,7 @@ function startColtRunGame() {
 
   const getTransparentRunFrame = () => {
     if (runVideo.readyState < 2 || !runFrameContext) return null;
-    const frameStamp = Math.floor(runVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(runVideo);
     if (frameStamp === runFrameStamp) return runFrameCanvas;
     const sourceW = runVideo.videoWidth || runFrameWidth;
     const sourceH = runVideo.videoHeight || runFrameHeight;
@@ -3752,7 +3776,7 @@ function startColtRunGame() {
 
   const getTransparentLeapFrame = () => {
     if (leapVideo.readyState < 2 || !leapFrameContext) return null;
-    const frameStamp = Math.floor(leapVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(leapVideo);
     if (frameStamp === leapFrameStamp) return leapFrameCanvas;
     const sourceW = leapVideo.videoWidth || leapFrameWidth;
     const sourceH = leapVideo.videoHeight || leapFrameHeight;
@@ -4014,7 +4038,7 @@ function startColtRunGame() {
     const isReady = isVideoSource ? sourceMedia.readyState >= 2 : sourceMedia.complete && sourceMedia.naturalWidth;
     if (!isReady || !mrNievesFrameContext || !mrNievesCropContext) return null;
     const frameState = mrNievesFrameStates[frameStateKey] || mrNievesFrameStates.idle;
-    const frameStamp = isVideoSource ? Math.floor(sourceMedia.currentTime * 30) : 0;
+    const frameStamp = isVideoSource ? getDecodedVideoFrameStamp(sourceMedia) : 0;
     if (frameStamp === frameState.stamp && mrNievesActiveFrameState === frameStateKey) return mrNievesFrameCanvas;
     const sourceW = sourceMedia.videoWidth || sourceMedia.naturalWidth || mrNievesFrameWidth;
     const sourceH = sourceMedia.videoHeight || sourceMedia.naturalHeight || mrNievesFrameHeight;
@@ -4188,7 +4212,7 @@ function startColtRunGame() {
   const getTransparentMrNievesCelebrationFrame = () => getTransparentMrNievesFrame(mrNievesCelebrationVideo, "celebration");
   const getTransparentDeathFrame = () => {
     if (deathVideo.readyState < 2 || !deathFrameContext) return null;
-    const frameStamp = Math.floor(deathVideo.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(deathVideo);
     if (frameStamp === deathFrameStamp) return deathFrameCanvas;
     const sourceW = deathVideo.videoWidth || deathFrameWidth;
     const sourceH = deathVideo.videoHeight || deathFrameHeight;
@@ -4446,7 +4470,7 @@ function startColtRunGame() {
   const getTransparentLavaRockVideoFrame = (index = 0) => {
     const video = getLavaRockVideoSpecial(index);
     if (!video || video.readyState < 2 || !lavaRockVideoFrameContext) return null;
-    const frameStamp = Math.floor(video.currentTime * 30);
+    const frameStamp = getDecodedVideoFrameStamp(video);
     if (frameStamp === lavaRockVideoFrameStamp && lavaRockVideoFrameSource === index) return lavaRockVideoFrameCanvas;
     const sourceW = video.videoWidth || lavaRockVideoFrameSize;
     const sourceH = video.videoHeight || lavaRockVideoFrameSize;
@@ -5001,7 +5025,7 @@ function startColtRunGame() {
     });
   };
 
-  const updateLavaRocks = now => {
+  const updateLavaRocks = (now, deltaScale) => {
     const difficulty = Math.min(level, 8);
     const mode = getDifficultySettings();
     const maxActiveRocks = Math.max(1, Math.min(mode.maxActiveRocks, 3 + Math.floor(difficulty / 2) + mode.activeRockBonus));
@@ -5038,9 +5062,9 @@ function startColtRunGame() {
     }
     let activeRockCount = 0;
     for (const rock of fallingLavaRocks) {
-      rock.x += rock.vx;
-      rock.y += rock.vy;
-      rock.angle += rock.spin * 0.08;
+      rock.x += rock.vx * deltaScale;
+      rock.y += rock.vy * deltaScale;
+      rock.angle += rock.spin * 0.08 * deltaScale;
       const box = getLavaRockDrawBox(rock);
       const screenX = box.x - cameraX;
       if (box.y < gameViewportHeight + box.h + 80 && screenX > -box.w - 220 && screenX < gameViewportWidth + 360) {
@@ -5093,6 +5117,7 @@ function startColtRunGame() {
     lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
     lavaRockVideoFrameSource = -1;
+    lastSimulationFrameAt = 0;
     levelStart = performance.now();
     levelDurationSeconds = getLevelDurationSeconds();
     statusNode.textContent = "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
@@ -5413,6 +5438,10 @@ function startColtRunGame() {
 
   const update = frameNow => {
     const now = Number.isFinite(frameNow) ? frameNow : performance.now();
+    const targetFrameMs = 1000 / 60;
+    const frameElapsedMs = lastSimulationFrameAt ? Math.max(0, now - lastSimulationFrameAt) : targetFrameMs;
+    const deltaScale = Math.min(4, frameElapsedMs / targetFrameMs);
+    lastSimulationFrameAt = now;
     const overlayOpen = characterSelectOpen || (leaderboardPanel && !leaderboardPanel.hidden);
     if (overlayOpen && lastOverlayFrameAt && now - lastOverlayFrameAt < 1000 / 30) {
       animationId = requestAnimationFrame(update);
@@ -5460,9 +5489,12 @@ function startColtRunGame() {
         player.jumpPrepUntil = now + 150;
         stopRunningAudio();
       }
-      player.vy += currentGravity;
-      player.x += player.vx;
-      player.y += player.vy;
+      const previousPlayerY = player.y;
+      const previousPlayerBottom = previousPlayerY + player.h;
+      const previousVerticalVelocity = player.vy;
+      player.vy += currentGravity * deltaScale;
+      player.x += player.vx * deltaScale;
+      player.y += previousVerticalVelocity * deltaScale + currentGravity * deltaScale * (deltaScale + 1) / 2;
       player.x = Math.max(0, player.x);
       const previousGroundPlatform = player.groundPlatform;
       player.grounded = false;
@@ -5474,8 +5506,8 @@ function startColtRunGame() {
         const footX = Math.max(platform.x, Math.min(platform.x + platform.w, player.x + player.w / 2));
         const surfaceY = getPlatformSurfaceY(platform, footX);
         const stayedOnPlatform = Boolean(platformCollisionProfiles[spriteIndex]) && wasGrounded && previousGroundPlatform === platform;
-        const wasAbove = player.y + player.h - player.vy <= surfaceY + (stayedOnPlatform ? 12 : 0);
-        const hitTop = player.y + player.h >= surfaceY - (stayedOnPlatform ? 12 : 0) && player.y + player.h <= surfaceY + platform.h + 12;
+        const wasAbove = previousPlayerBottom <= surfaceY + (stayedOnPlatform ? 12 : 0);
+        const hitTop = player.y + player.h >= surfaceY - (stayedOnPlatform ? 12 : 0);
         if (withinX && wasAbove && hitTop && player.vy >= 0) {
           player.y = surfaceY - player.h;
           player.vy = 0;
@@ -5502,7 +5534,7 @@ function startColtRunGame() {
           scoreNode.textContent = score;
         }
       });
-      updateLavaRocks(now);
+      updateLavaRocks(now, deltaScale);
       if (!lost) {
         const coltHitbox = getColtHazardHitbox();
         for (const rock of fallingLavaRocks) {
@@ -5795,6 +5827,7 @@ function startColtRunGame() {
       levelStart += performance.now() - documentHiddenAt;
     }
     documentHiddenAt = 0;
+    lastSimulationFrameAt = 0;
     characterPlaybackKey = "";
     syncCharacterVideoPlayback(true);
   };
@@ -5832,6 +5865,7 @@ function startColtRunGame() {
       touchCleanups.forEach(cleanup => cleanup());
       stagedMediaTimers.forEach(timer => window.clearTimeout(timer));
       stopRunningAudio();
+      gameplayVideos.forEach(stopTrackingDecodedVideoFrames);
       inGameMusic.removeEventListener("ended", onInGameMusicEnded);
       [
         ambientAudio,
