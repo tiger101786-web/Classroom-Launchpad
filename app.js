@@ -2272,11 +2272,14 @@ function startColtRunGame() {
   const smallPlatformSpriteIndex = 21;
   const horseHeadPlatformSpriteIndex = 8;
   const dragonHeadPlatformSpriteIndex = 31;
+  const churchPlatformSpriteIndex = 32;
+  const bishopPlatformSpriteIndex = 33;
+  const scenicPlatformSpriteIndexSet = new Set([churchPlatformSpriteIndex, bishopPlatformSpriteIndex]);
   const challengePillarSpriteIndex = 26;
   const challengePlatformSpriteIndexes = [challengePillarSpriteIndex, 27, 28, 29, 30];
   const challengePlatformSpriteIndexSet = new Set(challengePlatformSpriteIndexes);
   const tallChallengePlatformSpriteIndexSet = new Set([challengePillarSpriteIndex, 27]);
-  const platformAssetVersions = Array.from({ length: 32 }, () => "20260718-platform07-replace1");
+  const platformAssetVersions = Array.from({ length: 34 }, () => "20260718-platform07-replace1");
   platformAssetVersions[0] = "20260718-platform01-replace1";
   platformAssetVersions[1] = "20260718-platform02-replace1";
   platformAssetVersions[3] = "20260718-platform04-replace1";
@@ -2305,6 +2308,8 @@ function startColtRunGame() {
   platformAssetVersions[29] = "20260721-platform30-challenge1";
   platformAssetVersions[30] = "20260721-platform31-challenge1";
   platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260722-platform32-dragon-head2";
+  platformAssetVersions[churchPlatformSpriteIndex] = "20260722-platform33-st-cletus-church1";
+  platformAssetVersions[bishopPlatformSpriteIndex] = "20260722-platform34-bishop-statue1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
     `assets/colt-run-platform-${String(index + 1).padStart(2, "0")}.png?v=${version}`
   ));
@@ -2320,7 +2325,7 @@ function startColtRunGame() {
     if (!sprite.getAttribute("src")) sprite.src = platformSpriteSources[spriteIndex];
     return sprite;
   };
-  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.25, 0.54];
+  const platformSurfaceRatios = [0.24, 0.27, 0.20, 0.18, 0.24, 0.27, 0.22, 0.25, 0.49, 0.24, 0.23, 0.22, 0.42, 0.52, 0.41, 0.13, 0.52, 0.50, 0.50, 0.50, 0.22, 0.18, 0.41, 0.25, 0.31, 0.30, 0.16, 0.23, 0.30, 0.41, 0.25, 0.54, 0.61, 0.61];
   const platformCollisionProfiles = {
     0: { offsetY: 10 },
     7: { leftSurfaceRatio: 0.47, rightSurfaceRatio: 0.03 },
@@ -2354,6 +2359,8 @@ function startColtRunGame() {
       ? Math.max(54, Math.min(112, drawW * naturalRatio))
       : spriteIndex === dragonHeadPlatformSpriteIndex
         ? Math.max(150, Math.min(260, drawW * naturalRatio))
+      : scenicPlatformSpriteIndexSet.has(spriteIndex)
+        ? Math.max(150, Math.min(250, drawW * naturalRatio))
       : spriteIndex === horseHeadPlatformSpriteIndex
         ? Math.max(118, Math.min(230, drawW * naturalRatio))
       : tallChallengePlatformSpriteIndexSet.has(spriteIndex)
@@ -2395,13 +2402,16 @@ function startColtRunGame() {
     }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 14 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 17 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
   lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[13] = "assets/colt-run-lava-rock-14.png?v=20260722-horse-head1";
+  lavaRockSpriteSources[14] = "assets/colt-run-lava-rock-15.png?v=20260722-dragon-rocks1";
+  lavaRockSpriteSources[15] = "assets/colt-run-lava-rock-16.png?v=20260722-dragon-rocks1";
+  lavaRockSpriteSources[16] = "assets/colt-run-lava-rock-17.png?v=20260722-dragon-rocks1";
   const lavaRockSprites = lavaRockSpriteSources.map(() => {
     const image = new Image();
     image.decoding = "async";
@@ -2457,7 +2467,10 @@ function startColtRunGame() {
     { coreX: 0.34, coreY: 0.67, rx: 0.25, ry: 0.25 },
     { coreX: 0.16, coreY: 0.78, rx: 0.14, ry: 0.19 },
     { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 },
-    { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 }
+    { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 },
+    { coreX: 0.33, coreY: 0.56, rx: 0.27, ry: 0.34 },
+    { coreX: 0.31, coreY: 0.61, rx: 0.27, ry: 0.33 },
+    { coreX: 0.31, coreY: 0.62, rx: 0.27, ry: 0.34 }
   ];
   const lavaRockShowerHitProfiles = [
     [
@@ -2507,7 +2520,7 @@ function startColtRunGame() {
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
   const lavaRockSingleHitProfiles = lavaRockHitProfiles.map(profile => [profile]);
-  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9];
+  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9, 1, 1, 1];
   const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
     `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
   ));
@@ -4679,7 +4692,7 @@ function startColtRunGame() {
         lastPlatformSprite = challengePlatformSpriteIndex;
         return challengePlatformSpriteIndex;
       }
-      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25, dragonHeadPlatformSpriteIndex];
+      const widePlatforms = [0, 2, 6, 7, 9, 11, 12, 13, 14, 15, 17, 18, 22, 23, 24, 25, dragonHeadPlatformSpriteIndex, churchPlatformSpriteIndex, bishopPlatformSpriteIndex];
       const islandPlatforms = [1, 2, 3, 4, 5, horseHeadPlatformSpriteIndex, 10, 11, 12, 14, 15, 20];
       const choices = width > 230 ? widePlatforms : islandPlatforms;
       const activeChoices = choices.filter(choice => !retiredPlatformSpriteIndexes.has(choice));
