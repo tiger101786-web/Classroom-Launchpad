@@ -2553,7 +2553,14 @@ function startColtRunGame() {
   const mrNievesIdleVideo = createDeferredVideo("assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake2");
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideo = createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1");
-  const mrNievesCelebrationVideo = createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1");
+  const mrNievesCelebrationVideos = [
+    createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1"),
+    createDeferredVideo("assets/colt-run-mr-nieves-celebration-02.mp4?v=20260723-celebration2"),
+    createDeferredVideo("assets/colt-run-mr-nieves-celebration-03.mp4?v=20260723-celebration3")
+  ];
+  let mrNievesCelebrationIndex = 0;
+  let lastMrNievesCelebrationIndex = -1;
+  const getMrNievesCelebrationVideo = () => mrNievesCelebrationVideos[mrNievesCelebrationIndex];
   const mrNievesDeathVideo = createDeferredVideo("assets/colt-run-mr-nieves-death.mp4?v=20260723-death2");
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.decoding = "async";
@@ -2564,7 +2571,7 @@ function startColtRunGame() {
       ensureMediaSource(mrNievesIdleVideo);
       ensureMediaSource(mrNievesRunVideo, "metadata");
       ensureMediaSource(mrNievesInAirVideo, "metadata");
-      ensureMediaSource(mrNievesCelebrationVideo, "metadata");
+      mrNievesCelebrationVideos.forEach(video => ensureMediaSource(video, "metadata"));
       return;
     }
     ensureMediaSource(idleVideo);
@@ -2644,7 +2651,9 @@ function startColtRunGame() {
     run: { stamp: -1, crop: null },
     jump: { stamp: -1, crop: null },
     inAir: { stamp: -1, crop: null },
-    celebration: { stamp: -1, crop: null },
+    celebration0: { stamp: -1, crop: null },
+    celebration1: { stamp: -1, crop: null },
+    celebration2: { stamp: -1, crop: null },
     death: { stamp: -1, crop: null }
   };
   let mrNievesActiveFrameState = "";
@@ -3072,9 +3081,25 @@ function startColtRunGame() {
   };
 
   const keepMrNievesCelebrationVideoPlaying = () => {
+    const mrNievesCelebrationVideo = getMrNievesCelebrationVideo();
     ensureMediaSource(mrNievesCelebrationVideo);
     if (!mrNievesCelebrationVideo.paused) return;
     mrNievesCelebrationVideo.play().catch(() => {});
+  };
+
+  const chooseMrNievesCelebrationVideo = () => {
+    let nextIndex = Math.floor(Math.random() * mrNievesCelebrationVideos.length);
+    if (mrNievesCelebrationVideos.length > 1 && nextIndex === lastMrNievesCelebrationIndex) {
+      nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (mrNievesCelebrationVideos.length - 1))) % mrNievesCelebrationVideos.length;
+    }
+    mrNievesCelebrationIndex = nextIndex;
+    lastMrNievesCelebrationIndex = nextIndex;
+    const video = getMrNievesCelebrationVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
   };
 
   const keepMrNievesDeathVideoPlaying = () => {
@@ -3095,7 +3120,7 @@ function startColtRunGame() {
     mrNievesIdleVideo,
     mrNievesRunVideo,
     mrNievesInAirVideo,
-    mrNievesCelebrationVideo,
+    ...mrNievesCelebrationVideos,
     mrNievesDeathVideo,
     deathVideo
   ];
@@ -3114,7 +3139,10 @@ function startColtRunGame() {
         nextKey = `mrNieves:${player.state}`;
         if (player.state === "run") activeVideos = [mrNievesRunVideo];
         else if (player.state === "leap") activeVideos = [mrNievesInAirVideo];
-        else if (player.state === "celebrate") activeVideos = [mrNievesCelebrationVideo];
+        else if (player.state === "celebrate") {
+          nextKey = `mrNieves:celebrate:${mrNievesCelebrationIndex}`;
+          activeVideos = [getMrNievesCelebrationVideo()];
+        }
         else activeVideos = [mrNievesIdleVideo];
       } else if (player.state === "run") {
         nextKey = "colt:run";
@@ -4231,7 +4259,7 @@ function startColtRunGame() {
   const getTransparentMrNievesRunFrame = () => getTransparentMrNievesFrame(mrNievesRunVideo, "run");
   const getTransparentMrNievesJumpFrame = () => getTransparentMrNievesFrame(mrNievesJumpImage, "jump");
   const getTransparentMrNievesInAirFrame = () => getTransparentMrNievesFrame(mrNievesInAirVideo, "inAir");
-  const getTransparentMrNievesCelebrationFrame = () => getTransparentMrNievesFrame(mrNievesCelebrationVideo, "celebration");
+  const getTransparentMrNievesCelebrationFrame = () => getTransparentMrNievesFrame(getMrNievesCelebrationVideo(), `celebration${mrNievesCelebrationIndex}`);
   const getTransparentMrNievesDeathFrame = () => getTransparentMrNievesFrame(mrNievesDeathVideo, "death");
   const getTransparentDeathFrame = () => {
     if (deathVideo.readyState < 2 || !deathFrameContext) return null;
@@ -5234,7 +5262,7 @@ function startColtRunGame() {
     const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
     const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
     if (mrNievesFrame) {
-      if (mrNievesIsCelebrating && mrNievesCelebrationVideo.readyState >= 2) keepMrNievesCelebrationVideoPlaying();
+      if (mrNievesIsCelebrating && getMrNievesCelebrationVideo().readyState >= 2) keepMrNievesCelebrationVideoPlaying();
       else if (mrNievesIsInAir && mrNievesInAirVideo.readyState >= 2) keepMrNievesInAirVideoPlaying();
       else if (mrNievesIsRunning && mrNievesRunVideo.readyState >= 2) keepMrNievesRunVideoPlaying();
       else keepMrNievesIdleVideoPlaying();
@@ -5582,8 +5610,7 @@ function startColtRunGame() {
         player.grounded = true;
         player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";
         if (selectedCharacter === "mrNieves") {
-          ensureMediaSource(mrNievesCelebrationVideo);
-          if (mrNievesCelebrationVideo.readyState >= 1) mrNievesCelebrationVideo.currentTime = 0;
+          chooseMrNievesCelebrationVideo();
           keepMrNievesCelebrationVideoPlaying();
         }
         stopRunningAudio();
@@ -5908,7 +5935,7 @@ function startColtRunGame() {
         mrNievesIdleVideo,
         mrNievesRunVideo,
         mrNievesInAirVideo,
-        mrNievesCelebrationVideo,
+        ...mrNievesCelebrationVideos,
         mrNievesDeathVideo,
         deathVideo,
         ...lavaRockVideoSpecials,
