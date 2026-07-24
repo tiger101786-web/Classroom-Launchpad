@@ -2554,7 +2554,7 @@ function startColtRunGame() {
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideo = createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1");
   const mrNievesCelebrationVideo = createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1");
-  const mrNievesDeathVideo = createDeferredVideo("assets/colt-run-mr-nieves-death.mp4?v=20260722-death1");
+  const mrNievesDeathVideo = createDeferredVideo("assets/colt-run-mr-nieves-death.mp4?v=20260723-death2");
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.decoding = "async";
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
