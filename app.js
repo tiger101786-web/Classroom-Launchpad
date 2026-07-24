@@ -2522,9 +2522,12 @@ function startColtRunGame() {
   ];
   const lavaRockSingleHitProfiles = lavaRockHitProfiles.map(profile => [profile]);
   const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9, 1, 1, 1];
-  const backgroundSpriteSources = Array.from({ length: 5 }, (_, index) => (
-    `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
-  ));
+  const backgroundSpriteSources = [
+    ...Array.from({ length: 5 }, (_, index) => (
+      `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
+    )),
+    "assets/colt-run-bg-06.png?v=20260724-background6"
+  ];
   const backgroundSprites = backgroundSpriteSources.map(() => {
     const image = new Image();
     image.decoding = "async";
@@ -2541,14 +2544,23 @@ function startColtRunGame() {
     "assets/colt-run-bg-02.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-03.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-04.mp4?v=20260722-hd-video1",
-    "assets/colt-run-bg-05.mp4?v=20260722-hd-video1"
+    "assets/colt-run-bg-05.mp4?v=20260722-hd-video1",
+    "assets/colt-run-bg-06.mp4?v=20260724-background6"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";
   coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
   const coinVideo = createDeferredVideo("assets/colt-run-coin-spin.mp4?v=20260704-coin2");
   const flagVideo = createDeferredVideo("assets/colt-run-flag.mp4?v=20260704-flagblow");
-  const idleVideo = createDeferredVideo("assets/colt-run-idle.mp4?v=20260703-idle");
+  const coltIdleVideos = [
+    createDeferredVideo("assets/colt-run-idle.mp4?v=20260703-idle"),
+    createDeferredVideo("assets/colt-run-idle-02.mp4?v=20260724-idle2")
+  ];
+  coltIdleVideos.forEach(video => {
+    video.loop = false;
+  });
+  let coltIdleIndex = 0;
+  const getColtIdleVideo = () => coltIdleVideos[coltIdleIndex];
   const runVideo = createDeferredVideo("assets/colt-run-run.mp4?v=20260704-best-run");
   const leapVideo = createDeferredVideo("assets/colt-run-leap.mp4?v=20260704-best2-leap");
   const mrNievesIdleVideos = [
@@ -2590,7 +2602,8 @@ function startColtRunGame() {
       ensureMediaSource(mrNievesDeathVideo, "metadata");
       return;
     }
-    ensureMediaSource(idleVideo);
+    coltIdleVideos.forEach(video => ensureMediaSource(video, "metadata"));
+    ensureMediaSource(getColtIdleVideo());
     ensureMediaSource(runVideo, "metadata");
     ensureMediaSource(leapVideo, "metadata");
   };
@@ -2624,8 +2637,10 @@ function startColtRunGame() {
   const idleCropContext = idleCropCanvas.getContext("2d");
   if (idleFrameContext) idleFrameContext.imageSmoothingEnabled = false;
   if (idleCropContext) idleCropContext.imageSmoothingEnabled = false;
-  let idleFrameStamp = -1;
-  let idleStableCrop = null;
+  const idleFrameStates = coltIdleVideos.map(() => ({
+    stamp: -1,
+    stableCrop: null
+  }));
   const runFrameWidth = 330;
   const runFrameHeight = 192;
   const runFrameCanvas = document.createElement("canvas");
@@ -3063,9 +3078,20 @@ function startColtRunGame() {
   };
 
   const keepIdleVideoPlaying = () => {
+    const idleVideo = getColtIdleVideo();
     ensureMediaSource(idleVideo);
     if (!idleVideo.paused) return;
     idleVideo.play().catch(() => {});
+  };
+
+  const chooseColtIdleVideo = () => {
+    coltIdleIndex = (coltIdleIndex + 1) % coltIdleVideos.length;
+    const video = getColtIdleVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
   };
 
   const keepRunVideoPlaying = () => {
@@ -3159,7 +3185,7 @@ function startColtRunGame() {
     deathVideo.play().catch(() => {});
   };
   const characterAnimationVideos = [
-    idleVideo,
+    ...coltIdleVideos,
     runVideo,
     leapVideo,
     ...mrNievesIdleVideos,
@@ -3175,8 +3201,8 @@ function startColtRunGame() {
     let nextKey = "hidden";
     if (!document.hidden) {
       if (characterSelectOpen) {
-        nextKey = "character-select";
-        activeVideos = [idleVideo, getMrNievesIdleVideo()];
+        nextKey = `character-select:${coltIdleIndex}:${mrNievesIdleIndex}`;
+        activeVideos = [getColtIdleVideo(), getMrNievesIdleVideo()];
       } else if (lost) {
         nextKey = `death:${selectedCharacter}`;
         activeVideos = [selectedCharacter === "mrNieves" ? mrNievesDeathVideo : deathVideo];
@@ -3202,8 +3228,8 @@ function startColtRunGame() {
         nextKey = "colt:leap";
         activeVideos = [leapVideo];
       } else if (player.state !== "jumpPrep") {
-        nextKey = "colt:idle";
-        activeVideos = [idleVideo];
+        nextKey = `colt:idle:${coltIdleIndex}`;
+        activeVideos = [getColtIdleVideo()];
       } else {
         nextKey = "colt:jump-prep";
       }
@@ -3222,6 +3248,14 @@ function startColtRunGame() {
   };
   characterAnimationVideos.forEach(video => {
     video.addEventListener("canplay", () => syncCharacterVideoPlayback(true));
+  });
+  coltIdleVideos.forEach(video => {
+    video.addEventListener("ended", () => {
+      if (video !== getColtIdleVideo()) return;
+      chooseColtIdleVideo();
+      characterPlaybackKey = "";
+      syncCharacterVideoPlayback(true);
+    });
   });
   mrNievesIdleVideos.forEach(video => {
     video.addEventListener("ended", () => {
@@ -3460,9 +3494,11 @@ function startColtRunGame() {
   };
 
   const getTransparentIdleFrame = () => {
+    const idleVideo = getColtIdleVideo();
+    const idleFrameState = idleFrameStates[coltIdleIndex];
     if (idleVideo.readyState < 2 || !idleFrameContext) return null;
     const frameStamp = getDecodedVideoFrameStamp(idleVideo);
-    if (frameStamp === idleFrameStamp) return idleFrameCanvas;
+    if (frameStamp === idleFrameState.stamp) return idleFrameCanvas;
     const sourceW = idleVideo.videoWidth || idleFrameWidth;
     const sourceH = idleVideo.videoHeight || idleFrameHeight;
     const sourceRatio = sourceW / sourceH;
@@ -3492,9 +3528,10 @@ function startColtRunGame() {
       const average = (red + green + blue) / 3;
       const vividColtRed = red > green * 1.58 && red > blue * 1.48 && red > 82;
       const blackInk = average < 31 && darkest < 20;
+      const greenScreen = green > 70 && green > red * 1.35 && green > blue * 1.18 && green - red > 35;
       const lowSaturation = brightest - darkest < 112;
       const mutedWarmGray = red > green && red > blue && red - green < 70 && red - blue < 86;
-      return !vividColtRed && !blackInk && average > 32 && (lowSaturation || mutedWarmGray);
+      return greenScreen || (!vividColtRed && !blackInk && average > 32 && (lowSaturation || mutedWarmGray));
     };
     const transparent = new Uint8Array(idleFrameWidth * idleFrameHeight);
     const queue = [];
@@ -3537,8 +3574,9 @@ function startColtRunGame() {
       const average = (red + green + blue) / 3;
       const vividColtRed = red > green * 1.6 && red > blue * 1.5 && red > 84;
       const blackInk = average < 31 && darkest < 20;
+      const greenScreen = green > 64 && green > red * 1.28 && green > blue * 1.12 && green - red > 28;
       const mutedWarmGray = red > green && red > blue && red - green < 76 && red - blue < 92;
-      return !vividColtRed && !blackInk && average > 36 && (brightest - darkest < 106 || mutedWarmGray);
+      return greenScreen || (!vividColtRed && !blackInk && average > 36 && (brightest - darkest < 106 || mutedWarmGray));
     };
     const seen = new Uint8Array(idleFrameWidth * idleFrameHeight);
     for (let pixelIndex = 0; pixelIndex < seen.length; pixelIndex += 1) {
@@ -3608,22 +3646,22 @@ function startColtRunGame() {
       maxX = Math.max(maxX, x);
       maxY = Math.max(maxY, y);
     }
-    if (!idleStableCrop && maxX > minX && maxY > minY) {
+    if (!idleFrameState.stableCrop && maxX > minX && maxY > minY) {
       const padding = 1;
-      idleStableCrop = {
+      idleFrameState.stableCrop = {
         x: Math.max(0, minX - padding),
         y: Math.max(0, minY - padding),
         w: Math.min(idleFrameWidth - 1, maxX + padding) - Math.max(0, minX - padding) + 1,
         h: Math.min(idleFrameHeight - 1, maxY + padding) - Math.max(0, minY - padding) + 1
       };
     }
-    if (idleStableCrop && idleCropContext) {
-      const cropW = idleStableCrop.w;
-      const cropH = idleStableCrop.h;
+    if (idleFrameState.stableCrop && idleCropContext) {
+      const cropW = idleFrameState.stableCrop.w;
+      const cropH = idleFrameState.stableCrop.h;
       idleCropCanvas.width = cropW;
       idleCropCanvas.height = cropH;
       idleCropContext.clearRect(0, 0, cropW, cropH);
-      idleCropContext.putImageData(idleFrameContext.getImageData(idleStableCrop.x, idleStableCrop.y, cropW, cropH), 0, 0);
+      idleCropContext.putImageData(idleFrameContext.getImageData(idleFrameState.stableCrop.x, idleFrameState.stableCrop.y, cropW, cropH), 0, 0);
       const cropRatio = cropW / cropH;
       const frameRatio = idleFrameWidth / idleFrameHeight;
       let fitW = idleFrameWidth;
@@ -3640,7 +3678,7 @@ function startColtRunGame() {
       idleFrameContext.clearRect(0, 0, idleFrameWidth, idleFrameHeight);
       idleFrameContext.drawImage(idleCropCanvas, fitX, fitY, fitW, fitH);
     }
-    idleFrameStamp = frameStamp;
+    idleFrameState.stamp = frameStamp;
     return idleFrameCanvas;
   };
 
@@ -5958,7 +5996,7 @@ function startColtRunGame() {
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
   updateDifficultyButtons();
   updateCharacterButtons();
-  ensureMediaSource(idleVideo);
+  ensureMediaSource(getColtIdleVideo());
   chooseMrNievesIdleVideo();
   scheduleMediaLoad(coinVideo, 1800);
   scheduleMediaLoad(flagVideo, 2600);
@@ -5993,7 +6031,7 @@ function startColtRunGame() {
         rockDeathAudio,
         coinVideo,
         flagVideo,
-        idleVideo,
+        ...coltIdleVideos,
         runVideo,
         leapVideo,
         ...mrNievesIdleVideos,
