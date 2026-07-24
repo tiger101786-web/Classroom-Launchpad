@@ -4352,7 +4352,13 @@ function startColtRunGame() {
     mrNievesActiveFrameState = frameStateKey;
     return mrNievesFrameCanvas;
   };
-  const getTransparentMrNievesIdleFrame = () => getTransparentMrNievesFrame(getMrNievesIdleVideo(), `idle${mrNievesIdleIndex}`);
+  const getLastTransparentMrNievesFrame = () => (
+    mrNievesActiveFrameState ? mrNievesFrameCanvas : null
+  );
+  const getTransparentMrNievesIdleFrame = () => (
+    getTransparentMrNievesFrame(getMrNievesIdleVideo(), `idle${mrNievesIdleIndex}`) ||
+    getLastTransparentMrNievesFrame()
+  );
   const getTransparentMrNievesRunFrame = () => getTransparentMrNievesFrame(mrNievesRunVideo, "run");
   const getTransparentMrNievesJumpFrame = () => getTransparentMrNievesFrame(mrNievesJumpImage, "jump");
   const getTransparentMrNievesInAirFrame = () => getTransparentMrNievesFrame(getMrNievesInAirVideo(), `inAir${mrNievesInAirIndex}`);
@@ -5377,11 +5383,13 @@ function startColtRunGame() {
     } else if (leapFrame) {
       keepLeapVideoPlaying();
       ctx.drawImage(leapFrame, -drawW / 2, 0, drawW, drawH);
-    } else if (sprite.complete && sprite.naturalWidth) {
+    } else if (!isMrNieves && sprite.complete && sprite.naturalWidth) {
       ctx.drawImage(sprite, -drawW / 2, 0, drawW, drawH);
-    } else {
+    } else if (!isMrNieves) {
       ctx.fillStyle = "#7b0b31";
       ctx.fillRect(-player.w / 2, drawH - player.h, player.w, player.h);
+    } else {
+      keepMrNievesIdleVideoPlaying();
     }
     ctx.restore();
   };
