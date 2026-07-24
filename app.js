@@ -2098,7 +2098,7 @@ function startColtRunGame() {
     {
       id: "wasteland-showdown",
       source: "assets/colt-run-game-music-wasteland-showdown.mp3?v=20260721-six-track-playlist1",
-      gain: 0.92
+      gain: 1.08
     },
     {
       id: "battle-theme-1",
