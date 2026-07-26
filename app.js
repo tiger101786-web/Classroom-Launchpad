@@ -2114,6 +2114,16 @@ function startColtRunGame() {
       id: "battle-theme-4",
       source: "assets/colt-run-game-music-battle-theme-4.mp3?v=20260721-eight-track-playlist1",
       gain: 1.28
+    },
+    {
+      id: "battle-mus",
+      source: "assets/colt-run-game-music-battle-mus.mp3?v=20260725-ten-track-playlist1",
+      gain: 1
+    },
+    {
+      id: "sonic-battle",
+      source: "assets/colt-run-game-music-sonic-battle.mp3?v=20260725-ten-track-playlist1",
+      gain: 1.28
     }
   ];
   const inGameMusic = createDeferredAudio("");
