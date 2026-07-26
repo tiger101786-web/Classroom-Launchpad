@@ -2430,6 +2430,10 @@ function startColtRunGame() {
   lavaRockSpriteSources[14] = "assets/colt-run-lava-rock-15.png?v=20260722-dragon-rocks1";
   lavaRockSpriteSources[15] = "assets/colt-run-lava-rock-16.png?v=20260722-dragon-rocks1";
   lavaRockSpriteSources[16] = "assets/colt-run-lava-rock-17.png?v=20260722-dragon-rocks1";
+  const retiredLavaRockSpriteIndexes = new Set([14, 15]);
+  const activeLavaRockSpriteIndexes = lavaRockSpriteSources
+    .map((_, index) => index)
+    .filter(index => !retiredLavaRockSpriteIndexes.has(index));
   const lavaRockSprites = lavaRockSpriteSources.map(() => {
     const image = new Image();
     image.decoding = "async";
@@ -2566,7 +2570,7 @@ function startColtRunGame() {
     "assets/colt-run-bg-05.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-06.mp4?v=20260724-background6",
     "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
-    "assets/colt-run-bg-08.mp4?v=20260725-backgrounds7-8"
+    "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";
@@ -5159,7 +5163,9 @@ function startColtRunGame() {
     const difficulty = Math.min(level, 8);
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
-    const rockType = Math.floor(Math.random() * lavaRockSprites.length);
+    const rockType = activeLavaRockSpriteIndexes[
+      Math.floor(Math.random() * activeLavaRockSpriteIndexes.length)
+    ];
     ensureLavaRockSprite(rockType);
     const baseSize = 116 + Math.random() * 32 + difficulty * 2;
     const size = baseSize * (lavaRockSizeMultipliers[rockType] || 1);
