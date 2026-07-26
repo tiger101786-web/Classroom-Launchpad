@@ -2424,16 +2424,15 @@ function startColtRunGame() {
     }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 17 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 18 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
   lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
-  lavaRockSpriteSources[13] = "assets/colt-run-lava-rock-14.png?v=20260722-horse-head1";
-  lavaRockSpriteSources[14] = "assets/colt-run-lava-rock-15.png?v=20260725-replacement-rocks1";
-  lavaRockSpriteSources[15] = "assets/colt-run-lava-rock-16.png?v=20260725-replacement-rocks1";
-  lavaRockSpriteSources[16] = "assets/colt-run-lava-rock-17.png?v=20260722-dragon-rocks1";
+  for (let index = 13; index < 18; index += 1) {
+    lavaRockSpriteSources[index] = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260726-lava-heads1`;
+  }
   const activeLavaRockSpriteIndexes = lavaRockSpriteSources.map((_, index) => index);
   const lavaRockSprites = lavaRockSpriteSources.map(() => {
     const image = new Image();
@@ -2490,10 +2489,11 @@ function startColtRunGame() {
     { coreX: 0.34, coreY: 0.67, rx: 0.25, ry: 0.25 },
     { coreX: 0.16, coreY: 0.78, rx: 0.14, ry: 0.19 },
     { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 },
-    { coreX: 0.30, coreY: 0.66, rx: 0.25, ry: 0.27 },
-    { coreX: 0.33, coreY: 0.56, rx: 0.27, ry: 0.34 },
-    { coreX: 0.31, coreY: 0.61, rx: 0.27, ry: 0.33 },
-    { coreX: 0.31, coreY: 0.62, rx: 0.27, ry: 0.34 }
+    { coreX: 0.30, coreY: 0.56, rx: 0.27, ry: 0.34 },
+    { coreX: 0.29, coreY: 0.58, rx: 0.27, ry: 0.32 },
+    { coreX: 0.30, coreY: 0.57, rx: 0.27, ry: 0.34 },
+    { coreX: 0.29, coreY: 0.57, rx: 0.27, ry: 0.31 },
+    { coreX: 0.30, coreY: 0.58, rx: 0.27, ry: 0.31 }
   ];
   const lavaRockShowerHitProfiles = [
     [
@@ -2543,7 +2543,7 @@ function startColtRunGame() {
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
   const lavaRockSingleHitProfiles = lavaRockHitProfiles.map(profile => [profile]);
-  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 0.9, 1, 1, 1];
+  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 1, 1, 1, 1, 1];
   const backgroundSpriteSources = [
     ...Array.from({ length: 5 }, (_, index) => (
       `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
@@ -2609,7 +2609,8 @@ function startColtRunGame() {
   const mrNievesCelebrationVideos = [
     createDeferredVideo("assets/colt-run-mr-nieves-celebration.mp4?v=20260717-celebration1"),
     createDeferredVideo("assets/colt-run-mr-nieves-celebration-02.mp4?v=20260723-celebration2"),
-    createDeferredVideo("assets/colt-run-mr-nieves-celebration-03.mp4?v=20260723-celebration3")
+    createDeferredVideo("assets/colt-run-mr-nieves-celebration-03.mp4?v=20260723-celebration3"),
+    createDeferredVideo("assets/colt-run-mr-nieves-celebration-04.mp4?v=20260726-celebration4")
   ];
   let mrNievesCelebrationIndex = 0;
   let lastMrNievesCelebrationIndex = -1;
@@ -2718,6 +2719,7 @@ function startColtRunGame() {
     celebration0: { stamp: -1, crop: null },
     celebration1: { stamp: -1, crop: null },
     celebration2: { stamp: -1, crop: null },
+    celebration3: { stamp: -1, crop: null },
     death0: { stamp: -1, crop: null },
     death1: { stamp: -1, crop: null }
   };
