@@ -2526,7 +2526,9 @@ function startColtRunGame() {
     ...Array.from({ length: 5 }, (_, index) => (
       `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
     )),
-    "assets/colt-run-bg-06.png?v=20260724-background6"
+    "assets/colt-run-bg-06.png?v=20260724-background6",
+    "assets/colt-run-bg-07.png?v=20260725-backgrounds7-8",
+    "assets/colt-run-bg-08.png?v=20260725-backgrounds7-8"
   ];
   const backgroundSprites = backgroundSpriteSources.map(() => {
     const image = new Image();
@@ -2545,7 +2547,9 @@ function startColtRunGame() {
     "assets/colt-run-bg-03.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-04.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-05.mp4?v=20260722-hd-video1",
-    "assets/colt-run-bg-06.mp4?v=20260724-background6"
+    "assets/colt-run-bg-06.mp4?v=20260724-background6",
+    "assets/colt-run-bg-07.mp4?v=20260725-backgrounds7-8",
+    "assets/colt-run-bg-08.mp4?v=20260725-backgrounds7-8"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";
