@@ -2424,7 +2424,7 @@ function startColtRunGame() {
     }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 18 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 26 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
   lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
@@ -2433,7 +2433,25 @@ function startColtRunGame() {
   for (let index = 13; index < 18; index += 1) {
     lavaRockSpriteSources[index] = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260726-lava-heads1`;
   }
+  for (let index = 18; index < 26; index += 1) {
+    lavaRockSpriteSources[index] = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260726-background8-rocks1`;
+  }
   const activeLavaRockSpriteIndexes = lavaRockSpriteSources.map((_, index) => index);
+  const background008Index = 7;
+  const background008FeaturedLavaRockChance = 0.75;
+  const background008FeaturedLavaRockSpriteIndexes = Array.from({ length: 8 }, (_, index) => index + 18);
+  const background008LegacyLavaRockSpriteIndexes = activeLavaRockSpriteIndexes.filter(index => (
+    !background008FeaturedLavaRockSpriteIndexes.includes(index)
+  ));
+  const chooseRegularLavaRockSpriteIndex = () => {
+    let spriteIndexes = activeLavaRockSpriteIndexes;
+    if (currentBackgroundIndex === background008Index) {
+      spriteIndexes = Math.random() < background008FeaturedLavaRockChance
+        ? background008FeaturedLavaRockSpriteIndexes
+        : background008LegacyLavaRockSpriteIndexes;
+    }
+    return spriteIndexes[Math.floor(Math.random() * spriteIndexes.length)];
+  };
   const lavaRockSprites = lavaRockSpriteSources.map(() => {
     const image = new Image();
     image.decoding = "async";
@@ -2493,7 +2511,15 @@ function startColtRunGame() {
     { coreX: 0.29, coreY: 0.58, rx: 0.27, ry: 0.32 },
     { coreX: 0.30, coreY: 0.57, rx: 0.27, ry: 0.34 },
     { coreX: 0.29, coreY: 0.57, rx: 0.27, ry: 0.31 },
-    { coreX: 0.30, coreY: 0.58, rx: 0.27, ry: 0.31 }
+    { coreX: 0.30, coreY: 0.58, rx: 0.27, ry: 0.31 },
+    { coreX: 0.31, coreY: 0.72, rx: 0.25, ry: 0.23 },
+    { coreX: 0.29, coreY: 0.76, rx: 0.24, ry: 0.18 },
+    { coreX: 0.35, coreY: 0.75, rx: 0.27, ry: 0.2 },
+    { coreX: 0.45, coreY: 0.65, rx: 0.27, ry: 0.25 },
+    { coreX: 0.27, coreY: 0.80, rx: 0.22, ry: 0.15 },
+    { coreX: 0.26, coreY: 0.82, rx: 0.23, ry: 0.13 },
+    { coreX: 0.34, coreY: 0.69, rx: 0.28, ry: 0.24 },
+    { coreX: 0.50, coreY: 0.60, rx: 0.25, ry: 0.22 }
   ];
   const lavaRockShowerHitProfiles = [
     [
@@ -2543,7 +2569,16 @@ function startColtRunGame() {
     { coreX: 0.35, coreY: 0.66, rx: 0.2, ry: 0.2 }
   ];
   const lavaRockSingleHitProfiles = lavaRockHitProfiles.map(profile => [profile]);
-  const lavaRockSizeMultipliers = [0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9, 1, 1, 1, 1, 1];
+  lavaRockSingleHitProfiles[25] = [
+    { coreX: 0.67, coreY: 0.27, rx: 0.17, ry: 0.16 },
+    { coreX: 0.28, coreY: 0.72, rx: 0.2, ry: 0.18 },
+    { coreX: 0.72, coreY: 0.73, rx: 0.18, ry: 0.17 }
+  ];
+  const lavaRockSizeMultipliers = [
+    0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9,
+    1, 1, 1, 1, 1,
+    1, 1.04, 1, 0.96, 1.06, 1.28, 1, 1.08
+  ];
   const backgroundSpriteSources = [
     ...Array.from({ length: 5 }, (_, index) => (
       `assets/colt-run-bg-${String(index + 1).padStart(2, "0")}.png?v=20260719-background-stills-match-videos1`
@@ -5183,9 +5218,7 @@ function startColtRunGame() {
     const difficulty = Math.min(level, 8);
     const mode = getDifficultySettings();
     const speed = mode.rockSpeedMultiplier;
-    const rockType = activeLavaRockSpriteIndexes[
-      Math.floor(Math.random() * activeLavaRockSpriteIndexes.length)
-    ];
+    const rockType = chooseRegularLavaRockSpriteIndex();
     ensureLavaRockSprite(rockType);
     const baseSize = 116 + Math.random() * 32 + difficulty * 2;
     const size = baseSize * (lavaRockSizeMultipliers[rockType] || 1);
