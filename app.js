@@ -1780,6 +1780,7 @@ function renderColtRun() {
           <button class="outline-btn" type="button" data-colt-run="fullscreen">⛶ Fullscreen</button>
           <button class="outline-btn" type="button" data-colt-run="characterSelect">Character</button>
           <button class="outline-btn" type="button" data-colt-run="leaderboard">Leaderboard</button>
+          <button id="coltRunLeaderboardPromptToggle" class="outline-btn" type="button" data-colt-run="leaderboardPrompts" aria-pressed="true">Leaderboard Popups: On</button>
           <button class="outline-btn" type="button" data-colt-run="restart">Restart</button>
           <button id="coltRunNextLevel" class="primary-btn" type="button" data-colt-run="new" disabled>Next Level</button>
           <button class="outline-btn" type="button" data-colt-run="back" aria-keyshortcuts="B">Back (B)</button>
@@ -1848,8 +1849,11 @@ function startColtRunGame() {
   const leaderboardBody = document.getElementById("coltRunLeaderboardBody");
   const leaderboardForm = document.getElementById("coltRunLeaderboardForm");
   const leaderboardNameInput = document.getElementById("coltRunPlayerName");
+  const leaderboardPromptToggle = document.getElementById("coltRunLeaderboardPromptToggle");
   const leaderboardStorageKey = "coltRunCoinLeaderboardV1";
   const leaderboardMigrationKey = "coltRunSharedLeaderboardMigratedV1";
+  const leaderboardPromptsStorageKey = "coltRunLeaderboardPromptsV1";
+  let leaderboardPromptsEnabled = localStorage.getItem(leaderboardPromptsStorageKey) !== "off";
   const characterSelectPanel = document.getElementById("coltRunCharacterSelect");
   const characterButtons = shell ? Array.from(shell.querySelectorAll("[data-character]")) : [];
   const selectColtCanvas = document.getElementById("coltRunSelectColt");
@@ -2345,6 +2349,9 @@ function startColtRunGame() {
     24: { surfacePoints: [[0, 0.16], [0.35, 0.17], [0.45, 0.23], [0.58, 0.40], [0.70, 0.48], [1, 0.48]] },
     25: { surfacePoints: [[0, 0.31], [0.35, 0.31], [0.43, 0.29], [0.68, 0.11], [0.75, 0.10], [1, 0.10]] }
   };
+  const platformFlagAnchors = {
+    0: { xRatio: 0.64 }
+  };
 
   const getPlatformDrawSize = platform => {
     const spriteIndex = platform.sprite % platformSprites.length;
@@ -2558,7 +2565,7 @@ function startColtRunGame() {
     "assets/colt-run-bg-04.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-05.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-06.mp4?v=20260724-background6",
-    "assets/colt-run-bg-07.mp4?v=20260725-backgrounds7-8",
+    "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
     "assets/colt-run-bg-08.mp4?v=20260725-backgrounds7-8"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
@@ -2784,6 +2791,19 @@ function startColtRunGame() {
   };
   const saveLeaderboard = () => {
     localStorage.setItem(leaderboardStorageKey, JSON.stringify(normalizeLeaderboard(leaderboard)));
+  };
+  const updateLeaderboardPromptToggle = () => {
+    if (!leaderboardPromptToggle) return;
+    leaderboardPromptToggle.textContent = `Leaderboard Popups: ${leaderboardPromptsEnabled ? "On" : "Off"}`;
+    leaderboardPromptToggle.setAttribute("aria-pressed", String(leaderboardPromptsEnabled));
+  };
+  const toggleLeaderboardPrompts = () => {
+    leaderboardPromptsEnabled = !leaderboardPromptsEnabled;
+    localStorage.setItem(leaderboardPromptsStorageKey, leaderboardPromptsEnabled ? "on" : "off");
+    updateLeaderboardPromptToggle();
+    statusNode.textContent = leaderboardPromptsEnabled
+      ? "Leaderboard popups are on. Qualifying scores will open the name screen automatically."
+      : "Leaderboard popups are off. Gameplay will continue uninterrupted; use Leaderboard to save a qualifying score.";
   };
   const leaderboardQualifies = (coins, seconds, mode = difficultyMode) => {
     if (coins <= 0) return false;
@@ -4971,7 +4991,12 @@ function startColtRunGame() {
       x += width;
     }
     const last = platforms[platforms.length - 1];
-    flag = { x: last.x + last.w - 34, y: last.y - 86 };
+    const flagAnchor = platformFlagAnchors[last.sprite] || {};
+    const flagX = Number.isFinite(flagAnchor.xRatio)
+      ? last.x + last.w * flagAnchor.xRatio
+      : last.x + last.w - 34;
+    const flagSurfaceY = getPlatformSurfaceY(last, flagX);
+    flag = { x: flagX, y: flagSurfaceY - 86 };
     [...new Set(platforms.map(platform => platform.sprite))].forEach(ensurePlatformSprite);
   };
 
@@ -5021,8 +5046,12 @@ function startColtRunGame() {
     scoreNode.textContent = score;
     if (leaderboardQualifies(finalCoins, finalSeconds, finalDifficulty)) {
       pendingLeaderboardEntry = { coins: finalCoins, seconds: finalSeconds, difficulty: finalDifficulty };
-      statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Enter your name.`;
-      openLeaderboard();
+      if (leaderboardPromptsEnabled) {
+        statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Enter your name.`;
+        openLeaderboard();
+      } else {
+        statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Use Leaderboard to save it, or press R/Enter to continue.`;
+      }
     } else {
       statusNode.textContent = "The Colt lost all coins. Press R or Enter to start again.";
     }
@@ -5270,7 +5299,7 @@ function startColtRunGame() {
     });
   };
 
-  const resetLevel = (newSeed = false, keepRun = false) => {
+  const resetLevel = (newSeed = false, keepRun = false, preservePendingLeaderboardEntry = false) => {
     if (newSeed) {
       levelSeed = Date.now() + Math.floor(Math.random() * 9999);
       chooseLevelBackground();
@@ -5287,7 +5316,7 @@ function startColtRunGame() {
     if (!keepRun) {
       score = 0;
       runTimeBankSeconds = 0;
-      pendingLeaderboardEntry = null;
+      if (!preservePendingLeaderboardEntry) pendingLeaderboardEntry = null;
       leaderboardOpenedAt = 0;
       if (leaderboardPanel) leaderboardPanel.hidden = true;
     }
@@ -5312,7 +5341,9 @@ function startColtRunGame() {
     lastSimulationFrameAt = 0;
     levelStart = performance.now();
     levelDurationSeconds = getLevelDurationSeconds();
-    statusNode.textContent = "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
+    statusNode.textContent = preservePendingLeaderboardEntry && pendingLeaderboardEntry
+      ? "New run started. Your qualifying score is waiting; use Leaderboard whenever you are ready to save it."
+      : "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
     levelNode.textContent = level;
     scoreNode.textContent = score;
     setTimeDisplay(levelDurationSeconds.toFixed(1));
@@ -5646,7 +5677,7 @@ function startColtRunGame() {
       return;
     }
     lastOverlayFrameAt = overlayOpen ? now : 0;
-    if (leaderboardPanel && !leaderboardPanel.hidden && !pendingLeaderboardEntry && !won && !lost) {
+    if (leaderboardPanel && !leaderboardPanel.hidden && !won && !lost) {
       draw();
       animationId = requestAnimationFrame(update);
       return;
@@ -5809,19 +5840,19 @@ function startColtRunGame() {
       event.preventDefault();
       if (won) nextLevel();
       else if (lost) {
-        if (pendingLeaderboardEntry) openLeaderboard();
-        else resetLevel(false);
+        if (pendingLeaderboardEntry && leaderboardPromptsEnabled) openLeaderboard();
+        else resetLevel(false, false, Boolean(pendingLeaderboardEntry));
       }
       else statusNode.textContent = "Reach the finish flag first, then Enter starts the next level.";
       return;
     }
     if (event.code === "KeyR") {
       event.preventDefault();
-      if (pendingLeaderboardEntry) {
+      if (pendingLeaderboardEntry && leaderboardPromptsEnabled) {
         openLeaderboard();
         return;
       }
-      resetLevel(false);
+      resetLevel(false, false, Boolean(pendingLeaderboardEntry));
       return;
     }
     const key = keyMap[event.code];
@@ -5867,10 +5898,11 @@ function startColtRunGame() {
     playColtRunAudio();
     if (button.dataset.coltRun === "fullscreen") toggleFullscreen();
     if (button.dataset.coltRun === "leaderboard") openLeaderboard();
+    if (button.dataset.coltRun === "leaderboardPrompts") toggleLeaderboardPrompts();
     if (button.dataset.coltRun === "closeLeaderboard") closeLeaderboard();
     if (button.dataset.coltRun === "restart") {
-      if (pendingLeaderboardEntry) openLeaderboard();
-      else resetLevel(false);
+      if (pendingLeaderboardEntry && leaderboardPromptsEnabled) openLeaderboard();
+      else resetLevel(false, false, Boolean(pendingLeaderboardEntry));
     }
     if (button.dataset.coltRun === "new") {
       if (won) nextLevel();
@@ -6039,6 +6071,7 @@ function startColtRunGame() {
   if (leaderboardForm) leaderboardForm.addEventListener("submit", onLeaderboardSubmit);
   updateDifficultyButtons();
   updateCharacterButtons();
+  updateLeaderboardPromptToggle();
   ensureMediaSource(getColtIdleVideo());
   chooseMrNievesIdleVideo();
   scheduleMediaLoad(coinVideo, 1800);
