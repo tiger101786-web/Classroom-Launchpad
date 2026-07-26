@@ -5764,12 +5764,31 @@ function startColtRunGame() {
     if (won || coltDeathHasFallen()) {
       ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
       ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = "#f8dce8";
-      ctx.font = "900 48px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(won ? "Finish Flag Reached!" : "Try Again", w / 2, h / 2 - 10);
-      ctx.font = "800 20px Arial";
-      ctx.fillText(won ? "Press Enter for Next Level or R to Restart." : "Press R or Enter to Restart.", w / 2, h / 2 + 28);
+      if (won) {
+        const playerScreenCenter = player.x - cameraX + player.w / 2;
+        const panelW = Math.min(465, w - 40);
+        const panelH = 96;
+        const panelX = playerScreenCenter < w / 2 ? w - panelW - 20 : 20;
+        const panelY = 20;
+        ctx.fillStyle = "rgba(20, 4, 12, 0.84)";
+        ctx.fillRect(panelX, panelY, panelW, panelH);
+        ctx.strokeStyle = "rgba(248, 220, 232, 0.72)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(panelX, panelY, panelW, panelH);
+        ctx.fillStyle = "#f8dce8";
+        ctx.textAlign = "center";
+        ctx.font = "900 34px Arial";
+        ctx.fillText("Finish Flag Reached!", panelX + panelW / 2, panelY + 40);
+        ctx.font = "800 17px Arial";
+        ctx.fillText("Press Enter for Next Level or R to Restart.", panelX + panelW / 2, panelY + 72);
+      } else {
+        ctx.fillStyle = "#f8dce8";
+        ctx.font = "900 48px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Try Again", w / 2, h / 2 - 10);
+        ctx.font = "800 20px Arial";
+        ctx.fillText("Press R or Enter to Restart.", w / 2, h / 2 + 28);
+      }
     }
   };
 
