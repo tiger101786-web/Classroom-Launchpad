@@ -2055,6 +2055,7 @@ function startColtRunGame() {
   };
   const decodedVideoFrameVersions = new WeakMap();
   const decodedVideoFrameCallbackIds = new WeakMap();
+  const useTimeBasedDecodedVideoFrames = /firefox/i.test(navigator.userAgent);
   const trackDecodedVideoFrames = video => {
     if (!video || typeof video.requestVideoFrameCallback !== "function" || decodedVideoFrameCallbackIds.has(video)) return;
     const onVideoFrame = () => {
@@ -2070,7 +2071,7 @@ function startColtRunGame() {
     decodedVideoFrameCallbackIds.delete(video);
   };
   const getDecodedVideoFrameStamp = (video, fallbackFrameRate = 30) => {
-    if (typeof video.requestVideoFrameCallback === "function") {
+    if (!useTimeBasedDecodedVideoFrames && typeof video.requestVideoFrameCallback === "function") {
       trackDecodedVideoFrames(video);
       return decodedVideoFrameVersions.get(video) || 0;
     }
@@ -2097,7 +2098,7 @@ function startColtRunGame() {
     {
       id: "dark-descent",
       source: "assets/colt-run-game-music-dark-descent.mp3?v=20260721-four-track-playlist1",
-      gain: 0.9
+      gain: 1.05
     },
     {
       id: "wasteland-showdown",
@@ -2427,13 +2428,10 @@ function startColtRunGame() {
   lavaRockSpriteSources[11] = "assets/colt-run-lava-rock-12.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[12] = "assets/colt-run-lava-rock-13.png?v=20260721-new-rocks1";
   lavaRockSpriteSources[13] = "assets/colt-run-lava-rock-14.png?v=20260722-horse-head1";
-  lavaRockSpriteSources[14] = "assets/colt-run-lava-rock-15.png?v=20260722-dragon-rocks1";
-  lavaRockSpriteSources[15] = "assets/colt-run-lava-rock-16.png?v=20260722-dragon-rocks1";
+  lavaRockSpriteSources[14] = "assets/colt-run-lava-rock-15.png?v=20260725-replacement-rocks1";
+  lavaRockSpriteSources[15] = "assets/colt-run-lava-rock-16.png?v=20260725-replacement-rocks1";
   lavaRockSpriteSources[16] = "assets/colt-run-lava-rock-17.png?v=20260722-dragon-rocks1";
-  const retiredLavaRockSpriteIndexes = new Set([14, 15]);
-  const activeLavaRockSpriteIndexes = lavaRockSpriteSources
-    .map((_, index) => index)
-    .filter(index => !retiredLavaRockSpriteIndexes.has(index));
+  const activeLavaRockSpriteIndexes = lavaRockSpriteSources.map((_, index) => index);
   const lavaRockSprites = lavaRockSpriteSources.map(() => {
     const image = new Image();
     image.decoding = "async";
@@ -2568,7 +2566,7 @@ function startColtRunGame() {
     "assets/colt-run-bg-03.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-04.mp4?v=20260722-hd-video1",
     "assets/colt-run-bg-05.mp4?v=20260722-hd-video1",
-    "assets/colt-run-bg-06.mp4?v=20260724-background6",
+    "assets/colt-run-bg-06.mp4?v=20260725-background6-hq2",
     "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
     "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2"
   ].map(createDeferredVideo);
@@ -3150,11 +3148,28 @@ function startColtRunGame() {
     leapVideo.play().catch(() => {});
   };
 
+  const mrNievesIdlePlaybackProgress = new WeakMap();
   const keepMrNievesIdleVideoPlaying = () => {
     const mrNievesIdleVideo = getMrNievesIdleVideo();
     ensureMediaSource(mrNievesIdleVideo);
-    if (!mrNievesIdleVideo.paused) return;
-    mrNievesIdleVideo.play().catch(() => {});
+    const now = performance.now();
+    const currentTime = Number.isFinite(mrNievesIdleVideo.currentTime) ? mrNievesIdleVideo.currentTime : 0;
+    const previousProgress = mrNievesIdlePlaybackProgress.get(mrNievesIdleVideo);
+    const playbackAdvanced = !previousProgress || Math.abs(currentTime - previousProgress.currentTime) > 0.01;
+    if (mrNievesIdleVideo.paused || mrNievesIdleVideo.seeking || mrNievesIdleVideo.readyState < 2 || playbackAdvanced) {
+      mrNievesIdlePlaybackProgress.set(mrNievesIdleVideo, { currentTime, checkedAt: now });
+    } else if (!mrNievesIdleVideo.ended && now - previousProgress.checkedAt > 1100) {
+      try {
+        const duration = Number.isFinite(mrNievesIdleVideo.duration) ? mrNievesIdleVideo.duration : 0;
+        mrNievesIdleVideo.currentTime = duration && currentTime >= duration - 0.08 ? 0 : currentTime + 0.001;
+      } catch {}
+      mrNievesIdlePlaybackProgress.set(mrNievesIdleVideo, {
+        currentTime: mrNievesIdleVideo.currentTime,
+        checkedAt: now
+      });
+      mrNievesIdleVideo.pause();
+    }
+    if (mrNievesIdleVideo.paused) mrNievesIdleVideo.play().catch(() => {});
   };
 
   const keepMrNievesRunVideoPlaying = () => {
