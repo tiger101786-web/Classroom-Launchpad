@@ -2179,6 +2179,9 @@ function startColtRunGame() {
   let score = 0;
   let won = false;
   let lost = false;
+  let finishLandingPending = false;
+  let finishPlatform = null;
+  let finishTouchElapsedSeconds = 0;
   let deathLeaderboardHandled = false;
   let pendingLeaderboardEntry = null;
   let leaderboard = [];
@@ -5320,6 +5323,85 @@ function startColtRunGame() {
     });
   };
 
+  const completeFinishLanding = () => {
+    const landingPlatform = finishPlatform || platforms[platforms.length - 1];
+    if (!landingPlatform) return;
+    const footX = Math.max(
+      landingPlatform.x + 6,
+      Math.min(landingPlatform.x + landingPlatform.w - 6, player.x + player.w / 2)
+    );
+    player.x = Math.max(
+      landingPlatform.x + 4,
+      Math.min(landingPlatform.x + landingPlatform.w - player.w - 4, footX - player.w / 2)
+    );
+    player.y = getPlatformSurfaceY(landingPlatform, player.x + player.w / 2) - player.h;
+    player.vx = 0;
+    player.vy = 0;
+    player.grounded = true;
+    player.groundPlatform = landingPlatform;
+    player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";
+    finishLandingPending = false;
+    won = true;
+    runTimeBankSeconds += finishTouchElapsedSeconds;
+    finishTouchElapsedSeconds = 0;
+    if (selectedCharacter === "mrNieves") {
+      chooseMrNievesCelebrationVideo();
+      keepMrNievesCelebrationVideoPlaying();
+    }
+    scoreNode.textContent = score;
+    if (nextLevelButton) nextLevelButton.disabled = false;
+    statusNode.textContent = "You reached the finish flag. Press Enter or Next Level to keep your coins going.";
+  };
+
+  const beginFinishLanding = now => {
+    if (finishLandingPending || won || lost) return;
+    finishPlatform = platforms[platforms.length - 1] || null;
+    if (!finishPlatform) return;
+    finishLandingPending = true;
+    finishTouchElapsedSeconds = Math.max(0, (now - levelStart) / 1000);
+    if (nextLevelButton) nextLevelButton.disabled = true;
+    fallingLavaRocks = [];
+    nextLavaRockAt = 0;
+    nextForwardLavaRockAt = 0;
+    nextLavaRockShowerAt = 0;
+    player.vx = 0;
+    const minPlayerX = finishPlatform.x + 4;
+    const maxPlayerX = Math.max(minPlayerX, finishPlatform.x + finishPlatform.w - player.w - 4);
+    player.x = Math.max(minPlayerX, Math.min(maxPlayerX, player.x));
+    const surfaceY = getPlatformSurfaceY(finishPlatform, player.x + player.w / 2);
+    const alreadyLanded = player.grounded && player.groundPlatform === finishPlatform;
+    if (alreadyLanded || player.y + player.h >= surfaceY - 1) {
+      completeFinishLanding();
+      return;
+    }
+    player.grounded = false;
+    player.groundPlatform = null;
+    player.state = "leap";
+    if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
+    stopRunningAudio();
+    statusNode.textContent = "Finish flag reached. Landing on the final platform...";
+  };
+
+  const updateFinishLanding = deltaScale => {
+    if (!finishLandingPending || !finishPlatform) return;
+    const mode = getDifficultySettings();
+    const currentGravity = gravity * mode.gravityMultiplier;
+    const previousVerticalVelocity = player.vy;
+    player.vy += currentGravity * deltaScale;
+    player.y += previousVerticalVelocity * deltaScale + currentGravity * deltaScale * (deltaScale + 1) / 2;
+    const minPlayerX = finishPlatform.x + 4;
+    const maxPlayerX = Math.max(minPlayerX, finishPlatform.x + finishPlatform.w - player.w - 4);
+    player.x = Math.max(minPlayerX, Math.min(maxPlayerX, player.x));
+    const surfaceY = getPlatformSurfaceY(finishPlatform, player.x + player.w / 2);
+    if (player.y + player.h >= surfaceY) {
+      completeFinishLanding();
+      return;
+    }
+    player.grounded = false;
+    player.groundPlatform = null;
+    player.state = "leap";
+  };
+
   const resetLevel = (newSeed = false, keepRun = false, preservePendingLeaderboardEntry = false) => {
     if (newSeed) {
       levelSeed = Date.now() + Math.floor(Math.random() * 9999);
@@ -5343,6 +5425,9 @@ function startColtRunGame() {
     }
     won = false;
     lost = false;
+    finishLandingPending = false;
+    finishPlatform = null;
+    finishTouchElapsedSeconds = 0;
     deathLeaderboardHandled = false;
     deathStartedAt = 0;
     deathX = 0;
@@ -5709,6 +5794,14 @@ function startColtRunGame() {
       return;
     }
     if (!won && !lost) {
+      if (finishLandingPending) {
+        updateFinishLanding(deltaScale);
+        cameraX = Math.max(0, player.x - 230);
+        stopRunningAudio();
+        draw();
+        animationId = requestAnimationFrame(update);
+        return;
+      }
       const mode = getDifficultySettings();
       const currentMoveSpeed = moveSpeed * mode.playerSpeedMultiplier;
       const currentJumpPower = jumpPower * mode.jumpPowerMultiplier;
@@ -5796,26 +5889,9 @@ function startColtRunGame() {
         }
       }
       if (!lost && player.x + player.w > flag.x && player.y + player.h > flag.y && player.y < flag.y + 90) {
-        runTimeBankSeconds += Math.max(0, (performance.now() - levelStart) / 1000);
-        won = true;
-        fallingLavaRocks = [];
-        nextLavaRockAt = 0;
-        nextForwardLavaRockAt = 0;
-        nextLavaRockShowerAt = 0;
-        player.vx = 0;
-        player.vy = 0;
-        player.grounded = true;
-        player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";
-        if (selectedCharacter === "mrNieves") {
-          chooseMrNievesCelebrationVideo();
-          keepMrNievesCelebrationVideoPlaying();
-        }
-        stopRunningAudio();
-        scoreNode.textContent = score;
-        if (nextLevelButton) nextLevelButton.disabled = false;
-        statusNode.textContent = "You reached the finish flag. Press Enter or Next Level to keep your coins going.";
+        beginFinishLanding(now);
       }
-      if (!lost && player.y > gameViewportHeight - 36) {
+      if (!lost && !finishLandingPending && player.y > gameViewportHeight - 36) {
         triggerColtDeath("The Colt fell. Restart and try a new route.");
       }
       cameraX = Math.max(0, player.x - 230);
