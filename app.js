@@ -2308,7 +2308,7 @@ function startColtRunGame() {
   platformAssetVersions[28] = "20260721-platform29-challenge1";
   platformAssetVersions[29] = "20260721-platform30-challenge1";
   platformAssetVersions[30] = "20260721-platform31-challenge1";
-  platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260722-platform32-dragon-head2";
+  platformAssetVersions[dragonHeadPlatformSpriteIndex] = "20260725-platform32-dragon-head3";
   platformAssetVersions[churchPlatformSpriteIndex] = "20260722-platform33-st-cletus-church1";
   platformAssetVersions[bishopPlatformSpriteIndex] = "20260722-platform34-bishop-statue1";
   const platformSpriteSources = platformAssetVersions.map((version, index) => (
