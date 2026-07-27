@@ -47,10 +47,15 @@ async function run() {
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Student Login")) {
       throw new Error("Header login button was not placed beside PlusPortal.");
     }
+    const lightHeaderColors = await page.locator(".portal-btn, .login-btn:not(.signed-in)").evaluateAll(buttons => buttons.map(button => getComputedStyle(button).backgroundColor));
+    if (new Set(lightHeaderColors).size !== 1) {
+      throw new Error(`Light-mode PlusPortal and Student Login colors did not match: ${lightHeaderColors.join(", ")}.`);
+    }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkLoginColor = await page.locator(".login-btn:not(.signed-in)").first().evaluate(button => getComputedStyle(button).backgroundColor);
-    if (darkLoginColor !== "rgb(5, 5, 5)") {
-      throw new Error(`Dark-mode Student Login button was ${darkLoginColor} instead of black.`);
+    const darkPortalColor = await page.locator(".portal-btn").first().evaluate(button => getComputedStyle(button).backgroundColor);
+    if (darkLoginColor !== "rgb(5, 5, 5)" || darkPortalColor !== darkLoginColor) {
+      throw new Error(`Dark-mode PlusPortal and Student Login colors did not match: ${darkPortalColor}, ${darkLoginColor}.`);
     }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const lockedText = await page.locator(".colt-corner-locked").innerText();
@@ -74,8 +79,9 @@ async function run() {
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkTeacherColor = await page.locator('.login-btn[data-action="teacherDashboard"]').evaluate(button => getComputedStyle(button).backgroundColor);
-    if (darkTeacherColor !== "rgb(5, 5, 5)") {
-      throw new Error(`Dark-mode Teacher button was ${darkTeacherColor} instead of black.`);
+    const darkTeacherPortalColor = await page.locator(".portal-btn").first().evaluate(button => getComputedStyle(button).backgroundColor);
+    if (darkTeacherColor !== "rgb(5, 5, 5)" || darkTeacherPortalColor !== darkTeacherColor) {
+      throw new Error(`Dark-mode PlusPortal and Teacher colors did not match: ${darkTeacherPortalColor}, ${darkTeacherColor}.`);
     }
     await page.locator('[data-action="toggleTheme"]').first().click();
     await page.locator('[data-action="openColtCorner"]').first().click();
@@ -125,6 +131,7 @@ async function run() {
       loginBesidePlusPortal: true,
       darkModeStudentLoginIsBlack: true,
       darkModeTeacherButtonIsBlack: true,
+      plusPortalMatchesLoginColors: true,
       coltCornerShowsProtectedState: true,
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,

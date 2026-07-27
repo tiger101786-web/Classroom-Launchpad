@@ -309,14 +309,15 @@ h3 {
   font-weight: 800;
 }
 
+.portal-btn,
 .login-btn {
   background: var(--blue);
   color: #fff;
   border-color: var(--blue);
 }
 
-body[data-theme="night"] .login-btn:not(.signed-in),
-body[data-theme="night"] .login-btn[data-action="teacherDashboard"] {
+body[data-theme="night"] .portal-btn,
+body[data-theme="night"] .login-btn {
   background: #050505;
   color: #fff;
   border-color: #050505;
@@ -550,7 +551,7 @@ body[data-theme="night"] .activation-code-list > div {
 
 .portal-btn {
   background: var(--blue);
-  color: var(--white);
+  color: #fff;
   border-color: var(--blue);
 }
 
