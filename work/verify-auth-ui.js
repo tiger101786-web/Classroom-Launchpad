@@ -42,6 +42,16 @@ async function run() {
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    const faviconLinks = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]').count();
+    const faviconResponse = await page.request.get("http://localhost:8098/favicon.ico");
+    const manifestResponse = await page.request.get("http://localhost:8098/site.webmanifest");
+    const manifest = await manifestResponse.json();
+    if (faviconLinks < 5 || !faviconResponse.ok() || !String(faviconResponse.headers()["content-type"]).includes("image/x-icon")) {
+      throw new Error("Cross-browser favicon links or the ICO response are incomplete.");
+    }
+    if (!manifestResponse.ok() || manifest.icons?.length !== 2) {
+      throw new Error("The favicon web manifest is incomplete.");
+    }
     await page.locator('[data-action="login"]').first().waitFor();
     const headerButtons = await page.locator(".header-actions button").allTextContents();
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Student Login")) {
@@ -128,6 +138,7 @@ async function run() {
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
+      crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,
       darkModeStudentLoginIsBlack: true,
       darkModeTeacherButtonIsBlack: true,
