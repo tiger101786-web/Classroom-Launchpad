@@ -658,8 +658,15 @@ async function handleApprovedStudentsApi(req, res, pathname) {
       const body = await readBody(req);
       const emails = Array.isArray(body.emails)
         ? body.emails
-        : (String(body.emails || "").match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || []);
-      const before = normalizeApprovedStudents(db.approvedStudents);
+        : (String(body.emails || "").match(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || []);
+      let before = normalizeApprovedStudents(db.approvedStudents);
+      for (const incomingEmail of emails.map(normalizeEmail).filter(email => email.includes("'"))) {
+        const [localPart, domain] = incomingEmail.split("@");
+        const truncatedEmail = `${localPart.slice(localPart.indexOf("'") + 1)}@${domain}`;
+        if (!before.some(student => student.email === incomingEmail)) {
+          before = before.map(student => student.email === truncatedEmail ? { ...student, email: incomingEmail } : student);
+        }
+      }
       db.approvedStudents = normalizeApprovedStudents([...before, ...emails]);
       const activationCodes = [];
       db.approvedStudents = db.approvedStudents.map(student => {

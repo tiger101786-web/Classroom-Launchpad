@@ -70,9 +70,24 @@ async function run() {
   check(importResult.activationCodes.length === 1, "Import did not issue a one-time activation code.");
   check(/^[A-Z]{3}-[2-9]{3}$/.test(importResult.activationCodes[0].activationCode), "Activation code did not use the short ABC-234 format.");
 
+  await fetch(`${base}/api/approved-students/import`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({ emails: "example.student@scscolts.org" })
+  });
+  const apostropheImport = await fetch(`${base}/api/approved-students/import`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({ emails: "o'example.student@scscolts.org" })
+  });
+  const apostropheResult = await apostropheImport.json();
+  check(apostropheImport.status === 200, `Apostrophe email import returned ${apostropheImport.status}.`);
+  check(apostropheResult.students.some(student => student.email === "o'example.student@scscolts.org"), "Apostrophe email was not preserved.");
+  check(!apostropheResult.students.some(student => student.email === "example.student@scscolts.org"), "Truncated apostrophe email was not repaired.");
+
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();
-  check(privateResult.students.length === 1, "Teacher could not read the private allowlist.");
+  check(privateResult.students.length === 2, "Teacher could not read the private allowlist.");
   check(!("activationHash" in privateResult.students[0]) && !("passwordHash" in privateResult.students[0]), "Secret hashes leaked through the teacher API.");
 
   const outsiderList = await fetch(`${base}/api/approved-students`);
@@ -160,6 +175,7 @@ async function run() {
     allowlistIsPrivate: true,
     crossOriginRequestBlocked: true,
     oneTimeActivationWorks: true,
+    apostropheEmailsArePreserved: true,
     passwordsAreRequired: true,
     studentIdentityCannotBeSpoofed: true,
     studentCannotAlterExistingTopics: true
