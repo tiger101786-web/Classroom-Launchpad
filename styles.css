@@ -318,9 +318,9 @@ h3 {
 
 body[data-theme="night"] .portal-btn,
 body[data-theme="night"] .login-btn {
-  background: #050505;
-  color: #fff;
-  border-color: #050505;
+  background: var(--white);
+  color: var(--blue-dark);
+  border-color: var(--border);
 }
 
 .login-btn.signed-in {
