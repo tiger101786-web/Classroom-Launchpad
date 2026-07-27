@@ -315,6 +315,13 @@ h3 {
   border-color: var(--blue);
 }
 
+body[data-theme="night"] .login-btn:not(.signed-in),
+body[data-theme="night"] .login-btn[data-action="teacherDashboard"] {
+  background: #050505;
+  color: #fff;
+  border-color: #050505;
+}
+
 .login-btn.signed-in {
   max-width: 180px;
   overflow: hidden;

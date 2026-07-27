@@ -47,6 +47,12 @@ async function run() {
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Student Login")) {
       throw new Error("Header login button was not placed beside PlusPortal.");
     }
+    await page.locator('[data-action="toggleTheme"]').first().click();
+    const darkLoginColor = await page.locator(".login-btn:not(.signed-in)").first().evaluate(button => getComputedStyle(button).backgroundColor);
+    if (darkLoginColor !== "rgb(5, 5, 5)") {
+      throw new Error(`Dark-mode Student Login button was ${darkLoginColor} instead of black.`);
+    }
+    await page.locator('[data-action="toggleTheme"]').first().click();
     const lockedText = await page.locator(".colt-corner-locked").innerText();
     if (!lockedText.includes("Only approved students")) throw new Error("Colt Corner did not show its protected state.");
     await page.locator('[data-action="login"]').first().click();
@@ -66,6 +72,12 @@ async function run() {
       throw new Error("Teacher dashboard navigation is incomplete.");
     }
     await page.locator('[data-action="back"]').first().click();
+    await page.locator('[data-action="toggleTheme"]').first().click();
+    const darkTeacherColor = await page.locator('.login-btn[data-action="teacherDashboard"]').evaluate(button => getComputedStyle(button).backgroundColor);
+    if (darkTeacherColor !== "rgb(5, 5, 5)") {
+      throw new Error(`Dark-mode Teacher button was ${darkTeacherColor} instead of black.`);
+    }
+    await page.locator('[data-action="toggleTheme"]').first().click();
     await page.locator('[data-action="openColtCorner"]').first().click();
     const identityLabels = await page.locator("#threadForm .field label").allTextContents();
     const identityValues = await page.locator("#threadForm input[readonly]").evaluateAll(inputs => inputs.map(input => input.value));
@@ -111,6 +123,8 @@ async function run() {
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
       loginBesidePlusPortal: true,
+      darkModeStudentLoginIsBlack: true,
+      darkModeTeacherButtonIsBlack: true,
       coltCornerShowsProtectedState: true,
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
