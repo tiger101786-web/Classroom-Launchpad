@@ -3,12 +3,13 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const root = path.resolve(__dirname, "..");
+const dataDir = path.join(__dirname, `auth-ui-test-data-${process.pid}`);
 const child = spawn(process.execPath, ["server.js"], {
   cwd: root,
   env: {
     ...process.env,
     PORT: "8098",
-    DATA_DIR: path.join(__dirname, `auth-ui-test-data-${process.pid}`),
+    DATA_DIR: dataDir,
     SESSION_SECRET: "test-session-secret-at-least-32-characters",
     TEACHER_PIN: "654321"
   },
@@ -45,7 +46,7 @@ async function run() {
     if (!loginText.includes("one-time activation code") || !loginText.includes("Do not reuse your Google password")) {
       throw new Error("Website account and password guidance was missing.");
     }
-    await page.screenshot({ path: path.join(__dirname, "auth-login-ui-qa.png"), fullPage: true });
+    await page.screenshot({ path: path.join(dataDir, "auth-login-ui-qa.png"), fullPage: true });
     await page.locator('[data-action="back"]').click();
     await page.locator('[data-action="teacher"]').click();
     await page.locator("#pinInput").fill("654321");
@@ -64,6 +65,16 @@ async function run() {
     if (!activationText.includes("ui.test@scscolts.org") || !activationText.includes("Download Codes")) {
       throw new Error("Teacher activation-code results were not displayed.");
     }
+    await page.locator("#approvedStudentRosterFile").setInputFiles({
+      name: "private-roster.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from("Grade,Student Name,School Email\r\n5,\"Student, UI\",ui.test@scscolts.org")
+    });
+    await page.getByText("Student, UI", { exact: true }).waitFor();
+    const studentIdentity = await page.locator(".approved-student-identity").filter({ hasText: "ui.test@scscolts.org" }).innerText();
+    if (!studentIdentity.includes("Student, UI") || !studentIdentity.includes("Grade 5")) {
+      throw new Error("Private roster name and grade were not displayed.");
+    }
     await page.locator('[data-action="dashboardSection"][data-section="websites"]').first().click();
     await page.locator("#dashboardLinkSearch").waitFor();
     await page.locator("#dashboardLinkSearch").fill("Google");
@@ -74,7 +85,7 @@ async function run() {
     if (!await page.locator("#dailyLaunchForm").count() || !await page.locator("#classTimerForm").count()) {
       throw new Error("Classroom tools were not preserved in the redesigned dashboard.");
     }
-    await page.screenshot({ path: path.join(__dirname, "teacher-dashboard-ui-qa.png"), fullPage: true });
+    await page.screenshot({ path: path.join(dataDir, "teacher-dashboard-ui-qa.png"), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
@@ -83,6 +94,7 @@ async function run() {
       coltCornerShowsProtectedState: true,
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
+      privateRosterNamesDisplay: true,
       dashboardNavigationComplete: true,
       websiteSearchWorks: true,
       classroomToolsPreserved: true,

@@ -449,8 +449,54 @@ body[data-theme="night"] .auth-notice {
   overflow-wrap: anywhere;
 }
 
+.approved-student-identity {
+  display: grid;
+  gap: 3px;
+}
+
+.approved-student-identity > strong {
+  color: var(--blue-dark);
+  font-size: 1rem;
+}
+
+.approved-student-identity > span {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
 .approved-student-row .actions {
   flex: 0 0 auto;
+}
+
+.roster-import-panel {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--paper);
+}
+
+.roster-import-panel small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.roster-file-button {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.roster-file-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .activation-code-results {

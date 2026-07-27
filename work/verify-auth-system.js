@@ -85,6 +85,21 @@ async function run() {
   check(apostropheResult.students.some(student => student.email === "o'example.student@scscolts.org"), "Apostrophe email was not preserved.");
   check(!apostropheResult.students.some(student => student.email === "example.student@scscolts.org"), "Truncated apostrophe email was not repaired.");
 
+  const rosterImport = await fetch(`${base}/api/approved-students/import`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({
+      students: [
+        { email: "test.student@scscolts.org", name: "Student, Test", grade: "5" },
+        { email: "o'example.student@scscolts.org", name: "Example, O'Neil", grade: "6" }
+      ]
+    })
+  });
+  const rosterResult = await rosterImport.json();
+  check(rosterImport.status === 200 && rosterResult.updated === 2, "Private roster names were not merged.");
+  check(rosterResult.students.some(student => student.email === "test.student@scscolts.org" && student.name === "Student, Test" && student.grade === "5"), "Roster name and grade were not stored.");
+  check(rosterResult.activationCodes.length === 0, "Roster name update replaced an existing activation code.");
+
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();
   check(privateResult.students.length === 2, "Teacher could not read the private allowlist.");
@@ -176,6 +191,7 @@ async function run() {
     crossOriginRequestBlocked: true,
     oneTimeActivationWorks: true,
     apostropheEmailsArePreserved: true,
+    privateRosterNamesCanBeMerged: true,
     passwordsAreRequired: true,
     studentIdentityCannotBeSpoofed: true,
     studentCannotAlterExistingTopics: true

@@ -106,6 +106,54 @@ function cloneLinks(items) {
   return JSON.parse(JSON.stringify(items));
 }
 
+function parseCsvRows(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let quoted = false;
+  const source = String(text || "").replace(/^\uFEFF/, "");
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (character === '"') {
+      if (quoted && source[index + 1] === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === "," && !quoted) {
+      row.push(value.trim());
+      value = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && source[index + 1] === "\n") index += 1;
+      row.push(value.trim());
+      if (row.some(cell => cell)) rows.push(row);
+      row = [];
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+  row.push(value.trim());
+  if (row.some(cell => cell)) rows.push(row);
+  return rows;
+}
+
+function parseStudentRosterCsv(text) {
+  const rows = parseCsvRows(text);
+  if (rows.length < 2) throw new Error("The roster file does not contain any student rows.");
+  const headers = rows[0].map(header => header.toLowerCase().replace(/[^a-z]/g, ""));
+  const emailIndex = headers.findIndex(header => ["email", "schoolemail", "studentemail"].includes(header));
+  const nameIndex = headers.findIndex(header => ["name", "studentname"].includes(header));
+  const gradeIndex = headers.findIndex(header => ["grade", "studentgrade"].includes(header));
+  if (emailIndex < 0 || nameIndex < 0) throw new Error("The roster must include Student Name and School Email columns.");
+  return rows.slice(1).map(row => ({
+    email: row[emailIndex] || "",
+    name: row[nameIndex] || "",
+    grade: gradeIndex >= 0 ? row[gradeIndex] || "" : ""
+  })).filter(student => student.email && student.name);
+}
+
 function normalizeRequests(items) {
   return (Array.isArray(items) ? items : []).filter(item => item && item.id !== DAILY_LAUNCH_REQUEST_ID && item.id !== CLASS_TIMER_REQUEST_ID && item.id !== RANDOM_ACTIVITY_REQUEST_ID).map(item => ({
     id: item.id || makeId(),
@@ -336,8 +384,9 @@ const sharedBackend = {
   loadApprovedStudents() {
     return this.request("/api/approved-students");
   },
-  importApprovedStudents(emails) {
-    return this.request("/api/approved-students/import", { method: "PUT", body: JSON.stringify({ emails }) });
+  importApprovedStudents(entries) {
+    const body = Array.isArray(entries) ? { students: entries } : { emails: entries };
+    return this.request("/api/approved-students/import", { method: "PUT", body: JSON.stringify(body) });
   },
   removeApprovedStudent(email) {
     return this.request(`/api/approved-students/${encodeURIComponent(email)}`, { method: "DELETE", body: "{}" });
@@ -6519,6 +6568,16 @@ function renderApprovedStudentManager() {
           <textarea id="approvedStudentEmails" rows="6" placeholder="student@${escapeHtml(authConfig.studentEmailDomain)}"></textarea>
         </div>
         <button class="primary-btn" type="submit">Add Approved Emails</button>
+        <div class="roster-import-panel">
+          <div>
+            <strong>Add names and grades</strong>
+            <small>Choose a private roster CSV with Student Name, School Email, and Grade columns. Existing activation codes and passwords will not change.</small>
+          </div>
+          <label class="outline-btn roster-file-button">
+            Import Names &amp; Grades
+            <input id="approvedStudentRosterFile" type="file" accept=".csv,text/csv">
+          </label>
+        </div>
         <button class="outline-btn" type="button" data-action="regenerateStudentCodes">Generate New Codes for Unregistered Students</button>
         <p id="approvedStudentStatus" class="request-message" aria-live="polite"></p>
       </form>
@@ -6541,8 +6600,9 @@ function renderApprovedStudentManager() {
         <div class="approved-student-list">
           ${approvedStudents.length ? approvedStudents.map(student => `
             <div class="approved-student-row">
-              <span>
-                ${escapeHtml(student.email)}
+              <span class="approved-student-identity">
+                <strong>${escapeHtml(student.name || "Name not added")}</strong>
+                <span>${escapeHtml(student.email)}${student.grade ? ` · Grade ${escapeHtml(student.grade)}` : ""}</span>
                 <small>${student.registered ? "Registered" : student.activationReady ? "Waiting for first login" : "Needs activation code"}</small>
               </span>
               <div class="actions">
@@ -7293,6 +7353,29 @@ function attachScreenHandlers() {
       } catch (error) {
         status.textContent = error.message;
         status.classList.add("error");
+      }
+    });
+  }
+
+  const approvedStudentRosterFile = document.getElementById("approvedStudentRosterFile");
+  if (approvedStudentRosterFile) {
+    approvedStudentRosterFile.addEventListener("change", async event => {
+      const status = document.getElementById("approvedStudentStatus");
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const students = parseStudentRosterCsv(await file.text());
+        const result = await sharedBackend.importApprovedStudents(students);
+        approvedStudents = result.students || [];
+        activationCodeResults = result.activationCodes || [];
+        status.textContent = `${result.updated || 0} names updated. ${result.added || 0} new students added.`;
+        status.classList.remove("error");
+        window.setTimeout(() => render(), 900);
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      } finally {
+        event.target.value = "";
       }
     });
   }

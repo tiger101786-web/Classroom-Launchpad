@@ -656,18 +656,39 @@ async function handleApprovedStudentsApi(req, res, pathname) {
   if (req.method === "PUT" && pathname === "/api/approved-students/import") {
     try {
       const body = await readBody(req);
-      const emails = Array.isArray(body.emails)
-        ? body.emails
-        : (String(body.emails || "").match(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || []);
+      const incomingStudents = Array.isArray(body.students)
+        ? body.students.map(student => ({
+            email: normalizeEmail(student && student.email),
+            name: cleanText(student && student.name, 80),
+            grade: cleanGrade(student && student.grade)
+          }))
+        : (Array.isArray(body.emails)
+            ? body.emails
+            : (String(body.emails || "").match(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [])
+          ).map(email => ({ email: normalizeEmail(email), name: "", grade: "" }));
       let before = normalizeApprovedStudents(db.approvedStudents);
-      for (const incomingEmail of emails.map(normalizeEmail).filter(email => email.includes("'"))) {
+      for (const incomingEmail of incomingStudents.map(student => student.email).filter(email => email.includes("'"))) {
         const [localPart, domain] = incomingEmail.split("@");
         const truncatedEmail = `${localPart.slice(localPart.indexOf("'") + 1)}@${domain}`;
         if (!before.some(student => student.email === incomingEmail)) {
           before = before.map(student => student.email === truncatedEmail ? { ...student, email: incomingEmail } : student);
         }
       }
-      db.approvedStudents = normalizeApprovedStudents([...before, ...emails]);
+      const beforeByEmail = new Map(before.map(student => [student.email, student]));
+      let updated = 0;
+      for (const incoming of incomingStudents) {
+        if (!incoming.email || !incoming.email.endsWith(`@${allowedStudentDomain}`)) continue;
+        const existing = beforeByEmail.get(incoming.email);
+        if (existing) {
+          const nextName = incoming.name || existing.name;
+          const nextGrade = incoming.grade || existing.grade;
+          if (nextName !== existing.name || nextGrade !== existing.grade) updated += 1;
+          beforeByEmail.set(incoming.email, { ...existing, name: nextName, grade: nextGrade });
+        } else {
+          beforeByEmail.set(incoming.email, incoming);
+        }
+      }
+      db.approvedStudents = normalizeApprovedStudents([...beforeByEmail.values()]);
       const activationCodes = [];
       db.approvedStudents = db.approvedStudents.map(student => {
         if (student.passwordHash || student.activationHash) return student;
@@ -685,6 +706,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
       sendJson(res, 200, {
         ok: true,
         added: db.approvedStudents.length - before.length,
+        updated,
         total: db.approvedStudents.length,
         activationCodes,
         students: publicApprovedStudents(db.approvedStudents)
