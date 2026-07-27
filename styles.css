@@ -55,6 +55,57 @@ body[data-theme="night"] {
 
 button, input, select, textarea { font: inherit; }
 
+.site-footer {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 0 24px 28px;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+
+.privacy-page {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.privacy-back {
+  margin-bottom: 18px;
+  text-decoration: none;
+}
+
+.privacy-card {
+  display: grid;
+  gap: 14px;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.privacy-card h1 {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+}
+
+.privacy-card h2 {
+  margin-top: 14px;
+  font-size: 1.45rem;
+}
+
+.privacy-card p {
+  line-height: 1.65;
+}
+
+.privacy-updated {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 button {
   border: 0;
   cursor: pointer;
@@ -233,7 +284,7 @@ h3 {
   color: var(--ink);
 }
 
-.icon-btn, .back-btn, .mode-btn, .portal-btn {
+.icon-btn, .back-btn, .mode-btn, .portal-btn, .login-btn, .logout-btn {
   min-width: 44px;
   height: 44px;
   border-radius: 8px;
@@ -247,15 +298,124 @@ h3 {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.icon-btn:hover, .back-btn:hover, .mode-btn:hover, .portal-btn:hover {
+.icon-btn:hover, .back-btn:hover, .mode-btn:hover, .portal-btn:hover, .login-btn:hover, .logout-btn:hover {
   transform: translateY(-1px);
   border-color: var(--blue);
   box-shadow: 0 8px 18px rgba(86, 7, 32, 0.16);
 }
 
-.mode-btn, .portal-btn {
+.mode-btn, .portal-btn, .login-btn, .logout-btn {
   padding: 0 14px;
   font-weight: 800;
+}
+
+.login-btn {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+.login-btn.signed-in {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background: transparent;
+}
+
+.auth-card {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  max-width: 680px;
+  margin: 28px auto;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.auth-card > p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.google-signin-slot {
+  width: min(360px, 100%);
+  min-height: 44px;
+}
+
+.auth-notice {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #d9a300;
+  border-radius: 10px;
+  background: #fff8d8;
+  color: #5a4300;
+}
+
+body[data-theme="night"] .auth-notice {
+  background: #332b12;
+  color: #ffe699;
+}
+
+.teacher-google-login {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.colt-corner-locked {
+  align-items: center;
+}
+
+.forum-lock {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  font-size: clamp(5rem, 12vw, 9rem);
+}
+
+.approved-student-manager {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.approved-student-summary {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+}
+
+.approved-student-list {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.approved-student-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--paper);
+}
+
+.approved-student-row span {
+  overflow-wrap: anywhere;
 }
 
 .portal-btn {
@@ -3266,3 +3426,17 @@ body[data-theme="night"] .class-timer-badge {
 
 
 
+@media (max-width: 720px) {
+  .approved-student-manager {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .login-btn.signed-in {
+    max-width: 135px;
+  }
+}

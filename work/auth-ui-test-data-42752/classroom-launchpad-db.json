@@ -1,0 +1,24 @@
+{
+  "threads": [],
+  "mutedStudents": [],
+  "websiteRequests": [],
+  "leaderboards": [],
+  "approvedStudents": [],
+  "teacherPin": null,
+  "dailyLaunch": {
+    "message": "Check the board for today's first task, then choose a teacher-approved activity or resource.",
+    "updatedAt": ""
+  },
+  "classTimer": {
+    "title": "Work Time",
+    "status": "idle",
+    "durationSeconds": 600,
+    "remainingSeconds": 600,
+    "endAt": "",
+    "updatedAt": ""
+  },
+  "randomActivity": {
+    "locked": false,
+    "updatedAt": ""
+  }
+}

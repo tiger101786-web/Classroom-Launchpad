@@ -273,8 +273,14 @@ const sharedBackend = {
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
       ...options
     });
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    return response.status === 204 ? null : response.json();
+    const payload = response.status === 204 ? null : await response.json().catch(() => null);
+    if (!response.ok) {
+      const error = new Error(payload && payload.error ? payload.error : `Request failed: ${response.status}`);
+      error.status = response.status;
+      error.code = payload && payload.code;
+      throw error;
+    }
+    return payload;
   },
   loadState() {
     return this.request("/api/state");
@@ -305,6 +311,33 @@ const sharedBackend = {
   },
   importLeaderboards(leaderboards) {
     return this.request("/api/leaderboards/import", { method: "PUT", body: JSON.stringify({ leaderboards }) });
+  },
+  loadAuthConfig() {
+    return this.request("/api/auth/config");
+  },
+  loadSession() {
+    return this.request("/api/auth/session");
+  },
+  googleLogin(credential) {
+    return this.request("/api/auth/google", { method: "POST", body: JSON.stringify({ credential }) });
+  },
+  teacherLogin(pin) {
+    return this.request("/api/auth/teacher", { method: "POST", body: JSON.stringify({ pin }) });
+  },
+  logout() {
+    return this.request("/api/auth/logout", { method: "POST", body: "{}" });
+  },
+  changeTeacherPin(pin) {
+    return this.request("/api/auth/teacher-pin", { method: "PUT", body: JSON.stringify({ pin }) });
+  },
+  loadApprovedStudents() {
+    return this.request("/api/approved-students");
+  },
+  importApprovedStudents(emails) {
+    return this.request("/api/approved-students/import", { method: "PUT", body: JSON.stringify({ emails }) });
+  },
+  removeApprovedStudent(email) {
+    return this.request(`/api/approved-students/${encodeURIComponent(email)}`, { method: "DELETE", body: "{}" });
   }
 };
 
@@ -853,7 +886,24 @@ let classTimerClock = null;
 let sharedSyncTimer = null;
 let randomActivity = null;
 let coltRunGame = null;
+let authConfig = { googleClientId: "", googleWorkspaceDomain: "scscolts.org", googleConfigured: false, teacherConfigured: false };
+let authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
+let approvedStudents = [];
+let postingBlocked = false;
+let authMessage = "";
 const app = document.getElementById("app");
+
+function isSignedIn() {
+  return Boolean(authSession && authSession.authenticated);
+}
+
+function isTeacher() {
+  return isSignedIn() && authSession.role === "teacher";
+}
+
+function isApprovedStudent() {
+  return isSignedIn() && authSession.role === "student";
+}
 
 function hasSharedData() {
   return classThreads.length > 0
@@ -880,6 +930,8 @@ async function loadSharedState(shouldRender = true) {
   const before = sharedSnapshot();
   try {
     const state = await sharedBackend.loadState();
+    if (state && state.auth) authSession = state.auth;
+    postingBlocked = Boolean(state && state.postingBlocked);
     const incomingThreads = normalizeThreads(state && state.threads);
     const incomingMuted = normalizeMutedStudents(state && state.mutedStudents);
     const incomingRequests = normalizeRequests(state && state.websiteRequests);
@@ -900,8 +952,8 @@ async function loadSharedState(shouldRender = true) {
     store.saveClassTimer(classTimer);
     store.saveRandomActivitySettings(randomActivitySettings);
     if (shouldRender && before !== sharedSnapshot() && !isEditingForm()) render();
-  } catch {
-    sharedBackend.enabled = false;
+  } catch (error) {
+    if (!error || error.status >= 500) sharedBackend.enabled = false;
   }
 }
 
@@ -926,14 +978,26 @@ function saveLinks(next) {
 function saveWebsiteRequests(next, shouldRender = true) {
   websiteRequests = normalizeRequests(next);
   store.saveRequests(websiteRequests);
-  if (sharedBackend.enabled) sharedBackend.saveWebsiteRequests([dailyLaunchRequestMarker(), classTimerRequestMarker(), randomActivityRequestMarker(), ...websiteRequests]).catch(() => {});
+  if (sharedBackend.enabled) sharedBackend.saveWebsiteRequests(websiteRequests).catch(error => {
+    authMessage = error.message;
+    loadSharedState(true);
+  });
   if (shouldRender) render();
 }
 
 function saveClassThreads(next, shouldRender = true) {
   classThreads = normalizeThreads(next);
   store.saveThreads(classThreads);
-  if (sharedBackend.enabled) sharedBackend.saveThreads(classThreads).catch(() => {});
+  if (sharedBackend.enabled) sharedBackend.saveThreads(classThreads).then(result => {
+    if (result && result.threads) {
+      classThreads = normalizeThreads(result.threads);
+      store.saveThreads(classThreads);
+      if (["coltCorner", "thread"].includes(screen.name)) render();
+    }
+  }).catch(error => {
+    authMessage = error.message;
+    loadSharedState(true);
+  });
   if (shouldRender) render();
 }
 
@@ -1189,6 +1253,18 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
   `;
 }
 
+function renderAuthButton() {
+  if (isSignedIn()) {
+    return `
+      <button class="login-btn signed-in" data-action="${isTeacher() ? "teacherDashboard" : "account"}" title="${escapeHtml(authSession.email || authSession.name)}">
+        ${escapeHtml(isTeacher() ? "Teacher" : authSession.name || "Student")}
+      </button>
+      <button class="logout-btn" data-action="logout">Log Out</button>
+    `;
+  }
+  return `<button class="login-btn" data-action="login">Student Login</button>`;
+}
+
 function categoryTopbar() {
   return `
     <div class="topbar category-topbar">
@@ -1215,6 +1291,7 @@ function renderHome() {
         false,
         `<div class="header-actions">
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
+          ${renderAuthButton()}
           <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
           <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
         </div>`
@@ -1317,6 +1394,19 @@ function renderRandomActivityCard() {
 }
 
 function renderColtCornerPreview() {
+  if (!isSignedIn()) {
+    return `
+      <section class="colt-corner-preview colt-corner-locked">
+        <div class="colt-corner-heading">
+          <span class="feature-kicker">Protected Class Forum</span>
+          <h2>Colt Corner</h2>
+          <p>Only approved students and the teacher can view or use the class message board.</p>
+          <button class="primary-btn colt-corner-open" data-action="login">Sign In to Colt Corner</button>
+        </div>
+        <div class="forum-lock" aria-hidden="true">🔒</div>
+      </section>
+    `;
+  }
   const topicCount = classThreads.length;
   const replyCount = classThreads.reduce((total, thread) => total + getThreadReplies(thread).length, 0);
   return `
@@ -1346,6 +1436,18 @@ function renderColtCornerPreview() {
 }
 
 function renderStudentWebsiteRequest() {
+  if (!isSignedIn()) {
+    return `
+      <section class="student-request-card protected-feature-card">
+        <div class="request-heading">
+          <span class="feature-kicker">Protected Student Feature</span>
+          <h2>Suggest a Website</h2>
+          <p>Approved students can sign in to send website suggestions.</p>
+        </div>
+        <button class="primary-btn" data-action="login">Student Login</button>
+      </section>
+    `;
+  }
   return `
     <section class="student-request-card">
       <div class="request-heading">
@@ -1360,8 +1462,8 @@ function renderStudentWebsiteRequest() {
       </div>
       <form id="studentRequestForm" class="student-request-form">
         <div class="field">
-          <label for="requestStudentName">Name</label>
-          <input id="requestStudentName" autocomplete="name" placeholder="Your name">
+          <label>Requesting as</label>
+          <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
           <label for="requestGrade">Grade</label>
@@ -1379,6 +1481,16 @@ function renderStudentWebsiteRequest() {
 }
 
 function renderColtCorner() {
+  if (!isSignedIn()) {
+    return `
+      <section class="auth-card">
+        <span class="feature-kicker">Protected Class Forum</span>
+        <h2>Sign in to open Colt Corner</h2>
+        <p>The message board is available only to approved students and the teacher.</p>
+        <button class="primary-btn" data-action="login">Sign In With Google</button>
+      </section>
+    `;
+  }
   const visibleThreads = sortedThreads();
   return `
     <section class="colt-corner-card">
@@ -1405,8 +1517,8 @@ function renderColtCorner() {
       </div>
       <form id="threadForm" class="thread-form">
         <div class="field">
-          <label for="threadStudentName">Name</label>
-          <input id="threadStudentName" autocomplete="name" placeholder="Your name">
+          <label>Posting as</label>
+          <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
           <label for="threadGrade">Grade</label>
@@ -1469,6 +1581,12 @@ function renderThreadRow(thread) {
 }
 
 function renderThreadDetail(threadId) {
+  if (!isSignedIn()) {
+    return `
+      ${pageHeader("Colt Corner", "Approved student login required", true)}
+      ${renderColtCorner()}
+    `;
+  }
   const thread = classThreads.find(item => item.id === threadId);
   if (!thread) {
     return `
@@ -1492,8 +1610,8 @@ function renderThreadDetail(threadId) {
       </section>
       <form id="replyForm" class="reply-form" data-thread-id="${thread.id}">
         <div class="field">
-          <label for="replyStudentName">Name</label>
-          <input id="replyStudentName" autocomplete="name" placeholder="Your name">
+          <label>Posting as</label>
+          <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
           <label for="replyGrade">Grade</label>
@@ -6281,6 +6399,11 @@ function renderPin() {
   return `
     ${pageHeader("Teacher PIN", "", true)}
     <section class="pin-card">
+      <div class="teacher-google-login">
+        <h2>Teacher Sign-In</h2>
+        <p>Use your approved teacher Google account or the recovery PIN.</p>
+        <div id="googleTeacherButton" class="google-signin-slot"></div>
+      </div>
       <form id="pinForm" class="form-grid">
         <div class="field">
           <label for="pinInput">PIN</label>
@@ -6289,6 +6412,64 @@ function renderPin() {
         <p id="pinError" class="error"></p>
         <button class="primary-btn" type="submit">Enter Teacher Mode</button>
       </form>
+    </section>
+  `;
+}
+
+function renderLogin() {
+  return `
+    ${pageHeader("Student Login", "Use your St. Cletus school Google account.", true)}
+    <section class="auth-card">
+      <span class="feature-kicker">Protected Student Access</span>
+      <h2>Sign in with Google</h2>
+      <p>Use the school account assigned to you. Classroom Launchpad never receives or stores your Google password.</p>
+      ${authConfig.googleConfigured
+        ? `<div id="googleStudentButton" class="google-signin-slot"></div>`
+        : `<div class="auth-notice"><strong>Setup is not finished yet.</strong><p>Mr. Nieves still needs to connect the Google sign-in Client ID in Render.</p></div>`}
+      <p id="authStatus" class="request-message ${authMessage ? "error" : ""}" aria-live="polite">${escapeHtml(authMessage)}</p>
+    </section>
+  `;
+}
+
+function renderAccount() {
+  return `
+    ${pageHeader("Your Account", "", true)}
+    <section class="auth-card">
+      <span class="feature-kicker">Signed In</span>
+      <h2>${escapeHtml(authSession.name || "Student")}</h2>
+      <p>${escapeHtml(authSession.email || "")}</p>
+      <button class="outline-btn" data-action="logout">Log Out</button>
+    </section>
+  `;
+}
+
+function renderApprovedStudentManager() {
+  return `
+    <section class="form-card approved-student-manager">
+      <div>
+        <span class="feature-kicker">Private Access List</span>
+        <h2>Approved Student Emails</h2>
+        <p class="instruction">Paste one or more @${escapeHtml(authConfig.googleWorkspaceDomain)} addresses. This private list is stored on the server and is never shown publicly.</p>
+      </div>
+      <form id="approvedStudentImportForm" class="form-grid">
+        <div class="field">
+          <label for="approvedStudentEmails">Student emails</label>
+          <textarea id="approvedStudentEmails" rows="6" placeholder="student@${escapeHtml(authConfig.googleWorkspaceDomain)}"></textarea>
+        </div>
+        <button class="primary-btn" type="submit">Add Approved Emails</button>
+        <p id="approvedStudentStatus" class="request-message" aria-live="polite"></p>
+      </form>
+      <div class="approved-student-summary">
+        <strong>${approvedStudents.length} approved ${approvedStudents.length === 1 ? "student" : "students"}</strong>
+        <div class="approved-student-list">
+          ${approvedStudents.length ? approvedStudents.map(student => `
+            <div class="approved-student-row">
+              <span>${escapeHtml(student.email)}</span>
+              <button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>
+            </div>
+          `).join("") : `<p class="instruction">No student emails have been imported yet.</p>`}
+        </div>
+      </div>
     </section>
   `;
 }
@@ -6302,6 +6483,7 @@ function renderDashboard() {
       <button class="outline-btn" data-action="changePin"> Change PIN</button>
       <button class="outline-btn" data-action="reset">↺ Reset Sample Links</button>
     </section>
+    ${renderApprovedStudentManager()}
     <section class="form-card daily-launch-editor">
       <div>
         <span class="feature-kicker">Homepage Message</span>
@@ -6611,12 +6793,91 @@ function render() {
   if (screen.name === "coltCorner") html = renderColtCornerPage();
   if (screen.name === "thread") html = renderThreadDetail(screen.id);
   if (screen.name === "pin") html = renderPin();
+  if (screen.name === "login") html = renderLogin();
+  if (screen.name === "account") html = renderAccount();
   if (screen.name === "dashboard") html = renderDashboard();
   if (screen.name === "edit") html = renderEdit(screen.id);
   if (screen.name === "changePin") html = renderChangePin();
   app.innerHTML = html + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
   observeDeferredVideos(app);
+}
+
+function loadGoogleIdentityLibrary() {
+  if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-google-identity="true"]');
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", reject, { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleIdentity = "true";
+    script.addEventListener("load", resolve, { once: true });
+    script.addEventListener("error", reject, { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+async function handleGoogleCredential(response) {
+  authMessage = "";
+  try {
+    const result = await sharedBackend.googleLogin(response.credential);
+    authSession = result.session;
+    await loadSharedState(false);
+    if (isTeacher()) {
+      await loadApprovedStudents();
+      setScreen({ name: "dashboard" });
+    } else {
+      setScreen({ name: "home" });
+    }
+  } catch (error) {
+    authMessage = error.message;
+    render();
+  }
+}
+
+async function attachGoogleSignIn() {
+  const slots = [
+    document.getElementById("googleStudentButton"),
+    document.getElementById("googleTeacherButton")
+  ].filter(Boolean);
+  if (!slots.length || !authConfig.googleConfigured || !authConfig.googleClientId) return;
+  try {
+    await loadGoogleIdentityLibrary();
+    window.google.accounts.id.initialize({
+      client_id: authConfig.googleClientId,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+    slots.forEach(slot => window.google.accounts.id.renderButton(slot, {
+      type: "standard",
+      theme: theme === "night" ? "filled_black" : "outline",
+      size: "large",
+      shape: "rectangular",
+      text: "signin_with",
+      width: Math.min(360, Math.max(240, slot.clientWidth || 320))
+    }));
+  } catch {
+    authMessage = "Google sign-in could not load. Check the internet connection and try again.";
+    const status = document.getElementById("authStatus");
+    if (status) status.textContent = authMessage;
+  }
+}
+
+async function loadApprovedStudents() {
+  if (!sharedBackend.enabled || !isTeacher()) return;
+  try {
+    const result = await sharedBackend.loadApprovedStudents();
+    approvedStudents = Array.isArray(result.students) ? result.students : [];
+  } catch (error) {
+    authMessage = error.message;
+  }
 }
 
 function attachScreenHandlers() {
@@ -6640,18 +6901,42 @@ function attachScreenHandlers() {
   startCalendarClock();
   startClassTimerClock();
   if (screen.name === "coltRun") startColtRunGame();
+  attachGoogleSignIn();
 
   const pinForm = document.getElementById("pinForm");
   if (pinForm) {
-    pinForm.addEventListener("submit", event => {
+    pinForm.addEventListener("submit", async event => {
       event.preventDefault();
       const input = document.getElementById("pinInput");
       const error = document.getElementById("pinError");
-      if (input.value === store.getPin() || input.value === DEFAULT_TEACHER_PIN) {
-        store.setPin(input.value);
+      try {
+        const result = await sharedBackend.teacherLogin(input.value);
+        authSession = result.session;
+        await loadApprovedStudents();
         setScreen({ name: "dashboard" });
+      } catch (loginError) {
+        error.textContent = loginError.message;
       }
-      else error.textContent = "That PIN did not match.";
+    });
+  }
+
+  const approvedStudentImportForm = document.getElementById("approvedStudentImportForm");
+  if (approvedStudentImportForm) {
+    approvedStudentImportForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("approvedStudentStatus");
+      const emails = document.getElementById("approvedStudentEmails").value;
+      try {
+        const result = await sharedBackend.importApprovedStudents(emails);
+        approvedStudents = result.students || [];
+        status.textContent = `${result.added} added. ${result.total} students are now approved.`;
+        status.classList.remove("error");
+        document.getElementById("approvedStudentEmails").value = "";
+        window.setTimeout(() => render(), 700);
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
     });
   }
 
@@ -6766,16 +7051,20 @@ function attachScreenHandlers() {
 
   const changePinForm = document.getElementById("changePinForm");
   if (changePinForm) {
-    changePinForm.addEventListener("submit", event => {
+    changePinForm.addEventListener("submit", async event => {
       event.preventDefault();
       const pin = document.getElementById("newPin").value.replace(/\D/g, "");
       const confirm = document.getElementById("confirmPin").value.replace(/\D/g, "");
       const error = document.getElementById("pinChangeError");
-      if (pin.length < 4) error.textContent = "Use at least four digits.";
+      if (pin.length < 6) error.textContent = "Use at least six digits.";
       else if (pin !== confirm) error.textContent = "The PIN entries do not match.";
       else {
-        store.setPin(pin);
-        setScreen({ name: "dashboard" });
+        try {
+          await sharedBackend.changeTeacherPin(pin);
+          setScreen({ name: "dashboard" });
+        } catch (saveError) {
+          error.textContent = saveError.message;
+        }
       }
     });
   }
@@ -6836,7 +7125,7 @@ function attachStudentRequestForm() {
     event.preventDefault();
     const request = {
       id: makeId(),
-      studentName: document.getElementById("requestStudentName").value.trim(),
+      studentName: authSession.name,
       grade: document.getElementById("requestGrade").value.trim(),
       websiteName: document.getElementById("requestWebsiteName").value.trim(),
       createdAt: new Date().toISOString()
@@ -6863,7 +7152,7 @@ function attachThreadForm() {
     event.preventDefault();
     const thread = {
       id: makeId(),
-      studentName: document.getElementById("threadStudentName").value.trim(),
+      studentName: authSession.name,
       grade: document.getElementById("threadGrade").value.trim(),
       title: document.getElementById("threadTitle").value.trim(),
       body: document.getElementById("threadBody").value.trim(),
@@ -6894,7 +7183,7 @@ function attachReplyForm() {
     event.preventDefault();
     const reply = {
       id: makeId(),
-      studentName: document.getElementById("replyStudentName").value.trim(),
+      studentName: authSession.name,
       grade: document.getElementById("replyGrade").value.trim(),
       message: document.getElementById("replyMessage").value.trim(),
       createdAt: new Date().toISOString()
@@ -6927,6 +7216,8 @@ function attachReplyForm() {
 }
 
 function validateThreadTopic(thread) {
+  if (!isSignedIn()) return "Please sign in with your approved school Google account.";
+  if (postingBlocked) return "Posting is unavailable. Please check with Mr. Nieves.";
   if (!thread.studentName) return "Please add your name.";
   if (!thread.grade) return "Please add your grade.";
   if (!thread.title) return "Please add a topic title.";
@@ -6938,6 +7229,8 @@ function validateThreadTopic(thread) {
 }
 
 function validateThreadReply(reply) {
+  if (!isSignedIn()) return "Please sign in with your approved school Google account.";
+  if (postingBlocked) return "Replying is unavailable. Please check with Mr. Nieves.";
   if (!reply.studentName) return "Please add your name.";
   if (!reply.grade) return "Please add your grade.";
   if (!reply.message) return "Please type a reply.";
@@ -6967,17 +7260,43 @@ function validateWebsite(link) {
   return "";
 }
 
-app.addEventListener("click", event => {
+app.addEventListener("click", async event => {
   const target = event.target.closest("[data-action]");
   if (!target) return;
   const action = target.dataset.action;
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
-    else if (["dashboard", "category", "pin", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
-  if (action === "teacher") setScreen({ name: "pin" });
+  if (action === "teacher") {
+    if (isTeacher()) {
+      await loadApprovedStudents();
+      setScreen({ name: "dashboard" });
+    } else setScreen({ name: "pin" });
+  }
+  if (action === "teacherDashboard") {
+    await loadApprovedStudents();
+    setScreen({ name: "dashboard" });
+  }
+  if (action === "login") {
+    authMessage = "";
+    setScreen({ name: "login" });
+  }
+  if (action === "account") setScreen({ name: "account" });
+  if (action === "logout") {
+    try {
+      await sharedBackend.logout();
+    } catch {}
+    authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
+    classThreads = [];
+    mutedStudents = [];
+    websiteRequests = [];
+    approvedStudents = [];
+    if (window.google && window.google.accounts) window.google.accounts.id.disableAutoSelect();
+    setScreen({ name: "home" });
+  }
   if (action === "toggleTheme") toggleTheme();
   if (action === "category") setScreen({ name: "category", category: target.dataset.category });
   if (action === "randomActivity") {
@@ -6987,13 +7306,22 @@ app.addEventListener("click", event => {
     if (card) card.outerHTML = renderRandomActivityCard();
     observeDeferredVideos(app);
   }
-  if (action === "openColtCorner") setScreen({ name: "coltCorner" });
+  if (action === "openColtCorner") setScreen({ name: isSignedIn() ? "coltCorner" : "login" });
   if (action === "openColtRun") setScreen({ name: "coltRun" });
   if (action === "openThread") setScreen({ name: "thread", id: target.dataset.id });
   if (action === "open") window.open(target.dataset.url, "_blank", "noopener,noreferrer");
   if (action === "add") setScreen({ name: "edit", id: null });
   if (action === "edit") setScreen({ name: "edit", id: target.dataset.id });
   if (action === "changePin") setScreen({ name: "changePin" });
+  if (action === "removeApprovedStudent") {
+    try {
+      const result = await sharedBackend.removeApprovedStudent(target.dataset.email);
+      approvedStudents = result.students || [];
+      render();
+    } catch (error) {
+      authMessage = error.message;
+    }
+  }
   if (action === "delete") {
     const link = links.find(item => item.id === target.dataset.id);
     modal = {
@@ -7097,8 +7425,24 @@ app.addEventListener("change", event => {
 
 window.addEventListener("popstate", () => setScreen({ name: "home" }));
 
-render();
-startSharedSync();
+async function initializeApp() {
+  if (sharedBackend.enabled) {
+    try {
+      const [configResult, sessionResult] = await Promise.all([
+        sharedBackend.loadAuthConfig(),
+        sharedBackend.loadSession()
+      ]);
+      authConfig = { ...authConfig, ...(configResult || {}) };
+      authSession = sessionResult && sessionResult.session ? sessionResult.session : authSession;
+      await loadSharedState(false);
+      if (isTeacher()) await loadApprovedStudents();
+    } catch {}
+  }
+  render();
+  startSharedSync();
+}
+
+initializeApp();
 
 
 

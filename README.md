@@ -35,3 +35,15 @@ After pushing the repository to GitHub:
 
 Render serves the website and its `/api` routes from the same address. GitHub Pages remains available as a browser-only fallback, but shared permanent data is available only from the Render address.
 
+## Secure Google student login
+
+Colt Corner and student website requests require a verified Google session when the site is opened from the Node server or Render. Configure these private Render environment variables:
+
+- `GOOGLE_CLIENT_ID`: Web OAuth client ID from Google Cloud
+- `GOOGLE_WORKSPACE_DOMAIN`: Student Workspace domain (`scscolts.org`)
+- `SESSION_SECRET`: Long random value used to sign secure login cookies
+- `TEACHER_GOOGLE_EMAIL`: Approved teacher Google email
+- `TEACHER_PIN`: Initial recovery PIN; change it from Teacher Dashboard after setup
+
+Approved student addresses are managed from Teacher Dashboard and are stored only in the private server database under `DATA_DIR`. Do not commit a student email list to GitHub.
+

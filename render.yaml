@@ -9,6 +9,16 @@ services:
     envVars:
       - key: DATA_DIR
         value: /var/data
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_WORKSPACE_DOMAIN
+        value: scscolts.org
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TEACHER_PIN
+        sync: false
+      - key: TEACHER_GOOGLE_EMAIL
+        sync: false
     disk:
       name: classroom-launchpad-data
       mountPath: /var/data

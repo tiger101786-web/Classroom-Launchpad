@@ -1,0 +1,35 @@
+{
+  "threads": [],
+  "mutedStudents": [],
+  "websiteRequests": [],
+  "leaderboards": [],
+  "approvedStudents": [
+    {
+      "email": "test.student@scscolts.org",
+      "name": "",
+      "grade": "",
+      "googleSub": "",
+      "createdAt": "2026-07-27T18:06:55.181Z"
+    }
+  ],
+  "teacherPin": {
+    "salt": "8ffde7fbf200a398685746469f96fc90",
+    "hash": "88f0cd88d5363d772f6f5c0d0021d5ede62749aa76287535b355992982480a3765e62a39b6d0a6763496eddf1e6d2a24422f5a86f21f8783f0b98b7661600db6"
+  },
+  "dailyLaunch": {
+    "message": "Check the board for today's first task, then choose a teacher-approved activity or resource.",
+    "updatedAt": ""
+  },
+  "classTimer": {
+    "title": "Work Time",
+    "status": "idle",
+    "durationSeconds": 600,
+    "remainingSeconds": 600,
+    "endAt": "",
+    "updatedAt": ""
+  },
+  "randomActivity": {
+    "locked": false,
+    "updatedAt": ""
+  }
+}
