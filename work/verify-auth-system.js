@@ -68,6 +68,7 @@ async function run() {
   const importResult = await imported.json();
   check(imported.status === 200 && importResult.added === 1, "Allowlist import did not filter the wrong domain.");
   check(importResult.activationCodes.length === 1, "Import did not issue a one-time activation code.");
+  check(/^[A-Z]{3}-[2-9]{3}$/.test(importResult.activationCodes[0].activationCode), "Activation code did not use the short ABC-234 format.");
 
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();

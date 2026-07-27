@@ -137,8 +137,15 @@ function verifyStudentSecret(secret, salt, hash) {
 }
 
 function createActivationCode() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({ length: 10 }, () => alphabet[crypto.randomInt(alphabet.length)]).join("");
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const numbers = "23456789";
+  const prefix = Array.from({ length: 3 }, () => letters[crypto.randomInt(letters.length)]).join("");
+  const suffix = Array.from({ length: 3 }, () => numbers[crypto.randomInt(numbers.length)]).join("");
+  return `${prefix}-${suffix}`;
+}
+
+function normalizeActivationCode(value) {
+  return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 function publicApprovedStudents(entries) {
@@ -495,7 +502,7 @@ async function handleAuthApi(req, res, pathname) {
       const body = await readBody(req);
       const email = normalizeEmail(body.email);
       const password = String(body.password || "");
-      const activationCode = String(body.activationCode || "").trim().toUpperCase();
+      const activationCode = normalizeActivationCode(body.activationCode);
       const name = cleanText(body.name, 80);
       const grade = cleanGrade(body.grade);
       if (!email.endsWith(`@${allowedStudentDomain}`)) {
@@ -658,7 +665,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
       db.approvedStudents = db.approvedStudents.map(student => {
         if (student.passwordHash || student.activationHash) return student;
         const code = createActivationCode();
-        const record = hashStudentSecret(code);
+        const record = hashStudentSecret(normalizeActivationCode(code));
         activationCodes.push({ email: student.email, activationCode: code });
         return {
           ...student,
@@ -686,7 +693,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
     db.approvedStudents = normalizeApprovedStudents(db.approvedStudents).map(student => {
       if (student.passwordHash) return student;
       const code = createActivationCode();
-      const record = hashStudentSecret(code);
+      const record = hashStudentSecret(normalizeActivationCode(code));
       activationCodes.push({ email: student.email, activationCode: code });
       return {
         ...student,
@@ -713,7 +720,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
       return true;
     }
     const code = createActivationCode();
-    const record = hashStudentSecret(code);
+    const record = hashStudentSecret(normalizeActivationCode(code));
     const resetStudent = {
       ...student,
       passwordSalt: "",
