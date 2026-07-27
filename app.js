@@ -7916,6 +7916,7 @@ app.addEventListener("change", event => {
 window.addEventListener("popstate", () => setScreen({ name: "home" }));
 
 async function initializeApp() {
+  render();
   if (sharedBackend.enabled) {
     try {
       const [configResult, sessionResult] = await Promise.all([

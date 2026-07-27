@@ -31,6 +31,15 @@ async function run() {
     executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
   });
   try {
+    const instantPage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await instantPage.route("**/api/**", async route => {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      await route.continue();
+    });
+    await instantPage.goto("http://localhost:8098/", { waitUntil: "domcontentloaded" });
+    await instantPage.locator(".hero-panel").waitFor({ timeout: 750 });
+    await instantPage.close();
+
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
     await page.locator('[data-action="login"]').first().waitFor();
@@ -100,6 +109,7 @@ async function run() {
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     console.log(JSON.stringify({
+      homepageRendersBeforeAccountChecks: true,
       loginBesidePlusPortal: true,
       coltCornerShowsProtectedState: true,
       activationAndPasswordGuidancePresent: true,
