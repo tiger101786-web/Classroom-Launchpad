@@ -332,7 +332,7 @@ function publicSession(session) {
     role: session.role,
     name: session.name || (session.role === "teacher" ? "Mr. Nieves" : "Student"),
     email: session.role === "student" ? session.email : "",
-    grade: session.role === "student" ? session.grade || "" : ""
+    grade: session.role === "student" ? session.grade || "" : "Teacher"
   };
 }
 
@@ -424,7 +424,7 @@ function validateStudentThreadUpdate(existing, incoming, session) {
     const draft = newThreads[0] || {};
     const title = cleanText(draft.title, 80);
     const body = cleanMultilineText(draft.body, 360);
-    const grade = cleanGrade(draft.grade || session.grade);
+    const grade = cleanGrade(session.grade);
     if (!title || !body || !grade) throw new Error("Topic title, message, and grade are required.");
     return [{
       id: crypto.randomUUID(),
@@ -457,7 +457,7 @@ function validateStudentThreadUpdate(existing, incoming, session) {
     if (JSON.stringify(newReplies.slice(0, -1)) !== JSON.stringify(oldReplies)) throw new Error("Existing replies cannot be changed.");
     const draft = newReplies[newReplies.length - 1] || {};
     const message = cleanMultilineText(draft.message, 320);
-    const grade = cleanGrade(draft.grade || session.grade);
+    const grade = cleanGrade(session.grade);
     if (!message || !grade) throw new Error("Reply and grade are required.");
     return existing.map(thread => thread.id === changedThread.oldThread.id ? {
       ...thread,
@@ -471,6 +471,24 @@ function validateStudentThreadUpdate(existing, incoming, session) {
     } : thread);
   }
   throw new Error("Students may only add one topic or reply at a time.");
+}
+
+function applyTeacherThreadIdentity(existing, incoming, session) {
+  const existingById = new Map(existing.map(thread => [String(thread.id), thread]));
+  const teacherName = cleanText(session.name || "Mr. Nieves", 80);
+  return incoming.map(thread => {
+    const priorThread = existingById.get(String(thread && thread.id));
+    if (!priorThread) {
+      return { ...thread, studentName: teacherName, grade: "Teacher" };
+    }
+    const existingReplyIds = new Set((Array.isArray(priorThread.replies) ? priorThread.replies : []).map(reply => String(reply.id)));
+    const replies = (Array.isArray(thread.replies) ? thread.replies : []).map(reply => (
+      existingReplyIds.has(String(reply && reply.id))
+        ? reply
+        : { ...reply, studentName: teacherName, grade: "Teacher" }
+    ));
+    return { ...thread, replies };
+  });
 }
 
 async function handleAuthApi(req, res, pathname) {
@@ -503,8 +521,8 @@ async function handleAuthApi(req, res, pathname) {
       const email = normalizeEmail(body.email);
       const password = String(body.password || "");
       const activationCode = normalizeActivationCode(body.activationCode);
-      const name = cleanText(body.name, 80);
-      const grade = cleanGrade(body.grade);
+      const providedName = cleanText(body.name, 80);
+      const providedGrade = cleanGrade(body.grade);
       if (!email.endsWith(`@${allowedStudentDomain}`)) {
         sendJson(res, 403, { error: `Use an approved @${allowedStudentDomain} student email.`, code: "WRONG_DOMAIN" });
         return true;
@@ -513,14 +531,20 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(res, 400, { error: "Create a password containing at least 10 characters." });
         return true;
       }
-      if (!name || !grade || !activationCode) {
-        sendJson(res, 400, { error: "Name, grade, and activation code are required." });
+      if (!activationCode) {
+        sendJson(res, 400, { error: "The activation code is required." });
         return true;
       }
       const db = readDb();
       const approved = normalizeApprovedStudents(db.approvedStudents).find(student => student.email === email);
       if (!approved) {
         sendJson(res, 403, { error: "This school email is not on the approved student list.", code: "NOT_APPROVED" });
+        return true;
+      }
+      const name = approved.name || providedName;
+      const grade = approved.grade || providedGrade;
+      if (!name || !grade) {
+        sendJson(res, 400, { error: "Name and grade are required when they are not already saved in the approved roster." });
         return true;
       }
       if (approved.passwordHash) {
@@ -859,7 +883,7 @@ async function handleApi(req, res, pathname) {
       const db = readDb();
       if (allowed.role === "teacher") {
         if (!Array.isArray(body.threads)) throw new Error("threads must be an array.");
-        db.threads = body.threads;
+        db.threads = applyTeacherThreadIdentity(db.threads, body.threads, allowed);
       } else {
         if (rejectIfMuted(db, allowed, res)) return true;
         db.threads = validateStudentThreadUpdate(db.threads, body.threads, allowed);
@@ -886,7 +910,7 @@ async function handleApi(req, res, pathname) {
         if (!body.websiteRequests.length) throw new Error("A website request is required.");
         const draft = body.websiteRequests[0] || {};
         const websiteName = cleanText(draft.websiteName, 120);
-        const grade = cleanGrade(draft.grade || allowed.grade);
+        const grade = cleanGrade(allowed.grade);
         if (!websiteName || !grade) throw new Error("Website name and grade are required.");
         db.websiteRequests = [{
           id: crypto.randomUUID(),

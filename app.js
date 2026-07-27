@@ -979,6 +979,11 @@ function isApprovedStudent() {
   return isSignedIn() && authSession.role === "student";
 }
 
+function forumRoleLabel(grade = authSession.grade) {
+  const value = String(grade || "").trim();
+  return value.toLowerCase() === "teacher" ? "Teacher" : `Grade ${value}`;
+}
+
 function hasSharedData() {
   return classThreads.length > 0
     || mutedStudents.length > 0
@@ -1591,12 +1596,12 @@ function renderColtCorner() {
       </div>
       <form id="threadForm" class="thread-form">
         <div class="field">
-          <label>Posting as</label>
+          <label>Name</label>
           <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
-          <label for="threadGrade">Grade</label>
-          <input id="threadGrade" autocomplete="off" placeholder="Your grade">
+          <label>Grade</label>
+          <input value="${escapeHtml(isTeacher() ? "Teacher" : authSession.grade)}" readonly>
         </div>
         <div class="field">
           <label for="threadTitle">Topic title</label>
@@ -1647,7 +1652,7 @@ function renderThreadRow(thread) {
   return `
     <button class="thread-row" data-action="openThread" data-id="${thread.id}">
       <span class="thread-topic">${escapeHtml(thread.title)}</span>
-      <span>${escapeHtml(thread.studentName)}<small>Grade ${escapeHtml(thread.grade)}</small></span>
+      <span>${escapeHtml(thread.studentName)}<small>${escapeHtml(forumRoleLabel(thread.grade))}</small></span>
       <span class="thread-replies">${replyCount}</span>
       <span>${lastDate ? escapeHtml(lastDate) : "New"}<small>${escapeHtml(lastPost.studentName || thread.studentName)}</small></span>
     </button>
@@ -1676,7 +1681,7 @@ function renderThreadDetail(threadId) {
         <span class="feature-kicker">Topic Starter</span>
         <h2>${escapeHtml(thread.title)}</h2>
         <p>${escapeHtml(thread.body)}</p>
-        <p class="meta">${escapeHtml(thread.studentName)} • Grade ${escapeHtml(thread.grade)}${formatShortDate(thread.createdAt) ? ` • ${escapeHtml(formatShortDate(thread.createdAt))}` : ""}</p>
+        <p class="meta">${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${formatShortDate(thread.createdAt) ? ` • ${escapeHtml(formatShortDate(thread.createdAt))}` : ""}</p>
       </article>
       <section class="thread-reply-list" aria-label="Thread replies">
         <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
@@ -1684,12 +1689,12 @@ function renderThreadDetail(threadId) {
       </section>
       <form id="replyForm" class="reply-form" data-thread-id="${thread.id}">
         <div class="field">
-          <label>Posting as</label>
+          <label>Name</label>
           <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
-          <label for="replyGrade">Grade</label>
-          <input id="replyGrade" autocomplete="off" placeholder="Your grade">
+          <label>Grade</label>
+          <input value="${escapeHtml(isTeacher() ? "Teacher" : authSession.grade)}" readonly>
         </div>
         <div class="field">
           <label for="replyMessage">Reply</label>
@@ -1707,7 +1712,7 @@ function renderThreadReply(reply) {
   return `
     <article class="thread-reply-post">
       <p>${escapeHtml(reply.message)}</p>
-      <p class="meta">${escapeHtml(reply.studentName)} • Grade ${escapeHtml(reply.grade)}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
+      <p class="meta">${escapeHtml(reply.studentName)} • ${escapeHtml(forumRoleLabel(reply.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
     </article>
   `;
 }
@@ -7056,7 +7061,7 @@ function renderTeacherThread(thread) {
   return `
     <article class="teacher-card thread-teacher-card">
       <h3>${escapeHtml(thread.title)}</h3>
-      <p class="meta">Started by ${escapeHtml(thread.studentName)} • Grade ${escapeHtml(thread.grade)}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
+      <p class="meta">Started by ${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
       <p class="instruction">${escapeHtml(thread.body)}</p>
       ${replies.length ? `<div class="teacher-replies">${replies.map(reply => renderTeacherReply(thread, reply)).join("")}</div>` : ""}
       <div class="actions">
@@ -7073,7 +7078,7 @@ function renderTeacherReply(thread, reply) {
   return `
     <article class="teacher-reply">
       <p>${escapeHtml(reply.message)}</p>
-      <p class="meta">${escapeHtml(reply.studentName)} • Grade ${escapeHtml(reply.grade)}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
+      <p class="meta">${escapeHtml(reply.studentName)} • ${escapeHtml(forumRoleLabel(reply.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
       <div class="actions">
         <button class="outline-btn" data-action="muteStudent" data-student="${escapeHtml(reply.studentName)}" ${muted ? "disabled" : ""}>${muted ? "Muted" : "Mute Student"}</button>
         <button class="danger-btn" data-action="deleteReply" data-thread-id="${thread.id}" data-reply-id="${reply.id}">Delete Reply</button>
@@ -7593,7 +7598,7 @@ function attachThreadForm() {
     const thread = {
       id: makeId(),
       studentName: authSession.name,
-      grade: document.getElementById("threadGrade").value.trim(),
+      grade: isTeacher() ? "Teacher" : authSession.grade,
       title: document.getElementById("threadTitle").value.trim(),
       body: document.getElementById("threadBody").value.trim(),
       createdAt: new Date().toISOString(),
@@ -7624,7 +7629,7 @@ function attachReplyForm() {
     const reply = {
       id: makeId(),
       studentName: authSession.name,
-      grade: document.getElementById("replyGrade").value.trim(),
+      grade: isTeacher() ? "Teacher" : authSession.grade,
       message: document.getElementById("replyMessage").value.trim(),
       createdAt: new Date().toISOString()
     };

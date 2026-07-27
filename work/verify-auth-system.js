@@ -59,6 +59,7 @@ async function run() {
   const cookie = teacherLogin.headers.get("set-cookie").split(";")[0];
   const teacher = await teacherLogin.json();
   check(teacher.session.role === "teacher", "Teacher session role was incorrect.");
+  check(teacher.session.name === "Mr. Nieves" && teacher.session.grade === "Teacher", "Teacher identity was not automatic.");
 
   const imported = await fetch(`${base}/api/approved-students/import`, {
     method: "PUT",
@@ -122,7 +123,7 @@ async function run() {
       email: "test.student@scscolts.org",
       activationCode: importResult.activationCodes[0].activationCode,
       name: "Verified Student",
-      grade: "5",
+      grade: "7",
       password: "correct-horse-classroom"
     })
   });
@@ -161,7 +162,7 @@ async function run() {
     body: JSON.stringify({ threads: [{
       id: "student-supplied-id",
       studentName: "Impersonated Name",
-      grade: "5",
+      grade: "7",
       title: "Verified topic",
       body: "This is a test topic.",
       createdAt: "2000-01-01T00:00:00.000Z",
@@ -170,7 +171,8 @@ async function run() {
   });
   const newTopicResult = await newTopic.json();
   check(newTopic.status === 200, `Approved student topic returned ${newTopic.status}.`);
-  check(newTopicResult.threads[0].studentName === "Verified Student", "Student could spoof another name.");
+  check(newTopicResult.threads[0].studentName === "Student, Test", "Student could spoof another name or replace the approved roster name.");
+  check(newTopicResult.threads[0].grade === "5", "Student could spoof another grade.");
   check(newTopicResult.threads[0].id !== "student-supplied-id", "Server trusted a student-supplied topic ID.");
 
   const altered = structuredClone(newTopicResult.threads);
@@ -181,6 +183,25 @@ async function run() {
     body: JSON.stringify({ threads: altered })
   });
   check(alterationAttempt.status === 400, `Existing-topic alteration returned ${alterationAttempt.status}.`);
+
+  const teacherTopic = await fetch(`${base}/api/threads`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({
+      threads: [{
+        id: "teacher-supplied-id",
+        studentName: "Different Name",
+        grade: "4",
+        title: "Teacher topic",
+        body: "This is a teacher topic.",
+        createdAt: new Date().toISOString(),
+        replies: []
+      }, ...newTopicResult.threads]
+    })
+  });
+  const teacherTopicResult = await teacherTopic.json();
+  check(teacherTopic.status === 200, `Teacher topic returned ${teacherTopic.status}.`);
+  check(teacherTopicResult.threads[0].studentName === "Mr. Nieves" && teacherTopicResult.threads[0].grade === "Teacher", "Teacher post identity was not enforced.");
 
   console.log(JSON.stringify({
     guestCannotReadThreads: true,
@@ -194,6 +215,8 @@ async function run() {
     privateRosterNamesCanBeMerged: true,
     passwordsAreRequired: true,
     studentIdentityCannotBeSpoofed: true,
+    studentGradeCannotBeSpoofed: true,
+    teacherPostsUseTeacherIdentity: true,
     studentCannotAlterExistingTopics: true
   }, null, 2));
 }

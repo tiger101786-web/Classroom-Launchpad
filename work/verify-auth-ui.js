@@ -56,6 +56,16 @@ async function run() {
     if (dashboardSections.length !== 7 || !dashboardSections.some(label => label.includes("Students & Access"))) {
       throw new Error("Teacher dashboard navigation is incomplete.");
     }
+    await page.locator('[data-action="back"]').first().click();
+    await page.locator('[data-action="openColtCorner"]').first().click();
+    const identityLabels = await page.locator("#threadForm .field label").allTextContents();
+    const identityValues = await page.locator("#threadForm input[readonly]").evaluateAll(inputs => inputs.map(input => input.value));
+    if (identityLabels.includes("Posting as") || identityValues[0] !== "Mr. Nieves" || identityValues[1] !== "Teacher") {
+      throw new Error("Teacher Colt Corner identity was not filled automatically.");
+    }
+    await page.locator('[data-action="back"]').first().click();
+    await page.locator('[data-action="teacher"]').first().click();
+    await page.locator(".dashboard-nav").waitFor();
     await page.locator('[data-action="dashboardSection"][data-section="students"]').first().click();
     await page.locator("#approvedStudentEmails").waitFor();
     await page.locator("#approvedStudentEmails").fill("ui.test@scscolts.org");
@@ -95,6 +105,7 @@ async function run() {
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
       privateRosterNamesDisplay: true,
+      teacherForumIdentityAutomatic: true,
       dashboardNavigationComplete: true,
       websiteSearchWorks: true,
       classroomToolsPreserved: true,
