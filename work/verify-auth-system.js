@@ -1,7 +1,6 @@
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const crypto = require("crypto");
 
 const root = path.resolve(__dirname, "..");
 const dataDir = path.join(__dirname, `auth-api-test-data-${process.pid}`);
@@ -15,28 +14,13 @@ const child = spawn(process.execPath, ["server.js"], {
     DATA_DIR: dataDir,
     SESSION_SECRET: "test-session-secret-at-least-32-characters",
     TEACHER_PIN: "654321",
-    GOOGLE_CLIENT_ID: "test.apps.googleusercontent.com",
-    TEACHER_GOOGLE_EMAIL: "cnieves@stcletuscolts.com"
+    STUDENT_EMAIL_DOMAIN: "scscolts.org"
   },
   stdio: ["ignore", "pipe", "pipe"]
 });
 
 const base = "http://localhost:8097";
 const originHeaders = { Origin: base, "Content-Type": "application/json" };
-const testSessionSecret = "test-session-secret-at-least-32-characters";
-
-function signedStudentCookie() {
-  const payload = Buffer.from(JSON.stringify({
-    role: "student",
-    sub: "google-student-123",
-    email: "test.student@scscolts.org",
-    name: "Verified Student",
-    grade: "",
-    exp: Date.now() + 60_000
-  })).toString("base64url");
-  const signature = crypto.createHmac("sha256", testSessionSecret).update(payload).digest("base64url");
-  return `classroom_launchpad_session=${payload}.${signature}`;
-}
 
 function check(value, message) {
   if (!value) throw new Error(message);
@@ -83,10 +67,12 @@ async function run() {
   });
   const importResult = await imported.json();
   check(imported.status === 200 && importResult.added === 1, "Allowlist import did not filter the wrong domain.");
+  check(importResult.activationCodes.length === 1, "Import did not issue a one-time activation code.");
 
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();
   check(privateResult.students.length === 1, "Teacher could not read the private allowlist.");
+  check(!("activationHash" in privateResult.students[0]) && !("passwordHash" in privateResult.students[0]), "Secret hashes leaked through the teacher API.");
 
   const outsiderList = await fetch(`${base}/api/approved-students`);
   check(outsiderList.status === 401, `Outsider allowlist read returned ${outsiderList.status}.`);
@@ -98,7 +84,46 @@ async function run() {
   });
   check(badOrigin.status === 403, `Cross-origin login returned ${badOrigin.status}.`);
 
-  const studentCookie = signedStudentCookie();
+  const registration = await fetch(`${base}/api/auth/register`, {
+    method: "POST",
+    headers: originHeaders,
+    body: JSON.stringify({
+      email: "test.student@scscolts.org",
+      activationCode: importResult.activationCodes[0].activationCode,
+      name: "Verified Student",
+      grade: "5",
+      password: "correct-horse-classroom"
+    })
+  });
+  check(registration.status === 200, `Student registration returned ${registration.status}.`);
+  const studentCookie = registration.headers.get("set-cookie").split(";")[0];
+
+  const reusedCode = await fetch(`${base}/api/auth/register`, {
+    method: "POST",
+    headers: originHeaders,
+    body: JSON.stringify({
+      email: "test.student@scscolts.org",
+      activationCode: importResult.activationCodes[0].activationCode,
+      name: "Impersonator",
+      grade: "7",
+      password: "another-classroom-password"
+    })
+  });
+  check(reusedCode.status === 409, `Reused activation code returned ${reusedCode.status}.`);
+
+  const wrongPassword = await fetch(`${base}/api/auth/login`, {
+    method: "POST",
+    headers: originHeaders,
+    body: JSON.stringify({ email: "test.student@scscolts.org", password: "wrong-password" })
+  });
+  check(wrongPassword.status === 401, `Wrong password returned ${wrongPassword.status}.`);
+
+  const validLogin = await fetch(`${base}/api/auth/login`, {
+    method: "POST",
+    headers: originHeaders,
+    body: JSON.stringify({ email: "test.student@scscolts.org", password: "correct-horse-classroom" })
+  });
+  check(validLogin.status === 200, `Valid password returned ${validLogin.status}.`);
   const newTopic = await fetch(`${base}/api/threads`, {
     method: "PUT",
     headers: { ...originHeaders, Cookie: studentCookie },
@@ -133,6 +158,8 @@ async function run() {
     wrongDomainFiltered: true,
     allowlistIsPrivate: true,
     crossOriginRequestBlocked: true,
+    oneTimeActivationWorks: true,
+    passwordsAreRequired: true,
     studentIdentityCannotBeSpoofed: true,
     studentCannotAlterExistingTopics: true
   }, null, 2));

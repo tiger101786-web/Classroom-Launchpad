@@ -3,20 +3,16 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
-const { OAuth2Client } = require("google-auth-library");
 
 const root = __dirname;
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
 const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
 const port = Number(process.env.PORT || 8080);
-const googleClientId = String(process.env.GOOGLE_CLIENT_ID || "").trim();
-const allowedGoogleDomain = String(process.env.GOOGLE_WORKSPACE_DOMAIN || "scscolts.org").trim().toLowerCase();
-const teacherGoogleEmail = normalizeEmail(process.env.TEACHER_GOOGLE_EMAIL || "");
+const allowedStudentDomain = String(process.env.STUDENT_EMAIL_DOMAIN || "scscolts.org").trim().toLowerCase();
 const configuredSessionSecret = String(process.env.SESSION_SECRET || "");
 const sessionSecret = configuredSessionSecret || crypto.randomBytes(48).toString("hex");
 const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_ENV === "production" ? "" : "1017"));
 const sessionCookieName = "classroom_launchpad_session";
-const googleClient = new OAuth2Client(googleClientId || undefined);
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 const loginAttempts = new Map();
 
@@ -103,13 +99,17 @@ function normalizeApprovedStudents(entries) {
   return (Array.isArray(entries) ? entries : []).flatMap(entry => {
     const source = typeof entry === "string" ? { email: entry } : (entry || {});
     const email = normalizeEmail(source.email);
-    if (!email || !email.endsWith(`@${allowedGoogleDomain}`) || seen.has(email)) return [];
+    if (!email || !email.endsWith(`@${allowedStudentDomain}`) || seen.has(email)) return [];
     seen.add(email);
     return [{
       email,
       name: cleanText(source.name, 80),
       grade: cleanGrade(source.grade),
-      googleSub: cleanText(source.googleSub, 128),
+      passwordSalt: cleanText(source.passwordSalt, 128),
+      passwordHash: cleanText(source.passwordHash, 256),
+      activationSalt: cleanText(source.activationSalt, 128),
+      activationHash: cleanText(source.activationHash, 256),
+      activationIssuedAt: Number.isFinite(Date.parse(source.activationIssuedAt)) ? new Date(source.activationIssuedAt).toISOString() : "",
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
   }).sort((a, b) => a.email.localeCompare(b.email));
@@ -120,6 +120,36 @@ function hashTeacherPin(pin, salt = crypto.randomBytes(16).toString("hex")) {
     salt,
     hash: crypto.scryptSync(String(pin), salt, 64).toString("hex")
   };
+}
+
+function hashStudentSecret(secret, salt = crypto.randomBytes(16).toString("hex")) {
+  return {
+    salt,
+    hash: crypto.scryptSync(String(secret), salt, 64).toString("hex")
+  };
+}
+
+function verifyStudentSecret(secret, salt, hash) {
+  if (!salt || !hash) return false;
+  const actual = crypto.scryptSync(String(secret), salt, 64);
+  const expected = Buffer.from(hash, "hex");
+  return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+}
+
+function createActivationCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({ length: 10 }, () => alphabet[crypto.randomInt(alphabet.length)]).join("");
+}
+
+function publicApprovedStudents(entries) {
+  return normalizeApprovedStudents(entries).map(student => ({
+    email: student.email,
+    name: student.name,
+    grade: student.grade,
+    registered: Boolean(student.passwordHash),
+    activationReady: Boolean(student.activationHash),
+    activationIssuedAt: student.activationIssuedAt
+  }));
 }
 
 function verifyTeacherPin(pin, stored) {
@@ -439,9 +469,8 @@ function validateStudentThreadUpdate(existing, incoming, session) {
 async function handleAuthApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/auth/config") {
     sendJson(res, 200, {
-      googleClientId,
-      googleWorkspaceDomain: allowedGoogleDomain,
-      googleConfigured: Boolean(googleClientId && configuredSessionSecret),
+      studentEmailDomain: allowedStudentDomain,
+      studentLoginConfigured: Boolean(configuredSessionSecret),
       teacherConfigured: Boolean(initialTeacherPin || readDb().teacherPin)
     });
     return true;
@@ -452,34 +481,33 @@ async function handleAuthApi(req, res, pathname) {
     return true;
   }
 
-  if (req.method === "POST" && pathname === "/api/auth/google") {
+  if (req.method === "POST" && pathname === "/api/auth/register") {
     if (!requireSameOrigin(req, res)) return true;
     if (!rateLimitLogin(req)) {
-      sendJson(res, 429, { error: "Too many login attempts. Please wait and try again." });
+      sendJson(res, 429, { error: "Too many registration attempts. Please wait and try again." });
       return true;
     }
-    if (!googleClientId || !configuredSessionSecret) {
-      sendJson(res, 503, { error: "Google login has not been configured yet.", code: "AUTH_NOT_CONFIGURED" });
+    if (!configuredSessionSecret) {
+      sendJson(res, 503, { error: "Student login has not been configured yet.", code: "AUTH_NOT_CONFIGURED" });
       return true;
     }
     try {
       const body = await readBody(req);
-      const ticket = await googleClient.verifyIdToken({ idToken: String(body.credential || ""), audience: googleClientId });
-      const payload = ticket.getPayload() || {};
-      const email = normalizeEmail(payload.email);
-      if (payload.email_verified && teacherGoogleEmail && email === teacherGoogleEmail) {
-        const session = {
-          role: "teacher",
-          name: cleanText(payload.name || "Mr. Nieves", 80),
-          email,
-          sub: cleanText(payload.sub, 128),
-          exp: Date.now() + 8 * 60 * 60 * 1000
-        };
-        sendJson(res, 200, { ok: true, session: publicSession(session) }, { "Set-Cookie": sessionCookie(req, session) });
+      const email = normalizeEmail(body.email);
+      const password = String(body.password || "");
+      const activationCode = String(body.activationCode || "").trim().toUpperCase();
+      const name = cleanText(body.name, 80);
+      const grade = cleanGrade(body.grade);
+      if (!email.endsWith(`@${allowedStudentDomain}`)) {
+        sendJson(res, 403, { error: `Use an approved @${allowedStudentDomain} student email.`, code: "WRONG_DOMAIN" });
         return true;
       }
-      if (!payload.email_verified || normalizeEmail(payload.hd) !== allowedGoogleDomain) {
-        sendJson(res, 403, { error: `Please use your managed ${allowedGoogleDomain} school account.`, code: "WRONG_DOMAIN" });
+      if (password.length < 10 || password.length > 128) {
+        sendJson(res, 400, { error: "Create a password containing at least 10 characters." });
+        return true;
+      }
+      if (!name || !grade || !activationCode) {
+        sendJson(res, 400, { error: "Name, grade, and activation code are required." });
         return true;
       }
       const db = readDb();
@@ -488,21 +516,63 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(res, 403, { error: "This school email is not on the approved student list.", code: "NOT_APPROVED" });
         return true;
       }
-      approved.name = cleanText(payload.name || approved.name, 80);
-      approved.googleSub = cleanText(payload.sub, 128);
+      if (approved.passwordHash) {
+        sendJson(res, 409, { error: "This account is already registered. Use the Log In form or ask Mr. Nieves for a reset code.", code: "ALREADY_REGISTERED" });
+        return true;
+      }
+      if (!verifyStudentSecret(activationCode, approved.activationSalt, approved.activationHash)) {
+        sendJson(res, 401, { error: "The activation code did not match.", code: "INVALID_ACTIVATION_CODE" });
+        return true;
+      }
+      const passwordRecord = hashStudentSecret(password);
+      approved.name = name;
+      approved.grade = grade;
+      approved.passwordSalt = passwordRecord.salt;
+      approved.passwordHash = passwordRecord.hash;
+      approved.activationSalt = "";
+      approved.activationHash = "";
+      approved.activationIssuedAt = "";
       db.approvedStudents = db.approvedStudents.map(student => normalizeEmail(student.email) === email ? approved : student);
       writeDb(db);
       const session = {
         role: "student",
-        sub: approved.googleSub,
+        email,
+        name: approved.name,
+        grade: approved.grade,
+        exp: Date.now() + 12 * 60 * 60 * 1000
+      };
+      sendJson(res, 200, { ok: true, session: publicSession(session) }, { "Set-Cookie": sessionCookie(req, session) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/auth/login") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (!rateLimitLogin(req)) {
+      sendJson(res, 429, { error: "Too many login attempts. Please wait and try again." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const email = normalizeEmail(body.email);
+      const password = String(body.password || "");
+      const approved = normalizeApprovedStudents(readDb().approvedStudents).find(student => student.email === email);
+      if (!approved || !approved.passwordHash || !verifyStudentSecret(password, approved.passwordSalt, approved.passwordHash)) {
+        sendJson(res, 401, { error: "The email or password did not match.", code: "INVALID_LOGIN" });
+        return true;
+      }
+      const session = {
+        role: "student",
         email,
         name: approved.name || email.split("@")[0],
         grade: approved.grade,
         exp: Date.now() + 12 * 60 * 60 * 1000
       };
       sendJson(res, 200, { ok: true, session: publicSession(session) }, { "Set-Cookie": sessionCookie(req, session) });
-    } catch {
-      sendJson(res, 401, { error: "Google could not verify this login. Please try again.", code: "INVALID_GOOGLE_TOKEN" });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
     }
     return true;
   }
@@ -572,7 +642,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
   const db = readDb();
 
   if (req.method === "GET" && pathname === "/api/approved-students") {
-    sendJson(res, 200, { students: normalizeApprovedStudents(db.approvedStudents) });
+    sendJson(res, 200, { students: publicApprovedStudents(db.approvedStudents) });
     return true;
   }
 
@@ -584,12 +654,26 @@ async function handleApprovedStudentsApi(req, res, pathname) {
         : (String(body.emails || "").match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || []);
       const before = normalizeApprovedStudents(db.approvedStudents);
       db.approvedStudents = normalizeApprovedStudents([...before, ...emails]);
+      const activationCodes = [];
+      db.approvedStudents = db.approvedStudents.map(student => {
+        if (student.passwordHash || student.activationHash) return student;
+        const code = createActivationCode();
+        const record = hashStudentSecret(code);
+        activationCodes.push({ email: student.email, activationCode: code });
+        return {
+          ...student,
+          activationSalt: record.salt,
+          activationHash: record.hash,
+          activationIssuedAt: new Date().toISOString()
+        };
+      });
       writeDb(db);
       sendJson(res, 200, {
         ok: true,
         added: db.approvedStudents.length - before.length,
         total: db.approvedStudents.length,
-        students: db.approvedStudents
+        activationCodes,
+        students: publicApprovedStudents(db.approvedStudents)
       });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
@@ -597,11 +681,63 @@ async function handleApprovedStudentsApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "POST" && pathname === "/api/approved-students/regenerate-codes") {
+    const activationCodes = [];
+    db.approvedStudents = normalizeApprovedStudents(db.approvedStudents).map(student => {
+      if (student.passwordHash) return student;
+      const code = createActivationCode();
+      const record = hashStudentSecret(code);
+      activationCodes.push({ email: student.email, activationCode: code });
+      return {
+        ...student,
+        activationSalt: record.salt,
+        activationHash: record.hash,
+        activationIssuedAt: new Date().toISOString()
+      };
+    });
+    writeDb(db);
+    sendJson(res, 200, {
+      ok: true,
+      activationCodes,
+      students: publicApprovedStudents(db.approvedStudents)
+    });
+    return true;
+  }
+
+  if (req.method === "POST" && pathname.endsWith("/reset-code")) {
+    const encodedEmail = pathname.slice("/api/approved-students/".length, -"/reset-code".length);
+    const email = normalizeEmail(decodeURIComponent(encodedEmail));
+    const student = normalizeApprovedStudents(db.approvedStudents).find(item => item.email === email);
+    if (!student) {
+      sendJson(res, 404, { error: "Approved student not found." });
+      return true;
+    }
+    const code = createActivationCode();
+    const record = hashStudentSecret(code);
+    const resetStudent = {
+      ...student,
+      passwordSalt: "",
+      passwordHash: "",
+      activationSalt: record.salt,
+      activationHash: record.hash,
+      activationIssuedAt: new Date().toISOString()
+    };
+    db.approvedStudents = db.approvedStudents.map(item => normalizeEmail(item.email) === email ? resetStudent : item);
+    writeDb(db);
+    sendJson(res, 200, {
+      ok: true,
+      email,
+      activationCode: code,
+      students: publicApprovedStudents(db.approvedStudents)
+    });
+    return true;
+  }
+
   if (req.method === "DELETE" && pathname.startsWith("/api/approved-students/")) {
     const email = normalizeEmail(decodeURIComponent(pathname.slice("/api/approved-students/".length)));
     db.approvedStudents = normalizeApprovedStudents(db.approvedStudents).filter(student => student.email !== email);
     writeDb(db);
-    sendJson(res, 200, { ok: true, students: db.approvedStudents });
+    sendJson(res, 200, { ok: true, students: publicApprovedStudents(db.approvedStudents) });
     return true;
   }
 
@@ -613,7 +749,7 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/health") {
     sendJson(res, 200, {
       ok: true,
-      googleAuthConfigured: Boolean(googleClientId && configuredSessionSecret),
+      studentLoginConfigured: Boolean(configuredSessionSecret),
       teacherAuthConfigured: Boolean(initialTeacherPin || readDb().teacherPin)
     });
     return true;
@@ -852,6 +988,6 @@ server.listen(port, "0.0.0.0", () => {
     .map(item => `http://${item.address}:${port}/`);
   console.log(`Classroom Launchpad server running at http://localhost:${port}/`);
   addresses.forEach(address => console.log(`Network URL: ${address}`));
-  if (!googleClientId || !configuredSessionSecret) console.log("Google login is waiting for GOOGLE_CLIENT_ID and SESSION_SECRET.");
+  if (!configuredSessionSecret) console.log("Student login is waiting for SESSION_SECRET.");
   if (!initialTeacherPin && !readDb().teacherPin) console.log("Teacher login is waiting for TEACHER_PIN.");
 });

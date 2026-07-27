@@ -1,3 +1,5 @@
 data/*.json
 data/*.tmp
 node_modules/
+work/auth-api-test-data*/
+work/auth-ui-test-data*/

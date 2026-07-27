@@ -318,8 +318,11 @@ const sharedBackend = {
   loadSession() {
     return this.request("/api/auth/session");
   },
-  googleLogin(credential) {
-    return this.request("/api/auth/google", { method: "POST", body: JSON.stringify({ credential }) });
+  registerStudent(account) {
+    return this.request("/api/auth/register", { method: "POST", body: JSON.stringify(account) });
+  },
+  loginStudent(email, password) {
+    return this.request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
   },
   teacherLogin(pin) {
     return this.request("/api/auth/teacher", { method: "POST", body: JSON.stringify({ pin }) });
@@ -338,6 +341,12 @@ const sharedBackend = {
   },
   removeApprovedStudent(email) {
     return this.request(`/api/approved-students/${encodeURIComponent(email)}`, { method: "DELETE", body: "{}" });
+  },
+  resetStudentCode(email) {
+    return this.request(`/api/approved-students/${encodeURIComponent(email)}/reset-code`, { method: "POST", body: "{}" });
+  },
+  regenerateStudentCodes() {
+    return this.request("/api/approved-students/regenerate-codes", { method: "POST", body: "{}" });
   }
 };
 
@@ -886,11 +895,12 @@ let classTimerClock = null;
 let sharedSyncTimer = null;
 let randomActivity = null;
 let coltRunGame = null;
-let authConfig = { googleClientId: "", googleWorkspaceDomain: "scscolts.org", googleConfigured: false, teacherConfigured: false };
+let authConfig = { studentEmailDomain: "scscolts.org", studentLoginConfigured: false, teacherConfigured: false };
 let authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
 let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
+let activationCodeResults = [];
 const app = document.getElementById("app");
 
 function isSignedIn() {
@@ -1487,7 +1497,7 @@ function renderColtCorner() {
         <span class="feature-kicker">Protected Class Forum</span>
         <h2>Sign in to open Colt Corner</h2>
         <p>The message board is available only to approved students and the teacher.</p>
-        <button class="primary-btn" data-action="login">Sign In With Google</button>
+        <button class="primary-btn" data-action="login">Student Login</button>
       </section>
     `;
   }
@@ -6399,15 +6409,12 @@ function renderPin() {
   return `
     ${pageHeader("Teacher PIN", "", true)}
     <section class="pin-card">
-      <div class="teacher-google-login">
-        <h2>Teacher Sign-In</h2>
-        <p>Use your approved teacher Google account or the recovery PIN.</p>
-        <div id="googleTeacherButton" class="google-signin-slot"></div>
-      </div>
+      <h2>Teacher Sign-In</h2>
+      <p class="instruction">Enter your private server-protected recovery PIN.</p>
       <form id="pinForm" class="form-grid">
         <div class="field">
           <label for="pinInput">PIN</label>
-          <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8">
+          <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" maxlength="12">
         </div>
         <p id="pinError" class="error"></p>
         <button class="primary-btn" type="submit">Enter Teacher Mode</button>
@@ -6418,14 +6425,54 @@ function renderPin() {
 
 function renderLogin() {
   return `
-    ${pageHeader("Student Login", "Use your St. Cletus school Google account.", true)}
-    <section class="auth-card">
+    ${pageHeader("Student Login", "Use your approved school email and Classroom Launchpad password.", true)}
+    <section class="auth-card student-auth-card">
       <span class="feature-kicker">Protected Student Access</span>
-      <h2>Sign in with Google</h2>
-      <p>Use the school account assigned to you. Classroom Launchpad never receives or stores your Google password.</p>
-      ${authConfig.googleConfigured
-        ? `<div id="googleStudentButton" class="google-signin-slot"></div>`
-        : `<div class="auth-notice"><strong>Setup is not finished yet.</strong><p>Mr. Nieves still needs to connect the Google sign-in Client ID in Render.</p></div>`}
+      <h2>Classroom Launchpad Account</h2>
+      <p>Your first login requires a one-time activation code from Mr. Nieves. Classroom Launchpad passwords are separate from school Google passwords.</p>
+      <div class="student-auth-grid">
+        <form id="studentLoginForm" class="form-grid auth-form-panel">
+          <h3>Log In</h3>
+          <div class="field">
+            <label for="studentLoginEmail">School email</label>
+            <input id="studentLoginEmail" type="email" autocomplete="username" placeholder="student@${escapeHtml(authConfig.studentEmailDomain)}">
+          </div>
+          <div class="field">
+            <label for="studentLoginPassword">Classroom Launchpad password</label>
+            <input id="studentLoginPassword" type="password" autocomplete="current-password">
+          </div>
+          <button class="primary-btn" type="submit">Log In</button>
+        </form>
+        <form id="studentRegisterForm" class="form-grid auth-form-panel">
+          <h3>First Login</h3>
+          <div class="field">
+            <label for="studentRegisterEmail">Approved school email</label>
+            <input id="studentRegisterEmail" type="email" autocomplete="username" placeholder="student@${escapeHtml(authConfig.studentEmailDomain)}">
+          </div>
+          <div class="field">
+            <label for="studentActivationCode">One-time activation code</label>
+            <input id="studentActivationCode" autocomplete="one-time-code" maxlength="14">
+          </div>
+          <div class="field">
+            <label for="studentRegisterName">First and last name</label>
+            <input id="studentRegisterName" autocomplete="name" maxlength="80">
+          </div>
+          <div class="field">
+            <label for="studentRegisterGrade">Grade</label>
+            <input id="studentRegisterGrade" autocomplete="off" maxlength="12">
+          </div>
+          <div class="field">
+            <label for="studentRegisterPassword">Create password</label>
+            <input id="studentRegisterPassword" type="password" autocomplete="new-password" minlength="10">
+            <small>Use at least 10 characters. Do not reuse your Google password.</small>
+          </div>
+          <div class="field">
+            <label for="studentRegisterPasswordConfirm">Confirm password</label>
+            <input id="studentRegisterPasswordConfirm" type="password" autocomplete="new-password" minlength="10">
+          </div>
+          <button class="primary-btn" type="submit">Create Account</button>
+        </form>
+      </div>
       <p id="authStatus" class="request-message ${authMessage ? "error" : ""}" aria-live="polite">${escapeHtml(authMessage)}</p>
     </section>
   `;
@@ -6449,23 +6496,44 @@ function renderApprovedStudentManager() {
       <div>
         <span class="feature-kicker">Private Access List</span>
         <h2>Approved Student Emails</h2>
-        <p class="instruction">Paste one or more @${escapeHtml(authConfig.googleWorkspaceDomain)} addresses. This private list is stored on the server and is never shown publicly.</p>
+        <p class="instruction">Paste one or more @${escapeHtml(authConfig.studentEmailDomain)} addresses. New students receive one-time activation codes for their first login.</p>
       </div>
       <form id="approvedStudentImportForm" class="form-grid">
         <div class="field">
           <label for="approvedStudentEmails">Student emails</label>
-          <textarea id="approvedStudentEmails" rows="6" placeholder="student@${escapeHtml(authConfig.googleWorkspaceDomain)}"></textarea>
+          <textarea id="approvedStudentEmails" rows="6" placeholder="student@${escapeHtml(authConfig.studentEmailDomain)}"></textarea>
         </div>
         <button class="primary-btn" type="submit">Add Approved Emails</button>
+        <button class="outline-btn" type="button" data-action="regenerateStudentCodes">Generate New Codes for Unregistered Students</button>
         <p id="approvedStudentStatus" class="request-message" aria-live="polite"></p>
       </form>
+      ${activationCodeResults.length ? `
+        <section class="activation-code-results">
+          <div>
+            <strong>Save these one-time codes now</strong>
+            <p>Codes are displayed only when created. Give each code privately to the matching student.</p>
+          </div>
+          <button class="outline-btn" data-action="downloadActivationCodes">Download Codes</button>
+          <div class="activation-code-list">
+            ${activationCodeResults.map(item => `
+              <div><span>${escapeHtml(item.email)}</span><code>${escapeHtml(item.activationCode)}</code></div>
+            `).join("")}
+          </div>
+        </section>
+      ` : ""}
       <div class="approved-student-summary">
         <strong>${approvedStudents.length} approved ${approvedStudents.length === 1 ? "student" : "students"}</strong>
         <div class="approved-student-list">
           ${approvedStudents.length ? approvedStudents.map(student => `
             <div class="approved-student-row">
-              <span>${escapeHtml(student.email)}</span>
-              <button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>
+              <span>
+                ${escapeHtml(student.email)}
+                <small>${student.registered ? "Registered" : student.activationReady ? "Waiting for first login" : "Needs activation code"}</small>
+              </span>
+              <div class="actions">
+                <button class="outline-btn" data-action="resetStudentCode" data-email="${escapeHtml(student.email)}">${student.registered ? "Reset Password" : "New Code"}</button>
+                <button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>
+              </div>
             </div>
           `).join("") : `<p class="instruction">No student emails have been imported yet.</p>`}
         </div>
@@ -6754,11 +6822,11 @@ function renderChangePin() {
       <form id="changePinForm" class="form-grid">
         <div class="field">
           <label for="newPin">New PIN</label>
-          <input id="newPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">
+          <input id="newPin" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password">
         </div>
         <div class="field">
           <label for="confirmPin">Confirm PIN</label>
-          <input id="confirmPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">
+          <input id="confirmPin" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password">
         </div>
         <p id="pinChangeError" class="error"></p>
         <button class="primary-btn" type="submit">Save PIN</button>
@@ -6803,73 +6871,6 @@ function render() {
   observeDeferredVideos(app);
 }
 
-function loadGoogleIdentityLibrary() {
-  if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[data-google-identity="true"]');
-    if (existing) {
-      existing.addEventListener("load", resolve, { once: true });
-      existing.addEventListener("error", reject, { once: true });
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleIdentity = "true";
-    script.addEventListener("load", resolve, { once: true });
-    script.addEventListener("error", reject, { once: true });
-    document.head.appendChild(script);
-  });
-}
-
-async function handleGoogleCredential(response) {
-  authMessage = "";
-  try {
-    const result = await sharedBackend.googleLogin(response.credential);
-    authSession = result.session;
-    await loadSharedState(false);
-    if (isTeacher()) {
-      await loadApprovedStudents();
-      setScreen({ name: "dashboard" });
-    } else {
-      setScreen({ name: "home" });
-    }
-  } catch (error) {
-    authMessage = error.message;
-    render();
-  }
-}
-
-async function attachGoogleSignIn() {
-  const slots = [
-    document.getElementById("googleStudentButton"),
-    document.getElementById("googleTeacherButton")
-  ].filter(Boolean);
-  if (!slots.length || !authConfig.googleConfigured || !authConfig.googleClientId) return;
-  try {
-    await loadGoogleIdentityLibrary();
-    window.google.accounts.id.initialize({
-      client_id: authConfig.googleClientId,
-      callback: handleGoogleCredential,
-      auto_select: false,
-      cancel_on_tap_outside: true
-    });
-    slots.forEach(slot => window.google.accounts.id.renderButton(slot, {
-      type: "standard",
-      theme: theme === "night" ? "filled_black" : "outline",
-      size: "large",
-      shape: "rectangular",
-      text: "signin_with",
-      width: Math.min(360, Math.max(240, slot.clientWidth || 320))
-    }));
-  } catch {
-    authMessage = "Google sign-in could not load. Check the internet connection and try again.";
-    const status = document.getElementById("authStatus");
-    if (status) status.textContent = authMessage;
-  }
-}
-
 async function loadApprovedStudents() {
   if (!sharedBackend.enabled || !isTeacher()) return;
   try {
@@ -6901,7 +6902,57 @@ function attachScreenHandlers() {
   startCalendarClock();
   startClassTimerClock();
   if (screen.name === "coltRun") startColtRunGame();
-  attachGoogleSignIn();
+  const studentLoginForm = document.getElementById("studentLoginForm");
+  if (studentLoginForm) {
+    studentLoginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("authStatus");
+      try {
+        const result = await sharedBackend.loginStudent(
+          document.getElementById("studentLoginEmail").value,
+          document.getElementById("studentLoginPassword").value
+        );
+        authSession = result.session;
+        authMessage = "";
+        await loadSharedState(false);
+        setScreen({ name: "home" });
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
+
+  const studentRegisterForm = document.getElementById("studentRegisterForm");
+  if (studentRegisterForm) {
+    studentRegisterForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("authStatus");
+      const password = document.getElementById("studentRegisterPassword").value;
+      const confirmation = document.getElementById("studentRegisterPasswordConfirm").value;
+      if (password !== confirmation) {
+        status.textContent = "The password entries do not match.";
+        status.classList.add("error");
+        return;
+      }
+      try {
+        const result = await sharedBackend.registerStudent({
+          email: document.getElementById("studentRegisterEmail").value,
+          activationCode: document.getElementById("studentActivationCode").value,
+          name: document.getElementById("studentRegisterName").value,
+          grade: document.getElementById("studentRegisterGrade").value,
+          password
+        });
+        authSession = result.session;
+        authMessage = "";
+        await loadSharedState(false);
+        setScreen({ name: "home" });
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
 
   const pinForm = document.getElementById("pinForm");
   if (pinForm) {
@@ -6929,6 +6980,7 @@ function attachScreenHandlers() {
       try {
         const result = await sharedBackend.importApprovedStudents(emails);
         approvedStudents = result.students || [];
+        activationCodeResults = result.activationCodes || [];
         status.textContent = `${result.added} added. ${result.total} students are now approved.`;
         status.classList.remove("error");
         document.getElementById("approvedStudentEmails").value = "";
@@ -7216,7 +7268,7 @@ function attachReplyForm() {
 }
 
 function validateThreadTopic(thread) {
-  if (!isSignedIn()) return "Please sign in with your approved school Google account.";
+  if (!isSignedIn()) return "Please log in with your approved Classroom Launchpad account.";
   if (postingBlocked) return "Posting is unavailable. Please check with Mr. Nieves.";
   if (!thread.studentName) return "Please add your name.";
   if (!thread.grade) return "Please add your grade.";
@@ -7229,7 +7281,7 @@ function validateThreadTopic(thread) {
 }
 
 function validateThreadReply(reply) {
-  if (!isSignedIn()) return "Please sign in with your approved school Google account.";
+  if (!isSignedIn()) return "Please log in with your approved Classroom Launchpad account.";
   if (postingBlocked) return "Replying is unavailable. Please check with Mr. Nieves.";
   if (!reply.studentName) return "Please add your name.";
   if (!reply.grade) return "Please add your grade.";
@@ -7294,7 +7346,7 @@ app.addEventListener("click", async event => {
     mutedStudents = [];
     websiteRequests = [];
     approvedStudents = [];
-    if (window.google && window.google.accounts) window.google.accounts.id.disableAutoSelect();
+    activationCodeResults = [];
     setScreen({ name: "home" });
   }
   if (action === "toggleTheme") toggleTheme();
@@ -7321,6 +7373,39 @@ app.addEventListener("click", async event => {
     } catch (error) {
       authMessage = error.message;
     }
+  }
+  if (action === "resetStudentCode") {
+    try {
+      const result = await sharedBackend.resetStudentCode(target.dataset.email);
+      approvedStudents = result.students || [];
+      activationCodeResults = [{ email: result.email, activationCode: result.activationCode }];
+      render();
+    } catch (error) {
+      authMessage = error.message;
+    }
+  }
+  if (action === "regenerateStudentCodes") {
+    try {
+      const result = await sharedBackend.regenerateStudentCodes();
+      approvedStudents = result.students || [];
+      activationCodeResults = result.activationCodes || [];
+      render();
+    } catch (error) {
+      authMessage = error.message;
+    }
+  }
+  if (action === "downloadActivationCodes" && activationCodeResults.length) {
+    const rows = [
+      ["Student Email", "One-Time Activation Code"],
+      ...activationCodeResults.map(item => [item.email, item.activationCode])
+    ];
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `classroom-launchpad-activation-codes-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
   if (action === "delete") {
     const link = links.find(item => item.id === target.dataset.id);

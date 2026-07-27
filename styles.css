@@ -344,6 +344,37 @@ h3 {
   line-height: 1.6;
 }
 
+.student-auth-card {
+  max-width: 980px;
+}
+
+.student-auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.auth-form-panel {
+  align-content: start;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.auth-form-panel h3 {
+  margin-bottom: 4px;
+}
+
+.auth-form-panel small,
+.approved-student-row small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .google-signin-slot {
   width: min(360px, 100%);
   min-height: 44px;
@@ -416,6 +447,52 @@ body[data-theme="night"] .auth-notice {
 
 .approved-student-row span {
   overflow-wrap: anywhere;
+}
+
+.approved-student-row .actions {
+  flex: 0 0 auto;
+}
+
+.activation-code-results {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 2px solid #c58c00;
+  border-radius: 12px;
+  background: #fff8d8;
+  color: #4f3900;
+}
+
+body[data-theme="night"] .activation-code-results {
+  background: #332b12;
+  color: #ffe699;
+}
+
+.activation-code-list {
+  display: grid;
+  gap: 7px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.activation-code-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+body[data-theme="night"] .activation-code-list > div {
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.activation-code-list code {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
 }
 
 .portal-btn {
@@ -3429,6 +3506,16 @@ body[data-theme="night"] .class-timer-badge {
 @media (max-width: 720px) {
   .approved-student-manager {
     grid-template-columns: 1fr;
+  }
+
+  .student-auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .approved-student-row,
+  .activation-code-list > div {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .header-actions {

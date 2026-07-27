@@ -42,14 +42,27 @@ async function run() {
     await page.locator('[data-action="login"]').first().click();
     await page.locator(".auth-card").waitFor();
     const loginText = await page.locator(".auth-card").innerText();
-    if (!loginText.includes("never receives or stores your Google password")) {
-      throw new Error("Login privacy explanation was missing.");
+    if (!loginText.includes("one-time activation code") || !loginText.includes("Do not reuse your Google password")) {
+      throw new Error("Website account and password guidance was missing.");
     }
     await page.screenshot({ path: path.join(__dirname, "auth-login-ui-qa.png"), fullPage: true });
+    await page.locator('[data-action="back"]').click();
+    await page.locator('[data-action="teacher"]').click();
+    await page.locator("#pinInput").fill("654321");
+    await page.locator("#pinForm").evaluate(form => form.requestSubmit());
+    await page.locator("#approvedStudentEmails").waitFor();
+    await page.locator("#approvedStudentEmails").fill("ui.test@scscolts.org");
+    await page.locator("#approvedStudentImportForm").evaluate(form => form.requestSubmit());
+    await page.locator(".activation-code-results").waitFor();
+    const activationText = await page.locator(".activation-code-results").innerText();
+    if (!activationText.includes("ui.test@scscolts.org") || !activationText.includes("Download Codes")) {
+      throw new Error("Teacher activation-code results were not displayed.");
+    }
     console.log(JSON.stringify({
       loginBesidePlusPortal: true,
       coltCornerShowsProtectedState: true,
-      loginPrivacyMessagePresent: true,
+      activationAndPasswordGuidancePresent: true,
+      teacherCanGenerateActivationCodes: true,
       horizontalOverflow: await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
     }, null, 2));
   } finally {
