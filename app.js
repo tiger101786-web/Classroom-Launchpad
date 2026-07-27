@@ -901,6 +901,21 @@ let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
 let activationCodeResults = [];
+const dashboardSections = [
+  { id: "overview", label: "Overview", icon: "⌂" },
+  { id: "students", label: "Students & Access", icon: "♙" },
+  { id: "tools", label: "Classroom Tools", icon: "◷" },
+  { id: "corner", label: "Colt Corner", icon: "✦" },
+  { id: "requests", label: "Website Requests", icon: "✉" },
+  { id: "websites", label: "Manage Websites", icon: "▦" },
+  { id: "settings", label: "Settings", icon: "⚙" }
+];
+let dashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
+let dashboardLinkSearch = "";
+let dashboardLinkCategory = "all";
+let dashboardLinkStatus = "all";
+let dashboardLinkPage = 1;
+const DASHBOARD_LINKS_PER_PAGE = 15;
 const app = document.getElementById("app");
 
 function isSignedIn() {
@@ -6542,7 +6557,7 @@ function renderApprovedStudentManager() {
   `;
 }
 
-function renderDashboard() {
+function renderLegacyDashboard() {
   const sorted = [...links].sort((a, b) => `${a.category}${a.title}`.localeCompare(`${b.category}${b.title}`));
   return `
     ${pageHeader("Teacher Dashboard", "", true)}
@@ -6694,6 +6709,267 @@ function renderDashboard() {
     <section class="teacher-list">
       ${sorted.map(renderTeacherLink).join("")}
     </section>
+  `;
+}
+
+function dashboardSectionDetails() {
+  return dashboardSections.find(section => section.id === dashboardSection) || dashboardSections[0];
+}
+
+function renderDashboardNavigation() {
+  return `
+    <nav class="dashboard-nav" aria-label="Teacher dashboard sections">
+      <div class="dashboard-nav-heading">
+        <span class="feature-kicker">Teacher Controls</span>
+        <strong>Dashboard Menu</strong>
+      </div>
+      <div class="dashboard-nav-items">
+        ${dashboardSections.map(section => `
+          <button
+            type="button"
+            class="dashboard-nav-button ${section.id === dashboardSection ? "is-active" : ""}"
+            data-action="dashboardSection"
+            data-section="${section.id}"
+            ${section.id === dashboardSection ? 'aria-current="page"' : ""}
+          >
+            <span aria-hidden="true">${section.icon}</span>
+            ${escapeHtml(section.label)}
+            ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
+          </button>
+        `).join("")}
+      </div>
+    </nav>
+  `;
+}
+
+function renderDashboardOverview() {
+  const registered = approvedStudents.filter(student => student.registered).length;
+  const waiting = approvedStudents.filter(student => !student.registered).length;
+  const activeLinks = links.filter(link => link.active).length;
+  const metrics = [
+    ["Approved Students", approvedStudents.length, "students"],
+    ["Registered", registered, "students"],
+    ["Awaiting First Login", waiting, "students"],
+    ["Colt Corner Topics", classThreads.length, "corner"],
+    ["Website Requests", websiteRequests.length, "requests"],
+    ["Muted Students", mutedStudents.length, "corner"]
+  ];
+  return `
+    <section class="dashboard-overview" aria-label="Dashboard overview">
+      <div class="dashboard-metric-grid">
+        ${metrics.map(([label, value, section]) => `
+          <button class="dashboard-metric-card" data-action="dashboardSection" data-section="${section}">
+            <span>${escapeHtml(label)}</span>
+            <strong>${value}</strong>
+            <small>View details →</small>
+          </button>
+        `).join("")}
+      </div>
+      <section class="dashboard-quick-panel">
+        <div>
+          <span class="feature-kicker">Quick Actions</span>
+          <h3>What would you like to manage?</h3>
+          <p class="instruction">${activeLinks} of ${links.length} websites are currently visible to students.</p>
+        </div>
+        <div class="dashboard-quick-actions">
+          <button class="primary-btn" data-action="add">+ Add Website</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="students">Manage Student Access</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="tools">Open Classroom Tools</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="requests">Review Requests</button>
+        </div>
+      </section>
+      <section class="dashboard-status-panel">
+        <div>
+          <span class="dashboard-status-dot ${randomActivitySettings.locked ? "is-locked" : ""}"></span>
+          <span>Random Activity</span>
+          <strong>${randomActivitySettings.locked ? "Locked" : "Available"}</strong>
+        </div>
+        <div>
+          <span class="dashboard-status-dot ${classTimer.status === "running" ? "" : "is-idle"}"></span>
+          <span>Class Timer</span>
+          <strong>${escapeHtml(classTimerStatusText(classTimer))}</strong>
+        </div>
+      </section>
+    </section>
+  `;
+}
+
+function renderDashboardClassroomTools() {
+  const legacy = renderLegacyDashboard();
+  const start = legacy.indexOf('<section class="form-card daily-launch-editor">');
+  const end = legacy.indexOf('<h2 class="section-title">Colt Corner Threads</h2>');
+  return `<div class="dashboard-tools-grid">${legacy.slice(start, end)}</div>`;
+}
+
+function renderDashboardColtCorner() {
+  return `
+    <div class="dashboard-split-view">
+      <section>
+        <div class="dashboard-subheading">
+          <div><span class="feature-kicker">Discussion Board</span><h3>Topics & Replies</h3></div>
+          <span class="dashboard-count">${classThreads.length}</span>
+        </div>
+        <div class="teacher-list">
+          ${classThreads.length ? sortedThreads().map(renderTeacherThread).join("") : emptyCard("No Colt Corner topics yet.")}
+        </div>
+      </section>
+      <aside>
+        <div class="dashboard-subheading">
+          <div><span class="feature-kicker">Posting Access</span><h3>Muted Students</h3></div>
+          <span class="dashboard-count">${mutedStudents.length}</span>
+        </div>
+        <div class="teacher-list">
+          ${mutedStudents.length ? mutedStudents.map(renderMutedStudent).join("") : emptyCard("No muted students.")}
+        </div>
+      </aside>
+    </div>
+  `;
+}
+
+function renderDashboardRequests() {
+  return `
+    <section>
+      <div class="dashboard-subheading">
+        <div><span class="feature-kicker">Student Suggestions</span><h3>Pending Website Requests</h3></div>
+        <span class="dashboard-count">${websiteRequests.length}</span>
+      </div>
+      <div class="teacher-list">
+        ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student website requests yet.")}
+      </div>
+    </section>
+  `;
+}
+
+function filteredDashboardLinks() {
+  const query = dashboardLinkSearch.trim().toLowerCase();
+  return [...links]
+    .filter(link => dashboardLinkCategory === "all" || link.category === dashboardLinkCategory)
+    .filter(link => dashboardLinkStatus === "all" || (dashboardLinkStatus === "active" ? link.active : !link.active))
+    .filter(link => !query || [link.title, link.category, link.instruction, link.url].some(value => String(value).toLowerCase().includes(query)))
+    .sort((a, b) => `${a.category}${a.title}`.localeCompare(`${b.category}${b.title}`));
+}
+
+function renderDashboardLinkRow(link) {
+  return `
+    <article class="dashboard-link-row">
+      <div class="dashboard-link-name">
+        <strong>${escapeHtml(link.title)}</strong>
+        <small>${escapeHtml(link.url)}</small>
+      </div>
+      <span class="dashboard-category-pill">${escapeHtml(link.category)}</span>
+      <label class="toggle-row dashboard-link-toggle">
+        <span>${link.active ? "Active" : "Hidden"}</span>
+        <span class="switch"><input type="checkbox" data-action="toggleActive" data-id="${link.id}" ${link.active ? "checked" : ""}><span class="slider"></span></span>
+      </label>
+      <div class="actions">
+        <button class="outline-btn" data-action="edit" data-id="${link.id}">Edit</button>
+        <button class="danger-btn" data-action="delete" data-id="${link.id}">Delete</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderDashboardWebsites() {
+  const filtered = filteredDashboardLinks();
+  const pageCount = Math.max(1, Math.ceil(filtered.length / DASHBOARD_LINKS_PER_PAGE));
+  dashboardLinkPage = Math.min(dashboardLinkPage, pageCount);
+  const start = (dashboardLinkPage - 1) * DASHBOARD_LINKS_PER_PAGE;
+  const visible = filtered.slice(start, start + DASHBOARD_LINKS_PER_PAGE);
+  return `
+    <section class="dashboard-website-manager">
+      <div class="dashboard-manager-toolbar">
+        <label class="dashboard-search">
+          <span class="sr-only">Search websites</span>
+          <input id="dashboardLinkSearch" type="search" value="${escapeHtml(dashboardLinkSearch)}" placeholder="Search websites…">
+        </label>
+        <label>
+          <span class="sr-only">Filter by category</span>
+          <select id="dashboardLinkCategory">
+            <option value="all">All categories</option>
+            ${categories.map(category => `<option value="${escapeHtml(category)}" ${dashboardLinkCategory === category ? "selected" : ""}>${escapeHtml(category)}</option>`).join("")}
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">Filter by status</span>
+          <select id="dashboardLinkStatus">
+            <option value="all" ${dashboardLinkStatus === "all" ? "selected" : ""}>All statuses</option>
+            <option value="active" ${dashboardLinkStatus === "active" ? "selected" : ""}>Active</option>
+            <option value="hidden" ${dashboardLinkStatus === "hidden" ? "selected" : ""}>Hidden</option>
+          </select>
+        </label>
+        <button class="primary-btn" data-action="add">+ Add Website</button>
+      </div>
+      <div class="dashboard-manager-summary">
+        <strong>${filtered.length} ${filtered.length === 1 ? "website" : "websites"}</strong>
+        <span>Page ${dashboardLinkPage} of ${pageCount}</span>
+      </div>
+      <div class="dashboard-link-table" aria-live="polite">
+        <div class="dashboard-link-header" aria-hidden="true"><span>Website</span><span>Category</span><span>Status</span><span>Actions</span></div>
+        ${visible.length ? visible.map(renderDashboardLinkRow).join("") : emptyCard("No websites match these filters.")}
+      </div>
+      ${pageCount > 1 ? `
+        <div class="dashboard-pagination" aria-label="Website pages">
+          <button class="outline-btn" data-action="dashboardLinkPage" data-page="${dashboardLinkPage - 1}" ${dashboardLinkPage === 1 ? "disabled" : ""}>← Previous</button>
+          <span>Page ${dashboardLinkPage} of ${pageCount}</span>
+          <button class="outline-btn" data-action="dashboardLinkPage" data-page="${dashboardLinkPage + 1}" ${dashboardLinkPage === pageCount ? "disabled" : ""}>Next →</button>
+        </div>
+      ` : ""}
+    </section>
+  `;
+}
+
+function renderDashboardSettings() {
+  return `
+    <div class="dashboard-settings-grid">
+      <section class="form-card dashboard-setting-card">
+        <span class="feature-kicker">Teacher Security</span>
+        <h3>Teacher PIN</h3>
+        <p class="instruction">Change the private PIN used to open this dashboard.</p>
+        <button class="primary-btn" data-action="changePin">Change Teacher PIN</button>
+      </section>
+      <section class="form-card dashboard-setting-card">
+        <span class="feature-kicker">Website Library</span>
+        <h3>Reset Sample Links</h3>
+        <p class="instruction">Restore the original sample websites. This removes teacher edits to the link library.</p>
+        <button class="danger-btn" data-action="reset">Reset Sample Links</button>
+      </section>
+      <section class="form-card dashboard-setting-card">
+        <span class="feature-kicker">Current Session</span>
+        <h3>Sign Out</h3>
+        <p class="instruction">Log out when you are finished, especially on a shared computer.</p>
+        <button class="outline-btn" data-action="logout">Log Out</button>
+      </section>
+    </div>
+  `;
+}
+
+function renderDashboardSection() {
+  if (dashboardSection === "students") return renderApprovedStudentManager();
+  if (dashboardSection === "tools") return renderDashboardClassroomTools();
+  if (dashboardSection === "corner") return renderDashboardColtCorner();
+  if (dashboardSection === "requests") return renderDashboardRequests();
+  if (dashboardSection === "websites") return renderDashboardWebsites();
+  if (dashboardSection === "settings") return renderDashboardSettings();
+  return renderDashboardOverview();
+}
+
+function renderDashboard() {
+  const current = dashboardSectionDetails();
+  return `
+    ${pageHeader("Teacher Dashboard", "", true)}
+    <div class="teacher-dashboard-shell">
+      ${renderDashboardNavigation()}
+      <main class="dashboard-workspace" id="dashboardWorkspace">
+        <header class="dashboard-workspace-header">
+          <div>
+            <span class="feature-kicker">Teacher Dashboard</span>
+            <h2>${escapeHtml(current.label)}</h2>
+          </div>
+          ${dashboardSection !== "overview" ? `<button class="outline-btn dashboard-overview-button" data-action="dashboardSection" data-section="overview">Back to Overview</button>` : ""}
+        </header>
+        ${renderDashboardSection()}
+      </main>
+    </div>
   `;
 }
 
@@ -6882,6 +7158,35 @@ async function loadApprovedStudents() {
 }
 
 function attachScreenHandlers() {
+  const dashboardSearch = document.getElementById("dashboardLinkSearch");
+  if (dashboardSearch) {
+    dashboardSearch.addEventListener("input", event => {
+      dashboardLinkSearch = event.target.value;
+      dashboardLinkPage = 1;
+      render();
+      const nextSearch = document.getElementById("dashboardLinkSearch");
+      if (nextSearch) {
+        nextSearch.focus();
+        nextSearch.setSelectionRange(dashboardLinkSearch.length, dashboardLinkSearch.length);
+      }
+    });
+  }
+  const dashboardCategory = document.getElementById("dashboardLinkCategory");
+  if (dashboardCategory) {
+    dashboardCategory.addEventListener("change", event => {
+      dashboardLinkCategory = event.target.value;
+      dashboardLinkPage = 1;
+      render();
+    });
+  }
+  const dashboardStatus = document.getElementById("dashboardLinkStatus");
+  if (dashboardStatus) {
+    dashboardStatus.addEventListener("change", event => {
+      dashboardLinkStatus = event.target.value;
+      dashboardLinkPage = 1;
+      render();
+    });
+  }
   const search = document.getElementById("studentSearch");
   if (search) {
     search.addEventListener("input", event => {
@@ -7331,6 +7636,18 @@ app.addEventListener("click", async event => {
   if (action === "teacherDashboard") {
     await loadApprovedStudents();
     setScreen({ name: "dashboard" });
+  }
+  if (action === "dashboardSection") {
+    const nextSection = dashboardSections.some(section => section.id === target.dataset.section) ? target.dataset.section : "overview";
+    dashboardSection = nextSection;
+    sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+    render();
+    document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if (action === "dashboardLinkPage") {
+    dashboardLinkPage = Math.max(1, Number(target.dataset.page) || 1);
+    render();
+    document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (action === "login") {
     authMessage = "";
