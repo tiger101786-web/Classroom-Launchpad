@@ -960,6 +960,7 @@ const dashboardSections = [
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
 let dashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
+let dashboardStudentSearch = "";
 let dashboardLinkSearch = "";
 let dashboardLinkCategory = "all";
 let dashboardLinkStatus = "all";
@@ -6560,6 +6561,17 @@ function renderAccount() {
 }
 
 function renderApprovedStudentManager() {
+  const studentQuery = dashboardStudentSearch.trim().toLowerCase();
+  const visibleStudents = approvedStudents.filter(student => {
+    if (!studentQuery) return true;
+    const status = student.registered
+      ? "registered reset password"
+      : student.activationReady
+        ? "waiting for first login new code"
+        : "needs activation code new code";
+    return [student.name, student.email, student.grade, status]
+      .some(value => String(value || "").toLowerCase().includes(studentQuery));
+  });
   return `
     <section class="form-card approved-student-manager">
       <div>
@@ -6601,9 +6613,18 @@ function renderApprovedStudentManager() {
         </section>
       ` : ""}
       <div class="approved-student-summary">
-        <strong>${approvedStudents.length} approved ${approvedStudents.length === 1 ? "student" : "students"}</strong>
+        <div class="approved-student-summary-header">
+          <div>
+            <strong>${approvedStudents.length} approved ${approvedStudents.length === 1 ? "student" : "students"}</strong>
+            ${studentQuery ? `<small>${visibleStudents.length} matching ${visibleStudents.length === 1 ? "student" : "students"}</small>` : ""}
+          </div>
+          <label class="approved-student-search">
+            <span class="sr-only">Search approved students</span>
+            <input id="dashboardStudentSearch" type="search" value="${escapeHtml(dashboardStudentSearch)}" placeholder="Search name, email, grade, or status…">
+          </label>
+        </div>
         <div class="approved-student-list">
-          ${approvedStudents.length ? approvedStudents.map(student => `
+          ${visibleStudents.length ? visibleStudents.map(student => `
             <div class="approved-student-row">
               <span class="approved-student-identity">
                 <strong>${escapeHtml(student.name || "Name not added")}</strong>
@@ -6615,7 +6636,7 @@ function renderApprovedStudentManager() {
                 <button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>
               </div>
             </div>
-          `).join("") : `<p class="instruction">No student emails have been imported yet.</p>`}
+          `).join("") : `<p class="instruction">${approvedStudents.length ? "No students match this search." : "No student emails have been imported yet."}</p>`}
         </div>
       </div>
     </section>
@@ -7223,6 +7244,18 @@ async function loadApprovedStudents() {
 }
 
 function attachScreenHandlers() {
+  const studentManagerSearch = document.getElementById("dashboardStudentSearch");
+  if (studentManagerSearch) {
+    studentManagerSearch.addEventListener("input", event => {
+      dashboardStudentSearch = event.target.value;
+      render();
+      const nextSearch = document.getElementById("dashboardStudentSearch");
+      if (nextSearch) {
+        nextSearch.focus();
+        nextSearch.setSelectionRange(dashboardStudentSearch.length, dashboardStudentSearch.length);
+      }
+    });
+  }
   const dashboardSearch = document.getElementById("dashboardLinkSearch");
   if (dashboardSearch) {
     dashboardSearch.addEventListener("input", event => {

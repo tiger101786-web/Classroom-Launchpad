@@ -434,6 +434,42 @@ body[data-theme="night"] .auth-notice {
   gap: 12px;
 }
 
+.approved-student-summary-header {
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.approved-student-summary-header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.approved-student-summary-header small {
+  color: var(--muted);
+}
+
+.approved-student-search {
+  width: min(390px, 100%);
+}
+
+.approved-student-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.approved-student-search input:focus {
+  outline: 3px solid rgba(123, 11, 49, 0.16);
+  border-color: var(--blue);
+}
+
 .approved-student-list {
   display: grid;
   gap: 8px;
@@ -3984,6 +4020,15 @@ body[data-theme="night"] .class-timer-badge {
 }
 
 @media (max-width: 720px) {
+  .approved-student-summary-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .approved-student-search {
+    width: 100%;
+  }
+
   .teacher-dashboard-shell {
     gap: 12px;
     margin-top: 12px;

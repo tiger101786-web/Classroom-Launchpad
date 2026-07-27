@@ -122,6 +122,15 @@ async function run() {
     if (!studentIdentity.includes("Student, UI") || !studentIdentity.includes("Grade 5")) {
       throw new Error("Private roster name and grade were not displayed.");
     }
+    await page.locator("#dashboardStudentSearch").fill("Student, UI");
+    if (await page.locator(".approved-student-row").count() !== 1) {
+      throw new Error("Student manager search did not filter by student name.");
+    }
+    await page.locator("#dashboardStudentSearch").fill("no matching student");
+    if (!await page.getByText("No students match this search.", { exact: true }).count()) {
+      throw new Error("Student manager search did not show its empty state.");
+    }
+    await page.locator("#dashboardStudentSearch").fill("");
     await page.locator('[data-action="dashboardSection"][data-section="websites"]').first().click();
     await page.locator("#dashboardLinkSearch").waitFor();
     await page.locator("#dashboardLinkSearch").fill("Google");
@@ -147,6 +156,7 @@ async function run() {
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
       privateRosterNamesDisplay: true,
+      studentManagerSearchWorks: true,
       teacherForumIdentityAutomatic: true,
       dashboardNavigationComplete: true,
       websiteSearchWorks: true,
