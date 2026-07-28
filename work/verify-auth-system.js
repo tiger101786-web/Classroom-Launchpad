@@ -61,6 +61,31 @@ async function run() {
   check(teacher.session.role === "teacher", "Teacher session role was incorrect.");
   check(teacher.session.name === "Mr. Nieves" && teacher.session.grade === "Teacher", "Teacher identity was not automatic.");
 
+  const sharedLinks = [{
+    id: "shared-test-link",
+    title: "Shared Browser Test",
+    instruction: "Verify this website appears everywhere.",
+    url: "https://example.com/shared-browser-test",
+    category: "Computer Skills",
+    active: true,
+    todayChoice: false
+  }];
+  const guestLinkWrite = await fetch(`${base}/api/links`, {
+    method: "PUT",
+    headers: originHeaders,
+    body: JSON.stringify({ links: sharedLinks })
+  });
+  check(guestLinkWrite.status === 401, `Guest website-library write returned ${guestLinkWrite.status}.`);
+  const teacherLinkWrite = await fetch(`${base}/api/links`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({ links: sharedLinks })
+  });
+  const teacherLinkResult = await teacherLinkWrite.json();
+  check(teacherLinkWrite.status === 200 && teacherLinkResult.links[0].title === "Shared Browser Test", "Teacher could not save the shared website library.");
+  const sharedGuestState = await fetch(`${base}/api/state`).then(response => response.json());
+  check(sharedGuestState.links.some(link => link.id === "shared-test-link"), "A second browser could not read the shared website library.");
+
   const imported = await fetch(`${base}/api/approved-students/import`, {
     method: "PUT",
     headers: { ...originHeaders, Cookie: cookie },
@@ -206,6 +231,8 @@ async function run() {
   console.log(JSON.stringify({
     guestCannotReadThreads: true,
     guestCannotWriteThreads: true,
+    guestCannotEditWebsiteLibrary: true,
+    websiteLibraryIsSharedAcrossBrowsers: true,
     teacherSessionWorks: true,
     wrongDomainFiltered: true,
     allowlistIsPrivate: true,

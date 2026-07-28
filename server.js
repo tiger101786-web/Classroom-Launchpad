@@ -17,6 +17,7 @@ const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "
 const loginAttempts = new Map();
 
 const defaultDb = {
+  links: null,
   threads: [],
   mutedStudents: [],
   websiteRequests: [],
@@ -55,6 +56,31 @@ function cleanMultilineText(value, maxLength) {
 
 function cleanGrade(value) {
   return cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
+}
+
+function normalizeLinks(entries) {
+  if (!Array.isArray(entries)) return null;
+  const seen = new Set();
+  return entries.slice(0, 500).flatMap(entry => {
+    const source = entry && typeof entry === "object" ? entry : {};
+    const id = cleanText(source.id, 100) || crypto.randomUUID();
+    const title = cleanText(source.title, 120);
+    const instruction = cleanMultilineText(source.instruction, 500);
+    const url = cleanText(source.url, 2048);
+    const category = cleanText(source.category, 80);
+    const allowedUrl = url === "internal:colt-run" || /^https?:\/\/\S+$/i.test(url);
+    if (!title || !url || !category || !allowedUrl || seen.has(id)) return [];
+    seen.add(id);
+    return [{
+      id,
+      title,
+      instruction,
+      url,
+      category,
+      active: source.active !== false,
+      todayChoice: Boolean(source.todayChoice)
+    }];
+  });
 }
 
 function cleanLeaderboardName(name) {
@@ -203,6 +229,7 @@ function readDb() {
 function writeDb(db) {
   fs.mkdirSync(dataDir, { recursive: true });
   const next = {
+    links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: Array.isArray(db.threads) ? db.threads : [],
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
@@ -393,6 +420,7 @@ function publicState(db, session) {
   const signedIn = session && ["student", "teacher"].includes(session.role);
   const teacher = session && session.role === "teacher";
   return {
+    links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: signedIn ? db.threads : [],
     mutedStudents: teacher ? db.mutedStudents : [],
     websiteRequests: teacher ? db.websiteRequests : [],
@@ -835,6 +863,22 @@ async function handleApi(req, res, pathname) {
 
   if (req.method === "GET" && pathname === "/api/leaderboards") {
     sendJson(res, 200, { leaderboards: readDb().leaderboards });
+    return true;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/links") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (!requireRole(req, res, ["teacher"])) return true;
+    try {
+      const body = await readBody(req);
+      if (!Array.isArray(body.links)) throw new Error("links must be an array.");
+      const db = readDb();
+      db.links = normalizeLinks(body.links);
+      writeDb(db);
+      sendJson(res, 200, { ok: true, links: db.links });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

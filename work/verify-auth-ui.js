@@ -80,6 +80,20 @@ async function run() {
     }
     await page.screenshot({ path: path.join(dataDir, "auth-login-ui-qa.png"), fullPage: true });
     await page.locator('[data-action="back"]').click();
+    await page.evaluate(() => {
+      const stored = JSON.parse(localStorage.getItem("earlyFinisherLinks") || "[]");
+      stored.push({
+        id: "existing-browser-only-link",
+        title: "Existing Browser Addition",
+        instruction: "This was saved before shared storage was enabled.",
+        url: "https://example.com/existing-browser-addition",
+        category: "Computer Skills",
+        active: true,
+        todayChoice: false
+      });
+      localStorage.setItem("earlyFinisherLinks", JSON.stringify(stored));
+    });
+    await page.reload({ waitUntil: "networkidle" });
     await page.locator('[data-action="teacher"]').click();
     await page.locator("#pinInput").fill("654321");
     await page.locator("#pinForm").evaluate(form => form.requestSubmit());
@@ -141,6 +155,29 @@ async function run() {
     if (await page.locator(".dashboard-link-row").count() < 1) {
       throw new Error("Website search did not return a matching result.");
     }
+    await page.locator("#dashboardLinkSearch").fill("");
+    await page.locator('[data-action="add"]').first().click();
+    await page.locator("#siteTitle").fill("Cross Browser Website");
+    await page.locator("#siteInstruction").fill("This link must appear in every browser.");
+    await page.locator("#siteUrl").fill("https://example.com/cross-browser");
+    await page.locator("#siteCategory").selectOption("Computer Skills");
+    const sharedSave = page.waitForResponse(response => response.url().endsWith("/api/links") && response.request().method() === "PUT");
+    await page.locator("#websiteForm").evaluate(form => form.requestSubmit());
+    const sharedSaveResponse = await sharedSave;
+    if (!sharedSaveResponse.ok()) throw new Error(`Shared website save returned ${sharedSaveResponse.status()}.`);
+    const secondContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const secondBrowserPage = await secondContext.newPage();
+    await secondBrowserPage.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    await secondBrowserPage.locator("#studentSearch").fill("Cross Browser Website");
+    if (!await secondBrowserPage.getByText("Cross Browser Website", { exact: true }).count()) {
+      throw new Error("A website added by the teacher did not appear in a separate browser profile.");
+    }
+    await secondBrowserPage.locator("#studentSearch").fill("Existing Browser Addition");
+    if (!await secondBrowserPage.getByText("Existing Browser Addition", { exact: true }).count()) {
+      throw new Error("The teacher's existing browser-only website additions were not migrated.");
+    }
+    await secondContext.close();
+    await page.locator(".dashboard-nav").waitFor();
     await page.locator('[data-action="dashboardSection"][data-section="tools"]').first().click();
     if (!await page.locator("#dailyLaunchForm").count() || !await page.locator("#classTimerForm").count()) {
       throw new Error("Classroom tools were not preserved in the redesigned dashboard.");
@@ -163,6 +200,8 @@ async function run() {
       teacherForumIdentityAutomatic: true,
       dashboardNavigationComplete: true,
       websiteSearchWorks: true,
+      websiteAdditionsSyncAcrossBrowsers: true,
+      existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
       mobileHorizontalOverflow: mobileOverflow
     }, null, 2));

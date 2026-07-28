@@ -106,6 +106,25 @@ function cloneLinks(items) {
   return JSON.parse(JSON.stringify(items));
 }
 
+function normalizeSharedLinks(items) {
+  return (Array.isArray(items) ? items : []).flatMap(item => {
+    if (!item || typeof item !== "object") return [];
+    const title = String(item.title || "").trim();
+    const url = String(item.url || "").trim();
+    const category = String(item.category || "").trim();
+    if (!title || !url || !category) return [];
+    return [{
+      id: String(item.id || makeId()),
+      title,
+      instruction: String(item.instruction || "").trim(),
+      url,
+      category,
+      active: item.active !== false,
+      todayChoice: Boolean(item.todayChoice)
+    }];
+  });
+}
+
 function parseCsvRows(text) {
   const rows = [];
   let row = [];
@@ -335,6 +354,9 @@ const sharedBackend = {
   },
   saveThreads(threads) {
     return this.request("/api/threads", { method: "PUT", body: JSON.stringify({ threads }) });
+  },
+  saveLinks(links) {
+    return this.request("/api/links", { method: "PUT", body: JSON.stringify({ links }) });
   },
   saveMutedStudents(students) {
     return this.request("/api/muted-students", { method: "PUT", body: JSON.stringify({ mutedStudents: students }) });
@@ -1002,7 +1024,7 @@ function isEditingForm() {
 }
 
 function sharedSnapshot() {
-  return JSON.stringify({ classThreads, mutedStudents, websiteRequests, dailyLaunch, classTimer, randomActivitySettings });
+  return JSON.stringify({ links, classThreads, mutedStudents, websiteRequests, dailyLaunch, classTimer, randomActivitySettings });
 }
 
 async function loadSharedState(shouldRender = true) {
@@ -1018,6 +1040,16 @@ async function loadSharedState(shouldRender = true) {
     const incomingLaunch = normalizeDailyLaunch((state && state.dailyLaunch) || extractDailyLaunchFromRequests(state && state.websiteRequests));
     const incomingTimer = chooseSharedClassTimer(state && state.classTimer, extractClassTimerFromRequests(state && state.websiteRequests));
     const incomingRandomActivity = chooseSharedRandomActivitySettings(state && state.randomActivity, extractRandomActivitySettingsFromRequests(state && state.websiteRequests));
+    if (state && Array.isArray(state.links)) {
+      links = normalizeSharedLinks(state.links);
+      store.saveLinks(links);
+    } else if (state && state.links === null && isTeacher()) {
+      const migrated = await sharedBackend.saveLinks(links);
+      if (migrated && Array.isArray(migrated.links)) {
+        links = normalizeSharedLinks(migrated.links);
+        store.saveLinks(links);
+      }
+    }
     classThreads = incomingThreads;
     mutedStudents = incomingMuted;
     websiteRequests = incomingRequests;
@@ -1050,8 +1082,19 @@ function setScreen(next) {
 }
 
 function saveLinks(next) {
-  links = next;
+  links = normalizeSharedLinks(next);
   store.saveLinks(links);
+  if (sharedBackend.enabled && isTeacher()) {
+    sharedBackend.saveLinks(links).then(result => {
+      if (!result || !Array.isArray(result.links)) return;
+      links = normalizeSharedLinks(result.links);
+      store.saveLinks(links);
+      if (!isEditingForm()) render();
+    }).catch(error => {
+      authMessage = error.message;
+      loadSharedState(true);
+    });
+  }
   render();
 }
 
@@ -7366,6 +7409,7 @@ function attachScreenHandlers() {
       try {
         const result = await sharedBackend.teacherLogin(input.value);
         authSession = result.session;
+        await loadSharedState(false);
         await loadApprovedStudents();
         setScreen({ name: "dashboard" });
       } catch (loginError) {
