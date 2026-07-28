@@ -155,6 +155,24 @@ async function run() {
   check(registration.status === 200, `Student registration returned ${registration.status}.`);
   const studentCookie = registration.headers.get("set-cookie").split(";")[0];
 
+  const studentWebsiteRequest = await fetch(`${base}/api/website-requests`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: studentCookie },
+    body: JSON.stringify({
+      websiteRequests: [{
+        studentName: "Impersonated Name",
+        grade: "7",
+        websiteName: "Shared Request Test"
+      }]
+    })
+  });
+  check(studentWebsiteRequest.status === 200, `Student website request returned ${studentWebsiteRequest.status}.`);
+  const teacherStateAfterRequest = await fetch(`${base}/api/state`, {
+    headers: { Origin: base, Cookie: cookie }
+  }).then(response => response.json());
+  const savedWebsiteRequest = teacherStateAfterRequest.websiteRequests.find(request => request.websiteName === "Shared Request Test");
+  check(savedWebsiteRequest && savedWebsiteRequest.studentName === "Student, Test" && savedWebsiteRequest.grade === "5", "Website request was not shared with the teacher or did not use the approved student identity.");
+
   const reusedCode = await fetch(`${base}/api/auth/register`, {
     method: "POST",
     headers: originHeaders,
@@ -240,6 +258,7 @@ async function run() {
     oneTimeActivationWorks: true,
     apostropheEmailsArePreserved: true,
     privateRosterNamesCanBeMerged: true,
+    websiteRequestsAreSharedWithTeacher: true,
     passwordsAreRequired: true,
     studentIdentityCannotBeSpoofed: true,
     studentGradeCannotBeSpoofed: true,

@@ -1081,6 +1081,12 @@ function setScreen(next) {
   requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 }
 
+function openTeacherDashboard() {
+  dashboardSection = "overview";
+  sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+  setScreen({ name: "dashboard" });
+}
+
 function saveLinks(next) {
   links = normalizeSharedLinks(next);
   store.saveLinks(links);
@@ -7411,7 +7417,7 @@ function attachScreenHandlers() {
         authSession = result.session;
         await loadSharedState(false);
         await loadApprovedStudents();
-        setScreen({ name: "dashboard" });
+        openTeacherDashboard();
       } catch (loginError) {
         error.textContent = loginError.message;
       }
@@ -7795,12 +7801,12 @@ app.addEventListener("click", async event => {
   if (action === "teacher") {
     if (isTeacher()) {
       await loadApprovedStudents();
-      setScreen({ name: "dashboard" });
+      openTeacherDashboard();
     } else setScreen({ name: "pin" });
   }
   if (action === "teacherDashboard") {
     await loadApprovedStudents();
-    setScreen({ name: "dashboard" });
+    openTeacherDashboard();
   }
   if (action === "dashboardSection") {
     const nextSection = dashboardSections.some(section => section.id === target.dataset.section) ? target.dataset.section : "overview";

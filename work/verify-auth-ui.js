@@ -186,6 +186,13 @@ async function run() {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    await page.locator('[data-action="dashboardSection"][data-section="requests"]').first().click();
+    await page.locator('[data-action="back"]').first().click();
+    await page.locator('[data-action="teacher"]').first().click();
+    const defaultDashboardSection = await page.locator(".dashboard-nav-button.is-active").innerText();
+    if (!defaultDashboardSection.includes("Overview")) {
+      throw new Error(`Teacher Dashboard reopened on ${defaultDashboardSection} instead of Overview.`);
+    }
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
       crossBrowserFaviconsAvailable: true,
@@ -203,6 +210,7 @@ async function run() {
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
+      teacherDashboardAlwaysOpensOnOverview: true,
       mobileHorizontalOverflow: mobileOverflow
     }, null, 2));
     if (mobileOverflow) throw new Error("Teacher dashboard has horizontal overflow on mobile.");
