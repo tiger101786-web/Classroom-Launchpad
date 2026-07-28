@@ -12,7 +12,7 @@ function check(value, message) {
 
 check(audio.length === 19865, "Colt death audio size changed unexpectedly.");
 check(audio[0] === 0xff && (audio[1] & 0xe0) === 0xe0, "Colt death audio does not begin with a valid MP3 frame.");
-check(appSource.includes('createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-horse-death1")'), "Colt death audio is not registered.");
+check(appSource.includes('createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2")'), "Colt death audio is not registered.");
 check(appSource.includes("ensureMediaSource(coltDeathAudio);"), "Colt death audio is not preloaded with the Colt character media.");
 
 const triggerStart = appSource.indexOf("const triggerColtDeath =");
