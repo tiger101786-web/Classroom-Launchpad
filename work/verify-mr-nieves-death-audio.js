@@ -29,11 +29,11 @@ const triggerStart = appSource.indexOf("const triggerColtDeath =");
 const triggerEnd = appSource.indexOf("const updateColtDeath =", triggerStart);
 const trigger = appSource.slice(triggerStart, triggerEnd);
 const mrAudioCall = trigger.indexOf('if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();');
-const coltRockCall = trigger.indexOf("else if (options.rockHit) playRockDeathAudio();");
+const coltDeathCall = trigger.indexOf("else playColtDeathAudio();");
 const deathTimestamp = trigger.indexOf("deathStartedAt = performance.now();");
 const deathAnimation = trigger.indexOf("const activeDeathVideo =");
 check(mrAudioCall >= 0, "Mr. Nieves death sound is not selected by character.");
-check(coltRockCall > mrAudioCall, "The Colt's existing rock-death sound path was not preserved.");
+check(coltDeathCall > mrAudioCall, "The Colt and Mr. Nieves death sounds are not separated by character.");
 check(mrAudioCall < deathTimestamp && mrAudioCall < deathAnimation, "Mr. Nieves death sound does not start before the death animation.");
 check((appSource.match(/triggerColtDeath\(/g) || []).length === 3, "Not every death cause uses the shared death trigger.");
 
@@ -43,5 +43,5 @@ console.log(JSON.stringify({
   mrNievesDeathAnimationsCovered: 2,
   allDeathCausesCovered: 3,
   audioStartsBeforeAnimation: true,
-  coltDeathSoundPreserved: true
+  coltAndMrNievesSoundsRemainSeparate: true
 }, null, 2));
