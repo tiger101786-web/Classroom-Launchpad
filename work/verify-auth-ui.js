@@ -72,6 +72,27 @@ async function run() {
     await page.locator('[data-action="toggleTheme"]').first().click();
     const lockedText = await page.locator(".colt-corner-locked").innerText();
     if (!lockedText.includes("Only approved students")) throw new Error("Colt Corner did not show its protected state.");
+    await page.locator('[data-action="category"][data-category="Logic Games"]').first().click();
+    await page.locator('[data-action="openColtRun"]').first().click();
+    await page.locator(".colt-run-character-panel").waitFor();
+    const howToPlayCards = await page.locator(".colt-run-control-card").count();
+    const howToPlayText = await page.locator(".colt-run-how-to-play").innerText();
+    const gameStatusText = await page.locator(".colt-run-status-panel").innerText();
+    if (howToPlayCards !== 4 || !howToPlayText.includes("Move") || !howToPlayText.includes("Jump") || !howToPlayText.includes("Reach the Flag")) {
+      throw new Error("Colt Run character selection does not contain the complete How to Play panel.");
+    }
+    if (!gameStatusText.toLowerCase().includes("game status") || gameStatusText.includes("Use arrow keys")) {
+      throw new Error(`Colt Run live status panel did not replace the old directions sentence: ${JSON.stringify(gameStatusText)}.`);
+    }
+    await page.screenshot({ path: path.join(dataDir, "colt-run-how-to-play-ui-qa.png"), fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileColtRunOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    if (mobileColtRunOverflow || !await page.locator(".colt-run-how-to-play").isVisible()) {
+      throw new Error("Colt Run How to Play panel is not usable on a compact screen.");
+    }
+    await page.screenshot({ path: path.join(dataDir, "colt-run-how-to-play-mobile-ui-qa.png"), fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="login"]').first().click();
     await page.locator(".auth-card").waitFor();
     const loginText = await page.locator(".auth-card").innerText();
@@ -200,6 +221,9 @@ async function run() {
       darkModeGuestHeaderButtonsMatch: true,
       darkModeTeacherHeaderButtonsMatch: true,
       coltCornerShowsProtectedState: true,
+      coltRunHowToPlayPanelComplete: true,
+      coltRunUsesDedicatedLiveStatus: true,
+      coltRunHowToPlayResponsive: true,
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
       privateRosterNamesDisplay: true,

@@ -1993,7 +1993,60 @@ function renderColtRun() {
       <div class="colt-run-stage">
         <div id="coltRunCharacterSelect" class="colt-run-character-select" aria-label="Choose character">
           <div class="colt-run-character-panel">
-            <h3>Choose Your Runner</h3>
+            <div class="colt-run-character-heading">
+              <div>
+                <span>Get Ready</span>
+                <h3>Choose Your Runner</h3>
+              </div>
+              <p>Learn the controls, then pick a character to begin.</p>
+            </div>
+            <section class="colt-run-how-to-play" aria-labelledby="coltRunHowToPlayTitle">
+              <div class="colt-run-how-to-play-title">
+                <span aria-hidden="true">?</span>
+                <div>
+                  <h4 id="coltRunHowToPlayTitle">How to Play</h4>
+                  <p>Run, jump, and reach the finish flag before time runs out.</p>
+                </div>
+              </div>
+              <div class="colt-run-control-grid">
+                <div class="colt-run-control-card">
+                  <span class="colt-run-control-number">1</span>
+                  <div>
+                    <strong>Move</strong>
+                    <span class="colt-run-key-row">
+                      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                      <em>or</em>
+                      <kbd>&larr;</kbd><kbd>&rarr;</kbd>
+                    </span>
+                  </div>
+                </div>
+                <div class="colt-run-control-card">
+                  <span class="colt-run-control-number">2</span>
+                  <div>
+                    <strong>Jump</strong>
+                    <span class="colt-run-key-row">
+                      <kbd class="is-wide">Space</kbd>
+                      <em>or</em>
+                      <kbd>&uarr;</kbd>
+                    </span>
+                  </div>
+                </div>
+                <div class="colt-run-control-card">
+                  <span class="colt-run-control-number">3</span>
+                  <div>
+                    <strong>Reach the Flag</strong>
+                    <small>Beat the clock to finish.</small>
+                  </div>
+                </div>
+                <div class="colt-run-control-card">
+                  <span class="colt-run-control-number">4</span>
+                  <div>
+                    <strong>Return</strong>
+                    <span class="colt-run-key-row"><kbd>B</kbd><small>Back to Launchpad</small></span>
+                  </div>
+                </div>
+              </div>
+            </section>
             <div class="colt-run-character-grid">
               <button type="button" data-colt-run="character" data-character="colt">
                 <canvas id="coltRunSelectColt" width="300" height="200" aria-hidden="true"></canvas>
@@ -2018,7 +2071,10 @@ function renderColtRun() {
         </div>
       </div>
       <div class="colt-run-footer">
-        <p id="coltRunStatus">Use arrow keys or WASD to move. Space or up arrow jumps. Press B to return to the Launchpad.</p>
+        <div class="colt-run-status-panel" role="status" aria-live="polite">
+          <span>Game Status</span>
+          <p id="coltRunStatus">Choose a runner to begin.</p>
+        </div>
         <div class="colt-run-actions">
           <div class="colt-run-volume" aria-label="Game audio volume">
             <button id="coltRunMusicToggle" class="colt-run-volume-btn" type="button" data-colt-run="musicToggle" aria-label="Turn game audio off"></button>
@@ -5731,7 +5787,7 @@ function startColtRunGame() {
     levelDurationSeconds = getLevelDurationSeconds();
     statusNode.textContent = preservePendingLeaderboardEntry && pendingLeaderboardEntry
       ? "New run started. Your qualifying score is waiting; use Leaderboard whenever you are ready to save it."
-      : "Use arrow keys or WASD to move. Space or up arrow jumps. Reach the flag before time runs out.";
+      : "Choose a runner to begin. Reach the flag before time runs out.";
     levelNode.textContent = level;
     scoreNode.textContent = score;
     setTimeDisplay(levelDurationSeconds.toFixed(1));
