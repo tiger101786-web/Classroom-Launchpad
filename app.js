@@ -2441,11 +2441,13 @@ function startColtRunGame() {
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260714-running1", true);
   const mrNievesRunningAudio = createDeferredAudio(mrNievesRunMediaSource, true);
   const rockDeathAudio = createDeferredAudio("assets/colt-run-rock-death-audio.mp3?v=20260714-rock-death1");
+  const mrNievesDeathAudio = createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1");
   const ambientLayerVolume = 1;
   const inGameMusicLayerVolume = 0.5;
   const characterSelectMusicLayerVolume = 0.7;
   const runningLayerVolume = 0.9;
   const rockDeathLayerVolume = 1;
+  const mrNievesDeathLayerVolume = 1;
   const ambientBoostGain = 3.6;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   let ambientAudioContext = null;
@@ -2468,6 +2470,8 @@ function startColtRunGame() {
   mrNievesRunningAudio.muted = musicMuted;
   rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
   rockDeathAudio.muted = musicMuted;
+  mrNievesDeathAudio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
+  mrNievesDeathAudio.muted = musicMuted;
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let lastRenderedTimeText = "";
@@ -2970,6 +2974,7 @@ function startColtRunGame() {
       mrNievesInAirVideos.forEach(video => ensureMediaSource(video, "metadata"));
       mrNievesCelebrationVideos.forEach(video => ensureMediaSource(video, "metadata"));
       mrNievesDeathVideos.forEach(video => ensureMediaSource(video, "metadata"));
+      ensureMediaSource(mrNievesDeathAudio);
       return;
     }
     coltIdleVideos.forEach(video => ensureMediaSource(video, "metadata"));
@@ -3365,6 +3370,14 @@ function startColtRunGame() {
     } catch {}
     rockDeathAudio.play().catch(() => {});
   };
+  const playMrNievesDeathAudio = () => {
+    if (musicMuted || musicVolume <= 0) return;
+    ensureMediaSource(mrNievesDeathAudio);
+    try {
+      mrNievesDeathAudio.currentTime = 0;
+    } catch {}
+    mrNievesDeathAudio.play().catch(() => {});
+  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
@@ -3407,6 +3420,8 @@ function startColtRunGame() {
     mrNievesRunningAudio.muted = musicMuted;
     rockDeathAudio.volume = musicMuted ? 0 : musicVolume * rockDeathLayerVolume;
     rockDeathAudio.muted = musicMuted;
+    mrNievesDeathAudio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
+    mrNievesDeathAudio.muted = musicMuted;
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -3423,6 +3438,7 @@ function startColtRunGame() {
       characterSelectMusic.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
+      mrNievesDeathAudio.pause();
     }
     else playColtRunAudio();
   };
@@ -3440,6 +3456,7 @@ function startColtRunGame() {
       characterSelectMusic.pause();
       stopRunningAudio();
       rockDeathAudio.pause();
+      mrNievesDeathAudio.pause();
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -5370,6 +5387,8 @@ function startColtRunGame() {
     player.grounded = false;
     player.state = "death";
     stopRunningAudio();
+    if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();
+    else if (options.rockHit) playRockDeathAudio();
     deathStartedAt = performance.now();
     deathX = player.x;
     deathFallStartY = Math.min(player.y, gameViewportHeight - player.h + 6);
@@ -5382,7 +5401,6 @@ function startColtRunGame() {
     } catch {}
     if (selectedCharacter === "mrNieves") keepMrNievesDeathVideoPlaying();
     else keepDeathVideoPlaying();
-    if (options.rockHit) playRockDeathAudio();
     statusNode.textContent = message;
   };
 
@@ -5779,6 +5797,10 @@ function startColtRunGame() {
     nextLavaRockShowerAt = performance.now() + (3200 + Math.random() * 1800) * mode.showerIntervalMultiplier;
     deathVideo.pause();
     mrNievesDeathVideos.forEach(video => video.pause());
+    mrNievesDeathAudio.pause();
+    try {
+      mrNievesDeathAudio.currentTime = 0;
+    } catch {}
     lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
     lavaRockVideoFrameSource = -1;
@@ -6559,6 +6581,7 @@ function startColtRunGame() {
         runningAudio,
         mrNievesRunningAudio,
         rockDeathAudio,
+        mrNievesDeathAudio,
         coinVideo,
         flagVideo,
         ...coltIdleVideos,
