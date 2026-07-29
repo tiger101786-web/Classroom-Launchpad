@@ -20,7 +20,9 @@ check(channels === 1 && sampleRate === 44100 && bitsPerSample === 16, "Death aud
 check(durationSeconds > 0.5 && durationSeconds < 0.6, "Death audio duration changed unexpectedly.");
 
 check(appSource.includes('createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1")'), "Mr. Nieves death audio is not registered.");
-check(appSource.includes("ensureMediaSource(mrNievesDeathAudio);"), "Mr. Nieves death audio is not preloaded with his character media.");
+check(appSource.includes('createDeferredAudio("assets/colt-run-mr-nieves-death-audio-02.mp3?v=20260728-makedeath2")'), "Second Mr. Nieves death audio is not registered.");
+check(appSource.includes("mrNievesDeathAudios.forEach(audio => ensureMediaSource(audio));"), "Mr. Nieves death audio is not preloaded with his character media.");
+check(appSource.includes("chooseNonRepeatingAudioIndex(\n      mrNievesDeathAudios.length,\n      lastMrNievesDeathAudioIndex"), "Mr. Nieves death sounds do not use the non-repeating selector.");
 
 const deathVideoMatches = appSource.match(/createDeferredVideo\("assets\/colt-run-mr-nieves-death(?:-02)?\.mp4\?[^"]+"\)/g) || [];
 check(deathVideoMatches.length === 2, `Expected two Mr. Nieves death animations, found ${deathVideoMatches.length}.`);
@@ -40,6 +42,8 @@ check((appSource.match(/triggerColtDeath\(/g) || []).length === 3, "Not every de
 console.log(JSON.stringify({
   validWav: true,
   durationSeconds: Number(durationSeconds.toFixed(3)),
+  mrNievesDeathSounds: 2,
+  nonRepeatingRotation: true,
   mrNievesDeathAnimationsCovered: 2,
   allDeathCausesCovered: 3,
   audioStartsBeforeAnimation: true,

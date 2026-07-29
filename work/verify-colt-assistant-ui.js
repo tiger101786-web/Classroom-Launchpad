@@ -92,6 +92,12 @@ async function run() {
     await assistantHome.click();
     assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
 
+    await page.locator("#coltAssistantInput").fill("mouse help");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /trackpad|connected|Mr\. Nieves/i);
+    assert.equal(await page.getByText("Mouse Accuracy", { exact: true }).count(), 0);
+    await assistantHome.click();
+
     await page.locator("#coltAssistantInput").fill("What can u do?");
     await page.locator(".colt-assistant-form button[type='submit']").click();
     assert.match(

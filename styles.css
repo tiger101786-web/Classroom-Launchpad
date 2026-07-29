@@ -4630,6 +4630,156 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   }
 }
 
+.colt-assistant-moderation-feedback:not(:empty) {
+  display: block;
+  padding: 0.85rem 1rem 0.85rem 3rem;
+  border: 1px solid rgba(190, 18, 76, 0.35);
+  border-radius: 14px;
+  background: rgba(190, 18, 76, 0.08);
+  color: var(--text);
+  position: relative;
+  line-height: 1.45;
+}
+
+.colt-assistant-moderation-feedback:not(:empty)::before {
+  content: "C";
+  position: absolute;
+  left: 0.85rem;
+  top: 0.78rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: 0.78rem;
+}
+
+.colt-assistant-moderation-feedback.pending {
+  border-color: #b7791f;
+  background: rgba(183, 121, 31, 0.12);
+}
+
+.colt-assistant-moderation-feedback.success {
+  border-color: #238636;
+  background: rgba(35, 134, 54, 0.1);
+}
+
+.colt-corner-pending-note {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 4px solid #b7791f;
+  border-radius: 8px;
+  background: rgba(183, 121, 31, 0.12);
+  font-weight: 700;
+}
+
+.moderation-dashboard {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.moderation-queue,
+.moderation-recent .teacher-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.moderation-card {
+  display: grid;
+  gap: 0.9rem;
+  border-left: 5px solid #b7791f;
+}
+
+.moderation-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.moderation-card-heading h3,
+.moderation-card-heading p {
+  margin: 0;
+}
+
+.moderation-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.moderation-status-pill.is-pending {
+  background: #fff1c2;
+  color: #704500;
+}
+
+.moderation-status-pill.is-approved {
+  background: #d9f7df;
+  color: #145523;
+}
+
+.moderation-status-pill.is-rejected {
+  background: #ffe0e6;
+  color: #7d1530;
+}
+
+.moderation-trigger-panel {
+  padding: 0.8rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(183, 121, 31, 0.1);
+}
+
+.moderation-reason-list {
+  margin: 0.45rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.moderation-actions {
+  flex-wrap: wrap;
+}
+
+.moderation-recent {
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+}
+
+.moderation-recent summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.moderation-recent[open] summary {
+  margin-bottom: 1rem;
+}
+
+.moderation-recent-card {
+  display: grid;
+  gap: 0.55rem;
+}
+
+@media (max-width: 720px) {
+  .moderation-card-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .moderation-status-pill {
+    align-self: flex-start;
+  }
+
+  .moderation-actions > button {
+    width: 100%;
+  }
+}
+
 
 
 

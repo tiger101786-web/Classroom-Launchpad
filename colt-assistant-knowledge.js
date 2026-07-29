@@ -163,7 +163,10 @@
       },
       {
         id: "mouse",
-        keywords: ["mouse not working", "trackpad not working", "cursor not moving", "pointer not moving"],
+        keywords: [
+          "mouse", "mouse help", "mouse problem", "mouse issue", "mouse not working",
+          "trackpad", "trackpad help", "trackpad not working", "cursor not moving", "pointer not moving"
+        ],
         response: "1. Move one finger gently on the trackpad.\n2. Click once and wait.\n3. If you use a mouse, check that it is connected.\n4. Ask Mr. Nieves before unplugging other equipment."
       },
       {

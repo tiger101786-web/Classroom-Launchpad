@@ -5,9 +5,9 @@
   "description": "Classroom Launchpad and Colt Run",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js",
-    "test": "node work/verify-colt-assistant.js",
-    "build": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js"
+    "check": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js",
+    "test": "node work/verify-colt-assistant.js && node work/verify-colt-corner-moderation.js",
+    "build": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js"
   },
   "engines": {
     "node": ">=20"

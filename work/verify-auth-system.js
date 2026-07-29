@@ -200,17 +200,16 @@ async function run() {
   });
   check(validLogin.status === 200, `Valid password returned ${validLogin.status}.`);
   const newTopic = await fetch(`${base}/api/threads`, {
-    method: "PUT",
+    method: "POST",
     headers: { ...originHeaders, Cookie: studentCookie },
-    body: JSON.stringify({ threads: [{
+    body: JSON.stringify({
       id: "student-supplied-id",
       studentName: "Impersonated Name",
       grade: "7",
       title: "Verified topic",
-      body: "This is a test topic.",
-      createdAt: "2000-01-01T00:00:00.000Z",
-      replies: []
-    }] })
+      message: "This is a test topic.",
+      createdAt: "2000-01-01T00:00:00.000Z"
+    })
   });
   const newTopicResult = await newTopic.json();
   check(newTopic.status === 200, `Approved student topic returned ${newTopic.status}.`);
@@ -225,21 +224,18 @@ async function run() {
     headers: { ...originHeaders, Cookie: studentCookie },
     body: JSON.stringify({ threads: altered })
   });
-  check(alterationAttempt.status === 400, `Existing-topic alteration returned ${alterationAttempt.status}.`);
+  check(alterationAttempt.status === 405, `Existing-topic alteration returned ${alterationAttempt.status}.`);
 
   const teacherTopic = await fetch(`${base}/api/threads`, {
-    method: "PUT",
+    method: "POST",
     headers: { ...originHeaders, Cookie: cookie },
     body: JSON.stringify({
-      threads: [{
-        id: "teacher-supplied-id",
-        studentName: "Different Name",
-        grade: "4",
-        title: "Teacher topic",
-        body: "This is a teacher topic.",
-        createdAt: new Date().toISOString(),
-        replies: []
-      }, ...newTopicResult.threads]
+      id: "teacher-supplied-id",
+      studentName: "Different Name",
+      grade: "4",
+      title: "Teacher topic",
+      message: "This is a teacher topic.",
+      createdAt: new Date().toISOString()
     })
   });
   const teacherTopicResult = await teacherTopic.json();

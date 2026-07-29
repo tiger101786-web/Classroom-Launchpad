@@ -367,6 +367,33 @@ const sharedBackend = {
   saveThreads(threads) {
     return this.request("/api/threads", { method: "PUT", body: JSON.stringify({ threads }) });
   },
+  submitTopic(topic) {
+    return this.request("/api/threads", {
+      method: "POST",
+      body: JSON.stringify({ title: topic.title, message: topic.body })
+    });
+  },
+  submitReply(threadId, reply) {
+    return this.request(`/api/threads/${encodeURIComponent(threadId)}/replies`, {
+      method: "POST",
+      body: JSON.stringify({ message: reply.message })
+    });
+  },
+  deleteThread(threadId) {
+    return this.request(`/api/threads/${encodeURIComponent(threadId)}`, { method: "DELETE", body: "{}" });
+  },
+  deleteReply(threadId, replyId) {
+    return this.request(`/api/threads/${encodeURIComponent(threadId)}/replies/${encodeURIComponent(replyId)}`, {
+      method: "DELETE",
+      body: "{}"
+    });
+  },
+  moderatePost(postId, update) {
+    return this.request(`/api/moderation/${encodeURIComponent(postId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(update)
+    });
+  },
   saveLinks(links) {
     return this.request("/api/links", { method: "PUT", body: JSON.stringify({ links }) });
   },
@@ -967,6 +994,9 @@ let links = store.loadLinks();
 let websiteRequests = store.loadRequests();
 let classThreads = store.loadThreads();
 let mutedStudents = store.loadMutedStudents();
+let pendingModeration = [];
+let moderationQueue = [];
+let recentlyModerated = [];
 let dailyLaunch = store.loadDailyLaunch();
 let classTimer = store.loadClassTimer();
 let randomActivitySettings = store.loadRandomActivitySettings();
@@ -1007,6 +1037,35 @@ function isSignedIn() {
   return Boolean(authSession && authSession.authenticated);
 }
 
+function normalizeModerationItems(items) {
+  return (Array.isArray(items) ? items : []).map(item => ({
+    id: String(item && item.id || ""),
+    type: item && item.type === "reply" ? "reply" : "topic",
+    threadId: String(item && item.threadId || ""),
+    studentName: String(item && item.studentName || ""),
+    grade: String(item && item.grade || ""),
+    title: String(item && item.title || ""),
+    message: String(item && item.message || ""),
+    submittedAt: String(item && item.submittedAt || ""),
+    moderationStatus: String(item && item.moderationStatus || ""),
+    moderationReasons: (Array.isArray(item && item.moderationReasons) ? item.moderationReasons : []).map(reason => ({
+      code: String(reason && reason.code || ""),
+      label: String(reason && reason.label || "")
+    })),
+    moderatedAt: String(item && item.moderatedAt || ""),
+    moderatedBy: String(item && item.moderatedBy || "")
+  })).filter(item => item.id);
+}
+
+function normalizePendingModeration(items) {
+  return (Array.isArray(items) ? items : []).map(item => ({
+    id: String(item && item.id || ""),
+    type: item && item.type === "reply" ? "reply" : "topic",
+    title: String(item && item.title || ""),
+    submittedAt: String(item && item.submittedAt || "")
+  })).filter(item => item.id);
+}
+
 function isTeacher() {
   return isSignedIn() && authSession.role === "teacher";
 }
@@ -1037,7 +1096,18 @@ function isEditingForm() {
 }
 
 function sharedSnapshot() {
-  return JSON.stringify({ links, classThreads, mutedStudents, websiteRequests, dailyLaunch, classTimer, randomActivitySettings });
+  return JSON.stringify({
+    links,
+    classThreads,
+    mutedStudents,
+    websiteRequests,
+    dailyLaunch,
+    classTimer,
+    randomActivitySettings,
+    pendingModeration,
+    moderationQueue,
+    recentlyModerated
+  });
 }
 
 async function loadSharedState(shouldRender = true) {
@@ -1049,6 +1119,9 @@ async function loadSharedState(shouldRender = true) {
     postingBlocked = Boolean(state && state.postingBlocked);
     const incomingThreads = normalizeThreads(state && state.threads);
     const incomingMuted = normalizeMutedStudents(state && state.mutedStudents);
+    const incomingPendingModeration = normalizePendingModeration(state && state.pendingModeration);
+    const incomingModerationQueue = normalizeModerationItems(state && state.moderation && state.moderation.pending);
+    const incomingRecentlyModerated = normalizeModerationItems(state && state.moderation && state.moderation.recent);
     const incomingRequests = normalizeRequests(state && state.websiteRequests);
     const incomingLaunch = normalizeDailyLaunch((state && state.dailyLaunch) || extractDailyLaunchFromRequests(state && state.websiteRequests));
     const incomingTimer = chooseSharedClassTimer(state && state.classTimer, extractClassTimerFromRequests(state && state.websiteRequests));
@@ -1069,6 +1142,9 @@ async function loadSharedState(shouldRender = true) {
     }
     classThreads = incomingThreads;
     mutedStudents = incomingMuted;
+    pendingModeration = incomingPendingModeration;
+    moderationQueue = incomingModerationQueue;
+    recentlyModerated = incomingRecentlyModerated;
     websiteRequests = incomingRequests;
     dailyLaunch = incomingLaunch;
     classTimer = incomingTimer;
@@ -1675,7 +1751,12 @@ function renderColtCorner() {
           <textarea id="threadBody" maxlength="360" placeholder="Start the conversation with a school-appropriate question or idea"></textarea>
         </div>
         <button class="primary-btn" type="submit">Start Topic</button>
-        <p id="threadStatus" class="request-message" aria-live="polite"></p>
+        ${!isTeacher() && pendingModeration.length ? `
+          <p class="colt-corner-pending-note" role="status">
+            ${pendingModeration.length} ${pendingModeration.length === 1 ? "message is" : "messages are"} waiting for Mr. Nieves to review.
+          </p>
+        ` : ""}
+        <p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
         <figure class="colt-corner-banner thread-form-banner">
           <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
             <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
@@ -1764,7 +1845,12 @@ function renderThreadDetail(threadId) {
           <textarea id="replyMessage" maxlength="320" placeholder="Write a respectful question or response"></textarea>
         </div>
         <button class="primary-btn" type="submit">Post Reply</button>
-        <p id="replyStatus" class="request-message" aria-live="polite"></p>
+        ${!isTeacher() && pendingModeration.length ? `
+          <p class="colt-corner-pending-note" role="status">
+            ${pendingModeration.length} ${pendingModeration.length === 1 ? "message is" : "messages are"} waiting for Mr. Nieves to review.
+          </p>
+        ` : ""}
+        <p id="replyStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
       </form>
     </section>
   `;
@@ -7137,6 +7223,7 @@ function renderDashboardNavigation() {
             <span aria-hidden="true">${section.icon}</span>
             ${escapeHtml(section.label)}
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
+            ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
           </button>
         `).join("")}
       </div>
@@ -7153,6 +7240,7 @@ function renderDashboardOverview() {
     ["Registered", registered, "students"],
     ["Awaiting First Login", waiting, "students"],
     ["Colt Corner Topics", classThreads.length, "corner"],
+    ["Posts Awaiting Review", moderationQueue.length, "corner"],
     ["Website Requests", websiteRequests.length, "requests"],
     ["Muted Students", mutedStudents.length, "corner"]
   ];
@@ -7203,8 +7291,90 @@ function renderDashboardClassroomTools() {
   return `<div class="dashboard-tools-grid">${legacy.slice(start, end)}</div>`;
 }
 
+function renderModerationReasons(item) {
+  const reasons = Array.isArray(item.moderationReasons) ? item.moderationReasons : [];
+  return reasons.length
+    ? `<ul class="moderation-reason-list">${reasons.map(reason => `<li>${escapeHtml(reason.label)}</li>`).join("")}</ul>`
+    : `<p class="instruction">No rule details were recorded.</p>`;
+}
+
+function renderPendingModerationCard(item) {
+  const submitted = formatShortDate(item.submittedAt);
+  return `
+    <article class="teacher-card moderation-card" data-moderation-card="${escapeHtml(item.id)}">
+      <div class="moderation-card-heading">
+        <div>
+          <span class="feature-kicker">${item.type === "reply" ? "Pending Reply" : "Pending Topic"}</span>
+          <h3>${escapeHtml(item.studentName || "Student")}</h3>
+          <p class="meta">${escapeHtml(forumRoleLabel(item.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
+        </div>
+        <span class="moderation-status-pill is-pending">Needs Review</span>
+      </div>
+      ${item.type === "topic" ? `
+        <label class="field">
+          <span>Topic title</span>
+          <input class="moderation-edit-title" maxlength="80" value="${escapeHtml(item.title)}">
+        </label>
+      ` : ""}
+      <label class="field">
+        <span>Message</span>
+        <textarea class="moderation-edit-message" maxlength="${item.type === "topic" ? "360" : "320"}">${escapeHtml(item.message)}</textarea>
+      </label>
+      <div class="moderation-trigger-panel">
+        <strong>Why it was flagged</strong>
+        ${renderModerationReasons(item)}
+      </div>
+      <div class="actions moderation-actions">
+        <button class="primary-btn" data-action="moderatePost" data-moderation-action="approve" data-id="${escapeHtml(item.id)}">Approve</button>
+        <button class="outline-btn" data-action="moderatePost" data-moderation-action="edit_approve" data-id="${escapeHtml(item.id)}">Edit and Approve</button>
+        <button class="outline-btn" data-action="moderatePost" data-moderation-action="reject" data-id="${escapeHtml(item.id)}">Reject</button>
+        <button class="danger-btn" data-action="moderatePost" data-moderation-action="delete" data-id="${escapeHtml(item.id)}">Delete</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderRecentModerationItem(item) {
+  const moderated = formatShortDate(item.moderatedAt);
+  const approved = item.moderationStatus === "approved";
+  return `
+    <article class="teacher-card moderation-recent-card">
+      <div class="moderation-card-heading">
+        <div>
+          <strong>${escapeHtml(item.studentName || "Student")}</strong>
+          <p class="meta">${item.type === "reply" ? "Reply" : "Topic"}${moderated ? ` • ${escapeHtml(moderated)}` : ""}${item.moderatedBy ? ` • ${escapeHtml(item.moderatedBy)}` : ""}</p>
+        </div>
+        <span class="moderation-status-pill ${approved ? "is-approved" : "is-rejected"}">${approved ? "Approved" : "Rejected"}</span>
+      </div>
+      <p class="instruction">${escapeHtml(item.message)}</p>
+      ${renderModerationReasons(item)}
+    </article>
+  `;
+}
+
 function renderDashboardColtCorner() {
   return `
+    <section class="moderation-dashboard" aria-labelledby="moderationQueueHeading">
+      <div class="dashboard-subheading">
+        <div><span class="feature-kicker">Server-Side Safety Review</span><h3 id="moderationQueueHeading">Colt Corner Moderation</h3></div>
+        <span class="dashboard-count">${moderationQueue.length}</span>
+      </div>
+      <p class="instruction">Messages held here are hidden from students until you approve them.</p>
+      <p id="moderationDashboardStatus" class="request-message" aria-live="polite"></p>
+      <div class="moderation-queue">
+        ${moderationQueue.length
+          ? moderationQueue.map(renderPendingModerationCard).join("")
+          : emptyCard("No Colt Corner messages are waiting for review.")}
+      </div>
+      <details class="moderation-recent">
+        <summary>Recently moderated posts (${recentlyModerated.length})</summary>
+        <div class="teacher-list">
+          ${recentlyModerated.length
+            ? recentlyModerated.map(renderRecentModerationItem).join("")
+            : emptyCard("No recently moderated posts.")}
+        </div>
+      </details>
+    </section>
     <div class="dashboard-split-view">
       <section>
         <div class="dashboard-subheading">
@@ -7946,7 +8116,7 @@ function attachThreadForm() {
   const threadForm = document.getElementById("threadForm");
   if (!threadForm || threadForm.dataset.ready === "true") return;
   threadForm.dataset.ready = "true";
-  threadForm.addEventListener("submit", event => {
+  threadForm.addEventListener("submit", async event => {
     event.preventDefault();
     const thread = {
       id: makeId(),
@@ -7962,14 +8132,34 @@ function attachThreadForm() {
     if (error) {
       status.textContent = error;
       status.classList.add("error");
+      document.getElementById(!thread.title ? "threadTitle" : "threadBody").focus();
       return;
     }
-    saveClassThreads([thread, ...classThreads], false);
-    threadForm.reset();
-    status.textContent = "Topic started.";
-    status.classList.remove("error");
-    const list = document.querySelector(".thread-list");
-    if (list) list.outerHTML = renderThreadTable(sortedThreads());
+    const button = threadForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    button.textContent = "Checking...";
+    status.textContent = "Colt Assistant is checking your message.";
+    status.classList.remove("error", "pending", "success");
+    try {
+      const result = await sharedBackend.submitTopic(thread);
+      classThreads = normalizeThreads(result && result.threads);
+      pendingModeration = normalizePendingModeration(result && result.pendingModeration);
+      status.textContent = result && result.message ? result.message : "Topic started.";
+      status.classList.toggle("error", result && result.moderationStatus === "blocked");
+      status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
+      status.classList.toggle("success", result && result.moderationStatus === "approved");
+      if (result && result.moderationStatus !== "blocked") threadForm.reset();
+      if (result && result.moderationStatus === "blocked") document.getElementById("threadBody").focus();
+      const list = document.querySelector(".thread-list");
+      if (list) list.outerHTML = renderThreadTable(sortedThreads());
+    } catch (submissionError) {
+      status.textContent = submissionError.message;
+      status.classList.add("error");
+      document.getElementById("threadBody").focus();
+    } finally {
+      button.disabled = false;
+      button.textContent = "Start Topic";
+    }
   });
 }
 
@@ -7977,7 +8167,7 @@ function attachReplyForm() {
   const replyForm = document.getElementById("replyForm");
   if (!replyForm || replyForm.dataset.ready === "true") return;
   replyForm.dataset.ready = "true";
-  replyForm.addEventListener("submit", event => {
+  replyForm.addEventListener("submit", async event => {
     event.preventDefault();
     const reply = {
       id: makeId(),
@@ -7991,24 +8181,41 @@ function attachReplyForm() {
     if (error) {
       status.textContent = error;
       status.classList.add("error");
+      document.getElementById("replyMessage").focus();
       return;
     }
     const threadId = replyForm.dataset.threadId;
-    saveClassThreads(classThreads.map(thread => {
-      if (thread.id !== threadId) return thread;
-      return { ...thread, replies: [...getThreadReplies(thread), reply] };
-    }), false);
-    replyForm.reset();
-    status.textContent = "Reply posted.";
-    status.classList.remove("error");
-    const updated = classThreads.find(thread => thread.id === threadId);
-    const list = document.querySelector(".thread-reply-list");
-    if (updated && list) {
-      const replies = getThreadReplies(updated);
-      list.innerHTML = `
-        <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
-        ${replies.map(renderThreadReply).join("")}
-      `;
+    const button = replyForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    button.textContent = "Checking...";
+    status.textContent = "Colt Assistant is checking your reply.";
+    status.classList.remove("error", "pending", "success");
+    try {
+      const result = await sharedBackend.submitReply(threadId, reply);
+      classThreads = normalizeThreads(result && result.threads);
+      pendingModeration = normalizePendingModeration(result && result.pendingModeration);
+      status.textContent = result && result.message ? result.message : "Reply posted.";
+      status.classList.toggle("error", result && result.moderationStatus === "blocked");
+      status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
+      status.classList.toggle("success", result && result.moderationStatus === "approved");
+      if (result && result.moderationStatus !== "blocked") replyForm.reset();
+      if (result && result.moderationStatus === "blocked") document.getElementById("replyMessage").focus();
+      const updated = classThreads.find(thread => thread.id === threadId);
+      const list = document.querySelector(".thread-reply-list");
+      if (updated && list) {
+        const replies = getThreadReplies(updated);
+        list.innerHTML = `
+          <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
+          ${replies.map(renderThreadReply).join("")}
+        `;
+      }
+    } catch (submissionError) {
+      status.textContent = submissionError.message;
+      status.classList.add("error");
+      document.getElementById("replyMessage").focus();
+    } finally {
+      button.disabled = false;
+      button.textContent = "Post Reply";
     }
   });
 }
@@ -8179,13 +8386,52 @@ app.addEventListener("click", async event => {
     saveWebsiteRequests(websiteRequests.filter(item => item.id !== target.dataset.id));
   }
   if (action === "deleteThread") {
-    saveClassThreads(classThreads.filter(item => item.id !== target.dataset.id));
+    try {
+      const result = await sharedBackend.deleteThread(target.dataset.id);
+      classThreads = normalizeThreads(result && result.threads);
+      moderationQueue = normalizeModerationItems(result && result.moderation && result.moderation.pending);
+      recentlyModerated = normalizeModerationItems(result && result.moderation && result.moderation.recent);
+      render();
+    } catch (error) {
+      authMessage = error.message;
+    }
   }
   if (action === "deleteReply") {
-    saveClassThreads(classThreads.map(thread => {
-      if (thread.id !== target.dataset.threadId) return thread;
-      return { ...thread, replies: getThreadReplies(thread).filter(reply => reply.id !== target.dataset.replyId) };
-    }));
+    try {
+      const result = await sharedBackend.deleteReply(target.dataset.threadId, target.dataset.replyId);
+      classThreads = normalizeThreads(result && result.threads);
+      moderationQueue = normalizeModerationItems(result && result.moderation && result.moderation.pending);
+      recentlyModerated = normalizeModerationItems(result && result.moderation && result.moderation.recent);
+      render();
+    } catch (error) {
+      authMessage = error.message;
+    }
+  }
+  if (action === "moderatePost") {
+    const moderationAction = target.dataset.moderationAction;
+    const card = target.closest("[data-moderation-card]");
+    const update = { action: moderationAction };
+    if (moderationAction === "edit_approve" && card) {
+      const titleInput = card.querySelector(".moderation-edit-title");
+      const messageInput = card.querySelector(".moderation-edit-message");
+      update.title = titleInput ? titleInput.value.trim() : "";
+      update.message = messageInput ? messageInput.value.trim() : "";
+    }
+    target.disabled = true;
+    try {
+      const result = await sharedBackend.moderatePost(target.dataset.id, update);
+      classThreads = normalizeThreads(result && result.threads);
+      moderationQueue = normalizeModerationItems(result && result.moderation && result.moderation.pending);
+      recentlyModerated = normalizeModerationItems(result && result.moderation && result.moderation.recent);
+      render();
+    } catch (error) {
+      target.disabled = false;
+      const status = document.getElementById("moderationDashboardStatus");
+      if (status) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    }
   }
   if (action === "muteStudent") {
     const name = target.dataset.student || "";

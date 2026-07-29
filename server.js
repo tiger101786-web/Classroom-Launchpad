@@ -3,6 +3,13 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
+const moderationConfig = require("./colt-corner-moderation-config");
+const {
+  hashNormalizedMessage,
+  moderateMessage,
+  normalizeForModeration,
+  studentMessageFor
+} = require("./colt-corner-moderation");
 
 const root = __dirname;
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
@@ -56,6 +63,161 @@ function cleanMultilineText(value, maxLength) {
 
 function cleanGrade(value) {
   return cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
+}
+
+const moderationStatuses = new Set(["approved", "needs_review", "blocked"]);
+
+function validIsoDate(value, fallback = "") {
+  return Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : fallback;
+}
+
+function normalizeModerationReasons(entries) {
+  return (Array.isArray(entries) ? entries : []).slice(0, 20).flatMap(entry => {
+    if (typeof entry === "string") {
+      const label = cleanText(entry, 160);
+      return label ? [{ code: "legacy", label }] : [];
+    }
+    const code = cleanText(entry && entry.code, 60).replace(/[^a-z0-9_-]/gi, "");
+    const label = cleanText(entry && entry.label, 160);
+    return code && label ? [{ code, label }] : [];
+  });
+}
+
+function normalizeModeratedPost(source, type) {
+  const createdAt = validIsoDate(source && source.createdAt, new Date().toISOString());
+  const submittedAt = validIsoDate(source && source.submittedAt, createdAt);
+  const status = moderationStatuses.has(source && source.moderationStatus)
+    ? source.moderationStatus
+    : "approved";
+  const base = {
+    id: cleanText(source && source.id, 100) || crypto.randomUUID(),
+    studentName: cleanText(source && source.studentName, 80),
+    grade: cleanGrade(source && source.grade),
+    createdAt,
+    submittedAt,
+    moderationStatus: status,
+    moderationReasons: normalizeModerationReasons(source && source.moderationReasons),
+    moderatedAt: validIsoDate(source && source.moderatedAt),
+    moderatedBy: cleanText(source && source.moderatedBy, 80),
+    normalizedMessageHash: cleanText(source && source.normalizedMessageHash, 128),
+    authorKey: cleanText(source && source.authorKey, 128)
+  };
+  if (type === "topic") {
+    return {
+      ...base,
+      title: cleanText(source && (source.title || source.message), 80) || "Class Topic",
+      body: cleanMultilineText(source && (source.body || source.message), 360),
+      replies: (Array.isArray(source && source.replies) ? source.replies : [])
+        .map(reply => normalizeModeratedPost(reply, "reply"))
+    };
+  }
+  return {
+    ...base,
+    message: cleanMultilineText(source && source.message, 320)
+  };
+}
+
+function normalizeModeratedThreads(entries) {
+  return (Array.isArray(entries) ? entries : []).slice(0, 1000)
+    .map(thread => normalizeModeratedPost(thread, "topic"));
+}
+
+function pruneModeratedThreads(entries, now = Date.now()) {
+  const cutoff = now - moderationConfig.limits.rejectedRetentionDays * 24 * 60 * 60 * 1000;
+  return normalizeModeratedThreads(entries)
+    .filter(thread => !(
+      thread.moderationStatus === "blocked"
+      && thread.moderatedAt
+      && Date.parse(thread.moderatedAt) < cutoff
+    ))
+    .map(thread => ({
+      ...thread,
+      replies: (thread.replies || []).filter(reply => !(
+        reply.moderationStatus === "blocked"
+        && reply.moderatedAt
+        && Date.parse(reply.moderatedAt) < cutoff
+      ))
+    }));
+}
+
+function studentAuthorKey(session) {
+  return crypto.createHash("sha256").update(normalizeEmail(session && session.email)).digest("hex");
+}
+
+function isApprovedPost(post) {
+  return !post || !post.moderationStatus || post.moderationStatus === "approved";
+}
+
+function publicPost(post, type) {
+  const base = {
+    id: post.id,
+    studentName: post.studentName,
+    grade: post.grade,
+    createdAt: post.createdAt
+  };
+  return type === "topic"
+    ? {
+        ...base,
+        title: post.title,
+        body: post.body,
+        replies: (post.replies || []).filter(isApprovedPost).map(reply => publicPost(reply, "reply"))
+      }
+    : { ...base, message: post.message };
+}
+
+function publicApprovedThreads(entries) {
+  return normalizeModeratedThreads(entries).filter(isApprovedPost).map(thread => publicPost(thread, "topic"));
+}
+
+function moderationItem(post, type, threadId = "") {
+  return {
+    id: post.id,
+    type,
+    threadId: threadId || (type === "topic" ? post.id : ""),
+    studentName: post.studentName,
+    grade: post.grade,
+    title: type === "topic" ? post.title : "",
+    message: type === "topic" ? post.body : post.message,
+    submittedAt: post.submittedAt || post.createdAt,
+    moderationStatus: post.moderationStatus || "approved",
+    moderationReasons: normalizeModerationReasons(post.moderationReasons),
+    moderatedAt: post.moderatedAt || "",
+    moderatedBy: post.moderatedBy || ""
+  };
+}
+
+function teacherModerationData(db) {
+  const all = normalizeModeratedThreads(db.threads).flatMap(thread => [
+    moderationItem(thread, "topic"),
+    ...(thread.replies || []).map(reply => moderationItem(reply, "reply", thread.id))
+  ]);
+  return {
+    pending: all
+      .filter(item => item.moderationStatus === "needs_review")
+      .sort((a, b) => String(a.submittedAt).localeCompare(String(b.submittedAt))),
+    recent: all
+      .filter(item => item.moderatedAt)
+      .sort((a, b) => String(b.moderatedAt).localeCompare(String(a.moderatedAt)))
+      .slice(0, 50)
+  };
+}
+
+function studentPendingModeration(db, session) {
+  if (!session || session.role !== "student") return [];
+  const authorKey = studentAuthorKey(session);
+  return normalizeModeratedThreads(db.threads).flatMap(thread => [
+    ...(thread.authorKey === authorKey && thread.moderationStatus === "needs_review"
+      ? [moderationItem(thread, "topic")]
+      : []),
+    ...(thread.replies || [])
+      .filter(reply => reply.authorKey === authorKey && reply.moderationStatus === "needs_review")
+      .map(reply => moderationItem(reply, "reply", thread.id))
+  ]).map(item => ({
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    submittedAt: item.submittedAt
+  }));
 }
 
 function normalizeLinks(entries) {
@@ -230,7 +392,7 @@ function writeDb(db) {
   fs.mkdirSync(dataDir, { recursive: true });
   const next = {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
-    threads: Array.isArray(db.threads) ? db.threads : [],
+    threads: pruneModeratedThreads(db.threads),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     leaderboards: normalizeLeaderboards(db.leaderboards),
@@ -421,7 +583,9 @@ function publicState(db, session) {
   const teacher = session && session.role === "teacher";
   return {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
-    threads: signedIn ? db.threads : [],
+    threads: signedIn ? publicApprovedThreads(db.threads) : [],
+    pendingModeration: session && session.role === "student" ? studentPendingModeration(db, session) : [],
+    ...(teacher ? { moderation: teacherModerationData(db) } : {}),
     mutedStudents: teacher ? db.mutedStudents : [],
     websiteRequests: teacher ? db.websiteRequests : [],
     leaderboards: db.leaderboards,
@@ -438,6 +602,121 @@ function rejectIfMuted(db, session, res) {
   if (!isStudentMuted(db, session)) return false;
   sendJson(res, 403, { error: "Posting is unavailable. Please check with Mr. Nieves.", code: "POSTING_BLOCKED" });
   return true;
+}
+
+function allModeratedPosts(db) {
+  return normalizeModeratedThreads(db.threads).flatMap(thread => [
+    thread,
+    ...(thread.replies || [])
+  ]);
+}
+
+function moderationPostText(post) {
+  return typeof post.message === "string"
+    ? post.message
+    : `${post.title || ""}\n${post.body || ""}`;
+}
+
+function editDistance(left, right) {
+  const a = String(left || "");
+  const b = String(right || "");
+  const previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let row = 1; row <= a.length; row += 1) {
+    let diagonal = previous[0];
+    previous[0] = row;
+    for (let column = 1; column <= b.length; column += 1) {
+      const old = previous[column];
+      previous[column] = Math.min(
+        previous[column] + 1,
+        previous[column - 1] + 1,
+        diagonal + (a[row - 1] === b[column - 1] ? 0 : 1)
+      );
+      diagonal = old;
+    }
+  }
+  return previous[b.length];
+}
+
+function nearlyIdenticalMessage(left, right) {
+  const a = normalizeForModeration(left).reduced;
+  const b = normalizeForModeration(right).reduced;
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 10) return false;
+  return 1 - editDistance(a, b) / Math.max(a.length, b.length) >= 0.88;
+}
+
+function addModerationReason(result, code, label) {
+  if (!result.reasons.some(item => item.code === code)) result.reasons.push({ code, label });
+}
+
+function applyPostingBehavior(db, session, result, now = Date.now()) {
+  if (!session || session.role !== "student") return result;
+  const authorKey = studentAuthorKey(session);
+  const posts = allModeratedPosts(db).filter(post => post.authorKey === authorKey);
+  const fiveMinutesAgo = now - 5 * 60 * 1000;
+  const duplicateCutoff = now - moderationConfig.limits.duplicateWindowMinutes * 60 * 1000;
+  const recentPosts = posts.filter(post => Date.parse(post.submittedAt || post.createdAt) >= fiveMinutesAgo);
+  const lastPostAt = posts.reduce((latest, post) => Math.max(latest, Date.parse(post.submittedAt || post.createdAt) || 0), 0);
+  const duplicates = posts.filter(post => (
+    Date.parse(post.submittedAt || post.createdAt) >= duplicateCutoff
+    && (
+      (post.normalizedMessageHash && post.normalizedMessageHash === result.normalizedMessageHash)
+      || nearlyIdenticalMessage(moderationPostText(post), result.originalText)
+    )
+  ));
+
+  if (recentPosts.length >= moderationConfig.limits.maximumPostsPerFiveMinutes) {
+    result.status = "blocked";
+    addModerationReason(result, "rate_limit", "Too many messages within five minutes");
+  } else if (lastPostAt && now - lastPostAt < moderationConfig.limits.minimumSecondsBetweenPosts * 1000) {
+    if (result.status === "approved") result.status = "needs_review";
+    addModerationReason(result, "rate_limit", "Messages submitted less than ten seconds apart");
+  }
+
+  if (duplicates.length >= 2) {
+    result.status = "blocked";
+    addModerationReason(result, "duplicate", "Repeated identical or nearly identical message after a warning");
+  } else if (duplicates.length === 1) {
+    if (result.status === "approved") result.status = "needs_review";
+    addModerationReason(result, "duplicate", "Repeated identical or nearly identical message");
+  }
+
+  result.studentMessage = result.status === "approved"
+    ? ""
+    : studentMessageFor(result.status, result.reasons);
+  return result;
+}
+
+function moderationFields(result, session, submittedAt) {
+  const approvedByTeacher = session.role === "teacher";
+  return {
+    submittedAt,
+    moderationStatus: approvedByTeacher ? "approved" : result.status,
+    moderationReasons: approvedByTeacher ? [] : result.reasons,
+    moderatedAt: approvedByTeacher ? submittedAt : "",
+    moderatedBy: approvedByTeacher ? cleanText(session.name || "Mr. Nieves", 80) : "",
+    normalizedMessageHash: result.normalizedMessageHash,
+    authorKey: session.role === "student" ? studentAuthorKey(session) : "teacher"
+  };
+}
+
+function preserveNonPublicModeration(existing, incoming) {
+  const next = normalizeModeratedThreads(incoming);
+  const nextById = new Map(next.map(thread => [thread.id, thread]));
+  for (const prior of normalizeModeratedThreads(existing)) {
+    if (prior.moderationStatus !== "approved") {
+      if (!nextById.has(prior.id)) next.push(prior);
+      continue;
+    }
+    const candidate = nextById.get(prior.id);
+    if (!candidate) continue;
+    const candidateReplyIds = new Set((candidate.replies || []).map(reply => reply.id));
+    candidate.replies.push(...(prior.replies || []).filter(reply => (
+      reply.moderationStatus !== "approved" && !candidateReplyIds.has(reply.id)
+    )));
+  }
+  return next;
 }
 
 function validateStudentThreadUpdate(existing, incoming, session) {
@@ -519,6 +798,51 @@ function applyTeacherThreadIdentity(existing, incoming, session) {
     ));
     return { ...thread, replies };
   });
+}
+
+function findModerationTarget(db, id) {
+  const targetId = String(id || "");
+  for (const thread of db.threads) {
+    if (String(thread.id) === targetId) return { type: "topic", thread, post: thread };
+    const reply = (thread.replies || []).find(item => String(item.id) === targetId);
+    if (reply) return { type: "reply", thread, post: reply };
+  }
+  return null;
+}
+
+function deleteModerationTarget(db, target) {
+  if (target.type === "topic") {
+    db.threads = db.threads.filter(thread => thread.id !== target.thread.id);
+  } else {
+    target.thread.replies = (target.thread.replies || []).filter(reply => reply.id !== target.post.id);
+  }
+}
+
+function updateModerationTarget(target, body, teacherName) {
+  const action = cleanText(body && body.action, 30);
+  if (action === "delete") return { deleted: true };
+  if (!["approve", "reject", "edit_approve"].includes(action)) {
+    throw new Error("Choose Approve, Reject, Edit and Approve, or Delete.");
+  }
+  if (action === "edit_approve") {
+    if (target.type === "topic") {
+      const title = cleanText(body.title, 80);
+      const message = cleanMultilineText(body.message, 360);
+      if (!title || !message) throw new Error("A topic title and message are required.");
+      target.post.title = title;
+      target.post.body = message;
+      target.post.normalizedMessageHash = hashNormalizedMessage(`${title}\n${message}`);
+    } else {
+      const message = cleanMultilineText(body.message, 320);
+      if (!message) throw new Error("A reply message is required.");
+      target.post.message = message;
+      target.post.normalizedMessageHash = hashNormalizedMessage(message);
+    }
+  }
+  target.post.moderationStatus = action === "reject" ? "blocked" : "approved";
+  target.post.moderatedAt = new Date().toISOString();
+  target.post.moderatedBy = teacherName;
+  return { deleted: false };
 }
 
 async function handleAuthApi(req, res, pathname) {
@@ -857,7 +1181,179 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/threads") {
     const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
-    sendJson(res, 200, { threads: readDb().threads });
+    sendJson(res, 200, { threads: publicApprovedThreads(readDb().threads) });
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/moderation") {
+    if (!requireRole(req, res, ["teacher"])) return true;
+    sendJson(res, 200, { moderation: teacherModerationData(readDb()) });
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/threads") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
+      const title = cleanText(body.title, 80);
+      const message = cleanMultilineText(body.message || body.body, 360);
+      const grade = allowed.role === "teacher" ? "Teacher" : cleanGrade(allowed.grade);
+      if (!title || !message || !grade) throw new Error("Topic title and message are required.");
+      const submittedAt = new Date().toISOString();
+      const result = allowed.role === "teacher"
+        ? moderateMessage(`${title}\n${message}`)
+        : applyPostingBehavior(db, allowed, moderateMessage(`${title}\n${message}`));
+      if (allowed.role === "student" && result.status === "blocked") {
+        sendJson(res, 200, {
+          ok: false,
+          moderationStatus: "blocked",
+          message: result.studentMessage,
+          reasons: result.reasons.map(item => item.code),
+          threads: publicApprovedThreads(db.threads),
+          pendingModeration: studentPendingModeration(db, allowed)
+        });
+        return true;
+      }
+      const topic = {
+        id: crypto.randomUUID(),
+        studentName: allowed.role === "teacher"
+          ? cleanText(allowed.name || "Mr. Nieves", 80)
+          : studentDisplayName(allowed),
+        grade,
+        title,
+        body: message,
+        createdAt: submittedAt,
+        replies: [],
+        ...moderationFields(result, allowed, submittedAt)
+      };
+      db.threads = [topic, ...normalizeModeratedThreads(db.threads)];
+      writeDb(db);
+      sendJson(res, result.status === "needs_review" ? 202 : 200, {
+        ok: true,
+        moderationStatus: topic.moderationStatus,
+        message: topic.moderationStatus === "needs_review"
+          ? result.studentMessage
+          : "Topic started.",
+        threads: publicApprovedThreads(db.threads),
+        pendingModeration: studentPendingModeration(db, allowed)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const replySubmission = pathname.match(/^\/api\/threads\/([^/]+)\/replies$/);
+  if (req.method === "POST" && replySubmission) {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
+      const threadId = decodeURIComponent(replySubmission[1]);
+      const thread = normalizeModeratedThreads(db.threads).find(item => item.id === threadId);
+      if (!thread || !isApprovedPost(thread)) {
+        sendJson(res, 404, { error: "That Colt Corner topic is not available." });
+        return true;
+      }
+      const message = cleanMultilineText(body.message, 320);
+      const grade = allowed.role === "teacher" ? "Teacher" : cleanGrade(allowed.grade);
+      if (!message || !grade) throw new Error("A reply message is required.");
+      const submittedAt = new Date().toISOString();
+      const result = allowed.role === "teacher"
+        ? moderateMessage(message)
+        : applyPostingBehavior(db, allowed, moderateMessage(message));
+      if (allowed.role === "student" && result.status === "blocked") {
+        sendJson(res, 200, {
+          ok: false,
+          moderationStatus: "blocked",
+          message: result.studentMessage,
+          reasons: result.reasons.map(item => item.code),
+          threads: publicApprovedThreads(db.threads),
+          pendingModeration: studentPendingModeration(db, allowed)
+        });
+        return true;
+      }
+      thread.replies.push({
+        id: crypto.randomUUID(),
+        studentName: allowed.role === "teacher"
+          ? cleanText(allowed.name || "Mr. Nieves", 80)
+          : studentDisplayName(allowed),
+        grade,
+        message,
+        createdAt: submittedAt,
+        ...moderationFields(result, allowed, submittedAt)
+      });
+      db.threads = normalizeModeratedThreads(db.threads).map(item => item.id === thread.id ? thread : item);
+      writeDb(db);
+      sendJson(res, result.status === "needs_review" ? 202 : 200, {
+        ok: true,
+        moderationStatus: result.status,
+        message: result.status === "needs_review" ? result.studentMessage : "Reply posted.",
+        threads: publicApprovedThreads(db.threads),
+        pendingModeration: studentPendingModeration(db, allowed)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const moderationAction = pathname.match(/^\/api\/moderation\/([^/]+)$/);
+  if (req.method === "PATCH" && moderationAction) {
+    if (!requireSameOrigin(req, res)) return true;
+    const teacher = requireRole(req, res, ["teacher"]);
+    if (!teacher) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      db.threads = normalizeModeratedThreads(db.threads);
+      const target = findModerationTarget(db, decodeURIComponent(moderationAction[1]));
+      if (!target) {
+        sendJson(res, 404, { error: "Moderation item not found." });
+        return true;
+      }
+      const update = updateModerationTarget(target, body, cleanText(teacher.name || "Mr. Nieves", 80));
+      if (update.deleted) deleteModerationTarget(db, target);
+      writeDb(db);
+      sendJson(res, 200, {
+        ok: true,
+        threads: publicApprovedThreads(db.threads),
+        moderation: teacherModerationData(db)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const deleteReply = pathname.match(/^\/api\/threads\/([^/]+)\/replies\/([^/]+)$/);
+  if (req.method === "DELETE" && deleteReply) {
+    if (!requireSameOrigin(req, res)) return true;
+    if (!requireRole(req, res, ["teacher"])) return true;
+    const db = readDb();
+    db.threads = normalizeModeratedThreads(db.threads);
+    const thread = db.threads.find(item => item.id === decodeURIComponent(deleteReply[1]));
+    if (thread) thread.replies = thread.replies.filter(reply => reply.id !== decodeURIComponent(deleteReply[2]));
+    writeDb(db);
+    sendJson(res, 200, { ok: true, threads: publicApprovedThreads(db.threads), moderation: teacherModerationData(db) });
+    return true;
+  }
+
+  const deleteThread = pathname.match(/^\/api\/threads\/([^/]+)$/);
+  if (req.method === "DELETE" && deleteThread) {
+    if (!requireSameOrigin(req, res)) return true;
+    if (!requireRole(req, res, ["teacher"])) return true;
+    const db = readDb();
+    db.threads = normalizeModeratedThreads(db.threads).filter(thread => thread.id !== decodeURIComponent(deleteThread[1]));
+    writeDb(db);
+    sendJson(res, 200, { ok: true, threads: publicApprovedThreads(db.threads), moderation: teacherModerationData(db) });
     return true;
   }
 
@@ -929,13 +1425,19 @@ async function handleApi(req, res, pathname) {
       const db = readDb();
       if (allowed.role === "teacher") {
         if (!Array.isArray(body.threads)) throw new Error("threads must be an array.");
-        db.threads = applyTeacherThreadIdentity(db.threads, body.threads, allowed);
+        db.threads = preserveNonPublicModeration(
+          db.threads,
+          applyTeacherThreadIdentity(publicApprovedThreads(db.threads), body.threads, allowed)
+        );
       } else {
-        if (rejectIfMuted(db, allowed, res)) return true;
-        db.threads = validateStudentThreadUpdate(db.threads, body.threads, allowed);
+        sendJson(res, 405, {
+          error: "Please refresh Classroom Launchpad before posting.",
+          code: "USE_MODERATED_POSTING"
+        });
+        return true;
       }
       writeDb(db);
-      sendJson(res, 200, { ok: true, threads: db.threads });
+      sendJson(res, 200, { ok: true, threads: publicApprovedThreads(db.threads) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
