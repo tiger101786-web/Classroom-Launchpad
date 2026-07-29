@@ -3,21 +3,61 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
-const audioPath = path.join(root, "assets", "colt-run-mr-nieves-celebration-audio.mp3");
-const audio = fs.readFileSync(audioPath);
+const audioFiles = [
+  ["colt-run-mr-nieves-celebration-audio.mp3", 19661],
+  ["colt-run-mr-nieves-celebration-audio-02.mp3", 33792],
+  ["colt-run-mr-nieves-celebration-audio-03.mp3", 43776],
+  ["colt-run-mr-nieves-celebration-audio-04.mp3", 68545],
+  ["colt-run-mr-nieves-celebration-audio-05.mp3", 52662]
+];
 
 function check(value, message) {
   if (!value) throw new Error(message);
 }
 
-check(audio.length === 19661, "Mr. Nieves celebration audio size changed unexpectedly.");
-check(audio.toString("ascii", 0, 3) === "ID3", "Mr. Nieves celebration audio does not contain a valid MP3 ID3 header.");
-check(appSource.includes('createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1")'), "Mr. Nieves celebration audio is not registered.");
+audioFiles.forEach(([fileName, expectedSize]) => {
+  const audio = fs.readFileSync(path.join(root, "assets", fileName));
+  const hasId3Header = audio.toString("ascii", 0, 3) === "ID3";
+  const hasMp3Frame = audio[0] === 0xff && (audio[1] & 0xe0) === 0xe0;
+  check(audio.length === expectedSize, `${fileName} size changed unexpectedly.`);
+  check(hasId3Header || hasMp3Frame, `${fileName} does not begin with a valid MP3 header or frame.`);
+});
+
+[
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1")',
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-02.mp3?v=20260728-letsgo1")',
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-louder1")',
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1")',
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-ohyeah1")'
+].forEach(registration => {
+  check(appSource.includes(registration), `Missing celebration registration: ${registration}`);
+});
+
+check(
+  appSource.includes("const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.18, 1, 1];"),
+  "The maleyayboy volume increase is missing or assigned to the wrong sound."
+);
 
 const characterMediaStart = appSource.indexOf("const ensureCharacterMedia =");
 const characterMediaEnd = appSource.indexOf("const stagedMediaTimers =", characterMediaStart);
 const characterMedia = appSource.slice(characterMediaStart, characterMediaEnd);
-check(characterMedia.includes("ensureMediaSource(mrNievesCelebrationAudio);"), "Celebration audio is not preloaded with Mr. Nieves.");
+check(
+  characterMedia.includes("mrNievesCelebrationAudios.forEach(audio => ensureMediaSource(audio));"),
+  "The Mr. Nieves celebration rotation is not preloaded with his character media."
+);
+
+const audioPlayerStart = appSource.indexOf("const chooseNonRepeatingAudioIndex =");
+const audioPlayerEnd = appSource.indexOf("const syncRunningAudio =", audioPlayerStart);
+const audioPlayer = appSource.slice(audioPlayerStart, audioPlayerEnd);
+check(
+  audioPlayer.includes("if (audioCount > 1 && nextIndex === lastIndex)"),
+  "The consecutive-repeat guard is missing."
+);
+check(
+  audioPlayer.includes("mrNievesCelebrationAudios.length")
+    && audioPlayer.includes("lastMrNievesCelebrationAudioIndex = nextIndex;"),
+  "The celebration rotation is not using all five sounds with remembered history."
+);
 
 const finishStart = appSource.indexOf("const beginFinishLanding =");
 const finishEnd = appSource.indexOf("const updateFinishLanding =", finishStart);
@@ -34,8 +74,10 @@ const completeFinish = appSource.slice(completeStart, completeEnd);
 check(completeFinish.includes('player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";'), "Character-specific celebration animation routing changed.");
 
 console.log(JSON.stringify({
-  validMp3Header: true,
+  validMp3Files: 5,
   mrNievesOnly: true,
+  nonRepeatingRotation: true,
+  maleyayboyVolumeMultiplier: 1.18,
   startsAtFlagContact: true,
   startsBeforeCelebrationAnimation: true,
   allMrNievesCelebrationAnimationsCovered: 4,

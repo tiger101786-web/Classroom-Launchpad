@@ -2462,9 +2462,11 @@ function startColtRunGame() {
   const mrNievesCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-02.mp3?v=20260728-letsgo1"),
-    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy1"),
-    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1")
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-louder1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-ohyeah1")
   ];
+  const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.18, 1, 1];
   let lastMrNievesDeathAudioIndex = -1;
   let lastMrNievesCelebrationAudioIndex = -1;
   const ambientLayerVolume = 1;
@@ -2503,8 +2505,10 @@ function startColtRunGame() {
     audio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
     audio.muted = musicMuted;
   });
-  mrNievesCelebrationAudios.forEach(audio => {
-    audio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
+  mrNievesCelebrationAudios.forEach((audio, index) => {
+    audio.volume = musicMuted
+      ? 0
+      : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
     audio.muted = musicMuted;
   });
   const keys = { left: false, right: false, jump: false };
@@ -3504,8 +3508,10 @@ function startColtRunGame() {
       audio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
       audio.muted = musicMuted;
     });
-    mrNievesCelebrationAudios.forEach(audio => {
-      audio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
+    mrNievesCelebrationAudios.forEach((audio, index) => {
+      audio.volume = musicMuted
+        ? 0
+        : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
     applyAmbientBoost();
