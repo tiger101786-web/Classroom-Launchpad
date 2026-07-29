@@ -26,16 +26,16 @@ audioFiles.forEach(([fileName, expectedSize]) => {
 [
   'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1")',
   'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-02.mp3?v=20260728-letsgo1")',
-  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-louder1")',
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-ohyeah-boost1")',
   'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1")',
-  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-ohyeah1")'
+  'createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")'
 ].forEach(registration => {
   check(appSource.includes(registration), `Missing celebration registration: ${registration}`);
 });
 
 check(
-  appSource.includes("const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.18, 1, 1];"),
-  "The maleyayboy volume increase is missing or assigned to the wrong sound."
+  appSource.includes("const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];"),
+  "The maleyayboy and maleohyeah volume boosts are missing or assigned to the wrong sounds."
 );
 
 const characterMediaStart = appSource.indexOf("const ensureCharacterMedia =");
@@ -77,7 +77,8 @@ console.log(JSON.stringify({
   validMp3Files: 5,
   mrNievesOnly: true,
   nonRepeatingRotation: true,
-  maleyayboyVolumeMultiplier: 1.18,
+  maleyayboyVolumeMultiplier: 1.4,
+  maleohyeahVolumeMultiplier: 1.4,
   startsAtFlagContact: true,
   startsBeforeCelebrationAnimation: true,
   allMrNievesCelebrationAnimationsCovered: 4,

@@ -2546,11 +2546,11 @@ function startColtRunGame() {
   const mrNievesCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-02.mp3?v=20260728-letsgo1"),
-    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-louder1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy-ohyeah-boost1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1"),
-    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-ohyeah1")
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")
   ];
-  const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.18, 1, 1];
+  const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastMrNievesDeathAudioIndex = -1;
   let lastMrNievesCelebrationAudioIndex = -1;
   const ambientLayerVolume = 1;
