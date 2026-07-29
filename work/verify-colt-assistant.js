@@ -148,6 +148,8 @@ assert(!safeLinks.some(link => link.id === "unsafe-1"));
 assert(safeLinks.every(link => !Object.hasOwn(link, "url")));
 
 const assistantSource = fs.readFileSync(path.join(root, "colt-assistant.js"), "utf8");
+const knowledgeSource = fs.readFileSync(path.join(root, "colt-assistant-knowledge.js"), "utf8");
+assert(!/[âÃ�]/.test(knowledgeSource));
 assert(!/\bfetch\s*\(/.test(assistantSource));
 assert(!/\bXMLHttpRequest\b/.test(assistantSource));
 assert(!/\bWebSocket\b/.test(assistantSource));

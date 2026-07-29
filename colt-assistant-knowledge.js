@@ -193,7 +193,7 @@
           "usb drive not showing", "flash drive not showing", "computer cannot find my usb",
           "computer can't find my usb", "eject usb", "remove usb"
         ],
-        response: "1. Ask Mr. Nieves before connecting or removing a USB drive.\n2. Insert it gently in the correct directionâ€”never force it.\n3. Wait a few seconds and check the Files app.\n4. Before removing it, use the Eject button next to the drive.\n5. If it does not appear, stop and ask Mr. Nieves."
+        response: "1. Ask Mr. Nieves before connecting or removing a USB drive.\n2. Insert it gently in the correct direction. Never force it.\n3. Wait a few seconds and check the Files app.\n4. Before removing it, use the Eject button next to the drive.\n5. If it does not appear, stop and ask Mr. Nieves."
       },
       {
         id: "wifi",
