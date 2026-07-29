@@ -68,13 +68,17 @@
 
     const playerWrap = buildElement("div", "colt-radio-player");
     const placeholder = buildElement("p", "colt-radio-placeholder", "Choose a station, then press Play in the radio player.");
-    const iframe = document.createElement("iframe");
-    iframe.title = "Lofi Cafe radio player";
-    iframe.loading = "lazy";
-    iframe.referrerPolicy = "no-referrer";
-    iframe.setAttribute("allow", "autoplay");
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-    iframe.hidden = true;
+    function createPlayerFrame() {
+      const frame = document.createElement("iframe");
+      frame.title = "Lofi Cafe radio player";
+      frame.loading = "lazy";
+      frame.referrerPolicy = "no-referrer";
+      frame.setAttribute("allow", "autoplay");
+      frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      frame.hidden = true;
+      return frame;
+    }
+    let iframe = createPlayerFrame();
     playerWrap.append(placeholder, iframe);
 
     const note = buildElement("p", "colt-radio-note", "Free, ad-free music streamed by Lofi Cafe. No account required.");
@@ -96,8 +100,11 @@
     }
 
     function stopRadio({ focusLauncher = true } = {}) {
-      iframe.removeAttribute("src");
-      iframe.hidden = true;
+      const activeFrame = iframe;
+      activeFrame.src = "about:blank";
+      activeFrame.remove();
+      iframe = createPlayerFrame();
+      playerWrap.append(iframe);
       placeholder.hidden = false;
       activeStation = "";
       stationButtons.forEach(button => {
@@ -159,6 +166,7 @@
       }
     });
     globalObject.addEventListener("colt-assistant-opened", () => minimizePanel({ focusLauncher: false }));
+    globalObject.addEventListener("colt-run-opening", () => stopRadio({ focusLauncher: false }));
     globalObject.addEventListener("classroom-launchpad-rendered", updateVisibility);
 
     updateVisibility({ detail: { screen: "home" } });

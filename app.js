@@ -8333,7 +8333,10 @@ app.addEventListener("click", async event => {
     observeDeferredVideos(app);
   }
   if (action === "openColtCorner") setScreen({ name: isSignedIn() ? "coltCorner" : "login" });
-  if (action === "openColtRun") setScreen({ name: "coltRun" });
+  if (action === "openColtRun") {
+    window.dispatchEvent(new CustomEvent("colt-run-opening"));
+    setScreen({ name: "coltRun" });
+  }
   if (action === "openThread") setScreen({ name: "thread", id: target.dataset.id });
   if (action === "open") window.open(target.dataset.url, "_blank", "noopener,noreferrer");
   if (action === "add") setScreen({ name: "edit", id: null });

@@ -42,6 +42,11 @@ function overlaps(first, second) {
 
 async function run() {
   const root = path.resolve(__dirname, "..");
+  const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  assert(
+    appSource.includes('window.dispatchEvent(new CustomEvent("colt-run-opening"));\n    setScreen({ name: "coltRun" });'),
+    "Colt Run does not send the immediate radio stop event before opening."
+  );
   const port = await availablePort();
   const baseUrl = `http://127.0.0.1:${port}`;
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "colt-radio-ui-"));
@@ -154,10 +159,18 @@ async function run() {
 
     await radioLauncher.click();
     await page.evaluate(() => {
+      window.__coltRadioFrameBeforeGame = document.querySelector(".colt-radio-player iframe");
+      window.dispatchEvent(new CustomEvent("colt-run-opening"));
       window.dispatchEvent(new CustomEvent("classroom-launchpad-rendered", { detail: { screen: "coltRun" } }));
     });
     assert(await page.locator("#coltRadioRoot").isHidden(), "Colt Radio remains visible during Colt Run.");
     assert.equal(await iframe.getAttribute("src"), null, "Colt Radio did not stop when Colt Run opened.");
+    const hardStopState = await page.evaluate(() => ({
+      oldFrameDisconnected: !window.__coltRadioFrameBeforeGame.isConnected,
+      playerWasRebuilt: window.__coltRadioFrameBeforeGame !== document.querySelector(".colt-radio-player iframe")
+    }));
+    assert(hardStopState.oldFrameDisconnected, "The playing Lofi Cafe frame remained connected.");
+    assert(hardStopState.playerWasRebuilt, "Colt Radio did not rebuild its player after stopping.");
 
     const noHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
     assert(noHorizontalOverflow, "Colt Radio caused mobile horizontal overflow.");
