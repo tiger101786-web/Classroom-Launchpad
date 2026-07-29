@@ -1408,14 +1408,15 @@ body[data-theme="night"] .forum-rules-card li {
 .thread-form-banner {
   grid-column: 1 / -1;
   width: 100%;
-  margin: 10px 0 0;
+  margin: 0;
   align-self: start;
 }
 
 .thread-form-banner img,
 .thread-form-banner video {
+  display: block;
   width: 100%;
-  min-height: 190px;
+  height: auto;
   object-fit: contain;
   object-position: center;
 }

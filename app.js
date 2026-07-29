@@ -1755,12 +1755,12 @@ function renderColtCorner() {
           </p>
         ` : ""}
         <p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
-        <figure class="colt-corner-banner thread-form-banner">
-          <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
-            <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
-          </video>
-        </figure>
       </form>
+      <figure class="colt-corner-banner thread-form-banner">
+        <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
+          <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
+        </video>
+      </figure>
       ${renderThreadTable(visibleThreads)}
     </section>
   `;

@@ -81,6 +81,7 @@ async function run() {
 
     const studentPage = await studentContext.newPage();
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await studentPage.locator(".colt-corner-preview .colt-corner-graphic").waitFor();
     assert.equal(await studentPage.locator(".colt-corner-preview .colt-corner-graphic").count(), 1);
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert.equal(await studentPage.locator(".colt-corner-card .colt-corner-graphic").count(), 0);
@@ -96,23 +97,39 @@ async function run() {
     });
     assert(pageColumns.aligned);
     assert(pageColumns.widthDifference < 3);
+    await studentPage.waitForFunction(() => {
+      const video = document.querySelector(".colt-corner-card > .thread-form-banner video");
+      return Boolean(video && video.videoWidth && video.videoHeight);
+    });
+    const bannerLayout = await studentPage.locator(".colt-corner-card > .thread-form-banner").evaluate(banner => {
+      const card = banner.parentElement.getBoundingClientRect();
+      const bannerRect = banner.getBoundingClientRect();
+      const video = banner.querySelector("video");
+      const videoRect = video.getBoundingClientRect();
+      return {
+        spansBothColumns: bannerRect.width > card.width * 0.9,
+        ratioDifference: Math.abs(
+          (videoRect.width / videoRect.height) - (video.videoWidth / video.videoHeight)
+        )
+      };
+    });
+    assert(bannerLayout.spansBothColumns);
+    assert(bannerLayout.ratioDifference < 0.02, JSON.stringify(bannerLayout));
     const formLayout = await studentPage.locator("#threadForm").evaluate(form => {
       const fields = Array.from(form.querySelectorAll(":scope > .field")).map(element => element.getBoundingClientRect());
       const button = form.querySelector("button[type='submit']").getBoundingClientRect();
-      const banner = form.querySelector(".thread-form-banner").getBoundingClientRect();
       const formBox = form.getBoundingClientRect();
       return {
         nameGradeAligned: Math.abs(fields[0].top - fields[1].top) < 3,
         titleGap: fields[2].top - fields[0].bottom,
         bodyGap: fields[3].top - fields[2].bottom,
         buttonGap: button.top - fields[3].bottom,
-        bannerGap: banner.top - button.bottom,
         buttonWidthRatio: button.width / formBox.width
       };
     });
     assert(formLayout.nameGradeAligned);
     assert(formLayout.titleGap <= 20 && formLayout.bodyGap <= 20);
-    assert(formLayout.buttonGap <= 20 && formLayout.bannerGap <= 30, JSON.stringify(formLayout));
+    assert(formLayout.buttonGap <= 20, JSON.stringify(formLayout));
     assert(formLayout.buttonWidthRatio >= 0.95);
     await studentPage.locator("#threadTitle").fill("Normal classroom question");
     await studentPage.locator("#threadBody").fill("Which lesson should we finish today?");
