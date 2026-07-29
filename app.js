@@ -1730,11 +1730,6 @@ function renderColtCorner() {
             Colt Corner checks messages for safety. Some messages may be held for Mr. Nieves to review before appearing.
           </p>
         </section>
-        <figure class="colt-corner-graphic">
-          <video autoplay muted loop playsinline aria-label="Animated Colt Corner message board logo">
-            <source data-src="assets/colt-corner-message-board.mp4" type="video/mp4">
-          </video>
-        </figure>
       </div>
       <form id="threadForm" class="thread-form">
         <div class="field">

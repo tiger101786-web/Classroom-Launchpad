@@ -81,9 +81,21 @@ async function run() {
 
     const studentPage = await studentContext.newPage();
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    assert.equal(await studentPage.locator(".colt-corner-preview .colt-corner-graphic").count(), 1);
     await studentPage.locator('[data-action="openColtCorner"]').click();
+    assert.equal(await studentPage.locator(".colt-corner-card .colt-corner-graphic").count(), 0);
     assert(await studentPage.getByText("Never share personal information.", { exact: true }).isVisible());
     assert(await studentPage.getByText(/Some messages may be held for Mr\. Nieves to review before appearing/i).isVisible());
+    const pageColumns = await studentPage.locator(".colt-corner-card").evaluate(card => {
+      const heading = card.querySelector(":scope > .colt-corner-heading").getBoundingClientRect();
+      const form = card.querySelector(":scope > .thread-form").getBoundingClientRect();
+      return {
+        aligned: Math.abs(heading.top - form.top) < 3,
+        widthDifference: Math.abs(heading.width - form.width)
+      };
+    });
+    assert(pageColumns.aligned);
+    assert(pageColumns.widthDifference < 3);
     const formLayout = await studentPage.locator("#threadForm").evaluate(form => {
       const fields = Array.from(form.querySelectorAll(":scope > .field")).map(element => element.getBoundingClientRect());
       const button = form.querySelector("button[type='submit']").getBoundingClientRect();

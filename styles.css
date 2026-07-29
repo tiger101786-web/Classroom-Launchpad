@@ -1237,13 +1237,17 @@ body[data-theme="night"] .request-spirit {
 
 .colt-corner-card {
   display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
   align-items: start;
   margin-top: 22px;
   margin-bottom: 20px;
   padding: 20px;
   border-left: 8px solid var(--blue);
+}
+
+.colt-corner-card .forum-rules-card {
+  width: 100%;
 }
 
 .colt-corner-preview {
