@@ -61,6 +61,13 @@ async function run() {
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Ctrl\+C|Ctrl\+Shift\+T/i);
     await assistantHome.click();
 
+    await page.getByRole("button", { name: "Ask a Question", exact: true }).click();
+    await page.locator("#coltAssistantInput").fill("downloads");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Downloads folder|download or upload/i);
+    assert.doesNotMatch(await page.locator(".colt-assistant-conversation").innerText(), /I’m not sure about that one/i);
+    await assistantHome.click();
+
     await page.getByRole("button", { name: "Today’s Directions", exact: true }).click();
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|Today’s Launch/i);
     assert(!(await assistantBack.isDisabled()));

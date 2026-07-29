@@ -179,7 +179,7 @@
       {
         id: "email",
         keywords: [
-          "email not working", "email problem", "email problems", "email issue", "email issues",
+          "email", "school email", "email help", "email not working", "email problem", "email problems", "email issue", "email issues",
           "email not sending", "cannot send email", "can't send email", "email not received",
           "cannot open email", "can't open email", "email attachment"
         ],
@@ -188,6 +188,7 @@
       {
         id: "usb",
         keywords: [
+          "usb", "usb drive", "flash drive", "thumb drive", "usb help",
           "usb not working", "usb problem", "usb issue", "flash drive not working",
           "usb drive not showing", "flash drive not showing", "computer cannot find my usb",
           "computer can't find my usb", "eject usb", "remove usb"
@@ -197,6 +198,7 @@
       {
         id: "wifi",
         keywords: [
+          "wifi", "wi-fi", "internet", "internet connection", "wifi help",
           "wifi not working", "wi-fi not working", "internet not working", "no internet",
           "not connected to wifi", "not connected to wi-fi", "wifi problem", "wifi issue",
           "internet problem", "internet issue", "offline"
@@ -206,6 +208,7 @@
       {
         id: "camera-microphone",
         keywords: [
+          "camera", "webcam", "microphone", "mic", "camera help", "microphone help",
           "camera not working", "webcam not working", "microphone not working", "mic not working",
           "camera problem", "camera issue", "microphone problem", "microphone issue",
           "cannot use camera", "can't use camera", "cannot use microphone", "can't use microphone"
@@ -215,6 +218,7 @@
       {
         id: "charging",
         keywords: [
+          "charging", "charger", "battery", "battery help", "charging help",
           "computer not charging", "chromebook not charging", "battery not charging",
           "charger not working", "charging problem", "charging issue", "battery low",
           "low battery", "computer is dying", "chromebook is dying"
@@ -224,6 +228,7 @@
       {
         id: "download-upload",
         keywords: [
+          "download", "downloads", "upload", "uploads", "download help", "upload help",
           "download not working", "upload not working", "file not downloading", "file not uploading",
           "cannot download", "can't download", "cannot upload", "can't upload",
           "download problem", "upload problem", "cannot find my download", "can't find my download"
@@ -233,6 +238,7 @@
       {
         id: "copy-paste",
         keywords: [
+          "copy and paste", "copy paste", "copying and pasting",
           "copy and paste not working", "cannot copy and paste", "can't copy and paste",
           "how do i copy and paste", "copy problem", "paste problem"
         ],
