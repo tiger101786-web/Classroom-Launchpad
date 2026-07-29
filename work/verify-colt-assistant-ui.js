@@ -42,6 +42,18 @@ async function run() {
     await page.getByRole("button", { name: "Ask a Question", exact: true }).click();
     assert(await page.locator("#coltAssistantInput").evaluate(element => document.activeElement === element));
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Type a short classroom question/i);
+    await page.getByRole("button", { name: "Ask a Question", exact: true }).dblclick();
+    assert.equal(
+      await page.getByText(
+        "Type a short classroom question below. Please do not enter your name, email, password, grade, or other private information.",
+        { exact: true }
+      ).count(),
+      1
+    );
+    await page.locator("#coltAssistantInput").fill("how can i fix my keyboard");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Click once inside the box|Try one letter/i);
+    assert.equal(await page.getByText("TypingClub", { exact: true }).count(), 0);
     await assistantHome.click();
     assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
 

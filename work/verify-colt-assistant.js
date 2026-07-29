@@ -46,6 +46,11 @@ assert(hasCategory(ask("Show me a game."), "Review Games"));
 assert.match(ask("What can I do when I finish?").text, /assigned work|approved activity/i);
 assert.equal(ask("Can I go to YouTube?").recommendations[0].title, "YouTube");
 assert.match(ask("My sound does not work.").text, /volume|muted|headphones/i);
+const keyboardRepairResponse = ask("how can i fix my keyboard");
+assert.match(keyboardRepairResponse.text, /click once inside|try one letter|ask Mr\. Nieves/i);
+assert.equal(keyboardRepairResponse.recommendations, undefined);
+assert.match(ask("My keyboard is broken.").text, /click once inside|try one letter/i);
+assert.match(ask("How do I fix my trackpad?").text, /move one finger|connected/i);
 
 const passwordResponse = ask("My password is test123.");
 assert.equal(passwordResponse.sensitive, true);

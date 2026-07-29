@@ -257,7 +257,27 @@
         return record({ text: knowledge.responses.unapprovedWebsite }, "unapproved-website");
       }
 
-      const troubleshooting = (knowledge.troubleshooting || []).find(item => matchesAny(normalized, item.keywords));
+      const troubleshootingItems = knowledge.troubleshooting || [];
+      let troubleshooting = troubleshootingItems.find(item => matchesAny(normalized, item.keywords));
+      if (!troubleshooting) {
+        const problemWords = [
+          "fix", "broken", "problem", "not working", "does not work", "doesn't work",
+          "wont work", "won't work", "cannot use", "can't use"
+        ];
+        const deviceTroubleshooting = [
+          { id: "keyboard", words: ["keyboard", "keys"] },
+          { id: "mouse", words: ["mouse", "trackpad", "cursor", "pointer"] },
+          { id: "no-sound", words: ["sound", "audio", "volume"] },
+          { id: "headphones", words: ["headphones", "headphone", "earbuds"] },
+          { id: "website-loading", words: ["website", "site", "page"] }
+        ];
+        const deviceMatch = deviceTroubleshooting.find(item => (
+          matchesAny(normalized, item.words) && matchesAny(normalized, problemWords)
+        ));
+        if (deviceMatch) {
+          troubleshooting = troubleshootingItems.find(item => item.id === deviceMatch.id);
+        }
+      }
       if (troubleshooting) {
         return record({
           text: troubleshooting.response,
@@ -735,6 +755,10 @@
     }
 
     function focusQuestionInput() {
+      if (lastReadableText === knowledge.responses.askQuestion) {
+        input.focus();
+        return;
+      }
       saveConversationStep();
       appendAssistantResponse({ text: knowledge.responses.askQuestion });
       input.focus();
