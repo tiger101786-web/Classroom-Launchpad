@@ -155,7 +155,8 @@
         id: "keyboard",
         keywords: [
           "keyboard not typing", "keyboard won't type", "keys not working", "cannot type", "can't type",
-          "fix my keyboard", "keyboard problem", "keyboard is broken", "keyboard not working"
+          "fix my keyboard", "keyboard problem", "keyboard problems", "keyboard issue", "keyboard issues",
+          "keyboard trouble", "difficulty with my keyboard", "keyboard is broken", "keyboard not working"
         ],
         response: "1. Click once inside the box where you want to type.\n2. Try one letter.\n3. Check that no key is being held down.\n4. If it still does not type, ask Mr. Nieves."
       },

@@ -50,7 +50,7 @@ async function run() {
       ).count(),
       1
     );
-    await page.locator("#coltAssistantInput").fill("how can i fix my keyboard");
+    await page.locator("#coltAssistantInput").fill("im having keyboard issues");
     await page.locator(".colt-assistant-form button[type='submit']").click();
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Click once inside the box|Try one letter/i);
     assert.equal(await page.getByText("TypingClub", { exact: true }).count(), 0);

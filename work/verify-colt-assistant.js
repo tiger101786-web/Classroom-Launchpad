@@ -50,6 +50,11 @@ const keyboardRepairResponse = ask("how can i fix my keyboard");
 assert.match(keyboardRepairResponse.text, /click once inside|try one letter|ask Mr\. Nieves/i);
 assert.equal(keyboardRepairResponse.recommendations, undefined);
 assert.match(ask("My keyboard is broken.").text, /click once inside|try one letter/i);
+const keyboardIssuesResponse = ask("im having keyboard issues");
+assert.match(keyboardIssuesResponse.text, /click once inside|try one letter|ask Mr\. Nieves/i);
+assert.equal(keyboardIssuesResponse.recommendations, undefined);
+assert.match(ask("I am having trouble with my keyboard.").text, /click once inside|try one letter/i);
+assert.match(ask("I have difficulty with my keyboard.").text, /click once inside|try one letter/i);
 assert.match(ask("How do I fix my trackpad?").text, /move one finger|connected/i);
 
 const passwordResponse = ask("My password is test123.");

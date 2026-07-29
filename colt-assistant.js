@@ -261,8 +261,9 @@
       let troubleshooting = troubleshootingItems.find(item => matchesAny(normalized, item.keywords));
       if (!troubleshooting) {
         const problemWords = [
-          "fix", "broken", "problem", "not working", "does not work", "doesn't work",
-          "wont work", "won't work", "cannot use", "can't use"
+          "fix", "broken", "problem", "problems", "issue", "issues", "trouble",
+          "difficulty", "not working", "does not work", "doesn't work", "wont work",
+          "won't work", "cannot use", "can't use"
         ];
         const deviceTroubleshooting = [
           { id: "keyboard", words: ["keyboard", "keys"] },
