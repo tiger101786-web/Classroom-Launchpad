@@ -4419,7 +4419,8 @@ body[data-theme="night"] .class-timer-badge {
 
 .colt-radio-player iframe {
   display: block;
-  width: 100%;
+  width: calc(100% + 42px);
+  max-width: none;
   height: 96px;
   border: 0;
   background: #12060b;

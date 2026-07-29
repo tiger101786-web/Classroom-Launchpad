@@ -111,6 +111,17 @@ async function run() {
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/studying");
     assert.equal(await iframe.getAttribute("sandbox"), "allow-scripts allow-same-origin");
     assert.equal(await iframe.getAttribute("allow"), "autoplay");
+    const croppedPlayerLayout = await page.locator(".colt-radio-player").evaluate(player => {
+      const frame = player.querySelector("iframe");
+      const playerBox = player.getBoundingClientRect();
+      const frameBox = frame.getBoundingClientRect();
+      return {
+        clippedOverflow: getComputedStyle(player).overflow === "hidden",
+        extraFrameWidth: frameBox.width - playerBox.width
+      };
+    });
+    assert(croppedPlayerLayout.clippedOverflow);
+    assert(croppedPlayerLayout.extraFrameWidth >= 38, JSON.stringify(croppedPlayerLayout));
 
     await page.getByRole("button", { name: "Working", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
