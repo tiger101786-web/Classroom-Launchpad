@@ -43,6 +43,11 @@ function hasCategory(response, category) {
 
 assert(hasCategory(ask("I want to make something."), "Creative Projects"));
 assert(hasCategory(ask("Show me a game."), "Review Games"));
+const activityChooserResponse = ask("Help me choose an activity.");
+assert.match(activityChooserResponse.text, /what kind of approved activity/i);
+assert(Array.isArray(activityChooserResponse.choices) && activityChooserResponse.choices.length >= 5);
+assert(activityChooserResponse.choices.some(item => item.label === "Create something"));
+assert.match(ask("Choose an activity.").text, /what kind of approved activity/i);
 assert.match(ask("What can I do when I finish?").text, /assigned work|approved activity/i);
 assert.equal(ask("Can I go to YouTube?").recommendations[0].title, "YouTube");
 assert.match(ask("My sound does not work.").text, /volume|muted|headphones/i);

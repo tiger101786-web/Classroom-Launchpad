@@ -350,7 +350,10 @@
         }, "conversation-greeting");
       }
 
-      if (matchesAny(normalized, conversation.capabilities)) {
+      if (
+        matchesAny(normalized, conversation.capabilities)
+        && !matchesAny(normalized, knowledge.intentKeywords.chooseActivity)
+      ) {
         return record({
           text: conversationResponses.capabilities,
           choices: mainHelpChoices()

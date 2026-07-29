@@ -33,6 +33,16 @@ async function run() {
     assert(await assistantHome.isVisible());
     assert(await assistantBack.isDisabled());
 
+    await page.getByRole("button", { name: "Find an Activity", exact: true }).click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /What kind of approved activity/i);
+    assert.equal(await page.getByRole("button", { name: "Create something", exact: true }).count(), 1);
+    assert.equal(await page.getByRole("button", { name: "Play a learning game", exact: true }).count(), 1);
+    assert.doesNotMatch(
+      await page.locator(".colt-assistant-conversation").innerText(),
+      /I can help you find approved websites, choose an activity, review classroom rules/i
+    );
+    await assistantHome.click();
+
     await page.getByRole("button", { name: "Today’s Directions", exact: true }).click();
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|Today’s Launch/i);
     assert(!(await assistantBack.isDisabled()));
