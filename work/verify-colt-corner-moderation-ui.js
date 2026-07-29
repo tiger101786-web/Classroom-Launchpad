@@ -82,6 +82,8 @@ async function run() {
     const studentPage = await studentContext.newPage();
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await studentPage.locator('[data-action="openColtCorner"]').click();
+    assert(await studentPage.getByText("Never share personal information.", { exact: true }).isVisible());
+    assert(await studentPage.getByText(/Some messages may be held for Mr\. Nieves to review before appearing/i).isVisible());
     await studentPage.locator("#threadTitle").fill("Normal classroom question");
     await studentPage.locator("#threadBody").fill("Which lesson should we finish today?");
     await studentPage.locator("#threadForm button[type='submit']").click();

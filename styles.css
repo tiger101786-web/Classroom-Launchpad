@@ -1354,6 +1354,22 @@ body[data-theme="night"] .request-spirit {
   font-weight: 800;
 }
 
+.forum-moderation-note {
+  margin: 0.8rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(190, 18, 76, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+body[data-theme="night"] .forum-moderation-note {
+  border-color: rgba(255, 182, 204, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 body[data-theme="night"] .forum-rules-card {
   border-color: rgba(244, 242, 243, 0.14);
   background: rgba(86, 7, 32, 0.34);

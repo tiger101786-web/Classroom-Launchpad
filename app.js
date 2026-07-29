@@ -1719,13 +1719,16 @@ function renderColtCorner() {
         <section class="forum-rules-card" aria-label="Colt Corner forum rules">
           <h3>Forum Rules</h3>
           <ol>
-            <li>Be respectful.</li>
-            <li>Keep it appropriate.</li>
+            <li>Be respectful and kind.</li>
+            <li>Keep every message school appropriate.</li>
             <li>School-related topics only.</li>
-            <li>Stay on topic.</li>
-            <li>Think before you post.</li>
-            <li>No spamming or repeat posts.</li>
+            <li>Never share personal information.</li>
+            <li>Do not post outside links or usernames.</li>
+            <li>No bullying, threats, spam, or repeated posts.</li>
           </ol>
+          <p class="forum-moderation-note">
+            Colt Corner checks messages for safety. Some messages may be held for Mr. Nieves to review before appearing.
+          </p>
         </section>
         <figure class="colt-corner-graphic">
           <video autoplay muted loop playsinline aria-label="Animated Colt Corner message board logo">
