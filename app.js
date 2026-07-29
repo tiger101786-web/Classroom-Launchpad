@@ -2438,8 +2438,8 @@ function startColtRunGame() {
   const lastInGameMusicTrackStorageKey = "coltRunLastInGameMusicTrackV1";
   let currentInGameMusicTrack = null;
   const characterSelectMusic = createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true);
-  const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260714-running1", true);
-  const mrNievesRunningAudio = createDeferredAudio(mrNievesRunMediaSource, true);
+  const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260728-gallop1", true);
+  const mrNievesRunningAudio = createDeferredAudio("assets/colt-run-mr-nieves-running-audio.mp3?v=20260728-running1", true);
   const coltDeathAudio = createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2");
   const coltCelebrationAudio = createDeferredAudio("assets/colt-run-colt-celebration-audio.mp3?v=20260728-gentle-whinny1");
   const mrNievesDeathAudio = createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1");
