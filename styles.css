@@ -4299,17 +4299,25 @@ body[data-theme="night"] .class-timer-badge {
   min-width: 0;
 }
 
+.colt-assistant-heading > div {
+  display: grid;
+  gap: 4px;
+}
+
 .colt-assistant-heading h2 {
-  margin-top: 3px;
+  margin: 0;
   color: #ffffff;
   font-size: 1.2rem;
+  line-height: 1.05;
 }
 
 .colt-assistant-heading .feature-kicker {
+  padding: 4px 8px;
   border: 1px solid rgba(86, 7, 32, 0.18);
   background: #fbe4ec;
   color: #560720;
-  font-size: 0.66rem;
+  font-size: 0.58rem;
+  line-height: 1;
 }
 
 body[data-theme="night"] .colt-assistant-heading .feature-kicker {
