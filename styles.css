@@ -1239,7 +1239,7 @@ body[data-theme="night"] .request-spirit {
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1fr);
   gap: 20px;
-  align-items: stretch;
+  align-items: start;
   margin-top: 22px;
   margin-bottom: 20px;
   padding: 20px;
@@ -1404,8 +1404,8 @@ body[data-theme="night"] .forum-rules-card li {
 .thread-form-banner {
   grid-column: 1 / -1;
   width: 100%;
-  margin: auto 0 0;
-  align-self: end;
+  margin: 10px 0 0;
+  align-self: start;
 }
 
 .thread-form-banner img,
@@ -1418,7 +1418,7 @@ body[data-theme="night"] .forum-rules-card li {
 
 .colt-corner-card .colt-corner-heading,
 .colt-corner-card .thread-form {
-  height: 100%;
+  height: auto;
 }
 
 .colt-corner-card .colt-corner-graphic {
@@ -1485,6 +1485,40 @@ body:not([data-theme="night"]) .colt-corner-graphic video {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
+}
+
+.colt-corner-card .thread-form {
+  align-content: start;
+  align-self: start;
+  row-gap: 14px;
+}
+
+.thread-form .field {
+  align-self: start;
+}
+
+.thread-form .field input,
+.thread-form .field textarea {
+  padding: 12px 14px;
+}
+
+.thread-form .field textarea {
+  min-height: 108px;
+}
+
+.thread-form > .request-message,
+.thread-form > .colt-corner-pending-note {
+  grid-column: 1 / -1;
+}
+
+.thread-form > .request-message:empty {
+  display: none;
+}
+
+.thread-form > button[type="submit"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 2px;
 }
 
 .thread-form .field:nth-child(3),

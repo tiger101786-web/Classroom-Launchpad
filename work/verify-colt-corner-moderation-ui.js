@@ -84,6 +84,24 @@ async function run() {
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert(await studentPage.getByText("Never share personal information.", { exact: true }).isVisible());
     assert(await studentPage.getByText(/Some messages may be held for Mr\. Nieves to review before appearing/i).isVisible());
+    const formLayout = await studentPage.locator("#threadForm").evaluate(form => {
+      const fields = Array.from(form.querySelectorAll(":scope > .field")).map(element => element.getBoundingClientRect());
+      const button = form.querySelector("button[type='submit']").getBoundingClientRect();
+      const banner = form.querySelector(".thread-form-banner").getBoundingClientRect();
+      const formBox = form.getBoundingClientRect();
+      return {
+        nameGradeAligned: Math.abs(fields[0].top - fields[1].top) < 3,
+        titleGap: fields[2].top - fields[0].bottom,
+        bodyGap: fields[3].top - fields[2].bottom,
+        buttonGap: button.top - fields[3].bottom,
+        bannerGap: banner.top - button.bottom,
+        buttonWidthRatio: button.width / formBox.width
+      };
+    });
+    assert(formLayout.nameGradeAligned);
+    assert(formLayout.titleGap <= 20 && formLayout.bodyGap <= 20);
+    assert(formLayout.buttonGap <= 20 && formLayout.bannerGap <= 30, JSON.stringify(formLayout));
+    assert(formLayout.buttonWidthRatio >= 0.95);
     await studentPage.locator("#threadTitle").fill("Normal classroom question");
     await studentPage.locator("#threadBody").fill("Which lesson should we finish today?");
     await studentPage.locator("#threadForm button[type='submit']").click();
