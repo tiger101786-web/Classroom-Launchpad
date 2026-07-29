@@ -270,7 +270,15 @@
           { id: "mouse", words: ["mouse", "trackpad", "cursor", "pointer"] },
           { id: "no-sound", words: ["sound", "audio", "volume"] },
           { id: "headphones", words: ["headphones", "headphone", "earbuds"] },
-          { id: "website-loading", words: ["website", "site", "page"] }
+          { id: "website-loading", words: ["website", "site", "page"] },
+          { id: "email", words: ["email", "message", "attachment"] },
+          { id: "usb", words: ["usb", "flash drive", "thumb drive"] },
+          { id: "wifi", words: ["wifi", "wi-fi", "internet", "connection", "offline"] },
+          { id: "camera-microphone", words: ["camera", "webcam", "microphone", "mic"] },
+          { id: "charging", words: ["charger", "charging", "battery", "power"] },
+          { id: "download-upload", words: ["download", "upload", "file"] },
+          { id: "copy-paste", words: ["copy", "paste", "clipboard"] },
+          { id: "screen-display", words: ["screen", "display", "brightness"] }
         ];
         const deviceMatch = deviceTroubleshooting.find(item => (
           matchesAny(normalized, item.words) && matchesAny(normalized, problemWords)

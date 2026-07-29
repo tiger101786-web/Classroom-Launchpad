@@ -25,6 +25,7 @@
       { label: "Classroom Rules", prompt: "What are the classroom rules?" },
       { label: "I Finished Early", prompt: "What can I do when I’m finished?" },
       { label: "Using Launchpad", prompt: "How do I use Classroom Launchpad?" },
+      { label: "Keyboard Shortcuts", prompt: "Show me keyboard shortcuts." },
       { label: "What Can You Do?", prompt: "What can you do?" }
     ],
     suggestedQuestions: [
@@ -174,6 +175,84 @@
         id: "return-launchpad",
         keywords: ["return to classroom launchpad", "go back to classroom launchpad", "get back to launchpad", "lost classroom launchpad"],
         response: "Use the Classroom Launchpad bookmark in your browser. If its tab is still open, click that tab. Ask Mr. Nieves if you cannot find it."
+      },
+      {
+        id: "email",
+        keywords: [
+          "email not working", "email problem", "email problems", "email issue", "email issues",
+          "email not sending", "cannot send email", "can't send email", "email not received",
+          "cannot open email", "can't open email", "email attachment"
+        ],
+        response: "Do not enter your email address or password here.\n1. Make sure the school email page finished loading.\n2. Check that the message and attachment finished loading or sending.\n3. Wait a few seconds, then refresh one time.\n4. If you see an error or still cannot send or open the message, ask Mr. Nieves."
+      },
+      {
+        id: "usb",
+        keywords: [
+          "usb not working", "usb problem", "usb issue", "flash drive not working",
+          "usb drive not showing", "flash drive not showing", "computer cannot find my usb",
+          "computer can't find my usb", "eject usb", "remove usb"
+        ],
+        response: "1. Ask Mr. Nieves before connecting or removing a USB drive.\n2. Insert it gently in the correct directionâ€”never force it.\n3. Wait a few seconds and check the Files app.\n4. Before removing it, use the Eject button next to the drive.\n5. If it does not appear, stop and ask Mr. Nieves."
+      },
+      {
+        id: "wifi",
+        keywords: [
+          "wifi not working", "wi-fi not working", "internet not working", "no internet",
+          "not connected to wifi", "not connected to wi-fi", "wifi problem", "wifi issue",
+          "internet problem", "internet issue", "offline"
+        ],
+        response: "1. Wait a few seconds and check whether the Wi-Fi symbol appears.\n2. Refresh the approved page one time.\n3. Do not change networks or enter a Wi-Fi password.\n4. If the page still says offline, ask Mr. Nieves."
+      },
+      {
+        id: "camera-microphone",
+        keywords: [
+          "camera not working", "webcam not working", "microphone not working", "mic not working",
+          "camera problem", "camera issue", "microphone problem", "microphone issue",
+          "cannot use camera", "can't use camera", "cannot use microphone", "can't use microphone"
+        ],
+        response: "1. Make sure you are using a teacher-approved website.\n2. Check that the camera cover is open and the microphone is not muted.\n3. If the approved site asks for permission, stop and ask Mr. Nieves before allowing it.\n4. Refresh the page one time.\n5. If it still does not work, ask Mr. Nieves."
+      },
+      {
+        id: "charging",
+        keywords: [
+          "computer not charging", "chromebook not charging", "battery not charging",
+          "charger not working", "charging problem", "charging issue", "battery low",
+          "low battery", "computer is dying", "chromebook is dying"
+        ],
+        response: "1. Save your work.\n2. Tell Mr. Nieves that the battery is low.\n3. Use only the charger and outlet Mr. Nieves approves.\n4. Never use a damaged cable or force a plug.\n5. If it does not begin charging, stop and ask Mr. Nieves."
+      },
+      {
+        id: "download-upload",
+        keywords: [
+          "download not working", "upload not working", "file not downloading", "file not uploading",
+          "cannot download", "can't download", "cannot upload", "can't upload",
+          "download problem", "upload problem", "cannot find my download", "can't find my download"
+        ],
+        response: "1. Wait for the download or upload to finish.\n2. Do not click the button repeatedly.\n3. For a download, check the Downloads folder in the Files app.\n4. For an upload, confirm that the correct school file was selected.\n5. If the file is missing or an error appears, ask Mr. Nieves."
+      },
+      {
+        id: "copy-paste",
+        keywords: [
+          "copy and paste not working", "cannot copy and paste", "can't copy and paste",
+          "how do i copy and paste", "copy problem", "paste problem"
+        ],
+        response: "1. Select the school-appropriate text or item.\n2. Press Ctrl+C to copy.\n3. Click where it belongs.\n4. Press Ctrl+V to paste.\n5. If the website blocks pasting or it still does not work, ask Mr. Nieves."
+      },
+      {
+        id: "keyboard-shortcuts",
+        keywords: [
+          "keyboard shortcuts", "keyboard shortcut", "show me shortcuts", "computer shortcuts",
+          "chromebook shortcuts", "shortcut keys", "use shortcuts"
+        ],
+        response: "Useful classroom keyboard shortcuts:\nCtrl+C — Copy\nCtrl+V — Paste\nCtrl+X — Cut\nCtrl+Z — Undo\nCtrl+A — Select all\nCtrl+F — Find on the page\nCtrl+R — Refresh the page\nCtrl+T — Open a new tab\nCtrl+W — Close the current tab\nCtrl+Shift+T — Reopen the last closed tab\nUse shortcuts only on teacher-approved pages, and ask Mr. Nieves before closing a class tab."
+      },
+      {
+        id: "screen-display",
+        keywords: [
+          "screen is black", "black screen", "screen too dark", "display not working",
+          "screen problem", "screen issue", "cannot see the screen", "can't see the screen"
+        ],
+        response: "1. Press one brightness-up key gently.\n2. Check that the Chromebook is awake.\n3. Do not close programs or change display settings.\n4. If the screen stays black, flickers, or looks damaged, stop and ask Mr. Nieves."
       }
     ],
     responses: {
@@ -201,6 +280,16 @@
       "Mouse not working",
       "Accidentally closed a page",
       "Return to Classroom Launchpad",
+      "Email not working",
+      "USB drive not showing",
+      "Wi-Fi not working",
+      "Camera not working",
+      "Microphone not working",
+      "Computer not charging",
+      "Download not working",
+      "Copy and paste not working",
+      "Keyboard shortcuts",
+      "Screen is black",
       "Login trouble"
     ],
     unknownQuestionResponses: [

@@ -43,6 +43,24 @@ async function run() {
     );
     await assistantHome.click();
 
+    await page.getByRole("button", { name: "Computer Help", exact: true }).click();
+    assert.equal(await page.getByRole("button", { name: "Email not working", exact: true }).count(), 1);
+    assert.equal(await page.getByRole("button", { name: "USB drive not showing", exact: true }).count(), 1);
+    assert.equal(await page.getByRole("button", { name: "Wi-Fi not working", exact: true }).count(), 1);
+    assert.equal(await page.getByRole("button", { name: "Cannot print", exact: true }).count(), 0);
+    assert.equal(await page.getByRole("button", { name: "Keyboard shortcuts", exact: true }).count(), 1);
+    await page.getByRole("button", { name: "Email not working", exact: true }).click();
+    assert.match(
+      await page.locator(".colt-assistant-conversation").innerText(),
+      /Do not enter your email address or password|school email page/i
+    );
+    await assistantHome.click();
+
+    await page.getByRole("button", { name: "More Help", exact: true }).click();
+    await page.getByRole("button", { name: "Keyboard Shortcuts", exact: true }).click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Ctrl\+C|Ctrl\+Shift\+T/i);
+    await assistantHome.click();
+
     await page.getByRole("button", { name: "Today’s Directions", exact: true }).click();
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|Today’s Launch/i);
     assert(!(await assistantBack.isDisabled()));
