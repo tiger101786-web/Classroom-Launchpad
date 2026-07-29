@@ -3960,6 +3960,73 @@ function startColtRunGame() {
     });
   };
 
+  const cleanIdleGreenScreenSpill = (pixels, width, height, clearInterior = false) => {
+    const isResidualGreen = pixelIndex => {
+      const offset = pixelIndex * 4;
+      if (pixels[offset + 3] < 16) return false;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      return (
+        green > 32 &&
+        green > red * 1.08 &&
+        green > blue * 1.04 &&
+        green - red > 7
+      );
+    };
+    const isObviousGreen = pixelIndex => {
+      const offset = pixelIndex * 4;
+      if (pixels[offset + 3] < 16) return false;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      return (
+        green > 54 &&
+        green > red * 1.22 &&
+        green > blue * 1.12 &&
+        green - red > 20
+      );
+    };
+    for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
+      if (isObviousGreen(pixelIndex)) pixels[pixelIndex * 4 + 3] = 0;
+    }
+    for (let pass = 0; pass < 4; pass += 1) {
+      const toClear = [];
+      for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
+        if (!isResidualGreen(pixelIndex)) continue;
+        const x = pixelIndex % width;
+        const y = Math.floor(pixelIndex / width);
+        let touchesTransparent = false;
+        for (let dy = -1; dy <= 1 && !touchesTransparent; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nextX = x + dx;
+            const nextY = y + dy;
+            if (
+              nextX < 0 ||
+              nextX >= width ||
+              nextY < 0 ||
+              nextY >= height ||
+              pixels[(nextY * width + nextX) * 4 + 3] < 16
+            ) {
+              touchesTransparent = true;
+              break;
+            }
+          }
+        }
+        if (touchesTransparent) toClear.push(pixelIndex);
+      }
+      if (!toClear.length) break;
+      toClear.forEach(pixelIndex => {
+        pixels[pixelIndex * 4 + 3] = 0;
+      });
+    }
+    if (!clearInterior) return;
+    for (let pixelIndex = 0; pixelIndex < width * height; pixelIndex += 1) {
+      if (isResidualGreen(pixelIndex)) pixels[pixelIndex * 4 + 3] = 0;
+    }
+  };
+
   const getTransparentIdleFrame = () => {
     const idleVideo = getColtIdleVideo();
     const idleFrameState = idleFrameStates[coltIdleIndex];
@@ -4098,6 +4165,7 @@ function startColtRunGame() {
       });
     }
     cleanColtBackdropHalo(pixels, idleFrameWidth, idleFrameHeight);
+    cleanIdleGreenScreenSpill(pixels, idleFrameWidth, idleFrameHeight, true);
     idleFrameContext.putImageData(frame, 0, 0);
     let minX = idleFrameWidth;
     let minY = idleFrameHeight;
@@ -4769,6 +4837,9 @@ function startColtRunGame() {
       soften.forEach(index => {
         pixels[index * 4 + 3] = Math.max(0, pixels[index * 4 + 3] - 120);
       });
+    }
+    if (frameStateKey.startsWith("idle")) {
+      cleanIdleGreenScreenSpill(pixels, mrNievesFrameWidth, mrNievesFrameHeight);
     }
     mrNievesFrameContext.putImageData(frame, 0, 0);
     let minX = mrNievesFrameWidth;
