@@ -84,6 +84,28 @@ async function run() {
     await radioLauncher.click();
     const radioPanel = page.locator(".colt-radio-panel");
     await assert.doesNotReject(() => radioPanel.waitFor());
+    await page.evaluate(() => {
+      document.body.dataset.theme = "night";
+    });
+    const badgeStyles = await page.evaluate(() => {
+      const radio = getComputedStyle(document.querySelector(".colt-radio-heading .feature-kicker"));
+      const assistant = getComputedStyle(document.querySelector(".colt-assistant-heading .feature-kicker"));
+      return {
+        radio: {
+          color: radio.color,
+          backgroundColor: radio.backgroundColor,
+          fontSize: radio.fontSize,
+          padding: radio.padding
+        },
+        assistant: {
+          color: assistant.color,
+          backgroundColor: assistant.backgroundColor,
+          fontSize: assistant.fontSize,
+          padding: assistant.padding
+        }
+      };
+    });
+    assert.deepEqual(badgeStyles.radio, badgeStyles.assistant, JSON.stringify(badgeStyles));
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     const iframe = radioPanel.locator("iframe");
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/studying");

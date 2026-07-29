@@ -4351,10 +4351,12 @@ body[data-theme="night"] .class-timer-badge {
   width: max-content;
   max-width: 100%;
   margin-bottom: 2px;
-  padding: 3px 8px;
-  background: #ffffff;
-  color: var(--blue-dark);
-  font-size: 0.66rem;
+  padding: 4px 8px;
+  border: 1px solid rgba(86, 7, 32, 0.18);
+  background: #fbe4ec;
+  color: #560720;
+  font-size: 0.58rem;
+  line-height: 1;
 }
 
 .colt-radio-heading h2 {
@@ -4452,6 +4454,12 @@ body[data-theme="night"] .class-timer-badge {
 body[data-theme="night"] .colt-radio-panel {
   border-color: rgba(244, 242, 243, 0.18);
   background: #1d1d21;
+}
+
+body[data-theme="night"] .colt-radio-heading .feature-kicker {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: #351722;
+  color: #ffdbe7;
 }
 
 body[data-theme="night"] .colt-radio-station {
