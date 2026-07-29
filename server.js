@@ -1572,7 +1572,7 @@ function serveStatic(req, res, pathname) {
       "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=(), autoplay=(self \"https://loficafe.net\")"
     });
     fs.createReadStream(filePath).pipe(res);
   });

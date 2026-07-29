@@ -723,6 +723,7 @@
       panel.hidden = false;
       launcher.setAttribute("aria-expanded", "true");
       launcher.hidden = true;
+      globalObject.dispatchEvent(new CustomEvent("colt-assistant-opened"));
       input.focus();
     }
 
@@ -848,6 +849,9 @@
       }
     });
     globalObject.addEventListener("classroom-launchpad-rendered", updateVisibility);
+    globalObject.addEventListener("colt-radio-opened", () => {
+      if (!panel.hidden) closePanel();
+    });
 
     addWelcome();
     updateVisibility();

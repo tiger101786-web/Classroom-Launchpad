@@ -4267,6 +4267,204 @@ body[data-theme="night"] .class-timer-badge {
 
 }
 
+/* Colt Radio */
+.colt-radio-root[hidden],
+.colt-radio-panel[hidden] {
+  display: none;
+}
+
+.colt-radio-launcher {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 19;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 17px 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #240711, var(--blue));
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 14px 30px rgba(86, 7, 32, 0.3);
+}
+
+.colt-radio-launcher.is-playing {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 14px 30px rgba(86, 7, 32, 0.34);
+}
+
+.colt-radio-launcher-mark,
+.colt-radio-heading-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border: 2px solid rgba(255, 255, 255, 0.84);
+  border-radius: 50%;
+  background: #240711;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.colt-radio-panel {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 19;
+  width: min(430px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgba(17, 8, 12, 0.36);
+}
+
+.colt-radio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(135deg, rgba(36, 7, 17, 0.94), rgba(123, 11, 49, 0.9)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0 8px, transparent 8px 18px);
+  color: #ffffff;
+}
+
+.colt-radio-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.colt-radio-heading .feature-kicker {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: 2px;
+  padding: 3px 8px;
+  background: #ffffff;
+  color: var(--blue-dark);
+  font-size: 0.66rem;
+}
+
+.colt-radio-heading h2 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  line-height: 1.05;
+}
+
+.colt-radio-header-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.colt-radio-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 9px;
+  background: rgba(36, 7, 17, 0.5);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.colt-radio-stations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 12px 10px;
+}
+
+.colt-radio-station {
+  min-height: 42px;
+  padding: 8px 7px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--blue-dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.colt-radio-station.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.colt-radio-player {
+  min-height: 96px;
+  margin: 0 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #12060b;
+}
+
+.colt-radio-player iframe {
+  display: block;
+  width: 100%;
+  height: 96px;
+  border: 0;
+  background: #12060b;
+}
+
+.colt-radio-placeholder {
+  display: grid;
+  min-height: 96px;
+  place-items: center;
+  margin: 0;
+  padding: 22px;
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.colt-radio-placeholder[hidden] {
+  display: none;
+}
+
+.colt-radio-note {
+  margin: 0;
+  padding: 10px 14px 13px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+body[data-theme="night"] .colt-radio-panel {
+  border-color: rgba(244, 242, 243, 0.18);
+  background: #1d1d21;
+}
+
+body[data-theme="night"] .colt-radio-station {
+  border-color: rgba(244, 242, 243, 0.18);
+  background: #111114;
+  color: #f8dce6;
+}
+
+body[data-theme="night"] .colt-radio-station.is-active {
+  background: var(--blue);
+  color: #ffffff;
+}
+
 /* Colt Assistant */
 .colt-assistant-root[hidden] {
   display: none;
@@ -4629,7 +4827,33 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   box-shadow: 0 0 0 3px rgba(123, 11, 49, 0.15);
 }
 
+.colt-radio-launcher:focus-visible,
+.colt-radio-icon-btn:focus-visible,
+.colt-radio-station:focus-visible {
+  outline: 3px solid #f9a8c0;
+  outline-offset: 3px;
+}
+
 @media (max-width: 720px) {
+  .colt-radio-launcher {
+    left: 12px;
+    bottom: 12px;
+    min-height: 50px;
+  }
+
+  .colt-radio-panel {
+    left: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 14px;
+  }
+
+  .colt-radio-root.has-class-timer .colt-radio-panel {
+    bottom: 94px;
+    max-height: calc(100dvh - 110px);
+  }
+
   .colt-assistant-launcher {
     right: 12px;
     bottom: 12px;
@@ -4662,6 +4886,35 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .colt-assistant-form .primary-btn {
     width: 100%;
   }
+
+  .colt-radio-player,
+  .colt-radio-placeholder {
+    min-height: 96px;
+  }
+
+  .colt-radio-player iframe {
+    height: 96px;
+  }
+}
+
+@media (max-width: 420px) {
+  .colt-radio-launcher {
+    width: 50px;
+    padding: 7px;
+  }
+
+  .colt-radio-launcher-label {
+    display: none;
+  }
+
+  .colt-radio-stations {
+    gap: 6px;
+    padding-inline: 9px;
+  }
+
+  .colt-radio-station {
+    font-size: 0.76rem;
+  }
 }
 
 @media (max-width: 360px) {
@@ -4679,7 +4932,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .colt-assistant-launcher,
   .colt-assistant-choice,
   .colt-assistant-recommendation,
-  .colt-assistant-panel {
+  .colt-assistant-panel,
+  .colt-radio-launcher,
+  .colt-radio-panel {
     scroll-behavior: auto;
     transition: none;
   }

@@ -51,3 +51,7 @@ Colt Assistant is a free, local, keyword-based classroom helper. It reads only t
 
 Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
 
+## Colt Radio
+
+Colt Radio embeds the free Lofi Cafe Studying, Working, and Chilling stations directly inside Classroom Launchpad. It has no outbound navigation link, does not require an account, does not store listening history, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. The school network must allow `loficafe.net` for the embedded stations to play.
+
