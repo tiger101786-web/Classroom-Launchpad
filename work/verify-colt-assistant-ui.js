@@ -26,6 +26,24 @@ async function run() {
     await page.locator(".colt-assistant-launcher").click();
     assert(await page.locator(".colt-assistant-panel").isVisible());
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /approved activity/i);
+    assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
+    assert.equal(await page.getByRole("button", { name: "More Help", exact: true }).count(), 1);
+    const assistantHome = page.getByRole("button", { name: "Return to Colt Assistant home", exact: true });
+    const assistantBack = page.getByRole("button", { name: "Go back one Colt Assistant step", exact: true });
+    assert(await assistantHome.isVisible());
+    assert(await assistantBack.isDisabled());
+
+    await page.getByRole("button", { name: "Today’s Directions", exact: true }).click();
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|Today’s Launch/i);
+    assert(!(await assistantBack.isDisabled()));
+    await assistantBack.click();
+    assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
+
+    await page.getByRole("button", { name: "Ask a Question", exact: true }).click();
+    assert(await page.locator("#coltAssistantInput").evaluate(element => document.activeElement === element));
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Type a short classroom question/i);
+    await assistantHome.click();
+    assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
 
     await page.locator("#coltAssistantInput").fill("What can u do?");
     await page.locator(".colt-assistant-form button[type='submit']").click();

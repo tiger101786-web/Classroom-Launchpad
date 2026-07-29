@@ -153,6 +153,7 @@
     const getLinks = options.getLinks || (() => []);
     const getCategories = options.getCategories || (() => []);
     const getRules = options.getRules || (() => knowledge.classroomRules || []);
+    const getTodayDirections = options.getTodayDirections || (() => "");
     const isLinksReady = options.isLinksReady || (() => true);
     const limit = Math.max(1, Math.min(3, Number(knowledge.recommendationLimit) || 3));
     const state = {
@@ -266,6 +267,15 @@
 
       if (matchesAny(normalized, ["still need help", "still not working", "did not fix", "didn't fix"])) {
         return record({ text: "Please stop troubleshooting and ask Mr. Nieves for help." }, "escalation");
+      }
+
+      if (matchesAny(normalized, knowledge.intentKeywords.todayDirections)) {
+        const directions = String(getTodayDirections() || "").trim();
+        return record({
+          text: directions
+            ? `${knowledge.responses.todayDirectionsIntro}\n${directions}`
+            : "Today’s directions are not available yet. Please check with Mr. Nieves."
+        }, "today-directions");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.classroomRules)) {
@@ -440,7 +450,35 @@
       state.responseCounters.clear();
     }
 
-    return { respond, recommendCategory, resetContext };
+    function getContextSnapshot() {
+      return {
+        lastCategory: state.lastCategory,
+        lastIntent: state.lastIntent,
+        lastResponse: state.lastResponse ? {
+          ...state.lastResponse,
+          recommendations: Array.isArray(state.lastResponse.recommendations) ? [...state.lastResponse.recommendations] : undefined,
+          choices: Array.isArray(state.lastResponse.choices) ? [...state.lastResponse.choices] : undefined,
+          list: Array.isArray(state.lastResponse.list) ? [...state.lastResponse.list] : undefined
+        } : null,
+        shownLinkIds: Array.from(state.shownLinkIds, ([category, ids]) => [category, Array.from(ids)]),
+        responseCounters: Array.from(state.responseCounters)
+      };
+    }
+
+    function restoreContext(snapshot) {
+      const source = snapshot && typeof snapshot === "object" ? snapshot : {};
+      state.lastCategory = String(source.lastCategory || "");
+      state.lastIntent = String(source.lastIntent || "");
+      state.lastResponse = source.lastResponse || null;
+      state.shownLinkIds = new Map(
+        Array.isArray(source.shownLinkIds)
+          ? source.shownLinkIds.map(([category, ids]) => [category, new Set(Array.isArray(ids) ? ids : [])])
+          : []
+      );
+      state.responseCounters = new Map(Array.isArray(source.responseCounters) ? source.responseCounters : []);
+    }
+
+    return { respond, recommendCategory, resetContext, getContextSnapshot, restoreContext };
   }
 
   function buildElement(tag, className, text) {
@@ -461,6 +499,7 @@
       getLinks: bridge.getApprovedLinks,
       getCategories: bridge.getCategories,
       getRules: bridge.getClassroomRules,
+      getTodayDirections: bridge.getTodayDirections,
       isLinksReady: bridge.isApprovedLinksReady
     });
 
@@ -493,6 +532,21 @@
     close.setAttribute("aria-label", "Close Colt Assistant");
     header.append(headingWrap, close);
 
+    const toolbar = buildElement("nav", "colt-assistant-toolbar");
+    toolbar.setAttribute("aria-label", "Colt Assistant controls");
+    const home = buildElement("button", "colt-assistant-tool", "Home");
+    home.type = "button";
+    home.setAttribute("aria-label", "Return to Colt Assistant home");
+    const back = buildElement("button", "colt-assistant-tool", "Back");
+    back.type = "button";
+    back.disabled = true;
+    back.setAttribute("aria-label", "Go back one Colt Assistant step");
+    const readAloud = buildElement("button", "colt-assistant-tool is-read", "Read Aloud");
+    readAloud.type = "button";
+    readAloud.setAttribute("aria-label", "Read the latest Colt Assistant response aloud");
+    if (!("speechSynthesis" in globalObject) || !("SpeechSynthesisUtterance" in globalObject)) readAloud.hidden = true;
+    toolbar.append(home, back, readAloud);
+
     const conversation = buildElement("div", "colt-assistant-conversation");
     conversation.setAttribute("aria-live", "polite");
     conversation.setAttribute("aria-label", "Colt Assistant conversation");
@@ -513,11 +567,36 @@
     send.type = "submit";
     form.append(label, input, send);
     footer.append(clear, form);
-    panel.append(header, conversation, footer);
+    panel.append(header, toolbar, conversation, footer);
     root.append(launcher, panel);
+
+    const conversationHistory = [];
+    let lastReadableText = "";
+    let isReading = false;
 
     function scrollConversation() {
       conversation.scrollTop = conversation.scrollHeight;
+    }
+
+    function stopReading() {
+      if ("speechSynthesis" in globalObject) globalObject.speechSynthesis.cancel();
+      isReading = false;
+      readAloud.textContent = "Read Aloud";
+      readAloud.setAttribute("aria-label", "Read the latest Colt Assistant response aloud");
+    }
+
+    function updateBackButton() {
+      back.disabled = conversationHistory.length === 0;
+    }
+
+    function saveConversationStep() {
+      conversationHistory.push({
+        nodes: Array.from(conversation.childNodes).map(node => node.cloneNode(true)),
+        context: responder.getContextSnapshot(),
+        lastReadableText
+      });
+      if (conversationHistory.length > 20) conversationHistory.shift();
+      updateBackButton();
     }
 
     function appendUserMessage(text, sensitive) {
@@ -534,11 +613,15 @@
     function appendChoices(choices) {
       if (!Array.isArray(choices) || !choices.length) return;
       const wrap = buildElement("div", "colt-assistant-choices");
+      if (choices.some(item => item.kind === "primary")) wrap.classList.add("is-primary-menu");
+      if (choices.some(item => item.kind === "more-option")) wrap.classList.add("is-more-menu");
       choices.forEach(item => {
         const button = buildElement("button", "colt-assistant-choice", item.label);
         button.type = "button";
         button.dataset.choiceValue = item.value;
         button.dataset.choiceKind = item.kind || "prompt";
+        if (item.kind === "primary" || item.kind === "focus") button.classList.add("is-primary");
+        if (item.kind === "more") button.classList.add("is-more");
         wrap.append(button);
       });
       conversation.append(wrap);
@@ -576,17 +659,27 @@
       conversation.append(row);
       appendRecommendations(response.recommendations, response.reminder);
       appendChoices(response.choices);
+      lastReadableText = [
+        response.text,
+        ...(Array.isArray(response.list) ? response.list : [])
+      ].filter(Boolean).join(". ");
       scrollConversation();
+    }
+
+    function appendHomeMenu() {
+      appendChoices((knowledge.primaryActions || []).map(item => choice(item.label, item.prompt, item.kind)));
+      appendChoices([choice("More Help", "__more_help__", "more")]);
     }
 
     function addWelcome() {
       appendAssistantResponse({ text: knowledge.welcomeMessage });
-      appendChoices((knowledge.suggestedQuestions || []).map(label => choice(label, label)));
+      appendHomeMenu();
     }
 
     function submitPrompt(value) {
       const prompt = String(value || "").trim().slice(0, 300);
       if (!prompt) return;
+      saveConversationStep();
       const response = responder.respond(prompt);
       appendUserMessage(prompt, response.sensitive);
       appendAssistantResponse(response);
@@ -602,6 +695,7 @@
     }
 
     function closePanel() {
+      stopReading();
       panel.hidden = true;
       launcher.hidden = false;
       launcher.setAttribute("aria-expanded", "false");
@@ -609,10 +703,59 @@
     }
 
     function clearConversation() {
+      stopReading();
+      conversationHistory.length = 0;
       responder.resetContext();
       conversation.replaceChildren();
       addWelcome();
+      updateBackButton();
       input.focus();
+    }
+
+    function goBack() {
+      const previous = conversationHistory.pop();
+      if (!previous) return;
+      stopReading();
+      responder.restoreContext(previous.context);
+      conversation.replaceChildren(...previous.nodes.map(node => node.cloneNode(true)));
+      lastReadableText = previous.lastReadableText || "";
+      updateBackButton();
+      scrollConversation();
+      input.focus();
+    }
+
+    function showMoreHelp() {
+      saveConversationStep();
+      appendUserMessage("More Help", false);
+      appendAssistantResponse({
+        text: "What else can I help you with?",
+        choices: (knowledge.moreHelpActions || []).map(item => choice(item.label, item.prompt, "more-option"))
+      });
+      input.focus();
+    }
+
+    function focusQuestionInput() {
+      saveConversationStep();
+      appendAssistantResponse({ text: knowledge.responses.askQuestion });
+      input.focus();
+    }
+
+    function toggleReadAloud() {
+      if (isReading) {
+        stopReading();
+        return;
+      }
+      if (!lastReadableText || !("speechSynthesis" in globalObject)) return;
+      globalObject.speechSynthesis.cancel();
+      const utterance = new globalObject.SpeechSynthesisUtterance(lastReadableText);
+      utterance.rate = 0.92;
+      utterance.pitch = 1;
+      utterance.onend = stopReading;
+      utterance.onerror = stopReading;
+      isReading = true;
+      readAloud.textContent = "Stop Reading";
+      readAloud.setAttribute("aria-label", "Stop reading Colt Assistant response");
+      globalObject.speechSynthesis.speak(utterance);
     }
 
     function updateVisibility() {
@@ -629,6 +772,9 @@
 
     launcher.addEventListener("click", openPanel);
     close.addEventListener("click", closePanel);
+    home.addEventListener("click", clearConversation);
+    back.addEventListener("click", goBack);
+    readAloud.addEventListener("click", toggleReadAloud);
     clear.addEventListener("click", clearConversation);
     form.addEventListener("submit", event => {
       event.preventDefault();
@@ -642,8 +788,18 @@
       }
       const choiceButton = event.target.closest("[data-choice-value]");
       if (!choiceButton) return;
+      const kind = choiceButton.dataset.choiceKind;
+      if (kind === "focus") {
+        focusQuestionInput();
+        return;
+      }
+      if (kind === "more") {
+        showMoreHelp();
+        return;
+      }
+      saveConversationStep();
       appendUserMessage(choiceButton.textContent, false);
-      const response = choiceButton.dataset.choiceKind === "category"
+      const response = kind === "category"
         ? responder.recommendCategory(choiceButton.dataset.choiceValue)
         : responder.respond(choiceButton.dataset.choiceValue);
       appendAssistantResponse(response);

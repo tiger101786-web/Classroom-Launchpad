@@ -6,6 +6,8 @@ Student questions are handled in the browser. Conversations last only while the 
 
 It can also handle basic classroom-safe conversation, including greetings, thanks, goodbyes, simple jokes, encouragement, questions about what it can do, and follow-ups such as “show me more.” Follow-up memory is temporary and is cleared with the conversation or when the page refreshes.
 
+The student home screen uses four primary choices—Find an Activity, Today’s Directions, Computer Help, and Ask a Question—so advanced options do not overwhelm students. Home and Back controls provide simple navigation, and Read Aloud uses the browser’s built-in speech feature when it is available.
+
 ## Files
 
 - `colt-assistant-knowledge.js` contains the teacher-editable messages, suggested questions, keywords, classroom rules, and troubleshooting directions.
@@ -28,9 +30,9 @@ Change `true` to `false` to hide Colt Assistant. Change it back to `true` to ena
 
 In `colt-assistant-knowledge.js`, edit the words after `welcomeMessage:`. Keep the message inside the quotation marks.
 
-## Edit suggested questions
+## Edit the opening choices
 
-Find `suggestedQuestions`. Each quoted line becomes a starter button. You can change the wording, remove a line, or add another quoted line. Keep a comma between items.
+The simplified interface uses `primaryActions` for its four large starting choices and `moreHelpActions` for the smaller More Help menu. Edit their `label` text to change what students see. The `prompt` text determines which local assistant response opens.
 
 ## Add keywords or common phrases
 
@@ -57,6 +59,8 @@ Colt Assistant reads the current active website list from Classroom Launchpad. I
 - Students must click the button; websites never open automatically.
 - No more than three recommendations are shown at once.
 - Manage website names, descriptions, categories, and active status through the existing Teacher Dashboard.
+
+Today’s Directions reads the existing teacher-managed Today’s Launch message. It does not maintain a second copy of those directions.
 
 ## Edit troubleshooting directions
 

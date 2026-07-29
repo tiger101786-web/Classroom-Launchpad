@@ -15,6 +15,18 @@
       openInNewTab: true,
       reminder: "Stay on the assigned activity and ask Mr. Nieves before switching."
     },
+    primaryActions: [
+      { label: "Find an Activity", prompt: "Help me choose an activity.", kind: "primary" },
+      { label: "Today’s Directions", prompt: "What are today’s directions?", kind: "primary" },
+      { label: "Computer Help", prompt: "I need help with my computer.", kind: "primary" },
+      { label: "Ask a Question", prompt: "", kind: "focus" }
+    ],
+    moreHelpActions: [
+      { label: "Classroom Rules", prompt: "What are the classroom rules?" },
+      { label: "I Finished Early", prompt: "What can I do when I’m finished?" },
+      { label: "Using Launchpad", prompt: "How do I use Classroom Launchpad?" },
+      { label: "What Can You Do?", prompt: "What can you do?" }
+    ],
     suggestedQuestions: [
       "What can you do?",
       "Help me choose an activity.",
@@ -56,6 +68,7 @@
       earlyFinisher: ["finished", "finish early", "early finisher", "done with my work", "done early", "when i finish", "when i'm finished"],
       classroomRules: ["rules", "expectations", "classroom rules", "what am i allowed", "class rules"],
       computerHelp: ["computer help", "help with my computer", "computer problem", "something is not working"],
+      todayDirections: ["today's directions", "todays directions", "today's launch", "todays launch", "what do i do first", "what are we doing today", "what is today's assignment"],
       permission: ["can i switch", "may i switch", "switch activities", "do i have permission", "can i leave this activity"],
       loginHelp: ["login", "log in", "sign in", "account", "activation code", "password reset"],
       navigationHelp: ["how do i use", "where do i click", "return to classroom launchpad", "go back to classroom launchpad", "get back to launchpad", "find the home page"],
@@ -169,6 +182,8 @@
       noApprovedMatches: "I could not find an active approved website for that request. Please ask Mr. Nieves.",
       linksLoading: "The approved website list is still loading. Please wait a moment and try again.",
       navigation: "Use the search box to find an approved website, or choose a Website Category on the home page. Use the Classroom Launchpad bookmark to return from another page.",
+      todayDirectionsIntro: "Here are Mr. Nieves’s current directions:",
+      askQuestion: "Type a short classroom question below. Please do not enter your name, email, password, grade, or other private information.",
       rulesIntro: "Here are the Classroom Launchpad expectations:",
       recommendationsIntro: "Here are approved choices:",
       sensitiveHidden: "Private information was hidden."

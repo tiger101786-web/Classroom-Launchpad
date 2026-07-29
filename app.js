@@ -8287,6 +8287,9 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
   getClassroomRules() {
     return [...CLASSROOM_EXPECTATIONS];
   },
+  getTodayDirections() {
+    return getLaunchPlainText(dailyLaunch.message).slice(0, 1000);
+  },
   getCurrentScreen() {
     return screen.name;
   },

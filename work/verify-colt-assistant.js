@@ -27,6 +27,7 @@ const responder = core.createResponder({
   getLinks: () => approvedLinks,
   getCategories: () => categories,
   getRules: () => knowledge.classroomRules,
+  getTodayDirections: () => "Open TypingClub and complete lesson five before choosing an approved activity.",
   isLinksReady: () => true
 });
 
@@ -55,6 +56,7 @@ assert(hasCategory(ask("Show me science websites."), "Social Studies & Science")
 assert.match(ask("I want a website that is not on the list.").text, /not currently on the approved list/i);
 assert(hasCategory(ask("I wana dra."), "Creative Projects"));
 assert.match(ask("How do I return to Classroom Launchpad?").text, /bookmark|launchpad/i);
+assert.match(ask("What are today's directions?").text, /TypingClub|lesson five/i);
 
 const gradeResponse = ask("What is my grade?");
 assert.equal(gradeResponse.sensitive, true);
@@ -86,10 +88,17 @@ assert.match(ask("You are helpful").text, /glad|thank/i);
 
 responder.resetContext();
 const creativeFirstPage = ask("Show me creative websites.");
+const savedContext = responder.getContextSnapshot();
 const creativeMore = ask("Show me more.");
 assert.equal(creativeFirstPage.recommendations.length, 3);
 assert.equal(creativeMore.recommendations.length, 1);
 assert(!creativeMore.recommendations.some(next => creativeFirstPage.recommendations.some(previous => previous.id === next.id)));
+responder.restoreContext(savedContext);
+const restoredMore = ask("Show me more.");
+assert.deepEqual(
+  restoredMore.recommendations.map(item => item.id),
+  creativeMore.recommendations.map(item => item.id)
+);
 const repeatedResponse = ask("Say that again");
 assert.match(repeatedResponse.text, /here it is again/i);
 responder.resetContext();
