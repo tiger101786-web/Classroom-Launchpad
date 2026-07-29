@@ -8,6 +8,18 @@ const categories = [
   "Class Videos"
 ];
 
+const CLASSROOM_EXPECTATIONS = Array.isArray(window.COLT_ASSISTANT_KNOWLEDGE?.classroomRules)
+  && window.COLT_ASSISTANT_KNOWLEDGE.classroomRules.length
+  ? window.COLT_ASSISTANT_KNOWLEDGE.classroomRules.map(rule => String(rule))
+  : [
+      "Stay on approved websites.",
+      "Work quietly.",
+      "Keep headphone volume low.",
+      "Do not switch activities without permission.",
+      "Ask before visiting an unlisted website.",
+      "Use respectful and school-appropriate language."
+    ];
+
 const DEFAULT_TEACHER_PIN = "1017";
 const LEGACY_DEFAULT_PINS = ["123", "1234"];
 const DEFAULT_DAILY_LAUNCH = {
@@ -972,6 +984,7 @@ let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
 let activationCodeResults = [];
+let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
   { id: "students", label: "Students & Access", icon: "♙" },
@@ -1043,12 +1056,16 @@ async function loadSharedState(shouldRender = true) {
     if (state && Array.isArray(state.links)) {
       links = normalizeSharedLinks(state.links);
       store.saveLinks(links);
+      approvedLinksReady = true;
     } else if (state && state.links === null && isTeacher()) {
       const migrated = await sharedBackend.saveLinks(links);
       if (migrated && Array.isArray(migrated.links)) {
         links = normalizeSharedLinks(migrated.links);
         store.saveLinks(links);
+        approvedLinksReady = true;
       }
+    } else if (state && state.links === null) {
+      approvedLinksReady = false;
     }
     classThreads = incomingThreads;
     mutedStudents = incomingMuted;
@@ -1461,11 +1478,7 @@ function renderHomeDefault() {
         <div>
           <h3>Classroom Launchpad Expectations:</h3>
           <ol>
-            <li>Stay on approved sites.</li>
-            <li>Work quietly.</li>
-            <li>Keep headphones low.</li>
-            <li>Do not switch activities without permission.</li>
-            <li>Ask for permission before switching to any unlisted website.</li>
+            ${CLASSROOM_EXPECTATIONS.map(rule => `<li>${escapeHtml(rule)}</li>`).join("")}
           </ol>
         </div>
         <figure class="expectations-colt">
@@ -7528,6 +7541,9 @@ function render() {
   app.innerHTML = html + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
   observeDeferredVideos(app);
+  window.dispatchEvent(new CustomEvent("classroom-launchpad-rendered", {
+    detail: { screen: screen.name }
+  }));
 }
 
 async function loadApprovedStudents() {
@@ -8245,6 +8261,45 @@ app.addEventListener("change", event => {
 });
 
 window.addEventListener("popstate", () => setScreen({ name: "home" }));
+
+window.ClassroomLaunchpadAssistantData = Object.freeze({
+  getApprovedLinks() {
+    return links
+      .filter(link => link && link.active !== false)
+      .map(link => ({
+        id: String(link.id || ""),
+        title: String(link.title || ""),
+        instruction: String(link.instruction || ""),
+        category: String(link.category || ""),
+        url: String(link.url || ""),
+        active: true
+      }));
+  },
+  getCategories() {
+    return [...categories];
+  },
+  getClassroomRules() {
+    return [...CLASSROOM_EXPECTATIONS];
+  },
+  getCurrentScreen() {
+    return screen.name;
+  },
+  isApprovedLinksReady() {
+    return approvedLinksReady;
+  },
+  openApprovedLink(id) {
+    const approved = links.find(link => link && link.active !== false && String(link.id) === String(id));
+    if (!approved) return false;
+    try {
+      const url = new URL(approved.url);
+      if (!["http:", "https:"].includes(url.protocol)) return false;
+      window.open(url.href, "_blank", "noopener,noreferrer");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+});
 
 async function initializeApp() {
   render();

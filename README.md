@@ -45,3 +45,9 @@ Colt Corner and student website requests require a Classroom Launchpad account w
 
 Approved student addresses and one-time activation codes are managed from Teacher Dashboard. Students create a separate Classroom Launchpad password on first login. Passwords and activation codes are stored as one-way scrypt hashes in the private server database under `DATA_DIR`. Do not commit student email or activation-code lists to GitHub.
 
+## Colt Assistant
+
+Colt Assistant is a free, local, keyword-based classroom helper. It reads only the current active approved websites and does not use a paid API, language model, search engine, or outside message service. Student conversations exist only on the current page and are not saved.
+
+Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
+
