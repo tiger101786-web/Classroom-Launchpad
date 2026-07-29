@@ -4,6 +4,8 @@ Colt Assistant is a free, keyword-based classroom helper built directly into Cla
 
 Student questions are handled in the browser. Conversations last only while the current page is open and are never placed in browser storage or the server database.
 
+It can also handle basic classroom-safe conversation, including greetings, thanks, goodbyes, simple jokes, encouragement, questions about what it can do, and follow-ups such as “show me more.” Follow-up memory is temporary and is cleared with the conversation or when the page refreshes.
+
 ## Files
 
 - `colt-assistant-knowledge.js` contains the teacher-editable messages, suggested questions, keywords, classroom rules, and troubleshooting directions.
@@ -43,6 +45,8 @@ For example:
 Add another phrase inside the brackets and quotation marks. Do not add website addresses to this file.
 
 The `intentKeywords` section works the same way for classroom rules, early-finisher questions, computer help, permission, login help, and navigation.
+
+The `conversationKeywords` and `conversationResponses` sections control greetings, basic conversation, friendly replies, jokes, encouragement, and follow-up phrases. These remain local templates and do not turn Colt Assistant into a general-purpose AI.
 
 ## Website recommendations
 

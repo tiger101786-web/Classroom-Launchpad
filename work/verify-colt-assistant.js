@@ -63,6 +63,38 @@ assert.match(gradeResponse.text, /private information/i);
 assert.match(ask("Who won the World Series in 1998?").text, /ask Mr\. Nieves/i);
 assert(ask("Show me creative websites.").recommendations.length <= 3);
 
+const capabilityResponse = ask("What can u do?");
+assert.match(capabilityResponse.text, /approved websites|choose an activity/i);
+assert(Array.isArray(capabilityResponse.choices) && capabilityResponse.choices.length >= 4);
+
+const firstGreeting = ask("Hi");
+const secondGreeting = ask("Hello");
+assert.match(firstGreeting.text, /help|activity|website/i);
+assert.notEqual(firstGreeting.text, secondGreeting.text);
+assert.match(ask("Who are you?").text, /Colt Assistant|classroom helper/i);
+assert.match(ask("How are you?").text, /ready|great|help/i);
+assert.match(ask("Thank you").text, /welcome|happy to help|you got it/i);
+assert.match(ask("Goodbye").text, /goodbye|see you|bye/i);
+
+const firstJoke = ask("Tell me a joke");
+const secondJoke = ask("Another joke");
+assert.match(firstJoke.text, /computer|graphics|microchips|keyboard|space/i);
+assert.notEqual(firstJoke.text, secondJoke.text);
+assert(Array.isArray(ask("I'm bored").choices));
+assert.match(ask("This is hard").text, /small step|Mr\. Nieves/i);
+assert.match(ask("You are helpful").text, /glad|thank/i);
+
+responder.resetContext();
+const creativeFirstPage = ask("Show me creative websites.");
+const creativeMore = ask("Show me more.");
+assert.equal(creativeFirstPage.recommendations.length, 3);
+assert.equal(creativeMore.recommendations.length, 1);
+assert(!creativeMore.recommendations.some(next => creativeFirstPage.recommendations.some(previous => previous.id === next.id)));
+const repeatedResponse = ask("Say that again");
+assert.match(repeatedResponse.text, /here it is again/i);
+responder.resetContext();
+assert.match(ask("Show me more").text, /pick a category|kind of activity/i);
+
 const safeLinks = core.safeApprovedLinks(() => approvedLinks);
 assert(!safeLinks.some(link => link.id === "hidden-1"));
 assert(!safeLinks.some(link => link.id === "unsafe-1"));

@@ -16,6 +16,7 @@
       reminder: "Stay on the assigned activity and ask Mr. Nieves before switching."
     },
     suggestedQuestions: [
+      "What can you do?",
       "Help me choose an activity.",
       "Show me creative websites.",
       "What can I do when I’m finished?",
@@ -60,6 +61,57 @@
       navigationHelp: ["how do i use", "where do i click", "return to classroom launchpad", "go back to classroom launchpad", "get back to launchpad", "find the home page"],
       unapprovedWebsite: ["not on the list", "unlisted website", "different website", "another website", "website that is not approved"],
       websiteSearch: ["find a website", "show me a website", "website for", "open website", "can i go to"]
+    },
+    conversationKeywords: {
+      greeting: ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "hi colt", "hello colt"],
+      capabilities: ["what can you do", "what can u do", "how can you help", "can you help me", "help me", "what do you do"],
+      identity: ["who are you", "what are you", "what is your name", "what's your name", "are you a person", "are you human", "are you a robot"],
+      wellbeing: ["how are you", "how are u", "how is it going", "how's it going", "are you okay"],
+      thanks: ["thank you", "thanks", "thank u", "thx", "that helped"],
+      goodbye: ["bye", "goodbye", "see you", "see ya", "later"],
+      more: ["show me more", "more choices", "another choice", "another one", "something else", "give me another", "other websites"],
+      negativeChoice: ["no", "no thanks", "not that one", "i don't like those", "different choice"],
+      affirmative: ["yes", "yes please", "sure", "okay", "ok", "sounds good"],
+      repeat: ["say that again", "repeat that", "what did you say"],
+      joke: ["tell me a joke", "another joke", "computer joke", "make me laugh"],
+      bored: ["i am bored", "i'm bored", "this is boring", "nothing to do"],
+      encouragement: ["this is hard", "i can't do this", "i dont understand", "i don't understand", "i am confused", "i'm confused"],
+      compliment: ["you are cool", "you're cool", "good job", "you are helpful", "awesome"]
+    },
+    conversationResponses: {
+      greeting: [
+        "Hi! I’m ready to help. What would you like to do?",
+        "Hello! Would you like an activity, a website, or computer help?",
+        "Hey there! Let’s find something teacher-approved for you."
+      ],
+      capabilities: "I can help you find approved websites, choose an activity, review classroom rules, and solve simple computer problems. I can also understand some greetings and follow-up questions.",
+      identity: "I’m Colt Assistant, a classroom helper built into Classroom Launchpad. I’m not a person, and I only use teacher-approved local information.",
+      wellbeing: [
+        "I’m ready and happy to help! What do you need?",
+        "I’m doing great and ready for a classroom question.",
+        "Ready to help! Should we find an activity or solve a computer problem?"
+      ],
+      thanks: [
+        "You’re welcome!",
+        "Happy to help!",
+        "You got it! Let me know if you need another approved choice."
+      ],
+      goodbye: [
+        "Goodbye! Have a great class.",
+        "See you later! Remember to stay on your assigned activity.",
+        "Bye! Ask Mr. Nieves if you need anything else."
+      ],
+      jokes: [
+        "Why did the computer go to art class? It wanted to improve its graphics!",
+        "What is a computer’s favorite snack? Microchips!",
+        "Why was the keyboard so relaxed? It had plenty of space!"
+      ],
+      bored: "Let’s find a teacher-approved activity. What sounds interesting?",
+      encouragement: "That’s okay. Try one small step at a time. Tell me what part is confusing, or ask Mr. Nieves if you need help with your assignment.",
+      compliment: "Thank you! I’m glad I could help.",
+      noContextForMore: "I can show more choices after we pick a category. What kind of activity would you like?",
+      noContextForYes: "Great! What would you like help with?",
+      noContextForRepeat: "Tell me what you would like repeated, or choose one of the classroom help buttons."
     },
     earlyFinisher: {
       response: "First, check Today’s Launch and make sure your assigned work is complete. Then choose a teacher-approved activity.",

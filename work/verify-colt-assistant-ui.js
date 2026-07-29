@@ -27,6 +27,15 @@ async function run() {
     assert(await page.locator(".colt-assistant-panel").isVisible());
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /approved activity/i);
 
+    await page.locator("#coltAssistantInput").fill("What can u do?");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    assert.match(
+      await page.locator(".colt-assistant-conversation").innerText(),
+      /approved websites|choose an activity/i
+    );
+    assert((await page.locator(".colt-assistant-choice").count()) >= 4);
+    await page.locator(".colt-assistant-clear").click();
+
     await page.locator("#coltAssistantInput").fill("I wana dra.");
     await page.locator(".colt-assistant-form button[type='submit']").click();
     await page.waitForSelector(".colt-assistant-recommendation");
@@ -35,6 +44,11 @@ async function run() {
     assert((await desktopRecommendations.count()) <= 3);
     const recommendationText = await desktopRecommendations.first().innerText();
     assert.match(recommendationText, /Creative Projects/i);
+    const firstTitles = await desktopRecommendations.locator("h3").allTextContents();
+    await page.getByRole("button", { name: "Show me more", exact: true }).last().click();
+    const allTitles = await page.locator(".colt-assistant-recommendation h3").allTextContents();
+    assert(allTitles.length > firstTitles.length);
+    assert(allTitles.slice(firstTitles.length).some(title => !firstTitles.includes(title)));
 
     await page.locator("#coltAssistantInput").fill("My password is test123.");
     await page.locator(".colt-assistant-form button[type='submit']").click();

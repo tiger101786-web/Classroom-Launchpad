@@ -52,8 +52,8 @@
     const normalizedInput = normalizeText(input);
     const normalizedPhrase = normalizeText(phrase);
     if (!normalizedInput || !normalizedPhrase) return false;
+    if (normalizedPhrase.length < 4) return words(normalizedInput).includes(normalizedPhrase);
     if (normalizedInput.includes(normalizedPhrase)) return true;
-    if (normalizedPhrase.length < 4) return false;
     if (similarity(normalizedInput, normalizedPhrase) >= 0.82) return true;
     const inputWords = words(normalizedInput);
     const phraseWords = words(normalizedPhrase);
@@ -138,8 +138,10 @@
     return bestScore >= 0.72 ? best : null;
   }
 
-  function categoryRecommendations(category, links, limit) {
-    return links.filter(link => link.category === category).slice(0, limit);
+  function categoryRecommendations(category, links, limit, excludedIds = new Set()) {
+    return links
+      .filter(link => link.category === category && !excludedIds.has(link.id))
+      .slice(0, limit);
   }
 
   function choice(label, value, kind = "prompt") {
@@ -153,77 +155,242 @@
     const getRules = options.getRules || (() => knowledge.classroomRules || []);
     const isLinksReady = options.isLinksReady || (() => true);
     const limit = Math.max(1, Math.min(3, Number(knowledge.recommendationLimit) || 3));
+    const state = {
+      lastCategory: "",
+      lastIntent: "",
+      lastResponse: null,
+      shownLinkIds: new Map(),
+      responseCounters: new Map()
+    };
 
-    function recommendCategory(category) {
-      if (!isLinksReady()) return { text: knowledge.responses.linksLoading };
+    function pickResponse(key, responses, fallback = "") {
+      const choices = Array.isArray(responses) ? responses.filter(Boolean) : [responses].filter(Boolean);
+      if (!choices.length) return fallback;
+      const index = state.responseCounters.get(key) || 0;
+      state.responseCounters.set(key, index + 1);
+      return choices[index % choices.length];
+    }
+
+    function record(response, intent, category = "") {
+      const safeResponse = response || { text: knowledge.responses.unknown };
+      state.lastIntent = intent;
+      if (category) state.lastCategory = category;
+      state.lastResponse = {
+        ...safeResponse,
+        recommendations: Array.isArray(safeResponse.recommendations) ? [...safeResponse.recommendations] : undefined,
+        choices: Array.isArray(safeResponse.choices) ? [...safeResponse.choices] : undefined,
+        list: Array.isArray(safeResponse.list) ? [...safeResponse.list] : undefined
+      };
+      return safeResponse;
+    }
+
+    function activityChoices() {
+      return (knowledge.activityChoices || []).map(item => choice(item.label, item.category, "category"));
+    }
+
+    function mainHelpChoices() {
+      return [
+        choice("Choose an activity", "Help me choose an activity."),
+        choice("Find a website", "Show me a website."),
+        choice("Classroom rules", "What are the classroom rules?"),
+        choice("Computer help", "I need help with my computer.")
+      ];
+    }
+
+    function recommendCategory(category, showMore = false) {
+      if (!isLinksReady()) return record({ text: knowledge.responses.linksLoading }, "links-loading");
       const links = safeApprovedLinks(getLinks);
-      const recommendations = categoryRecommendations(category, links, limit);
-      if (!recommendations.length) return { text: knowledge.responses.noApprovedMatches };
-      return {
-        text: `${knowledge.responses.recommendationsIntro} ${category}`,
+      const previouslyShown = showMore && state.lastCategory === category
+        ? state.shownLinkIds.get(category) || new Set()
+        : new Set();
+      let recommendations = categoryRecommendations(category, links, limit, previouslyShown);
+      let wrapped = false;
+      if (!recommendations.length && previouslyShown.size) {
+        recommendations = categoryRecommendations(category, links, limit);
+        previouslyShown.clear();
+        wrapped = true;
+      }
+      if (!recommendations.length) return record({ text: knowledge.responses.noApprovedMatches }, "no-matches", category);
+      recommendations.forEach(link => previouslyShown.add(link.id));
+      state.shownLinkIds.set(category, previouslyShown);
+      const totalInCategory = links.filter(link => link.category === category).length;
+      const hasMore = totalInCategory > recommendations.length;
+      return record({
+        text: wrapped
+          ? `We reached the end, so here are the first approved ${category} choices again.`
+          : showMore
+            ? `Here are more approved ${category} choices:`
+            : `${knowledge.responses.recommendationsIntro} ${category}`,
         recommendations,
         reminder: knowledge.externalLinks.reminder,
-        choices: [choice("Show another category", "Help me choose an activity.")]
-      };
+        choices: [
+          ...(hasMore ? [choice("Show me more", "Show me more.")] : []),
+          choice("Choose something else", "Help me choose an activity.")
+        ]
+      }, "category-recommendation", category);
     }
 
     function respond(rawInput) {
       const input = String(rawInput || "").slice(0, 300);
       const normalized = normalizeText(input);
-      if (!normalized) return { text: "Type a short classroom question or choose one of the buttons." };
+      const conversation = knowledge.conversationKeywords || {};
+      const conversationResponses = knowledge.conversationResponses || {};
+      if (!normalized) return record({ text: "Type a short classroom question or choose one of the buttons." }, "empty");
 
       if (looksSensitive(input)) {
-        return { text: knowledge.responses.privateInformation, sensitive: true };
+        return record({ text: knowledge.responses.privateInformation, sensitive: true }, "privacy");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.loginHelp)) {
-        return { text: knowledge.responses.loginHelp, sensitive: /\b(password|activation|code|pin)\b/i.test(normalized) };
+        return record({
+          text: knowledge.responses.loginHelp,
+          sensitive: /\b(password|activation|code|pin)\b/i.test(normalized)
+        }, "login-help");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.permission)) {
-        return { text: knowledge.responses.permission };
+        return record({ text: knowledge.responses.permission }, "permission");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.unapprovedWebsite)) {
-        return { text: knowledge.responses.unapprovedWebsite };
+        return record({ text: knowledge.responses.unapprovedWebsite }, "unapproved-website");
       }
 
       const troubleshooting = (knowledge.troubleshooting || []).find(item => matchesAny(normalized, item.keywords));
       if (troubleshooting) {
-        return {
+        return record({
           text: troubleshooting.response,
           choices: [choice("I still need help", "I still need help with this computer problem.")]
-        };
+        }, "troubleshooting");
       }
 
       if (matchesAny(normalized, ["still need help", "still not working", "did not fix", "didn't fix"])) {
-        return { text: "Please stop troubleshooting and ask Mr. Nieves for help." };
+        return record({ text: "Please stop troubleshooting and ask Mr. Nieves for help." }, "escalation");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.classroomRules)) {
-        return {
+        return record({
           text: knowledge.responses.rulesIntro,
           list: getRules(),
           choices: [choice("Help me choose an activity", "Help me choose an activity.")]
-        };
+        }, "classroom-rules");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.earlyFinisher)) {
-        return {
+        return record({
           text: knowledge.earlyFinisher.response,
           choices: (knowledge.earlyFinisher.followUps || []).map(label => choice(label, label))
-        };
+        }, "early-finisher");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.navigationHelp)) {
-        return { text: knowledge.responses.navigation };
+        return record({ text: knowledge.responses.navigation }, "navigation");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.computerHelp)) {
-        return {
+        return record({
           text: knowledge.responses.computerHelp,
           choices: (knowledge.troubleshootingChoices || []).map(label => choice(label, label))
-        };
+        }, "computer-help");
+      }
+
+      if (matchesAny(normalized, conversation.repeat)) {
+        if (!state.lastResponse) {
+          return record({ text: conversationResponses.noContextForRepeat }, "conversation-repeat");
+        }
+        return record({
+          ...state.lastResponse,
+          text: `Sure—here it is again:\n${state.lastResponse.text}`
+        }, "conversation-repeat", state.lastCategory);
+      }
+
+      if (matchesAny(normalized, conversation.more) || matchesAny(normalized, conversation.negativeChoice)) {
+        if (state.lastCategory) return recommendCategory(state.lastCategory, true);
+        return record({
+          text: conversationResponses.noContextForMore,
+          choices: activityChoices()
+        }, "conversation-more");
+      }
+
+      if (matchesAny(normalized, conversation.greeting)) {
+        return record({
+          text: pickResponse("greeting", conversationResponses.greeting),
+          choices: mainHelpChoices()
+        }, "conversation-greeting");
+      }
+
+      if (matchesAny(normalized, conversation.capabilities)) {
+        return record({
+          text: conversationResponses.capabilities,
+          choices: mainHelpChoices()
+        }, "conversation-capabilities");
+      }
+
+      if (matchesAny(normalized, conversation.identity)) {
+        return record({
+          text: conversationResponses.identity,
+          choices: [choice("What can you do?", "What can you do?")]
+        }, "conversation-identity");
+      }
+
+      if (matchesAny(normalized, conversation.wellbeing)) {
+        return record({
+          text: pickResponse("wellbeing", conversationResponses.wellbeing),
+          choices: mainHelpChoices()
+        }, "conversation-wellbeing");
+      }
+
+      if (matchesAny(normalized, conversation.thanks)) {
+        return record({
+          text: pickResponse("thanks", conversationResponses.thanks),
+          choices: [choice("Choose another activity", "Help me choose an activity.")]
+        }, "conversation-thanks");
+      }
+
+      if (matchesAny(normalized, conversation.goodbye)) {
+        return record({ text: pickResponse("goodbye", conversationResponses.goodbye) }, "conversation-goodbye");
+      }
+
+      if (matchesAny(normalized, conversation.joke)) {
+        return record({
+          text: pickResponse("jokes", conversationResponses.jokes),
+          choices: [
+            choice("Another joke", "Tell me a joke."),
+            choice("Choose an activity", "Help me choose an activity.")
+          ]
+        }, "conversation-joke");
+      }
+
+      if (matchesAny(normalized, conversation.bored)) {
+        return record({
+          text: conversationResponses.bored,
+          choices: activityChoices()
+        }, "conversation-bored");
+      }
+
+      if (matchesAny(normalized, conversation.encouragement)) {
+        return record({
+          text: conversationResponses.encouragement,
+          choices: [
+            choice("Computer help", "I need help with my computer."),
+            choice("Ask Mr. Nieves", "I still need help.")
+          ]
+        }, "conversation-encouragement");
+      }
+
+      if (matchesAny(normalized, conversation.compliment)) {
+        return record({
+          text: conversationResponses.compliment,
+          choices: [choice("What can you do?", "What can you do?")]
+        }, "conversation-compliment");
+      }
+
+      if (matchesAny(normalized, conversation.affirmative)) {
+        if (state.lastCategory) return recommendCategory(state.lastCategory, true);
+        return record({
+          text: conversationResponses.noContextForYes,
+          choices: mainHelpChoices()
+        }, "conversation-affirmative");
       }
 
       const categories = getCategories();
@@ -234,31 +401,46 @@
         const approvedLinks = safeApprovedLinks(getLinks);
         const website = matchingWebsite(normalized, approvedLinks);
         if (website) {
-          return {
+          const shown = state.shownLinkIds.get(website.category) || new Set();
+          shown.add(website.id);
+          state.shownLinkIds.set(website.category, shown);
+          return record({
             text: knowledge.responses.recommendationsIntro,
             recommendations: [website],
-            reminder: knowledge.externalLinks.reminder
-          };
+            reminder: knowledge.externalLinks.reminder,
+            choices: [choice("Show me more", "Show me more.")]
+          }, "website-recommendation", website.category);
         }
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.chooseActivity)) {
-        return {
+        return record({
           text: "What kind of approved activity would you like?",
-          choices: (knowledge.activityChoices || []).map(item => choice(item.label, item.category, "category"))
-        };
+          choices: activityChoices()
+        }, "choose-activity");
       }
 
       if (matchesAny(normalized, knowledge.intentKeywords.websiteSearch)) {
-        return isLinksReady()
+        return record(isLinksReady()
           ? { text: knowledge.responses.unapprovedWebsite }
-          : { text: knowledge.responses.linksLoading };
+          : { text: knowledge.responses.linksLoading }, "website-search");
       }
 
-      return { text: knowledge.responses.unknown };
+      return record({
+        text: pickResponse("unknown", knowledge.unknownQuestionResponses, knowledge.responses.unknown),
+        choices: [choice("What can you do?", "What can you do?")]
+      }, "unknown");
     }
 
-    return { respond, recommendCategory };
+    function resetContext() {
+      state.lastCategory = "";
+      state.lastIntent = "";
+      state.lastResponse = null;
+      state.shownLinkIds.clear();
+      state.responseCounters.clear();
+    }
+
+    return { respond, recommendCategory, resetContext };
   }
 
   function buildElement(tag, className, text) {
@@ -427,6 +609,7 @@
     }
 
     function clearConversation() {
+      responder.resetContext();
       conversation.replaceChildren();
       addWelcome();
       input.focus();
