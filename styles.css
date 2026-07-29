@@ -4306,8 +4306,16 @@ body[data-theme="night"] .class-timer-badge {
 }
 
 .colt-assistant-heading .feature-kicker {
-  color: #ffdbe7;
+  border: 1px solid rgba(86, 7, 32, 0.18);
+  background: #fbe4ec;
+  color: #560720;
   font-size: 0.66rem;
+}
+
+body[data-theme="night"] .colt-assistant-heading .feature-kicker {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: #351722;
+  color: #ffdbe7;
 }
 
 .colt-assistant-close {
