@@ -2442,8 +2442,18 @@ function startColtRunGame() {
   const mrNievesRunningAudio = createDeferredAudio("assets/colt-run-mr-nieves-running-audio.mp3?v=20260728-running1", true);
   const coltDeathAudio = createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2");
   const coltCelebrationAudio = createDeferredAudio("assets/colt-run-colt-celebration-audio.mp3?v=20260728-gentle-whinny1");
-  const mrNievesDeathAudio = createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1");
-  const mrNievesCelebrationAudio = createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1");
+  const mrNievesDeathAudios = [
+    createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-death-audio-02.mp3?v=20260728-makedeath2")
+  ];
+  const mrNievesCelebrationAudios = [
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-02.mp3?v=20260728-letsgo1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-03.mp3?v=20260728-yayboy1"),
+    createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1")
+  ];
+  let lastMrNievesDeathAudioIndex = -1;
+  let lastMrNievesCelebrationAudioIndex = -1;
   const ambientLayerVolume = 1;
   const inGameMusicLayerVolume = 0.5;
   const characterSelectMusicLayerVolume = 0.7;
@@ -2476,10 +2486,14 @@ function startColtRunGame() {
   coltDeathAudio.muted = musicMuted;
   coltCelebrationAudio.volume = musicMuted ? 0 : musicVolume * coltCelebrationLayerVolume;
   coltCelebrationAudio.muted = musicMuted;
-  mrNievesDeathAudio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
-  mrNievesDeathAudio.muted = musicMuted;
-  mrNievesCelebrationAudio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
-  mrNievesCelebrationAudio.muted = musicMuted;
+  mrNievesDeathAudios.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
+    audio.muted = musicMuted;
+  });
+  mrNievesCelebrationAudios.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
+    audio.muted = musicMuted;
+  });
   const keys = { left: false, right: false, jump: false };
   let animationId = 0;
   let lastRenderedTimeText = "";
@@ -2982,8 +2996,8 @@ function startColtRunGame() {
       mrNievesInAirVideos.forEach(video => ensureMediaSource(video, "metadata"));
       mrNievesCelebrationVideos.forEach(video => ensureMediaSource(video, "metadata"));
       mrNievesDeathVideos.forEach(video => ensureMediaSource(video, "metadata"));
-      ensureMediaSource(mrNievesDeathAudio);
-      ensureMediaSource(mrNievesCelebrationAudio);
+      mrNievesDeathAudios.forEach(audio => ensureMediaSource(audio));
+      mrNievesCelebrationAudios.forEach(audio => ensureMediaSource(audio));
       return;
     }
     coltIdleVideos.forEach(video => ensureMediaSource(video, "metadata"));
@@ -3389,21 +3403,45 @@ function startColtRunGame() {
     } catch {}
     coltCelebrationAudio.play().catch(() => {});
   };
+  const chooseNonRepeatingAudioIndex = (audioCount, lastIndex) => {
+    let nextIndex = Math.floor(Math.random() * audioCount);
+    if (audioCount > 1 && nextIndex === lastIndex) {
+      nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (audioCount - 1))) % audioCount;
+    }
+    return nextIndex;
+  };
+  const playExclusiveAudio = (audios, activeIndex) => {
+    const activeAudio = audios[activeIndex];
+    audios.forEach((audio, index) => {
+      if (index === activeIndex) return;
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch {}
+    });
+    ensureMediaSource(activeAudio);
+    try {
+      activeAudio.currentTime = 0;
+    } catch {}
+    activeAudio.play().catch(() => {});
+  };
   const playMrNievesDeathAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
-    ensureMediaSource(mrNievesDeathAudio);
-    try {
-      mrNievesDeathAudio.currentTime = 0;
-    } catch {}
-    mrNievesDeathAudio.play().catch(() => {});
+    const nextIndex = chooseNonRepeatingAudioIndex(
+      mrNievesDeathAudios.length,
+      lastMrNievesDeathAudioIndex
+    );
+    lastMrNievesDeathAudioIndex = nextIndex;
+    playExclusiveAudio(mrNievesDeathAudios, nextIndex);
   };
   const playMrNievesCelebrationAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
-    ensureMediaSource(mrNievesCelebrationAudio);
-    try {
-      mrNievesCelebrationAudio.currentTime = 0;
-    } catch {}
-    mrNievesCelebrationAudio.play().catch(() => {});
+    const nextIndex = chooseNonRepeatingAudioIndex(
+      mrNievesCelebrationAudios.length,
+      lastMrNievesCelebrationAudioIndex
+    );
+    lastMrNievesCelebrationAudioIndex = nextIndex;
+    playExclusiveAudio(mrNievesCelebrationAudios, nextIndex);
   };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
@@ -3449,10 +3487,14 @@ function startColtRunGame() {
     coltDeathAudio.muted = musicMuted;
     coltCelebrationAudio.volume = musicMuted ? 0 : musicVolume * coltCelebrationLayerVolume;
     coltCelebrationAudio.muted = musicMuted;
-    mrNievesDeathAudio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
-    mrNievesDeathAudio.muted = musicMuted;
-    mrNievesCelebrationAudio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
-    mrNievesCelebrationAudio.muted = musicMuted;
+    mrNievesDeathAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume * mrNievesDeathLayerVolume;
+      audio.muted = musicMuted;
+    });
+    mrNievesCelebrationAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume * mrNievesCelebrationLayerVolume;
+      audio.muted = musicMuted;
+    });
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -3470,8 +3512,8 @@ function startColtRunGame() {
       stopRunningAudio();
       coltDeathAudio.pause();
       coltCelebrationAudio.pause();
-      mrNievesDeathAudio.pause();
-      mrNievesCelebrationAudio.pause();
+      mrNievesDeathAudios.forEach(audio => audio.pause());
+      mrNievesCelebrationAudios.forEach(audio => audio.pause());
     }
     else playColtRunAudio();
   };
@@ -3490,8 +3532,8 @@ function startColtRunGame() {
       stopRunningAudio();
       coltDeathAudio.pause();
       coltCelebrationAudio.pause();
-      mrNievesDeathAudio.pause();
-      mrNievesCelebrationAudio.pause();
+      mrNievesDeathAudios.forEach(audio => audio.pause());
+      mrNievesCelebrationAudios.forEach(audio => audio.pause());
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -5914,14 +5956,18 @@ function startColtRunGame() {
     try {
       coltCelebrationAudio.currentTime = 0;
     } catch {}
-    mrNievesDeathAudio.pause();
-    try {
-      mrNievesDeathAudio.currentTime = 0;
-    } catch {}
-    mrNievesCelebrationAudio.pause();
-    try {
-      mrNievesCelebrationAudio.currentTime = 0;
-    } catch {}
+    mrNievesDeathAudios.forEach(audio => {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch {}
+    });
+    mrNievesCelebrationAudios.forEach(audio => {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch {}
+    });
     lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
     lavaRockVideoFrameSource = -1;
@@ -6703,8 +6749,8 @@ function startColtRunGame() {
         mrNievesRunningAudio,
         coltDeathAudio,
         coltCelebrationAudio,
-        mrNievesDeathAudio,
-        mrNievesCelebrationAudio,
+        ...mrNievesDeathAudios,
+        ...mrNievesCelebrationAudios,
         coinVideo,
         flagVideo,
         ...coltIdleVideos,
