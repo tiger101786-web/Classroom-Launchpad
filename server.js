@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
+const zlib = require("zlib");
 const moderationConfig = require("./colt-corner-moderation-config");
 const {
   hashNormalizedMessage,
@@ -372,6 +373,60 @@ const mimeTypes = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };
+const compressibleStaticExtensions = new Set([".html", ".css", ".js", ".json", ".svg", ".webmanifest"]);
+
+function parseByteRange(rangeHeader, fileSize) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(String(rangeHeader || "").trim());
+  if (!match || (!match[1] && !match[2])) return null;
+  let start;
+  let end;
+  if (!match[1]) {
+    const suffixLength = Number(match[2]);
+    if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) return null;
+    start = Math.max(0, fileSize - suffixLength);
+    end = fileSize - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] ? Number(match[2]) : fileSize - 1;
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) return null;
+    end = Math.min(end, fileSize - 1);
+  }
+  if (start < 0 || start >= fileSize || end < start) return null;
+  return { start, end };
+}
+
+function staticCacheControl(url, extension) {
+  if (extension === ".html") return "no-cache";
+  if (url.searchParams.has("v")) return "public, max-age=31536000, immutable";
+  return "public, max-age=3600";
+}
+
+function staticRequestIsFresh(req, etag, modifiedAt) {
+  const ifNoneMatch = String(req.headers["if-none-match"] || "");
+  if (ifNoneMatch) return ifNoneMatch.split(",").map(value => value.trim()).includes(etag);
+  const ifModifiedSince = Date.parse(String(req.headers["if-modified-since"] || ""));
+  return Number.isFinite(ifModifiedSince) && modifiedAt.getTime() <= ifModifiedSince + 999;
+}
+
+function ifRangeAllowsPartialResponse(req, etag, modifiedAt) {
+  const ifRange = String(req.headers["if-range"] || "").trim();
+  if (!ifRange) return true;
+  if (ifRange.startsWith("\"")) return ifRange === etag;
+  const ifRangeDate = Date.parse(ifRange);
+  return Number.isFinite(ifRangeDate) && modifiedAt.getTime() <= ifRangeDate + 999;
+}
+
+function requestAcceptsGzip(req) {
+  return String(req.headers["accept-encoding"] || "")
+    .split(",")
+    .map(value => value.trim().toLowerCase())
+    .some(value => {
+      const [encoding, ...parameters] = value.split(";").map(part => part.trim());
+      if (encoding !== "gzip" && encoding !== "*") return false;
+      const quality = parameters.find(parameter => parameter.startsWith("q="));
+      return !quality || Number(quality.slice(2)) > 0;
+    });
+}
 
 function ensureDb() {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -1539,10 +1594,16 @@ async function handleApi(req, res, pathname) {
   return false;
 }
 
-function serveStatic(req, res, pathname) {
+function serveStatic(req, res, url) {
+  const pathname = url.pathname;
   if (pathname.startsWith("/data/") || pathname.startsWith("/work/") || pathname.startsWith("/private/")) {
     res.writeHead(404);
     res.end("Not found");
+    return;
+  }
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.writeHead(405, { Allow: "GET, HEAD" });
+    res.end("Method not allowed");
     return;
   }
 
@@ -1568,12 +1629,76 @@ function serveStatic(req, res, pathname) {
       res.end("Not found");
       return;
     }
-    res.writeHead(200, {
-      "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+    const extension = path.extname(filePath).toLowerCase();
+    const modifiedAt = stats.mtime;
+    const compressible = stats.size >= 1024 && compressibleStaticExtensions.has(extension);
+    const canCompress = req.method === "GET" &&
+      !req.headers.range &&
+      compressible &&
+      requestAcceptsGzip(req);
+    const etagEncoding = canCompress ? "-gzip" : "";
+    const etag = `"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}${etagEncoding}"`;
+    const commonHeaders = {
+      "Content-Type": mimeTypes[extension] || "application/octet-stream",
+      "Cache-Control": staticCacheControl(url, extension),
+      "ETag": etag,
+      "Last-Modified": modifiedAt.toUTCString(),
+      "Accept-Ranges": "bytes",
+      ...(compressible ? { "Vary": "Accept-Encoding" } : {}),
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Permissions-Policy": "camera=(), microphone=(), geolocation=(), autoplay=(self \"https://loficafe.net\")"
+    };
+    if (staticRequestIsFresh(req, etag, modifiedAt)) {
+      res.writeHead(304, commonHeaders);
+      res.end();
+      return;
+    }
+
+    const ifRangeAllowed = ifRangeAllowsPartialResponse(req, etag, modifiedAt);
+    const requestedRange = req.headers.range && ifRangeAllowed
+      ? parseByteRange(req.headers.range, stats.size)
+      : null;
+    if (req.headers.range && ifRangeAllowed && !requestedRange) {
+      res.writeHead(416, {
+        ...commonHeaders,
+        "Content-Range": `bytes */${stats.size}`,
+        "Content-Length": 0
+      });
+      res.end();
+      return;
+    }
+    if (requestedRange) {
+      const contentLength = requestedRange.end - requestedRange.start + 1;
+      res.writeHead(206, {
+        ...commonHeaders,
+        "Content-Range": `bytes ${requestedRange.start}-${requestedRange.end}/${stats.size}`,
+        "Content-Length": contentLength
+      });
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
+      fs.createReadStream(filePath, requestedRange).pipe(res);
+      return;
+    }
+
+    if (canCompress) {
+      res.writeHead(200, {
+        ...commonHeaders,
+        "Content-Encoding": "gzip"
+      });
+      fs.createReadStream(filePath).pipe(zlib.createGzip({ level: 6 })).pipe(res);
+      return;
+    }
+    res.writeHead(200, {
+      ...commonHeaders,
+      "Content-Length": stats.size
     });
+    if (req.method === "HEAD") {
+      res.end();
+      return;
+    }
     fs.createReadStream(filePath).pipe(res);
   });
 }
@@ -1582,7 +1707,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     if (await handleApi(req, res, url.pathname)) return;
-    serveStatic(req, res, url.pathname);
+    serveStatic(req, res, url);
   } catch {
     if (!res.headersSent) sendJson(res, 500, { error: "The server could not complete this request." });
     else res.end();
