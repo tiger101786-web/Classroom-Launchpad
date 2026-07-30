@@ -2563,6 +2563,7 @@ function startColtRunGame() {
   const runningLayerVolume = 0.9;
   const coltDeathLayerVolume = 1;
   const coltCelebrationLayerVolume = 1;
+  const coltCelebrationAudioCueSeconds = 0.74;
   const mrNievesDeathLayerVolume = 1;
   const mrNievesCelebrationLayerVolume = 1;
   const ambientBoostGain = 3.6;
@@ -2618,6 +2619,7 @@ function startColtRunGame() {
   let finishLandingPending = false;
   let finishPlatform = null;
   let finishTouchElapsedSeconds = 0;
+  let coltCelebrationAudioPending = false;
   let deathLeaderboardHandled = false;
   let pendingLeaderboardEntry = null;
   let leaderboard = [];
@@ -6009,6 +6011,7 @@ function startColtRunGame() {
       chooseMrNievesCelebrationVideo();
       keepMrNievesCelebrationVideoPlaying();
     } else {
+      coltCelebrationAudioPending = true;
       try {
         coltCelebrationVideo.currentTime = 0;
       } catch {}
@@ -6025,7 +6028,6 @@ function startColtRunGame() {
     if (!finishPlatform) return;
     stopRunningAudio();
     if (selectedCharacter === "mrNieves") playMrNievesCelebrationAudio();
-    else playColtCelebrationAudio();
     finishLandingPending = true;
     finishTouchElapsedSeconds = Math.max(0, (now - levelStart) / 1000);
     if (nextLevelButton) nextLevelButton.disabled = true;
@@ -6097,6 +6099,7 @@ function startColtRunGame() {
     finishLandingPending = false;
     finishPlatform = null;
     finishTouchElapsedSeconds = 0;
+    coltCelebrationAudioPending = false;
     deathLeaderboardHandled = false;
     deathStartedAt = 0;
     deathX = 0;
@@ -6254,6 +6257,10 @@ function startColtRunGame() {
       ctx.drawImage(leapFrame, -drawW / 2, 0, drawW, drawH);
     } else if (coltCelebrationFrame) {
       keepColtCelebrationVideoPlaying();
+      if (coltCelebrationAudioPending && coltCelebrationVideo.currentTime >= coltCelebrationAudioCueSeconds) {
+        coltCelebrationAudioPending = false;
+        playColtCelebrationAudio();
+      }
       ctx.drawImage(coltCelebrationFrame, -drawW / 2, 0, drawW, drawH);
     } else if (!isMrNieves && sprite.complete && sprite.naturalWidth) {
       ctx.drawImage(sprite, -drawW / 2, 0, drawW, drawH);

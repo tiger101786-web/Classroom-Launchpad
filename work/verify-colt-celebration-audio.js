@@ -36,11 +36,8 @@ check(characterMedia.includes("coltCelebrationAudios.forEach(audio => ensureMedi
 const finishStart = appSource.indexOf("const beginFinishLanding =");
 const finishEnd = appSource.indexOf("const updateFinishLanding =", finishStart);
 const finishTrigger = appSource.slice(finishStart, finishEnd);
-const coltAudioCall = finishTrigger.indexOf("else playColtCelebrationAudio();");
-const pendingFlag = finishTrigger.indexOf("finishLandingPending = true;");
-const possibleImmediateLanding = finishTrigger.indexOf("completeFinishLanding();");
 check(finishTrigger.includes('if (selectedCharacter === "mrNieves") playMrNievesCelebrationAudio();'), "Mr. Nieves celebration sound routing changed.");
-check(coltAudioCall >= 0 && coltAudioCall < pendingFlag && coltAudioCall < possibleImmediateLanding, "Colt celebration audio does not start immediately at flag contact.");
+check(!finishTrigger.includes("playColtCelebrationAudio();"), "The Colt celebration sound still starts immediately at flag contact.");
 
 const completeStart = appSource.indexOf("const completeFinishLanding =");
 const completeEnd = appSource.indexOf("const beginFinishLanding =", completeStart);
@@ -54,14 +51,34 @@ check(
   completeFinish.includes("keepColtCelebrationVideoPlaying();"),
   "The Colt celebration animation does not start after the finish landing."
 );
+check(
+  completeFinish.includes("coltCelebrationAudioPending = true;"),
+  "The Colt celebration sound is not armed when its animation starts."
+);
+check(
+  appSource.includes("const coltCelebrationAudioCueSeconds = 0.74;"),
+  "The Colt celebration sound is not aligned with the 0.74-second rearing cue."
+);
+const celebrationDrawStart = appSource.indexOf("} else if (coltCelebrationFrame) {");
+const celebrationDrawEnd = appSource.indexOf("} else if (!isMrNieves && sprite.complete", celebrationDrawStart);
+const celebrationDraw = appSource.slice(celebrationDrawStart, celebrationDrawEnd);
+check(
+  celebrationDraw.includes("coltCelebrationVideo.currentTime >= coltCelebrationAudioCueSeconds"),
+  "The Colt celebration sound is not synchronized to the animation timeline."
+);
+check(
+  celebrationDraw.includes("playColtCelebrationAudio();"),
+  "The synchronized rearing cue does not play either Colt celebration sound."
+);
 
 console.log(JSON.stringify({
   validMp3Files: 2,
   validCelebrationVideo: true,
   coltOnly: true,
   nonRepeatingRandomRotation: true,
-  startsAtFlagContact: true,
-  startsBeforeFinishAnimation: true,
+  doesNotStartAtFlagContact: true,
+  animationCueSeconds: 0.74,
+  synchronizedToRearingMotion: true,
   coltCelebrationAnimation: true,
   minecraftDeathSoundRestored: true,
   mrNievesCelebrationSoundUnchanged: true
