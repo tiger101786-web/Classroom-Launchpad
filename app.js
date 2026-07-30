@@ -3057,7 +3057,7 @@ function startColtRunGame() {
   const coinSprite = new Image();
   coinSprite.decoding = "async";
   coinSprite.src = "assets/colt-run-coin.png?v=20260709-coin-gold";
-  const coinVideo = createDeferredVideo("assets/colt-run-coin-spin.mp4?v=20260704-coin2");
+  const coinVideo = createDeferredVideo("assets/colt-run-coin-spin.mp4?v=20260730-yellow-halo1");
   const flagVideo = createDeferredVideo("assets/colt-run-flag.mp4?v=20260704-flagblow");
   const coltIdleVideos = [
     createDeferredVideo("assets/colt-run-idle.mp4?v=20260703-idle"),
@@ -3132,7 +3132,7 @@ function startColtRunGame() {
     stagedMediaTimers.push(timer);
   };
   let animatedBackgroundReadyAt = Number.POSITIVE_INFINITY;
-  const coinFrameSize = 96;
+  const coinFrameSize = 128;
   const coinFrameCanvas = document.createElement("canvas");
   coinFrameCanvas.width = coinFrameSize;
   coinFrameCanvas.height = coinFrameSize;
@@ -3962,9 +3962,23 @@ function startColtRunGame() {
     coinFrameContext.drawImage(coinVideo, sx, sy, sw, sh, 0, 0, coinFrameSize, coinFrameSize);
     const frame = coinFrameContext.getImageData(0, 0, coinFrameSize, coinFrameSize);
     const pixels = frame.data;
+    const cornerOffsets = [
+      0,
+      (coinFrameSize - 1) * 4,
+      (coinFrameSize * (coinFrameSize - 1)) * 4,
+      (coinFrameSize * coinFrameSize - 1) * 4
+    ];
+    const keyRed = cornerOffsets.reduce((total, offset) => total + pixels[offset], 0) / cornerOffsets.length;
+    const keyGreen = cornerOffsets.reduce((total, offset) => total + pixels[offset + 1], 0) / cornerOffsets.length;
+    const keyBlue = cornerOffsets.reduce((total, offset) => total + pixels[offset + 2], 0) / cornerOffsets.length;
     const center = coinFrameSize / 2;
     const coinRadius = coinFrameSize * 0.49;
-    const softEdge = coinFrameSize * 0.025;
+    const softEdge = coinFrameSize * 0.035;
+    const clampChannel = value => Math.max(0, Math.min(255, Math.round(value)));
+    const smoothstep = value => {
+      const clamped = Math.max(0, Math.min(1, value));
+      return clamped * clamped * (3 - 2 * clamped);
+    };
     for (let index = 0; index < pixels.length; index += 4) {
       const pixelIndex = index / 4;
       const pixelX = pixelIndex % coinFrameSize;
@@ -3973,15 +3987,36 @@ function startColtRunGame() {
       const red = pixels[index];
       const green = pixels[index + 1];
       const blue = pixels[index + 2];
-      const brightest = Math.max(red, green, blue);
-      const darkest = Math.min(red, green, blue);
-      const average = (red + green + blue) / 3;
-      const whiteBackdrop = average > 214 && brightest - darkest < 58;
-      if (whiteBackdrop) {
+      const greenDominance = green - Math.max(red, blue);
+      const foregroundSignal = Math.max(
+        0,
+        red - keyRed,
+        blue - keyBlue,
+        Math.abs(green - keyGreen) * 0.7
+      );
+      let alpha = 255;
+      if (greenDominance > 40) {
+        alpha = Math.round(smoothstep((foregroundSignal - 8) / 104) * 255);
+      }
+      if (alpha < 7 || distanceFromCenter > coinRadius) {
+        pixels[index] = 0;
+        pixels[index + 1] = 0;
+        pixels[index + 2] = 0;
         pixels[index + 3] = 0;
-      } else if (distanceFromCenter > coinRadius) {
-        pixels[index + 3] = 0;
-      } else if (distanceFromCenter > coinRadius - softEdge) {
+        continue;
+      }
+      if (alpha < 254) {
+        const opacity = alpha / 255;
+        pixels[index] = clampChannel((red - keyRed * (1 - opacity)) / opacity);
+        pixels[index + 1] = clampChannel((green - keyGreen * (1 - opacity)) / opacity);
+        pixels[index + 2] = clampChannel((blue - keyBlue * (1 - opacity)) / opacity);
+      }
+      if (greenDominance > 40) {
+        pixels[index] = Math.max(pixels[index], clampChannel(pixels[index + 1] * 1.03));
+        pixels[index + 2] = Math.min(pixels[index + 2], clampChannel(pixels[index] * 0.18));
+      }
+      pixels[index + 3] = alpha;
+      if (distanceFromCenter > coinRadius - softEdge) {
         const fade = Math.max(0, Math.min(1, (coinRadius - distanceFromCenter) / softEdge));
         pixels[index + 3] = Math.round(pixels[index + 3] * fade);
       }
@@ -6425,16 +6460,13 @@ function startColtRunGame() {
       const transparentCoinFrame = getTransparentCoinFrame();
       if (transparentCoinFrame) {
         ctx.save();
-        ctx.shadowColor = "rgba(255, 82, 21, 0.52)";
+        ctx.shadowColor = "rgba(255, 196, 30, 0.48)";
         ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.arc(x, coin.y, coinSize / 2, 0, Math.PI * 2);
-        ctx.clip();
         ctx.drawImage(transparentCoinFrame, x - coinSize / 2, coin.y - coinSize / 2, coinSize, coinSize);
         ctx.restore();
       } else if (coinSprite.complete && coinSprite.naturalWidth) {
         ctx.save();
-        ctx.shadowColor = "rgba(255, 82, 21, 0.52)";
+        ctx.shadowColor = "rgba(255, 196, 30, 0.48)";
         ctx.shadowBlur = 12;
         ctx.drawImage(coinSprite, x - coinSize / 2, coin.y - coinSize / 2, coinSize, coinSize);
         ctx.restore();
