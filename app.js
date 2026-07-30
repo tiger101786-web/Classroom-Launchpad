@@ -2545,14 +2545,21 @@ function startColtRunGame() {
   const characterSelectMusic = createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true);
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260728-gallop1", true);
   const mrNievesRunningAudio = createDeferredAudio("assets/colt-run-mr-nieves-running-audio.mp3?v=20260728-running1", true);
-  const coltDeathAudio = createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2");
+  const coinPickupAudio = createDeferredAudio("assets/colt-run-coin-pickup-audio.mp3?v=20260730-gameplay-cues1");
+  const getReadyAudio = createDeferredAudio("assets/colt-run-get-ready-audio.mp3?v=20260730-gameplay-cues1");
+  const nextLevelAudio = createDeferredAudio("assets/colt-run-next-level-audio.mp3?v=20260730-gameplay-cues1");
+  const coltDeathAudios = [
+    createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2"),
+    createDeferredAudio("assets/colt-run-game-over-audio.mp3?v=20260730-gameplay-cues1")
+  ];
   const coltCelebrationAudios = [
     createDeferredAudio("assets/colt-run-colt-celebration-audio.mp3?v=20260728-gentle-whinny1"),
     createDeferredAudio("assets/colt-run-colt-celebration-audio-02.mp3?v=20260729-horse2celeb1")
   ];
   const mrNievesDeathAudios = [
     createDeferredAudio("assets/colt-run-mr-nieves-death-audio.wav?v=20260727-pain1"),
-    createDeferredAudio("assets/colt-run-mr-nieves-death-audio-02.mp3?v=20260728-makedeath2")
+    createDeferredAudio("assets/colt-run-mr-nieves-death-audio-02.mp3?v=20260728-makedeath2"),
+    createDeferredAudio("assets/colt-run-game-over-audio.mp3?v=20260730-gameplay-cues1")
   ];
   const mrNievesCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio.mp3?v=20260728-woohoo1"),
@@ -2562,6 +2569,7 @@ function startColtRunGame() {
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")
   ];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
+  let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
   let lastMrNievesDeathAudioIndex = -1;
   let lastMrNievesCelebrationAudioIndex = -1;
@@ -2569,6 +2577,7 @@ function startColtRunGame() {
   const inGameMusicLayerVolume = 0.5;
   const characterSelectMusicLayerVolume = 0.7;
   const runningLayerVolume = 0.9;
+  const gameplayCueLayerVolume = 1;
   const coltDeathLayerVolume = 1;
   const coltCelebrationLayerVolume = 1;
   const coltCelebrationAudioCueSeconds = 0.74;
@@ -2594,8 +2603,14 @@ function startColtRunGame() {
   runningAudio.muted = musicMuted;
   mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   mrNievesRunningAudio.muted = musicMuted;
-  coltDeathAudio.volume = musicMuted ? 0 : musicVolume * coltDeathLayerVolume;
-  coltDeathAudio.muted = musicMuted;
+  [coinPickupAudio, getReadyAudio, nextLevelAudio].forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume * gameplayCueLayerVolume;
+    audio.muted = musicMuted;
+  });
+  coltDeathAudios.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume * coltDeathLayerVolume;
+    audio.muted = musicMuted;
+  });
   coltCelebrationAudios.forEach(audio => {
     audio.volume = musicMuted ? 0 : musicVolume * coltCelebrationLayerVolume;
     audio.muted = musicMuted;
@@ -2717,6 +2732,7 @@ function startColtRunGame() {
     resetLevel(true);
     closeCharacterSelect();
     playColtRunAudio();
+    playGameplayCue(getReadyAudio);
     syncGameStatus();
   };
   const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 };
@@ -3152,7 +3168,7 @@ function startColtRunGame() {
     ensureMediaSource(runVideo, "metadata");
     ensureMediaSource(leapVideo, "metadata");
     ensureMediaSource(coltCelebrationVideo, "metadata");
-    ensureMediaSource(coltDeathAudio);
+    coltDeathAudios.forEach(audio => ensureMediaSource(audio));
     coltCelebrationAudios.forEach(audio => ensureMediaSource(audio));
   };
   const stagedMediaTimers = [];
@@ -3536,13 +3552,30 @@ function startColtRunGame() {
       mrNievesRunningAudio.currentTime = 0;
     } catch {}
   };
+  const gameplayCueAudios = [coinPickupAudio, getReadyAudio, nextLevelAudio];
+  const stopAndRewindAudio = audio => {
+    audio.pause();
+    try {
+      audio.currentTime = 0;
+    } catch {}
+  };
+  const stopGameplayCues = () => gameplayCueAudios.forEach(stopAndRewindAudio);
+  const playGameplayCue = audio => {
+    if (musicMuted || musicVolume <= 0) return;
+    ensureMediaSource(audio);
+    try {
+      audio.currentTime = 0;
+    } catch {}
+    audio.play().catch(() => {});
+  };
   const playColtDeathAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
-    ensureMediaSource(coltDeathAudio);
-    try {
-      coltDeathAudio.currentTime = 0;
-    } catch {}
-    coltDeathAudio.play().catch(() => {});
+    const nextIndex = chooseNonRepeatingAudioIndex(
+      coltDeathAudios.length,
+      lastColtDeathAudioIndex
+    );
+    lastColtDeathAudioIndex = nextIndex;
+    playExclusiveAudio(coltDeathAudios, nextIndex);
   };
   const playColtCelebrationAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
@@ -3633,8 +3666,14 @@ function startColtRunGame() {
     runningAudio.muted = musicMuted;
     mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     mrNievesRunningAudio.muted = musicMuted;
-    coltDeathAudio.volume = musicMuted ? 0 : musicVolume * coltDeathLayerVolume;
-    coltDeathAudio.muted = musicMuted;
+    gameplayCueAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume * gameplayCueLayerVolume;
+      audio.muted = musicMuted;
+    });
+    coltDeathAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume * coltDeathLayerVolume;
+      audio.muted = musicMuted;
+    });
     coltCelebrationAudios.forEach(audio => {
       audio.volume = musicMuted ? 0 : musicVolume * coltCelebrationLayerVolume;
       audio.muted = musicMuted;
@@ -3664,7 +3703,8 @@ function startColtRunGame() {
       inGameMusic.pause();
       characterSelectMusic.pause();
       stopRunningAudio();
-      coltDeathAudio.pause();
+      stopGameplayCues();
+      coltDeathAudios.forEach(audio => audio.pause());
       coltCelebrationAudios.forEach(audio => audio.pause());
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
@@ -3684,7 +3724,8 @@ function startColtRunGame() {
       inGameMusic.pause();
       characterSelectMusic.pause();
       stopRunningAudio();
-      coltDeathAudio.pause();
+      stopGameplayCues();
+      coltDeathAudios.forEach(audio => audio.pause());
       coltCelebrationAudios.forEach(audio => audio.pause());
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
@@ -5728,6 +5769,7 @@ function startColtRunGame() {
     player.grounded = false;
     player.state = "death";
     stopRunningAudio();
+    stopGameplayCues();
     if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();
     else playColtDeathAudio();
     deathStartedAt = performance.now();
@@ -6150,10 +6192,8 @@ function startColtRunGame() {
       coltCelebrationVideo.currentTime = 0;
     } catch {}
     mrNievesDeathVideos.forEach(video => video.pause());
-    coltDeathAudio.pause();
-    try {
-      coltDeathAudio.currentTime = 0;
-    } catch {}
+    stopGameplayCues();
+    coltDeathAudios.forEach(stopAndRewindAudio);
     coltCelebrationAudios.forEach(audio => {
       audio.pause();
       try {
@@ -6189,6 +6229,7 @@ function startColtRunGame() {
   const nextLevel = () => {
     level += 1;
     resetLevel(true, true);
+    playGameplayCue(nextLevelAudio);
   };
 
   const drawDeathColt = () => {
@@ -6638,6 +6679,7 @@ function startColtRunGame() {
           coin.taken = true;
           score += 10;
           scoreNode.textContent = score;
+          playGameplayCue(coinPickupAudio);
         }
       });
       updateLavaRocks(now, deltaScale);
@@ -6935,6 +6977,9 @@ function startColtRunGame() {
   chooseMrNievesIdleVideo();
   scheduleMediaLoad(coinVideo, 1800);
   scheduleMediaLoad(flagVideo, 2600);
+  scheduleMediaLoad(coinPickupAudio, 900);
+  scheduleMediaLoad(getReadyAudio, 1200);
+  scheduleMediaLoad(nextLevelAudio, 1500);
   resetLevel(true);
   openCharacterSelect();
   update();
@@ -6963,7 +7008,8 @@ function startColtRunGame() {
         characterSelectMusic,
         runningAudio,
         mrNievesRunningAudio,
-        coltDeathAudio,
+        ...gameplayCueAudios,
+        ...coltDeathAudios,
         ...coltCelebrationAudios,
         ...mrNievesDeathAudios,
         ...mrNievesCelebrationAudios,
