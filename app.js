@@ -2874,6 +2874,7 @@ function startColtRunGame() {
   }
   const activeLavaRockSpriteIndexes = lavaRockSpriteSources.map((_, index) => index);
   const background008Index = 7;
+  const background009Index = 8;
   const background008FeaturedLavaRockChance = 0.75;
   const background008FeaturedLavaRockSpriteIndexes = Array.from({ length: 8 }, (_, index) => index + 18);
   const background008LegacyLavaRockSpriteIndexes = activeLavaRockSpriteIndexes.filter(index => (
@@ -3021,7 +3022,8 @@ function startColtRunGame() {
     )),
     "assets/colt-run-bg-06.png?v=20260724-background6",
     "assets/colt-run-bg-07.png?v=20260725-backgrounds7-8",
-    "assets/colt-run-bg-08.png?v=20260725-backgrounds7-8"
+    "assets/colt-run-bg-08.png?v=20260725-backgrounds7-8",
+    "assets/colt-run-bg-09.png?v=20260729-background9-lower-platforms1"
   ];
   const backgroundSprites = backgroundSpriteSources.map(() => {
     const image = new Image();
@@ -3042,7 +3044,8 @@ function startColtRunGame() {
     "assets/colt-run-bg-05.mp4?v=20260726-backgrounds1-5-hq2",
     "assets/colt-run-bg-06.mp4?v=20260725-background6-hq2",
     "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
-    "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2"
+    "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2",
+    "assets/colt-run-bg-09.mp4?v=20260729-background9-lower-platforms1"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";
@@ -5559,7 +5562,9 @@ function startColtRunGame() {
     coins = [];
     let x = 280;
     let y = 430;
-    const minPlatformY = 258;
+    // Keep the playable platforms beneath background 009's spectator ledge
+    // so the platform artwork cannot cover the cartoon crowd.
+    const minPlatformY = currentBackgroundIndex === background009Index ? 340 : 258;
     const maxPlatformY = 438;
     const levelVerticalProgress = Math.min(1, Math.max(0, level - 1) / 7);
     const platformRepeatClearance = gameViewportWidth + 120;
