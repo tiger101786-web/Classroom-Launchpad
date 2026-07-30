@@ -2865,7 +2865,7 @@ function startColtRunGame() {
     }
     return platform.y + drawH * (surfaceRatio - platformSurfaceRatios[spriteIndex]);
   };
-  const lavaRockSpriteSources = Array.from({ length: 26 }, (_, index) => (
+  const lavaRockSpriteSources = Array.from({ length: 32 }, (_, index) => (
     `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260707-rocks6`
   ));
   lavaRockSpriteSources[10] = "assets/colt-run-lava-rock-11.png?v=20260721-new-rocks1";
@@ -2877,6 +2877,9 @@ function startColtRunGame() {
   for (let index = 18; index < 26; index += 1) {
     lavaRockSpriteSources[index] = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260726-background8-rocks1`;
   }
+  for (let index = 26; index < 32; index += 1) {
+    lavaRockSpriteSources[index] = `assets/colt-run-lava-rock-${String(index + 1).padStart(2, "0")}.png?v=20260730-background9-rocks1`;
+  }
   const activeLavaRockSpriteIndexes = lavaRockSpriteSources.map((_, index) => index);
   const background008Index = 7;
   const background009Index = 8;
@@ -2885,12 +2888,21 @@ function startColtRunGame() {
   const background008LegacyLavaRockSpriteIndexes = activeLavaRockSpriteIndexes.filter(index => (
     !background008FeaturedLavaRockSpriteIndexes.includes(index)
   ));
+  const background009FeaturedLavaRockChance = 0.75;
+  const background009FeaturedLavaRockSpriteIndexes = Array.from({ length: 6 }, (_, index) => index + 26);
+  const background009LegacyLavaRockSpriteIndexes = activeLavaRockSpriteIndexes.filter(index => (
+    !background009FeaturedLavaRockSpriteIndexes.includes(index)
+  ));
   const chooseRegularLavaRockSpriteIndex = () => {
     let spriteIndexes = activeLavaRockSpriteIndexes;
     if (currentBackgroundIndex === background008Index) {
       spriteIndexes = Math.random() < background008FeaturedLavaRockChance
         ? background008FeaturedLavaRockSpriteIndexes
         : background008LegacyLavaRockSpriteIndexes;
+    } else if (currentBackgroundIndex === background009Index) {
+      spriteIndexes = Math.random() < background009FeaturedLavaRockChance
+        ? background009FeaturedLavaRockSpriteIndexes
+        : background009LegacyLavaRockSpriteIndexes;
     }
     return spriteIndexes[Math.floor(Math.random() * spriteIndexes.length)];
   };
@@ -2961,7 +2973,13 @@ function startColtRunGame() {
     { coreX: 0.27, coreY: 0.80, rx: 0.22, ry: 0.15 },
     { coreX: 0.26, coreY: 0.82, rx: 0.23, ry: 0.13 },
     { coreX: 0.34, coreY: 0.69, rx: 0.28, ry: 0.24 },
-    { coreX: 0.50, coreY: 0.60, rx: 0.25, ry: 0.22 }
+    { coreX: 0.50, coreY: 0.60, rx: 0.25, ry: 0.22 },
+    { coreX: 0.78, coreY: 0.84, rx: 0.16, ry: 0.14 },
+    { coreX: 0.69, coreY: 0.80, rx: 0.20, ry: 0.15 },
+    { coreX: 0.73, coreY: 0.84, rx: 0.20, ry: 0.14 },
+    { coreX: 0.72, coreY: 0.81, rx: 0.18, ry: 0.14 },
+    { coreX: 0.75, coreY: 0.85, rx: 0.16, ry: 0.13 },
+    { coreX: 0.73, coreY: 0.84, rx: 0.18, ry: 0.14 }
   ];
   const lavaRockShowerHitProfiles = [
     [
@@ -3019,7 +3037,8 @@ function startColtRunGame() {
   const lavaRockSizeMultipliers = [
     0.72, 0.92, 0.92, 0.9, 0.9, 0.82, 0.84, 0.84, 0.9, 0.9, 0.88, 1.18, 0.9,
     1, 1, 1, 1, 1,
-    1, 1.04, 1, 0.96, 1.06, 1.28, 1, 1.08
+    1, 1.04, 1, 0.96, 1.06, 1.28, 1, 1.08,
+    1, 1, 1, 1, 1, 1
   ];
   const backgroundSpriteSources = [
     ...Array.from({ length: 5 }, (_, index) => (
