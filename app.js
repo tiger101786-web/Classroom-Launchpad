@@ -3023,7 +3023,8 @@ function startColtRunGame() {
     "assets/colt-run-bg-06.png?v=20260724-background6",
     "assets/colt-run-bg-07.png?v=20260725-backgrounds7-8",
     "assets/colt-run-bg-08.png?v=20260725-backgrounds7-8",
-    "assets/colt-run-bg-09.png?v=20260729-background9-replacement-hq1"
+    "assets/colt-run-bg-09.png?v=20260729-background9-replacement-hq1",
+    "assets/colt-run-bg-10.png?v=20260730-background10-hq1"
   ];
   const backgroundSprites = backgroundSpriteSources.map(() => {
     const image = new Image();
@@ -3045,7 +3046,8 @@ function startColtRunGame() {
     "assets/colt-run-bg-06.mp4?v=20260725-background6-hq2",
     "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
     "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2",
-    "assets/colt-run-bg-09.mp4?v=20260729-background9-replacement-hq1"
+    "assets/colt-run-bg-09.mp4?v=20260729-background9-replacement-hq1",
+    "assets/colt-run-bg-10.mp4?v=20260730-background10-hq1"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";
