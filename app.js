@@ -4047,7 +4047,7 @@ function startColtRunGame() {
     return flagFrameCanvas;
   };
 
-  const cleanColtBackdropHalo = (pixels, width, height) => {
+  const cleanColtBackdropHalo = (pixels, width, height, protectPaleDetails = false) => {
     const isProtectedColtPixel = pixelIndex => {
       const offset = pixelIndex * 4;
       if (pixels[offset + 3] < 16) return false;
@@ -4063,7 +4063,15 @@ function startColtRunGame() {
       const redHighlight = red > 120 && red > green * 1.35 && red > blue * 1.25;
       const blackOutline = average < 20 || (average < 34 && darkest < 24 && chroma < 12);
       const silverHoof = average > 54 && average < 170 && chroma < 54 && green >= red - 18 && blue >= red - 12;
-      return vividColtRed || deepColtRed || redHighlight || blackOutline || silverHoof;
+      const paleMarking =
+        protectPaleDetails &&
+        average > 92 &&
+        red > 104 &&
+        green > 52 &&
+        blue > 48 &&
+        red > green * 1.03 &&
+        red > blue * 1.03;
+      return vividColtRed || deepColtRed || redHighlight || blackOutline || silverHoof || paleMarking;
     };
     const isResidualBackdrop = pixelIndex => {
       const offset = pixelIndex * 4;
@@ -4264,7 +4272,14 @@ function startColtRunGame() {
       const blackInk = average < 31 && darkest < 20;
       const greenScreen = green > 64 && green > red * 1.28 && green > blue * 1.12 && green - red > 28;
       const mutedWarmGray = red > green && red > blue && red - green < 76 && red - blue < 92;
-      return greenScreen || (!vividColtRed && !blackInk && average > 36 && (brightest - darkest < 106 || mutedWarmGray));
+      const paleColtDetail =
+        average > 92 &&
+        red > 104 &&
+        green > 52 &&
+        blue > 48 &&
+        red > green * 1.03 &&
+        red > blue * 1.03;
+      return greenScreen || (!vividColtRed && !blackInk && !paleColtDetail && average > 36 && (brightest - darkest < 106 || mutedWarmGray));
     };
     const seen = new Uint8Array(idleFrameWidth * idleFrameHeight);
     for (let pixelIndex = 0; pixelIndex < seen.length; pixelIndex += 1) {
@@ -4318,7 +4333,7 @@ function startColtRunGame() {
         pixels[index * 4 + 3] = 0;
       });
     }
-    cleanColtBackdropHalo(pixels, idleFrameWidth, idleFrameHeight);
+    cleanColtBackdropHalo(pixels, idleFrameWidth, idleFrameHeight, true);
     cleanIdleGreenScreenSpill(pixels, idleFrameWidth, idleFrameHeight, true);
     idleFrameContext.putImageData(frame, 0, 0);
     let minX = idleFrameWidth;
