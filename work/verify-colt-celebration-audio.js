@@ -63,12 +63,20 @@ const celebrationDrawStart = appSource.indexOf("} else if (coltCelebrationFrame)
 const celebrationDrawEnd = appSource.indexOf("} else if (!isMrNieves && sprite.complete", celebrationDrawStart);
 const celebrationDraw = appSource.slice(celebrationDrawStart, celebrationDrawEnd);
 check(
-  celebrationDraw.includes("coltCelebrationVideo.currentTime >= coltCelebrationAudioCueSeconds"),
+  celebrationDraw.includes("celebrationVideoTime >= coltCelebrationAudioCueSeconds"),
   "The Colt celebration sound is not synchronized to the animation timeline."
 );
 check(
   celebrationDraw.includes("playColtCelebrationAudio();"),
   "The synchronized rearing cue does not play either Colt celebration sound."
+);
+check(
+  celebrationDraw.includes("celebrationVideoTime < coltCelebrationLastVideoTime - 0.25"),
+  "The Colt celebration sound is not re-armed when the animation loops."
+);
+check(
+  celebrationDraw.includes("coltCelebrationLastVideoTime = celebrationVideoTime;"),
+  "The Colt celebration loop position is not tracked."
 );
 
 console.log(JSON.stringify({
@@ -79,6 +87,7 @@ console.log(JSON.stringify({
   doesNotStartAtFlagContact: true,
   animationCueSeconds: 0.74,
   synchronizedToRearingMotion: true,
+  repeatsWithEveryAnimationLoop: true,
   coltCelebrationAnimation: true,
   minecraftDeathSoundRestored: true,
   mrNievesCelebrationSoundUnchanged: true

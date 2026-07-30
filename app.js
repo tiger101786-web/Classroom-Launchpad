@@ -2620,6 +2620,7 @@ function startColtRunGame() {
   let finishPlatform = null;
   let finishTouchElapsedSeconds = 0;
   let coltCelebrationAudioPending = false;
+  let coltCelebrationLastVideoTime = 0;
   let deathLeaderboardHandled = false;
   let pendingLeaderboardEntry = null;
   let leaderboard = [];
@@ -6012,6 +6013,7 @@ function startColtRunGame() {
       keepMrNievesCelebrationVideoPlaying();
     } else {
       coltCelebrationAudioPending = true;
+      coltCelebrationLastVideoTime = 0;
       try {
         coltCelebrationVideo.currentTime = 0;
       } catch {}
@@ -6100,6 +6102,7 @@ function startColtRunGame() {
     finishPlatform = null;
     finishTouchElapsedSeconds = 0;
     coltCelebrationAudioPending = false;
+    coltCelebrationLastVideoTime = 0;
     deathLeaderboardHandled = false;
     deathStartedAt = 0;
     deathX = 0;
@@ -6257,10 +6260,15 @@ function startColtRunGame() {
       ctx.drawImage(leapFrame, -drawW / 2, 0, drawW, drawH);
     } else if (coltCelebrationFrame) {
       keepColtCelebrationVideoPlaying();
-      if (coltCelebrationAudioPending && coltCelebrationVideo.currentTime >= coltCelebrationAudioCueSeconds) {
+      const celebrationVideoTime = coltCelebrationVideo.currentTime;
+      if (celebrationVideoTime < coltCelebrationLastVideoTime - 0.25) {
+        coltCelebrationAudioPending = true;
+      }
+      if (coltCelebrationAudioPending && celebrationVideoTime >= coltCelebrationAudioCueSeconds) {
         coltCelebrationAudioPending = false;
         playColtCelebrationAudio();
       }
+      coltCelebrationLastVideoTime = celebrationVideoTime;
       ctx.drawImage(coltCelebrationFrame, -drawW / 2, 0, drawW, drawH);
     } else if (!isMrNieves && sprite.complete && sprite.naturalWidth) {
       ctx.drawImage(sprite, -drawW / 2, 0, drawW, drawH);
