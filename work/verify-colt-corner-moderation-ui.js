@@ -83,6 +83,17 @@ async function run() {
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await studentPage.locator(".colt-corner-preview .colt-corner-graphic").waitFor();
     assert.equal(await studentPage.locator(".colt-corner-preview .colt-corner-graphic").count(), 1);
+    const previewLayout = await studentPage.locator(".colt-corner-preview").evaluate(preview => {
+      const previewBox = preview.getBoundingClientRect();
+      const graphic = preview.querySelector(".colt-corner-graphic").getBoundingClientRect();
+      const videoElement = preview.querySelector(".colt-corner-graphic video");
+      return {
+        rightInset: previewBox.right - graphic.right,
+        objectFit: getComputedStyle(videoElement).objectFit
+      };
+    });
+    assert(previewLayout.rightInset <= 30, JSON.stringify(previewLayout));
+    assert.equal(previewLayout.objectFit, "contain");
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert.equal(await studentPage.locator(".colt-corner-card .colt-corner-graphic").count(), 0);
     assert(await studentPage.getByText("Never share personal information.", { exact: true }).isVisible());
