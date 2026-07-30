@@ -2267,6 +2267,14 @@ function startColtRunGame() {
   if (!characterNames[selectedCharacter]) selectedCharacter = "colt";
   let characterSelectOpen = true;
   let initialCharacterSelectionPending = true;
+  let deathStatusText = "";
+  const runnerSelectionStatusText = "Choose a runner to begin. Reach the flag before time runs out.";
+  const selectedRunnerStatusText = () => `${characterNames[selectedCharacter]} selected. Reach the flag before time runs out.`;
+  const syncGameStatus = () => {
+    statusNode.textContent = characterSelectOpen || initialCharacterSelectionPending
+      ? runnerSelectionStatusText
+      : deathStatusText || selectedRunnerStatusText();
+  };
   const difficultyStorageKey = "coltRunDifficultyV1";
   const difficultyModes = {
     easy: {
@@ -2660,7 +2668,7 @@ function startColtRunGame() {
   const setDifficultyMode = mode => {
     if (!difficultyModes[mode]) return;
     if (difficultyMode === mode) {
-      statusNode.textContent = `${difficultyModes[mode].label} mode is already selected.`;
+      syncGameStatus();
       canvas.focus({ preventScroll: true });
       return;
     }
@@ -2669,7 +2677,7 @@ function startColtRunGame() {
     updateDifficultyButtons();
     level = 1;
     resetLevel(true);
-    statusNode.textContent = `${difficultyModes[mode].label} mode selected. Reach the flag before time runs out.`;
+    syncGameStatus();
   };
   const updateCharacterButtons = () => {
     characterButtons.forEach(button => {
@@ -2680,10 +2688,12 @@ function startColtRunGame() {
   };
   const openCharacterSelect = () => {
     characterSelectOpen = true;
+    deathStatusText = "";
     if (characterSelectPanel) characterSelectPanel.hidden = false;
     updateCharacterButtons();
     stopRunningAudio();
     if (initialCharacterSelectionPending) playColtRunAudio();
+    syncGameStatus();
   };
   const closeCharacterSelect = () => {
     characterSelectOpen = false;
@@ -2707,7 +2717,7 @@ function startColtRunGame() {
     resetLevel(true);
     closeCharacterSelect();
     playColtRunAudio();
-    statusNode.textContent = `${characterNames[selectedCharacter]} selected. Reach the flag before time runs out.`;
+    syncGameStatus();
   };
   const player = { x: 48, y: 300, w: 82, h: 62, vx: 0, vy: 0, grounded: false, groundPlatform: null, facing: 1, state: "idle", jumpPrepUntil: 0 };
   const coltSprites = {
@@ -3317,9 +3327,7 @@ function startColtRunGame() {
     leaderboardPromptsEnabled = !leaderboardPromptsEnabled;
     localStorage.setItem(leaderboardPromptsStorageKey, leaderboardPromptsEnabled ? "on" : "off");
     updateLeaderboardPromptToggle();
-    statusNode.textContent = leaderboardPromptsEnabled
-      ? "Leaderboard popups are on. Qualifying scores will open the name screen automatically."
-      : "Leaderboard popups are off. Gameplay will continue uninterrupted; use Leaderboard to save a qualifying score.";
+    syncGameStatus();
   };
   const leaderboardQualifies = (coins, seconds, mode = difficultyMode) => {
     if (coins <= 0) return false;
@@ -3394,7 +3402,7 @@ function startColtRunGame() {
       pendingLeaderboardEntry = null;
       if (leaderboardNameInput) leaderboardNameInput.value = "";
       if (leaderboardForm) leaderboardForm.hidden = true;
-      statusNode.textContent = "Leaderboard name skipped. Press R or Enter to start again.";
+      syncGameStatus();
     }
     if (leaderboardOpenedAt && !won && !lost) {
       levelStart += performance.now() - leaderboardOpenedAt;
@@ -3421,14 +3429,14 @@ function startColtRunGame() {
     activeLeaderboardMode = entryMode;
     saveLeaderboard();
     renderLeaderboardList();
-    statusNode.textContent = `Leaderboard saved to ${difficultyModes[entryMode].label}${sharedBackend.enabled ? " and shared with the class" : " on this device"}. Press R or Enter to start again.`;
+    syncGameStatus();
     if (sharedBackend.enabled) {
       sharedBackend.submitLeaderboardEntry(entry).then(result => {
         leaderboard = normalizeLeaderboard(result && result.leaderboards);
         saveLeaderboard();
         if (leaderboardPanel && !leaderboardPanel.hidden) renderLeaderboardList();
       }).catch(() => {
-        statusNode.textContent = `Leaderboard saved on this device. Shared saving is temporarily unavailable.`;
+        syncGameStatus();
       });
     }
     if (leaderboardNameInput) leaderboardNameInput.value = "";
@@ -5708,8 +5716,12 @@ function startColtRunGame() {
     [...new Set(platforms.map(platform => platform.sprite))].forEach(ensurePlatformSprite);
   };
 
-  const triggerColtDeath = message => {
+  const triggerColtDeath = () => {
     if (lost) return;
+    const lostCoins = score;
+    deathStatusText = lostCoins > 0
+      ? `${characterNames[selectedCharacter]} lost ${lostCoins} coins. Press R or Enter to start again.`
+      : `${characterNames[selectedCharacter]} lost all coins. Press R or Enter to start again.`;
     lost = true;
     player.vx = 0;
     player.vy = 0;
@@ -5730,7 +5742,7 @@ function startColtRunGame() {
     } catch {}
     if (selectedCharacter === "mrNieves") keepMrNievesDeathVideoPlaying();
     else keepDeathVideoPlaying();
-    statusNode.textContent = message;
+    syncGameStatus();
   };
 
   const updateColtDeath = now => {
@@ -5756,14 +5768,10 @@ function startColtRunGame() {
     if (leaderboardQualifies(finalCoins, finalSeconds, finalDifficulty)) {
       pendingLeaderboardEntry = { coins: finalCoins, seconds: finalSeconds, difficulty: finalDifficulty };
       if (leaderboardPromptsEnabled) {
-        statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Enter your name.`;
         openLeaderboard();
-      } else {
-        statusNode.textContent = `Top 10 ${difficultyModes[finalDifficulty].label} run: ${finalCoins} coins in ${formatRunTime(finalSeconds)}. Use Leaderboard to save it, or press R/Enter to continue.`;
       }
-    } else {
-      statusNode.textContent = "The Colt lost all coins. Press R or Enter to start again.";
     }
+    syncGameStatus();
   };
 
   const getColtHazardHitbox = () => ({
@@ -6042,7 +6050,7 @@ function startColtRunGame() {
     }
     scoreNode.textContent = score;
     if (nextLevelButton) nextLevelButton.disabled = false;
-    statusNode.textContent = "You reached the finish flag. Press Enter or Next Level to keep your coins going.";
+    syncGameStatus();
   };
 
   const beginFinishLanding = now => {
@@ -6073,7 +6081,7 @@ function startColtRunGame() {
     player.state = "leap";
     if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
     stopRunningAudio();
-    statusNode.textContent = "Finish flag reached. Landing on the final platform...";
+    syncGameStatus();
   };
 
   const updateFinishLanding = deltaScale => {
@@ -6125,6 +6133,7 @@ function startColtRunGame() {
     coltCelebrationAudioPending = false;
     coltCelebrationLastVideoTime = 0;
     deathLeaderboardHandled = false;
+    deathStatusText = "";
     deathStartedAt = 0;
     deathX = 0;
     deathY = 0;
@@ -6169,9 +6178,7 @@ function startColtRunGame() {
     lastSimulationFrameAt = 0;
     levelStart = performance.now();
     levelDurationSeconds = getLevelDurationSeconds();
-    statusNode.textContent = preservePendingLeaderboardEntry && pendingLeaderboardEntry
-      ? "New run started. Your qualifying score is waiting; use Leaderboard whenever you are ready to save it."
-      : "Choose a runner to begin. Reach the flag before time runs out.";
+    syncGameStatus();
     levelNode.textContent = level;
     scoreNode.textContent = score;
     setTimeDisplay(levelDurationSeconds.toFixed(1));
@@ -6564,7 +6571,7 @@ function startColtRunGame() {
       const elapsedSeconds = (now - levelStart) / 1000;
       const remainingSeconds = Math.max(0, levelDurationSeconds - elapsedSeconds);
       if (remainingSeconds <= 0) {
-        triggerColtDeath("Time ran out. Restart and try for the flag again.");
+        triggerColtDeath();
         setTimeDisplay("0.0");
         draw();
         animationId = requestAnimationFrame(update);
@@ -6638,7 +6645,7 @@ function startColtRunGame() {
         const coltHitbox = getColtHazardHitbox();
         for (const rock of fallingLavaRocks) {
           if (lavaRockHitsRect(rock, coltHitbox)) {
-            triggerColtDeath("The Colt was hit by a lava rock. Restart and try again.");
+            triggerColtDeath();
             break;
           }
         }
@@ -6647,7 +6654,7 @@ function startColtRunGame() {
         beginFinishLanding(now);
       }
       if (!lost && !finishLandingPending && player.y > gameViewportHeight - 36) {
-        triggerColtDeath("The Colt fell. Restart and try a new route.");
+        triggerColtDeath();
       }
       cameraX = Math.max(0, player.x - 230);
       setTimeDisplay(remainingSeconds.toFixed(1));
@@ -6695,7 +6702,7 @@ function startColtRunGame() {
         if (pendingLeaderboardEntry && leaderboardPromptsEnabled) openLeaderboard();
         else resetLevel(false, false, Boolean(pendingLeaderboardEntry));
       }
-      else statusNode.textContent = "Reach the finish flag first, then Enter starts the next level.";
+      else syncGameStatus();
       return;
     }
     if (event.code === "KeyR") {
@@ -6758,7 +6765,7 @@ function startColtRunGame() {
     }
     if (button.dataset.coltRun === "new") {
       if (won) nextLevel();
-      else statusNode.textContent = "Reach the finish flag first, then Next Level unlocks.";
+      else syncGameStatus();
     }
   };
   const onLeaderboardSubmit = event => {
@@ -6783,7 +6790,7 @@ function startColtRunGame() {
       canvas.focus({ preventScroll: true });
       updateFullscreenButton();
     }).catch(() => {
-      statusNode.textContent = "Fullscreen is not available in this browser.";
+      syncGameStatus();
     });
   };
   const bindTouchButton = button => {
