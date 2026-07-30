@@ -71,7 +71,8 @@ check(audioCall >= 0 && audioCall < pendingFlag && audioCall < possibleImmediate
 const completeStart = appSource.indexOf("const completeFinishLanding =");
 const completeEnd = appSource.indexOf("const beginFinishLanding =", completeStart);
 const completeFinish = appSource.slice(completeStart, completeEnd);
-check(completeFinish.includes('player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";'), "Character-specific celebration animation routing changed.");
+check(completeFinish.includes('player.state = "celebrate";'), "Character-specific celebration animation routing changed.");
+check(completeFinish.includes("chooseMrNievesCelebrationVideo();"), "Mr. Nieves celebration animation routing changed.");
 
 console.log(JSON.stringify({
   validMp3Files: 5,
@@ -82,5 +83,5 @@ console.log(JSON.stringify({
   startsAtFlagContact: true,
   startsBeforeCelebrationAnimation: true,
   allMrNievesCelebrationAnimationsCovered: 4,
-  coltFinishBehaviorUnchanged: true
+  mrNievesFinishBehaviorUnchanged: true
 }, null, 2));

@@ -3063,6 +3063,7 @@ function startColtRunGame() {
   const getColtIdleVideo = () => coltIdleVideos[coltIdleIndex];
   const runVideo = createDeferredVideo("assets/colt-run-run.mp4?v=20260704-best-run");
   const leapVideo = createDeferredVideo("assets/colt-run-leap.mp4?v=20260704-best2-leap");
+  const coltCelebrationVideo = createDeferredVideo("assets/colt-run-colt-celebration.mp4?v=20260729-celebration1");
   const mrNievesIdleVideos = [
     createDeferredVideo("assets/colt-run-mr-nieves-idle.mp4?v=20260716-idle-remake2"),
     createDeferredVideo("assets/colt-run-mr-nieves-idle-02.mp4?v=20260723-idle2")
@@ -3114,6 +3115,7 @@ function startColtRunGame() {
     ensureMediaSource(getColtIdleVideo());
     ensureMediaSource(runVideo, "metadata");
     ensureMediaSource(leapVideo, "metadata");
+    ensureMediaSource(coltCelebrationVideo, "metadata");
     ensureMediaSource(coltDeathAudio);
     coltCelebrationAudios.forEach(audio => ensureMediaSource(audio));
   };
@@ -3173,8 +3175,11 @@ function startColtRunGame() {
   const leapCropContext = leapCropCanvas.getContext("2d");
   if (leapFrameContext) leapFrameContext.imageSmoothingEnabled = false;
   if (leapCropContext) leapCropContext.imageSmoothingEnabled = false;
-  let leapFrameStamp = -1;
-  let leapStableCrop = null;
+  const coltMotionFrameStates = {
+    leap: { stamp: -1, crop: null },
+    celebration: { stamp: -1, crop: null }
+  };
+  let coltMotionActiveFrameState = "";
   // Preserve more of the source pixel-art detail before the character is
   // chroma-keyed, cropped, and scaled onto the game surface.
   const mrNievesFrameWidth = 330;
@@ -3700,6 +3705,12 @@ function startColtRunGame() {
     leapVideo.play().catch(() => {});
   };
 
+  const keepColtCelebrationVideoPlaying = () => {
+    ensureMediaSource(coltCelebrationVideo);
+    if (!coltCelebrationVideo.paused) return;
+    coltCelebrationVideo.play().catch(() => {});
+  };
+
   const mrNievesIdlePlaybackProgress = new WeakMap();
   const keepMrNievesIdleVideoPlaying = () => {
     const mrNievesIdleVideo = getMrNievesIdleVideo();
@@ -3810,6 +3821,7 @@ function startColtRunGame() {
     ...coltIdleVideos,
     runVideo,
     leapVideo,
+    coltCelebrationVideo,
     ...mrNievesIdleVideos,
     mrNievesRunVideo,
     ...mrNievesInAirVideos,
@@ -3851,6 +3863,9 @@ function startColtRunGame() {
       } else if (player.state === "leap") {
         nextKey = "colt:leap";
         activeVideos = [leapVideo];
+      } else if (player.state === "celebrate") {
+        nextKey = "colt:celebrate";
+        activeVideos = [coltCelebrationVideo];
       } else if (player.state !== "jumpPrep") {
         nextKey = `colt:idle:${coltIdleIndex}`;
         activeVideos = [getColtIdleVideo()];
@@ -4628,12 +4643,13 @@ function startColtRunGame() {
     return runFrameCanvas;
   };
 
-  const getTransparentLeapFrame = () => {
-    if (leapVideo.readyState < 2 || !leapFrameContext) return null;
-    const frameStamp = getDecodedVideoFrameStamp(leapVideo);
-    if (frameStamp === leapFrameStamp) return leapFrameCanvas;
-    const sourceW = leapVideo.videoWidth || leapFrameWidth;
-    const sourceH = leapVideo.videoHeight || leapFrameHeight;
+  const getTransparentLeapFrame = (sourceVideo = leapVideo, frameStateKey = "leap") => {
+    if (sourceVideo.readyState < 2 || !leapFrameContext) return null;
+    const frameState = coltMotionFrameStates[frameStateKey] || coltMotionFrameStates.leap;
+    const frameStamp = getDecodedVideoFrameStamp(sourceVideo);
+    if (frameStamp === frameState.stamp && coltMotionActiveFrameState === frameStateKey) return leapFrameCanvas;
+    const sourceW = sourceVideo.videoWidth || leapFrameWidth;
+    const sourceH = sourceVideo.videoHeight || leapFrameHeight;
     const sourceRatio = sourceW / sourceH;
     const targetRatio = leapFrameWidth / leapFrameHeight;
     let drawW = leapFrameWidth;
@@ -4648,7 +4664,7 @@ function startColtRunGame() {
       drawX = (leapFrameWidth - drawW) / 2;
     }
     leapFrameContext.clearRect(0, 0, leapFrameWidth, leapFrameHeight);
-    leapFrameContext.drawImage(leapVideo, drawX, drawY, drawW, drawH);
+    leapFrameContext.drawImage(sourceVideo, drawX, drawY, drawW, drawH);
     const frame = leapFrameContext.getImageData(0, 0, leapFrameWidth, leapFrameHeight);
     const pixels = frame.data;
     const isBackgroundPixel = pixelIndex => {
@@ -4662,10 +4678,11 @@ function startColtRunGame() {
       const vividColtRed = red > green * 1.48 && red > blue * 1.38 && red > 76;
       const brightHighlight = red > 166 && green > 62 && blue > 56;
       const blackInk = average < 34 && darkest < 24;
+      const greenScreen = green > 64 && green > red * 1.28 && green > blue * 1.12 && green - red > 28;
       const lowSaturation = brightest - darkest < 116;
       const mutedWarmGray = red > green && red > blue && red - green < 74 && red - blue < 90;
       const paleBackdrop = average > 180 && brightest - darkest < 82;
-      return !vividColtRed && !brightHighlight && !blackInk && average > 34 && (lowSaturation || mutedWarmGray || paleBackdrop);
+      return greenScreen || (!vividColtRed && !brightHighlight && !blackInk && average > 34 && (lowSaturation || mutedWarmGray || paleBackdrop));
     };
     const transparent = new Uint8Array(leapFrameWidth * leapFrameHeight);
     const queue = [];
@@ -4709,7 +4726,8 @@ function startColtRunGame() {
       const vividColtRed = red > green * 1.52 && red > blue * 1.42 && red > 80;
       const brightHighlight = red > 166 && green > 62 && blue > 56;
       const blackInk = average < 31 && darkest < 22;
-      return !vividColtRed && !brightHighlight && !blackInk && average > 44 && brightest - darkest < 104;
+      const greenScreen = green > 58 && green > red * 1.22 && green > blue * 1.08 && green - red > 22;
+      return greenScreen || (!vividColtRed && !brightHighlight && !blackInk && average > 44 && brightest - darkest < 104);
     };
     for (let pass = 0; pass < 2; pass += 1) {
       const toClear = [];
@@ -4751,9 +4769,10 @@ function startColtRunGame() {
       const vividColtRed = red > green * 1.42 && red > blue * 1.32 && red > 74;
       const brightHighlight = red > 166 && green > 62 && blue > 56;
       const blackInk = average < 31 && darkest < 22;
+      const greenScreen = green > 54 && green > red * 1.18 && green > blue * 1.06 && green - red > 17;
       const paleGray = average > 108 && brightest - darkest < 98;
       const mutedWarmGray = red >= green - 8 && red >= blue - 8 && red - green < 72 && red - blue < 92 && average > 78;
-      return !vividColtRed && !brightHighlight && !blackInk && (paleGray || mutedWarmGray);
+      return greenScreen || (!vividColtRed && !brightHighlight && !blackInk && (paleGray || mutedWarmGray));
     };
     const seenDetached = new Uint8Array(leapFrameWidth * leapFrameHeight);
     for (let pixelIndex = 0; pixelIndex < seenDetached.length; pixelIndex += 1) {
@@ -4820,6 +4839,7 @@ function startColtRunGame() {
       }
     }
     cleanColtBackdropHalo(pixels, leapFrameWidth, leapFrameHeight);
+    cleanIdleGreenScreenSpill(pixels, leapFrameWidth, leapFrameHeight, true);
     leapFrameContext.putImageData(frame, 0, 0);
     let minX = leapFrameWidth;
     let minY = leapFrameHeight;
@@ -4845,14 +4865,14 @@ function startColtRunGame() {
         w: Math.min(leapFrameWidth - 1, maxX + rightPadding) - Math.max(0, minX - leftPadding) + 1,
         h: Math.min(leapFrameHeight - 1, maxY + verticalPadding) - Math.max(0, minY - verticalPadding) + 1
       };
-      if (!leapStableCrop) {
-        leapStableCrop = nextCrop;
+      if (!frameState.crop) {
+        frameState.crop = nextCrop;
       } else {
-        const cropX = Math.min(leapStableCrop.x, nextCrop.x);
-        const cropY = Math.min(leapStableCrop.y, nextCrop.y);
-        const cropMaxX = Math.max(leapStableCrop.x + leapStableCrop.w - 1, nextCrop.x + nextCrop.w - 1);
-        const cropMaxY = Math.max(leapStableCrop.y + leapStableCrop.h - 1, nextCrop.y + nextCrop.h - 1);
-        leapStableCrop = {
+        const cropX = Math.min(frameState.crop.x, nextCrop.x);
+        const cropY = Math.min(frameState.crop.y, nextCrop.y);
+        const cropMaxX = Math.max(frameState.crop.x + frameState.crop.w - 1, nextCrop.x + nextCrop.w - 1);
+        const cropMaxY = Math.max(frameState.crop.y + frameState.crop.h - 1, nextCrop.y + nextCrop.h - 1);
+        frameState.crop = {
           x: cropX,
           y: cropY,
           w: cropMaxX - cropX + 1,
@@ -4860,13 +4880,13 @@ function startColtRunGame() {
         };
       }
     }
-    if (leapStableCrop && leapCropContext) {
-      const cropW = leapStableCrop.w;
-      const cropH = leapStableCrop.h;
+    if (frameState.crop && leapCropContext) {
+      const cropW = frameState.crop.w;
+      const cropH = frameState.crop.h;
       leapCropCanvas.width = cropW;
       leapCropCanvas.height = cropH;
       leapCropContext.clearRect(0, 0, cropW, cropH);
-      leapCropContext.putImageData(leapFrameContext.getImageData(leapStableCrop.x, leapStableCrop.y, cropW, cropH), 0, 0);
+      leapCropContext.putImageData(leapFrameContext.getImageData(frameState.crop.x, frameState.crop.y, cropW, cropH), 0, 0);
       const cropRatio = cropW / cropH;
       const frameRatio = leapFrameWidth / leapFrameHeight;
       let fitW = leapFrameWidth;
@@ -4883,9 +4903,12 @@ function startColtRunGame() {
       leapFrameContext.clearRect(0, 0, leapFrameWidth, leapFrameHeight);
       leapFrameContext.drawImage(leapCropCanvas, fitX, fitY, fitW, fitH);
     }
-    leapFrameStamp = frameStamp;
+    frameState.stamp = frameStamp;
+    coltMotionActiveFrameState = frameStateKey;
     return leapFrameCanvas;
   };
+
+  const getTransparentColtCelebrationFrame = () => getTransparentLeapFrame(coltCelebrationVideo, "celebration");
 
   const getTransparentMrNievesFrame = (sourceMedia, frameStateKey) => {
     const isVideoSource = typeof sourceMedia.readyState === "number";
@@ -5975,7 +5998,7 @@ function startColtRunGame() {
     player.vy = 0;
     player.grounded = true;
     player.groundPlatform = landingPlatform;
-    player.state = selectedCharacter === "mrNieves" ? "celebrate" : "idle";
+    player.state = "celebrate";
     finishLandingPending = false;
     won = true;
     runTimeBankSeconds += finishTouchElapsedSeconds;
@@ -5983,6 +6006,11 @@ function startColtRunGame() {
     if (selectedCharacter === "mrNieves") {
       chooseMrNievesCelebrationVideo();
       keepMrNievesCelebrationVideoPlaying();
+    } else {
+      try {
+        coltCelebrationVideo.currentTime = 0;
+      } catch {}
+      keepColtCelebrationVideoPlaying();
     }
     scoreNode.textContent = score;
     if (nextLevelButton) nextLevelButton.disabled = false;
@@ -6079,6 +6107,10 @@ function startColtRunGame() {
     nextForwardLavaRockAt = performance.now() + mode.forwardCooldown;
     nextLavaRockShowerAt = performance.now() + (3200 + Math.random() * 1800) * mode.showerIntervalMultiplier;
     deathVideo.pause();
+    coltCelebrationVideo.pause();
+    try {
+      coltCelebrationVideo.currentTime = 0;
+    } catch {}
     mrNievesDeathVideos.forEach(video => video.pause());
     coltDeathAudio.pause();
     try {
@@ -6184,8 +6216,9 @@ function startColtRunGame() {
     const mrNievesIsInAir = isMrNieves && player.state === "leap";
     const mrNievesIsRunning = isMrNieves && player.state === "run";
     const mrNievesIsCelebrating = isMrNieves && player.state === "celebrate";
-    const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 150 : mrNievesIsCelebrating ? 132 : mrNievesIsRunning ? 128 : 128) : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
-    const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsInAir ? 140 : mrNievesIsCelebrating ? 154 : mrNievesIsRunning ? 154 : 154) : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
+    const coltIsCelebrating = !isMrNieves && player.state === "celebrate";
+    const drawW = isMrNieves ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 150 : mrNievesIsCelebrating ? 132 : mrNievesIsRunning ? 128 : 128) : coltIsCelebrating ? 180 : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
+    const drawH = isMrNieves ? (mrNievesIsJumping ? 142 : mrNievesIsInAir ? 140 : mrNievesIsCelebrating ? 154 : mrNievesIsRunning ? 154 : 154) : coltIsCelebrating ? 123 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
     const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : 8));
     ctx.save();
@@ -6201,6 +6234,7 @@ function startColtRunGame() {
     const idleFrame = !isMrNieves && player.state === "idle" ? getTransparentIdleFrame() : null;
     const runningFrame = !isMrNieves && player.state === "run" ? getTransparentRunFrame() : null;
     const leapFrame = !isMrNieves && player.state === "leap" ? getTransparentLeapFrame() : null;
+    const coltCelebrationFrame = coltIsCelebrating ? getTransparentColtCelebrationFrame() : null;
     if (mrNievesFrame) {
       if (mrNievesIsCelebrating && getMrNievesCelebrationVideo().readyState >= 2) keepMrNievesCelebrationVideoPlaying();
       else if (mrNievesIsInAir && getMrNievesInAirVideo().readyState >= 2) keepMrNievesInAirVideoPlaying();
@@ -6216,6 +6250,9 @@ function startColtRunGame() {
     } else if (leapFrame) {
       keepLeapVideoPlaying();
       ctx.drawImage(leapFrame, -drawW / 2, 0, drawW, drawH);
+    } else if (coltCelebrationFrame) {
+      keepColtCelebrationVideoPlaying();
+      ctx.drawImage(coltCelebrationFrame, -drawW / 2, 0, drawW, drawH);
     } else if (!isMrNieves && sprite.complete && sprite.naturalWidth) {
       ctx.drawImage(sprite, -drawW / 2, 0, drawW, drawH);
     } else if (!isMrNieves) {
@@ -6890,6 +6927,7 @@ function startColtRunGame() {
         ...coltIdleVideos,
         runVideo,
         leapVideo,
+        coltCelebrationVideo,
         ...mrNievesIdleVideos,
         mrNievesRunVideo,
         ...mrNievesInAirVideos,
