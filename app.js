@@ -2716,7 +2716,8 @@ function startColtRunGame() {
     run2: new Image(),
     run3: new Image(),
     jumpPrep: new Image(),
-    leap: new Image()
+    leap: new Image(),
+    deathLoading: new Image()
   };
   Object.values(coltSprites).forEach(image => {
     image.decoding = "async";
@@ -2727,6 +2728,7 @@ function startColtRunGame() {
   coltSprites.run3.src = "assets/colt-run-run-3.png?v=20260702-run3";
   coltSprites.jumpPrep.src = "assets/colt-run-jump-prep.png?v=20260702-clean";
   coltSprites.leap.src = "assets/colt-run-leap.png?v=20260702-clean";
+  coltSprites.deathLoading.src = "assets/colt-run-death-loading.png?v=20260730-death-loading1";
   const smallPlatformSpriteIndex = 21;
   const horseHeadPlatformSpriteIndex = 8;
   const dragonHeadPlatformSpriteIndex = 31;
@@ -6184,8 +6186,8 @@ function startColtRunGame() {
       else if (isMrNieves) keepMrNievesIdleVideoPlaying();
       else keepDeathVideoPlaying();
       ctx.drawImage(deathFrame, -drawW / 2, 0, drawW, drawH);
-    } else if (!isMrNieves && coltSprites.leap.complete && coltSprites.leap.naturalWidth) {
-      ctx.drawImage(coltSprites.leap, -drawW / 2, 0, drawW, drawH);
+    } else if (!isMrNieves && coltSprites.deathLoading.complete && coltSprites.deathLoading.naturalWidth) {
+      ctx.drawImage(coltSprites.deathLoading, -drawW / 2, 0, drawW, drawH);
     } else {
       ctx.fillStyle = "#7b0b31";
       ctx.fillRect(-player.w / 2, drawH - player.h, player.w, player.h);
