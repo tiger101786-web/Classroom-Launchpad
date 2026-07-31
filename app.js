@@ -2542,13 +2542,26 @@ function startColtRunGame() {
   const inGameMusic = createDeferredAudio("");
   const lastInGameMusicTrackStorageKey = "coltRunLastInGameMusicTrackV1";
   let currentInGameMusicTrack = null;
-  const characterSelectMusic = createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true);
+  const characterSelectMusicTracks = [
+    createDeferredAudio("assets/colt-run-character-select-music.mp3?v=20260719-character-select1", true),
+    createDeferredAudio("assets/colt-run-character-select-music-02.mp3?v=20260730-character-select-track2", true)
+  ];
+  const lastCharacterSelectMusicStorageKey = "coltRunLastCharacterSelectMusicV1";
+  const previousCharacterSelectMusicIndex = Number(localStorage.getItem(lastCharacterSelectMusicStorageKey));
+  const characterSelectMusicChoices = characterSelectMusicTracks
+    .map((audio, index) => ({ audio, index }))
+    .filter(choice => choice.index !== previousCharacterSelectMusicIndex);
+  const characterSelectMusicChoice = characterSelectMusicChoices[
+    Math.floor(Math.random() * characterSelectMusicChoices.length)
+  ] || { audio: characterSelectMusicTracks[0], index: 0 };
+  const characterSelectMusic = characterSelectMusicChoice.audio;
+  localStorage.setItem(lastCharacterSelectMusicStorageKey, String(characterSelectMusicChoice.index));
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260728-gallop1", true);
   const mrNievesRunningAudio = createDeferredAudio("assets/colt-run-mr-nieves-running-audio.mp3?v=20260728-running1", true);
   const coinPickupAudio = createDeferredAudio("assets/colt-run-coin-pickup-audio.mp3?v=20260730-gameplay-cues1");
   const getReadyAudio = createDeferredAudio("assets/colt-run-get-ready-audio.mp3?v=20260730-robot-countdown1");
   const nextLevelAudio = createDeferredAudio("assets/colt-run-next-level-audio.mp3?v=20260730-gameplay-cues1");
-  const gameplayCueVolumeMultipliers = [1, 1.55, 1];
+  const gameplayCueVolumeMultipliers = [1, 1.85, 1];
   const coltDeathAudios = [
     createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2"),
     createDeferredAudio("assets/colt-run-game-over-audio.mp3?v=20260730-gameplay-cues1")
@@ -2598,8 +2611,10 @@ function startColtRunGame() {
   ambientAudio.muted = musicMuted;
   inGameMusic.volume = musicMuted ? 0 : musicVolume * inGameMusicLayerVolume;
   inGameMusic.muted = musicMuted;
-  characterSelectMusic.volume = musicMuted ? 0 : musicVolume * characterSelectMusicLayerVolume;
-  characterSelectMusic.muted = musicMuted;
+  characterSelectMusicTracks.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume * characterSelectMusicLayerVolume;
+    audio.muted = musicMuted;
+  });
   runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   runningAudio.muted = musicMuted;
   mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
@@ -2722,10 +2737,12 @@ function startColtRunGame() {
     if (!characterNames[character]) return;
     if (initialCharacterSelectionPending) {
       initialCharacterSelectionPending = false;
-      characterSelectMusic.pause();
-      try {
-        characterSelectMusic.currentTime = 0;
-      } catch {}
+      characterSelectMusicTracks.forEach(audio => {
+        audio.pause();
+        try {
+          audio.currentTime = 0;
+        } catch {}
+      });
     }
     selectedCharacter = character;
     localStorage.setItem(characterStorageKey, selectedCharacter);
@@ -3663,8 +3680,10 @@ function startColtRunGame() {
     ambientAudio.volume = musicMuted ? 0 : musicVolume * ambientLayerVolume;
     ambientAudio.muted = musicMuted;
     applyInGameMusicVolume();
-    characterSelectMusic.volume = musicMuted ? 0 : musicVolume * characterSelectMusicLayerVolume;
-    characterSelectMusic.muted = musicMuted;
+    characterSelectMusicTracks.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume * characterSelectMusicLayerVolume;
+      audio.muted = musicMuted;
+    });
     runningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     runningAudio.muted = musicMuted;
     mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
@@ -3706,7 +3725,7 @@ function startColtRunGame() {
     if (musicMuted) {
       ambientAudio.pause();
       inGameMusic.pause();
-      characterSelectMusic.pause();
+      characterSelectMusicTracks.forEach(audio => audio.pause());
       stopRunningAudio();
       stopGameplayCues();
       coltDeathAudios.forEach(audio => audio.pause());
@@ -3727,7 +3746,7 @@ function startColtRunGame() {
       applyMusicVolume();
       ambientAudio.pause();
       inGameMusic.pause();
-      characterSelectMusic.pause();
+      characterSelectMusicTracks.forEach(audio => audio.pause());
       stopRunningAudio();
       stopGameplayCues();
       coltDeathAudios.forEach(audio => audio.pause());
@@ -7010,7 +7029,7 @@ function startColtRunGame() {
       [
         ambientAudio,
         inGameMusic,
-        characterSelectMusic,
+        ...characterSelectMusicTracks,
         runningAudio,
         mrNievesRunningAudio,
         ...gameplayCueAudios,
