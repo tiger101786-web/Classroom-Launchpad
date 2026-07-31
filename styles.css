@@ -1185,8 +1185,8 @@ body[data-theme="night"] .category-count {
 
 .request-spirit {
   position: relative;
-  width: min(330px, 100%);
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  aspect-ratio: 23 / 17;
   margin: 4px 0 0;
   overflow: hidden;
   border-radius: 8px;
