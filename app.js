@@ -451,6 +451,24 @@ const sharedBackend = {
     }
     return payload;
   },
+  async previewSubmissionFile(file) {
+    if (!this.enabled) return null;
+    const response = await fetch("/api/submissions/preview", {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "X-File-Name": encodeURIComponent(file.name)
+      },
+      body: file
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload && payload.error ? payload.error : "This file could not be previewed.");
+    return payload.preview;
+  },
+  async loadSubmissionPreview(id) {
+    const payload = await this.request(`/api/submissions/${encodeURIComponent(id)}/preview`);
+    return payload.preview;
+  },
   submitAssignmentLink(id, project) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}/link-submissions`, {
       method: "POST",
@@ -1128,13 +1146,14 @@ let dashboardSubmissionStatus = "all";
 let assignmentEditorId = "";
 let replacingAssignmentId = "";
 let submissionMethod = "file";
+let studentPreviewObjectUrl = "";
 let dashboardGradebookGrade = "4";
 let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "assignments", label: "Assignments & Submissions", icon: "▣" },
+  { id: "assignments", label: "Assignments & Submissions", navLabel: "Student Work", icon: "▣" },
   { id: "gradebooks", label: "Gradebooks", icon: "▦" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
@@ -1602,9 +1621,18 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
 
 function renderAuthButton() {
   if (isSignedIn()) {
+    const fullName = String(authSession.name || "Student").trim();
+    const firstName = fullName.split(/\s+/)[0] || "Student";
+    const studentLabel = String(authSession.email || "").toLowerCase() === "tiger101786@gmail.com"
+      ? "Test Account"
+      : fullName.length <= 11
+        ? fullName
+        : firstName.length <= 10
+          ? firstName
+          : "Student";
     return `
       <button class="login-btn signed-in" data-action="${isTeacher() ? "teacherDashboard" : "account"}" title="${escapeHtml(authSession.email || authSession.name)}">
-        ${escapeHtml(isTeacher() ? "Teacher" : authSession.name || "Student")}
+        ${escapeHtml(isTeacher() ? "Teacher" : studentLabel)}
       </button>
       <button class="logout-btn" data-action="logout">Log Out</button>
     `;
@@ -7240,6 +7268,32 @@ function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function renderOfficePreviewPayload(preview) {
+  if (!preview) return `<div class="office-preview-message"><strong>Preview unavailable</strong><p>This file could not be displayed.</p></div>`;
+  if (preview.kind === "docx") {
+    const paragraphs = String(preview.text || "").split(/\n+/).filter(Boolean).slice(0, 1200);
+    return `<article class="word-document-preview" aria-label="Preview of ${escapeHtml(preview.title || "Word document")}"><header><span>WORD DOCUMENT PREVIEW</span><strong>${escapeHtml(preview.title || "Document")}</strong></header><div>${paragraphs.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join("") || "<p>No previewable text was found.</p>"}${preview.images && preview.images.length ? `<div class="office-preview-images">${preview.images.map(image => `<img src="${escapeHtml(image.src)}" alt="Embedded image from ${escapeHtml(preview.title || "document")}">`).join("")}</div>` : ""}</div></article>`;
+  }
+  if (preview.kind === "pptx") {
+    return `<section class="powerpoint-document-preview" aria-label="Preview of ${escapeHtml(preview.title || "PowerPoint")}"><header><span>POWERPOINT PREVIEW</span><strong>${escapeHtml(preview.title || "Presentation")}</strong></header><div class="powerpoint-slide-list">${(preview.slides || []).map(slide => `<article class="powerpoint-slide"><span>Slide ${Number(slide.number) || 1}</span><div>${String(slide.text || "").split(/\n+/).filter(Boolean).map(line => `<p>${escapeHtml(line)}</p>`).join("")}</div></article>`).join("")}${preview.images && preview.images.length ? `<div class="office-preview-images">${preview.images.map(image => `<img src="${escapeHtml(image.src)}" alt="Embedded image from ${escapeHtml(preview.title || "presentation")}">`).join("")}</div>` : ""}</div></section>`;
+  }
+  return `<div class="office-preview-message"><strong>${escapeHtml(preview.title || "Preview unavailable")}</strong><p>${escapeHtml(preview.message || "Download this file to open it in the appropriate app.")}</p></div>`;
+}
+
+async function hydrateOfficeSubmissionPreviews() {
+  const targets = [...document.querySelectorAll("[data-office-submission-preview]")];
+  await Promise.all(targets.map(async target => {
+    if (target.dataset.loading === "true") return;
+    target.dataset.loading = "true";
+    try {
+      const preview = await sharedBackend.loadSubmissionPreview(target.dataset.officeSubmissionPreview);
+      target.innerHTML = renderOfficePreviewPayload(preview);
+    } catch (error) {
+      target.innerHTML = `<div class="office-preview-message"><strong>Preview unavailable</strong><p>${escapeHtml(error.message)}</p></div>`;
+    }
+  }));
+}
+
 function renderSubmissionPreview(submission) {
   if (!submission) return `<div class="submission-preview-empty"><strong>No file selected</strong><span>Your preview will appear here before you submit.</span></div>`;
   if (submission.submissionType === "link") {
@@ -7252,7 +7306,7 @@ function renderSubmissionPreview(submission) {
     return `<img class="submission-preview-image" src="${src}" alt="Preview of ${escapeHtml(submission.originalName)}">`;
   }
   if ([".doc", ".docx", ".ppt", ".pptx"].includes(submission.extension)) {
-    return `<div class="submission-preview-empty"><strong>${escapeHtml(submission.originalName)}</strong><span>Word and PowerPoint files are stored securely. Use Download above to open this file in the appropriate app.</span></div>`;
+    return `<div class="office-submission-preview" data-office-submission-preview="${escapeHtml(submission.id)}"><div class="office-preview-message"><strong>Preparing document preview…</strong><p>The file remains inside Classroom Launchpad.</p></div></div>`;
   }
   return `<iframe class="submission-preview-frame" src="${src}" title="Preview of ${escapeHtml(submission.originalName)}"></iframe>`;
 }
@@ -7346,6 +7400,7 @@ function renderAssignmentsPage() {
                 <input id="studentSubmissionFile" type="file" accept="${escapeHtml(selected.acceptedTypes.join(","))}" required>
               </label>
               <div id="selectedSubmissionFile" class="selected-upload-file">No file selected</div>
+              <section id="studentPreSubmitPreview" class="pre-submit-preview" hidden aria-live="polite"></section>
               <label class="field"><span>Optional note</span><textarea id="studentSubmissionNote" maxlength="500" placeholder="Add a short note for Mr. Nieves"></textarea></label>
               <div class="student-submit-footer">
                 <p>Your name and grade are added automatically. Maximum file size: ${selected.maxFileSizeMb} MB.</p>
@@ -7695,8 +7750,8 @@ function renderDashboardNavigation() {
             data-section="${section.id}"
             ${section.id === dashboardSection ? 'aria-current="page"' : ""}
           >
-            <span aria-hidden="true">${section.icon}</span>
-            ${escapeHtml(section.label)}
+            <span class="dashboard-nav-icon" aria-hidden="true">${section.icon}</span>
+            <span class="dashboard-nav-label">${escapeHtml(section.navLabel || section.label)}</span>
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
             ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
             ${section.id === "assignments" && submissions.some(item => item.status === "submitted") ? `<b>${submissions.filter(item => item.status === "submitted").length}</b>` : ""}
@@ -8007,6 +8062,21 @@ function renderAssignmentEditor() {
     maxFileSizeMb: 10, allowResubmissions: true, status: "open"
   };
   const localDue = assignment.dueAt ? new Date(new Date(assignment.dueAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
+  const localDueDate = localDue ? localDue.slice(0, 10) : "";
+  const localDueTime = localDue ? localDue.slice(11, 16) : "";
+  const timeValues = Array.from({ length: 57 }, (_, index) => {
+    const totalMinutes = 6 * 60 + index * 15;
+    return `${String(Math.floor(totalMinutes / 60)).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
+  });
+  if (localDueTime && !timeValues.includes(localDueTime)) timeValues.unshift(localDueTime);
+  const timeOptions = timeValues.map(value => {
+    const [hourValue, minuteValue] = value.split(":").map(Number);
+    const totalMinutes = hourValue * 60 + minuteValue;
+    const hour = Math.floor(totalMinutes / 60);
+    const minute = totalMinutes % 60;
+    const labelHour = hour % 12 || 12;
+    return `<option value="${value}" ${localDueTime === value ? "selected" : ""}>${labelHour}:${String(minute).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}</option>`;
+  }).join("");
   return `
     <section class="assignment-editor-card">
       <header><div><span class="feature-kicker">${existing ? "Edit Assignment" : "New Assignment"}</span><h3>${existing ? escapeHtml(existing.title) : "Create an Assignment"}</h3></div><button class="outline-btn" data-action="closeAssignmentEditor">Close</button></header>
@@ -8020,8 +8090,11 @@ function renderAssignmentEditor() {
           <div id="selectedAssignmentAttachment" class="selected-upload-file">${assignment.attachmentOriginalName ? "Keep the current file, or choose a replacement." : "No assignment file selected."}</div>
         </section>
         <fieldset class="assignment-option-group"><legend>Grade levels</legend><div>${["4", "5", "6", "7"].map(grade => `<label><input type="checkbox" name="assignmentGrade" value="${grade}" ${assignment.grades.includes(grade) ? "checked" : ""}> Grade ${grade}</label>`).join("")}</div></fieldset>
-        <label class="field"><span>Due date and time</span><input id="assignmentDueAt" type="datetime-local" value="${escapeHtml(localDue)}"></label>
-        <label class="field"><span>Status</span><select id="assignmentStatus"><option value="draft" ${assignment.status === "draft" ? "selected" : ""}>Draft</option><option value="open" ${assignment.status === "open" ? "selected" : ""}>Open</option><option value="closed" ${assignment.status === "closed" ? "selected" : ""}>Closed</option><option value="archived" ${assignment.status === "archived" ? "selected" : ""}>Archived</option></select></label>
+        <div class="assignment-schedule-grid">
+          <label class="field"><span>Due date</span><input id="assignmentDueDate" type="date" value="${escapeHtml(localDueDate)}"></label>
+          <label class="field"><span>Due time</span><select id="assignmentDueTime"><option value="">Select a time</option>${timeOptions}</select></label>
+          <label class="field"><span>Status</span><select id="assignmentStatus"><option value="draft" ${assignment.status === "draft" ? "selected" : ""}>Draft</option><option value="open" ${assignment.status === "open" ? "selected" : ""}>Open</option><option value="closed" ${assignment.status === "closed" ? "selected" : ""}>Closed</option><option value="archived" ${assignment.status === "archived" ? "selected" : ""}>Archived</option></select></label>
+        </div>
         <fieldset class="assignment-option-group assignment-file-types"><legend>Files students may submit</legend><div>${[[".pdf", "PDF"], [".doc", "Word DOC"], [".docx", "Word DOCX"], [".ppt", "PowerPoint PPT"], [".pptx", "PowerPoint PPTX"], [".png", "PNG"], [".jpg", "JPG"], [".webp", "WEBP"], [".txt", "Text"]].map(([extension, label]) => `<label><input type="checkbox" name="assignmentFileType" value="${extension}" ${assignment.acceptedTypes.includes(extension) || (extension === ".jpg" && assignment.acceptedTypes.includes(".jpeg")) ? "checked" : ""}> ${label}</label>`).join("")}</div></fieldset>
         <label class="field"><span>Maximum file size</span><select id="assignmentMaxSize">${[5, 10, 15].map(size => `<option value="${size}" ${assignment.maxFileSizeMb === size ? "selected" : ""}>${size} MB</option>`).join("")}</select></label>
         <label class="toggle-row assignment-resubmission-toggle"><span>Allow students to replace a submission</span><span class="switch"><input id="assignmentResubmissions" type="checkbox" ${assignment.allowResubmissions ? "checked" : ""}><span class="slider"></span></span></label>
@@ -8495,6 +8568,7 @@ function attachScreenHandlers() {
   attachStudentRequestForm();
   attachThreadForm();
   attachReplyForm();
+  hydrateOfficeSubmissionPreviews();
   startCalendarClock();
   startClassTimerClock();
   if (screen.name === "coltRun") startColtRunGame();
@@ -8761,12 +8835,18 @@ function attachScreenHandlers() {
       const status = document.getElementById("assignmentEditorMessage");
       const grades = [...assignmentEditorForm.querySelectorAll('input[name="assignmentGrade"]:checked')].map(input => input.value);
       const types = [...assignmentEditorForm.querySelectorAll('input[name="assignmentFileType"]:checked')].flatMap(input => input.value === ".jpg" ? [".jpg", ".jpeg"] : [input.value]);
-      const dueValue = document.getElementById("assignmentDueAt").value;
+      const dueDate = document.getElementById("assignmentDueDate").value;
+      const dueTime = document.getElementById("assignmentDueTime").value;
+      if ((dueDate && !dueTime) || (!dueDate && dueTime)) {
+        status.textContent = "Choose both a due date and a due time, or leave both blank.";
+        status.classList.add("error");
+        return;
+      }
       const assignment = {
         title: document.getElementById("assignmentTitle").value.trim(),
         instructions: document.getElementById("assignmentInstructions").value.trim(),
         grades,
-        dueAt: dueValue ? new Date(dueValue).toISOString() : "",
+        dueAt: dueDate && dueTime ? new Date(`${dueDate}T${dueTime}:00`).toISOString() : "",
         acceptedTypes: types,
         maxFileSizeMb: Number(document.getElementById("assignmentMaxSize").value),
         allowResubmissions: document.getElementById("assignmentResubmissions").checked,
@@ -8832,11 +8912,41 @@ function attachScreenHandlers() {
 
   const studentSubmissionFile = document.getElementById("studentSubmissionFile");
   if (studentSubmissionFile) {
-    studentSubmissionFile.addEventListener("change", () => {
+    studentSubmissionFile.addEventListener("change", async () => {
       const file = studentSubmissionFile.files && studentSubmissionFile.files[0];
       const display = document.getElementById("selectedSubmissionFile");
+      const preview = document.getElementById("studentPreSubmitPreview");
       display.textContent = file ? `${file.name} • ${formatFileSize(file.size)}` : "No file selected";
       display.classList.toggle("has-file", Boolean(file));
+      if (studentPreviewObjectUrl) {
+        URL.revokeObjectURL(studentPreviewObjectUrl);
+        studentPreviewObjectUrl = "";
+      }
+      if (!preview || !file) {
+        if (preview) preview.hidden = true;
+        return;
+      }
+      preview.hidden = false;
+      preview.innerHTML = `<div class="office-preview-message"><strong>Preparing preview…</strong><p>Your file has not been submitted.</p></div>`;
+      const extension = `.${file.name.split(".").pop().toLowerCase()}`;
+      try {
+        if ([".png", ".jpg", ".jpeg", ".webp"].includes(extension)) {
+          studentPreviewObjectUrl = URL.createObjectURL(file);
+          preview.innerHTML = `<img class="submission-preview-image" src="${studentPreviewObjectUrl}" alt="Preview of ${escapeHtml(file.name)}">`;
+        } else if (extension === ".pdf") {
+          studentPreviewObjectUrl = URL.createObjectURL(file);
+          preview.innerHTML = `<iframe class="submission-preview-frame" src="${studentPreviewObjectUrl}" title="Preview of ${escapeHtml(file.name)}"></iframe>`;
+        } else if (extension === ".txt") {
+          preview.innerHTML = `<pre class="text-file-preview">${escapeHtml((await file.text()).slice(0, 180000))}</pre>`;
+        } else if ([".doc", ".docx", ".ppt", ".pptx"].includes(extension)) {
+          const payload = await sharedBackend.previewSubmissionFile(file);
+          if (studentSubmissionFile.files && studentSubmissionFile.files[0] === file) preview.innerHTML = renderOfficePreviewPayload(payload);
+        } else {
+          preview.innerHTML = `<div class="office-preview-message"><strong>${escapeHtml(file.name)}</strong><p>A preview is not available for this file type.</p></div>`;
+        }
+      } catch (error) {
+        preview.innerHTML = `<div class="office-preview-message"><strong>Preview unavailable</strong><p>${escapeHtml(error.message)}</p></div>`;
+      }
     });
   }
   const studentSubmissionForm = document.getElementById("studentSubmissionForm");

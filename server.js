@@ -1400,6 +1400,21 @@ async function handleAssignmentsApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "POST" && pathname === "/api/submissions/preview") {
+    if (!requireSameOrigin(req, res)) return true;
+    try {
+      const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
+      const extension = path.extname(originalName).toLowerCase();
+      if (![".doc", ".docx", ".ppt", ".pptx"].includes(extension)) throw new Error("Choose a Word or PowerPoint file to preview.");
+      const buffer = await readBinaryBody(req, maxSubmissionBytes);
+      if (!buffer.length || !fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
+      sendJson(res, 200, { preview: officePreviewPayload(buffer, extension, originalName) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
   if (req.method === "POST" && pathname === "/api/assignments") {
     if (!requireSameOrigin(req, res)) return true;
     if (session.role !== "teacher") {
@@ -1700,6 +1715,25 @@ async function handleAssignmentsApi(req, res, pathname) {
     });
     if (req.method === "HEAD") res.end();
     else fs.createReadStream(filePath).pipe(res);
+    return true;
+  }
+
+  const submissionPreview = pathname.match(/^\/api\/submissions\/([^/]+)\/preview$/);
+  if (submissionPreview && req.method === "GET") {
+    try {
+      const db = readDb();
+      const submission = normalizeSubmissions(db.submissions).find(item => item.id === decodeURIComponent(submissionPreview[1]));
+      if (!submission || !canAccessSubmission(session, submission) || submission.submissionType !== "file") {
+        sendJson(res, 404, { error: "Submission not found." });
+        return true;
+      }
+      const filePath = submissionFilePath(submission);
+      if (!filePath || !fs.existsSync(filePath)) throw new Error("The submitted file is unavailable.");
+      const buffer = fs.readFileSync(filePath);
+      sendJson(res, 200, { preview: officePreviewPayload(buffer, submission.extension, submission.originalName) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 
@@ -2278,6 +2312,125 @@ function fileMatchesExtension(buffer, extension) {
   if ([".doc", ".ppt"].includes(extension)) return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]));
   if (extension === ".txt") return !buffer.subarray(0, Math.min(buffer.length, 4096)).includes(0);
   return false;
+}
+
+function decodeXmlText(value) {
+  return String(value || "")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function readableXmlText(xml, paragraphTag) {
+  return decodeXmlText(String(xml || "")
+    .replace(/<(?:w:tab|a:tab)\b[^>]*\/>/gi, "\t")
+    .replace(/<(?:w:br|a:br)\b[^>]*\/>/gi, "\n")
+    .replace(/<\/(?:w:t|a:t)>/gi, " ")
+    .replace(new RegExp(`</${paragraphTag}>`, "gi"), "\n")
+    .replace(/<\/w:tr>/gi, "\n")
+    .replace(/<[^>]+>/g, ""))
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function zipEntries(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 22) throw new Error("This Office file is incomplete.");
+  const minimum = Math.max(0, buffer.length - 65_557);
+  let endOffset = -1;
+  for (let offset = buffer.length - 22; offset >= minimum; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === 0x06054b50) {
+      endOffset = offset;
+      break;
+    }
+  }
+  if (endOffset < 0) throw new Error("This Office file could not be opened for preview.");
+  const count = Math.min(buffer.readUInt16LE(endOffset + 10), 2000);
+  let offset = buffer.readUInt32LE(endOffset + 16);
+  const entries = [];
+  for (let index = 0; index < count && offset + 46 <= buffer.length; index += 1) {
+    if (buffer.readUInt32LE(offset) !== 0x02014b50) break;
+    const flags = buffer.readUInt16LE(offset + 8);
+    const method = buffer.readUInt16LE(offset + 10);
+    const compressedSize = buffer.readUInt32LE(offset + 20);
+    const uncompressedSize = buffer.readUInt32LE(offset + 24);
+    const nameLength = buffer.readUInt16LE(offset + 28);
+    const extraLength = buffer.readUInt16LE(offset + 30);
+    const commentLength = buffer.readUInt16LE(offset + 32);
+    const localOffset = buffer.readUInt32LE(offset + 42);
+    const nameStart = offset + 46;
+    const nameEnd = nameStart + nameLength;
+    if (nameEnd > buffer.length) break;
+    const name = buffer.subarray(nameStart, nameEnd).toString("utf8").replace(/\\/g, "/");
+    entries.push({ name, flags, method, compressedSize, uncompressedSize, localOffset });
+    offset = nameEnd + extraLength + commentLength;
+  }
+  return entries;
+}
+
+function unzipEntry(buffer, entry) {
+  if (!entry || entry.flags & 1) throw new Error("Password-protected Office files cannot be previewed.");
+  if (entry.compressedSize > 8 * 1024 * 1024 || entry.uncompressedSize > 12 * 1024 * 1024) throw new Error("This document is too large to preview safely.");
+  const offset = entry.localOffset;
+  if (offset + 30 > buffer.length || buffer.readUInt32LE(offset) !== 0x04034b50) throw new Error("This Office file could not be opened for preview.");
+  const nameLength = buffer.readUInt16LE(offset + 26);
+  const extraLength = buffer.readUInt16LE(offset + 28);
+  const start = offset + 30 + nameLength + extraLength;
+  const end = start + entry.compressedSize;
+  if (start < 0 || end > buffer.length) throw new Error("This Office file could not be opened for preview.");
+  const compressed = buffer.subarray(start, end);
+  const output = entry.method === 0 ? Buffer.from(compressed) : entry.method === 8 ? zlib.inflateRawSync(compressed, { maxOutputLength: 12 * 1024 * 1024 }) : null;
+  if (!output || output.length > 12 * 1024 * 1024) throw new Error("This Office file uses an unsupported preview format.");
+  return output;
+}
+
+function officeMediaPreviews(buffer, entries, prefix) {
+  const mimeByExtension = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp" };
+  const images = [];
+  let totalBytes = 0;
+  for (const entry of entries.filter(item => item.name.startsWith(prefix)).slice(0, 40)) {
+    const extension = path.extname(entry.name).toLowerCase();
+    const mimeType = mimeByExtension[extension];
+    if (!mimeType) continue;
+    try {
+      const image = unzipEntry(buffer, entry);
+      if (image.length > 4 * 1024 * 1024 || totalBytes + image.length > 8 * 1024 * 1024) continue;
+      totalBytes += image.length;
+      images.push({ name: path.basename(entry.name), src: `data:${mimeType};base64,${image.toString("base64")}` });
+    } catch {}
+  }
+  return images;
+}
+
+function officePreviewPayload(buffer, extension, originalName) {
+  if (![".docx", ".pptx"].includes(extension)) {
+    return { kind: "unsupported", title: originalName, message: "A preview is not available for this older Office format. Download the file to open it." };
+  }
+  const entries = zipEntries(buffer);
+  if (extension === ".docx") {
+    const documentEntry = entries.find(entry => entry.name === "word/document.xml");
+    if (!documentEntry) throw new Error("This Word document does not contain readable document text.");
+    const text = readableXmlText(unzipEntry(buffer, documentEntry).toString("utf8"), "w:p").slice(0, 180_000);
+    return { kind: "docx", title: originalName, text: text || "This document does not contain previewable text.", images: officeMediaPreviews(buffer, entries, "word/media/") };
+  }
+  const slideEntries = entries
+    .filter(entry => /^ppt\/slides\/slide\d+\.xml$/i.test(entry.name))
+    .sort((a, b) => Number(a.name.match(/slide(\d+)/i)[1]) - Number(b.name.match(/slide(\d+)/i)[1]))
+    .slice(0, 100);
+  if (!slideEntries.length) throw new Error("This PowerPoint does not contain previewable slides.");
+  return {
+    kind: "pptx",
+    title: originalName,
+    slides: slideEntries.map((entry, index) => ({
+      number: index + 1,
+      text: readableXmlText(unzipEntry(buffer, entry).toString("utf8"), "a:p").slice(0, 20_000) || "No previewable text on this slide."
+    })),
+    images: officeMediaPreviews(buffer, entries, "ppt/media/")
+  };
 }
 
 function safeDownloadName(value) {

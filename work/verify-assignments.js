@@ -13,6 +13,40 @@ const server = spawn(process.execPath, [path.join(__dirname, "..", "server.js")]
   stdio: ["ignore", "pipe", "pipe"]
 });
 
+function createStoredZip(filename, contents) {
+  const name = Buffer.from(filename);
+  const data = Buffer.from(contents);
+  const local = Buffer.alloc(30);
+  local.writeUInt32LE(0x04034b50, 0);
+  local.writeUInt16LE(20, 4);
+  local.writeUInt16LE(0, 6);
+  local.writeUInt16LE(0, 8);
+  local.writeUInt32LE(0, 14);
+  local.writeUInt32LE(data.length, 18);
+  local.writeUInt32LE(data.length, 22);
+  local.writeUInt16LE(name.length, 26);
+  const central = Buffer.alloc(46);
+  central.writeUInt32LE(0x02014b50, 0);
+  central.writeUInt16LE(20, 4);
+  central.writeUInt16LE(20, 6);
+  central.writeUInt16LE(0, 8);
+  central.writeUInt16LE(0, 10);
+  central.writeUInt32LE(0, 16);
+  central.writeUInt32LE(data.length, 20);
+  central.writeUInt32LE(data.length, 24);
+  central.writeUInt16LE(name.length, 28);
+  central.writeUInt32LE(0, 42);
+  const localRecord = Buffer.concat([local, name, data]);
+  const centralRecord = Buffer.concat([central, name]);
+  const end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0);
+  end.writeUInt16LE(1, 8);
+  end.writeUInt16LE(1, 10);
+  end.writeUInt32LE(centralRecord.length, 12);
+  end.writeUInt32LE(localRecord.length, 16);
+  return Buffer.concat([localRecord, centralRecord, end]);
+}
+
 function cookieFrom(response) {
   return String(response.headers.get("set-cookie") || "").split(";")[0];
 }
@@ -64,7 +98,7 @@ async function waitForServer() {
     assert.equal(created.response.status, 201);
     const assignmentId = created.payload.assignment.id;
 
-    const assignmentDocx = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00]);
+    const assignmentDocx = createStoredZip("word/document.xml", "<w:document><w:body><w:p><w:r><w:t>Keyboard Shortcuts Assignment</w:t></w:r></w:p><w:p><w:r><w:t>Complete every question.</w:t></w:r></w:p></w:body></w:document>");
     const attached = await request(`/api/assignments/${assignmentId}/attachment`, {
       method: "POST",
       headers: {
@@ -98,6 +132,25 @@ async function waitForServer() {
 
     const guestAssignmentFile = await request(`/api/assignments/${assignmentId}/attachment`);
     assert.equal(guestAssignmentFile.response.status, 401);
+
+    const wordBeforeSubmitPreview = await request("/api/submissions/preview", {
+      method: "POST",
+      headers: { Origin: origin, Cookie: studentCookie, "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "X-File-Name": encodeURIComponent("Avery Shortcuts.docx") },
+      body: assignmentDocx
+    });
+    assert.equal(wordBeforeSubmitPreview.response.status, 200);
+    assert.equal(wordBeforeSubmitPreview.payload.preview.kind, "docx");
+    assert.match(wordBeforeSubmitPreview.payload.preview.text, /Complete every question/);
+
+    const presentation = createStoredZip("ppt/slides/slide1.xml", "<p:sld><p:cSld><a:p><a:r><a:t>My First Slide</a:t></a:r></a:p></p:cSld></p:sld>");
+    const powerpointPreview = await request("/api/submissions/preview", {
+      method: "POST",
+      headers: { Origin: origin, Cookie: studentCookie, "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "X-File-Name": encodeURIComponent("Avery Presentation.pptx") },
+      body: presentation
+    });
+    assert.equal(powerpointPreview.response.status, 200);
+    assert.equal(powerpointPreview.payload.preview.kind, "pptx");
+    assert.match(powerpointPreview.payload.preview.slides[0].text, /My First Slide/);
 
     const pdf = Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF");
     const submitted = await request(`/api/assignments/${assignmentId}/submissions`, {
@@ -148,6 +201,9 @@ async function waitForServer() {
     const teacherWordFile = await request(`/api/submissions/${submittedWord.payload.submission.id}/file`, { headers: { Cookie: teacherCookie } });
     assert.equal(teacherWordFile.response.status, 200);
     assert(teacherWordFile.payload.equals(assignmentDocx));
+    const teacherWordPreview = await request(`/api/submissions/${submittedWord.payload.submission.id}/preview`, { headers: { Cookie: teacherCookie } });
+    assert.equal(teacherWordPreview.response.status, 200);
+    assert.match(teacherWordPreview.payload.preview.text, /Keyboard Shortcuts Assignment/);
 
     const blockedLink = await request(`/api/assignments/${assignmentId}/link-submissions`, {
       method: "POST",
