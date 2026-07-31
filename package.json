@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "check": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-radio.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js",
-    "test": "node work/verify-colt-assistant.js && node work/verify-colt-corner-moderation.js && node work/verify-assignments.js",
+    "test": "node work/verify-colt-assistant.js && node work/verify-colt-corner-moderation.js && node work/verify-assignments.js && node work/verify-teacher-test-account.js",
     "build": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-radio.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js"
   },
   "engines": {

@@ -412,6 +412,23 @@ const sharedBackend = {
   updateAssignment(id, assignment) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(assignment) });
   },
+  async uploadAssignmentAttachment(id, file) {
+    if (!this.enabled) return null;
+    const response = await fetch(`/api/assignments/${encodeURIComponent(id)}/attachment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "X-File-Name": encodeURIComponent(file.name)
+      },
+      body: file
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload && payload.error ? payload.error : `Attachment upload failed: ${response.status}`);
+    return payload;
+  },
+  removeAssignmentAttachment(id) {
+    return this.request(`/api/assignments/${encodeURIComponent(id)}/attachment`, { method: "DELETE", body: "{}" });
+  },
   deleteAssignment(id) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
   },
@@ -1043,6 +1060,10 @@ function normalizeAssignments(items) {
     acceptedTypes: Array.isArray(item && item.acceptedTypes) ? item.acceptedTypes.map(String) : [".pdf"],
     maxFileSizeMb: Number(item && item.maxFileSizeMb) || 10,
     allowResubmissions: item && item.allowResubmissions !== false,
+    attachmentOriginalName: String(item && item.attachmentOriginalName || ""),
+    attachmentExtension: String(item && item.attachmentExtension || "").toLowerCase(),
+    attachmentMimeType: String(item && item.attachmentMimeType || ""),
+    attachmentSize: Number(item && item.attachmentSize) || 0,
     status: String(item && item.status || "draft"),
     createdAt: String(item && item.createdAt || ""),
     updatedAt: String(item && item.updatedAt || "")
@@ -7230,6 +7251,9 @@ function renderSubmissionPreview(submission) {
   if ([".png", ".jpg", ".jpeg", ".webp"].includes(submission.extension)) {
     return `<img class="submission-preview-image" src="${src}" alt="Preview of ${escapeHtml(submission.originalName)}">`;
   }
+  if ([".doc", ".docx", ".ppt", ".pptx"].includes(submission.extension)) {
+    return `<div class="submission-preview-empty"><strong>${escapeHtml(submission.originalName)}</strong><span>Word and PowerPoint files are stored securely. Use Download above to open this file in the appropriate app.</span></div>`;
+  }
   return `<iframe class="submission-preview-frame" src="${src}" title="Preview of ${escapeHtml(submission.originalName)}"></iframe>`;
 }
 
@@ -7244,6 +7268,19 @@ function renderStudentAssignmentCard(assignment) {
       <small>Due ${escapeHtml(assignmentDueText(assignment))}</small>
       <span class="assignment-grade-pill">${assignment.grades.length ? `Grade ${escapeHtml(assignment.grades.join(", "))}` : "All Grades"}</span>
     </button>
+  `;
+}
+
+function renderAssignmentAttachment(assignment) {
+  if (!assignment || !assignment.attachmentOriginalName) return "";
+  const previewable = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"].includes(assignment.attachmentExtension);
+  const fileUrl = `/api/assignments/${encodeURIComponent(assignment.id)}/attachment`;
+  return `
+    <section class="student-assignment-attachment">
+      <span class="assignment-attachment-icon" aria-hidden="true">▤</span>
+      <span><span class="feature-kicker">File from Mr. Nieves</span><strong>${escapeHtml(assignment.attachmentOriginalName)}</strong><small>${formatFileSize(assignment.attachmentSize)}${[".doc", ".docx"].includes(assignment.attachmentExtension) ? " • Microsoft Word" : [".ppt", ".pptx"].includes(assignment.attachmentExtension) ? " • Microsoft PowerPoint" : ""}</small></span>
+      <div class="actions">${previewable ? `<a class="outline-btn" href="${fileUrl}?view=inline" target="_blank" rel="noopener">Preview</a>` : ""}<a class="primary-btn" href="${fileUrl}">Download File</a></div>
+    </section>
   `;
 }
 
@@ -7281,6 +7318,7 @@ function renderAssignmentsPage() {
             <span class="assignment-due-badge">Due ${escapeHtml(assignmentDueText(selected))}</span>
           </header>
           <div class="assignment-instructions">${escapeHtml(selected.instructions || "Complete the assigned work and submit your file below.").replace(/\n/g, "<br>")}</div>
+          ${renderAssignmentAttachment(selected)}
           ${submission ? `
             <section class="student-submission-receipt">
               <div class="submission-file-heading">
@@ -7466,13 +7504,13 @@ function renderApprovedStudentManager() {
           ${visibleStudents.length ? visibleStudents.map(student => `
             <div class="approved-student-row">
               <span class="approved-student-identity">
-                <strong>${escapeHtml(student.name || "Name not added")}</strong>
+                <strong>${escapeHtml(student.name || "Name not added")}${student.teacherTestAccount ? ` <span class="test-account-badge">Teacher Test Account</span>` : ""}</strong>
                 <span>${escapeHtml(student.email)}${student.grade ? ` · Grade ${escapeHtml(student.grade)}` : ""}</span>
-                <small>${student.registered ? "Registered" : student.activationReady ? "Waiting for first login" : "Needs activation code"}</small>
+                <small>${student.registered ? "Registered" : student.activationReady ? "Waiting for first login" : student.teacherTestAccount ? "Click New Code to create the first-login access code" : "Needs activation code"}</small>
               </span>
               <div class="actions">
                 <button class="outline-btn" data-action="resetStudentCode" data-email="${escapeHtml(student.email)}">${student.registered ? "Reset Password" : "New Code"}</button>
-                <button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>
+                ${student.teacherTestAccount ? "" : `<button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>`}
               </div>
             </div>
           `).join("") : `<p class="instruction">${approvedStudents.length ? "No students match this search." : "No student emails have been imported yet."}</p>`}
@@ -7965,7 +8003,7 @@ function renderAssignmentEditor() {
   const existing = assignments.find(item => item.id === assignmentEditorId) || null;
   const assignment = existing || {
     title: "", instructions: "", grades: ["4", "5", "6", "7"], dueAt: "",
-    acceptedTypes: [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"],
+    acceptedTypes: [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".png", ".jpg", ".jpeg", ".webp", ".txt"],
     maxFileSizeMb: 10, allowResubmissions: true, status: "open"
   };
   const localDue = assignment.dueAt ? new Date(new Date(assignment.dueAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
@@ -7975,10 +8013,16 @@ function renderAssignmentEditor() {
       <form id="assignmentEditorForm" data-id="${existing ? escapeHtml(existing.id) : ""}">
         <label class="field"><span>Assignment title</span><input id="assignmentTitle" maxlength="120" value="${escapeHtml(assignment.title)}" placeholder="Example: Keyboard Shortcuts Practice" required></label>
         <label class="field assignment-instructions-field"><span>Directions</span><textarea id="assignmentInstructions" maxlength="3000" placeholder="Explain what students should complete and submit.">${escapeHtml(assignment.instructions)}</textarea></label>
+        <section class="assignment-attachment-editor">
+          <div><span class="feature-kicker">Assignment File</span><strong>Attach the document students need</strong><p>Optional: add a Word document, PDF, PowerPoint, image, or text file up to 20 MB.</p></div>
+          ${assignment.attachmentOriginalName ? `<div class="current-assignment-attachment"><span><strong>${escapeHtml(assignment.attachmentOriginalName)}</strong><small>${formatFileSize(assignment.attachmentSize)}</small></span><a class="outline-btn" href="/api/assignments/${encodeURIComponent(assignment.id)}/attachment">Download</a><label><input id="assignmentRemoveAttachment" type="checkbox"> Remove this file</label></div>` : ""}
+          <label class="assignment-attachment-picker" for="assignmentAttachmentFile"><span aria-hidden="true">＋</span><span><strong>${assignment.attachmentOriginalName ? "Replace assignment file" : "Choose assignment file"}</strong><small>DOC, DOCX, PDF, PPT, PPTX, PNG, JPG, WEBP, or TXT</small></span><input id="assignmentAttachmentFile" type="file" accept=".doc,.docx,.pdf,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.txt"></label>
+          <div id="selectedAssignmentAttachment" class="selected-upload-file">${assignment.attachmentOriginalName ? "Keep the current file, or choose a replacement." : "No assignment file selected."}</div>
+        </section>
         <fieldset class="assignment-option-group"><legend>Grade levels</legend><div>${["4", "5", "6", "7"].map(grade => `<label><input type="checkbox" name="assignmentGrade" value="${grade}" ${assignment.grades.includes(grade) ? "checked" : ""}> Grade ${grade}</label>`).join("")}</div></fieldset>
         <label class="field"><span>Due date and time</span><input id="assignmentDueAt" type="datetime-local" value="${escapeHtml(localDue)}"></label>
         <label class="field"><span>Status</span><select id="assignmentStatus"><option value="draft" ${assignment.status === "draft" ? "selected" : ""}>Draft</option><option value="open" ${assignment.status === "open" ? "selected" : ""}>Open</option><option value="closed" ${assignment.status === "closed" ? "selected" : ""}>Closed</option><option value="archived" ${assignment.status === "archived" ? "selected" : ""}>Archived</option></select></label>
-        <fieldset class="assignment-option-group assignment-file-types"><legend>Accepted files</legend><div>${[[".pdf", "PDF"], [".png", "PNG"], [".jpg", "JPG"], [".webp", "WEBP"], [".txt", "Text"]].map(([extension, label]) => `<label><input type="checkbox" name="assignmentFileType" value="${extension}" ${assignment.acceptedTypes.includes(extension) || (extension === ".jpg" && assignment.acceptedTypes.includes(".jpeg")) ? "checked" : ""}> ${label}</label>`).join("")}</div></fieldset>
+        <fieldset class="assignment-option-group assignment-file-types"><legend>Files students may submit</legend><div>${[[".pdf", "PDF"], [".doc", "Word DOC"], [".docx", "Word DOCX"], [".ppt", "PowerPoint PPT"], [".pptx", "PowerPoint PPTX"], [".png", "PNG"], [".jpg", "JPG"], [".webp", "WEBP"], [".txt", "Text"]].map(([extension, label]) => `<label><input type="checkbox" name="assignmentFileType" value="${extension}" ${assignment.acceptedTypes.includes(extension) || (extension === ".jpg" && assignment.acceptedTypes.includes(".jpeg")) ? "checked" : ""}> ${label}</label>`).join("")}</div></fieldset>
         <label class="field"><span>Maximum file size</span><select id="assignmentMaxSize">${[5, 10, 15].map(size => `<option value="${size}" ${assignment.maxFileSizeMb === size ? "selected" : ""}>${size} MB</option>`).join("")}</select></label>
         <label class="toggle-row assignment-resubmission-toggle"><span>Allow students to replace a submission</span><span class="switch"><input id="assignmentResubmissions" type="checkbox" ${assignment.allowResubmissions ? "checked" : ""}><span class="slider"></span></span></label>
         <p id="assignmentEditorMessage" class="request-message" aria-live="polite"></p>
@@ -8699,6 +8743,19 @@ function attachScreenHandlers() {
 
   const assignmentEditorForm = document.getElementById("assignmentEditorForm");
   if (assignmentEditorForm) {
+    const assignmentAttachmentFile = document.getElementById("assignmentAttachmentFile");
+    if (assignmentAttachmentFile) {
+      assignmentAttachmentFile.addEventListener("change", () => {
+        const file = assignmentAttachmentFile.files && assignmentAttachmentFile.files[0];
+        const display = document.getElementById("selectedAssignmentAttachment");
+        if (display) {
+          display.textContent = file ? `${file.name} • ${formatFileSize(file.size)}` : "No replacement file selected.";
+          display.classList.toggle("has-file", Boolean(file));
+        }
+        const remove = document.getElementById("assignmentRemoveAttachment");
+        if (remove && file) remove.checked = false;
+      });
+    }
     assignmentEditorForm.addEventListener("submit", async event => {
       event.preventDefault();
       const status = document.getElementById("assignmentEditorMessage");
@@ -8731,10 +8788,35 @@ function attachScreenHandlers() {
         return;
       }
       const button = assignmentEditorForm.querySelector('button[type="submit"]');
+      const attachmentFile = assignmentAttachmentFile && assignmentAttachmentFile.files && assignmentAttachmentFile.files[0];
+      if (attachmentFile && attachmentFile.size > 20 * 1024 * 1024) {
+        status.textContent = "Choose an assignment file that is 20 MB or smaller.";
+        status.classList.add("error");
+        return;
+      }
       button.disabled = true;
       try {
         const id = assignmentEditorForm.dataset.id;
-        const result = id ? await sharedBackend.updateAssignment(id, assignment) : await sharedBackend.createAssignment(assignment);
+        let result = id ? await sharedBackend.updateAssignment(id, assignment) : await sharedBackend.createAssignment(assignment);
+        const savedId = result.assignment && result.assignment.id;
+        if (attachmentFile && savedId) {
+          button.textContent = "Uploading Assignment File…";
+          const savedAssignmentResult = result;
+          try {
+            result = await sharedBackend.uploadAssignmentAttachment(savedId, attachmentFile);
+          } catch (uploadError) {
+            assignments = normalizeAssignments(savedAssignmentResult.assignments);
+            assignmentEditorId = savedId;
+            assignmentEditorForm.dataset.id = savedId;
+            status.textContent = `The assignment was saved, but the file was not attached: ${uploadError.message}`;
+            status.classList.add("error");
+            button.disabled = false;
+            button.textContent = "Save Assignment";
+            return;
+          }
+        } else if (savedId && document.getElementById("assignmentRemoveAttachment")?.checked) {
+          result = await sharedBackend.removeAssignmentAttachment(savedId);
+        }
         assignments = normalizeAssignments(result.assignments);
         submissions = normalizeSubmissions(result.submissions);
         replacingAssignmentId = "";

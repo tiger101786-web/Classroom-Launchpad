@@ -1,6 +1,7 @@
 data/*.json
 data/*.tmp
 data/student-submissions/
+data/assignment-files/
 node_modules/
 work/auth-api-test-data*/
 work/auth-ui-test-data*/

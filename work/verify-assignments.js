@@ -58,11 +58,26 @@ async function waitForServer() {
       headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
       body: JSON.stringify({
         title: "Keyboard Shortcuts Practice", instructions: "Complete the practice sheet.", grades: ["6"],
-        acceptedTypes: [".pdf"], maxFileSizeMb: 5, allowResubmissions: true, status: "open"
+        acceptedTypes: [".pdf", ".docx", ".pptx"], maxFileSizeMb: 5, allowResubmissions: true, status: "open"
       })
     });
     assert.equal(created.response.status, 201);
     const assignmentId = created.payload.assignment.id;
+
+    const assignmentDocx = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00]);
+    const attached = await request(`/api/assignments/${assignmentId}/attachment`, {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Cookie: teacherCookie,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "X-File-Name": encodeURIComponent("Keyboard Shortcuts Assignment.docx")
+      },
+      body: assignmentDocx
+    });
+    assert.equal(attached.response.status, 201);
+    assert.equal(attached.payload.assignment.attachmentOriginalName, "Keyboard Shortcuts Assignment.docx");
+    assert.equal(attached.payload.assignment.attachmentStoredName, undefined);
 
     const registered = await request("/api/auth/register", {
       method: "POST",
@@ -75,6 +90,14 @@ async function waitForServer() {
     const studentAssignments = await request("/api/assignments", { headers: { Cookie: studentCookie } });
     assert.equal(studentAssignments.payload.assignments.length, 1);
     assert.equal(studentAssignments.payload.submissions.length, 0);
+    assert.equal(studentAssignments.payload.assignments[0].attachmentExtension, ".docx");
+
+    const studentAssignmentFile = await request(`/api/assignments/${assignmentId}/attachment`, { headers: { Cookie: studentCookie } });
+    assert.equal(studentAssignmentFile.response.status, 200);
+    assert(studentAssignmentFile.payload.equals(assignmentDocx));
+
+    const guestAssignmentFile = await request(`/api/assignments/${assignmentId}/attachment`);
+    assert.equal(guestAssignmentFile.response.status, 401);
 
     const pdf = Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF");
     const submitted = await request(`/api/assignments/${assignmentId}/submissions`, {
@@ -109,6 +132,22 @@ async function waitForServer() {
     const studentAfterReview = await request("/api/assignments", { headers: { Cookie: studentCookie } });
     assert.equal(studentAfterReview.payload.submissions[0].status, "returned");
     assert.match(studentAfterReview.payload.submissions[0].feedback, /Excellent work/);
+
+    const submittedWord = await request(`/api/assignments/${assignmentId}/submissions`, {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Cookie: studentCookie,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "X-File-Name": encodeURIComponent("Avery Shortcuts.docx")
+      },
+      body: assignmentDocx
+    });
+    assert.equal(submittedWord.response.status, 201);
+    assert.equal(submittedWord.payload.submission.extension, ".docx");
+    const teacherWordFile = await request(`/api/submissions/${submittedWord.payload.submission.id}/file`, { headers: { Cookie: teacherCookie } });
+    assert.equal(teacherWordFile.response.status, 200);
+    assert(teacherWordFile.payload.equals(assignmentDocx));
 
     const blockedLink = await request(`/api/assignments/${assignmentId}/link-submissions`, {
       method: "POST",

@@ -16,8 +16,10 @@ const root = __dirname;
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
 const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
 const submissionDir = path.join(dataDir, "student-submissions");
+const assignmentFileDir = path.join(dataDir, "assignment-files");
 const port = Number(process.env.PORT || 8080);
 const allowedStudentDomain = String(process.env.STUDENT_EMAIL_DOMAIN || "scscolts.org").trim().toLowerCase();
+const teacherTestStudentEmail = "tiger101786@gmail.com";
 const configuredSessionSecret = String(process.env.SESSION_SECRET || "");
 const sessionSecret = configuredSessionSecret || crypto.randomBytes(48).toString("hex");
 const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_ENV === "production" ? "" : "1017"));
@@ -25,14 +27,20 @@ const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 const loginAttempts = new Map();
 const maxSubmissionBytes = 15 * 1024 * 1024;
+const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const allowedSubmissionTypes = new Map([
   [".pdf", "application/pdf"],
+  [".doc", "application/msword"],
+  [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  [".ppt", "application/vnd.ms-powerpoint"],
+  [".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
   [".png", "image/png"],
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".webp", "image/webp"],
   [".txt", "text/plain"]
 ]);
+const allowedAssignmentFileTypes = new Map(allowedSubmissionTypes);
 const commonProjectHosts = new Set([
   "canva.com", "www.canva.com", "prezi.com", "www.prezi.com", "scratch.mit.edu",
   "docs.google.com", "drive.google.com", "sites.google.com", "padlet.com", "www.padlet.com"
@@ -82,6 +90,11 @@ function cleanGrade(value) {
   const cleaned = cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
   const classroomGrade = cleaned.match(/\b([4-7])(?:th)?\b/i);
   return classroomGrade ? classroomGrade[1] : cleaned;
+}
+
+function isAllowedStudentEmail(email) {
+  const normalized = normalizeEmail(email);
+  return normalized === teacherTestStudentEmail || normalized.endsWith(`@${allowedStudentDomain}`);
 }
 
 const moderationStatuses = new Set(["approved", "needs_review", "blocked"]);
@@ -306,7 +319,7 @@ function normalizeApprovedStudents(entries) {
   return (Array.isArray(entries) ? entries : []).flatMap(entry => {
     const source = typeof entry === "string" ? { email: entry } : (entry || {});
     const email = normalizeEmail(source.email);
-    if (!email || !email.endsWith(`@${allowedStudentDomain}`) || seen.has(email)) return [];
+    if (!email || !isAllowedStudentEmail(email) || seen.has(email)) return [];
     seen.add(email);
     return [{
       email,
@@ -362,7 +375,8 @@ function publicApprovedStudents(entries) {
     grade: student.grade,
     registered: Boolean(student.passwordHash),
     activationReady: Boolean(student.activationHash),
-    activationIssuedAt: student.activationIssuedAt
+    activationIssuedAt: student.activationIssuedAt,
+    teacherTestAccount: student.email === teacherTestStudentEmail
   }));
 }
 
@@ -420,7 +434,7 @@ function normalizeAssignment(source) {
   const grades = [...new Set((Array.isArray(source && source.grades) ? source.grades : [])
     .map(cleanGrade)
     .filter(Boolean))].slice(0, 12);
-  const acceptedTypes = [...new Set((Array.isArray(source && source.acceptedTypes) ? source.acceptedTypes : [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"])
+  const acceptedTypes = [...new Set((Array.isArray(source && source.acceptedTypes) ? source.acceptedTypes : [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".png", ".jpg", ".jpeg", ".webp", ".txt"])
     .map(value => String(value || "").trim().toLowerCase())
     .filter(value => allowedSubmissionTypes.has(value)))];
   return {
@@ -432,6 +446,11 @@ function normalizeAssignment(source) {
     acceptedTypes: acceptedTypes.length ? acceptedTypes : [".pdf"],
     maxFileSizeMb: Math.max(1, Math.min(15, Number(source && source.maxFileSizeMb) || 10)),
     allowResubmissions: source && source.allowResubmissions !== false,
+    attachmentOriginalName: cleanText(source && source.attachmentOriginalName, 180),
+    attachmentStoredName: cleanText(source && source.attachmentStoredName, 180).replace(/[^a-z0-9._-]/gi, ""),
+    attachmentExtension: cleanText(source && source.attachmentExtension, 10).toLowerCase(),
+    attachmentMimeType: cleanText(source && source.attachmentMimeType, 140),
+    attachmentSize: Math.max(0, Number(source && source.attachmentSize) || 0),
     status,
     createdAt: validIsoDate(source && source.createdAt, new Date().toISOString()),
     updatedAt: validIsoDate(source && source.updatedAt, new Date().toISOString())
@@ -539,16 +558,35 @@ function requestAcceptsGzip(req) {
 function ensureDb() {
   fs.mkdirSync(dataDir, { recursive: true });
   fs.mkdirSync(submissionDir, { recursive: true });
+  fs.mkdirSync(assignmentFileDir, { recursive: true });
   if (!fs.existsSync(dbPath)) writeDb(defaultDb);
+}
+
+function withTeacherTestStudent(db) {
+  const approvedStudents = normalizeApprovedStudents(db && db.approvedStudents);
+  if (!approvedStudents.some(student => student.email === teacherTestStudentEmail)) {
+    approvedStudents.push({
+      email: teacherTestStudentEmail,
+      name: "Mr. Nieves Test Student",
+      grade: "4",
+      passwordSalt: "",
+      passwordHash: "",
+      activationSalt: "",
+      activationHash: "",
+      activationIssuedAt: "",
+      createdAt: new Date().toISOString()
+    });
+  }
+  return { ...db, approvedStudents: normalizeApprovedStudents(approvedStudents) };
 }
 
 function readDb() {
   ensureDb();
   try {
-    return { ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) };
+    return withTeacherTestStudent({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
   } catch {
     writeDb(defaultDb);
-    return { ...defaultDb };
+    return withTeacherTestStudent({ ...defaultDb });
   }
 }
 
@@ -770,7 +808,7 @@ function publicState(db, session) {
     ...(teacher ? { moderation: teacherModerationData(db) } : {}),
     mutedStudents: teacher ? db.mutedStudents : [],
     websiteRequests: teacher ? db.websiteRequests : [],
-    assignments: visibleAssignments,
+    assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
     leaderboards: db.leaderboards,
     dailyLaunch: db.dailyLaunch,
@@ -1061,7 +1099,7 @@ async function handleAuthApi(req, res, pathname) {
       const activationCode = normalizeActivationCode(body.activationCode);
       const providedName = cleanText(body.name, 80);
       const providedGrade = cleanGrade(body.grade);
-      if (!email.endsWith(`@${allowedStudentDomain}`)) {
+      if (!isAllowedStudentEmail(email)) {
         sendJson(res, 403, { error: `Use an approved @${allowedStudentDomain} student email.`, code: "WRONG_DOMAIN" });
         return true;
       }
@@ -1239,7 +1277,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
       const beforeByEmail = new Map(before.map(student => [student.email, student]));
       let updated = 0;
       for (const incoming of incomingStudents) {
-        if (!incoming.email || !incoming.email.endsWith(`@${allowedStudentDomain}`)) continue;
+        if (!incoming.email || !isAllowedStudentEmail(incoming.email)) continue;
         const existing = beforeByEmail.get(incoming.email);
         if (existing) {
           const nextName = incoming.name || existing.name;
@@ -1343,6 +1381,10 @@ async function handleApprovedStudentsApi(req, res, pathname) {
   return true;
 }
 
+function publicAssignmentRecord(assignment) {
+  return { ...assignment, attachmentStoredName: undefined };
+}
+
 function assignmentApiPayload(db, session) {
   const state = publicState(db, session);
   return { assignments: state.assignments || [], submissions: state.submissions || [] };
@@ -1372,10 +1414,114 @@ async function handleAssignmentsApi(req, res, pathname) {
       const db = readDb();
       db.assignments = [assignment, ...normalizeAssignments(db.assignments)];
       writeDb(db);
-      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), assignment });
+      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), assignment: publicAssignmentRecord(assignment) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
+    return true;
+  }
+
+  const assignmentAttachment = pathname.match(/^\/api\/assignments\/([^/]+)\/attachment$/);
+  if (assignmentAttachment && ["GET", "HEAD"].includes(req.method)) {
+    const db = readDb();
+    const id = decodeURIComponent(assignmentAttachment[1]);
+    const assignment = normalizeAssignments(db.assignments).find(item => item.id === id);
+    const visible = assignment && publicState(db, session).assignments.some(item => item.id === id);
+    if (!visible || !assignment.attachmentStoredName) {
+      sendJson(res, 404, { error: "Assignment file not found." });
+      return true;
+    }
+    const filePath = assignmentAttachmentPath(assignment);
+    if (!filePath || !fs.existsSync(filePath)) {
+      sendJson(res, 404, { error: "The assignment file is unavailable." });
+      return true;
+    }
+    const previewable = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"].includes(assignment.attachmentExtension);
+    const inline = previewable && new URL(req.url, "http://localhost").searchParams.get("view") === "inline";
+    const stats = fs.statSync(filePath);
+    res.writeHead(200, {
+      "Content-Type": assignment.attachmentMimeType || "application/octet-stream",
+      "Content-Length": stats.size,
+      "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${safeDownloadName(assignment.attachmentOriginalName)}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'"
+    });
+    if (req.method === "HEAD") res.end();
+    else fs.createReadStream(filePath).pipe(res);
+    return true;
+  }
+
+  if (assignmentAttachment && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can attach assignment files." });
+      return true;
+    }
+    try {
+      const db = readDb();
+      const id = decodeURIComponent(assignmentAttachment[1]);
+      const existing = normalizeAssignments(db.assignments).find(item => item.id === id);
+      if (!existing) throw new Error("Assignment not found.");
+      const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
+      const extension = path.extname(originalName).toLowerCase();
+      if (!allowedAssignmentFileTypes.has(extension)) throw new Error("Attach a PDF, Word, PowerPoint, image, or text file.");
+      const declaredSize = Number(req.headers["content-length"] || 0);
+      if (declaredSize > maxAssignmentFileBytes) throw new Error("The assignment file must be 20 MB or smaller.");
+      const buffer = await readBinaryBody(req, maxAssignmentFileBytes);
+      if (!buffer.length) throw new Error("Please choose an assignment file.");
+      if (!fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
+      fs.mkdirSync(assignmentFileDir, { recursive: true });
+      const storedName = `${crypto.randomUUID()}${extension}`;
+      const finalPath = path.join(assignmentFileDir, storedName);
+      const tempPath = `${finalPath}.tmp`;
+      fs.writeFileSync(tempPath, buffer, { flag: "wx" });
+      fs.renameSync(tempPath, finalPath);
+      const updated = normalizeAssignment({
+        ...existing,
+        attachmentOriginalName: originalName,
+        attachmentStoredName: storedName,
+        attachmentExtension: extension,
+        attachmentMimeType: allowedAssignmentFileTypes.get(extension),
+        attachmentSize: buffer.length,
+        updatedAt: new Date().toISOString()
+      });
+      db.assignments = normalizeAssignments(db.assignments).map(item => item.id === id ? updated : item);
+      writeDb(db);
+      removeAssignmentAttachment(existing);
+      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), assignment: publicAssignmentRecord(updated) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (assignmentAttachment && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can remove assignment files." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(assignmentAttachment[1]);
+    const existing = normalizeAssignments(db.assignments).find(item => item.id === id);
+    if (!existing) {
+      sendJson(res, 404, { error: "Assignment not found." });
+      return true;
+    }
+    removeAssignmentAttachment(existing);
+    const updated = normalizeAssignment({
+      ...existing,
+      attachmentOriginalName: "",
+      attachmentStoredName: "",
+      attachmentExtension: "",
+      attachmentMimeType: "",
+      attachmentSize: 0,
+      updatedAt: new Date().toISOString()
+    });
+    db.assignments = normalizeAssignments(db.assignments).map(item => item.id === id ? updated : item);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session), assignment: publicAssignmentRecord(updated) });
     return true;
   }
 
@@ -1399,7 +1545,7 @@ async function handleAssignmentsApi(req, res, pathname) {
       if (!updated.title) throw new Error("Assignment title is required.");
       db.assignments = normalizeAssignments(db.assignments).map(item => item.id === id ? updated : item);
       writeDb(db);
-      sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session), assignment: updated });
+      sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session), assignment: publicAssignmentRecord(updated) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -1414,8 +1560,10 @@ async function handleAssignmentsApi(req, res, pathname) {
     }
     const db = readDb();
     const id = decodeURIComponent(assignmentItem[1]);
+    const removedAssignment = normalizeAssignments(db.assignments).find(item => item.id === id);
     const removedSubmissions = normalizeSubmissions(db.submissions).filter(item => item.assignmentId === id);
     removedSubmissions.forEach(removeSubmissionFile);
+    if (removedAssignment) removeAssignmentAttachment(removedAssignment);
     db.assignments = normalizeAssignments(db.assignments).filter(item => item.id !== id);
     db.submissions = normalizeSubmissions(db.submissions).filter(item => item.assignmentId !== id);
     writeDb(db);
@@ -2126,6 +2274,8 @@ function fileMatchesExtension(buffer, extension) {
   if (extension === ".png") return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   if ([".jpg", ".jpeg"].includes(extension)) return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
   if (extension === ".webp") return buffer.length >= 12 && buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  if ([".docx", ".pptx"].includes(extension)) return buffer.length >= 4 && ["504b0304", "504b0506", "504b0708"].includes(buffer.subarray(0, 4).toString("hex"));
+  if ([".doc", ".ppt"].includes(extension)) return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]));
   if (extension === ".txt") return !buffer.subarray(0, Math.min(buffer.length, 4096)).includes(0);
   return false;
 }
@@ -2139,6 +2289,21 @@ function submissionFilePath(submission) {
   if (!filename || filename !== submission.storedName) return "";
   const resolved = path.join(submissionDir, filename);
   return resolved.startsWith(`${submissionDir}${path.sep}`) ? resolved : "";
+}
+
+function assignmentAttachmentPath(assignment) {
+  const filename = path.basename(String(assignment && assignment.attachmentStoredName || ""));
+  if (!filename || filename !== assignment.attachmentStoredName) return "";
+  const resolved = path.join(assignmentFileDir, filename);
+  return resolved.startsWith(`${assignmentFileDir}${path.sep}`) ? resolved : "";
+}
+
+function removeAssignmentAttachment(assignment) {
+  const filePath = assignmentAttachmentPath(assignment);
+  if (!filePath) return;
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch {}
 }
 
 function canAccessSubmission(session, submission) {
