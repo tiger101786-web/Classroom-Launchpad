@@ -1168,6 +1168,18 @@ body[data-theme="night"] .category-count {
   border-left: 8px solid var(--blue);
 }
 
+.student-request-entry-card {
+  display: block;
+}
+
+.student-request-entry-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 558px) minmax(360px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 13px;
+}
+
 .request-heading {
   display: grid;
   gap: 9px;
@@ -1207,7 +1219,7 @@ body[data-theme="night"] .request-spirit {
 }
 
 @media (max-width: 1040px) and (min-width: 721px) {
-  .student-request-card {
+  .student-request-entry-layout {
     grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
   }
 
@@ -1231,8 +1243,12 @@ body[data-theme="night"] .request-spirit {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
-  align-self: stretch;
-  align-content: space-evenly;
+  align-self: start;
+  align-content: normal;
+}
+
+.student-request-entry-layout .student-request-form {
+  margin-top: 4px;
 }
 
 .student-request-form .field:nth-child(3) {
@@ -4026,7 +4042,7 @@ body[data-theme="night"] .class-timer-badge {
     justify-self: center;
   }
 
-  .category-grid, .dashboard-actions, .daily-launch-editor, .class-timer-editor, .random-activity-control, .timer-form, .student-request-card, .student-request-form, .colt-corner-preview, .colt-corner-card, .thread-form, .reply-form, .expectations-copy, .category-content { grid-template-columns: 1fr; }
+  .category-grid, .dashboard-actions, .daily-launch-editor, .class-timer-editor, .random-activity-control, .timer-form, .student-request-card, .student-request-entry-layout, .student-request-form, .colt-corner-preview, .colt-corner-card, .thread-form, .reply-form, .expectations-copy, .category-content { grid-template-columns: 1fr; }
 
   .class-timer-badge {
     right: 12px;

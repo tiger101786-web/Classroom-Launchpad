@@ -1667,33 +1667,35 @@ function renderStudentWebsiteRequest() {
     `;
   }
   return `
-    <section class="student-request-card">
+    <section class="student-request-card student-request-entry-card">
       <div class="request-heading">
         <span class="feature-kicker">Website Request</span>
         <h2>Suggest a Website</h2>
         <p>Send Mr. Nieves a website idea to review before it is added.</p>
+      </div>
+      <div class="student-request-entry-layout">
         <figure class="request-spirit">
           <video autoplay muted loop playsinline aria-label="Animated Colts school spirit graphic">
             <source data-src="assets/request-spirit.mp4?v=20260730-website-request-art1" type="video/mp4">
           </video>
         </figure>
+        <form id="studentRequestForm" class="student-request-form">
+          <div class="field">
+            <label>Requesting as</label>
+            <input value="${escapeHtml(authSession.name)}" readonly>
+          </div>
+          <div class="field">
+            <label for="requestGrade">Grade</label>
+            <input id="requestGrade" autocomplete="off" placeholder="Your grade">
+          </div>
+          <div class="field">
+            <label for="requestWebsiteName">Website name</label>
+            <input id="requestWebsiteName" autocomplete="off" placeholder="Website to request">
+          </div>
+          <button class="primary-btn" type="submit">Send Request</button>
+          <p id="studentRequestMessage" class="request-message" aria-live="polite"></p>
+        </form>
       </div>
-      <form id="studentRequestForm" class="student-request-form">
-        <div class="field">
-          <label>Requesting as</label>
-          <input value="${escapeHtml(authSession.name)}" readonly>
-        </div>
-        <div class="field">
-          <label for="requestGrade">Grade</label>
-          <input id="requestGrade" autocomplete="off" placeholder="Your grade">
-        </div>
-        <div class="field">
-          <label for="requestWebsiteName">Website name</label>
-          <input id="requestWebsiteName" autocomplete="off" placeholder="Website to request">
-        </div>
-        <button class="primary-btn" type="submit">Send Request</button>
-        <p id="studentRequestMessage" class="request-message" aria-live="polite"></p>
-      </form>
     </section>
   `;
 }
