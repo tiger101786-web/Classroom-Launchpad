@@ -1674,7 +1674,7 @@ function renderStudentWebsiteRequest() {
         <p>Send Mr. Nieves a website idea to review before it is added.</p>
         <figure class="request-spirit">
           <video autoplay muted loop playsinline aria-label="Animated Colts school spirit graphic">
-            <source data-src="assets/request-spirit.mp4" type="video/mp4">
+            <source data-src="assets/request-spirit.mp4?v=20260730-website-request-art1" type="video/mp4">
           </video>
         </figure>
       </div>
