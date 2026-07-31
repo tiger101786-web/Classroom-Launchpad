@@ -2546,7 +2546,7 @@ function startColtRunGame() {
   const runningAudio = createDeferredAudio("assets/colt-run-running-audio.mp3?v=20260728-gallop1", true);
   const mrNievesRunningAudio = createDeferredAudio("assets/colt-run-mr-nieves-running-audio.mp3?v=20260728-running1", true);
   const coinPickupAudio = createDeferredAudio("assets/colt-run-coin-pickup-audio.mp3?v=20260730-gameplay-cues1");
-  const getReadyAudio = createDeferredAudio("assets/colt-run-get-ready-audio.mp3?v=20260730-gameplay-cues1");
+  const getReadyAudio = createDeferredAudio("assets/colt-run-get-ready-audio.mp3?v=20260730-robot-countdown1");
   const nextLevelAudio = createDeferredAudio("assets/colt-run-next-level-audio.mp3?v=20260730-gameplay-cues1");
   const coltDeathAudios = [
     createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2"),
