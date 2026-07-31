@@ -434,6 +434,12 @@ const sharedBackend = {
     }
     return payload;
   },
+  submitAssignmentLink(id, project) {
+    return this.request(`/api/assignments/${encodeURIComponent(id)}/link-submissions`, {
+      method: "POST",
+      body: JSON.stringify(project)
+    });
+  },
   reviewSubmission(id, update) {
     return this.request(`/api/submissions/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(update) });
   },
@@ -1051,6 +1057,9 @@ function normalizeSubmissions(items) {
     studentName: String(item && item.studentName || ""),
     grade: String(item && item.grade || ""),
     originalName: String(item && item.originalName || ""),
+    submissionType: item && item.submissionType === "link" ? "link" : "file",
+    projectTitle: String(item && item.projectTitle || ""),
+    projectUrl: String(item && item.projectUrl || ""),
     extension: String(item && item.extension || "").toLowerCase(),
     mimeType: String(item && item.mimeType || ""),
     size: Number(item && item.size) || 0,
@@ -1097,10 +1106,15 @@ let dashboardGradeFilter = "all";
 let dashboardSubmissionStatus = "all";
 let assignmentEditorId = "";
 let replacingAssignmentId = "";
+let submissionMethod = "file";
+let dashboardGradebookGrade = "4";
+let dashboardGradebookAssignment = "all";
+let dashboardGradebookSearch = "";
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
   { id: "assignments", label: "Assignments & Submissions", icon: "▣" },
+  { id: "gradebooks", label: "Gradebooks", icon: "▦" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
   { id: "corner", label: "Colt Corner", icon: "✦" },
@@ -7207,6 +7221,11 @@ function formatFileSize(bytes) {
 
 function renderSubmissionPreview(submission) {
   if (!submission) return `<div class="submission-preview-empty"><strong>No file selected</strong><span>Your preview will appear here before you submit.</span></div>`;
+  if (submission.submissionType === "link") {
+    let domain = "External project";
+    try { domain = new URL(submission.projectUrl).hostname; } catch {}
+    return `<div class="submission-link-preview"><span class="submission-link-icon" aria-hidden="true">↗</span><span class="feature-kicker">Linked Project</span><h3>${escapeHtml(submission.projectTitle || "Student Project")}</h3><p>${escapeHtml(domain)}</p><a class="primary-btn" href="${escapeHtml(submission.projectUrl)}" target="_blank" rel="noopener noreferrer">Open Project</a></div>`;
+  }
   const src = `/api/submissions/${encodeURIComponent(submission.id)}/file?view=inline`;
   if ([".png", ".jpg", ".jpeg", ".webp"].includes(submission.extension)) {
     return `<img class="submission-preview-image" src="${src}" alt="Preview of ${escapeHtml(submission.originalName)}">`;
@@ -7265,8 +7284,10 @@ function renderAssignmentsPage() {
           ${submission ? `
             <section class="student-submission-receipt">
               <div class="submission-file-heading">
-                <div><strong>${escapeHtml(submission.originalName)}</strong><span>${formatFileSize(submission.size)} • Submitted ${escapeHtml(formatShortDate(submission.submittedAt))}</span></div>
-                <a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a>
+                <div><strong>${escapeHtml(submission.submissionType === "link" ? submission.projectTitle : submission.originalName)}</strong><span>${submission.submissionType === "link" ? "External project link" : formatFileSize(submission.size)} • Submitted ${escapeHtml(formatShortDate(submission.submittedAt))}</span></div>
+                ${submission.submissionType === "link"
+                  ? `<a class="outline-btn" href="${escapeHtml(submission.projectUrl)}" target="_blank" rel="noopener noreferrer">Open Project</a>`
+                  : `<a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a>`}
               </div>
               <div class="submission-preview-box">${renderSubmissionPreview(submission)}</div>
               ${submission.note ? `<p class="submission-note"><strong>Your note:</strong> ${escapeHtml(submission.note)}</p>` : ""}
@@ -7274,7 +7295,11 @@ function renderAssignmentsPage() {
               ${selected.allowResubmissions && selected.status === "open" ? `<button class="primary-btn" data-action="replaceSubmission">Replace Submission</button>` : ""}
             </section>
           ` : `
-            <form id="studentSubmissionForm" class="student-upload-form" data-assignment-id="${escapeHtml(selected.id)}">
+            <div class="submission-method-tabs" role="tablist" aria-label="Submission method">
+              <button type="button" data-action="submissionMethod" data-method="file" class="${submissionMethod === "file" ? "is-active" : ""}">Upload a File</button>
+              <button type="button" data-action="submissionMethod" data-method="link" class="${submissionMethod === "link" ? "is-active" : ""}">Submit a Project Link</button>
+            </div>
+            ${submissionMethod === "file" ? `<form id="studentSubmissionForm" class="student-upload-form" data-assignment-id="${escapeHtml(selected.id)}">
               <label class="student-upload-drop" for="studentSubmissionFile">
                 <span class="upload-icon" aria-hidden="true">⇧</span>
                 <strong>Drop your file here</strong>
@@ -7292,7 +7317,14 @@ function renderAssignmentsPage() {
                 </div>
               </div>
               <p id="studentSubmissionMessage" class="request-message" aria-live="polite"></p>
-            </form>
+            </form>` : `<form id="studentLinkSubmissionForm" class="student-upload-form student-link-form" data-assignment-id="${escapeHtml(selected.id)}">
+              <div class="submission-link-help"><strong>Submit work created on another website</strong><p>Paste the share link from Canva, Prezi, Google, Scratch, or another website approved by Mr. Nieves. Make sure your teacher has permission to view it.</p></div>
+              <label class="field"><span>Project title</span><input id="studentProjectTitle" maxlength="180" placeholder="Example: My Ecosystem Presentation" required></label>
+              <label class="field"><span>Project share link</span><input id="studentProjectUrl" type="url" inputmode="url" placeholder="https://…" required></label>
+              <label class="field"><span>Optional note</span><textarea id="studentProjectNote" maxlength="500" placeholder="Add a short note for Mr. Nieves"></textarea></label>
+              <div class="student-submit-footer"><p>Your name and grade are added automatically.</p><div class="actions">${replacingAssignmentId === selected.id ? `<button class="outline-btn" type="button" data-action="cancelReplacement">Cancel</button>` : ""}<button class="primary-btn" type="submit">Submit Link to Mr. Nieves</button></div></div>
+              <p id="studentLinkSubmissionMessage" class="request-message" aria-live="polite"></p>
+            </form>`}
           `}
         ` : `<div class="assignment-list-empty"><h2>No assignments yet</h2><p>New assignments will appear here when Mr. Nieves posts them.</p></div>`}
       </main>
@@ -7994,7 +8026,7 @@ function renderTeacherSubmissionPreview(submission) {
   return `
     <article class="teacher-submission-preview">
       <header><div><span class="feature-kicker">Student Submission</span><h3>${escapeHtml(submission.studentName)}</h3><p>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")} • ${escapeHtml(formatShortDate(submission.submittedAt))}</p></div><span class="assignment-card-status is-${escapeHtml(submission.status)}">${escapeHtml(submission.status)}</span></header>
-      <div class="submission-file-heading"><div><strong>${escapeHtml(submission.originalName)}</strong><span>${formatFileSize(submission.size)}</span></div><a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a></div>
+      <div class="submission-file-heading"><div><strong>${escapeHtml(submission.submissionType === "link" ? submission.projectTitle : submission.originalName)}</strong><span>${submission.submissionType === "link" ? "External project link" : formatFileSize(submission.size)}</span></div>${submission.submissionType === "link" ? `<a class="outline-btn" href="${escapeHtml(submission.projectUrl)}" target="_blank" rel="noopener noreferrer">Open Project</a>` : `<a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a>`}</div>
       <div class="submission-preview-box teacher-file-preview">${renderSubmissionPreview(submission)}</div>
       ${submission.note ? `<div class="submission-note"><strong>Student note:</strong> ${escapeHtml(submission.note)}</div>` : ""}
       <form id="submissionReviewForm" data-id="${escapeHtml(submission.id)}">
@@ -8032,8 +8064,82 @@ function renderDashboardAssignments() {
   `;
 }
 
+function studentGradeNumber(student) {
+  const match = String(student && student.grade || "").match(/[4-7]/);
+  return match ? match[0] : "";
+}
+
+function gradebookAssignmentsFor(grade) {
+  return assignments.filter(assignment => assignment.status !== "archived" && assignment.status !== "draft" && (
+    !assignment.grades.length || assignment.grades.includes(grade)
+  ));
+}
+
+function renderGradebookStudentRow(student, gradeAssignments) {
+  const email = String(student.email || "").toLowerCase();
+  const relevantAssignments = dashboardGradebookAssignment === "all"
+    ? gradeAssignments
+    : gradeAssignments.filter(item => item.id === dashboardGradebookAssignment);
+  const studentSubmissions = submissions.filter(item => item.studentEmail.toLowerCase() === email && relevantAssignments.some(assignment => assignment.id === item.assignmentId));
+  const submitted = studentSubmissions.length;
+  const missing = Math.max(0, relevantAssignments.length - submitted);
+  const reviewed = studentSubmissions.filter(item => item.status === "reviewed").length;
+  const returned = studentSubmissions.filter(item => item.status === "returned").length;
+  const latest = [...studentSubmissions].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt))[0];
+  const focusedAssignment = dashboardGradebookAssignment === "all" ? null : relevantAssignments[0];
+  const focusedSubmission = focusedAssignment ? studentSubmissions.find(item => item.assignmentId === focusedAssignment.id) : null;
+  return `
+    <article class="gradebook-student-row">
+      <div class="gradebook-student-name"><span class="submission-student-initial">${escapeHtml((student.name || "S").charAt(0))}</span><span><strong>${escapeHtml(student.name || "Student")}</strong><small>${escapeHtml(student.email || "")}</small></span></div>
+      <span>${relevantAssignments.length}</span>
+      <span class="gradebook-positive">${submitted}</span>
+      <span class="gradebook-missing ${missing ? "has-missing" : ""}">${missing}</span>
+      <span>${reviewed}</span>
+      <span>${returned}</span>
+      <span class="gradebook-latest">${focusedAssignment
+        ? `<span class="assignment-card-status is-${escapeHtml(focusedSubmission ? focusedSubmission.status : "todo")}">${focusedSubmission ? escapeHtml(focusedSubmission.status) : "Missing"}</span>`
+        : (latest ? escapeHtml(formatShortDate(latest.submittedAt)) : "No submissions")}</span>
+      <button class="outline-btn" data-action="viewGradebookStudent" data-student="${escapeHtml(student.name || student.email)}">View Work</button>
+    </article>
+  `;
+}
+
+function renderDashboardGradebooks() {
+  const grade = dashboardGradebookGrade;
+  const gradeAssignments = gradebookAssignmentsFor(grade);
+  const query = dashboardGradebookSearch.trim().toLowerCase();
+  const gradeStudents = approvedStudents.filter(student => studentGradeNumber(student) === grade);
+  const students = gradeStudents
+    .filter(student => !query || [student.name, student.email].some(value => String(value || "").toLowerCase().includes(query)))
+    .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+  const gradeStudentEmails = new Set(gradeStudents.map(student => String(student.email || "").toLowerCase()));
+  const gradeSubmissions = submissions.filter(item => gradeStudentEmails.has(item.studentEmail.toLowerCase()) && gradeAssignments.some(assignment => assignment.id === item.assignmentId));
+  const totalExpected = gradeStudents.length * (dashboardGradebookAssignment === "all" ? gradeAssignments.length : Math.min(1, gradeAssignments.filter(item => item.id === dashboardGradebookAssignment).length));
+  const visibleSubmitted = dashboardGradebookAssignment === "all" ? gradeSubmissions : gradeSubmissions.filter(item => item.assignmentId === dashboardGradebookAssignment);
+  return `
+    <section class="gradebook-dashboard">
+      <div class="gradebook-tabs" role="tablist" aria-label="Gradebook grade levels">${["4", "5", "6", "7"].map(value => `<button class="${grade === value ? "is-active" : ""}" data-action="gradebookGrade" data-grade="${value}">Grade ${value}<span>${approvedStudents.filter(student => studentGradeNumber(student) === value).length}</span></button>`).join("")}</div>
+      <div class="gradebook-summary-grid">
+        <div><span>Students</span><strong>${gradeStudents.length}</strong></div>
+        <div><span>Assignments</span><strong>${gradeAssignments.length}</strong></div>
+        <div><span>Submitted</span><strong>${visibleSubmitted.length}</strong></div>
+        <div><span>Missing</span><strong>${Math.max(0, totalExpected - visibleSubmitted.length)}</strong></div>
+      </div>
+      <div class="gradebook-toolbar">
+        <label class="dashboard-search"><span class="sr-only">Search this gradebook</span><input id="dashboardGradebookSearch" type="search" value="${escapeHtml(dashboardGradebookSearch)}" placeholder="Search Grade ${grade} students…"></label>
+        <label><span class="sr-only">Choose assignment</span><select id="dashboardGradebookAssignment"><option value="all">All assignments</option>${gradeAssignments.map(assignment => `<option value="${escapeHtml(assignment.id)}" ${dashboardGradebookAssignment === assignment.id ? "selected" : ""}>${escapeHtml(assignment.title)}</option>`).join("")}</select></label>
+      </div>
+      <div class="gradebook-table" aria-live="polite">
+        <div class="gradebook-header" aria-hidden="true"><span>Student</span><span>Assigned</span><span>Submitted</span><span>Missing</span><span>Reviewed</span><span>Returned</span><span>Latest / Status</span><span>Action</span></div>
+        ${students.length ? students.map(student => renderGradebookStudentRow(student, gradeAssignments)).join("") : emptyCard(`No Grade ${grade} students match this search.`)}
+      </div>
+    </section>
+  `;
+}
+
 function renderDashboardSection() {
   if (dashboardSection === "assignments") return renderDashboardAssignments();
+  if (dashboardSection === "gradebooks") return renderDashboardGradebooks();
   if (dashboardSection === "students") return renderApprovedStudentManager();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
   if (dashboardSection === "corner") return renderDashboardColtCorner();
@@ -8309,6 +8415,25 @@ function attachScreenHandlers() {
     const control = document.getElementById(id);
     if (control) control.addEventListener("change", event => { setValue(event.target.value); selectedSubmissionId = ""; render(); });
   });
+  const gradebookSearch = document.getElementById("dashboardGradebookSearch");
+  if (gradebookSearch) {
+    gradebookSearch.addEventListener("input", event => {
+      dashboardGradebookSearch = event.target.value;
+      render();
+      const next = document.getElementById("dashboardGradebookSearch");
+      if (next) {
+        next.focus();
+        next.setSelectionRange(dashboardGradebookSearch.length, dashboardGradebookSearch.length);
+      }
+    });
+  }
+  const gradebookAssignment = document.getElementById("dashboardGradebookAssignment");
+  if (gradebookAssignment) {
+    gradebookAssignment.addEventListener("change", event => {
+      dashboardGradebookAssignment = event.target.value;
+      render();
+    });
+  }
   const search = document.getElementById("studentSearch");
   if (search) {
     search.addEventListener("input", event => {
@@ -8671,6 +8796,34 @@ function attachScreenHandlers() {
     });
   }
 
+  const studentLinkSubmissionForm = document.getElementById("studentLinkSubmissionForm");
+  if (studentLinkSubmissionForm) {
+    studentLinkSubmissionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const message = document.getElementById("studentLinkSubmissionMessage");
+      const button = studentLinkSubmissionForm.querySelector('button[type="submit"]');
+      button.disabled = true;
+      button.textContent = "Submitting…";
+      try {
+        const result = await sharedBackend.submitAssignmentLink(studentLinkSubmissionForm.dataset.assignmentId, {
+          projectTitle: document.getElementById("studentProjectTitle").value.trim(),
+          projectUrl: document.getElementById("studentProjectUrl").value.trim(),
+          note: document.getElementById("studentProjectNote").value.trim()
+        });
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        replacingAssignmentId = "";
+        assignmentView = "submitted";
+        render();
+      } catch (error) {
+        message.textContent = error.message;
+        message.classList.add("error");
+        button.disabled = false;
+        button.textContent = "Submit Link to Mr. Nieves";
+      }
+    });
+  }
+
   const submissionReviewForm = document.getElementById("submissionReviewForm");
   if (submissionReviewForm) {
     submissionReviewForm.addEventListener("submit", async event => {
@@ -8953,6 +9106,23 @@ app.addEventListener("click", async event => {
     render();
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  if (action === "gradebookGrade") {
+    dashboardGradebookGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
+    dashboardGradebookAssignment = "all";
+    dashboardGradebookSearch = "";
+    render();
+  }
+  if (action === "viewGradebookStudent") {
+    dashboardSubmissionSearch = target.dataset.student || "";
+    dashboardAssignmentFilter = dashboardGradebookAssignment;
+    dashboardGradeFilter = dashboardGradebookGrade;
+    dashboardSubmissionStatus = "all";
+    dashboardSection = "assignments";
+    selectedSubmissionId = "";
+    sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+    render();
+    document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   if (action === "login") {
     authMessage = "";
     setScreen({ name: "login" });
@@ -8978,6 +9148,10 @@ app.addEventListener("click", async event => {
   if (action === "assignmentView") {
     assignmentView = target.dataset.view || "todo";
     selectedAssignmentId = "";
+    render();
+  }
+  if (action === "submissionMethod") {
+    submissionMethod = target.dataset.method === "link" ? "link" : "file";
     render();
   }
   if (action === "selectAssignment") {

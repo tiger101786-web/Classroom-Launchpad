@@ -110,6 +110,38 @@ async function waitForServer() {
     assert.equal(studentAfterReview.payload.submissions[0].status, "returned");
     assert.match(studentAfterReview.payload.submissions[0].feedback, /Excellent work/);
 
+    const blockedLink = await request(`/api/assignments/${assignmentId}/link-submissions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: origin, Cookie: studentCookie },
+      body: JSON.stringify({ projectTitle: "Unsafe Project", projectUrl: "https://unapproved-example.invalid/project" })
+    });
+    assert.equal(blockedLink.response.status, 400);
+
+    const linked = await request(`/api/assignments/${assignmentId}/link-submissions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: origin, Cookie: studentCookie },
+      body: JSON.stringify({
+        projectTitle: "Keyboard Shortcuts Presentation",
+        projectUrl: "https://www.canva.com/design/example/view",
+        note: "My shared Canva project."
+      })
+    });
+    assert.equal(linked.response.status, 201, JSON.stringify(linked.payload));
+    assert.equal(linked.payload.submission.submissionType, "link");
+    assert.equal(linked.payload.submission.projectTitle, "Keyboard Shortcuts Presentation");
+    assert.equal(linked.payload.submission.projectUrl, "https://www.canva.com/design/example/view");
+    assert.equal(linked.payload.submissions.length, 1);
+
+    const linkAsFile = await request(`/api/submissions/${linked.payload.submission.id}/file?view=inline`, { headers: { Cookie: teacherCookie } });
+    assert.equal(linkAsFile.response.status, 404);
+
+    const returnedLink = await request(`/api/submissions/${linked.payload.submission.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
+      body: JSON.stringify({ status: "returned", feedback: "Please update the sharing setting." })
+    });
+    assert.equal(returnedLink.response.status, 200);
+
     const removed = await request(`/api/assignments/${assignmentId}`, {
       method: "DELETE", headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie }, body: "{}"
     });
@@ -117,7 +149,7 @@ async function waitForServer() {
     assert.equal(removed.payload.assignments.length, 0);
     assert.equal(removed.payload.submissions.length, 0);
 
-    console.log("Assignments and submissions verification passed.");
+    console.log("Assignments, file submissions, and approved project links verification passed.");
   } finally {
     server.kill();
     fs.rmSync(dataDir, { recursive: true, force: true });

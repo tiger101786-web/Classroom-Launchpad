@@ -33,6 +33,10 @@ const allowedSubmissionTypes = new Map([
   [".webp", "image/webp"],
   [".txt", "text/plain"]
 ]);
+const commonProjectHosts = new Set([
+  "canva.com", "www.canva.com", "prezi.com", "www.prezi.com", "scratch.mit.edu",
+  "docs.google.com", "drive.google.com", "sites.google.com", "padlet.com", "www.padlet.com"
+]);
 
 const defaultDb = {
   links: null,
@@ -75,7 +79,9 @@ function cleanMultilineText(value, maxLength) {
 }
 
 function cleanGrade(value) {
-  return cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
+  const cleaned = cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
+  const classroomGrade = cleaned.match(/\b([4-7])(?:th)?\b/i);
+  return classroomGrade ? classroomGrade[1] : cleaned;
 }
 
 const moderationStatuses = new Set(["approved", "needs_review", "blocked"]);
@@ -449,6 +455,9 @@ function normalizeSubmission(source) {
     studentName: cleanText(source && source.studentName, 80),
     grade: cleanGrade(source && source.grade),
     originalName: cleanText(source && source.originalName, 180),
+    submissionType: source && source.submissionType === "link" ? "link" : "file",
+    projectTitle: cleanText(source && source.projectTitle, 180),
+    projectUrl: cleanText(source && source.projectUrl, 2000),
     storedName: cleanText(source && source.storedName, 180).replace(/[^a-z0-9._-]/gi, ""),
     extension: cleanText(source && source.extension, 10).toLowerCase(),
     mimeType: cleanText(source && source.mimeType, 100),
@@ -464,7 +473,34 @@ function normalizeSubmission(source) {
 function normalizeSubmissions(entries) {
   return (Array.isArray(entries) ? entries : []).slice(0, 5000)
     .map(normalizeSubmission)
-    .filter(item => item.assignmentId && item.studentEmail && item.storedName);
+    .filter(item => item.assignmentId && item.studentEmail && (
+      (item.submissionType === "file" && item.storedName)
+      || (item.submissionType === "link" && item.projectUrl)
+    ));
+}
+
+function approvedProjectUrl(db, value) {
+  let parsed;
+  try {
+    parsed = new URL(String(value || "").trim());
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password) return null;
+  const hostname = parsed.hostname.toLowerCase().replace(/\.$/, "");
+  if (!hostname || hostname === "localhost" || /^[\d.:]+$/.test(hostname)) return null;
+  const approvedHosts = new Set([
+    ...commonProjectHosts,
+    ...(normalizeLinks(db && db.links) || []).flatMap(link => {
+      try {
+        return link.active ? [new URL(link.url).hostname.toLowerCase()] : [];
+      } catch {
+        return [];
+      }
+    })
+  ]);
+  const allowed = [...approvedHosts].some(host => hostname === host || hostname.endsWith(`.${host}`));
+  return allowed ? parsed.toString() : null;
 }
 
 function staticCacheControl(url, extension) {
@@ -1437,6 +1473,46 @@ async function handleAssignmentsApi(req, res, pathname) {
         feedback: "",
         submittedAt: now,
         updatedAt: now
+      });
+      if (existing) removeSubmissionFile(existing);
+      db.submissions = [submission, ...normalizeSubmissions(db.submissions).filter(item => !(
+        item.assignmentId === assignmentId && item.studentEmail === normalizeEmail(session.email)
+      ))];
+      writeDb(db);
+      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), submission: { ...submission, storedName: undefined } });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const submitLink = pathname.match(/^\/api\/assignments\/([^/]+)\/link-submissions$/);
+  if (submitLink && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "student") {
+      sendJson(res, 403, { error: "Only student accounts can submit project links." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      const assignmentId = decodeURIComponent(submitLink[1]);
+      const assignment = normalizeAssignments(db.assignments).find(item => item.id === assignmentId);
+      if (!assignment || assignment.status !== "open") throw new Error("This assignment is not accepting submissions.");
+      const grade = cleanGrade(session.grade);
+      if (assignment.grades.length && !assignment.grades.includes(grade)) throw new Error("This assignment is not assigned to your grade.");
+      const projectTitle = cleanText(body.projectTitle, 180);
+      const projectUrl = approvedProjectUrl(db, body.projectUrl);
+      if (!projectTitle) throw new Error("Please add a project title.");
+      if (!projectUrl) throw new Error("Use an approved HTTPS project link. Ask Mr. Nieves if the website needs to be approved.");
+      const existing = normalizeSubmissions(db.submissions).find(item => item.assignmentId === assignmentId && item.studentEmail === normalizeEmail(session.email));
+      if (existing && !assignment.allowResubmissions) throw new Error("This assignment does not allow replacement submissions.");
+      const now = new Date().toISOString();
+      const submission = normalizeSubmission({
+        id: crypto.randomUUID(), assignmentId, studentEmail: session.email,
+        studentName: studentDisplayName(session), grade, submissionType: "link",
+        projectTitle, projectUrl, note: body.note, status: "submitted", feedback: "",
+        submittedAt: now, updatedAt: now
       });
       if (existing) removeSubmissionFile(existing);
       db.submissions = [submission, ...normalizeSubmissions(db.submissions).filter(item => !(
