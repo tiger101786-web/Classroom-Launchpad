@@ -1659,8 +1659,8 @@ function renderStudentWebsiteRequest() {
       <section class="student-request-card protected-feature-card">
         <div class="request-heading">
           <span class="feature-kicker">Protected Student Feature</span>
-          <h2>Suggest a Website</h2>
-          <p>Approved students can sign in to send website suggestions.</p>
+          <h2>Suggest an Addition</h2>
+          <p>Approved students can sign in to send website or feature suggestions.</p>
         </div>
         <button class="primary-btn" data-action="login">Student Login</button>
       </section>
@@ -1669,9 +1669,9 @@ function renderStudentWebsiteRequest() {
   return `
     <section class="student-request-card student-request-entry-card">
       <div class="request-heading">
-        <span class="feature-kicker">Website Request</span>
-        <h2>Suggest a Website</h2>
-        <p>Send Mr. Nieves a website idea to review before it is added.</p>
+        <span class="feature-kicker">Launchpad Request</span>
+        <h2>Suggest an Addition</h2>
+        <p>Send Mr. Nieves a website or feature idea to review for Classroom Launchpad.</p>
       </div>
       <figure class="request-spirit">
         <video autoplay muted loop playsinline aria-label="Animated Colts school spirit graphic">
@@ -1688,10 +1688,10 @@ function renderStudentWebsiteRequest() {
           <input id="requestGrade" autocomplete="off" placeholder="Your grade">
         </div>
         <div class="field">
-          <label for="requestWebsiteName">Website name</label>
-          <input id="requestWebsiteName" autocomplete="off" placeholder="Website to request">
+          <label for="requestWebsiteName">Website or feature</label>
+          <input id="requestWebsiteName" autocomplete="off" placeholder="Example: a website, calculator, timer, or new tool">
         </div>
-        <button class="primary-btn" type="submit">Send Request</button>
+        <button class="primary-btn" type="submit">Submit Request</button>
         <p id="studentRequestMessage" class="request-message" aria-live="polite"></p>
       </form>
     </section>
@@ -8429,7 +8429,7 @@ function validateThreadReply(reply) {
 function validateWebsiteRequest(request) {
   if (!request.studentName) return "Please add your name.";
   if (!request.grade) return "Please add your grade.";
-  if (!request.websiteName) return "Please add the website name.";
+  if (!request.websiteName) return "Please add the website or feature.";
   return "";
 }
 
