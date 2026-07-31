@@ -1169,15 +1169,32 @@ body[data-theme="night"] .category-count {
 }
 
 .student-request-entry-card {
-  display: block;
-}
-
-.student-request-entry-layout {
   display: grid;
   grid-template-columns: minmax(0, 558px) minmax(360px, 1fr);
-  gap: 20px;
+  grid-template-rows: auto 1fr;
+  column-gap: 20px;
+  row-gap: 0;
   align-items: start;
-  margin-top: 13px;
+  height: 500px;
+}
+
+.student-request-entry-card > .request-heading {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 21px;
+}
+
+.student-request-entry-card > .request-spirit {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin: 0;
+}
+
+.student-request-entry-card > .student-request-form {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 24px;
 }
 
 .request-heading {
@@ -1219,7 +1236,7 @@ body[data-theme="night"] .request-spirit {
 }
 
 @media (max-width: 1040px) and (min-width: 721px) {
-  .student-request-entry-layout {
+  .student-request-entry-card {
     grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
   }
 
@@ -1245,10 +1262,6 @@ body[data-theme="night"] .request-spirit {
   align-items: end;
   align-self: start;
   align-content: normal;
-}
-
-.student-request-entry-layout .student-request-form {
-  margin-top: 4px;
 }
 
 .student-request-form .field:nth-child(3) {
@@ -4042,7 +4055,31 @@ body[data-theme="night"] .class-timer-badge {
     justify-self: center;
   }
 
-  .category-grid, .dashboard-actions, .daily-launch-editor, .class-timer-editor, .random-activity-control, .timer-form, .student-request-card, .student-request-entry-layout, .student-request-form, .colt-corner-preview, .colt-corner-card, .thread-form, .reply-form, .expectations-copy, .category-content { grid-template-columns: 1fr; }
+  .category-grid, .dashboard-actions, .daily-launch-editor, .class-timer-editor, .random-activity-control, .timer-form, .student-request-card, .student-request-form, .colt-corner-preview, .colt-corner-card, .thread-form, .reply-form, .expectations-copy, .category-content { grid-template-columns: 1fr; }
+
+  .student-request-entry-card {
+    height: auto;
+    grid-template-rows: auto;
+  }
+
+  .student-request-entry-card > .request-heading,
+  .student-request-entry-card > .request-spirit,
+  .student-request-entry-card > .student-request-form {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .student-request-entry-card > .request-heading {
+    margin-top: 0;
+  }
+
+  .student-request-entry-card > .request-spirit {
+    margin-top: 13px;
+  }
+
+  .student-request-entry-card > .student-request-form {
+    margin-top: 17px;
+  }
 
   .class-timer-badge {
     right: 12px;
