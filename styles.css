@@ -1231,6 +1231,8 @@ body[data-theme="night"] .request-spirit {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
+  align-self: stretch;
+  align-content: space-evenly;
 }
 
 .student-request-form .field:nth-child(3) {
