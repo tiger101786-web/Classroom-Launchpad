@@ -403,6 +403,43 @@ const sharedBackend = {
   saveWebsiteRequests(requests) {
     return this.request("/api/website-requests", { method: "PUT", body: JSON.stringify({ websiteRequests: requests }) });
   },
+  loadAssignments() {
+    return this.request("/api/assignments");
+  },
+  createAssignment(assignment) {
+    return this.request("/api/assignments", { method: "POST", body: JSON.stringify(assignment) });
+  },
+  updateAssignment(id, assignment) {
+    return this.request(`/api/assignments/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(assignment) });
+  },
+  deleteAssignment(id) {
+    return this.request(`/api/assignments/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
+  },
+  async submitAssignment(id, file, note) {
+    if (!this.enabled) return null;
+    const response = await fetch(`/api/assignments/${encodeURIComponent(id)}/submissions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "X-File-Name": encodeURIComponent(file.name),
+        "X-Submission-Note": encodeURIComponent(note || "")
+      },
+      body: file
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      const error = new Error(payload && payload.error ? payload.error : `Upload failed: ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    return payload;
+  },
+  reviewSubmission(id, update) {
+    return this.request(`/api/submissions/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(update) });
+  },
+  deleteSubmission(id) {
+    return this.request(`/api/submissions/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
+  },
   saveDailyLaunch(launch) {
     return this.request("/api/daily-launch", { method: "PUT", body: JSON.stringify({ message: launch.message }) });
   },
@@ -990,6 +1027,41 @@ const store = {
   }
 };
 
+function normalizeAssignments(items) {
+  return (Array.isArray(items) ? items : []).map(item => ({
+    id: String(item && item.id || ""),
+    title: String(item && item.title || ""),
+    instructions: String(item && item.instructions || ""),
+    grades: Array.isArray(item && item.grades) ? item.grades.map(String) : [],
+    dueAt: String(item && item.dueAt || ""),
+    acceptedTypes: Array.isArray(item && item.acceptedTypes) ? item.acceptedTypes.map(String) : [".pdf"],
+    maxFileSizeMb: Number(item && item.maxFileSizeMb) || 10,
+    allowResubmissions: item && item.allowResubmissions !== false,
+    status: String(item && item.status || "draft"),
+    createdAt: String(item && item.createdAt || ""),
+    updatedAt: String(item && item.updatedAt || "")
+  })).filter(item => item.id && item.title);
+}
+
+function normalizeSubmissions(items) {
+  return (Array.isArray(items) ? items : []).map(item => ({
+    id: String(item && item.id || ""),
+    assignmentId: String(item && item.assignmentId || ""),
+    studentEmail: String(item && item.studentEmail || ""),
+    studentName: String(item && item.studentName || ""),
+    grade: String(item && item.grade || ""),
+    originalName: String(item && item.originalName || ""),
+    extension: String(item && item.extension || "").toLowerCase(),
+    mimeType: String(item && item.mimeType || ""),
+    size: Number(item && item.size) || 0,
+    note: String(item && item.note || ""),
+    status: String(item && item.status || "submitted"),
+    feedback: String(item && item.feedback || ""),
+    submittedAt: String(item && item.submittedAt || ""),
+    updatedAt: String(item && item.updatedAt || "")
+  })).filter(item => item.id && item.assignmentId);
+}
+
 let links = store.loadLinks();
 let websiteRequests = store.loadRequests();
 let classThreads = store.loadThreads();
@@ -1014,9 +1086,21 @@ let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
 let activationCodeResults = [];
+let assignments = [];
+let submissions = [];
+let selectedAssignmentId = "";
+let selectedSubmissionId = "";
+let assignmentView = "todo";
+let dashboardSubmissionSearch = "";
+let dashboardAssignmentFilter = "all";
+let dashboardGradeFilter = "all";
+let dashboardSubmissionStatus = "all";
+let assignmentEditorId = "";
+let replacingAssignmentId = "";
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
+  { id: "assignments", label: "Assignments & Submissions", icon: "▣" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
   { id: "corner", label: "Colt Corner", icon: "✦" },
@@ -1101,6 +1185,8 @@ function sharedSnapshot() {
     classThreads,
     mutedStudents,
     websiteRequests,
+    assignments,
+    submissions,
     dailyLaunch,
     classTimer,
     randomActivitySettings,
@@ -1123,6 +1209,8 @@ async function loadSharedState(shouldRender = true) {
     const incomingModerationQueue = normalizeModerationItems(state && state.moderation && state.moderation.pending);
     const incomingRecentlyModerated = normalizeModerationItems(state && state.moderation && state.moderation.recent);
     const incomingRequests = normalizeRequests(state && state.websiteRequests);
+    const incomingAssignments = normalizeAssignments(state && state.assignments);
+    const incomingSubmissions = normalizeSubmissions(state && state.submissions);
     const incomingLaunch = normalizeDailyLaunch((state && state.dailyLaunch) || extractDailyLaunchFromRequests(state && state.websiteRequests));
     const incomingTimer = chooseSharedClassTimer(state && state.classTimer, extractClassTimerFromRequests(state && state.websiteRequests));
     const incomingRandomActivity = chooseSharedRandomActivitySettings(state && state.randomActivity, extractRandomActivitySettingsFromRequests(state && state.websiteRequests));
@@ -1146,6 +1234,8 @@ async function loadSharedState(shouldRender = true) {
     moderationQueue = incomingModerationQueue;
     recentlyModerated = incomingRecentlyModerated;
     websiteRequests = incomingRequests;
+    assignments = incomingAssignments;
+    submissions = incomingSubmissions;
     dailyLaunch = incomingLaunch;
     classTimer = incomingTimer;
     randomActivitySettings = incomingRandomActivity;
@@ -1573,6 +1663,7 @@ function renderHomeDefault() {
     <section class="category-grid">
       ${categories.map(category => categoryCard(category)).join("")}
     </section>
+    ${renderAssignmentsPreview()}
     ${renderColtCornerPreview()}
     ${renderStudentWebsiteRequest()}
   `;
@@ -7077,6 +7168,138 @@ function renderPin() {
   `;
 }
 
+function renderAssignmentsPreview() {
+  const studentSubmissions = submissions.filter(item => item.studentEmail === authSession.email);
+  const remaining = assignments.filter(assignment => !studentSubmissions.some(item => item.assignmentId === assignment.id)).length;
+  return `
+    <section class="assignments-home-card">
+      <div class="assignments-home-copy">
+        <span class="feature-kicker">Student Work</span>
+        <h2>Assignments &amp; Submissions</h2>
+        <p>${isApprovedStudent()
+          ? `${remaining} ${remaining === 1 ? "assignment is" : "assignments are"} waiting for you.`
+          : "Sign in to view assignments and submit your work to Mr. Nieves."}</p>
+        <div class="assignments-home-stats">
+          <span><strong>${isApprovedStudent() ? assignments.length : "—"}</strong> Assigned</span>
+          <span><strong>${isApprovedStudent() ? studentSubmissions.length : "—"}</strong> Submitted</span>
+        </div>
+      </div>
+      <button class="primary-btn" data-action="openAssignments">${isApprovedStudent() ? "Open Assignments" : "Student Login"}</button>
+    </section>
+  `;
+}
+
+function studentSubmissionFor(assignmentId) {
+  if (replacingAssignmentId === assignmentId) return null;
+  return submissions.find(item => item.assignmentId === assignmentId && item.studentEmail === authSession.email) || null;
+}
+
+function assignmentDueText(assignment) {
+  if (!assignment.dueAt) return "No due date";
+  return new Date(assignment.dueAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function renderSubmissionPreview(submission) {
+  if (!submission) return `<div class="submission-preview-empty"><strong>No file selected</strong><span>Your preview will appear here before you submit.</span></div>`;
+  const src = `/api/submissions/${encodeURIComponent(submission.id)}/file?view=inline`;
+  if ([".png", ".jpg", ".jpeg", ".webp"].includes(submission.extension)) {
+    return `<img class="submission-preview-image" src="${src}" alt="Preview of ${escapeHtml(submission.originalName)}">`;
+  }
+  return `<iframe class="submission-preview-frame" src="${src}" title="Preview of ${escapeHtml(submission.originalName)}"></iframe>`;
+}
+
+function renderStudentAssignmentCard(assignment) {
+  const submission = studentSubmissionFor(assignment.id);
+  const status = submission ? submission.status : "todo";
+  const late = assignment.dueAt && Date.now() > Date.parse(assignment.dueAt) && !submission;
+  return `
+    <button class="student-assignment-card ${selectedAssignmentId === assignment.id ? "is-selected" : ""}" data-action="selectAssignment" data-id="${escapeHtml(assignment.id)}">
+      <span class="assignment-card-status is-${escapeHtml(status)}">${submission ? (status === "returned" ? "Returned" : status === "reviewed" ? "Reviewed" : "Submitted") : late ? "Past Due" : "To Do"}</span>
+      <strong>${escapeHtml(assignment.title)}</strong>
+      <small>Due ${escapeHtml(assignmentDueText(assignment))}</small>
+      <span class="assignment-grade-pill">${assignment.grades.length ? `Grade ${escapeHtml(assignment.grades.join(", "))}` : "All Grades"}</span>
+    </button>
+  `;
+}
+
+function renderAssignmentsPage() {
+  if (!isApprovedStudent()) return `${pageHeader("Assignments & Submissions", "Student login is required.", true)}${renderLogin()}`;
+  const filtered = assignments.filter(assignment => {
+    const submission = studentSubmissionFor(assignment.id);
+    if (assignmentView === "submitted") return submission && submission.status !== "returned";
+    if (assignmentView === "returned") return submission && submission.status === "returned";
+    return !submission;
+  });
+  const selected = assignments.find(item => item.id === selectedAssignmentId)
+    && filtered.some(item => item.id === selectedAssignmentId)
+      ? assignments.find(item => item.id === selectedAssignmentId)
+      : (filtered[0] || null);
+  selectedAssignmentId = selected ? selected.id : "";
+  const submission = selected ? studentSubmissionFor(selected.id) : null;
+  return `
+    ${pageHeader("Assignments & Submissions", "Upload and review your class work.", true)}
+    <section class="student-assignments-shell">
+      <aside class="student-assignment-sidebar">
+        <div class="assignment-view-tabs" role="tablist" aria-label="Assignment status">
+          ${[["todo", "To Do"], ["submitted", "Submitted"], ["returned", "Returned"]].map(([id, label]) => `
+            <button data-action="assignmentView" data-view="${id}" class="${assignmentView === id ? "is-active" : ""}" role="tab">${label}</button>
+          `).join("")}
+        </div>
+        <div class="student-assignment-list">
+          ${filtered.length ? filtered.map(renderStudentAssignmentCard).join("") : `<div class="assignment-list-empty">Nothing is in this section right now.</div>`}
+        </div>
+      </aside>
+      <main class="student-submission-workspace">
+        ${selected ? `
+          <header class="student-assignment-heading">
+            <div><span class="feature-kicker">${submission ? "Submission Details" : "Assignment"}</span><h2>${escapeHtml(selected.title)}</h2></div>
+            <span class="assignment-due-badge">Due ${escapeHtml(assignmentDueText(selected))}</span>
+          </header>
+          <div class="assignment-instructions">${escapeHtml(selected.instructions || "Complete the assigned work and submit your file below.").replace(/\n/g, "<br>")}</div>
+          ${submission ? `
+            <section class="student-submission-receipt">
+              <div class="submission-file-heading">
+                <div><strong>${escapeHtml(submission.originalName)}</strong><span>${formatFileSize(submission.size)} • Submitted ${escapeHtml(formatShortDate(submission.submittedAt))}</span></div>
+                <a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a>
+              </div>
+              <div class="submission-preview-box">${renderSubmissionPreview(submission)}</div>
+              ${submission.note ? `<p class="submission-note"><strong>Your note:</strong> ${escapeHtml(submission.note)}</p>` : ""}
+              ${submission.feedback ? `<div class="teacher-feedback-box"><span class="feature-kicker">Feedback from Mr. Nieves</span><p>${escapeHtml(submission.feedback)}</p></div>` : ""}
+              ${selected.allowResubmissions && selected.status === "open" ? `<button class="primary-btn" data-action="replaceSubmission">Replace Submission</button>` : ""}
+            </section>
+          ` : `
+            <form id="studentSubmissionForm" class="student-upload-form" data-assignment-id="${escapeHtml(selected.id)}">
+              <label class="student-upload-drop" for="studentSubmissionFile">
+                <span class="upload-icon" aria-hidden="true">⇧</span>
+                <strong>Drop your file here</strong>
+                <span>or choose a file from your device</span>
+                <span class="outline-btn">Choose File</span>
+                <input id="studentSubmissionFile" type="file" accept="${escapeHtml(selected.acceptedTypes.join(","))}" required>
+              </label>
+              <div id="selectedSubmissionFile" class="selected-upload-file">No file selected</div>
+              <label class="field"><span>Optional note</span><textarea id="studentSubmissionNote" maxlength="500" placeholder="Add a short note for Mr. Nieves"></textarea></label>
+              <div class="student-submit-footer">
+                <p>Your name and grade are added automatically. Maximum file size: ${selected.maxFileSizeMb} MB.</p>
+                <div class="actions">
+                  ${replacingAssignmentId === selected.id ? `<button class="outline-btn" type="button" data-action="cancelReplacement">Cancel</button>` : ""}
+                  <button class="primary-btn" type="submit">Submit to Mr. Nieves</button>
+                </div>
+              </div>
+              <p id="studentSubmissionMessage" class="request-message" aria-live="polite"></p>
+            </form>
+          `}
+        ` : `<div class="assignment-list-empty"><h2>No assignments yet</h2><p>New assignments will appear here when Mr. Nieves posts them.</p></div>`}
+      </main>
+    </section>
+  `;
+}
+
 function renderLogin() {
   return `
     ${pageHeader("Student Login", "Use your approved school email and Classroom Launchpad password.", true)}
@@ -7406,6 +7629,7 @@ function renderDashboardNavigation() {
             ${escapeHtml(section.label)}
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
             ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
+            ${section.id === "assignments" && submissions.some(item => item.status === "submitted") ? `<b>${submissions.filter(item => item.status === "submitted").length}</b>` : ""}
           </button>
         `).join("")}
       </div>
@@ -7421,6 +7645,8 @@ function renderDashboardOverview() {
     ["Approved Students", approvedStudents.length, "students"],
     ["Registered", registered, "students"],
     ["Awaiting First Login", waiting, "students"],
+    ["Open Assignments", assignments.filter(item => item.status === "open").length, "assignments"],
+    ["New Submissions", submissions.filter(item => item.status === "submitted").length, "assignments"],
     ["Colt Corner Topics", classThreads.length, "corner"],
     ["Posts Awaiting Review", moderationQueue.length, "corner"],
     ["Website Requests", websiteRequests.length, "requests"],
@@ -7445,6 +7671,7 @@ function renderDashboardOverview() {
         </div>
         <div class="dashboard-quick-actions">
           <button class="primary-btn" data-action="add">+ Add Website</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="assignments">Assignments & Submissions</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="students">Manage Student Access</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="tools">Open Classroom Tools</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="requests">Review Requests</button>
@@ -7697,7 +7924,116 @@ function renderDashboardSettings() {
   `;
 }
 
+function assignmentStudentCount(assignment) {
+  return approvedStudents.filter(student => !assignment.grades.length || assignment.grades.includes(String(student.grade))).length;
+}
+
+function renderAssignmentEditor() {
+  if (!assignmentEditorId) return "";
+  const existing = assignments.find(item => item.id === assignmentEditorId) || null;
+  const assignment = existing || {
+    title: "", instructions: "", grades: ["4", "5", "6", "7"], dueAt: "",
+    acceptedTypes: [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"],
+    maxFileSizeMb: 10, allowResubmissions: true, status: "open"
+  };
+  const localDue = assignment.dueAt ? new Date(new Date(assignment.dueAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
+  return `
+    <section class="assignment-editor-card">
+      <header><div><span class="feature-kicker">${existing ? "Edit Assignment" : "New Assignment"}</span><h3>${existing ? escapeHtml(existing.title) : "Create an Assignment"}</h3></div><button class="outline-btn" data-action="closeAssignmentEditor">Close</button></header>
+      <form id="assignmentEditorForm" data-id="${existing ? escapeHtml(existing.id) : ""}">
+        <label class="field"><span>Assignment title</span><input id="assignmentTitle" maxlength="120" value="${escapeHtml(assignment.title)}" placeholder="Example: Keyboard Shortcuts Practice" required></label>
+        <label class="field assignment-instructions-field"><span>Directions</span><textarea id="assignmentInstructions" maxlength="3000" placeholder="Explain what students should complete and submit.">${escapeHtml(assignment.instructions)}</textarea></label>
+        <fieldset class="assignment-option-group"><legend>Grade levels</legend><div>${["4", "5", "6", "7"].map(grade => `<label><input type="checkbox" name="assignmentGrade" value="${grade}" ${assignment.grades.includes(grade) ? "checked" : ""}> Grade ${grade}</label>`).join("")}</div></fieldset>
+        <label class="field"><span>Due date and time</span><input id="assignmentDueAt" type="datetime-local" value="${escapeHtml(localDue)}"></label>
+        <label class="field"><span>Status</span><select id="assignmentStatus"><option value="draft" ${assignment.status === "draft" ? "selected" : ""}>Draft</option><option value="open" ${assignment.status === "open" ? "selected" : ""}>Open</option><option value="closed" ${assignment.status === "closed" ? "selected" : ""}>Closed</option><option value="archived" ${assignment.status === "archived" ? "selected" : ""}>Archived</option></select></label>
+        <fieldset class="assignment-option-group assignment-file-types"><legend>Accepted files</legend><div>${[[".pdf", "PDF"], [".png", "PNG"], [".jpg", "JPG"], [".webp", "WEBP"], [".txt", "Text"]].map(([extension, label]) => `<label><input type="checkbox" name="assignmentFileType" value="${extension}" ${assignment.acceptedTypes.includes(extension) || (extension === ".jpg" && assignment.acceptedTypes.includes(".jpeg")) ? "checked" : ""}> ${label}</label>`).join("")}</div></fieldset>
+        <label class="field"><span>Maximum file size</span><select id="assignmentMaxSize">${[5, 10, 15].map(size => `<option value="${size}" ${assignment.maxFileSizeMb === size ? "selected" : ""}>${size} MB</option>`).join("")}</select></label>
+        <label class="toggle-row assignment-resubmission-toggle"><span>Allow students to replace a submission</span><span class="switch"><input id="assignmentResubmissions" type="checkbox" ${assignment.allowResubmissions ? "checked" : ""}><span class="slider"></span></span></label>
+        <p id="assignmentEditorMessage" class="request-message" aria-live="polite"></p>
+        <button class="primary-btn" type="submit">${existing ? "Save Assignment" : "Create Assignment"}</button>
+      </form>
+    </section>
+  `;
+}
+
+function renderTeacherAssignmentRow(assignment) {
+  const assignmentSubmissions = submissions.filter(item => item.assignmentId === assignment.id);
+  return `
+    <article class="teacher-assignment-row">
+      <div><span class="assignment-card-status is-${escapeHtml(assignment.status)}">${escapeHtml(assignment.status)}</span><strong>${escapeHtml(assignment.title)}</strong><small>${escapeHtml(assignmentDueText(assignment))} • ${assignment.grades.length ? `Grades ${escapeHtml(assignment.grades.join(", "))}` : "All grades"}</small></div>
+      <div class="teacher-assignment-progress"><strong>${assignmentSubmissions.length}</strong><span>of ${assignmentStudentCount(assignment)} submitted</span></div>
+      <div class="actions"><button class="outline-btn" data-action="editAssignment" data-id="${escapeHtml(assignment.id)}">Edit</button><button class="danger-btn" data-action="deleteAssignment" data-id="${escapeHtml(assignment.id)}">Delete</button></div>
+    </article>
+  `;
+}
+
+function filteredSubmissions() {
+  const query = dashboardSubmissionSearch.trim().toLowerCase();
+  return submissions.filter(item => dashboardAssignmentFilter === "all" || item.assignmentId === dashboardAssignmentFilter)
+    .filter(item => dashboardGradeFilter === "all" || item.grade === dashboardGradeFilter)
+    .filter(item => dashboardSubmissionStatus === "all" || item.status === dashboardSubmissionStatus)
+    .filter(item => !query || [item.studentName, item.studentEmail, item.originalName].some(value => String(value).toLowerCase().includes(query)))
+    .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+}
+
+function renderTeacherSubmissionRow(submission) {
+  const assignment = assignments.find(item => item.id === submission.assignmentId);
+  return `
+    <button class="teacher-submission-row ${selectedSubmissionId === submission.id ? "is-selected" : ""}" data-action="selectSubmission" data-id="${escapeHtml(submission.id)}">
+      <span class="submission-student-initial">${escapeHtml((submission.studentName || "S").charAt(0))}</span>
+      <span><strong>${escapeHtml(submission.studentName || "Student")}</strong><small>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")}</small></span>
+      <span class="submission-time">${escapeHtml(formatShortDate(submission.submittedAt))}</span>
+      <span class="assignment-card-status is-${escapeHtml(submission.status)}">${submission.status === "submitted" ? "New" : escapeHtml(submission.status)}</span>
+    </button>
+  `;
+}
+
+function renderTeacherSubmissionPreview(submission) {
+  if (!submission) return `<div class="submission-preview-empty teacher-preview-empty"><strong>Select a submission</strong><span>The student’s work will open here without downloading it.</span></div>`;
+  const assignment = assignments.find(item => item.id === submission.assignmentId);
+  return `
+    <article class="teacher-submission-preview">
+      <header><div><span class="feature-kicker">Student Submission</span><h3>${escapeHtml(submission.studentName)}</h3><p>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")} • ${escapeHtml(formatShortDate(submission.submittedAt))}</p></div><span class="assignment-card-status is-${escapeHtml(submission.status)}">${escapeHtml(submission.status)}</span></header>
+      <div class="submission-file-heading"><div><strong>${escapeHtml(submission.originalName)}</strong><span>${formatFileSize(submission.size)}</span></div><a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a></div>
+      <div class="submission-preview-box teacher-file-preview">${renderSubmissionPreview(submission)}</div>
+      ${submission.note ? `<div class="submission-note"><strong>Student note:</strong> ${escapeHtml(submission.note)}</div>` : ""}
+      <form id="submissionReviewForm" data-id="${escapeHtml(submission.id)}">
+        <label class="field"><span>Teacher feedback</span><textarea id="submissionFeedback" maxlength="1500" placeholder="Add clear feedback for the student">${escapeHtml(submission.feedback)}</textarea></label>
+        <div class="submission-review-actions"><button class="outline-btn" type="submit" name="reviewAction" value="reviewed">Mark Reviewed</button><button class="primary-btn" type="submit" name="reviewAction" value="returned">Return to Student</button><button class="danger-btn" type="button" data-action="deleteSubmission" data-id="${escapeHtml(submission.id)}">Delete</button></div>
+        <p id="submissionReviewMessage" class="request-message" aria-live="polite"></p>
+      </form>
+    </article>
+  `;
+}
+
+function renderDashboardAssignments() {
+  const openAssignments = assignments.filter(item => item.status === "open").length;
+  const newSubmissions = submissions.filter(item => item.status === "submitted").length;
+  const returned = submissions.filter(item => item.status === "returned").length;
+  const missing = assignments.filter(item => item.status === "open").reduce((total, assignment) => total + Math.max(0, assignmentStudentCount(assignment) - submissions.filter(item => item.assignmentId === assignment.id).length), 0);
+  const visible = filteredSubmissions();
+  const selected = visible.find(item => item.id === selectedSubmissionId) || visible[0] || null;
+  selectedSubmissionId = selected ? selected.id : "";
+  return `
+    <section class="teacher-assignment-dashboard">
+      <div class="assignment-metric-grid">${[["Open Assignments", openAssignments], ["New Submissions", newSubmissions], ["Missing", missing], ["Returned", returned]].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("")}</div>
+      <div class="assignment-manager-heading"><div><span class="feature-kicker">Class Work</span><h3>Assignments</h3></div><button class="primary-btn" data-action="newAssignment">+ Create Assignment</button></div>
+      ${renderAssignmentEditor()}
+      <div class="teacher-assignment-list">${assignments.length ? assignments.map(renderTeacherAssignmentRow).join("") : emptyCard("No assignments yet. Create the first assignment when you are ready.")}</div>
+      <div class="assignment-manager-heading submission-inbox-heading"><div><span class="feature-kicker">Submission Inbox</span><h3>Student Work</h3></div><span class="dashboard-count">${visible.length}</span></div>
+      <div class="submission-filter-toolbar">
+        <label class="dashboard-search"><span class="sr-only">Search students</span><input id="dashboardSubmissionSearch" type="search" value="${escapeHtml(dashboardSubmissionSearch)}" placeholder="Search students…"></label>
+        <select id="dashboardAssignmentFilter" aria-label="Filter by assignment"><option value="all">All assignments</option>${assignments.map(item => `<option value="${escapeHtml(item.id)}" ${dashboardAssignmentFilter === item.id ? "selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}</select>
+        <select id="dashboardGradeFilter" aria-label="Filter by grade"><option value="all">All grades</option>${["4", "5", "6", "7"].map(grade => `<option value="${grade}" ${dashboardGradeFilter === grade ? "selected" : ""}>Grade ${grade}</option>`).join("")}</select>
+        <select id="dashboardSubmissionStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="submitted" ${dashboardSubmissionStatus === "submitted" ? "selected" : ""}>New</option><option value="reviewed" ${dashboardSubmissionStatus === "reviewed" ? "selected" : ""}>Reviewed</option><option value="returned" ${dashboardSubmissionStatus === "returned" ? "selected" : ""}>Returned</option></select>
+      </div>
+      <div class="teacher-submission-split"><div class="teacher-submission-list">${visible.length ? visible.map(renderTeacherSubmissionRow).join("") : emptyCard("No submissions match these filters.")}</div>${renderTeacherSubmissionPreview(selected)}</div>
+    </section>
+  `;
+}
+
 function renderDashboardSection() {
+  if (dashboardSection === "assignments") return renderDashboardAssignments();
   if (dashboardSection === "students") return renderApprovedStudentManager();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
   if (dashboardSection === "corner") return renderDashboardColtCorner();
@@ -7893,6 +8229,7 @@ function render() {
   if (screen.name === "pin") html = renderPin();
   if (screen.name === "login") html = renderLogin();
   if (screen.name === "account") html = renderAccount();
+  if (screen.name === "assignments") html = renderAssignmentsPage();
   if (screen.name === "dashboard") html = renderDashboard();
   if (screen.name === "edit") html = renderEdit(screen.id);
   if (screen.name === "changePin") html = renderChangePin();
@@ -7956,6 +8293,22 @@ function attachScreenHandlers() {
       render();
     });
   }
+  const submissionSearch = document.getElementById("dashboardSubmissionSearch");
+  if (submissionSearch) {
+    submissionSearch.addEventListener("input", event => {
+      dashboardSubmissionSearch = event.target.value;
+      render();
+      const next = document.getElementById("dashboardSubmissionSearch");
+      if (next) {
+        next.focus();
+        next.setSelectionRange(dashboardSubmissionSearch.length, dashboardSubmissionSearch.length);
+      }
+    });
+  }
+  [["dashboardAssignmentFilter", value => dashboardAssignmentFilter = value], ["dashboardGradeFilter", value => dashboardGradeFilter = value], ["dashboardSubmissionStatus", value => dashboardSubmissionStatus = value]].forEach(([id, setValue]) => {
+    const control = document.getElementById(id);
+    if (control) control.addEventListener("change", event => { setValue(event.target.value); selectedSubmissionId = ""; render(); });
+  });
   const search = document.getElementById("studentSearch");
   if (search) {
     search.addEventListener("input", event => {
@@ -8218,6 +8571,127 @@ function attachScreenHandlers() {
       }
     });
   }
+
+  const assignmentEditorForm = document.getElementById("assignmentEditorForm");
+  if (assignmentEditorForm) {
+    assignmentEditorForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("assignmentEditorMessage");
+      const grades = [...assignmentEditorForm.querySelectorAll('input[name="assignmentGrade"]:checked')].map(input => input.value);
+      const types = [...assignmentEditorForm.querySelectorAll('input[name="assignmentFileType"]:checked')].flatMap(input => input.value === ".jpg" ? [".jpg", ".jpeg"] : [input.value]);
+      const dueValue = document.getElementById("assignmentDueAt").value;
+      const assignment = {
+        title: document.getElementById("assignmentTitle").value.trim(),
+        instructions: document.getElementById("assignmentInstructions").value.trim(),
+        grades,
+        dueAt: dueValue ? new Date(dueValue).toISOString() : "",
+        acceptedTypes: types,
+        maxFileSizeMb: Number(document.getElementById("assignmentMaxSize").value),
+        allowResubmissions: document.getElementById("assignmentResubmissions").checked,
+        status: document.getElementById("assignmentStatus").value
+      };
+      if (!assignment.title) {
+        status.textContent = "Please add an assignment title.";
+        status.classList.add("error");
+        return;
+      }
+      if (!assignment.grades.length) {
+        status.textContent = "Choose at least one grade level.";
+        status.classList.add("error");
+        return;
+      }
+      if (!assignment.acceptedTypes.length) {
+        status.textContent = "Choose at least one accepted file type.";
+        status.classList.add("error");
+        return;
+      }
+      const button = assignmentEditorForm.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        const id = assignmentEditorForm.dataset.id;
+        const result = id ? await sharedBackend.updateAssignment(id, assignment) : await sharedBackend.createAssignment(assignment);
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        replacingAssignmentId = "";
+        assignmentEditorId = "";
+        render();
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+        button.disabled = false;
+      }
+    });
+  }
+
+  const studentSubmissionFile = document.getElementById("studentSubmissionFile");
+  if (studentSubmissionFile) {
+    studentSubmissionFile.addEventListener("change", () => {
+      const file = studentSubmissionFile.files && studentSubmissionFile.files[0];
+      const display = document.getElementById("selectedSubmissionFile");
+      display.textContent = file ? `${file.name} • ${formatFileSize(file.size)}` : "No file selected";
+      display.classList.toggle("has-file", Boolean(file));
+    });
+  }
+  const studentSubmissionForm = document.getElementById("studentSubmissionForm");
+  if (studentSubmissionForm) {
+    studentSubmissionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const file = studentSubmissionFile && studentSubmissionFile.files && studentSubmissionFile.files[0];
+      const message = document.getElementById("studentSubmissionMessage");
+      if (!file) {
+        message.textContent = "Please choose a file first.";
+        message.classList.add("error");
+        return;
+      }
+      const assignment = assignments.find(item => item.id === studentSubmissionForm.dataset.assignmentId);
+      if (assignment && file.size > assignment.maxFileSizeMb * 1024 * 1024) {
+        message.textContent = `Choose a file smaller than ${assignment.maxFileSizeMb} MB.`;
+        message.classList.add("error");
+        return;
+      }
+      const button = studentSubmissionForm.querySelector('button[type="submit"]');
+      button.disabled = true;
+      button.textContent = "Uploading…";
+      message.textContent = "Uploading your work securely…";
+      message.classList.remove("error");
+      try {
+        const result = await sharedBackend.submitAssignment(studentSubmissionForm.dataset.assignmentId, file, document.getElementById("studentSubmissionNote").value.trim());
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        replacingAssignmentId = "";
+        assignmentView = "submitted";
+        message.textContent = "Submitted to Mr. Nieves.";
+        render();
+      } catch (error) {
+        message.textContent = error.message;
+        message.classList.add("error");
+        button.disabled = false;
+        button.textContent = "Submit to Mr. Nieves";
+      }
+    });
+  }
+
+  const submissionReviewForm = document.getElementById("submissionReviewForm");
+  if (submissionReviewForm) {
+    submissionReviewForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = event.submitter;
+      const status = document.getElementById("submissionReviewMessage");
+      try {
+        const result = await sharedBackend.reviewSubmission(submissionReviewForm.dataset.id, {
+          status: button && button.value === "returned" ? "returned" : "reviewed",
+          feedback: document.getElementById("submissionFeedback").value.trim()
+        });
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        status.textContent = button && button.value === "returned" ? "Returned to the student." : "Marked as reviewed.";
+        render();
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
 }
 
 function startClassTimerClock() {
@@ -8454,7 +8928,7 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
-    else if (["dashboard", "category", "pin", "login", "account", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "assignments", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
   if (action === "teacher") {
@@ -8493,11 +8967,81 @@ app.addEventListener("click", async event => {
     mutedStudents = [];
     websiteRequests = [];
     approvedStudents = [];
+    assignments = [];
+    submissions = [];
     activationCodeResults = [];
     setScreen({ name: "home" });
   }
   if (action === "toggleTheme") toggleTheme();
   if (action === "category") setScreen({ name: "category", category: target.dataset.category });
+  if (action === "openAssignments") setScreen({ name: isApprovedStudent() ? "assignments" : "login" });
+  if (action === "assignmentView") {
+    assignmentView = target.dataset.view || "todo";
+    selectedAssignmentId = "";
+    render();
+  }
+  if (action === "selectAssignment") {
+    selectedAssignmentId = target.dataset.id;
+    render();
+  }
+  if (action === "replaceSubmission") {
+    replacingAssignmentId = selectedAssignmentId;
+    assignmentView = "todo";
+    render();
+  }
+  if (action === "cancelReplacement") {
+    replacingAssignmentId = "";
+    assignmentView = "submitted";
+    render();
+  }
+  if (action === "newAssignment") {
+    assignmentEditorId = "new";
+    render();
+  }
+  if (action === "editAssignment") {
+    assignmentEditorId = target.dataset.id;
+    render();
+  }
+  if (action === "closeAssignmentEditor") {
+    assignmentEditorId = "";
+    render();
+  }
+  if (action === "selectSubmission") {
+    selectedSubmissionId = target.dataset.id;
+    render();
+  }
+  if (action === "deleteAssignment") {
+    const assignment = assignments.find(item => item.id === target.dataset.id);
+    modal = {
+      title: "Delete assignment?",
+      message: `This permanently removes ${assignment ? assignment.title : "this assignment"} and every submitted file attached to it.`,
+      confirmText: "Delete Assignment",
+      onConfirm: async () => {
+        const result = await sharedBackend.deleteAssignment(target.dataset.id);
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        selectedSubmissionId = "";
+        render();
+      }
+    };
+    render();
+  }
+  if (action === "deleteSubmission") {
+    const submission = submissions.find(item => item.id === target.dataset.id);
+    modal = {
+      title: "Delete submission?",
+      message: `This permanently removes ${submission ? submission.studentName + "'s file" : "this submitted file"}.`,
+      confirmText: "Delete Submission",
+      onConfirm: async () => {
+        const result = await sharedBackend.deleteSubmission(target.dataset.id);
+        assignments = normalizeAssignments(result.assignments);
+        submissions = normalizeSubmissions(result.submissions);
+        selectedSubmissionId = "";
+        render();
+      }
+    };
+    render();
+  }
   if (action === "randomActivity") {
     if (randomActivitySettings.locked) return;
     randomActivity = pickRandomActivity();

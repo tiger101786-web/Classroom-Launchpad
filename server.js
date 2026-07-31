@@ -15,6 +15,7 @@ const {
 const root = __dirname;
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
 const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
+const submissionDir = path.join(dataDir, "student-submissions");
 const port = Number(process.env.PORT || 8080);
 const allowedStudentDomain = String(process.env.STUDENT_EMAIL_DOMAIN || "scscolts.org").trim().toLowerCase();
 const configuredSessionSecret = String(process.env.SESSION_SECRET || "");
@@ -23,12 +24,23 @@ const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_EN
 const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 const loginAttempts = new Map();
+const maxSubmissionBytes = 15 * 1024 * 1024;
+const allowedSubmissionTypes = new Map([
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
+  [".txt", "text/plain"]
+]);
 
 const defaultDb = {
   links: null,
   threads: [],
   mutedStudents: [],
   websiteRequests: [],
+  assignments: [],
+  submissions: [],
   leaderboards: [],
   approvedStudents: [],
   teacherPin: null,
@@ -395,6 +407,66 @@ function parseByteRange(rangeHeader, fileSize) {
   return { start, end };
 }
 
+function normalizeAssignment(source) {
+  const status = ["draft", "open", "closed", "archived"].includes(source && source.status)
+    ? source.status
+    : "draft";
+  const grades = [...new Set((Array.isArray(source && source.grades) ? source.grades : [])
+    .map(cleanGrade)
+    .filter(Boolean))].slice(0, 12);
+  const acceptedTypes = [...new Set((Array.isArray(source && source.acceptedTypes) ? source.acceptedTypes : [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"])
+    .map(value => String(value || "").trim().toLowerCase())
+    .filter(value => allowedSubmissionTypes.has(value)))];
+  return {
+    id: cleanText(source && source.id, 100) || crypto.randomUUID(),
+    title: cleanText(source && source.title, 120),
+    instructions: cleanMultilineText(source && source.instructions, 3000),
+    grades,
+    dueAt: validIsoDate(source && source.dueAt),
+    acceptedTypes: acceptedTypes.length ? acceptedTypes : [".pdf"],
+    maxFileSizeMb: Math.max(1, Math.min(15, Number(source && source.maxFileSizeMb) || 10)),
+    allowResubmissions: source && source.allowResubmissions !== false,
+    status,
+    createdAt: validIsoDate(source && source.createdAt, new Date().toISOString()),
+    updatedAt: validIsoDate(source && source.updatedAt, new Date().toISOString())
+  };
+}
+
+function normalizeAssignments(entries) {
+  return (Array.isArray(entries) ? entries : []).slice(0, 300)
+    .map(normalizeAssignment)
+    .filter(item => item.title);
+}
+
+function normalizeSubmission(source) {
+  const status = ["submitted", "reviewed", "returned"].includes(source && source.status)
+    ? source.status
+    : "submitted";
+  return {
+    id: cleanText(source && source.id, 100) || crypto.randomUUID(),
+    assignmentId: cleanText(source && source.assignmentId, 100),
+    studentEmail: normalizeEmail(source && source.studentEmail),
+    studentName: cleanText(source && source.studentName, 80),
+    grade: cleanGrade(source && source.grade),
+    originalName: cleanText(source && source.originalName, 180),
+    storedName: cleanText(source && source.storedName, 180).replace(/[^a-z0-9._-]/gi, ""),
+    extension: cleanText(source && source.extension, 10).toLowerCase(),
+    mimeType: cleanText(source && source.mimeType, 100),
+    size: Math.max(0, Number(source && source.size) || 0),
+    note: cleanMultilineText(source && source.note, 500),
+    status,
+    feedback: cleanMultilineText(source && source.feedback, 1500),
+    submittedAt: validIsoDate(source && source.submittedAt, new Date().toISOString()),
+    updatedAt: validIsoDate(source && source.updatedAt, new Date().toISOString())
+  };
+}
+
+function normalizeSubmissions(entries) {
+  return (Array.isArray(entries) ? entries : []).slice(0, 5000)
+    .map(normalizeSubmission)
+    .filter(item => item.assignmentId && item.studentEmail && item.storedName);
+}
+
 function staticCacheControl(url, extension) {
   if (extension === ".html") return "no-cache";
   if (url.searchParams.has("v")) return "public, max-age=31536000, immutable";
@@ -430,6 +502,7 @@ function requestAcceptsGzip(req) {
 
 function ensureDb() {
   fs.mkdirSync(dataDir, { recursive: true });
+  fs.mkdirSync(submissionDir, { recursive: true });
   if (!fs.existsSync(dbPath)) writeDb(defaultDb);
 }
 
@@ -450,6 +523,8 @@ function writeDb(db) {
     threads: pruneModeratedThreads(db.threads),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
+    assignments: normalizeAssignments(db.assignments),
+    submissions: normalizeSubmissions(db.submissions),
     leaderboards: normalizeLeaderboards(db.leaderboards),
     approvedStudents: normalizeApprovedStudents(db.approvedStudents),
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
@@ -636,6 +711,22 @@ function isStudentMuted(db, session) {
 function publicState(db, session) {
   const signedIn = session && ["student", "teacher"].includes(session.role);
   const teacher = session && session.role === "teacher";
+  const assignments = normalizeAssignments(db.assignments);
+  const submissions = normalizeSubmissions(db.submissions);
+  const visibleAssignments = teacher
+    ? assignments
+    : (session && session.role === "student"
+        ? assignments.filter(assignment => (
+          assignment.status === "open" && (!assignment.grades.length || assignment.grades.includes(cleanGrade(session.grade)))
+        ) || submissions.some(submission => (
+          submission.assignmentId === assignment.id && submission.studentEmail === normalizeEmail(session.email)
+        )))
+        : []);
+  const visibleSubmissions = teacher
+    ? submissions
+    : (session && session.role === "student"
+        ? submissions.filter(submission => submission.studentEmail === normalizeEmail(session.email))
+        : []);
   return {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: signedIn ? publicApprovedThreads(db.threads) : [],
@@ -643,6 +734,8 @@ function publicState(db, session) {
     ...(teacher ? { moderation: teacherModerationData(db) } : {}),
     mutedStudents: teacher ? db.mutedStudents : [],
     websiteRequests: teacher ? db.websiteRequests : [],
+    assignments: visibleAssignments,
+    submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
     leaderboards: db.leaderboards,
     dailyLaunch: db.dailyLaunch,
     classTimer: db.classTimer,
@@ -1214,6 +1307,230 @@ async function handleApprovedStudentsApi(req, res, pathname) {
   return true;
 }
 
+function assignmentApiPayload(db, session) {
+  const state = publicState(db, session);
+  return { assignments: state.assignments || [], submissions: state.submissions || [] };
+}
+
+async function handleAssignmentsApi(req, res, pathname) {
+  if (!pathname.startsWith("/api/assignments") && !pathname.startsWith("/api/submissions")) return false;
+  const session = requireRole(req, res, ["student", "teacher"]);
+  if (!session) return true;
+
+  if (req.method === "GET" && pathname === "/api/assignments") {
+    sendJson(res, 200, assignmentApiPayload(readDb(), session));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/assignments") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can create assignments." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const now = new Date().toISOString();
+      const assignment = normalizeAssignment({ ...body, id: crypto.randomUUID(), createdAt: now, updatedAt: now });
+      if (!assignment.title) throw new Error("Assignment title is required.");
+      const db = readDb();
+      db.assignments = [assignment, ...normalizeAssignments(db.assignments)];
+      writeDb(db);
+      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), assignment });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const assignmentItem = pathname.match(/^\/api\/assignments\/([^/]+)$/);
+  if (assignmentItem && req.method === "PATCH") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can update assignments." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      const id = decodeURIComponent(assignmentItem[1]);
+      const existing = normalizeAssignments(db.assignments).find(item => item.id === id);
+      if (!existing) {
+        sendJson(res, 404, { error: "Assignment not found." });
+        return true;
+      }
+      const updated = normalizeAssignment({ ...existing, ...body, id, createdAt: existing.createdAt, updatedAt: new Date().toISOString() });
+      if (!updated.title) throw new Error("Assignment title is required.");
+      db.assignments = normalizeAssignments(db.assignments).map(item => item.id === id ? updated : item);
+      writeDb(db);
+      sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session), assignment: updated });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (assignmentItem && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can delete assignments." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(assignmentItem[1]);
+    const removedSubmissions = normalizeSubmissions(db.submissions).filter(item => item.assignmentId === id);
+    removedSubmissions.forEach(removeSubmissionFile);
+    db.assignments = normalizeAssignments(db.assignments).filter(item => item.id !== id);
+    db.submissions = normalizeSubmissions(db.submissions).filter(item => item.assignmentId !== id);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session) });
+    return true;
+  }
+
+  const submitWork = pathname.match(/^\/api\/assignments\/([^/]+)\/submissions$/);
+  if (submitWork && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "student") {
+      sendJson(res, 403, { error: "Only student accounts can submit work." });
+      return true;
+    }
+    try {
+      const db = readDb();
+      const assignmentId = decodeURIComponent(submitWork[1]);
+      const assignment = normalizeAssignments(db.assignments).find(item => item.id === assignmentId);
+      if (!assignment || assignment.status !== "open") throw new Error("This assignment is not accepting submissions.");
+      const grade = cleanGrade(session.grade);
+      if (assignment.grades.length && !assignment.grades.includes(grade)) throw new Error("This assignment is not assigned to your grade.");
+      const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
+      const extension = path.extname(originalName).toLowerCase();
+      if (!assignment.acceptedTypes.includes(extension) || !allowedSubmissionTypes.has(extension)) {
+        throw new Error("That file type is not accepted for this assignment.");
+      }
+      const existing = normalizeSubmissions(db.submissions).find(item => item.assignmentId === assignmentId && item.studentEmail === normalizeEmail(session.email));
+      if (existing && !assignment.allowResubmissions) throw new Error("This assignment does not allow replacement submissions.");
+      const byteLimit = Math.min(maxSubmissionBytes, assignment.maxFileSizeMb * 1024 * 1024);
+      const declaredSize = Number(req.headers["content-length"] || 0);
+      if (declaredSize > byteLimit) throw new Error("That file is larger than the assignment allows.");
+      const buffer = await readBinaryBody(req, byteLimit);
+      if (!buffer.length) throw new Error("Please choose a file to submit.");
+      if (!fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
+      fs.mkdirSync(submissionDir, { recursive: true });
+      const storedName = `${crypto.randomUUID()}${extension}`;
+      const finalPath = path.join(submissionDir, storedName);
+      const tempPath = `${finalPath}.tmp`;
+      fs.writeFileSync(tempPath, buffer, { flag: "wx" });
+      fs.renameSync(tempPath, finalPath);
+      const now = new Date().toISOString();
+      const submission = normalizeSubmission({
+        id: crypto.randomUUID(),
+        assignmentId,
+        studentEmail: session.email,
+        studentName: studentDisplayName(session),
+        grade,
+        originalName,
+        storedName,
+        extension,
+        mimeType: allowedSubmissionTypes.get(extension),
+        size: buffer.length,
+        note: decodeURIComponent(String(req.headers["x-submission-note"] || "")),
+        status: "submitted",
+        feedback: "",
+        submittedAt: now,
+        updatedAt: now
+      });
+      if (existing) removeSubmissionFile(existing);
+      db.submissions = [submission, ...normalizeSubmissions(db.submissions).filter(item => !(
+        item.assignmentId === assignmentId && item.studentEmail === normalizeEmail(session.email)
+      ))];
+      writeDb(db);
+      sendJson(res, 201, { ok: true, ...assignmentApiPayload(db, session), submission: { ...submission, storedName: undefined } });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const submissionFile = pathname.match(/^\/api\/submissions\/([^/]+)\/file$/);
+  if (submissionFile && ["GET", "HEAD"].includes(req.method)) {
+    const db = readDb();
+    const submission = normalizeSubmissions(db.submissions).find(item => item.id === decodeURIComponent(submissionFile[1]));
+    if (!submission || !canAccessSubmission(session, submission)) {
+      sendJson(res, 404, { error: "Submission not found." });
+      return true;
+    }
+    const filePath = submissionFilePath(submission);
+    if (!filePath || !fs.existsSync(filePath)) {
+      sendJson(res, 404, { error: "The submitted file is unavailable." });
+      return true;
+    }
+    const previewable = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"].includes(submission.extension);
+    const disposition = previewable && new URL(req.url, "http://localhost").searchParams.get("view") === "inline" ? "inline" : "attachment";
+    const stats = fs.statSync(filePath);
+    res.writeHead(200, {
+      "Content-Type": submission.mimeType || "application/octet-stream",
+      "Content-Length": stats.size,
+      "Content-Disposition": `${disposition}; filename="${safeDownloadName(submission.originalName)}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'"
+    });
+    if (req.method === "HEAD") res.end();
+    else fs.createReadStream(filePath).pipe(res);
+    return true;
+  }
+
+  const submissionItem = pathname.match(/^\/api\/submissions\/([^/]+)$/);
+  if (submissionItem && req.method === "PATCH") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can review submissions." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      const id = decodeURIComponent(submissionItem[1]);
+      const existing = normalizeSubmissions(db.submissions).find(item => item.id === id);
+      if (!existing) {
+        sendJson(res, 404, { error: "Submission not found." });
+        return true;
+      }
+      const status = ["submitted", "reviewed", "returned"].includes(body.status) ? body.status : existing.status;
+      const updated = normalizeSubmission({
+        ...existing,
+        status,
+        feedback: body.feedback === undefined ? existing.feedback : body.feedback,
+        updatedAt: new Date().toISOString()
+      });
+      db.submissions = normalizeSubmissions(db.submissions).map(item => item.id === id ? updated : item);
+      writeDb(db);
+      sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (submissionItem && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can delete submissions." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(submissionItem[1]);
+    const submission = normalizeSubmissions(db.submissions).find(item => item.id === id);
+    if (submission) removeSubmissionFile(submission);
+    db.submissions = normalizeSubmissions(db.submissions).filter(item => item.id !== id);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...assignmentApiPayload(db, session) });
+    return true;
+  }
+
+  sendJson(res, 404, { error: "Not found." });
+  return true;
+}
+
 async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/health") {
     sendJson(res, 200, {
@@ -1226,6 +1543,7 @@ async function handleApi(req, res, pathname) {
 
   if (await handleAuthApi(req, res, pathname)) return true;
   if (await handleApprovedStudentsApi(req, res, pathname)) return true;
+  if (await handleAssignmentsApi(req, res, pathname)) return true;
 
   const session = readSession(req);
   if (req.method === "GET" && pathname === "/api/state") {
@@ -1701,6 +2019,64 @@ function serveStatic(req, res, url) {
     }
     fs.createReadStream(filePath).pipe(res);
   });
+}
+
+function readBinaryBody(req, limit = maxSubmissionBytes) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let total = 0;
+    let stopped = false;
+    req.on("data", chunk => {
+      if (stopped) return;
+      total += chunk.length;
+      if (total > limit) {
+        stopped = true;
+        reject(new Error("That file is larger than the assignment allows."));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      if (!stopped) resolve(Buffer.concat(chunks));
+    });
+    req.on("error", reject);
+  });
+}
+
+function fileMatchesExtension(buffer, extension) {
+  if (!Buffer.isBuffer(buffer) || !buffer.length) return false;
+  if (extension === ".pdf") return buffer.subarray(0, 5).toString("ascii") === "%PDF-";
+  if (extension === ".png") return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  if ([".jpg", ".jpeg"].includes(extension)) return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  if (extension === ".webp") return buffer.length >= 12 && buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  if (extension === ".txt") return !buffer.subarray(0, Math.min(buffer.length, 4096)).includes(0);
+  return false;
+}
+
+function safeDownloadName(value) {
+  return cleanText(value, 180).replace(/[^\x20-\x7E]|[\r\n"\\/]/g, "_") || "student-work";
+}
+
+function submissionFilePath(submission) {
+  const filename = path.basename(String(submission && submission.storedName || ""));
+  if (!filename || filename !== submission.storedName) return "";
+  const resolved = path.join(submissionDir, filename);
+  return resolved.startsWith(`${submissionDir}${path.sep}`) ? resolved : "";
+}
+
+function canAccessSubmission(session, submission) {
+  if (!session || !submission) return false;
+  return session.role === "teacher"
+    || (session.role === "student" && normalizeEmail(session.email) === submission.studentEmail);
+}
+
+function removeSubmissionFile(submission) {
+  const filePath = submissionFilePath(submission);
+  if (!filePath) return;
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch {}
 }
 
 const server = http.createServer(async (req, res) => {
