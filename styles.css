@@ -1160,7 +1160,7 @@ body[data-theme="night"] .category-count {
 
 .student-request-card {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(0, 558px) minmax(360px, 1fr);
   gap: 20px;
   align-items: center;
   margin-top: 20px;
@@ -1185,8 +1185,8 @@ body[data-theme="night"] .category-count {
 
 .request-spirit {
   position: relative;
-  width: 100%;
-  aspect-ratio: 23 / 17;
+  width: min(558px, 100%);
+  aspect-ratio: 31 / 23;
   margin: 4px 0 0;
   overflow: hidden;
   border-radius: 8px;
@@ -1204,6 +1204,17 @@ body[data-theme="night"] .request-spirit {
     0 0 0 4px #2a2a2f,
     0 0 0 7px rgba(244, 242, 243, 0.18),
     0 14px 28px rgba(0, 0, 0, 0.34);
+}
+
+@media (max-width: 1040px) and (min-width: 721px) {
+  .student-request-card {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+  }
+
+  .request-spirit {
+    width: 100%;
+    aspect-ratio: 23 / 17;
+  }
 }
 
 .request-spirit img,
