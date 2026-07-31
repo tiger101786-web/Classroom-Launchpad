@@ -2548,6 +2548,7 @@ function startColtRunGame() {
   const coinPickupAudio = createDeferredAudio("assets/colt-run-coin-pickup-audio.mp3?v=20260730-gameplay-cues1");
   const getReadyAudio = createDeferredAudio("assets/colt-run-get-ready-audio.mp3?v=20260730-robot-countdown1");
   const nextLevelAudio = createDeferredAudio("assets/colt-run-next-level-audio.mp3?v=20260730-gameplay-cues1");
+  const gameplayCueVolumeMultipliers = [1, 1.55, 1];
   const coltDeathAudios = [
     createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2"),
     createDeferredAudio("assets/colt-run-game-over-audio.mp3?v=20260730-gameplay-cues1")
@@ -2603,8 +2604,10 @@ function startColtRunGame() {
   runningAudio.muted = musicMuted;
   mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
   mrNievesRunningAudio.muted = musicMuted;
-  [coinPickupAudio, getReadyAudio, nextLevelAudio].forEach(audio => {
-    audio.volume = musicMuted ? 0 : musicVolume * gameplayCueLayerVolume;
+  [coinPickupAudio, getReadyAudio, nextLevelAudio].forEach((audio, index) => {
+    audio.volume = musicMuted
+      ? 0
+      : Math.min(1, musicVolume * gameplayCueLayerVolume * gameplayCueVolumeMultipliers[index]);
     audio.muted = musicMuted;
   });
   coltDeathAudios.forEach(audio => {
@@ -3666,8 +3669,10 @@ function startColtRunGame() {
     runningAudio.muted = musicMuted;
     mrNievesRunningAudio.volume = musicMuted ? 0 : musicVolume * runningLayerVolume;
     mrNievesRunningAudio.muted = musicMuted;
-    gameplayCueAudios.forEach(audio => {
-      audio.volume = musicMuted ? 0 : musicVolume * gameplayCueLayerVolume;
+    gameplayCueAudios.forEach((audio, index) => {
+      audio.volume = musicMuted
+        ? 0
+        : Math.min(1, musicVolume * gameplayCueLayerVolume * gameplayCueVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
     coltDeathAudios.forEach(audio => {
