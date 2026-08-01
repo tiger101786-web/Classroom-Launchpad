@@ -73,6 +73,13 @@ async function waitForServer() {
   try {
     await waitForServer();
 
+    const jszipVendor = await request("/vendor/jszip.min.js");
+    const docxPreviewVendor = await request("/vendor/docx-preview.min.js");
+    assert.equal(jszipVendor.response.status, 200);
+    assert.equal(docxPreviewVendor.response.status, 200);
+    assert.match(String(jszipVendor.response.headers.get("content-type")), /javascript/);
+    assert.match(String(docxPreviewVendor.response.headers.get("content-type")), /javascript/);
+
     const teacherLogin = await request("/api/auth/teacher", {
       method: "POST", headers: { "Content-Type": "application/json", Origin: origin }, body: JSON.stringify({ pin: "654321" })
     });

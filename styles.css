@@ -4439,6 +4439,19 @@ body[data-theme="night"] .assignment-card-status.is-reviewed { background: #2038
 .pre-submit-preview[hidden] { display: none; }
 .text-file-preview { width: 100%; min-height: 280px; margin: 0; padding: 22px; overflow: auto; background: #fff; color: #1f1f22; white-space: pre-wrap; }
 .office-submission-preview { width: 100%; max-height: 560px; min-height: 360px; overflow: auto; padding: 20px; }
+.student-submission-identity { display: flex; align-items: center; gap: 12px; max-width: 1132px; margin: 0 auto 14px; padding: 11px 15px; border: 1px solid var(--border); border-left: 5px solid var(--blue); border-radius: 11px; background: var(--white); box-shadow: var(--shadow); }
+.student-submission-identity-icon { display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 900; }
+.student-submission-identity > span:last-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 9px; min-width: 0; }
+.student-submission-identity small { width: 100%; color: var(--muted); font-size: .7rem; font-style: normal; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+.student-submission-identity strong { overflow-wrap: anywhere; color: var(--ink); }
+.student-submission-identity em { color: var(--muted); font-size: .86rem; font-style: normal; font-weight: 800; }
+.faithful-docx-host { padding: 0; }
+.faithful-docx-preview { width: 100%; min-width: 0; background: #303034; color: #222; }
+.faithful-docx-preview > header { position: sticky; top: 0; z-index: 3; display: grid; gap: 3px; padding: 12px 18px; background: #690728; color: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, .22); }
+.faithful-docx-preview > header span { font-size: .66rem; font-weight: 900; letter-spacing: .06em; }
+.faithful-docx-pages { width: 100%; min-width: 0; padding: 18px; overflow: hidden; background: #303034; }
+.faithful-docx-pages .docx-wrapper { padding: 0 !important; background: transparent !important; }
+.faithful-docx-pages section.docx { margin: 0 auto 18px !important; box-shadow: 0 8px 24px rgba(0, 0, 0, .35) !important; }
 .office-preview-message { display: grid; place-items: center; align-content: center; gap: 8px; min-height: 300px; padding: 26px; color: #f4f2f3; text-align: center; }
 .office-preview-message p { max-width: 520px; margin: 0; color: #d4d0d2; }
 .word-document-preview { width: min(760px, 100%); min-height: 480px; margin: 0 auto; background: #fff; color: #222; box-shadow: 0 12px 30px rgba(0, 0, 0, .25); }

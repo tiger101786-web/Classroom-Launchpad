@@ -120,7 +120,7 @@ async function run() {
     await page.locator("#pinForm").evaluate(form => form.requestSubmit());
     await page.locator(".dashboard-nav").waitFor();
     const dashboardSections = await page.locator(".dashboard-nav-button").allTextContents();
-    if (dashboardSections.length !== 7 || !dashboardSections.some(label => label.includes("Students & Access"))) {
+    if (dashboardSections.length < 8 || !dashboardSections.some(label => label.includes("Student Work")) || !dashboardSections.some(label => label.includes("Students & Access"))) {
       throw new Error("Teacher dashboard navigation is incomplete.");
     }
     await page.locator('[data-action="back"]').first().click();

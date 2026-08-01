@@ -2183,6 +2183,10 @@ function serveStatic(req, res, url) {
     return;
   }
 
+  const vendorFiles = new Map([
+    ["/vendor/jszip.min.js", path.join(root, "node_modules", "jszip", "dist", "jszip.min.js")],
+    ["/vendor/docx-preview.min.js", path.join(root, "node_modules", "docx-preview", "dist", "docx-preview.min.js")]
+  ]);
   const requested = pathname === "/" ? "/index.html" : pathname;
   let decoded;
   try {
@@ -2192,8 +2196,9 @@ function serveStatic(req, res, url) {
     res.end("Bad request");
     return;
   }
-  const filePath = path.normalize(path.join(root, decoded));
-  if (!filePath.startsWith(`${root}${path.sep}`) && filePath !== root) {
+  const vendorFilePath = vendorFiles.get(pathname);
+  const filePath = vendorFilePath || path.normalize(path.join(root, decoded));
+  if (!vendorFilePath && !filePath.startsWith(`${root}${path.sep}`) && filePath !== root) {
     res.writeHead(403);
     res.end("Forbidden");
     return;

@@ -469,6 +469,16 @@ const sharedBackend = {
     const payload = await this.request(`/api/submissions/${encodeURIComponent(id)}/preview`);
     return payload.preview;
   },
+  async loadSubmissionFile(id) {
+    const response = await fetch(`/api/submissions/${encodeURIComponent(id)}/file?view=inline`, {
+      credentials: "same-origin"
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload && payload.error ? payload.error : "This document could not be loaded.");
+    }
+    return response.blob();
+  },
   submitAssignmentLink(id, project) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}/link-submissions`, {
       method: "POST",
@@ -7280,8 +7290,74 @@ function renderOfficePreviewPayload(preview) {
   return `<div class="office-preview-message"><strong>${escapeHtml(preview.title || "Preview unavailable")}</strong><p>${escapeHtml(preview.message || "Download this file to open it in the appropriate app.")}</p></div>`;
 }
 
+async function renderFaithfulDocxPreview(source, target, title) {
+  if (!target) return;
+  if (!window.docx || typeof window.docx.renderAsync !== "function") {
+    throw new Error("The Word preview viewer did not load. Refresh the page and try again.");
+  }
+  const shell = document.createElement("article");
+  shell.className = "faithful-docx-preview";
+  shell.setAttribute("aria-label", `Full-page preview of ${title || "Word document"}`);
+  const header = document.createElement("header");
+  const label = document.createElement("span");
+  label.textContent = "FULL WORD DOCUMENT PREVIEW";
+  const name = document.createElement("strong");
+  name.textContent = title || "Word document";
+  header.append(label, name);
+  const pages = document.createElement("div");
+  pages.className = "faithful-docx-pages";
+  shell.append(header, pages);
+  target.replaceChildren(shell);
+  await window.docx.renderAsync(source, pages, pages, {
+    breakPages: true,
+    experimental: true,
+    ignoreHeight: false,
+    ignoreWidth: false,
+    ignoreFonts: false,
+    ignoreLastRenderedPageBreak: false,
+    renderHeaders: true,
+    renderFooters: true,
+    renderFootnotes: true,
+    renderEndnotes: true,
+    renderComments: false,
+    useBase64URL: true
+  });
+  const wrapper = pages.querySelector(".docx-wrapper");
+  const page = pages.querySelector("section.docx");
+  if (wrapper && page) {
+    const naturalWidth = page.offsetWidth;
+    const fitPages = () => {
+      const availableWidth = Math.max(280, pages.clientWidth - 36);
+      wrapper.style.zoom = String(Math.min(1, availableWidth / naturalWidth));
+    };
+    fitPages();
+    if (typeof ResizeObserver === "function") {
+      const observer = new ResizeObserver(() => {
+        if (!pages.isConnected) {
+          observer.disconnect();
+          return;
+        }
+        fitPages();
+      });
+      observer.observe(pages);
+    }
+  }
+}
+
 async function hydrateOfficeSubmissionPreviews() {
-  const targets = [...document.querySelectorAll("[data-office-submission-preview]")];
+  const docxTargets = [...document.querySelectorAll("[data-docx-submission-preview]")];
+  const officeTargets = [...document.querySelectorAll("[data-office-submission-preview]")];
+  await Promise.all(docxTargets.map(async target => {
+    if (target.dataset.loading === "true") return;
+    target.dataset.loading = "true";
+    try {
+      const blob = await sharedBackend.loadSubmissionFile(target.dataset.docxSubmissionPreview);
+      await renderFaithfulDocxPreview(blob, target, target.dataset.previewTitle || "Word document");
+    } catch (error) {
+      target.innerHTML = `<div class="office-preview-message"><strong>Preview unavailable</strong><p>${escapeHtml(error.message)}</p></div>`;
+    }
+  }));
+  const targets = officeTargets;
   await Promise.all(targets.map(async target => {
     if (target.dataset.loading === "true") return;
     target.dataset.loading = "true";
@@ -7305,7 +7381,10 @@ function renderSubmissionPreview(submission) {
   if ([".png", ".jpg", ".jpeg", ".webp"].includes(submission.extension)) {
     return `<img class="submission-preview-image" src="${src}" alt="Preview of ${escapeHtml(submission.originalName)}">`;
   }
-  if ([".doc", ".docx", ".ppt", ".pptx"].includes(submission.extension)) {
+  if (submission.extension === ".docx") {
+    return `<div class="office-submission-preview faithful-docx-host" data-docx-submission-preview="${escapeHtml(submission.id)}" data-preview-title="${escapeHtml(submission.originalName)}"><div class="office-preview-message"><strong>Preparing full document previewâ€¦</strong><p>The file remains inside Classroom Launchpad.</p></div></div>`;
+  }
+  if ([".doc", ".ppt", ".pptx"].includes(submission.extension)) {
     return `<div class="office-submission-preview" data-office-submission-preview="${escapeHtml(submission.id)}"><div class="office-preview-message"><strong>Preparing document preview…</strong><p>The file remains inside Classroom Launchpad.</p></div></div>`;
   }
   return `<iframe class="submission-preview-frame" src="${src}" title="Preview of ${escapeHtml(submission.originalName)}"></iframe>`;
@@ -7354,6 +7433,10 @@ function renderAssignmentsPage() {
   const submission = selected ? studentSubmissionFor(selected.id) : null;
   return `
     ${pageHeader("Assignments & Submissions", "Upload and review your class work.", true)}
+    <section class="student-submission-identity" aria-label="Current student">
+      <span class="student-submission-identity-icon" aria-hidden="true">${escapeHtml((authSession.name || "S").charAt(0))}</span>
+      <span><small>Submitting as</small><strong>${escapeHtml(authSession.name || "Student")}</strong><em>Grade ${escapeHtml(authSession.grade || "Not assigned")}</em></span>
+    </section>
     <section class="student-assignments-shell">
       <aside class="student-assignment-sidebar">
         <div class="assignment-view-tabs" role="tablist" aria-label="Assignment status">
@@ -8938,7 +9021,9 @@ function attachScreenHandlers() {
           preview.innerHTML = `<iframe class="submission-preview-frame" src="${studentPreviewObjectUrl}" title="Preview of ${escapeHtml(file.name)}"></iframe>`;
         } else if (extension === ".txt") {
           preview.innerHTML = `<pre class="text-file-preview">${escapeHtml((await file.text()).slice(0, 180000))}</pre>`;
-        } else if ([".doc", ".docx", ".ppt", ".pptx"].includes(extension)) {
+        } else if (extension === ".docx") {
+          await renderFaithfulDocxPreview(file, preview, file.name);
+        } else if ([".doc", ".ppt", ".pptx"].includes(extension)) {
           const payload = await sharedBackend.previewSubmissionFile(file);
           if (studentSubmissionFile.files && studentSubmissionFile.files[0] === file) preview.innerHTML = renderOfficePreviewPayload(payload);
         } else {
