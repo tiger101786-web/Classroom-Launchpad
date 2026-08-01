@@ -170,6 +170,20 @@ async function run() {
       throw new Error("Student manager search did not show its empty state.");
     }
     await page.locator("#dashboardStudentSearch").fill("");
+    await page.locator('[data-action="dashboardSection"][data-section="gradebooks"]').first().click();
+    await page.locator(".gradebook-student-row").first().waitFor();
+    const gradebookAlignment = await page.evaluate(() => {
+      const centers = elements => [...elements].map(element => {
+        const box = element.getBoundingClientRect();
+        return box.left + box.width / 2;
+      });
+      const header = centers(document.querySelectorAll(".gradebook-header > span"));
+      const row = centers(document.querySelectorAll(".gradebook-student-row:first-of-type > *"));
+      return header.map((center, index) => Math.abs(center - row[index]));
+    });
+    if (gradebookAlignment.length !== 8 || gradebookAlignment.some(offset => offset > 1)) {
+      throw new Error(`Gradebook headers and row values are not aligned: ${gradebookAlignment.join(", ")}.`);
+    }
     await page.locator('[data-action="dashboardSection"][data-section="websites"]').first().click();
     await page.locator("#dashboardLinkSearch").waitFor();
     await page.locator("#dashboardLinkSearch").fill("Google");

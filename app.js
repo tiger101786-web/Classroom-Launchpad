@@ -7322,6 +7322,13 @@ async function renderFaithfulDocxPreview(source, target, title) {
     renderComments: false,
     useBase64URL: true
   });
+  const revealCompletePages = () => {
+    pages.querySelectorAll("section.docx").forEach(pageSection => {
+      const completeHeight = pageSection.scrollHeight;
+      if (completeHeight > pageSection.clientHeight + 1) pageSection.style.minHeight = `${completeHeight}px`;
+    });
+  };
+  revealCompletePages();
   const wrapper = pages.querySelector(".docx-wrapper");
   const page = pages.querySelector("section.docx");
   if (wrapper && page) {
@@ -7331,12 +7338,17 @@ async function renderFaithfulDocxPreview(source, target, title) {
       wrapper.style.zoom = String(Math.min(1, availableWidth / naturalWidth));
     };
     fitPages();
+    pages.querySelectorAll("img").forEach(image => image.addEventListener("load", () => {
+      revealCompletePages();
+      fitPages();
+    }, { once: true }));
     if (typeof ResizeObserver === "function") {
       const observer = new ResizeObserver(() => {
         if (!pages.isConnected) {
           observer.disconnect();
           return;
         }
+        revealCompletePages();
         fitPages();
       });
       observer.observe(pages);

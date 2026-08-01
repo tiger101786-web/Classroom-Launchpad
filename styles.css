@@ -5505,7 +5505,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   align-items: center;
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(210px, 1.7fr) repeat(5, minmax(66px, 0.55fr)) minmax(110px, 0.9fr) auto;
+  grid-template-columns: minmax(210px, 1.8fr) repeat(5, minmax(72px, 0.62fr)) minmax(120px, 1fr) minmax(94px, 0.8fr);
   padding: 12px 14px;
 }
 
@@ -5516,6 +5516,18 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   font-weight: 900;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+.gradebook-header > span:not(:first-child),
+.gradebook-student-row > span {
+  justify-self: stretch;
+  text-align: center;
+}
+
+.gradebook-student-row > .outline-btn {
+  justify-self: stretch;
+  min-width: 0;
+  width: 100%;
 }
 
 .gradebook-student-row {
