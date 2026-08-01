@@ -236,6 +236,10 @@ async function run() {
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     await page.locator('[data-action="dashboardSection"][data-section="requests"]').first().click();
+    const requestDashboardText = await page.locator("#dashboardWorkspace").innerText();
+    if (!requestDashboardText.includes("Launchpad Requests") || !requestDashboardText.includes("Pending Addition Requests") || requestDashboardText.includes("Pending Website Requests")) {
+      throw new Error(`Teacher request dashboard wording does not match Suggest an Addition: ${JSON.stringify(requestDashboardText)}.`);
+    }
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="teacher"]').first().click();
     const defaultDashboardSection = await page.locator(".dashboard-nav-button.is-active").innerText();
@@ -262,6 +266,7 @@ async function run() {
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
+      teacherRequestWordingMatchesSuggestAnAddition: true,
       teacherDashboardAlwaysOpensOnOverview: true,
       mobileHorizontalOverflow: mobileOverflow
     }, null, 2));

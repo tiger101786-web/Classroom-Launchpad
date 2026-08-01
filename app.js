@@ -1168,7 +1168,7 @@ const dashboardSections = [
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
   { id: "corner", label: "Colt Corner", icon: "✦" },
-  { id: "requests", label: "Website Requests", icon: "✉" },
+  { id: "requests", label: "Launchpad Requests", icon: "✉" },
   { id: "websites", label: "Manage Websites", icon: "▦" },
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
@@ -7814,9 +7814,9 @@ function renderLegacyDashboard() {
     <section class="teacher-list">
       ${mutedStudents.length ? mutedStudents.map(renderMutedStudent).join("") : emptyCard("No muted students.")}
     </section>
-    <h2 class="section-title">Student Website Requests</h2>
+    <h2 class="section-title">Student Launchpad Requests</h2>
     <section class="teacher-list">
-      ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student website requests yet.")}
+      ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student addition requests yet.")}
     </section>
     <h2 class="section-title">Manage Links</h2>
     <section class="teacher-list">
@@ -7869,7 +7869,7 @@ function renderDashboardOverview() {
     ["New Submissions", submissions.filter(item => item.status === "submitted").length, "assignments"],
     ["Colt Corner Topics", classThreads.length, "corner"],
     ["Posts Awaiting Review", moderationQueue.length, "corner"],
-    ["Website Requests", websiteRequests.length, "requests"],
+    ["Launchpad Requests", websiteRequests.length, "requests"],
     ["Muted Students", mutedStudents.length, "corner"]
   ];
   return `
@@ -8031,11 +8031,11 @@ function renderDashboardRequests() {
   return `
     <section>
       <div class="dashboard-subheading">
-        <div><span class="feature-kicker">Student Suggestions</span><h3>Pending Website Requests</h3></div>
+        <div><span class="feature-kicker">Student Suggestions</span><h3>Pending Addition Requests</h3></div>
         <span class="dashboard-count">${websiteRequests.length}</span>
       </div>
       <div class="teacher-list">
-        ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student website requests yet.")}
+        ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student addition requests yet.")}
       </div>
     </section>
   `;
