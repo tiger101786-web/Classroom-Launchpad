@@ -92,6 +92,67 @@ async function run() {
       return fits;
     });
     if (!compactAssignmentTabsFit) throw new Error("Student assignment notification badges overflow the compact sidebar.");
+    const lateSubmissionFixture = await page.evaluate(() => {
+      const dueAt = "2026-08-01T12:00:00.000Z";
+      const assignment = { id: "late-assignment", title: "Late Work Test", dueAt };
+      const submission = {
+        id: "late-submission", assignmentId: assignment.id, studentName: "Student, UI", grade: "5",
+        submittedAt: "2026-08-02T13:00:00.000Z", status: "submitted", submissionType: "link",
+        projectTitle: "Late Project", projectUrl: "https://www.canva.com/design/example/view", note: "", feedback: ""
+      };
+      const original = { assignments, selectedSubmissionId };
+      try {
+        assignments = [assignment];
+        selectedSubmissionId = submission.id;
+        const row = new DOMParser().parseFromString(renderTeacherSubmissionRow(submission), "text/html");
+        const preview = new DOMParser().parseFromString(renderTeacherSubmissionPreview(submission), "text/html");
+        return {
+          onTime: submissionTimingDetails(assignment, { submittedAt: "2026-08-01T11:59:00.000Z" })?.label,
+          oneDayLate: submissionTimingDetails(assignment, { submittedAt: "2026-08-01T12:01:00.000Z" })?.label,
+          rowBadge: row.querySelector(".submission-late-badge")?.textContent.trim(),
+          previewBadge: preview.querySelector(".submission-late-badge")?.textContent.trim(),
+          noDueDateBadge: renderSubmissionTimingBadge({ dueAt: "" }, submission)
+        };
+      } finally {
+        ({ assignments, selectedSubmissionId } = original);
+      }
+    });
+    if (lateSubmissionFixture.onTime !== "On time" || lateSubmissionFixture.oneDayLate !== "Late by 1 day"
+      || lateSubmissionFixture.rowBadge !== "Late by 2 days" || lateSubmissionFixture.previewBadge !== "Late by 2 days"
+      || lateSubmissionFixture.noDueDateBadge !== "") {
+      throw new Error(`Teacher late-day indicators are incorrect: ${JSON.stringify(lateSubmissionFixture)}.`);
+    }
+    const launchpadFeedbackFixture = await page.evaluate(() => {
+      const originalSession = authSession;
+      try {
+        authSession = { authenticated: true, role: "student", name: "Student, UI", email: "ui.fixture@scscolts.org", grade: "5" };
+        const fixture = new DOMParser().parseFromString(renderStudentWebsiteRequest(), "text/html");
+        const select = fixture.querySelector("#requestFeedbackType");
+        return {
+          kicker: fixture.querySelector(".request-heading .feature-kicker")?.textContent.trim(),
+          heading: fixture.querySelector(".request-heading h2")?.textContent.trim(),
+          description: fixture.querySelector(".request-heading p")?.textContent.trim(),
+          labels: [...fixture.querySelectorAll(".student-request-form label")].map(label => label.textContent.trim()),
+          options: [...select.options].slice(1).map(option => option.textContent.trim()),
+          required: select.required,
+          placeholder: fixture.querySelector("#requestWebsiteName")?.getAttribute("placeholder"),
+          button: fixture.querySelector('button[type="submit"]')?.textContent.trim(),
+          validRequestError: validateWebsiteRequest({ studentName: "Student, UI", grade: "5", feedbackType: "Broken link", websiteName: "The practice link is broken." })
+        };
+      } finally {
+        authSession = originalSession;
+      }
+    });
+    const expectedFeedbackOptions = ["Website suggestion", "Feature request", "Bug or glitch", "Broken link", "Other"];
+    if (launchpadFeedbackFixture.kicker !== "Launchpad Feedback"
+      || launchpadFeedbackFixture.heading !== "Suggest or Report Something"
+      || launchpadFeedbackFixture.description !== "Send Mr. Nieves a website suggestion, feature idea, or report a bug or glitch in Classroom Launchpad."
+      || JSON.stringify(launchpadFeedbackFixture.labels) !== JSON.stringify(["Your name", "Grade", "Type of feedback", "Website, feature, or issue"])
+      || JSON.stringify(launchpadFeedbackFixture.options) !== JSON.stringify(expectedFeedbackOptions)
+      || !launchpadFeedbackFixture.required || launchpadFeedbackFixture.placeholder !== "Example: a new website, calculator, broken link, bug, or display problem"
+      || launchpadFeedbackFixture.button !== "Submit Feedback" || launchpadFeedbackFixture.validRequestError !== "") {
+      throw new Error(`Launchpad feedback form does not match the requested wording and controls: ${JSON.stringify(launchpadFeedbackFixture)}.`);
+    }
     await page.evaluate(() => {
       localStorage.removeItem("classroomLaunchpadHomeProfileQueueV1");
       localStorage.removeItem("classroomLaunchpadHomeProfileLastV1");
@@ -316,8 +377,8 @@ async function run() {
     const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     await page.locator('[data-action="dashboardSection"][data-section="requests"]').first().click();
     const requestDashboardText = await page.locator("#dashboardWorkspace").innerText();
-    if (!requestDashboardText.includes("Launchpad Requests") || !requestDashboardText.includes("Pending Addition Requests") || requestDashboardText.includes("Pending Website Requests")) {
-      throw new Error(`Teacher request dashboard wording does not match Suggest an Addition: ${JSON.stringify(requestDashboardText)}.`);
+    if (!requestDashboardText.includes("Launchpad Feedback") || !requestDashboardText.includes("Pending Launchpad Feedback") || requestDashboardText.includes("Pending Addition Requests")) {
+      throw new Error(`Teacher feedback dashboard wording does not match the student form: ${JSON.stringify(requestDashboardText)}.`);
     }
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="teacher"]').first().click();
@@ -329,6 +390,8 @@ async function run() {
       homepageRendersBeforeAccountChecks: true,
       studentAssignmentNotificationGroupsMatchTabs: true,
       studentAssignmentNotificationBadgesFitCompactScreens: true,
+      teacherSubmissionLateDaysAppearInInboxAndPreview: true,
+      launchpadFeedbackFormIncludesRequiredType: true,
       sevenHomeProfileVideosRotateWithoutImmediateRepeats: true,
       crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,
@@ -348,7 +411,7 @@ async function run() {
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
-      teacherRequestWordingMatchesSuggestAnAddition: true,
+      teacherFeedbackDashboardMatchesStudentForm: true,
       teacherDashboardAlwaysOpensOnOverview: true,
       mobileHorizontalOverflow: mobileOverflow
     }, null, 2));

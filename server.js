@@ -45,6 +45,13 @@ const commonProjectHosts = new Set([
   "canva.com", "www.canva.com", "prezi.com", "www.prezi.com", "scratch.mit.edu",
   "docs.google.com", "drive.google.com", "sites.google.com", "padlet.com", "www.padlet.com"
 ]);
+const launchpadFeedbackTypes = new Set([
+  "Website suggestion",
+  "Feature request",
+  "Bug or glitch",
+  "Broken link",
+  "Other"
+]);
 
 const defaultDb = {
   links: null,
@@ -2089,12 +2096,15 @@ async function handleApi(req, res, pathname) {
         if (!body.websiteRequests.length) throw new Error("A website request is required.");
         const draft = body.websiteRequests[0] || {};
         const websiteName = cleanText(draft.websiteName, 120);
+        const feedbackType = cleanText(draft.feedbackType, 40);
         const grade = cleanGrade(allowed.grade);
-        if (!websiteName || !grade) throw new Error("Website name and grade are required.");
+        if (!launchpadFeedbackTypes.has(feedbackType)) throw new Error("A valid feedback type is required.");
+        if (!websiteName || !grade) throw new Error("A feedback message and grade are required.");
         db.websiteRequests = [{
           id: crypto.randomUUID(),
           studentName: studentDisplayName(allowed),
           grade,
+          feedbackType,
           websiteName,
           createdAt: new Date().toISOString()
         }, ...db.websiteRequests];

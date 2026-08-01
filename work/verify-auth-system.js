@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 
 const root = path.resolve(__dirname, "..");
-const dataDir = path.join(__dirname, `auth-api-test-data-${process.pid}`);
+const dataDir = path.join(__dirname, `auth-api-test-data-${process.pid}-${Date.now()}`);
 fs.mkdirSync(dataDir, { recursive: true });
 
 const child = spawn(process.execPath, ["server.js"], {
@@ -93,8 +93,9 @@ async function run() {
   });
   const importResult = await imported.json();
   check(imported.status === 200 && importResult.added === 1, "Allowlist import did not filter the wrong domain.");
-  check(importResult.activationCodes.length === 1, "Import did not issue a one-time activation code.");
-  check(/^[A-Z]{3}-[2-9]{3}$/.test(importResult.activationCodes[0].activationCode), "Activation code did not use the short ABC-234 format.");
+  const studentActivation = importResult.activationCodes.find(item => item.email === "test.student@scscolts.org");
+  check(studentActivation, "Import did not issue a one-time activation code.");
+  check(/^[A-Z]{3}-[2-9]{3}$/.test(studentActivation.activationCode), "Activation code did not use the short ABC-234 format.");
 
   await fetch(`${base}/api/approved-students/import`, {
     method: "PUT",
@@ -128,7 +129,8 @@ async function run() {
 
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();
-  check(privateResult.students.length === 2, "Teacher could not read the private allowlist.");
+  check(privateResult.students.some(student => student.email === "test.student@scscolts.org")
+    && privateResult.students.some(student => student.email === "o'example.student@scscolts.org"), "Teacher could not read the private allowlist.");
   check(!("activationHash" in privateResult.students[0]) && !("passwordHash" in privateResult.students[0]), "Secret hashes leaked through the teacher API.");
 
   const outsiderList = await fetch(`${base}/api/approved-students`);
@@ -146,7 +148,7 @@ async function run() {
     headers: originHeaders,
     body: JSON.stringify({
       email: "test.student@scscolts.org",
-      activationCode: importResult.activationCodes[0].activationCode,
+      activationCode: studentActivation.activationCode,
       name: "Verified Student",
       grade: "7",
       password: "correct-horse-classroom"
@@ -162,6 +164,7 @@ async function run() {
       websiteRequests: [{
         studentName: "Impersonated Name",
         grade: "7",
+        feedbackType: "Bug or glitch",
         websiteName: "Shared Request Test"
       }]
     })
@@ -171,14 +174,21 @@ async function run() {
     headers: { Origin: base, Cookie: cookie }
   }).then(response => response.json());
   const savedWebsiteRequest = teacherStateAfterRequest.websiteRequests.find(request => request.websiteName === "Shared Request Test");
-  check(savedWebsiteRequest && savedWebsiteRequest.studentName === "Student, Test" && savedWebsiteRequest.grade === "5", "Website request was not shared with the teacher or did not use the approved student identity.");
+  check(savedWebsiteRequest && savedWebsiteRequest.studentName === "Student, Test" && savedWebsiteRequest.grade === "5" && savedWebsiteRequest.feedbackType === "Bug or glitch", "Launchpad feedback was not shared with the teacher or did not preserve its type and approved student identity.");
+
+  const missingFeedbackType = await fetch(`${base}/api/website-requests`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: studentCookie },
+    body: JSON.stringify({ websiteRequests: [{ websiteName: "Missing feedback type" }] })
+  });
+  check(missingFeedbackType.status === 400, `Feedback without a required type returned ${missingFeedbackType.status}.`);
 
   const reusedCode = await fetch(`${base}/api/auth/register`, {
     method: "POST",
     headers: originHeaders,
     body: JSON.stringify({
       email: "test.student@scscolts.org",
-      activationCode: importResult.activationCodes[0].activationCode,
+      activationCode: studentActivation.activationCode,
       name: "Impersonator",
       grade: "7",
       password: "another-classroom-password"

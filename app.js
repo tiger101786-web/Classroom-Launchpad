@@ -8,6 +8,14 @@ const categories = [
   "Class Videos"
 ];
 
+const LAUNCHPAD_FEEDBACK_TYPES = [
+  "Website suggestion",
+  "Feature request",
+  "Bug or glitch",
+  "Broken link",
+  "Other"
+];
+
 const CLASSROOM_EXPECTATIONS = Array.isArray(window.COLT_ASSISTANT_KNOWLEDGE?.classroomRules)
   && window.COLT_ASSISTANT_KNOWLEDGE.classroomRules.length
   ? window.COLT_ASSISTANT_KNOWLEDGE.classroomRules.map(rule => String(rule))
@@ -234,6 +242,7 @@ function normalizeRequests(items) {
     id: item.id || makeId(),
     studentName: item.studentName || "",
     grade: item.grade || "",
+    feedbackType: LAUNCHPAD_FEEDBACK_TYPES.includes(item.feedbackType) ? item.feedbackType : "Website suggestion",
     websiteName: item.websiteName || "",
     createdAt: item.createdAt || new Date().toISOString()
   }));
@@ -1212,7 +1221,7 @@ const dashboardSections = [
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
   { id: "corner", label: "Colt Corner", icon: "✦" },
-  { id: "requests", label: "Launchpad Requests", icon: "✉" },
+  { id: "requests", label: "Launchpad Feedback", icon: "✉" },
   { id: "websites", label: "Manage Websites", icon: "▦" },
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
@@ -1867,8 +1876,8 @@ function renderStudentWebsiteRequest() {
       <section class="student-request-card protected-feature-card">
         <div class="request-heading">
           <span class="feature-kicker">Protected Student Feature</span>
-          <h2>Suggest an Addition</h2>
-          <p>Approved students can sign in to send website or feature suggestions.</p>
+          <h2>Suggest or Report Something</h2>
+          <p>Send Mr. Nieves a website suggestion, feature idea, or report a bug or glitch in Classroom Launchpad.</p>
         </div>
         <button class="primary-btn" data-action="login">Student Login</button>
       </section>
@@ -1877,9 +1886,9 @@ function renderStudentWebsiteRequest() {
   return `
     <section class="student-request-card student-request-entry-card">
       <div class="request-heading">
-        <span class="feature-kicker">Launchpad Request</span>
-        <h2>Suggest an Addition</h2>
-        <p>Send Mr. Nieves a website or feature idea to review for Classroom Launchpad.</p>
+        <span class="feature-kicker">Launchpad Feedback</span>
+        <h2>Suggest or Report Something</h2>
+        <p>Send Mr. Nieves a website suggestion, feature idea, or report a bug or glitch in Classroom Launchpad.</p>
       </div>
       <figure class="request-spirit">
         <video autoplay muted loop playsinline aria-label="Animated Colts school spirit graphic">
@@ -1888,18 +1897,25 @@ function renderStudentWebsiteRequest() {
       </figure>
       <form id="studentRequestForm" class="student-request-form">
         <div class="field">
-          <label>Requesting as</label>
+          <label>Your name</label>
           <input value="${escapeHtml(authSession.name)}" readonly>
         </div>
         <div class="field">
           <label for="requestGrade">Grade</label>
           <input id="requestGrade" autocomplete="off" placeholder="Your grade">
         </div>
-        <div class="field">
-          <label for="requestWebsiteName">Website or feature</label>
-          <input id="requestWebsiteName" autocomplete="off" placeholder="Example: a website, calculator, timer, or new tool">
+        <div class="field request-feedback-type">
+          <label for="requestFeedbackType">Type of feedback</label>
+          <select id="requestFeedbackType" required>
+            <option value="" selected disabled>Choose a feedback type</option>
+            ${LAUNCHPAD_FEEDBACK_TYPES.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}
+          </select>
         </div>
-        <button class="primary-btn" type="submit">Submit Request</button>
+        <div class="field request-message-field">
+          <label for="requestWebsiteName">Website, feature, or issue</label>
+          <input id="requestWebsiteName" autocomplete="off" placeholder="Example: a new website, calculator, broken link, bug, or display problem">
+        </div>
+        <button class="primary-btn" type="submit">Submit Feedback</button>
         <p id="studentRequestMessage" class="request-message" aria-live="polite"></p>
       </form>
     </section>
@@ -7864,9 +7880,9 @@ function renderLegacyDashboard() {
     <section class="teacher-list">
       ${mutedStudents.length ? mutedStudents.map(renderMutedStudent).join("") : emptyCard("No muted students.")}
     </section>
-    <h2 class="section-title">Student Launchpad Requests</h2>
+    <h2 class="section-title">Student Launchpad Feedback</h2>
     <section class="teacher-list">
-      ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student addition requests yet.")}
+      ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student feedback yet.")}
     </section>
     <h2 class="section-title">Manage Links</h2>
     <section class="teacher-list">
@@ -7919,7 +7935,7 @@ function renderDashboardOverview() {
     ["New Submissions", submissions.filter(item => item.status === "submitted").length, "assignments"],
     ["Colt Corner Topics", classThreads.length, "corner"],
     ["Posts Awaiting Review", moderationQueue.length, "corner"],
-    ["Launchpad Requests", websiteRequests.length, "requests"],
+    ["Launchpad Feedback", websiteRequests.length, "requests"],
     ["Muted Students", mutedStudents.length, "corner"]
   ];
   return `
@@ -7944,7 +7960,7 @@ function renderDashboardOverview() {
           <button class="outline-btn" data-action="dashboardSection" data-section="assignments">Assignments & Submissions</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="students">Manage Student Access</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="tools">Open Classroom Tools</button>
-          <button class="outline-btn" data-action="dashboardSection" data-section="requests">Review Requests</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="requests">Review Feedback</button>
         </div>
       </section>
       <section class="dashboard-status-panel">
@@ -8081,11 +8097,11 @@ function renderDashboardRequests() {
   return `
     <section>
       <div class="dashboard-subheading">
-        <div><span class="feature-kicker">Student Suggestions</span><h3>Pending Addition Requests</h3></div>
+        <div><span class="feature-kicker">Student Suggestions & Reports</span><h3>Pending Launchpad Feedback</h3></div>
         <span class="dashboard-count">${websiteRequests.length}</span>
       </div>
       <div class="teacher-list">
-        ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student addition requests yet.")}
+        ${websiteRequests.length ? websiteRequests.map(renderWebsiteRequest).join("") : emptyCard("No student feedback yet.")}
       </div>
     </section>
   `;
@@ -8270,13 +8286,32 @@ function filteredSubmissions() {
     .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
 }
 
+function submissionTimingDetails(assignment, submission) {
+  if (!assignment?.dueAt || !submission?.submittedAt) return null;
+  const dueAt = Date.parse(assignment.dueAt);
+  const submittedAt = Date.parse(submission.submittedAt);
+  if (!Number.isFinite(dueAt) || !Number.isFinite(submittedAt)) return null;
+  if (submittedAt <= dueAt) return { daysLate: 0, label: "On time", className: "is-on-time" };
+  const daysLate = Math.ceil((submittedAt - dueAt) / (24 * 60 * 60 * 1000));
+  return {
+    daysLate,
+    label: `Late by ${daysLate} ${daysLate === 1 ? "day" : "days"}`,
+    className: "is-late"
+  };
+}
+
+function renderSubmissionTimingBadge(assignment, submission) {
+  const timing = submissionTimingDetails(assignment, submission);
+  if (!timing) return "";
+  return `<span class="submission-late-badge ${timing.className}" title="Due ${escapeHtml(assignmentDueText(assignment))}">${escapeHtml(timing.label)}</span>`;
+}
+
 function renderTeacherSubmissionRow(submission) {
   const assignment = assignments.find(item => item.id === submission.assignmentId);
   return `
     <button class="teacher-submission-row ${selectedSubmissionId === submission.id ? "is-selected" : ""}" data-action="selectSubmission" data-id="${escapeHtml(submission.id)}">
       <span class="submission-student-initial">${escapeHtml((submission.studentName || "S").charAt(0))}</span>
-      <span><strong>${escapeHtml(submission.studentName || "Student")}</strong><small>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")}</small></span>
-      <span class="submission-time">${escapeHtml(formatShortDate(submission.submittedAt))}</span>
+      <span><strong>${escapeHtml(submission.studentName || "Student")}</strong><small>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")}</small><span class="submission-row-timing"><span class="submission-time">${escapeHtml(formatShortDate(submission.submittedAt))}</span>${renderSubmissionTimingBadge(assignment, submission)}</span></span>
       <span class="assignment-card-status is-${escapeHtml(submission.status)}">${submission.status === "submitted" ? "New" : escapeHtml(submission.status)}</span>
     </button>
   `;
@@ -8287,7 +8322,7 @@ function renderTeacherSubmissionPreview(submission) {
   const assignment = assignments.find(item => item.id === submission.assignmentId);
   return `
     <article class="teacher-submission-preview">
-      <header><div><span class="feature-kicker">Student Submission</span><h3>${escapeHtml(submission.studentName)}</h3><p>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")} • ${escapeHtml(formatShortDate(submission.submittedAt))}</p></div><span class="assignment-card-status is-${escapeHtml(submission.status)}">${escapeHtml(submission.status)}</span></header>
+      <header><div><span class="feature-kicker">Student Submission</span><h3>${escapeHtml(submission.studentName)}</h3><p>Grade ${escapeHtml(submission.grade)} • ${escapeHtml(assignment ? assignment.title : "Assignment")} • Submitted ${escapeHtml(formatShortDate(submission.submittedAt))}</p></div><div class="teacher-submission-status-stack"><span class="assignment-card-status is-${escapeHtml(submission.status)}">${escapeHtml(submission.status)}</span>${renderSubmissionTimingBadge(assignment, submission)}</div></header>
       <div class="submission-file-heading"><div><strong>${escapeHtml(submission.submissionType === "link" ? submission.projectTitle : submission.originalName)}</strong><span>${submission.submissionType === "link" ? "External project link" : formatFileSize(submission.size)}</span></div>${submission.submissionType === "link" ? `<a class="outline-btn" href="${escapeHtml(submission.projectUrl)}" target="_blank" rel="noopener noreferrer">Open Project</a>` : `<a class="outline-btn" href="/api/submissions/${encodeURIComponent(submission.id)}/file" download>Download</a>`}</div>
       <div class="submission-preview-box teacher-file-preview">${renderSubmissionPreview(submission)}</div>
       ${submission.note ? `<div class="submission-note"><strong>Student note:</strong> ${escapeHtml(submission.note)}</div>` : ""}
@@ -8436,9 +8471,10 @@ function renderWebsiteRequest(request) {
   return `
     <article class="request-card">
       <div>
+        <span class="feature-kicker">${escapeHtml(request.feedbackType || "Website suggestion")}</span>
         <h3>${escapeHtml(request.websiteName)}</h3>
         <p class="meta">${escapeHtml(request.studentName)} • Grade ${escapeHtml(request.grade)}</p>
-        ${submitted ? `<p class="url-text">Requested ${escapeHtml(submitted)}</p>` : ""}
+        ${submitted ? `<p class="url-text">Submitted ${escapeHtml(submitted)}</p>` : ""}
       </div>
       <div class="actions">
         <button class="danger-btn" data-action="deleteRequest" data-id="${request.id}">Delete</button>
@@ -9243,6 +9279,7 @@ function attachStudentRequestForm() {
       id: makeId(),
       studentName: authSession.name,
       grade: document.getElementById("requestGrade").value.trim(),
+      feedbackType: document.getElementById("requestFeedbackType").value,
       websiteName: document.getElementById("requestWebsiteName").value.trim(),
       createdAt: new Date().toISOString()
     };
@@ -9255,7 +9292,7 @@ function attachStudentRequestForm() {
     }
     saveWebsiteRequests([request, ...websiteRequests], false);
     requestForm.reset();
-    message.textContent = "Request sent to Teacher Dashboard.";
+    message.textContent = "Feedback sent to Teacher Dashboard.";
     message.classList.remove("error");
   });
 }
@@ -9395,7 +9432,8 @@ function validateThreadReply(reply) {
 function validateWebsiteRequest(request) {
   if (!request.studentName) return "Please add your name.";
   if (!request.grade) return "Please add your grade.";
-  if (!request.websiteName) return "Please add the website or feature.";
+  if (!LAUNCHPAD_FEEDBACK_TYPES.includes(request.feedbackType)) return "Please choose a feedback type.";
+  if (!request.websiteName) return "Please describe the website, feature, or issue.";
   return "";
 }
 
