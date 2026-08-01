@@ -3465,6 +3465,16 @@ body[data-theme="night"] .colt-run-volume {
   margin-bottom: 14px;
 }
 
+.dashboard-subheading > div {
+  display: grid;
+  justify-items: start;
+  gap: 9px;
+}
+
+.dashboard-subheading > div > h3 {
+  margin-top: 0;
+}
+
 .dashboard-count {
   display: grid;
   min-width: 36px;
