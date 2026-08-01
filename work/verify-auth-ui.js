@@ -126,8 +126,24 @@ async function run() {
       const originalSession = authSession;
       try {
         authSession = { authenticated: true, role: "student", name: "Student, UI", email: "ui.fixture@scscolts.org", grade: "5" };
-        const fixture = new DOMParser().parseFromString(renderStudentWebsiteRequest(), "text/html");
+        const markup = renderStudentWebsiteRequest();
+        const fixture = new DOMParser().parseFromString(markup, "text/html");
         const select = fixture.querySelector("#requestFeedbackType");
+        const layoutFixture = document.createElement("div");
+        layoutFixture.style.width = "1130px";
+        layoutFixture.innerHTML = markup;
+        document.body.append(layoutFixture);
+        const cardRect = layoutFixture.querySelector(".student-request-entry-card").getBoundingClientRect();
+        const typeRect = layoutFixture.querySelector(".request-feedback-type").getBoundingClientRect();
+        const messageRect = layoutFixture.querySelector(".request-message-field").getBoundingClientRect();
+        const formRect = layoutFixture.querySelector(".student-request-form").getBoundingClientRect();
+        const buttonRect = layoutFixture.querySelector('button[type="submit"]').getBoundingClientRect();
+        const layout = {
+          feedbackFieldsShareRow: Math.abs(typeRect.top - messageRect.top) < 2,
+          buttonInsidePanel: buttonRect.bottom <= cardRect.bottom && buttonRect.left >= formRect.left && buttonRect.right <= formRect.right,
+          buttonSpansForm: Math.abs(buttonRect.width - formRect.width) < 2
+        };
+        layoutFixture.remove();
         return {
           kicker: fixture.querySelector(".request-heading .feature-kicker")?.textContent.trim(),
           heading: fixture.querySelector(".request-heading h2")?.textContent.trim(),
@@ -137,7 +153,8 @@ async function run() {
           required: select.required,
           placeholder: fixture.querySelector("#requestWebsiteName")?.getAttribute("placeholder"),
           button: fixture.querySelector('button[type="submit"]')?.textContent.trim(),
-          validRequestError: validateWebsiteRequest({ studentName: "Student, UI", grade: "5", feedbackType: "Broken link", websiteName: "The practice link is broken." })
+          validRequestError: validateWebsiteRequest({ studentName: "Student, UI", grade: "5", feedbackType: "Broken link", websiteName: "The practice link is broken." }),
+          layout
         };
       } finally {
         authSession = originalSession;
@@ -150,7 +167,9 @@ async function run() {
       || JSON.stringify(launchpadFeedbackFixture.labels) !== JSON.stringify(["Your name", "Grade", "Type of feedback", "Website, feature, or issue"])
       || JSON.stringify(launchpadFeedbackFixture.options) !== JSON.stringify(expectedFeedbackOptions)
       || !launchpadFeedbackFixture.required || launchpadFeedbackFixture.placeholder !== "Example: a new website, calculator, broken link, bug, or display problem"
-      || launchpadFeedbackFixture.button !== "Submit Feedback" || launchpadFeedbackFixture.validRequestError !== "") {
+      || launchpadFeedbackFixture.button !== "Submit Feedback" || launchpadFeedbackFixture.validRequestError !== ""
+      || !launchpadFeedbackFixture.layout.feedbackFieldsShareRow || !launchpadFeedbackFixture.layout.buttonInsidePanel
+      || !launchpadFeedbackFixture.layout.buttonSpansForm) {
       throw new Error(`Launchpad feedback form does not match the requested wording and controls: ${JSON.stringify(launchpadFeedbackFixture)}.`);
     }
     await page.evaluate(() => {
@@ -392,6 +411,7 @@ async function run() {
       studentAssignmentNotificationBadgesFitCompactScreens: true,
       teacherSubmissionLateDaysAppearInInboxAndPreview: true,
       launchpadFeedbackFormIncludesRequiredType: true,
+      launchpadFeedbackFormFitsInsidePanel: true,
       sevenHomeProfileVideosRotateWithoutImmediateRepeats: true,
       crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,
