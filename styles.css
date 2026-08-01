@@ -4482,7 +4482,9 @@ body[data-theme="night"] .assignment-card-status.is-reviewed { background: #2038
 .submission-preview-empty { display: grid; place-items: center; align-content: center; gap: 8px; min-height: 300px; padding: 24px; color: var(--muted); text-align: center; }
 .submission-note,
 .teacher-feedback-box { margin: 0; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--paper); line-height: 1.5; }
-.teacher-feedback-box { border-left: 5px solid var(--blue); }
+.teacher-feedback-box { display: grid; justify-items: start; gap: 8px; border-left: 5px solid var(--blue); }
+.teacher-feedback-box .feature-kicker { padding: 4px 8px; font-size: .66rem; line-height: 1.1; }
+.teacher-feedback-box p { width: 100%; margin: 0; overflow-wrap: anywhere; }
 
 .teacher-assignment-dashboard { display: grid; gap: 20px; }
 .assignment-metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }

@@ -42,6 +42,20 @@ async function run() {
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    const feedbackLayout = await page.evaluate(() => {
+      const box = document.createElement("div");
+      box.className = "teacher-feedback-box";
+      box.innerHTML = '<span class="feature-kicker">Feedback from Mr. Nieves</span><p>Good job with this!</p>';
+      document.body.appendChild(box);
+      const label = box.querySelector(".feature-kicker").getBoundingClientRect();
+      const message = box.querySelector("p").getBoundingClientRect();
+      const result = { gap: message.top - label.bottom, fontSize: parseFloat(getComputedStyle(box.querySelector(".feature-kicker")).fontSize) };
+      box.remove();
+      return result;
+    });
+    if (feedbackLayout.gap < 7 || feedbackLayout.fontSize > 11) {
+      throw new Error(`Student feedback label is too large or overlaps its message: ${JSON.stringify(feedbackLayout)}.`);
+    }
     const faviconLinks = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]').count();
     const faviconResponse = await page.request.get("http://localhost:8098/favicon.ico");
     const manifestResponse = await page.request.get("http://localhost:8098/site.webmanifest");
