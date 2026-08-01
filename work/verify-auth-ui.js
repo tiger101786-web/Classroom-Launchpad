@@ -42,6 +42,35 @@ async function run() {
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    await page.evaluate(() => {
+      localStorage.removeItem("classroomLaunchpadHomeProfileQueueV1");
+      localStorage.removeItem("classroomLaunchpadHomeProfileLastV1");
+    });
+    const profileVisits = [];
+    for (let visit = 0; visit < 7; visit += 1) {
+      await page.reload({ waitUntil: "networkidle" });
+      const sources = await page.locator(".school-photo source").evaluateAll(items => items.map(item => item.getAttribute("data-src").split("?")[0]));
+      if (sources.length !== 1) throw new Error(`Expected one selected home profile video, found ${sources.length}.`);
+      const profileMetadata = await page.locator(".school-photo").evaluate(video => new Promise((resolve, reject) => {
+        const done = () => resolve({ width: video.videoWidth, height: video.videoHeight, duration: video.duration });
+        if (video.readyState >= 1) return done();
+        const timer = setTimeout(() => reject(new Error("Profile video metadata timed out.")), 5000);
+        video.addEventListener("loadedmetadata", () => { clearTimeout(timer); done(); }, { once: true });
+        video.addEventListener("error", () => { clearTimeout(timer); reject(new Error("Profile video failed to load.")); }, { once: true });
+      }));
+      if (profileMetadata.width !== 544 || profileMetadata.height !== 544 || profileMetadata.duration < 5.7) {
+        throw new Error(`Profile video has invalid optimized metadata: ${JSON.stringify(profileMetadata)}.`);
+      }
+      profileVisits.push(sources[0]);
+    }
+    if (new Set(profileVisits).size !== 7) {
+      throw new Error(`Home profile rotation repeated before showing all seven videos: ${JSON.stringify(profileVisits)}.`);
+    }
+    await page.reload({ waitUntil: "networkidle" });
+    const nextProfile = await page.locator(".school-photo source").getAttribute("data-src");
+    if (nextProfile.split("?")[0] === profileVisits[profileVisits.length - 1]) {
+      throw new Error("Home profile rotation repeated the same video on consecutive visits.");
+    }
     const feedbackLayout = await page.evaluate(() => {
       const box = document.createElement("div");
       box.className = "teacher-feedback-box";
@@ -248,6 +277,7 @@ async function run() {
     }
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
+      sevenHomeProfileVideosRotateWithoutImmediateRepeats: true,
       crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,
       darkModeGuestHeaderButtonsMatch: true,

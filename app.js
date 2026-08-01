@@ -44,6 +44,50 @@ const DEFAULT_RANDOM_ACTIVITY_SETTINGS = {
 const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
 
+const HOME_PROFILE_VIDEOS = [
+  "assets/mr-nieves-colts.mp4",
+  "assets/home-profile-02.mp4",
+  "assets/home-profile-03.mp4",
+  "assets/home-profile-04.mp4",
+  "assets/home-profile-05.mp4",
+  "assets/home-profile-06.mp4",
+  "assets/home-profile-07.mp4"
+];
+const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
+const HOME_PROFILE_LAST_KEY = "classroomLaunchpadHomeProfileLastV1";
+
+function shuffledHomeProfileIndexes() {
+  const indexes = HOME_PROFILE_VIDEOS.map((_, index) => index);
+  for (let index = indexes.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [indexes[index], indexes[swapIndex]] = [indexes[swapIndex], indexes[index]];
+  }
+  return indexes;
+}
+
+function selectHomeProfileVideo() {
+  try {
+    const lastIndex = Number(localStorage.getItem(HOME_PROFILE_LAST_KEY));
+    let queue = JSON.parse(localStorage.getItem(HOME_PROFILE_QUEUE_KEY) || "[]");
+    const validQueue = Array.isArray(queue)
+      && new Set(queue).size === queue.length
+      && queue.every(index => Number.isInteger(index) && index >= 0 && index < HOME_PROFILE_VIDEOS.length);
+    if (!validQueue || !queue.length) queue = shuffledHomeProfileIndexes();
+    if (queue.length > 1 && queue[0] === lastIndex) {
+      const replacementIndex = queue.findIndex(index => index !== lastIndex);
+      [queue[0], queue[replacementIndex]] = [queue[replacementIndex], queue[0]];
+    }
+    const selectedIndex = queue.shift();
+    localStorage.setItem(HOME_PROFILE_QUEUE_KEY, JSON.stringify(queue));
+    localStorage.setItem(HOME_PROFILE_LAST_KEY, String(selectedIndex));
+    return HOME_PROFILE_VIDEOS[selectedIndex];
+  } catch (error) {
+    return HOME_PROFILE_VIDEOS[Math.floor(Math.random() * HOME_PROFILE_VIDEOS.length)];
+  }
+}
+
+const homeProfileVideo = selectHomeProfileVideo();
+
 let deferredVideoObserver = null;
 
 function isPreferredResponsiveVideo(video) {
@@ -1685,8 +1729,8 @@ function renderHome() {
         <div class="search-wrap">
           <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
         </div>
-        <video class="school-photo" autoplay muted loop playsinline aria-label="Mr. Nieves with the St. Cletus Colts mascot">
-          <source data-src="assets/mr-nieves-colts.mp4" type="video/mp4">
+        <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
+          <source data-src="${homeProfileVideo}?v=20260801-profile-rotation1" type="video/mp4">
         </video>
       </section>
     </section>
