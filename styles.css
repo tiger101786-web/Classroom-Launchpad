@@ -4387,8 +4387,11 @@ body[data-theme="night"] .class-timer-badge {
 
 .student-assignment-sidebar { border-right: 1px solid var(--border); background: color-mix(in srgb, var(--paper) 86%, var(--blue-soft)); }
 .assignment-view-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
-.assignment-view-tabs button { padding: 15px 8px; background: transparent; color: var(--muted); font-weight: 800; }
+.assignment-view-tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; padding: 9px 4px; background: transparent; color: var(--muted); font-size: .86rem; font-weight: 800; }
 .assignment-view-tabs button.is-active { background: var(--blue); color: #fff; }
+.assignment-tab-count { display: grid; flex: 0 0 auto; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-dark); font-size: .7rem; font-weight: 900; line-height: 1; }
+.assignment-view-tabs button.is-active .assignment-tab-count { background: rgba(255, 255, 255, .2); color: #fff; }
+body[data-theme="night"] .assignment-view-tabs button:not(.is-active) .assignment-tab-count { background: rgba(255, 255, 255, .1); color: var(--ink); }
 .student-assignment-list { display: grid; gap: 10px; max-height: 700px; overflow: auto; padding: 14px; }
 .student-assignment-card { display: grid; gap: 7px; width: 100%; padding: 15px; text-align: left; color: var(--ink); border: 1px solid var(--border); border-radius: 12px; background: var(--white); }
 .student-assignment-card:hover,

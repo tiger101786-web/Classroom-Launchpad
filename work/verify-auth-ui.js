@@ -42,6 +42,56 @@ async function run() {
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    const assignmentBuckets = await page.evaluate(() => [
+      studentAssignmentViewFor({ id: "fixture" }, null),
+      studentAssignmentViewFor({ id: "fixture" }, { status: "submitted" }),
+      studentAssignmentViewFor({ id: "fixture" }, { status: "reviewed" }),
+      studentAssignmentViewFor({ id: "fixture" }, { status: "returned" })
+    ]);
+    if (assignmentBuckets.join(",") !== "todo,submitted,submitted,returned") {
+      throw new Error(`Student assignment tab counts use incorrect status groups: ${JSON.stringify(assignmentBuckets)}.`);
+    }
+    const assignmentBadgeFixture = await page.evaluate(() => {
+      const original = { authSession, assignments, submissions, assignmentView, selectedAssignmentId, replacingAssignmentId };
+      try {
+        authSession = { authenticated: true, role: "student", name: "Student, UI", email: "ui.fixture@scscolts.org", grade: "5" };
+        assignments = ["todo", "submitted", "reviewed", "returned"].map((id, index) => ({
+          id, title: `Assignment ${index + 1}`, instructions: "Fixture", grades: ["5"], dueAt: "",
+          acceptedTypes: [".pdf"], maxFileSizeMb: 5, allowResubmissions: false, status: "open"
+        }));
+        submissions = [
+          { assignmentId: "submitted", studentEmail: authSession.email, status: "submitted" },
+          { assignmentId: "reviewed", studentEmail: authSession.email, status: "reviewed" },
+          { assignmentId: "returned", studentEmail: authSession.email, status: "returned" }
+        ];
+        assignmentView = "todo";
+        selectedAssignmentId = "";
+        replacingAssignmentId = "";
+        const fixture = new DOMParser().parseFromString(renderAssignmentsPage(), "text/html");
+        return [...fixture.querySelectorAll(".assignment-view-tabs button")].map(button => ({
+          label: button.querySelector("span:first-child")?.textContent.trim(),
+          count: button.querySelector(".assignment-tab-count")?.textContent.trim(),
+          accessibleName: button.getAttribute("aria-label")
+        }));
+      } finally {
+        ({ authSession, assignments, submissions, assignmentView, selectedAssignmentId, replacingAssignmentId } = original);
+      }
+    });
+    if (JSON.stringify(assignmentBadgeFixture.map(item => item.count)) !== JSON.stringify(["1", "2", "1"])
+      || assignmentBadgeFixture.some(item => !item.accessibleName?.includes("assignment"))) {
+      throw new Error(`Student assignment tab notification badges are incorrect: ${JSON.stringify(assignmentBadgeFixture)}.`);
+    }
+    const compactAssignmentTabsFit = await page.evaluate(() => {
+      const fixture = document.createElement("div");
+      fixture.style.width = "270px";
+      fixture.innerHTML = `<div class="assignment-view-tabs"><button class="is-active"><span>To Do</span><span class="assignment-tab-count">12</span></button><button><span>Submitted</span><span class="assignment-tab-count">12</span></button><button><span>Returned</span><span class="assignment-tab-count">12</span></button></div>`;
+      document.body.appendChild(fixture);
+      const fits = fixture.querySelector(".assignment-view-tabs").scrollWidth <= fixture.clientWidth
+        && [...fixture.querySelectorAll("button")].every(button => button.scrollWidth <= button.clientWidth);
+      fixture.remove();
+      return fits;
+    });
+    if (!compactAssignmentTabsFit) throw new Error("Student assignment notification badges overflow the compact sidebar.");
     await page.evaluate(() => {
       localStorage.removeItem("classroomLaunchpadHomeProfileQueueV1");
       localStorage.removeItem("classroomLaunchpadHomeProfileLastV1");
@@ -277,6 +327,8 @@ async function run() {
     }
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
+      studentAssignmentNotificationGroupsMatchTabs: true,
+      studentAssignmentNotificationBadgesFitCompactScreens: true,
       sevenHomeProfileVideosRotateWithoutImmediateRepeats: true,
       crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,

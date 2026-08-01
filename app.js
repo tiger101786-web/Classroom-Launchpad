@@ -7473,14 +7473,18 @@ function renderAssignmentAttachment(assignment) {
   `;
 }
 
+function studentAssignmentViewFor(assignment, submission = studentSubmissionFor(assignment.id)) {
+  if (!submission) return "todo";
+  return submission.status === "returned" ? "returned" : "submitted";
+}
+
 function renderAssignmentsPage() {
   if (!isApprovedStudent()) return `${pageHeader("Assignments & Submissions", "Student login is required.", true)}${renderLogin()}`;
-  const filtered = assignments.filter(assignment => {
-    const submission = studentSubmissionFor(assignment.id);
-    if (assignmentView === "submitted") return submission && submission.status !== "returned";
-    if (assignmentView === "returned") return submission && submission.status === "returned";
-    return !submission;
-  });
+  const assignmentCounts = assignments.reduce((counts, assignment) => {
+    counts[studentAssignmentViewFor(assignment)] += 1;
+    return counts;
+  }, { todo: 0, submitted: 0, returned: 0 });
+  const filtered = assignments.filter(assignment => studentAssignmentViewFor(assignment) === assignmentView);
   const selected = assignments.find(item => item.id === selectedAssignmentId)
     && filtered.some(item => item.id === selectedAssignmentId)
       ? assignments.find(item => item.id === selectedAssignmentId)
@@ -7497,7 +7501,9 @@ function renderAssignmentsPage() {
       <aside class="student-assignment-sidebar">
         <div class="assignment-view-tabs" role="tablist" aria-label="Assignment status">
           ${[["todo", "To Do"], ["submitted", "Submitted"], ["returned", "Returned"]].map(([id, label]) => `
-            <button data-action="assignmentView" data-view="${id}" class="${assignmentView === id ? "is-active" : ""}" role="tab">${label}</button>
+            <button data-action="assignmentView" data-view="${id}" class="${assignmentView === id ? "is-active" : ""}" role="tab" aria-selected="${assignmentView === id}" aria-label="${label}, ${assignmentCounts[id]} ${assignmentCounts[id] === 1 ? "assignment" : "assignments"}">
+              <span>${label}</span><span class="assignment-tab-count" aria-hidden="true">${assignmentCounts[id]}</span>
+            </button>
           `).join("")}
         </div>
         <div class="student-assignment-list">
