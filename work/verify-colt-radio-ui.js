@@ -75,7 +75,25 @@ async function run() {
       contentType: "text/html",
       body: "<!doctype html><title>Test Lofi Cafe Embed</title><button>Play</button>"
     }));
-    await page.route("https://stream.nightride.fm/**", route => route.fulfill({
+    await page.route("https://stream.nightride.fm/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({
+            icestats: {
+              source: [
+                { listenurl: "https://stream.nightride.fm/chillsynth.mp3", title: "Test Artist - Chillsynth Song" },
+                { listenurl: "https://stream.nightride.fm/datawave.mp3", title: "Test Artist - Datawave Song" }
+              ]
+            }
+          })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
+    await page.route("https://lofi.radio/**", route => route.fulfill({
       status: 200,
       contentType: "audio/mpeg",
       body: Buffer.from([])
@@ -119,7 +137,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Chillsynth", "Datawave"]
+      ["Studying", "Working", "Chilling", "Lofi FM", "Chillsynth", "Datawave"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -140,12 +158,25 @@ async function run() {
 
     await page.getByRole("button", { name: "Working", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
+    await page.evaluate(() => {
+      window.__embeddedFrameBeforeDirectStation = document.querySelector(".colt-radio-player iframe");
+    });
 
     await page.getByRole("button", { name: "Chillsynth", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/chillsynth.mp3");
     assert(await audio.isVisible(), "The Chillsynth stream did not use the existing Colt Radio player.");
     assert(await iframe.isHidden(), "The Lofi Cafe player remained visible after switching to Chillsynth.");
     assert.match(await page.locator(".colt-radio-note").innerText(), /Instrumental chillsynth/);
+    assert(await page.evaluate(() => !window.__embeddedFrameBeforeDirectStation.isConnected), "The old Lofi Cafe player kept running after switching stations.");
+    await page.getByText("Test Artist - Chillsynth Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Lofi FM", exact: true }).click();
+    const firstLofiTrack = await audio.getAttribute("src");
+    assert.match(firstLofiTrack, /^https:\/\/lofi\.radio\/songs\//);
+    assert(await audio.isVisible(), "Lofi FM did not use the existing Colt Radio audio controls.");
+    assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /^Purrple Cat - /);
+    await audio.evaluate(element => element.dispatchEvent(new Event("ended")));
+    assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lofi FM repeated the same track immediately.");
 
     await page.getByRole("button", { name: "Working", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
@@ -210,9 +241,12 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Chillsynth", "Datawave"],
+      stations: ["Studying", "Working", "Chilling", "Lofi FM", "Chillsynth", "Datawave"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
+      lofiFmAutomaticPlaylist: true,
+      liveTrackTitles: true,
+      embeddedPlayerDestroyedOnSwitch: true,
       onePlayerAtATime: true,
       stationPreferenceRemembered: true,
       assistantCollisionPrevented: true,
