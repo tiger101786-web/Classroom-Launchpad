@@ -247,7 +247,7 @@ async function run() {
       localStorage.removeItem("classroomLaunchpadHomeProfileLastV1");
     });
     const profileVisits = [];
-    for (let visit = 0; visit < 7; visit += 1) {
+    for (let visit = 0; visit < 12; visit += 1) {
       await page.reload({ waitUntil: "networkidle" });
       const sources = await page.locator(".school-photo source").evaluateAll(items => items.map(item => item.getAttribute("data-src").split("?")[0]));
       if (sources.length !== 1) throw new Error(`Expected one selected home profile video, found ${sources.length}.`);
@@ -263,8 +263,8 @@ async function run() {
       }
       profileVisits.push(sources[0]);
     }
-    if (new Set(profileVisits).size !== 7) {
-      throw new Error(`Home profile rotation repeated before showing all seven videos: ${JSON.stringify(profileVisits)}.`);
+    if (new Set(profileVisits).size !== 12) {
+      throw new Error(`Home profile rotation repeated before showing all twelve videos: ${JSON.stringify(profileVisits)}.`);
     }
     await page.reload({ waitUntil: "networkidle" });
     const nextProfile = await page.locator(".school-photo source").getAttribute("data-src");
@@ -484,7 +484,7 @@ async function run() {
       teacherSubmissionLateDaysAppearInInboxAndPreview: true,
       launchpadFeedbackFormIncludesRequiredType: true,
       launchpadFeedbackFormFitsInsidePanel: true,
-      sevenHomeProfileVideosRotateWithoutImmediateRepeats: true,
+      twelveHomeProfileVideosRotateWithoutImmediateRepeats: true,
       crossBrowserFaviconsAvailable: true,
       loginBesidePlusPortal: true,
       darkModeGuestHeaderButtonsMatch: true,

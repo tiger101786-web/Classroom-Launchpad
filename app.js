@@ -59,7 +59,12 @@ const HOME_PROFILE_VIDEOS = [
   "assets/home-profile-04.mp4",
   "assets/home-profile-05.mp4",
   "assets/home-profile-06.mp4",
-  "assets/home-profile-07.mp4"
+  "assets/home-profile-07.mp4",
+  "assets/home-profile-08.mp4",
+  "assets/home-profile-09.mp4",
+  "assets/home-profile-10.mp4",
+  "assets/home-profile-11.mp4",
+  "assets/home-profile-12.mp4"
 ];
 const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
 const HOME_PROFILE_LAST_KEY = "classroomLaunchpadHomeProfileLastV1";
@@ -1792,7 +1797,7 @@ function renderHome() {
           <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
         </div>
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
-          <source data-src="${homeProfileVideo}?v=20260801-profile-rotation1" type="video/mp4">
+          <source data-src="${homeProfileVideo}?v=20260801-profile-rotation12" type="video/mp4">
         </video>
       </section>
     </section>
