@@ -2,10 +2,43 @@
   "use strict";
 
   const stations = [
-    { id: "studying", label: "Studying" },
-    { id: "working", label: "Working" },
-    { id: "chilling", label: "Chilling" }
+    {
+      id: "studying",
+      label: "Studying",
+      type: "embed",
+      source: "https://loficafe.net/embed/studying",
+      note: "Free, ad-free study music streamed by Lofi Cafe. No account required."
+    },
+    {
+      id: "working",
+      label: "Working",
+      type: "embed",
+      source: "https://loficafe.net/embed/working",
+      note: "Free, ad-free work music streamed by Lofi Cafe. No account required."
+    },
+    {
+      id: "chilling",
+      label: "Chilling",
+      type: "embed",
+      source: "https://loficafe.net/embed/chilling",
+      note: "Free, ad-free chill music streamed by Lofi Cafe. No account required."
+    },
+    {
+      id: "chillsynth",
+      label: "Chillsynth",
+      type: "stream",
+      source: "https://stream.nightride.fm/chillsynth.mp3",
+      note: "Instrumental chillsynth and chillwave streamed by Nightride FM. No account required."
+    },
+    {
+      id: "datawave",
+      label: "Datawave",
+      type: "stream",
+      source: "https://stream.nightride.fm/datawave.mp3",
+      note: "Instrumental electronic and retro-computing music streamed by Nightride FM. No account required."
+    }
   ];
+  const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
   const hiddenScreens = new Set(["coltRun", "pin", "login", "account", "dashboard", "edit", "changePin"]);
 
   function buildElement(tag, className, text) {
@@ -56,7 +89,7 @@
     header.append(heading, headerActions);
 
     const stationNav = buildElement("nav", "colt-radio-stations");
-    stationNav.setAttribute("aria-label", "Choose a Lofi Cafe station");
+    stationNav.setAttribute("aria-label", "Choose a Colt Radio station");
     const stationButtons = stations.map(station => {
       const button = buildElement("button", "colt-radio-station", station.label);
       button.type = "button";
@@ -78,14 +111,53 @@
       frame.hidden = true;
       return frame;
     }
+    function createAudioPlayer() {
+      const audio = document.createElement("audio");
+      audio.className = "colt-radio-audio";
+      audio.controls = true;
+      audio.preload = "none";
+      audio.controlsList = "nodownload noplaybackrate";
+      audio.disableRemotePlayback = true;
+      audio.setAttribute("aria-label", "Colt Radio audio controls");
+      audio.hidden = true;
+      return audio;
+    }
     let iframe = createPlayerFrame();
-    playerWrap.append(placeholder, iframe);
+    const audio = createAudioPlayer();
+    playerWrap.append(placeholder, iframe, audio);
 
     const note = buildElement("p", "colt-radio-note", "Free, ad-free music streamed by Lofi Cafe. No account required.");
     panel.append(header, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
     let activeStation = "";
+
+    function preferredStation() {
+      try {
+        const savedStation = localStorage.getItem(preferredStationKey);
+        return stations.some(station => station.id === savedStation) ? savedStation : "studying";
+      } catch (error) {
+        return "studying";
+      }
+    }
+
+    function rememberStation(stationId) {
+      try {
+        localStorage.setItem(preferredStationKey, stationId);
+      } catch (error) {}
+    }
+
+    function clearAudioStream() {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      audio.hidden = true;
+    }
+
+    function clearEmbeddedPlayer() {
+      iframe.src = "about:blank";
+      iframe.hidden = true;
+    }
 
     function setLauncherState() {
       launcherLabel.textContent = activeStation ? "Colt Radio • On" : "Colt Radio";
@@ -101,10 +173,11 @@
 
     function stopRadio({ focusLauncher = true } = {}) {
       const activeFrame = iframe;
+      clearAudioStream();
       activeFrame.src = "about:blank";
       activeFrame.remove();
       iframe = createPlayerFrame();
-      playerWrap.append(iframe);
+      playerWrap.insertBefore(iframe, audio);
       placeholder.hidden = false;
       activeStation = "";
       stationButtons.forEach(button => {
@@ -119,15 +192,26 @@
       const station = stations.find(item => item.id === stationId);
       if (!station) return;
       activeStation = station.id;
-      iframe.src = `https://loficafe.net/embed/${station.id}`;
-      iframe.title = `Lofi Cafe ${station.label} station`;
-      iframe.hidden = false;
+      clearAudioStream();
+      clearEmbeddedPlayer();
+      if (station.type === "embed") {
+        iframe.src = station.source;
+        iframe.title = `Lofi Cafe ${station.label} station`;
+        iframe.hidden = false;
+      } else {
+        audio.src = station.source;
+        audio.setAttribute("aria-label", `${station.label} station audio controls`);
+        audio.hidden = false;
+        audio.load();
+      }
       placeholder.hidden = true;
+      note.textContent = station.note;
       stationButtons.forEach(button => {
         const selected = button.dataset.station === station.id;
         button.classList.toggle("is-active", selected);
         button.setAttribute("aria-pressed", String(selected));
       });
+      rememberStation(station.id);
       setLauncherState();
     }
 
@@ -136,7 +220,7 @@
       launcher.hidden = true;
       launcher.setAttribute("aria-expanded", "true");
       globalObject.dispatchEvent(new CustomEvent("colt-radio-opened"));
-      if (!activeStation) selectStation("studying");
+      if (!activeStation) selectStation(preferredStation());
       stationButtons.find(button => button.dataset.station === activeStation)?.focus();
     }
 

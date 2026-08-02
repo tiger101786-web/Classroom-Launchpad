@@ -5091,6 +5091,19 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
   background: #12060b;
 }
 
+.colt-radio-player .colt-radio-audio {
+  display: block;
+  width: 100%;
+  height: 96px;
+  padding: 20px 12px;
+  background: #12060b;
+}
+
+.colt-radio-player .colt-radio-audio[hidden],
+.colt-radio-player iframe[hidden] {
+  display: none;
+}
+
 .colt-radio-placeholder {
   display: grid;
   min-height: 96px;
