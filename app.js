@@ -80,11 +80,11 @@ const HOME_NAVIGATION_COLLAPSED_KEY = "classroomLaunchpadHomeNavigationCollapsed
 const HOME_NAVIGATION_ITEMS = [
   { id: "home-top", label: "Home", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"></path></svg>' },
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
-  { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
+  { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m3 8 4-3.5c1-.8 2.4-.8 3.4-.1L12 5.5l1.6-1.1c1-.7 2.4-.7 3.4.1L21 8l-3.2 3.3-3.6-2.8c-.8-.6-1.8-.5-2.5.2l-.7.7a1.7 1.7 0 0 1-2.4-2.4l1.2-1.2"></path><path d="m4.5 11 6.6 6.6a1.4 1.4 0 0 0 2 0l.4-.4M7.3 13.8l4.8 4.8a1.4 1.4 0 0 0 2 0l.4-.4M10.2 16.7l2.4 2.4a1.4 1.4 0 0 0 2 0l3.9-4a1.4 1.4 0 0 0 0-2L16.4 11"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
   { id: "home-assignments", label: "Assignments", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M8 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5H16"></path><path d="M9 5V3.8c0-.4.4-.8.8-.8h4.4c.4 0 .8.4.8.8V5H9Z"></path><path d="m8.5 13 2.2 2.2 4.8-5"></path></svg>' },
-  { id: "home-classroom-pass", label: "Classroom Pass", icon: "&#127915;" },
-  { id: "home-colt-corner", label: "Colt Corner", icon: "&#10022;" },
+  { id: "home-classroom-pass", label: "Classroom Pass", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4V7Z"></path><path d="M9 7v2M9 11v2M9 15v2"></path></svg>' },
+  { id: "home-colt-corner", label: "Colt Corner", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="message-bubble" d="M3 4.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3.5 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2Z"></path><path class="message-bubble" d="M10 13.5h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v2l-2.5-2H10a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"></path><circle class="message-dot" cx="5" cy="8.5" r="1"></circle><circle class="message-dot" cx="9" cy="8.5" r="1"></circle><circle class="message-dot" cx="13" cy="8.5" r="1"></circle><circle class="message-dot" cx="12" cy="16.5" r=".85"></circle><circle class="message-dot" cx="15" cy="16.5" r=".85"></circle><circle class="message-dot" cx="18" cy="16.5" r=".85"></circle></svg>' },
   { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
 ];
 
@@ -1865,7 +1865,7 @@ function renderHomeNavigation() {
       <nav class="home-navigation-list">
         ${HOME_NAVIGATION_ITEMS.map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
-            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-assignments" ? "is-assignment-icon" : ""}" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-assignments" ? "is-assignment-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
           </button>
         `).join("")}

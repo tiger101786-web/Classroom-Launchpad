@@ -55,13 +55,20 @@ async function run() {
         labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none",
         homeCircle: Math.round(document.querySelector(".home-navigation-icon.is-home-icon").getBoundingClientRect().width),
         homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width),
+        expectationsHandshake: Math.round(document.querySelector(".home-navigation-icon.is-expectations-icon svg").getBoundingClientRect().width),
+        expectationsPaths: document.querySelectorAll(".home-navigation-icon.is-expectations-icon svg path").length,
         categoriesGlobe: Math.round(document.querySelector(".home-navigation-icon.is-categories-icon svg").getBoundingClientRect().width),
         categoriesParts: document.querySelectorAll(".home-navigation-icon.is-categories-icon svg circle, .home-navigation-icon.is-categories-icon svg path").length,
         assignmentClipboard: Math.round(document.querySelector(".home-navigation-icon.is-assignment-icon svg").getBoundingClientRect().width),
-        assignmentPaths: document.querySelectorAll(".home-navigation-icon.is-assignment-icon svg path").length
+        assignmentPaths: document.querySelectorAll(".home-navigation-icon.is-assignment-icon svg path").length,
+        classroomPassTicket: Math.round(document.querySelector(".home-navigation-icon.is-pass-icon svg").getBoundingClientRect().width),
+        classroomPassUsesCurrentColor: getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon svg path")).stroke === getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon")).color,
+        coltCornerMessages: Math.round(document.querySelector(".home-navigation-icon.is-corner-icon svg").getBoundingClientRect().width),
+        coltCornerBubbles: document.querySelectorAll(".home-navigation-icon.is-corner-icon .message-bubble").length,
+        coltCornerDots: document.querySelectorAll(".home-navigation-icon.is-corner-icon .message-dot").length
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsHandshake < 22 || wideNavigation.expectationsPaths !== 2 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();
