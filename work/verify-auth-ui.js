@@ -42,6 +42,76 @@ async function run() {
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
+    await page.evaluate(() => localStorage.removeItem("classroomLaunchpadHomeNavigationCollapsedV1"));
+    await page.setViewportSize({ width: 1600, height: 1000 });
+    await page.reload({ waitUntil: "networkidle" });
+    const wideNavigation = await page.evaluate(() => {
+      const navigation = document.querySelector(".home-quick-navigation").getBoundingClientRect();
+      const hero = document.querySelector(".hero-panel").getBoundingClientRect();
+      return {
+        itemCount: document.querySelectorAll(".home-navigation-list .home-navigation-button").length,
+        navigationWidth: Math.round(navigation.width),
+        heroWidth: Math.round(hero.width),
+        labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none"
+      };
+    });
+    if (wideNavigation.itemCount !== 7 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible) {
+      throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
+    }
+    await page.locator('.home-navigation-button[data-target="home-launch"]').click();
+    await page.waitForTimeout(700);
+    const navigationJump = await page.evaluate(() => ({
+      scrollY: Math.round(window.scrollY),
+      activeTarget: document.querySelector(".home-navigation-button.is-active")?.dataset.target
+    }));
+    if (navigationJump.scrollY < 100 || navigationJump.activeTarget !== "home-launch") {
+      throw new Error(`Homepage navigation did not move to Today's Launch: ${JSON.stringify(navigationJump)}.`);
+    }
+    await page.locator('.home-navigation-list .home-navigation-button[data-target="home-top"]').click();
+    await page.waitForTimeout(700);
+    await page.locator('[data-action="toggleHomeNavigationCollapse"]').click();
+    const collapsedNavigation = await page.evaluate(() => ({
+      navigationWidth: Math.round(document.querySelector(".home-quick-navigation").getBoundingClientRect().width),
+      heroWidth: Math.round(document.querySelector(".hero-panel").getBoundingClientRect().width),
+      labelsHidden: getComputedStyle(document.querySelector(".home-navigation-label")).display === "none"
+    }));
+    if (collapsedNavigation.navigationWidth > 80 || collapsedNavigation.heroWidth !== 1132 || !collapsedNavigation.labelsHidden) {
+      throw new Error(`Collapsed homepage navigation is incorrect: ${JSON.stringify(collapsedNavigation)}.`);
+    }
+    await page.setViewportSize({ width: 1024, height: 850 });
+    const tabletTriggerVisible = await page.locator(".home-nav-mobile-trigger").isVisible();
+    if (!tabletTriggerVisible) throw new Error("Tablet homepage navigation trigger is hidden.");
+    await page.locator(".home-nav-mobile-trigger").click();
+    await page.waitForTimeout(300);
+    const tabletNavigation = await page.evaluate(() => {
+      const navigation = document.querySelector(".home-quick-navigation").getBoundingClientRect();
+      const radio = document.querySelector(".colt-radio-launcher")?.getBoundingClientRect();
+      return {
+        open: document.querySelector(".home-layout").classList.contains("is-mobile-nav-open"),
+        left: Math.round(navigation.left),
+        right: Math.round(navigation.right),
+        bottom: Math.round(navigation.bottom),
+        radioTop: radio ? Math.round(radio.top) : null,
+        labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none"
+      };
+    });
+    if (!tabletNavigation.open || tabletNavigation.left < 0 || tabletNavigation.right > 1024 || !tabletNavigation.labelsVisible
+      || (tabletNavigation.radioTop !== null && tabletNavigation.bottom > tabletNavigation.radioTop)) {
+      throw new Error(`Tablet homepage navigation is not contained or overlaps Colt Radio: ${JSON.stringify(tabletNavigation)}.`);
+    }
+    await page.keyboard.press("Escape");
+    if (await page.locator(".home-layout.is-mobile-nav-open").count()) throw new Error("Escape did not close the homepage navigation drawer.");
+    await page.setViewportSize({ width: 390, height: 800 });
+    const mobileNavigation = await page.evaluate(() => ({
+      triggerVisible: getComputedStyle(document.querySelector(".home-nav-mobile-trigger")).display !== "none",
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+    }));
+    if (!mobileNavigation.triggerVisible || mobileNavigation.horizontalOverflow) {
+      throw new Error(`Mobile homepage navigation is not responsive: ${JSON.stringify(mobileNavigation)}.`);
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.evaluate(() => localStorage.removeItem("classroomLaunchpadHomeNavigationCollapsedV1"));
+    await page.reload({ waitUntil: "networkidle" });
     const assignmentBuckets = await page.evaluate(() => [
       studentAssignmentViewFor({ id: "fixture" }, null),
       studentAssignmentViewFor({ id: "fixture" }, { status: "submitted" }),
@@ -407,6 +477,8 @@ async function run() {
     }
     console.log(JSON.stringify({
       homepageRendersBeforeAccountChecks: true,
+      homepageQuickNavigationPreservesContentSize: true,
+      homepageQuickNavigationResponsive: true,
       studentAssignmentNotificationGroupsMatchTabs: true,
       studentAssignmentNotificationBadgesFitCompactScreens: true,
       teacherSubmissionLateDaysAppearInInboxAndPreview: true,

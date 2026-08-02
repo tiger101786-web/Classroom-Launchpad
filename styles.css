@@ -117,6 +117,300 @@ button {
   padding: 28px 24px 36px;
 }
 
+body[data-screen="home"] .app-shell {
+  width: min(1480px, 100%);
+}
+
+body.home-navigation-open {
+  overflow: hidden;
+}
+
+.home-layout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1132px);
+  gap: 24px;
+  align-items: start;
+  justify-content: center;
+}
+
+.home-page-content {
+  width: 100%;
+  max-width: 1132px;
+  min-width: 0;
+}
+
+.home-quick-navigation {
+  position: sticky;
+  top: 28px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  max-height: calc(100vh - 112px);
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 7px solid var(--blue);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.home-quick-navigation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 38px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.home-quick-navigation-header > strong {
+  color: var(--blue-dark);
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-nav-collapse,
+.home-nav-close {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.home-nav-close {
+  display: none;
+}
+
+.home-navigation-list {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.home-navigation-button {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  font-size: .84rem;
+  font-weight: 900;
+}
+
+.home-navigation-button:hover {
+  border-color: color-mix(in srgb, var(--blue) 60%, var(--border));
+  background: var(--blue-soft);
+}
+
+.home-navigation-button.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(123, 11, 49, .2);
+}
+
+.home-navigation-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  color: var(--blue);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.home-navigation-button.is-active .home-navigation-icon {
+  color: #fff;
+}
+
+.home-navigation-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-navigation-top {
+  margin-top: 2px;
+}
+
+.home-nav-mobile-trigger,
+.home-navigation-backdrop {
+  display: none;
+}
+
+.home-navigation-anchor {
+  scroll-margin-top: 24px;
+}
+
+.home-layout.is-nav-collapsed {
+  grid-template-columns: 76px minmax(0, 1132px);
+}
+
+.home-layout.is-nav-collapsed .home-quick-navigation {
+  padding: 10px;
+  border-left-width: 5px;
+}
+
+.home-layout.is-nav-collapsed .home-quick-navigation-header {
+  justify-content: center;
+}
+
+.home-layout.is-nav-collapsed .home-quick-navigation-header > strong,
+.home-layout.is-nav-collapsed .home-navigation-label {
+  display: none;
+}
+
+.home-layout.is-nav-collapsed .home-navigation-button {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 6px;
+}
+
+.home-layout.is-nav-collapsed .home-navigation-icon {
+  width: 34px;
+  height: 34px;
+}
+
+@media (min-width: 1330px) and (max-width: 1499px) {
+  .home-layout {
+    grid-template-columns: 76px minmax(0, 1132px);
+  }
+
+  .home-quick-navigation {
+    padding: 10px;
+    border-left-width: 5px;
+  }
+
+  .home-quick-navigation-header {
+    justify-content: center;
+  }
+
+  .home-quick-navigation-header > strong,
+  .home-navigation-label,
+  .home-nav-collapse {
+    display: none;
+  }
+
+  .home-navigation-button {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 1329px) {
+  body[data-screen="home"] .app-shell {
+    width: min(1180px, 100%);
+  }
+
+  .home-layout,
+  .home-layout.is-nav-collapsed {
+    display: block;
+  }
+
+  .home-nav-mobile-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    margin-bottom: 12px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--blue);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+
+  .home-nav-mobile-trigger > span {
+    color: var(--blue);
+    font-size: 1.15rem;
+  }
+
+  .home-quick-navigation,
+  .home-layout.is-nav-collapsed .home-quick-navigation {
+    position: fixed;
+    inset: 14px auto 78px 14px;
+    z-index: 121;
+    width: min(300px, calc(100vw - 28px));
+    max-height: none;
+    padding: 14px;
+    border-left-width: 7px;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform .22s ease;
+  }
+
+  .home-layout.is-mobile-nav-open .home-quick-navigation {
+    transform: translateX(0);
+  }
+
+  .home-layout.is-nav-collapsed .home-quick-navigation-header {
+    justify-content: space-between;
+  }
+
+  .home-layout.is-nav-collapsed .home-quick-navigation-header > strong,
+  .home-layout.is-nav-collapsed .home-navigation-label {
+    display: block;
+  }
+
+  .home-layout.is-nav-collapsed .home-navigation-button {
+    grid-template-columns: 36px minmax(0, 1fr);
+    justify-items: stretch;
+    padding: 6px 10px;
+  }
+
+  .home-nav-collapse {
+    display: none;
+  }
+
+  .home-nav-close {
+    display: grid;
+  }
+
+  .home-navigation-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: rgba(0, 0, 0, .58);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease;
+  }
+
+  .home-layout.is-mobile-nav-open .home-navigation-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .topbar {
   display: flex;
   align-items: center;

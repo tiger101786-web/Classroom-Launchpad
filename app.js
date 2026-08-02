@@ -63,6 +63,16 @@ const HOME_PROFILE_VIDEOS = [
 ];
 const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
 const HOME_PROFILE_LAST_KEY = "classroomLaunchpadHomeProfileLastV1";
+const HOME_NAVIGATION_COLLAPSED_KEY = "classroomLaunchpadHomeNavigationCollapsedV1";
+const HOME_NAVIGATION_ITEMS = [
+  { id: "home-top", label: "Home", icon: "&#8962;" },
+  { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
+  { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
+  { id: "home-categories", label: "Website Categories", icon: "&#9638;" },
+  { id: "home-assignments", label: "Assignments", icon: "&#9635;" },
+  { id: "home-colt-corner", label: "Colt Corner", icon: "&#10022;" },
+  { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
+];
 
 function shuffledHomeProfileIndexes() {
   const indexes = HOME_PROFILE_VIDEOS.map((_, index) => index);
@@ -97,6 +107,7 @@ function selectHomeProfileVideo() {
 const homeProfileVideo = selectHomeProfileVideo();
 
 let deferredVideoObserver = null;
+let homeNavigationObserver = null;
 
 function isPreferredResponsiveVideo(video) {
   const mobileLayout = window.matchMedia("(max-width: 720px)").matches;
@@ -1186,6 +1197,15 @@ let randomActivitySettings = store.loadRandomActivitySettings();
 let screen = { name: "home" };
 let modal = null;
 let theme = store.getTheme();
+let homeNavigationCollapsed = (() => {
+  try {
+    return localStorage.getItem(HOME_NAVIGATION_COLLAPSED_KEY) === "true";
+  } catch {
+    return false;
+  }
+})();
+let homeNavigationMobileOpen = false;
+let homeNavigationActive = "home-top";
 let clockTimer = null;
 let classTimerClock = null;
 let sharedSyncTimer = null;
@@ -1714,9 +1734,42 @@ function categoryTopbar() {
   `;
 }
 
+function renderHomeNavigation() {
+  return `
+    <button class="home-nav-mobile-trigger" type="button" data-action="toggleHomeNavigation" aria-controls="homeQuickNavigation" aria-expanded="${homeNavigationMobileOpen ? "true" : "false"}">
+      <span aria-hidden="true">&#9776;</span><strong>Quick Navigation</strong>
+    </button>
+    <aside id="homeQuickNavigation" class="home-quick-navigation" aria-label="Homepage quick navigation">
+      <header class="home-quick-navigation-header">
+        <strong>Quick Navigation</strong>
+        <button class="home-nav-collapse" type="button" data-action="toggleHomeNavigationCollapse" aria-label="${homeNavigationCollapsed ? "Expand quick navigation" : "Collapse quick navigation"}" aria-expanded="${homeNavigationCollapsed ? "false" : "true"}">
+          <span aria-hidden="true">${homeNavigationCollapsed ? "&#8250;&#8250;" : "&#8249;&#8249;"}</span>
+        </button>
+        <button class="home-nav-close" type="button" data-action="closeHomeNavigation" aria-label="Close quick navigation">&#10005;</button>
+      </header>
+      <nav class="home-navigation-list">
+        ${HOME_NAVIGATION_ITEMS.map(item => `
+          <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
+            <span class="home-navigation-icon" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-label">${escapeHtml(item.label)}</span>
+          </button>
+        `).join("")}
+      </nav>
+      <button class="home-navigation-button home-navigation-top" type="button" data-action="homeNavigate" data-target="home-top" title="Back to Top">
+        <span class="home-navigation-icon" aria-hidden="true">&#8593;</span>
+        <span class="home-navigation-label">Back to Top</span>
+      </button>
+    </aside>
+    <button class="home-navigation-backdrop" type="button" data-action="closeHomeNavigation" aria-label="Close quick navigation"></button>
+  `;
+}
+
 function renderHome() {
   return `
-    <section class="hero-panel">
+    <div class="home-layout ${homeNavigationCollapsed ? "is-nav-collapsed" : ""} ${homeNavigationMobileOpen ? "is-mobile-nav-open" : ""}">
+    ${renderHomeNavigation()}
+    <div class="home-page-content">
+    <section id="home-top" class="hero-panel home-navigation-anchor">
       <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
         <source data-src="assets/hero-panel-bg.mp4" type="video/mp4">
       </video>
@@ -1746,12 +1799,14 @@ function renderHome() {
     <section id="homeBody">
       ${renderHomeDefault()}
     </section>
+    </div>
+    </div>
   `;
 }
 
 function renderHomeDefault() {
   return `
-    <section class="launch-row" aria-label="Launch tools">
+    <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="Launch tools">
       <section class="daily-launch-card" aria-label="Today's Launch">
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
           <source data-src="assets/daily-launch-bg.mp4" type="video/mp4">
@@ -1765,7 +1820,7 @@ function renderHomeDefault() {
       </section>
       ${renderRandomActivityCard()}
     </section>
-    <section class="rules-card">
+    <section id="home-expectations" class="rules-card home-navigation-anchor">
       <div class="expectations-copy">
         <div>
           <h3>Classroom Launchpad Expectations:</h3>
@@ -1785,13 +1840,15 @@ function renderHomeDefault() {
         </section>
       </div>
     </section>
-    <h2 class="section-title">Website Categories</h2>
-    <section class="category-grid">
-      ${categories.map(category => categoryCard(category)).join("")}
-    </section>
-    ${renderAssignmentsPreview()}
-    ${renderColtCornerPreview()}
-    ${renderStudentWebsiteRequest()}
+    <div id="home-categories" class="home-navigation-anchor">
+      <h2 class="section-title">Website Categories</h2>
+      <section class="category-grid">
+        ${categories.map(category => categoryCard(category)).join("")}
+      </section>
+    </div>
+    <div id="home-assignments" class="home-navigation-anchor">${renderAssignmentsPreview()}</div>
+    <div id="home-colt-corner" class="home-navigation-anchor">${renderColtCornerPreview()}</div>
+    <div id="home-feedback" class="home-navigation-anchor">${renderStudentWebsiteRequest()}</div>
   `;
 }
 
@@ -8623,7 +8680,13 @@ function renderModal() {
 
 function render() {
   stopColtRunGame();
+  if (homeNavigationObserver) homeNavigationObserver.disconnect();
+  if (screen.name !== "home") {
+    homeNavigationMobileOpen = false;
+    document.body.classList.remove("home-navigation-open");
+  }
   document.body.dataset.theme = theme;
+  document.body.dataset.screen = screen.name;
   let html = "";
   if (screen.name === "home") html = renderHome();
   if (screen.name === "category") html = renderCategory(screen.category);
@@ -8645,6 +8708,65 @@ function render() {
   }));
 }
 
+function updateHomeNavigationActive(targetId) {
+  if (!HOME_NAVIGATION_ITEMS.some(item => item.id === targetId)) return;
+  homeNavigationActive = targetId;
+  document.querySelectorAll(".home-navigation-button[data-target]").forEach(button => {
+    const active = button.dataset.target === targetId && !button.classList.contains("home-navigation-top");
+    button.classList.toggle("is-active", active);
+    if (active) button.setAttribute("aria-current", "location");
+    else button.removeAttribute("aria-current");
+  });
+}
+
+function setHomeNavigationMobileOpen(open) {
+  homeNavigationMobileOpen = Boolean(open);
+  document.querySelector(".home-layout")?.classList.toggle("is-mobile-nav-open", homeNavigationMobileOpen);
+  document.querySelector(".home-nav-mobile-trigger")?.setAttribute("aria-expanded", String(homeNavigationMobileOpen));
+  if (homeNavigationMobileOpen) document.querySelector(".home-navigation-button.is-active")?.focus({ preventScroll: true });
+  else if (document.querySelector(".home-quick-navigation")?.contains(document.activeElement)) {
+    document.querySelector(".home-nav-mobile-trigger")?.focus({ preventScroll: true });
+  }
+  syncHomeNavigationAccessibility();
+}
+
+function syncHomeNavigationAccessibility() {
+  const navigation = document.querySelector(".home-quick-navigation");
+  if (!navigation) return;
+  const hiddenMobileDrawer = window.matchMedia("(max-width: 1329px)").matches && !homeNavigationMobileOpen;
+  navigation.inert = hiddenMobileDrawer;
+  if (hiddenMobileDrawer) navigation.setAttribute("aria-hidden", "true");
+  else navigation.removeAttribute("aria-hidden");
+  document.body.classList.toggle("home-navigation-open", !hiddenMobileDrawer && window.matchMedia("(max-width: 1329px)").matches);
+}
+
+function applyHomeNavigationCollapsedState() {
+  const layout = document.querySelector(".home-layout");
+  const collapseButton = document.querySelector(".home-nav-collapse");
+  layout?.classList.toggle("is-nav-collapsed", homeNavigationCollapsed);
+  if (collapseButton) {
+    collapseButton.setAttribute("aria-label", homeNavigationCollapsed ? "Expand quick navigation" : "Collapse quick navigation");
+    collapseButton.setAttribute("aria-expanded", String(!homeNavigationCollapsed));
+    collapseButton.querySelector("span").innerHTML = homeNavigationCollapsed ? "&#8250;&#8250;" : "&#8249;&#8249;";
+  }
+}
+
+function attachHomeNavigation() {
+  if (homeNavigationObserver) homeNavigationObserver.disconnect();
+  if (screen.name !== "home") return;
+  const sections = HOME_NAVIGATION_ITEMS.map(item => document.getElementById(item.id)).filter(Boolean);
+  if (!sections.length) return;
+  syncHomeNavigationAccessibility();
+  const current = sections.filter(section => section.getBoundingClientRect().top <= window.innerHeight * 0.3).at(-1) || sections[0];
+  updateHomeNavigationActive(current.id);
+  if (!("IntersectionObserver" in window)) return;
+  homeNavigationObserver = new IntersectionObserver(entries => {
+    const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    if (visible[0]) updateHomeNavigationActive(visible[0].target.id);
+  }, { rootMargin: "-18% 0px -66% 0px", threshold: [0.01, 0.2, 0.5] });
+  sections.forEach(section => homeNavigationObserver.observe(section));
+}
+
 async function loadApprovedStudents() {
   if (!sharedBackend.enabled || !isTeacher()) return;
   try {
@@ -8656,6 +8778,7 @@ async function loadApprovedStudents() {
 }
 
 function attachScreenHandlers() {
+  attachHomeNavigation();
   const studentManagerSearch = document.getElementById("dashboardStudentSearch");
   if (studentManagerSearch) {
     studentManagerSearch.addEventListener("input", event => {
@@ -8743,6 +8866,7 @@ function attachScreenHandlers() {
       attachReplyForm();
       startCalendarClock();
       startClassTimerClock();
+      attachHomeNavigation();
     });
   }
 
@@ -9451,10 +9575,36 @@ function validateWebsite(link) {
   return "";
 }
 
+app.addEventListener("keydown", event => {
+  if (event.key === "Escape" && homeNavigationMobileOpen) setHomeNavigationMobileOpen(false);
+});
+
+window.addEventListener("resize", () => {
+  if (screen.name === "home") syncHomeNavigationAccessibility();
+}, { passive: true });
+
 app.addEventListener("click", async event => {
   const target = event.target.closest("[data-action]");
   if (!target) return;
   const action = target.dataset.action;
+
+  if (action === "homeNavigate") {
+    const destination = document.getElementById(target.dataset.target || "");
+    if (destination) {
+      updateHomeNavigationActive(destination.id);
+      setHomeNavigationMobileOpen(false);
+      destination.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+  if (action === "toggleHomeNavigation") setHomeNavigationMobileOpen(!homeNavigationMobileOpen);
+  if (action === "closeHomeNavigation") setHomeNavigationMobileOpen(false);
+  if (action === "toggleHomeNavigationCollapse") {
+    homeNavigationCollapsed = !homeNavigationCollapsed;
+    try {
+      localStorage.setItem(HOME_NAVIGATION_COLLAPSED_KEY, String(homeNavigationCollapsed));
+    } catch {}
+    applyHomeNavigationCollapsedState();
+  }
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
