@@ -277,7 +277,6 @@ body.home-navigation-open {
   stroke-linejoin: round;
 }
 
-.home-navigation-icon.is-expectations-icon svg,
 .home-navigation-icon.is-pass-icon svg {
   width: 22px;
   height: 22px;
@@ -286,6 +285,12 @@ body.home-navigation-open {
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.home-navigation-icon.is-expectations-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
 }
 
 .home-navigation-icon.is-corner-icon svg {
