@@ -113,6 +113,9 @@ async function run() {
     await teacherPage.locator('[data-action="teacherDashboard"]').click();
     await teacherPage.locator('[data-action="dashboardSection"][data-section="passes"]').first().click();
     await teacherPage.getByRole("heading", { name: "Classroom Pass Log", exact: true }).waitFor();
+    const excelDownload = teacherPage.getByRole("link", { name: "Download Excel Log", exact: true });
+    assert(await excelDownload.isVisible());
+    assert.equal(await excelDownload.getAttribute("href"), "/api/classroom-pass/export");
     assert(await teacherPage.getByRole("heading", { name: "Currently Out", exact: true }).isVisible());
     assert(await teacherPage.getByText("Pass Student", { exact: true }).first().isVisible());
     assert.match(await teacherPage.locator(".classroom-pass-current-card").innerText(), /Grade 5\s*·\s*Water/);

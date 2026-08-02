@@ -4,6 +4,7 @@ const net = require("node:net");
 const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const JSZip = require("jszip");
 
 function availablePort() {
   return new Promise((resolve, reject) => {
@@ -51,7 +52,11 @@ async function run() {
   async function request(pathname, options = {}) {
     const response = await fetch(`${baseUrl}${pathname}`, options);
     const contentType = String(response.headers.get("content-type") || "");
-    const payload = contentType.includes("application/json") ? await response.json() : await response.text();
+    const payload = contentType.includes("application/json")
+      ? await response.json()
+      : contentType.includes("spreadsheetml")
+        ? Buffer.from(await response.arrayBuffer())
+        : await response.text();
     return { response, payload };
   }
 
@@ -167,9 +172,20 @@ async function run() {
 
     result = await request("/api/classroom-pass/export", { headers: { Cookie: teacherCookie } });
     assert.equal(result.response.status, 200);
-    assert.match(result.response.headers.get("content-type"), /text\/csv/);
-    assert.match(result.payload, /Pass Student One/);
-    assert.match(result.payload, /Teacher Errand/);
+    assert.match(result.response.headers.get("content-type"), /spreadsheetml/);
+    assert.match(result.response.headers.get("content-disposition"), /\.xlsx"$/);
+    const workbook = await JSZip.loadAsync(result.payload);
+    const worksheet = await workbook.file("xl/worksheets/sheet1.xml").async("string");
+    const workbookStyles = await workbook.file("xl/styles.xml").async("string");
+    assert.match(worksheet, /CLASSROOM PASS LOG/);
+    assert.match(worksheet, /Pass Student One/);
+    assert.match(worksheet, /Teacher Errand/);
+    assert.match(worksheet, /<autoFilter ref="A6:J8"\/>/);
+    assert.match(worksheet, /state="frozen"/);
+    assert.match(worksheet, /width="34"/);
+    assert.match(workbookStyles, /FF7B0B31/);
+    assert.match(workbookStyles, /FFD97706/);
+    assert.match(workbookStyles, /FF278044/);
 
     result = await request("/api/classroom-pass/config", {
       method: "PATCH",
@@ -202,7 +218,7 @@ async function run() {
       studentReturnRecorded: true,
       teacherCorrectionSupported: true,
       teacherSettingsSupported: true,
-      csvExportAvailable: true,
+      formattedExcelExportAvailable: true,
       accidentalRecordDeletionSupported: true
     }, null, 2));
   } finally {

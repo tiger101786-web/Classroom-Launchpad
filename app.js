@@ -8791,7 +8791,7 @@ function renderDashboardClassroomPasses() {
       </section>
 
       <section class="classroom-pass-today-section">
-        <div class="assignment-manager-heading"><div><span class="feature-kicker">Today at a Glance</span><h3>Simple Daily Summary</h3></div><a class="outline-btn" href="/api/classroom-pass/export">Download CSV</a></div>
+        <div class="assignment-manager-heading"><div><span class="feature-kicker">Today at a Glance</span><h3>Simple Daily Summary</h3></div><a class="outline-btn" href="/api/classroom-pass/export">Download Excel Log</a></div>
         <div class="classroom-pass-metric-grid">
           <div><span>Currently Out</span><strong>${active.length}</strong></div>
           <div><span>Total Passes Today</span><strong>${today.length}</strong></div>

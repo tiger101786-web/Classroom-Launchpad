@@ -4,6 +4,7 @@ const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
 const zlib = require("zlib");
+const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
 const {
   hashNormalizedMessage,
@@ -1878,25 +1879,148 @@ function classroomPassPayload(db, session) {
   };
 }
 
-function sendClassroomPassCsv(res, passes) {
-  const quote = value => `"${String(value == null ? "" : value).replace(/"/g, '""')}"`;
-  const rows = [
-    ["Student", "Email", "Grade", "Destination", "Left classroom", "Returned", "Duration minutes", "Status", "Returned by"],
-    ...normalizeClassroomPasses(passes)
-      .sort((first, second) => Date.parse(second.outAt) - Date.parse(first.outAt))
-      .map(pass => {
-        const endTime = pass.returnedAt ? Date.parse(pass.returnedAt) : Date.now();
-        const durationMinutes = Math.max(0, Math.round((endTime - Date.parse(pass.outAt)) / 60000));
-        return [pass.studentName, pass.studentEmail, pass.grade, pass.destination, pass.outAt, pass.returnedAt, durationMinutes, pass.status, pass.returnedBy];
-      })
+function spreadsheetXml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function spreadsheetColumn(index) {
+  let value = index;
+  let label = "";
+  while (value > 0) {
+    value -= 1;
+    label = String.fromCharCode(65 + (value % 26)) + label;
+    value = Math.floor(value / 26);
+  }
+  return label;
+}
+
+function spreadsheetCell(row, column, value, style = 0) {
+  const reference = `${spreadsheetColumn(column)}${row}`;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `<c r="${reference}" s="${style}" t="n"><v>${value}</v></c>`;
+  }
+  return `<c r="${reference}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${spreadsheetXml(value)}</t></is></c>`;
+}
+
+function classroomPassSpreadsheetDate(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric"
+  }).format(date);
+}
+
+function classroomPassSpreadsheetTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function classroomPassSpreadsheetStatus(pass) {
+  if (pass.status === "out") return "Currently Out";
+  if (pass.status === "corrected") return "Teacher Corrected";
+  return "Returned";
+}
+
+async function sendClassroomPassWorkbook(res, passes) {
+  const records = normalizeClassroomPasses(passes)
+    .sort((first, second) => Date.parse(second.outAt) - Date.parse(first.outAt));
+  const completed = records.filter(pass => pass.returnedAt);
+  const activeCount = records.filter(pass => pass.status === "out").length;
+  const correctedCount = records.filter(pass => pass.status === "corrected").length;
+  const averageMinutes = completed.length
+    ? Math.round(completed.reduce((total, pass) => total + Math.max(0, (Date.parse(pass.returnedAt) - Date.parse(pass.outAt)) / 60000), 0) / completed.length)
+    : 0;
+  const generatedAt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    dateStyle: "long",
+    timeStyle: "short"
+  }).format(new Date());
+  const headers = ["Date", "Student Name", "Grade", "Destination", "Left Room", "Returned", "Minutes Out", "Status", "Returned By", "Student Email"];
+  const rows = [];
+  rows.push(`<row r="1" ht="30" customHeight="1">${spreadsheetCell(1, 1, "CLASSROOM PASS LOG", 1)}</row>`);
+  rows.push(`<row r="2" ht="21" customHeight="1">${spreadsheetCell(2, 1, `Generated ${generatedAt} · Times shown in Central Time`, 2)}</row>`);
+  rows.push(`<row r="3"></row>`);
+  const summary = [
+    ["Total Passes", records.length],
+    ["Currently Out", activeCount],
+    ["Returned", completed.length],
+    ["Average Minutes", averageMinutes],
+    ["Teacher Corrected", correctedCount]
   ];
+  rows.push(`<row r="4" ht="24" customHeight="1">${summary.map((item, index) => `${spreadsheetCell(4, index * 2 + 1, item[0], 6)}${spreadsheetCell(4, index * 2 + 2, item[1], 7)}`).join("")}</row>`);
+  rows.push(`<row r="5"></row>`);
+  rows.push(`<row r="6" ht="26" customHeight="1">${headers.map((header, index) => spreadsheetCell(6, index + 1, header, 3)).join("")}</row>`);
+  records.forEach((pass, index) => {
+    const row = index + 7;
+    const endTime = pass.returnedAt ? Date.parse(pass.returnedAt) : Date.now();
+    const durationMinutes = Math.max(0, Math.round((endTime - Date.parse(pass.outAt)) / 60000));
+    const baseStyle = index % 2 === 0 ? 4 : 5;
+    const statusStyle = pass.status === "out" ? 8 : pass.status === "corrected" ? 10 : 9;
+    const values = [
+      classroomPassSpreadsheetDate(pass.outAt),
+      pass.studentName,
+      pass.grade,
+      pass.destination,
+      classroomPassSpreadsheetTime(pass.outAt),
+      classroomPassSpreadsheetTime(pass.returnedAt),
+      durationMinutes,
+      classroomPassSpreadsheetStatus(pass),
+      pass.returnedBy,
+      pass.studentEmail
+    ];
+    rows.push(`<row r="${row}" ht="22" customHeight="1">${values.map((value, columnIndex) => spreadsheetCell(row, columnIndex + 1, value, columnIndex === 7 ? statusStyle : baseStyle)).join("")}</row>`);
+  });
+  const lastRow = Math.max(6, records.length + 6);
+  const worksheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="6" topLeftCell="A7" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <sheetFormatPr defaultRowHeight="18"/>
+  <cols><col min="1" max="1" width="14" customWidth="1"/><col min="2" max="2" width="25" customWidth="1"/><col min="3" max="3" width="10" customWidth="1"/><col min="4" max="4" width="24" customWidth="1"/><col min="5" max="6" width="16" customWidth="1"/><col min="7" max="7" width="15" customWidth="1"/><col min="8" max="8" width="20" customWidth="1"/><col min="9" max="9" width="22" customWidth="1"/><col min="10" max="10" width="34" customWidth="1"/></cols>
+  <sheetData>${rows.join("")}</sheetData>
+  <autoFilter ref="A6:J${lastRow}"/>
+  <mergeCells count="2"><mergeCell ref="A1:J1"/><mergeCell ref="A2:J2"/></mergeCells>
+  <pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>
+</worksheet>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="6"><font><sz val="11"/><name val="Aptos"/></font><font><b/><sz val="18"/><color rgb="FFFFFFFF"/><name val="Aptos Display"/></font><font><i/><sz val="10"/><color rgb="FF560720"/><name val="Aptos"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Aptos"/></font><font><b/><sz val="11"/><color rgb="FF560720"/><name val="Aptos"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Aptos"/></font></fonts>
+  <fills count="8"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF7B0B31"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3E7EB"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFFFFF"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD97706"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF278044"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF55585A"/><bgColor indexed="64"/></patternFill></fill></fills>
+  <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFD8D8D8"/></left><right style="thin"><color rgb="FFD8D8D8"/></right><top style="thin"><color rgb="FFD8D8D8"/></top><bottom style="thin"><color rgb="FFD8D8D8"/></bottom><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="11"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="4" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="5" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="5" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="5" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`);
+  zip.file("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`);
+  zip.file("xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="24000" windowHeight="15000"/></bookViews><sheets><sheet name="Classroom Pass Log" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+  zip.file("xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
+  zip.file("xl/worksheets/sheet1.xml", worksheet);
+  zip.file("xl/styles.xml", styles);
+  zip.file("docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>Classroom Pass Log</dc:title><dc:creator>Classroom Launchpad</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created></cp:coreProperties>`);
+  zip.file("docProps/app.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>Classroom Launchpad</Application></Properties>`);
+  const workbook = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE", compressionOptions: { level: 6 } });
   res.writeHead(200, {
-    "Content-Type": "text/csv; charset=utf-8",
-    "Content-Disposition": `attachment; filename="classroom-pass-log-${new Date().toISOString().slice(0, 10)}.csv"`,
+    "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "Content-Length": workbook.length,
+    "Content-Disposition": `attachment; filename="classroom-pass-log-${new Date().toISOString().slice(0, 10)}.xlsx"`,
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff"
   });
-  res.end(`\uFEFF${rows.map(row => row.map(quote).join(",")).join("\r\n")}`);
+  res.end(workbook);
 }
 
 async function handleClassroomPassApi(req, res, pathname) {
@@ -1909,7 +2033,7 @@ async function handleClassroomPassApi(req, res, pathname) {
       sendJson(res, 403, { error: "Only the teacher can export the Classroom Pass log." });
       return true;
     }
-    sendClassroomPassCsv(res, readDb().classroomPasses);
+    await sendClassroomPassWorkbook(res, readDb().classroomPasses);
     return true;
   }
 
