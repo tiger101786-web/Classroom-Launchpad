@@ -4939,6 +4939,7 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
   grid-template-columns: 58px minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
+  margin-top: 22px;
   padding: 22px;
   border: 1px solid var(--border);
   border-left: 7px solid var(--blue);
@@ -4975,7 +4976,17 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
 .classroom-pass-home-icon {
   width: 58px;
   height: 58px;
-  font-size: 1.8rem;
+  border-radius: 14px;
+}
+
+.classroom-pass-home-icon svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .classroom-pass-student-shell {

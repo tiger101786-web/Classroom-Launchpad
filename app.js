@@ -83,7 +83,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
   { id: "home-categories", label: "Website Categories", icon: "&#9638;" },
   { id: "home-assignments", label: "Assignments", icon: "&#9635;" },
-  { id: "home-classroom-pass", label: "Classroom Pass", icon: "&#8594;" },
+  { id: "home-classroom-pass", label: "Classroom Pass", icon: "&#127915;" },
   { id: "home-colt-corner", label: "Colt Corner", icon: "&#10022;" },
   { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
 ];
@@ -7506,7 +7506,14 @@ function renderClassroomPassPreview() {
         : "Student Login";
   return `
     <section class="classroom-pass-home-card ${activePass ? "has-active-pass" : ""}">
-      <div class="classroom-pass-home-icon" aria-hidden="true">→</div>
+      <div class="classroom-pass-home-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <rect x="3" y="5" width="18" height="15" rx="3"></rect>
+          <path d="M8 5V3h8v2"></path>
+          <circle cx="9" cy="11" r="2"></circle>
+          <path d="M6.5 16c.6-1.8 1.5-2.7 2.5-2.7s1.9.9 2.5 2.7M14 10h4M14 14h4"></path>
+        </svg>
+      </div>
       <div>
         <span class="feature-kicker">Leaving the Room</span>
         <h2>Classroom Pass</h2>
