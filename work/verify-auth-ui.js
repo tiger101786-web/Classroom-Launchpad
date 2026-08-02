@@ -52,10 +52,12 @@ async function run() {
         itemCount: document.querySelectorAll(".home-navigation-list .home-navigation-button").length,
         navigationWidth: Math.round(navigation.width),
         heroWidth: Math.round(hero.width),
-        labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none"
+        labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none",
+        homeCircle: Math.round(document.querySelector(".home-navigation-icon.is-home-icon").getBoundingClientRect().width),
+        homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width)
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();

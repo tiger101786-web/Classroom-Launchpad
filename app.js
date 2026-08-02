@@ -78,7 +78,7 @@ const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
 const HOME_PROFILE_LAST_KEY = "classroomLaunchpadHomeProfileLastV1";
 const HOME_NAVIGATION_COLLAPSED_KEY = "classroomLaunchpadHomeNavigationCollapsedV1";
 const HOME_NAVIGATION_ITEMS = [
-  { id: "home-top", label: "Home", icon: "&#8962;" },
+  { id: "home-top", label: "Home", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"></path></svg>' },
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
   { id: "home-categories", label: "Website Categories", icon: "&#9638;" },
@@ -1865,7 +1865,7 @@ function renderHomeNavigation() {
       <nav class="home-navigation-list">
         ${HOME_NAVIGATION_ITEMS.map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
-            <span class="home-navigation-icon" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
           </button>
         `).join("")}
