@@ -1797,7 +1797,7 @@ function renderHome() {
           <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
         </div>
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
-          <source data-src="${homeProfileVideo}?v=20260801-profile-rotation12-nobars" type="video/mp4">
+          <source data-src="${homeProfileVideo}?v=20260801-profile-rotation12-fullframe" type="video/mp4">
         </video>
       </section>
     </section>
