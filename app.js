@@ -82,7 +82,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
   { id: "home-categories", label: "Website Categories", icon: "&#9638;" },
-  { id: "home-assignments", label: "Assignments", icon: "&#9635;" },
+  { id: "home-assignments", label: "Assignments", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M8 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5H16"></path><path d="M9 5V3.8c0-.4.4-.8.8-.8h4.4c.4 0 .8.4.8.8V5H9Z"></path><path d="m8.5 13 2.2 2.2 4.8-5"></path></svg>' },
   { id: "home-classroom-pass", label: "Classroom Pass", icon: "&#127915;" },
   { id: "home-colt-corner", label: "Colt Corner", icon: "&#10022;" },
   { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
@@ -1865,7 +1865,7 @@ function renderHomeNavigation() {
       <nav class="home-navigation-list">
         ${HOME_NAVIGATION_ITEMS.map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
-            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : ""}" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-assignments" ? "is-assignment-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
           </button>
         `).join("")}

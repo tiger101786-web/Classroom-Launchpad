@@ -54,10 +54,12 @@ async function run() {
         heroWidth: Math.round(hero.width),
         labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none",
         homeCircle: Math.round(document.querySelector(".home-navigation-icon.is-home-icon").getBoundingClientRect().width),
-        homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width)
+        homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width),
+        assignmentClipboard: Math.round(document.querySelector(".home-navigation-icon.is-assignment-icon svg").getBoundingClientRect().width),
+        assignmentPaths: document.querySelectorAll(".home-navigation-icon.is-assignment-icon svg path").length
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();

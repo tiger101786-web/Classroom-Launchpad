@@ -257,6 +257,16 @@ body.home-navigation-open {
   stroke-linejoin: round;
 }
 
+.home-navigation-icon.is-assignment-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .home-navigation-button.is-active .home-navigation-icon {
   color: #fff;
 }
