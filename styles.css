@@ -4933,6 +4933,629 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
 }
 
 /* Colt Radio */
+/* Classroom Pass */
+.classroom-pass-home-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-left: 7px solid var(--blue);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.classroom-pass-home-card.has-active-pass {
+  border-left-color: #f59e0b;
+}
+
+.classroom-pass-home-card h2,
+.classroom-pass-home-card p {
+  margin: 4px 0 0;
+}
+
+.classroom-pass-home-card p {
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.classroom-pass-home-icon,
+.classroom-pass-avatar,
+.classroom-pass-current-avatar {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 900;
+}
+
+.classroom-pass-home-icon {
+  width: 58px;
+  height: 58px;
+  font-size: 1.8rem;
+}
+
+.classroom-pass-student-shell {
+  display: grid;
+  gap: 16px;
+  width: min(820px, 100%);
+  margin: 0 auto;
+}
+
+.classroom-pass-student-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--blue);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.classroom-pass-avatar {
+  width: 42px;
+  height: 42px;
+}
+
+.classroom-pass-student-identity > span:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.classroom-pass-student-identity small {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: .69rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.classroom-pass-student-identity em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.classroom-pass-start-card,
+.classroom-pass-active-student,
+.classroom-pass-student-recent {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.classroom-pass-availability {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 10px;
+  font-size: .92rem;
+}
+
+.classroom-pass-availability > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.classroom-pass-availability.is-available {
+  background: #e8f7ee;
+  color: #14532d;
+}
+
+.classroom-pass-availability.is-available > span {
+  background: #16834a;
+}
+
+.classroom-pass-availability.is-unavailable {
+  background: #f6ecef;
+  color: #6f1734;
+}
+
+.classroom-pass-availability.is-unavailable > span {
+  background: #9b234b;
+}
+
+.classroom-pass-permission-note {
+  display: grid;
+  gap: 3px;
+  margin: 20px 0;
+  color: var(--muted);
+}
+
+.classroom-pass-permission-note strong {
+  color: var(--blue-dark);
+  font-size: 1.05rem;
+}
+
+.classroom-pass-destinations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.classroom-pass-destinations legend {
+  width: 100%;
+  margin-bottom: 10px;
+  color: var(--blue-dark);
+  font-weight: 900;
+}
+
+.classroom-pass-destination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--blue-dark);
+  font-weight: 850;
+  text-align: left;
+}
+
+.classroom-pass-destination > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #3a1c27;
+  color: #fff;
+}
+
+.classroom-pass-destination.is-selected {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(184, 17, 75, .14);
+}
+
+.classroom-pass-start-button,
+.classroom-pass-return-button {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 18px;
+  font-size: 1rem;
+}
+
+.classroom-pass-active-student {
+  text-align: center;
+}
+
+.classroom-pass-active-icon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  margin: 18px auto 10px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.classroom-pass-active-student h2 {
+  margin: 4px 0;
+  font-size: 2rem;
+}
+
+.classroom-pass-student-timer {
+  display: grid;
+  gap: 4px;
+  width: min(320px, 100%);
+  margin: 20px auto 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #160910;
+  color: #fff;
+}
+
+.classroom-pass-student-timer span {
+  color: #f7c9d8;
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.classroom-pass-student-timer strong {
+  font-size: 2rem;
+}
+
+.classroom-pass-reminder,
+.classroom-pass-message {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-weight: 750;
+  text-align: center;
+}
+
+.classroom-pass-message {
+  padding: 12px;
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--blue-dark);
+}
+
+.classroom-pass-student-recent h3 {
+  margin-top: 0;
+}
+
+.classroom-pass-student-recent > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.classroom-pass-student-recent span {
+  display: grid;
+  gap: 3px;
+}
+
+.classroom-pass-student-recent small,
+.classroom-pass-student-recent em {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.classroom-pass-dashboard {
+  display: grid;
+  gap: 20px;
+}
+
+.classroom-pass-settings-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 230px;
+  align-items: end;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.classroom-pass-settings-card h3,
+.classroom-pass-settings-card p {
+  margin: 4px 0 0;
+}
+
+.classroom-pass-enabled-toggle {
+  min-width: 190px;
+  margin: 0;
+}
+
+.classroom-pass-capacity {
+  margin: 0;
+}
+
+.classroom-pass-current-list {
+  display: grid;
+  gap: 10px;
+}
+
+.classroom-pass-current-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid #f0b429;
+  border-left: 6px solid #f0a500;
+  border-radius: 12px;
+  background: #fff9e8;
+}
+
+.classroom-pass-current-avatar {
+  width: 46px;
+  height: 46px;
+}
+
+.classroom-pass-current-card h3,
+.classroom-pass-current-card p {
+  margin: 2px 0;
+}
+
+.classroom-pass-current-time {
+  display: grid;
+  gap: 3px;
+  min-width: 110px;
+  text-align: right;
+}
+
+.classroom-pass-current-time span {
+  color: #6f5430;
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.classroom-pass-current-time strong {
+  color: #602115;
+  font-size: 1.25rem;
+}
+
+.classroom-pass-all-present {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #acd8bd;
+  border-radius: 12px;
+  background: #edf8f1;
+  color: #14532d;
+}
+
+.classroom-pass-all-present span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #16834a;
+  color: #fff;
+}
+
+.classroom-pass-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.classroom-pass-metric-grid > div {
+  display: grid;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.classroom-pass-metric-grid span {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.classroom-pass-metric-grid strong {
+  color: var(--blue-dark);
+  font-size: 1.75rem;
+}
+
+.classroom-pass-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) repeat(4, minmax(120px, 1fr));
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.classroom-pass-filters input,
+.classroom-pass-filters select {
+  width: 100%;
+}
+
+.classroom-pass-log-table {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.classroom-pass-log-header,
+.classroom-pass-log-row {
+  display: grid;
+  grid-template-columns: minmax(165px, 1.7fr) .5fr .9fr .68fr .72fr .7fr .95fr 1.1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.classroom-pass-log-header {
+  padding: 11px 12px;
+  background: var(--blue);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+
+.classroom-pass-log-row {
+  min-height: 68px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--blue-dark);
+  font-size: .82rem;
+}
+
+.classroom-pass-log-row.is-active {
+  background: #fff9e8;
+}
+
+.classroom-pass-student-cell {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.classroom-pass-student-cell small {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.classroom-pass-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e7e8eb;
+  color: #33343a;
+  font-size: .66rem;
+  text-transform: uppercase;
+}
+
+.classroom-pass-status.is-out {
+  background: #ffe6aa;
+  color: #6f3c00;
+}
+
+.classroom-pass-status.is-corrected {
+  background: #f6dce6;
+  color: #6f1734;
+}
+
+.classroom-pass-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.classroom-pass-row-actions button {
+  min-height: 34px;
+  padding: 6px 8px;
+  font-size: .72rem;
+}
+
+body[data-theme="night"] .classroom-pass-availability.is-available,
+body[data-theme="night"] .classroom-pass-all-present {
+  border-color: #2b6844;
+  background: #14271c;
+  color: #c9f4d8;
+}
+
+body[data-theme="night"] .classroom-pass-current-card,
+body[data-theme="night"] .classroom-pass-log-row.is-active {
+  background: #2b2414;
+  color: #f8ebc7;
+}
+
+body[data-theme="night"] .classroom-pass-current-time span,
+body[data-theme="night"] .classroom-pass-current-time strong {
+  color: #f6d48b;
+}
+
+@media (max-width: 1050px) {
+  .classroom-pass-settings-card {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .classroom-pass-settings-card > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .classroom-pass-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .classroom-pass-filters .dashboard-search {
+    grid-column: 1 / -1;
+  }
+
+  .classroom-pass-log-header {
+    display: none;
+  }
+
+  .classroom-pass-log-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 18px;
+    padding: 15px;
+  }
+
+  .classroom-pass-student-cell,
+  .classroom-pass-row-actions {
+    grid-column: 1 / -1;
+  }
+
+  .classroom-pass-log-row > span[data-label]::before {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--muted);
+    content: attr(data-label);
+    font-size: .64rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 720px) {
+  .classroom-pass-home-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    padding: 17px;
+  }
+
+  .classroom-pass-home-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .classroom-pass-home-card .primary-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .classroom-pass-destinations,
+  .classroom-pass-settings-card,
+  .classroom-pass-metric-grid,
+  .classroom-pass-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .classroom-pass-settings-card > div:first-child,
+  .classroom-pass-filters .dashboard-search {
+    grid-column: auto;
+  }
+
+  .classroom-pass-current-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .classroom-pass-current-time {
+    text-align: left;
+  }
+
+  .classroom-pass-current-card .primary-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .classroom-pass-start-card,
+  .classroom-pass-active-student,
+  .classroom-pass-student-recent {
+    padding: 17px;
+  }
+
+  .classroom-pass-log-row {
+    grid-template-columns: 1fr;
+  }
+
+  .classroom-pass-student-cell,
+  .classroom-pass-row-actions {
+    grid-column: auto;
+  }
+}
+
 .colt-radio-root[hidden],
 .colt-radio-panel[hidden] {
   display: none;

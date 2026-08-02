@@ -15,6 +15,14 @@ const LAUNCHPAD_FEEDBACK_TYPES = [
   "Broken link",
   "Other"
 ];
+const CLASSROOM_PASS_DESTINATIONS = [
+  "Restroom",
+  "Water",
+  "Office",
+  "Nurse",
+  "Teacher Errand",
+  "Other Approved Reason"
+];
 
 const CLASSROOM_EXPECTATIONS = Array.isArray(window.COLT_ASSISTANT_KNOWLEDGE?.classroomRules)
   && window.COLT_ASSISTANT_KNOWLEDGE.classroomRules.length
@@ -75,6 +83,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-expectations", label: "Expectations", icon: "&#9745;" },
   { id: "home-categories", label: "Website Categories", icon: "&#9638;" },
   { id: "home-assignments", label: "Assignments", icon: "&#9635;" },
+  { id: "home-classroom-pass", label: "Classroom Pass", icon: "&#8594;" },
   { id: "home-colt-corner", label: "Colt Corner", icon: "&#10022;" },
   { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
 ];
@@ -559,6 +568,27 @@ const sharedBackend = {
   },
   deleteSubmission(id) {
     return this.request(`/api/submissions/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
+  },
+  loadClassroomPass() {
+    return this.request("/api/classroom-pass");
+  },
+  startClassroomPass(destination) {
+    return this.request("/api/classroom-pass/start", {
+      method: "POST",
+      body: JSON.stringify({ destination })
+    });
+  },
+  returnClassroomPass() {
+    return this.request("/api/classroom-pass/return", { method: "POST", body: "{}" });
+  },
+  updateClassroomPassConfig(config) {
+    return this.request("/api/classroom-pass/config", { method: "PATCH", body: JSON.stringify(config) });
+  },
+  closeClassroomPass(id) {
+    return this.request(`/api/classroom-pass/${encodeURIComponent(id)}`, { method: "PATCH", body: "{}" });
+  },
+  deleteClassroomPass(id) {
+    return this.request(`/api/classroom-pass/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
   },
   saveDailyLaunch(launch) {
     return this.request("/api/daily-launch", { method: "PUT", body: JSON.stringify({ message: launch.message }) });
@@ -1189,6 +1219,37 @@ function normalizeSubmissions(items) {
   })).filter(item => item.id && item.assignmentId);
 }
 
+function normalizeClassroomPassPayload(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+  const normalizePass = pass => ({
+    id: String(pass && pass.id || ""),
+    studentEmail: String(pass && pass.studentEmail || ""),
+    studentName: String(pass && pass.studentName || ""),
+    grade: String(pass && pass.grade || ""),
+    destination: String(pass && pass.destination || "Other Approved Reason"),
+    outAt: String(pass && pass.outAt || ""),
+    returnedAt: String(pass && pass.returnedAt || ""),
+    status: String(pass && pass.status || "out"),
+    returnedBy: String(pass && pass.returnedBy || "")
+  });
+  const passes = (Array.isArray(source.passes) ? source.passes : []).map(normalizePass).filter(pass => pass.id);
+  const activePass = source.activePass ? normalizePass(source.activePass) : passes.find(pass => pass.status === "out") || null;
+  return {
+    config: {
+      enabled: !source.config || source.config.enabled !== false,
+      maxActive: Math.max(1, Math.min(10, Number(source.config && source.config.maxActive) || 1)),
+      updatedAt: String(source.config && source.config.updatedAt || "")
+    },
+    destinations: Array.isArray(source.destinations) && source.destinations.length
+      ? source.destinations.map(String)
+      : [...CLASSROOM_PASS_DESTINATIONS],
+    activeCount: Math.max(0, Number(source.activeCount) || 0),
+    activePass,
+    passes,
+    canStart: Boolean(source.canStart)
+  };
+}
+
 let links = store.loadLinks();
 let websiteRequests = store.loadRequests();
 let classThreads = store.loadThreads();
@@ -1238,11 +1299,29 @@ let studentPreviewObjectUrl = "";
 let dashboardGradebookGrade = "4";
 let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
+let classroomPassData = {
+  config: { enabled: true, maxActive: 1, updatedAt: "" },
+  destinations: [...CLASSROOM_PASS_DESTINATIONS],
+  activeCount: 0,
+  activePass: null,
+  passes: [],
+  canStart: false
+};
+let classroomPassDestination = "";
+let classroomPassMessage = "";
+let classroomPassSearch = "";
+let classroomPassGradeFilter = "all";
+let classroomPassDestinationFilter = "all";
+let classroomPassStatusFilter = "all";
+let classroomPassDateFilter = classroomPassDateKey(new Date());
+let classroomPassClock = 0;
+let classroomPassRefreshTimer = 0;
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
   { id: "assignments", label: "Assignments & Submissions", navLabel: "Student Work", icon: "▣" },
   { id: "gradebooks", label: "Gradebooks", icon: "▦" },
+  { id: "passes", label: "Classroom Pass Log", navLabel: "Classroom Pass", icon: "→" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
   { id: "corner", label: "Colt Corner", icon: "✦" },
@@ -1406,7 +1485,8 @@ function setScreen(next) {
   requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 }
 
-function openTeacherDashboard() {
+async function openTeacherDashboard() {
+  await loadClassroomPassData(false);
   dashboardSection = "overview";
   sessionStorage.setItem("teacherDashboardSection", dashboardSection);
   setScreen({ name: "dashboard" });
@@ -1707,6 +1787,36 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
   `;
 }
 
+function formatClassroomPassTime(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function formatClassroomPassDate(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+}
+
+function classroomPassDateKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function classroomPassDuration(start, end = Date.now()) {
+  const startTime = Date.parse(start);
+  const endTime = typeof end === "number" ? end : Date.parse(end);
+  if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) return "—";
+  const totalSeconds = Math.max(0, Math.floor((endTime - startTime) / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return hours
+    ? `${hours}h ${String(minutes).padStart(2, "0")}m`
+    : `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function renderAuthButton() {
   if (isSignedIn()) {
     const fullName = String(authSession.name || "Student").trim();
@@ -1852,6 +1962,7 @@ function renderHomeDefault() {
       </section>
     </div>
     <div id="home-assignments" class="home-navigation-anchor">${renderAssignmentsPreview()}</div>
+    <div id="home-classroom-pass" class="home-navigation-anchor">${renderClassroomPassPreview()}</div>
     <div id="home-colt-corner" class="home-navigation-anchor">${renderColtCornerPreview()}</div>
     <div id="home-feedback" class="home-navigation-anchor">${renderStudentWebsiteRequest()}</div>
   `;
@@ -7384,6 +7495,34 @@ function renderAssignmentsPreview() {
   `;
 }
 
+function renderClassroomPassPreview() {
+  const activePass = classroomPassData.activePass;
+  const buttonText = isTeacher()
+    ? "Open Pass Log"
+    : activePass
+      ? "Return to Classroom"
+      : isApprovedStudent()
+        ? "Open Classroom Pass"
+        : "Student Login";
+  return `
+    <section class="classroom-pass-home-card ${activePass ? "has-active-pass" : ""}">
+      <div class="classroom-pass-home-icon" aria-hidden="true">→</div>
+      <div>
+        <span class="feature-kicker">Leaving the Room</span>
+        <h2>Classroom Pass</h2>
+        <p>${activePass
+          ? `You left for ${escapeHtml(activePass.destination)} at ${escapeHtml(formatClassroomPassTime(activePass.outAt))}.`
+          : isApprovedStudent()
+            ? "Use this pass whenever Mr. Nieves gives you permission to leave the classroom."
+            : isTeacher()
+              ? "See who is currently out and review student pass activity."
+              : "Student login is required to use the Classroom Pass."}</p>
+      </div>
+      <button class="primary-btn" data-action="openClassroomPass">${buttonText}</button>
+    </section>
+  `;
+}
+
 function studentSubmissionFor(assignmentId) {
   if (replacingAssignmentId === assignmentId) return null;
   return submissions.find(item => item.assignmentId === assignmentId && item.studentEmail === authSession.email) || null;
@@ -7644,6 +7783,70 @@ function renderAssignmentsPage() {
           `}
         ` : `<div class="assignment-list-empty"><h2>No assignments yet</h2><p>New assignments will appear here when Mr. Nieves posts them.</p></div>`}
       </main>
+    </section>
+  `;
+}
+
+function renderClassroomPassPage() {
+  if (!isApprovedStudent()) return `${pageHeader("Classroom Pass", "Student login is required.", true)}${renderLogin()}`;
+  const active = classroomPassData.activePass;
+  const config = classroomPassData.config;
+  const available = classroomPassData.canStart;
+  const availabilityMessage = !config.enabled
+    ? "Classroom Pass is not available right now. Please ask Mr. Nieves."
+    : available
+      ? "Available — choose where you are going after receiving permission."
+      : "A Classroom Pass is currently in use. Please wait until it becomes available.";
+  const recent = classroomPassData.passes.filter(pass => pass.status !== "out").slice(0, 3);
+  return `
+    ${pageHeader("Classroom Pass", "Quickly sign out and return without interrupting class.", true)}
+    <section class="classroom-pass-student-shell">
+      <section class="classroom-pass-student-identity" aria-label="Current student">
+        <span class="classroom-pass-avatar" aria-hidden="true">${escapeHtml((authSession.name || "S").charAt(0))}</span>
+        <span><small>Using this pass as</small><strong>${escapeHtml(authSession.name || "Student")}</strong><em>Grade ${escapeHtml(authSession.grade || "Not assigned")}</em></span>
+      </section>
+      ${active ? `
+        <section class="classroom-pass-active-student" aria-live="polite">
+          <span class="feature-kicker">Currently Signed Out</span>
+          <div class="classroom-pass-active-icon" aria-hidden="true">→</div>
+          <h2>${escapeHtml(active.destination)}</h2>
+          <p>You left the classroom at <strong>${escapeHtml(formatClassroomPassTime(active.outAt))}</strong>.</p>
+          <div class="classroom-pass-student-timer">
+            <span>Time out of the room</span>
+            <strong data-pass-start="${escapeHtml(active.outAt)}">${escapeHtml(classroomPassDuration(active.outAt))}</strong>
+          </div>
+          <button class="primary-btn classroom-pass-return-button" data-action="returnClassroomPass">Return to Classroom</button>
+          <p class="classroom-pass-reminder">Press this button as soon as you return.</p>
+        </section>
+      ` : `
+        <section class="classroom-pass-start-card">
+          <div class="classroom-pass-availability ${available ? "is-available" : "is-unavailable"}">
+            <span aria-hidden="true">${available ? "✓" : "•"}</span>
+            <strong>${escapeHtml(availabilityMessage)}</strong>
+          </div>
+          <div class="classroom-pass-permission-note">
+            <strong>Ask Mr. Nieves first.</strong>
+            <span>Then choose your destination and start the pass.</span>
+          </div>
+          <fieldset class="classroom-pass-destinations" ${available ? "" : "disabled"}>
+            <legend>Where are you going?</legend>
+            ${classroomPassData.destinations.map(destination => `
+              <button type="button" class="classroom-pass-destination ${classroomPassDestination === destination ? "is-selected" : ""}" data-action="selectClassroomPassDestination" data-destination="${escapeHtml(destination)}" aria-pressed="${classroomPassDestination === destination}">
+                <span aria-hidden="true">${destination === "Restroom" ? "R" : destination === "Water" ? "W" : destination === "Office" ? "O" : destination === "Nurse" ? "N" : destination === "Teacher Errand" ? "T" : "✓"}</span>
+                ${escapeHtml(destination)}
+              </button>
+            `).join("")}
+          </fieldset>
+          <button class="primary-btn classroom-pass-start-button" data-action="startClassroomPass" ${available && classroomPassDestination ? "" : "disabled"}>Leave Classroom</button>
+        </section>
+      `}
+      ${classroomPassMessage ? `<p class="classroom-pass-message" role="status">${escapeHtml(classroomPassMessage)}</p>` : ""}
+      ${recent.length ? `
+        <section class="classroom-pass-student-recent">
+          <h3>Your Recent Passes</h3>
+          ${recent.map(pass => `<div><span><strong>${escapeHtml(pass.destination)}</strong><small>${escapeHtml(formatClassroomPassDate(pass.outAt))} at ${escapeHtml(formatClassroomPassTime(pass.outAt))}</small></span><em>${escapeHtml(classroomPassDuration(pass.outAt, pass.returnedAt))}</em></div>`).join("")}
+        </section>
+      ` : ""}
     </section>
   `;
 }
@@ -7978,6 +8181,7 @@ function renderDashboardNavigation() {
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
             ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
             ${section.id === "assignments" && submissions.some(item => item.status === "submitted") ? `<b>${submissions.filter(item => item.status === "submitted").length}</b>` : ""}
+            ${section.id === "passes" && classroomPassData.passes.some(item => item.status === "out") ? `<b>${classroomPassData.passes.filter(item => item.status === "out").length}</b>` : ""}
           </button>
         `).join("")}
       </div>
@@ -7995,6 +8199,7 @@ function renderDashboardOverview() {
     ["Awaiting First Login", waiting, "students"],
     ["Open Assignments", assignments.filter(item => item.status === "open").length, "assignments"],
     ["New Submissions", submissions.filter(item => item.status === "submitted").length, "assignments"],
+    ["Students Currently Out", classroomPassData.passes.filter(item => item.status === "out").length, "passes"],
     ["Colt Corner Topics", classThreads.length, "corner"],
     ["Posts Awaiting Review", moderationQueue.length, "corner"],
     ["Launchpad Feedback", websiteRequests.length, "requests"],
@@ -8020,6 +8225,7 @@ function renderDashboardOverview() {
         <div class="dashboard-quick-actions">
           <button class="primary-btn" data-action="add">+ Add Website</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="assignments">Assignments & Submissions</button>
+          <button class="outline-btn" data-action="dashboardSection" data-section="passes">Classroom Pass Log</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="students">Manage Student Access</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="tools">Open Classroom Tools</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="requests">Review Feedback</button>
@@ -8496,9 +8702,120 @@ function renderDashboardGradebooks() {
   `;
 }
 
+function classroomPassStatusLabel(pass) {
+  if (pass.status === "out") return "Currently Out";
+  if (pass.status === "corrected") return "Teacher Corrected";
+  return "Returned";
+}
+
+function renderClassroomPassActiveCard(pass) {
+  return `
+    <article class="classroom-pass-current-card">
+      <span class="classroom-pass-current-avatar" aria-hidden="true">${escapeHtml((pass.studentName || "S").charAt(0))}</span>
+      <div>
+        <span class="feature-kicker">Currently Out</span>
+        <h3>${escapeHtml(pass.studentName)}</h3>
+        <p>Grade ${escapeHtml(pass.grade)} · ${escapeHtml(pass.destination)}</p>
+      </div>
+      <div class="classroom-pass-current-time">
+        <span>Left at ${escapeHtml(formatClassroomPassTime(pass.outAt))}</span>
+        <strong data-pass-start="${escapeHtml(pass.outAt)}">${escapeHtml(classroomPassDuration(pass.outAt))}</strong>
+      </div>
+      <button class="primary-btn" data-action="teacherReturnClassroomPass" data-id="${escapeHtml(pass.id)}">Mark Returned</button>
+    </article>
+  `;
+}
+
+function renderClassroomPassTableRow(pass) {
+  const active = pass.status === "out";
+  return `
+    <article class="classroom-pass-log-row ${active ? "is-active" : ""}">
+      <span class="classroom-pass-student-cell"><strong>${escapeHtml(pass.studentName)}</strong><small>${escapeHtml(pass.studentEmail)}</small></span>
+      <span data-label="Grade">${escapeHtml(pass.grade)}</span>
+      <span data-label="Destination">${escapeHtml(pass.destination)}</span>
+      <span data-label="Left">${escapeHtml(formatClassroomPassTime(pass.outAt))}</span>
+      <span data-label="Returned">${active ? "—" : escapeHtml(formatClassroomPassTime(pass.returnedAt))}</span>
+      <span data-label="Duration" data-pass-start="${escapeHtml(pass.outAt)}" ${active ? "" : `data-pass-end="${escapeHtml(pass.returnedAt)}"`}>${escapeHtml(classroomPassDuration(pass.outAt, active ? Date.now() : pass.returnedAt))}</span>
+      <span data-label="Status"><b class="classroom-pass-status is-${escapeHtml(pass.status)}">${escapeHtml(classroomPassStatusLabel(pass))}</b></span>
+      <span class="classroom-pass-row-actions">
+        ${active ? `<button class="outline-btn" data-action="teacherReturnClassroomPass" data-id="${escapeHtml(pass.id)}">Return</button>` : ""}
+        <button class="danger-btn" data-action="deleteClassroomPass" data-id="${escapeHtml(pass.id)}">Delete</button>
+      </span>
+    </article>
+  `;
+}
+
+function renderDashboardClassroomPasses() {
+  const passes = classroomPassData.passes;
+  const active = passes.filter(pass => pass.status === "out");
+  const todayKey = classroomPassDateKey(new Date());
+  const today = passes.filter(pass => classroomPassDateKey(pass.outAt) === todayKey);
+  const completedToday = today.filter(pass => pass.returnedAt);
+  const averageSeconds = completedToday.length
+    ? completedToday.reduce((total, pass) => total + Math.max(0, (Date.parse(pass.returnedAt) - Date.parse(pass.outAt)) / 1000), 0) / completedToday.length
+    : 0;
+  const query = classroomPassSearch.trim().toLowerCase();
+  const filtered = passes
+    .filter(pass => !classroomPassDateFilter || classroomPassDateKey(pass.outAt) === classroomPassDateFilter)
+    .filter(pass => classroomPassGradeFilter === "all" || pass.grade === classroomPassGradeFilter)
+    .filter(pass => classroomPassDestinationFilter === "all" || pass.destination === classroomPassDestinationFilter)
+    .filter(pass => classroomPassStatusFilter === "all" || pass.status === classroomPassStatusFilter)
+    .filter(pass => !query || `${pass.studentName} ${pass.studentEmail}`.toLowerCase().includes(query));
+  return `
+    <section class="classroom-pass-dashboard">
+      <section class="classroom-pass-settings-card">
+        <div>
+          <span class="feature-kicker">Teacher Controls</span>
+          <h3>Pass Availability</h3>
+          <p class="instruction">Students must still receive your permission before using the pass.</p>
+        </div>
+        <label class="toggle-row classroom-pass-enabled-toggle">
+          <span>${classroomPassData.config.enabled ? "Available to students" : "Passes are paused"}</span>
+          <span class="switch"><input id="classroomPassEnabled" type="checkbox" ${classroomPassData.config.enabled ? "checked" : ""}><span class="slider"></span></span>
+        </label>
+        <label class="field classroom-pass-capacity"><span>Students allowed out at once</span><select id="classroomPassCapacity">${[1, 2, 3, 4].map(value => `<option value="${value}" ${classroomPassData.config.maxActive === value ? "selected" : ""}>${value}</option>`).join("")}</select></label>
+      </section>
+
+      <section class="classroom-pass-current-section">
+        <div class="assignment-manager-heading"><div><span class="feature-kicker">Live Status</span><h3>Currently Out</h3></div><span class="dashboard-count">${active.length}</span></div>
+        <div class="classroom-pass-current-list">
+          ${active.length ? active.map(renderClassroomPassActiveCard).join("") : `<div class="classroom-pass-all-present"><span aria-hidden="true">✓</span><strong>Everyone is currently in the classroom.</strong></div>`}
+        </div>
+      </section>
+
+      <section class="classroom-pass-today-section">
+        <div class="assignment-manager-heading"><div><span class="feature-kicker">Today at a Glance</span><h3>Simple Daily Summary</h3></div><a class="outline-btn" href="/api/classroom-pass/export">Download CSV</a></div>
+        <div class="classroom-pass-metric-grid">
+          <div><span>Currently Out</span><strong>${active.length}</strong></div>
+          <div><span>Total Passes Today</span><strong>${today.length}</strong></div>
+          <div><span>Average Time Out</span><strong>${completedToday.length ? `${Math.max(1, Math.round(averageSeconds / 60))} min` : "—"}</strong></div>
+          <div><span>Unreturned Passes</span><strong>${active.length}</strong></div>
+        </div>
+      </section>
+
+      <section class="classroom-pass-history-section">
+        <div class="assignment-manager-heading"><div><span class="feature-kicker">Pass History</span><h3>Student Pass Activity</h3></div><span class="dashboard-count">${filtered.length}</span></div>
+        <div class="classroom-pass-filters">
+          <label class="dashboard-search"><span class="sr-only">Search students</span><input id="classroomPassSearch" type="search" value="${escapeHtml(classroomPassSearch)}" placeholder="Search student name…"></label>
+          <label><span class="sr-only">Choose date</span><input id="classroomPassDate" type="date" value="${escapeHtml(classroomPassDateFilter)}"></label>
+          <label><span class="sr-only">Filter grade</span><select id="classroomPassGrade"><option value="all">All grades</option>${["4", "5", "6", "7"].map(grade => `<option value="${grade}" ${classroomPassGradeFilter === grade ? "selected" : ""}>Grade ${grade}</option>`).join("")}</select></label>
+          <label><span class="sr-only">Filter destination</span><select id="classroomPassDestinationFilter"><option value="all">All destinations</option>${classroomPassData.destinations.map(destination => `<option value="${escapeHtml(destination)}" ${classroomPassDestinationFilter === destination ? "selected" : ""}>${escapeHtml(destination)}</option>`).join("")}</select></label>
+          <label><span class="sr-only">Filter status</span><select id="classroomPassStatus"><option value="all">All statuses</option><option value="out" ${classroomPassStatusFilter === "out" ? "selected" : ""}>Currently Out</option><option value="returned" ${classroomPassStatusFilter === "returned" ? "selected" : ""}>Returned</option><option value="corrected" ${classroomPassStatusFilter === "corrected" ? "selected" : ""}>Teacher Corrected</option></select></label>
+        </div>
+        <div class="classroom-pass-log-table" aria-live="polite">
+          <div class="classroom-pass-log-header" aria-hidden="true"><span>Student</span><span>Grade</span><span>Destination</span><span>Left</span><span>Returned</span><span>Duration</span><span>Status</span><span>Actions</span></div>
+          ${filtered.length ? filtered.map(renderClassroomPassTableRow).join("") : emptyCard("No Classroom Pass records match these filters.")}
+        </div>
+      </section>
+      ${classroomPassMessage ? `<p class="classroom-pass-message" role="status">${escapeHtml(classroomPassMessage)}</p>` : ""}
+    </section>
+  `;
+}
+
 function renderDashboardSection() {
   if (dashboardSection === "assignments") return renderDashboardAssignments();
   if (dashboardSection === "gradebooks") return renderDashboardGradebooks();
+  if (dashboardSection === "passes") return renderDashboardClassroomPasses();
   if (dashboardSection === "students") return renderApprovedStudentManager();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
   if (dashboardSection === "corner") return renderDashboardColtCorner();
@@ -8702,11 +9019,13 @@ function render() {
   if (screen.name === "login") html = renderLogin();
   if (screen.name === "account") html = renderAccount();
   if (screen.name === "assignments") html = renderAssignmentsPage();
+  if (screen.name === "classroomPass") html = renderClassroomPassPage();
   if (screen.name === "dashboard") html = renderDashboard();
   if (screen.name === "edit") html = renderEdit(screen.id);
   if (screen.name === "changePin") html = renderChangePin();
   app.innerHTML = html + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
+  startClassroomPassTimers();
   observeDeferredVideos(app);
   window.dispatchEvent(new CustomEvent("classroom-launchpad-rendered", {
     detail: { screen: screen.name }
@@ -8782,8 +9101,88 @@ async function loadApprovedStudents() {
   }
 }
 
+async function loadClassroomPassData(shouldRender = false) {
+  if (!sharedBackend.enabled || !isSignedIn()) return;
+  const before = JSON.stringify(classroomPassData);
+  try {
+    classroomPassData = normalizeClassroomPassPayload(await sharedBackend.loadClassroomPass());
+    if (shouldRender && before !== JSON.stringify(classroomPassData)) {
+      const active = document.activeElement;
+      if (!active || !active.closest(".classroom-pass-filters")) render();
+    }
+  } catch (error) {
+    classroomPassMessage = error.message;
+  }
+}
+
+function updateClassroomPassClocks() {
+  document.querySelectorAll("[data-pass-start]").forEach(element => {
+    const end = element.dataset.passEnd || Date.now();
+    element.textContent = classroomPassDuration(element.dataset.passStart, end);
+  });
+}
+
+function startClassroomPassTimers() {
+  if (classroomPassClock) window.clearInterval(classroomPassClock);
+  if (classroomPassRefreshTimer) window.clearInterval(classroomPassRefreshTimer);
+  classroomPassClock = 0;
+  classroomPassRefreshTimer = 0;
+  const relevant = screen.name === "classroomPass" || (screen.name === "dashboard" && dashboardSection === "passes");
+  if (!relevant) return;
+  updateClassroomPassClocks();
+  classroomPassClock = window.setInterval(updateClassroomPassClocks, 1000);
+  classroomPassRefreshTimer = window.setInterval(() => loadClassroomPassData(true), 5000);
+}
+
 function attachScreenHandlers() {
   attachHomeNavigation();
+  const passSearch = document.getElementById("classroomPassSearch");
+  if (passSearch) {
+    passSearch.addEventListener("input", event => {
+      classroomPassSearch = event.target.value;
+      render();
+      const next = document.getElementById("classroomPassSearch");
+      if (next) {
+        next.focus();
+        next.setSelectionRange(classroomPassSearch.length, classroomPassSearch.length);
+      }
+    });
+  }
+  [
+    ["classroomPassDate", value => classroomPassDateFilter = value],
+    ["classroomPassGrade", value => classroomPassGradeFilter = value],
+    ["classroomPassDestinationFilter", value => classroomPassDestinationFilter = value],
+    ["classroomPassStatus", value => classroomPassStatusFilter = value]
+  ].forEach(([id, update]) => {
+    const control = document.getElementById(id);
+    if (control) control.addEventListener("change", event => { update(event.target.value); render(); });
+  });
+  const passEnabled = document.getElementById("classroomPassEnabled");
+  if (passEnabled) passEnabled.addEventListener("change", async event => {
+    try {
+      classroomPassData = normalizeClassroomPassPayload(await sharedBackend.updateClassroomPassConfig({
+        enabled: event.target.checked,
+        maxActive: classroomPassData.config.maxActive
+      }));
+      classroomPassMessage = event.target.checked ? "Classroom Pass is available to students." : "Classroom Pass is paused.";
+    } catch (error) {
+      classroomPassMessage = error.message;
+    }
+    render();
+  });
+  const passCapacity = document.getElementById("classroomPassCapacity");
+  if (passCapacity) passCapacity.addEventListener("change", async event => {
+    try {
+      classroomPassData = normalizeClassroomPassPayload(await sharedBackend.updateClassroomPassConfig({
+        enabled: classroomPassData.config.enabled,
+        maxActive: Number(event.target.value)
+      }));
+      classroomPassMessage = `Up to ${classroomPassData.config.maxActive} ${classroomPassData.config.maxActive === 1 ? "student" : "students"} may be out at once.`;
+    } catch (error) {
+      classroomPassMessage = error.message;
+    }
+    render();
+  });
   const studentManagerSearch = document.getElementById("dashboardStudentSearch");
   if (studentManagerSearch) {
     studentManagerSearch.addEventListener("input", event => {
@@ -9613,21 +10012,22 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
-    else if (["dashboard", "category", "pin", "login", "account", "assignments", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "assignments", "classroomPass", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
   if (action === "teacher") {
     if (isTeacher()) {
       await loadApprovedStudents();
-      openTeacherDashboard();
+      await openTeacherDashboard();
     } else setScreen({ name: "pin" });
   }
   if (action === "teacherDashboard") {
     await loadApprovedStudents();
-    openTeacherDashboard();
+    await openTeacherDashboard();
   }
   if (action === "dashboardSection") {
     const nextSection = dashboardSections.some(section => section.id === target.dataset.section) ? target.dataset.section : "overview";
+    if (nextSection === "passes") await loadClassroomPassData(false);
     dashboardSection = nextSection;
     sessionStorage.setItem("teacherDashboardSection", dashboardSection);
     render();
@@ -9671,12 +10071,80 @@ app.addEventListener("click", async event => {
     approvedStudents = [];
     assignments = [];
     submissions = [];
+    classroomPassData = normalizeClassroomPassPayload(null);
+    classroomPassDestination = "";
+    classroomPassMessage = "";
     activationCodeResults = [];
     setScreen({ name: "home" });
   }
   if (action === "toggleTheme") toggleTheme();
   if (action === "category") setScreen({ name: "category", category: target.dataset.category });
   if (action === "openAssignments") setScreen({ name: isApprovedStudent() ? "assignments" : "login" });
+  if (action === "openClassroomPass") {
+    if (!isSignedIn()) setScreen({ name: "login" });
+    else if (isTeacher()) {
+      await loadClassroomPassData(false);
+      dashboardSection = "passes";
+      sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+      setScreen({ name: "dashboard" });
+    } else {
+      classroomPassMessage = "";
+      await loadClassroomPassData(false);
+      setScreen({ name: "classroomPass" });
+    }
+  }
+  if (action === "selectClassroomPassDestination") {
+    classroomPassDestination = classroomPassData.destinations.includes(target.dataset.destination) ? target.dataset.destination : "";
+    classroomPassMessage = "";
+    render();
+  }
+  if (action === "startClassroomPass") {
+    if (!classroomPassDestination) return;
+    try {
+      classroomPassData = normalizeClassroomPassPayload(await sharedBackend.startClassroomPass(classroomPassDestination));
+      classroomPassDestination = "";
+      classroomPassMessage = "Your departure time was recorded automatically.";
+      render();
+    } catch (error) {
+      classroomPassMessage = error.message;
+      await loadClassroomPassData(false);
+      render();
+    }
+  }
+  if (action === "returnClassroomPass") {
+    try {
+      classroomPassData = normalizeClassroomPassPayload(await sharedBackend.returnClassroomPass());
+      classroomPassMessage = "Welcome back. Your return time was recorded automatically.";
+      render();
+    } catch (error) {
+      classroomPassMessage = error.message;
+      render();
+    }
+  }
+  if (action === "teacherReturnClassroomPass") {
+    try {
+      classroomPassData = normalizeClassroomPassPayload(await sharedBackend.closeClassroomPass(target.dataset.id));
+      classroomPassMessage = "The student was marked as returned.";
+      render();
+    } catch (error) {
+      classroomPassMessage = error.message;
+      render();
+    }
+  }
+  if (action === "deleteClassroomPass") {
+    const pass = classroomPassData.passes.find(item => item.id === target.dataset.id);
+    modal = {
+      title: "Delete Classroom Pass record?",
+      message: `This permanently removes ${pass ? `${pass.studentName}'s ${pass.destination} pass` : "this pass record"}.`,
+      confirmText: "Delete Record",
+      onConfirm: async () => {
+        classroomPassData = normalizeClassroomPassPayload(await sharedBackend.deleteClassroomPass(target.dataset.id));
+        classroomPassMessage = "The pass record was deleted.";
+        render();
+      }
+    };
+    render();
+  }
   if (action === "assignmentView") {
     assignmentView = target.dataset.view || "todo";
     selectedAssignmentId = "";
@@ -10002,6 +10470,7 @@ async function initializeApp() {
       authConfig = { ...authConfig, ...(configResult || {}) };
       authSession = sessionResult && sessionResult.session ? sessionResult.session : authSession;
       await loadSharedState(false);
+      if (isSignedIn()) await loadClassroomPassData(false);
       if (isTeacher()) await loadApprovedStudents();
     } catch {}
   }

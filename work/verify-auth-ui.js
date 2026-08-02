@@ -55,7 +55,7 @@ async function run() {
         labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none"
       };
     });
-    if (wideNavigation.itemCount !== 7 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();

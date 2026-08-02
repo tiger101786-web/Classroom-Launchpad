@@ -52,6 +52,14 @@ const launchpadFeedbackTypes = new Set([
   "Broken link",
   "Other"
 ]);
+const classroomPassDestinations = new Set([
+  "Restroom",
+  "Water",
+  "Office",
+  "Nurse",
+  "Teacher Errand",
+  "Other Approved Reason"
+]);
 
 const defaultDb = {
   links: null,
@@ -60,6 +68,12 @@ const defaultDb = {
   websiteRequests: [],
   assignments: [],
   submissions: [],
+  classroomPasses: [],
+  classroomPassConfig: {
+    enabled: true,
+    maxActive: 1,
+    updatedAt: ""
+  },
   leaderboards: [],
   approvedStudents: [],
   teacherPin: null,
@@ -505,6 +519,41 @@ function normalizeSubmissions(entries) {
     ));
 }
 
+function normalizeClassroomPass(source) {
+  const outAt = validIsoDate(source && source.outAt, new Date().toISOString());
+  const returnedAt = validIsoDate(source && source.returnedAt);
+  const status = returnedAt
+    ? (source && source.status === "corrected" ? "corrected" : "returned")
+    : "out";
+  return {
+    id: cleanText(source && source.id, 100) || crypto.randomUUID(),
+    studentEmail: normalizeEmail(source && source.studentEmail),
+    studentName: cleanText(source && source.studentName, 80),
+    grade: cleanGrade(source && source.grade),
+    destination: classroomPassDestinations.has(source && source.destination)
+      ? source.destination
+      : "Other Approved Reason",
+    outAt,
+    returnedAt,
+    status,
+    returnedBy: cleanText(source && source.returnedBy, 80)
+  };
+}
+
+function normalizeClassroomPasses(entries) {
+  return (Array.isArray(entries) ? entries : []).slice(0, 10000)
+    .map(normalizeClassroomPass)
+    .filter(item => item.studentEmail && item.studentName && item.grade);
+}
+
+function normalizeClassroomPassConfig(config) {
+  return {
+    enabled: !config || config.enabled !== false,
+    maxActive: Math.max(1, Math.min(10, Number(config && config.maxActive) || 1)),
+    updatedAt: validIsoDate(config && config.updatedAt)
+  };
+}
+
 function approvedProjectUrl(db, value) {
   let parsed;
   try {
@@ -606,6 +655,8 @@ function writeDb(db) {
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
     submissions: normalizeSubmissions(db.submissions),
+    classroomPasses: normalizeClassroomPasses(db.classroomPasses),
+    classroomPassConfig: normalizeClassroomPassConfig(db.classroomPassConfig),
     leaderboards: normalizeLeaderboards(db.leaderboards),
     approvedStudents: normalizeApprovedStudents(db.approvedStudents),
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
@@ -1796,6 +1847,210 @@ async function handleAssignmentsApi(req, res, pathname) {
   return true;
 }
 
+function classroomPassCapacityCount(passes) {
+  return passes.filter(pass => pass.status === "out" && pass.studentEmail !== teacherTestStudentEmail).length;
+}
+
+function classroomPassPayload(db, session) {
+  const passes = normalizeClassroomPasses(db.classroomPasses)
+    .sort((first, second) => Date.parse(second.outAt) - Date.parse(first.outAt));
+  const config = normalizeClassroomPassConfig(db.classroomPassConfig);
+  const activeCount = classroomPassCapacityCount(passes);
+  if (session.role === "teacher") {
+    return {
+      config,
+      destinations: [...classroomPassDestinations],
+      activeCount,
+      passes
+    };
+  }
+  const email = normalizeEmail(session.email);
+  const studentPasses = passes.filter(pass => pass.studentEmail === email).slice(0, 25);
+  const activePass = studentPasses.find(pass => pass.status === "out") || null;
+  const testAccount = email === teacherTestStudentEmail;
+  return {
+    config,
+    destinations: [...classroomPassDestinations],
+    activeCount,
+    activePass,
+    passes: studentPasses,
+    canStart: Boolean(config.enabled && !activePass && (testAccount || activeCount < config.maxActive))
+  };
+}
+
+function sendClassroomPassCsv(res, passes) {
+  const quote = value => `"${String(value == null ? "" : value).replace(/"/g, '""')}"`;
+  const rows = [
+    ["Student", "Email", "Grade", "Destination", "Left classroom", "Returned", "Duration minutes", "Status", "Returned by"],
+    ...normalizeClassroomPasses(passes)
+      .sort((first, second) => Date.parse(second.outAt) - Date.parse(first.outAt))
+      .map(pass => {
+        const endTime = pass.returnedAt ? Date.parse(pass.returnedAt) : Date.now();
+        const durationMinutes = Math.max(0, Math.round((endTime - Date.parse(pass.outAt)) / 60000));
+        return [pass.studentName, pass.studentEmail, pass.grade, pass.destination, pass.outAt, pass.returnedAt, durationMinutes, pass.status, pass.returnedBy];
+      })
+  ];
+  res.writeHead(200, {
+    "Content-Type": "text/csv; charset=utf-8",
+    "Content-Disposition": `attachment; filename="classroom-pass-log-${new Date().toISOString().slice(0, 10)}.csv"`,
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff"
+  });
+  res.end(`\uFEFF${rows.map(row => row.map(quote).join(",")).join("\r\n")}`);
+}
+
+async function handleClassroomPassApi(req, res, pathname) {
+  if (!pathname.startsWith("/api/classroom-pass")) return false;
+  const session = requireRole(req, res, ["student", "teacher"]);
+  if (!session) return true;
+
+  if (req.method === "GET" && pathname === "/api/classroom-pass/export") {
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can export the Classroom Pass log." });
+      return true;
+    }
+    sendClassroomPassCsv(res, readDb().classroomPasses);
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/classroom-pass") {
+    sendJson(res, 200, classroomPassPayload(readDb(), session));
+    return true;
+  }
+
+  if (!requireSameOrigin(req, res)) return true;
+
+  if (req.method === "POST" && pathname === "/api/classroom-pass/start") {
+    if (session.role !== "student") {
+      sendJson(res, 403, { error: "Only student accounts can start a Classroom Pass." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const destination = cleanText(body.destination, 40);
+      if (!classroomPassDestinations.has(destination)) {
+        sendJson(res, 400, { error: "Choose an approved destination." });
+        return true;
+      }
+      const db = readDb();
+      const config = normalizeClassroomPassConfig(db.classroomPassConfig);
+      const passes = normalizeClassroomPasses(db.classroomPasses);
+      const email = normalizeEmail(session.email);
+      if (!config.enabled) {
+        sendJson(res, 403, { error: "Classroom Pass is not available right now.", code: "PASS_DISABLED" });
+        return true;
+      }
+      if (passes.some(pass => pass.studentEmail === email && pass.status === "out")) {
+        sendJson(res, 409, { error: "You already have an active Classroom Pass.", code: "PASS_ALREADY_ACTIVE" });
+        return true;
+      }
+      if (email !== teacherTestStudentEmail && classroomPassCapacityCount(passes) >= config.maxActive) {
+        sendJson(res, 409, { error: "A Classroom Pass is already in use. Please wait until it becomes available.", code: "PASS_UNAVAILABLE" });
+        return true;
+      }
+      const pass = normalizeClassroomPass({
+        id: crypto.randomUUID(),
+        studentEmail: email,
+        studentName: studentDisplayName(session),
+        grade: session.grade,
+        destination,
+        outAt: new Date().toISOString(),
+        returnedAt: "",
+        status: "out",
+        returnedBy: ""
+      });
+      db.classroomPasses = [pass, ...passes];
+      writeDb(db);
+      sendJson(res, 201, { ok: true, ...classroomPassPayload(db, session) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/classroom-pass/return") {
+    if (session.role !== "student") {
+      sendJson(res, 403, { error: "Only student accounts can complete their Classroom Pass." });
+      return true;
+    }
+    const db = readDb();
+    const email = normalizeEmail(session.email);
+    const passes = normalizeClassroomPasses(db.classroomPasses);
+    const active = passes.find(pass => pass.studentEmail === email && pass.status === "out");
+    if (!active) {
+      sendJson(res, 409, { error: "You do not have an active Classroom Pass.", code: "NO_ACTIVE_PASS" });
+      return true;
+    }
+    const returnedAt = new Date().toISOString();
+    db.classroomPasses = passes.map(pass => pass.id === active.id
+      ? { ...pass, returnedAt, status: "returned", returnedBy: studentDisplayName(session) }
+      : pass);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...classroomPassPayload(db, session) });
+    return true;
+  }
+
+  if (req.method === "PATCH" && pathname === "/api/classroom-pass/config") {
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can change Classroom Pass settings." });
+      return true;
+    }
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      db.classroomPassConfig = normalizeClassroomPassConfig({
+        enabled: body.enabled,
+        maxActive: body.maxActive,
+        updatedAt: new Date().toISOString()
+      });
+      writeDb(db);
+      sendJson(res, 200, { ok: true, ...classroomPassPayload(db, session) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const passItem = pathname.match(/^\/api\/classroom-pass\/([^/]+)$/);
+  if (passItem && req.method === "PATCH") {
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can update Classroom Pass records." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(passItem[1]);
+    const passes = normalizeClassroomPasses(db.classroomPasses);
+    const target = passes.find(pass => pass.id === id);
+    if (!target) {
+      sendJson(res, 404, { error: "Classroom Pass record not found." });
+      return true;
+    }
+    const returnedAt = target.returnedAt || new Date().toISOString();
+    db.classroomPasses = passes.map(pass => pass.id === id
+      ? { ...pass, returnedAt, status: "corrected", returnedBy: session.name || "Mr. Nieves" }
+      : pass);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...classroomPassPayload(db, session) });
+    return true;
+  }
+
+  if (passItem && req.method === "DELETE") {
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can delete Classroom Pass records." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(passItem[1]);
+    db.classroomPasses = normalizeClassroomPasses(db.classroomPasses).filter(pass => pass.id !== id);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...classroomPassPayload(db, session) });
+    return true;
+  }
+
+  sendJson(res, 404, { error: "Not found." });
+  return true;
+}
+
 async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/health") {
     sendJson(res, 200, {
@@ -1809,6 +2064,7 @@ async function handleApi(req, res, pathname) {
   if (await handleAuthApi(req, res, pathname)) return true;
   if (await handleApprovedStudentsApi(req, res, pathname)) return true;
   if (await handleAssignmentsApi(req, res, pathname)) return true;
+  if (await handleClassroomPassApi(req, res, pathname)) return true;
 
   const session = readSession(req);
   if (req.method === "GET" && pathname === "/api/state") {
