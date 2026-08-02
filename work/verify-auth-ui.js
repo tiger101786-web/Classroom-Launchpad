@@ -65,10 +65,12 @@ async function run() {
         classroomPassUsesCurrentColor: getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon svg path")).stroke === getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon")).color,
         coltCornerMessages: Math.round(document.querySelector(".home-navigation-icon.is-corner-icon svg").getBoundingClientRect().width),
         coltCornerBubbles: document.querySelectorAll(".home-navigation-icon.is-corner-icon .message-bubble").length,
-        coltCornerDots: document.querySelectorAll(".home-navigation-icon.is-corner-icon .message-dot").length
+        coltCornerDots: document.querySelectorAll(".home-navigation-icon.is-corner-icon .message-dot").length,
+        logicLightbulb: Math.round(document.querySelector(".card-icon .logic-lightbulb-icon").getBoundingClientRect().width),
+        logicLightbulbPaths: document.querySelectorAll(".card-icon .logic-lightbulb-icon path").length
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();
@@ -381,6 +383,22 @@ async function run() {
     const dashboardSections = await page.locator(".dashboard-nav-button").allTextContents();
     if (dashboardSections.length < 8 || !dashboardSections.some(label => label.includes("Student Work")) || !dashboardSections.some(label => label.includes("Students & Access"))) {
       throw new Error("Teacher dashboard navigation is incomplete.");
+    }
+    const quickHeadingGap = await page.locator(".dashboard-quick-panel").evaluate(panel => {
+      const label = panel.querySelector(".feature-kicker").getBoundingClientRect();
+      const heading = panel.querySelector("h3").getBoundingClientRect();
+      return Math.round(heading.top - label.bottom);
+    });
+    if (quickHeadingGap < 8) throw new Error(`Quick Actions heading gap is too small: ${quickHeadingGap}.`);
+    await page.locator('[data-action="dashboardSection"][data-section="assignments"]').first().click();
+    await page.locator(".teacher-assignment-dashboard").waitFor();
+    const assignmentHeadingGaps = await page.locator(".assignment-list-heading, .submission-inbox-heading").evaluateAll(headings => headings.map(heading => {
+      const label = heading.querySelector(".feature-kicker").getBoundingClientRect();
+      const title = heading.querySelector("h3").getBoundingClientRect();
+      return Math.round(title.top - label.bottom);
+    }));
+    if (assignmentHeadingGaps.length !== 2 || assignmentHeadingGaps.some(gap => gap < 8)) {
+      throw new Error(`Assignment heading gaps are too small: ${assignmentHeadingGaps.join(", ")}.`);
     }
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="toggleTheme"]').first().click();

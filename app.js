@@ -181,7 +181,7 @@ const categoryIcons = {
   "Social Studies & Science": "🌎",
   "Computer Skills": "💻",
   "Review Games": "★",
-  "Logic Games": "◆",
+  "Logic Games": '<svg class="logic-lightbulb-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9 18h6M10 21h4M8.4 14.2A6.2 6.2 0 1 1 15.6 14.2c-.8.7-1.2 1.5-1.3 2.3h-4.6c-.1-.8-.5-1.6-1.3-2.3Z"></path><path d="M12 1V.5M4.2 4.2l-.7-.7M19.8 4.2l.7-.7M2 11h-1M22 11h1"></path></svg>',
   "Creative Projects": "✎",
   "Class Videos": "▶"
 };
@@ -8621,7 +8621,7 @@ function renderDashboardAssignments() {
   return `
     <section class="teacher-assignment-dashboard">
       <div class="assignment-metric-grid">${[["Open Assignments", openAssignments], ["New Submissions", newSubmissions], ["Missing", missing], ["Returned", returned]].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("")}</div>
-      <div class="assignment-manager-heading"><div><span class="feature-kicker">Class Work</span><h3>Assignments</h3></div><button class="primary-btn" data-action="newAssignment">+ Create Assignment</button></div>
+      <div class="assignment-manager-heading assignment-list-heading"><div><span class="feature-kicker">Class Work</span><h3>Assignments</h3></div><button class="primary-btn" data-action="newAssignment">+ Create Assignment</button></div>
       ${renderAssignmentEditor()}
       <div class="teacher-assignment-list">${assignments.length ? assignments.map(renderTeacherAssignmentRow).join("") : emptyCard("No assignments yet. Create the first assignment when you are ready.")}</div>
       <div class="assignment-manager-heading submission-inbox-heading"><div><span class="feature-kicker">Submission Inbox</span><h3>Student Work</h3></div><span class="dashboard-count">${visible.length}</span></div>

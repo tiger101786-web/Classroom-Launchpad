@@ -1510,6 +1510,16 @@ body[data-theme="night"] .category-card::after {
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
+.card-icon .logic-lightbulb-icon {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .category-copy {
   position: relative;
   z-index: 2;
@@ -4953,6 +4963,20 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
 .teacher-submission-preview { display: grid; align-content: start; gap: 13px; min-width: 0; padding: 18px; }
 .teacher-submission-preview > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .teacher-submission-preview > header p { margin: 0; color: var(--muted); font-size: .82rem; }
+.assignment-list-heading .feature-kicker,
+.submission-inbox-heading .feature-kicker,
+.teacher-submission-preview > header .feature-kicker,
+.dashboard-quick-panel .feature-kicker {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.assignment-list-heading .feature-kicker + h3,
+.submission-inbox-heading .feature-kicker + h3,
+.teacher-submission-preview > header .feature-kicker + h3,
+.dashboard-quick-panel .feature-kicker + h3 {
+  margin-top: 0;
+}
 .teacher-submission-status-stack { display: grid; flex: 0 0 auto; justify-items: end; gap: 7px; }
 .teacher-file-preview { min-height: 400px; }
 #submissionReviewForm { display: grid; gap: 12px; }
