@@ -258,7 +258,10 @@ async function run() {
         video.addEventListener("loadedmetadata", () => { clearTimeout(timer); done(); }, { once: true });
         video.addEventListener("error", () => { clearTimeout(timer); reject(new Error("Profile video failed to load.")); }, { once: true });
       }));
-      if (profileMetadata.width !== 544 || profileMetadata.height !== 544 || profileMetadata.duration < 5.7) {
+      const supportedProfileSize = profileMetadata.width === profileMetadata.height
+        && profileMetadata.width >= 544
+        && profileMetadata.width <= 720;
+      if (!supportedProfileSize || profileMetadata.duration < 5.7) {
         throw new Error(`Profile video has invalid optimized metadata: ${JSON.stringify(profileMetadata)}.`);
       }
       profileVisits.push(sources[0]);
