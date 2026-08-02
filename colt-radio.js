@@ -121,12 +121,22 @@
 
     const playerWrap = buildElement("div", "colt-radio-player");
     const placeholder = buildElement("p", "colt-radio-placeholder", "Choose a station, then press Play in the radio player.");
-    const nowPlaying = buildElement("div", "colt-radio-now-playing");
+    const nowPlaying = buildElement("div", "colt-radio-now-playing colt-radio-stream-player");
     nowPlaying.hidden = true;
     nowPlaying.setAttribute("aria-live", "polite");
-    const nowPlayingLabel = buildElement("span", "", "Now Playing");
+    const streamArtwork = buildElement("span", "colt-radio-stream-artwork", "\u266b");
+    streamArtwork.setAttribute("aria-hidden", "true");
+    const streamDetails = buildElement("span", "colt-radio-stream-details");
+    const nowPlayingLabel = buildElement("span", "colt-radio-stream-label", "Now Playing");
     const nowPlayingTitle = buildElement("strong", "", "Loading track information...");
-    nowPlaying.append(nowPlayingLabel, nowPlayingTitle);
+    streamDetails.append(nowPlayingLabel, nowPlayingTitle);
+    const muteStream = buildElement("button", "colt-radio-stream-control colt-radio-mute", "\ud83d\udd0a");
+    muteStream.type = "button";
+    muteStream.setAttribute("aria-label", "Mute Colt Radio");
+    const toggleStream = buildElement("button", "colt-radio-stream-control colt-radio-play", "\u25b6");
+    toggleStream.type = "button";
+    toggleStream.setAttribute("aria-label", "Play Colt Radio");
+    nowPlaying.append(streamArtwork, streamDetails, muteStream, toggleStream);
     function createPlayerFrame() {
       const frame = document.createElement("iframe");
       frame.title = "Lofi Cafe radio player";
@@ -140,9 +150,7 @@
     function createAudioPlayer() {
       const audio = document.createElement("audio");
       audio.className = "colt-radio-audio";
-      audio.controls = true;
       audio.preload = "none";
-      audio.controlsList = "nodownload noplaybackrate";
       audio.disableRemotePlayback = true;
       audio.setAttribute("aria-label", "Colt Radio audio controls");
       audio.hidden = true;
@@ -181,6 +189,8 @@
       audio.load();
       audio.hidden = true;
       nowPlaying.hidden = true;
+      toggleStream.textContent = "\u25b6";
+      toggleStream.setAttribute("aria-label", "Play Colt Radio");
       nowPlayingTitle.textContent = "Loading track information...";
       if (metadataTimer) globalObject.clearInterval(metadataTimer);
       metadataTimer = 0;
@@ -243,6 +253,17 @@
       metadataTimer = globalObject.setInterval(() => refreshNowPlaying(station), 20000);
     }
 
+    function updateStreamLabel(station) {
+      const provider = station.type === "playlist" ? "Lofi FM" : "Nightride FM";
+      nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
+    }
+
+    function updatePlaybackButton() {
+      const playing = !audio.paused && !audio.ended;
+      toggleStream.textContent = playing ? "\u275a\u275a" : "\u25b6";
+      toggleStream.setAttribute("aria-label", playing ? "Pause Colt Radio" : "Play Colt Radio");
+    }
+
     function setLauncherState() {
       launcherLabel.textContent = activeStation ? "Colt Radio • On" : "Colt Radio";
       launcher.classList.toggle("is-playing", Boolean(activeStation));
@@ -282,12 +303,14 @@
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
         audio.hidden = false;
         nowPlaying.hidden = false;
+        updateStreamLabel(station);
         loadNextPlaylistTrack(station);
       } else {
         audio.src = station.source;
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
         audio.hidden = false;
         nowPlaying.hidden = false;
+        updateStreamLabel(station);
         audio.load();
         startNowPlayingUpdates(station);
       }
@@ -333,6 +356,17 @@
     audio.addEventListener("ended", () => {
       const station = stations.find(item => item.id === activeStation);
       if (station?.type === "playlist") loadNextPlaylistTrack(station, { autoplay: true });
+    });
+    audio.addEventListener("play", updatePlaybackButton);
+    audio.addEventListener("pause", updatePlaybackButton);
+    toggleStream.addEventListener("click", () => {
+      if (audio.paused) audio.play().catch(() => updatePlaybackButton());
+      else audio.pause();
+    });
+    muteStream.addEventListener("click", () => {
+      audio.muted = !audio.muted;
+      muteStream.textContent = audio.muted ? "\ud83d\udd07" : "\ud83d\udd0a";
+      muteStream.setAttribute("aria-label", audio.muted ? "Unmute Colt Radio" : "Mute Colt Radio");
     });
     panel.addEventListener("keydown", event => {
       if (event.key === "Escape") {

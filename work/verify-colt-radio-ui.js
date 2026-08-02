@@ -164,7 +164,11 @@ async function run() {
 
     await page.getByRole("button", { name: "Chillsynth", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/chillsynth.mp3");
-    assert(await audio.isVisible(), "The Chillsynth stream did not use the existing Colt Radio player.");
+    assert(await audio.isHidden(), "The browser's progress and duration bar remained visible for Chillsynth.");
+    assert(await page.locator(".colt-radio-stream-player").isVisible(), "The compact Chillsynth player did not appear.");
+    assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
+    assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
+    assert(await page.getByRole("button", { name: "Mute Colt Radio" }).isVisible(), "The compact speaker button is missing.");
     assert(await iframe.isHidden(), "The Lofi Cafe player remained visible after switching to Chillsynth.");
     assert.match(await page.locator(".colt-radio-note").innerText(), /Instrumental chillsynth/);
     assert(await page.evaluate(() => !window.__embeddedFrameBeforeDirectStation.isConnected), "The old Lofi Cafe player kept running after switching stations.");
@@ -173,7 +177,8 @@ async function run() {
     await page.getByRole("button", { name: "Lofi FM", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
     assert.match(firstLofiTrack, /^https:\/\/lofi\.radio\/songs\//);
-    assert(await audio.isVisible(), "Lofi FM did not use the existing Colt Radio audio controls.");
+    assert(await audio.isHidden(), "Lofi FM exposed a progress bar or song duration.");
+    assert(await page.locator(".colt-radio-stream-player").isVisible(), "Lofi FM did not use the compact Colt Radio player.");
     assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /^Purrple Cat - /);
     await audio.evaluate(element => element.dispatchEvent(new Event("ended")));
     assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lofi FM repeated the same track immediately.");
@@ -246,6 +251,8 @@ async function run() {
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
       liveTrackTitles: true,
+      compactControlsMatchOriginalStations: true,
+      progressAndDurationHidden: true,
       embeddedPlayerDestroyedOnSwitch: true,
       onePlayerAtATime: true,
       stationPreferenceRemembered: true,
