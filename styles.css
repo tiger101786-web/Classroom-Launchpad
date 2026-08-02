@@ -918,6 +918,10 @@ body[data-theme="night"] .activation-code-list > div {
   margin: 82px 0 0;
 }
 
+.home-feature--detail {
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+
 .home-feature .search-wrap {
   margin: 0;
 }
@@ -931,6 +935,11 @@ body[data-theme="night"] .activation-code-list > div {
   box-shadow: 0 18px 32px rgba(86, 7, 32, 0.18);
   justify-self: end;
   background: var(--blue-dark);
+}
+
+.home-feature--detail .school-photo {
+  width: 280px;
+  height: 280px;
 }
 
 body[data-theme="night"] .school-photo {
@@ -4358,6 +4367,10 @@ body[data-theme="night"] .class-timer-badge {
     gap: 16px;
   }
 
+  .home-feature--detail {
+    grid-template-columns: 1fr;
+  }
+
   .home-feature .search-wrap {
     width: 100%;
   }
@@ -4389,6 +4402,11 @@ body[data-theme="night"] .class-timer-badge {
     width: min(220px, 70vw);
     height: min(220px, 70vw);
     justify-self: center;
+  }
+
+  .home-feature--detail .school-photo {
+    width: min(220px, 70vw);
+    height: min(220px, 70vw);
   }
 
   .category-grid, .dashboard-actions, .daily-launch-editor, .class-timer-editor, .random-activity-control, .timer-form, .student-request-card, .student-request-form, .colt-corner-preview, .colt-corner-card, .thread-form, .reply-form, .expectations-copy, .category-content { grid-template-columns: 1fr; }

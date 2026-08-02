@@ -1792,12 +1792,12 @@ function renderHome() {
           <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
         </div>`
       )}
-      <section class="home-feature">
+      <section class="home-feature${homeProfileVideo.endsWith("home-profile-12.mp4") ? " home-feature--detail" : ""}">
         <div class="search-wrap">
           <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
         </div>
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
-          <source data-src="${homeProfileVideo}?v=20260802-profile-rotation12-1080" type="video/mp4">
+          <source data-src="${homeProfileVideo}?v=20260802-profile-rotation12-clean-detail" type="video/mp4">
         </video>
       </section>
     </section>
