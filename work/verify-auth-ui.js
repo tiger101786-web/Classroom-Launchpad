@@ -260,7 +260,7 @@ async function run() {
       }));
       const supportedProfileSize = profileMetadata.width === profileMetadata.height
         && profileMetadata.width >= 544
-        && profileMetadata.width <= 720;
+        && profileMetadata.width <= 1080;
       if (!supportedProfileSize || profileMetadata.duration < 5.7) {
         throw new Error(`Profile video has invalid optimized metadata: ${JSON.stringify(profileMetadata)}.`);
       }
