@@ -97,6 +97,37 @@ async function run() {
   check(studentActivation, "Import did not issue a one-time activation code.");
   check(/^[A-Z]{3}-[2-9]{3}$/.test(studentActivation.activationCode), "Activation code did not use the short ABC-234 format.");
 
+  const preassignedImport = await fetch(`${base}/api/approved-students/import`, {
+    method: "PUT",
+    headers: { ...originHeaders, Cookie: cookie },
+    body: JSON.stringify({
+      students: [{
+        email: "preassigned.student@scscolts.org",
+        name: "Student, Preassigned",
+        grade: "4",
+        activationCode: "CLT-786"
+      }]
+    })
+  });
+  const preassignedResult = await preassignedImport.json();
+  check(preassignedImport.status === 200 && preassignedResult.added === 1, "Preassigned roster student was not added.");
+  check(
+    preassignedResult.activationCodes.some(item => item.email === "preassigned.student@scscolts.org" && item.activationCode === "CLT-786"),
+    "The teacher-provided activation code was not preserved for the new student."
+  );
+  const preassignedRegistration = await fetch(`${base}/api/auth/register`, {
+    method: "POST",
+    headers: originHeaders,
+    body: JSON.stringify({
+      email: "preassigned.student@scscolts.org",
+      activationCode: "CLT-786",
+      name: "Student, Preassigned",
+      grade: "4",
+      password: "StudentPass123!"
+    })
+  });
+  check(preassignedRegistration.status === 200, "The preassigned activation code could not activate the new student account.");
+
   await fetch(`${base}/api/approved-students/import`, {
     method: "PUT",
     headers: { ...originHeaders, Cookie: cookie },
@@ -117,7 +148,7 @@ async function run() {
     headers: { ...originHeaders, Cookie: cookie },
     body: JSON.stringify({
       students: [
-        { email: "test.student@scscolts.org", name: "Student, Test", grade: "5" },
+        { email: "test.student@scscolts.org", name: "Student, Test", grade: "5", activationCode: "NEW-234" },
         { email: "o'example.student@scscolts.org", name: "Example, O'Neil", grade: "6" }
       ]
     })
@@ -125,7 +156,7 @@ async function run() {
   const rosterResult = await rosterImport.json();
   check(rosterImport.status === 200 && rosterResult.updated === 2, "Private roster names were not merged.");
   check(rosterResult.students.some(student => student.email === "test.student@scscolts.org" && student.name === "Student, Test" && student.grade === "5"), "Roster name and grade were not stored.");
-  check(rosterResult.activationCodes.length === 0, "Roster name update replaced an existing activation code.");
+  check(rosterResult.activationCodes.length === 0, "Roster update replaced an existing activation code.");
 
   const privateList = await fetch(`${base}/api/approved-students`, { headers: { Cookie: cookie, Origin: base } });
   const privateResult = await privateList.json();

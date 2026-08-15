@@ -254,11 +254,13 @@ function parseStudentRosterCsv(text) {
   const emailIndex = headers.findIndex(header => ["email", "schoolemail", "studentemail"].includes(header));
   const nameIndex = headers.findIndex(header => ["name", "studentname"].includes(header));
   const gradeIndex = headers.findIndex(header => ["grade", "studentgrade"].includes(header));
+  const activationCodeIndex = headers.findIndex(header => ["activationcode", "code", "studentactivationcode"].includes(header));
   if (emailIndex < 0 || nameIndex < 0) throw new Error("The roster must include Student Name and School Email columns.");
   return rows.slice(1).map(row => ({
     email: row[emailIndex] || "",
     name: row[nameIndex] || "",
-    grade: gradeIndex >= 0 ? row[gradeIndex] || "" : ""
+    grade: gradeIndex >= 0 ? row[gradeIndex] || "" : "",
+    activationCode: activationCodeIndex >= 0 ? row[activationCodeIndex] || "" : ""
   })).filter(student => student.email && student.name);
 }
 
@@ -7953,10 +7955,10 @@ function renderApprovedStudentManager() {
         <div class="roster-import-panel">
           <div>
             <strong>Add names and grades</strong>
-            <small>Choose a private roster CSV with Student Name, School Email, and Grade columns. Existing activation codes and passwords will not change.</small>
+            <small>Choose a private roster CSV with Student Name, School Email, and Grade columns. An optional Activation Code column can assign first-login codes to new students. Existing activation codes and passwords will not change.</small>
           </div>
           <label class="outline-btn roster-file-button">
-            Import Names &amp; Grades
+            Import Private Roster
             <input id="approvedStudentRosterFile" type="file" accept=".csv,text/csv">
           </label>
         </div>

@@ -1319,12 +1319,18 @@ async function handleApprovedStudentsApi(req, res, pathname) {
         ? body.students.map(student => ({
             email: normalizeEmail(student && student.email),
             name: cleanText(student && student.name, 80),
-            grade: cleanGrade(student && student.grade)
+            grade: cleanGrade(student && student.grade),
+            activationCode: cleanText(student && student.activationCode, 7).toUpperCase()
           }))
         : (Array.isArray(body.emails)
             ? body.emails
             : (String(body.emails || "").match(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [])
           ).map(email => ({ email: normalizeEmail(email), name: "", grade: "" }));
+      for (const incoming of incomingStudents) {
+        if (incoming.activationCode && !/^[A-HJ-NP-Z]{3}-[2-9]{3}$/.test(incoming.activationCode)) {
+          throw new Error("Activation codes in the roster must use the ABC-234 format.");
+        }
+      }
       let before = normalizeApprovedStudents(db.approvedStudents);
       for (const incomingEmail of incomingStudents.map(student => student.email).filter(email => email.includes("'"))) {
         const [localPart, domain] = incomingEmail.split("@");
@@ -1334,6 +1340,7 @@ async function handleApprovedStudentsApi(req, res, pathname) {
         }
       }
       const beforeByEmail = new Map(before.map(student => [student.email, student]));
+      const requestedActivationCodes = new Map();
       let updated = 0;
       for (const incoming of incomingStudents) {
         if (!incoming.email || !isAllowedStudentEmail(incoming.email)) continue;
@@ -1343,15 +1350,23 @@ async function handleApprovedStudentsApi(req, res, pathname) {
           const nextGrade = incoming.grade || existing.grade;
           if (nextName !== existing.name || nextGrade !== existing.grade) updated += 1;
           beforeByEmail.set(incoming.email, { ...existing, name: nextName, grade: nextGrade });
+          if (!existing.passwordHash && !existing.activationHash && incoming.activationCode) {
+            requestedActivationCodes.set(incoming.email, incoming.activationCode);
+          }
         } else {
-          beforeByEmail.set(incoming.email, incoming);
+          beforeByEmail.set(incoming.email, {
+            email: incoming.email,
+            name: incoming.name,
+            grade: incoming.grade
+          });
+          if (incoming.activationCode) requestedActivationCodes.set(incoming.email, incoming.activationCode);
         }
       }
       db.approvedStudents = normalizeApprovedStudents([...beforeByEmail.values()]);
       const activationCodes = [];
       db.approvedStudents = db.approvedStudents.map(student => {
         if (student.passwordHash || student.activationHash) return student;
-        const code = createActivationCode();
+        const code = requestedActivationCodes.get(student.email) || createActivationCode();
         const record = hashStudentSecret(normalizeActivationCode(code));
         activationCodes.push({ email: student.email, activationCode: code });
         return {
