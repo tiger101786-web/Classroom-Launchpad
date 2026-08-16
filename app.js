@@ -4,7 +4,7 @@ const categories = [
   "Computer Skills",
   "Review Games",
   "Logic Games",
-  "Reading & Math Practice",
+  "Reading & Math",
   "Creative Projects",
   "Class Videos"
 ];
@@ -183,7 +183,7 @@ const categoryIcons = {
   "Computer Skills": "💻",
   "Review Games": "★",
   "Logic Games": '<svg class="logic-lightbulb-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9 18h6M10 21h4M8.4 14.2A6.2 6.2 0 1 1 15.6 14.2c-.8.7-1.2 1.5-1.3 2.3h-4.6c-.1-.8-.5-1.6-1.3-2.3Z"></path><path d="M12 1V.5M4.2 4.2l-.7-.7M19.8 4.2l.7-.7M2 11h-1M22 11h1"></path></svg>',
-  "Reading & Math Practice": "📚",
+  "Reading & Math": "📚",
   "Creative Projects": "✎",
   "Class Videos": "▶"
 };
@@ -202,7 +202,8 @@ function normalizeSharedLinks(items) {
     if (!item || typeof item !== "object") return [];
     const title = String(item.title || "").trim();
     const url = String(item.url || "").trim();
-    const category = String(item.category || "").trim();
+    const rawCategory = String(item.category || "").trim();
+    const category = rawCategory === "Reading & Math Practice" ? "Reading & Math" : rawCategory;
     if (!title || !url || !category) return [];
     return [{
       id: String(item.id || makeId()),
@@ -901,7 +902,11 @@ const store = {
         active: true,
         todayChoice: false,
         ...item,
-        category: item.category === "Social Studies" ? "Social Studies & Science" : item.category
+        category: item.category === "Social Studies"
+          ? "Social Studies & Science"
+          : item.category === "Reading & Math Practice"
+            ? "Reading & Math"
+            : item.category
       })).filter(item => item.title !== "GCFGlobal Internet Safety").map(item => {
         if (item.title === "GCFGlobal Computer Basics") {
           return {
