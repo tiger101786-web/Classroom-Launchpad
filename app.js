@@ -1847,6 +1847,41 @@ function renderAuthButton() {
   return `<button class="login-btn" data-action="login">Student Login</button>`;
 }
 
+function renderGoogleHeaderControls() {
+  const googleApps = [
+    { name: "Gmail", shortName: "G", url: "https://mail.google.com/" },
+    { name: "Google Drive", shortName: "D", url: "https://drive.google.com/" },
+    { name: "Google Docs", shortName: "Do", url: "https://docs.google.com/document/u/0/" },
+    { name: "Google Slides", shortName: "Sl", url: "https://docs.google.com/presentation/u/0/" },
+    { name: "Google Sheets", shortName: "Sh", url: "https://docs.google.com/spreadsheets/u/0/" },
+    { name: "Google Classroom", shortName: "C", url: "https://classroom.google.com/" }
+  ];
+  return `
+    <details class="google-apps-menu">
+      <summary class="google-apps-trigger" title="Google Apps" aria-label="Open Google Apps menu">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <circle cx="5" cy="5" r="1.8"></circle><circle cx="12" cy="5" r="1.8"></circle><circle cx="19" cy="5" r="1.8"></circle>
+          <circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle>
+          <circle cx="5" cy="19" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle><circle cx="19" cy="19" r="1.8"></circle>
+        </svg>
+      </summary>
+      <div class="google-apps-panel" aria-label="Google Apps">
+        <div class="google-apps-panel-heading">
+          <strong>Google Apps</strong>
+          <span>Open in a new tab</span>
+        </div>
+        ${googleApps.map(appItem => `
+          <button class="google-app-link" type="button" data-action="openGoogleApp" data-url="${escapeHtml(appItem.url)}">
+            <span class="google-app-icon" aria-hidden="true">${escapeHtml(appItem.shortName)}</span>
+            <span>${escapeHtml(appItem.name)}</span>
+          </button>
+        `).join("")}
+      </div>
+    </details>
+    <button class="google-signin-btn" type="button" data-action="open" data-url="https://accounts.google.com/">Google Sign In</button>
+  `;
+}
+
 function categoryTopbar() {
   return `
     <div class="topbar category-topbar">
@@ -1906,6 +1941,7 @@ function renderHome() {
         false,
         `<div class="header-actions">
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
+          ${renderGoogleHeaderControls()}
           ${renderAuthButton()}
           <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
           <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
@@ -9996,7 +10032,14 @@ function validateWebsite(link) {
 }
 
 app.addEventListener("keydown", event => {
-  if (event.key === "Escape" && homeNavigationMobileOpen) setHomeNavigationMobileOpen(false);
+  if (event.key !== "Escape") return;
+  if (homeNavigationMobileOpen) setHomeNavigationMobileOpen(false);
+  document.querySelectorAll(".google-apps-menu[open]").forEach(menu => menu.removeAttribute("open"));
+});
+
+document.addEventListener("click", event => {
+  if (event.target.closest(".google-apps-menu")) return;
+  document.querySelectorAll(".google-apps-menu[open]").forEach(menu => menu.removeAttribute("open"));
 });
 
 window.addEventListener("resize", () => {
@@ -10245,6 +10288,10 @@ app.addEventListener("click", async event => {
     setScreen({ name: "coltRun" });
   }
   if (action === "openThread") setScreen({ name: "thread", id: target.dataset.id });
+  if (action === "openGoogleApp") {
+    target.closest(".google-apps-menu")?.removeAttribute("open");
+    window.open(target.dataset.url, "_blank", "noopener,noreferrer");
+  }
   if (action === "open") window.open(target.dataset.url, "_blank", "noopener,noreferrer");
   if (action === "add") setScreen({ name: "edit", id: null });
   if (action === "edit") setScreen({ name: "edit", id: target.dataset.id });
