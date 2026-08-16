@@ -1849,12 +1849,12 @@ function renderAuthButton() {
 
 function renderGoogleHeaderControls() {
   const googleApps = [
-    { name: "Gmail", shortName: "G", url: "https://mail.google.com/" },
-    { name: "Google Drive", shortName: "D", url: "https://drive.google.com/" },
-    { name: "Google Docs", shortName: "Do", url: "https://docs.google.com/document/u/0/" },
-    { name: "Google Slides", shortName: "Sl", url: "https://docs.google.com/presentation/u/0/" },
-    { name: "Google Sheets", shortName: "Sh", url: "https://docs.google.com/spreadsheets/u/0/" },
-    { name: "Google Classroom", shortName: "C", url: "https://classroom.google.com/" }
+    { name: "Gmail", icon: "assets/google-gmail.svg", url: "https://mail.google.com/" },
+    { name: "Google Drive", icon: "assets/google-drive.svg", url: "https://drive.google.com/" },
+    { name: "Google Docs", icon: "assets/google-docs.svg", url: "https://docs.google.com/document/u/0/" },
+    { name: "Google Slides", icon: "assets/google-slides.svg", url: "https://docs.google.com/presentation/u/0/" },
+    { name: "Google Sheets", icon: "assets/google-sheets.svg", url: "https://docs.google.com/spreadsheets/u/0/" },
+    { name: "Google Classroom", icon: "assets/google-classroom.svg", url: "https://classroom.google.com/" }
   ];
   return `
     <details class="google-apps-menu">
@@ -1872,7 +1872,9 @@ function renderGoogleHeaderControls() {
         </div>
         ${googleApps.map(appItem => `
           <button class="google-app-link" type="button" data-action="openGoogleApp" data-url="${escapeHtml(appItem.url)}">
-            <span class="google-app-icon" aria-hidden="true">${escapeHtml(appItem.shortName)}</span>
+            <span class="google-app-icon" aria-hidden="true">
+              <img src="${escapeHtml(appItem.icon)}" alt="" loading="eager" decoding="async">
+            </span>
             <span>${escapeHtml(appItem.name)}</span>
           </button>
         `).join("")}
