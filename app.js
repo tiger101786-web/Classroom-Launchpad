@@ -1844,7 +1844,7 @@ function renderAuthButton() {
       <button class="logout-btn" data-action="logout">Log Out</button>
     `;
   }
-  return `<button class="login-btn" data-action="login">Student Login</button>`;
+  return `<button class="login-btn" data-action="login">Launchpad Login</button>`;
 }
 
 function renderGoogleHeaderControls() {
@@ -2097,7 +2097,7 @@ function renderStudentWebsiteRequest() {
           <h2>Suggest or Report Something</h2>
           <p>Send Mr. Nieves a website suggestion, feature idea, or report a bug or glitch in Classroom Launchpad.</p>
         </div>
-        <button class="primary-btn" data-action="login">Student Login</button>
+        <button class="primary-btn" data-action="login">Launchpad Login</button>
       </section>
     `;
   }
@@ -2147,7 +2147,7 @@ function renderColtCorner() {
         <span class="feature-kicker">Protected Class Forum</span>
         <h2>Sign in to open Colt Corner</h2>
         <p>The message board is available only to approved students and the teacher.</p>
-        <button class="primary-btn" data-action="login">Student Login</button>
+        <button class="primary-btn" data-action="login">Launchpad Login</button>
       </section>
     `;
   }
@@ -7535,7 +7535,7 @@ function renderAssignmentsPreview() {
           <span><strong>${isApprovedStudent() ? studentSubmissions.length : "—"}</strong> Submitted</span>
         </div>
       </div>
-      <button class="primary-btn" data-action="openAssignments">${isApprovedStudent() ? "Open Assignments" : "Student Login"}</button>
+      <button class="primary-btn" data-action="openAssignments">${isApprovedStudent() ? "Open Assignments" : "Launchpad Login"}</button>
     </section>
   `;
 }
@@ -7548,7 +7548,7 @@ function renderClassroomPassPreview() {
       ? "Return to Classroom"
       : isApprovedStudent()
         ? "Open Classroom Pass"
-        : "Student Login";
+        : "Launchpad Login";
   return `
     <section class="classroom-pass-home-card ${activePass ? "has-active-pass" : ""}">
       <div class="classroom-pass-home-icon" aria-hidden="true">
@@ -7905,7 +7905,7 @@ function renderClassroomPassPage() {
 
 function renderLogin() {
   return `
-    ${pageHeader("Student Login", "Use your approved school email and Classroom Launchpad password.", true)}
+    ${pageHeader("Launchpad Login", "Use your approved school email and Classroom Launchpad password.", true)}
     <section class="auth-card student-auth-card">
       <span class="feature-kicker">Protected Student Access</span>
       <h2>Classroom Launchpad Account</h2>
