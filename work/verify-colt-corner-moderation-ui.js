@@ -58,13 +58,13 @@ async function run() {
       headers: { Origin: baseUrl },
       data: { pin: "123456" }
     });
-    assert(response.ok());
+    assert(response.ok(), await response.text());
     response = await teacherContext.request.put(`${baseUrl}/api/approved-students/import`, {
       headers: { Origin: baseUrl },
       data: { students: [{ email: "ui.student@scscolts.org", name: "UI Student", grade: "6" }] }
     });
     const imported = await response.json();
-    const activationCode = imported.activationCodes[0].activationCode;
+    const activationCode = imported.activationCodes.find(item => item.email === "ui.student@scscolts.org").activationCode;
 
     const studentContext = await browser.newContext();
     response = await studentContext.request.post(`${baseUrl}/api/auth/register`, {
@@ -77,7 +77,7 @@ async function run() {
         grade: "6"
       }
     });
-    assert(response.ok());
+    assert(response.ok(), await response.text());
 
     const studentPage = await studentContext.newPage();
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
@@ -159,6 +159,7 @@ async function run() {
     await teacherPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await teacherPage.locator('[data-action="teacherDashboard"]').click();
     await teacherPage.locator('[data-action="dashboardSection"][data-section="corner"]').first().click();
+    await teacherPage.locator('[data-action="coltCornerGrade"][data-grade="6"]').first().click();
     await teacherPage.getByRole("heading", { name: "Colt Corner Moderation", exact: true }).waitFor();
     assert.equal(await teacherPage.locator(".moderation-edit-title").inputValue(), "Questionable wording");
     assert(await teacherPage.getByText(/Possible insult, bullying/i).isVisible());

@@ -292,6 +292,7 @@ function normalizeThreads(items) {
       title: item.title || item.message || "Class Topic",
       studentName: item.studentName || "",
       grade: item.grade || "",
+      audienceGrade: String(item.audienceGrade || ""),
       body: item.body || item.message || "",
       replies,
       createdAt: item.createdAt || new Date().toISOString()
@@ -453,7 +454,7 @@ const sharedBackend = {
   submitTopic(topic) {
     return this.request("/api/threads", {
       method: "POST",
-      body: JSON.stringify({ title: topic.title, message: topic.body })
+      body: JSON.stringify({ title: topic.title, message: topic.body, grades: topic.grades })
     });
   },
   submitReply(threadId, reply) {
@@ -1308,6 +1309,7 @@ let studentPreviewObjectUrl = "";
 let dashboardGradebookGrade = "4";
 let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
+let teacherColtCornerGrade = "4";
 let classroomPassData = {
   config: { enabled: true, maxActive: 1, updatedAt: "" },
   destinations: [...CLASSROOM_PASS_DESTINATIONS],
@@ -1358,6 +1360,7 @@ function normalizeModerationItems(items) {
     threadId: String(item && item.threadId || ""),
     studentName: String(item && item.studentName || ""),
     grade: String(item && item.grade || ""),
+    audienceGrade: String(item && item.audienceGrade || ""),
     title: String(item && item.title || ""),
     message: String(item && item.message || ""),
     submittedAt: String(item && item.submittedAt || ""),
@@ -2062,14 +2065,16 @@ function renderColtCornerPreview() {
       </section>
     `;
   }
-  const topicCount = classThreads.length;
-  const replyCount = classThreads.reduce((total, thread) => total + getThreadReplies(thread).length, 0);
+  const previewThreads = isTeacher() ? visibleColtCornerThreads() : classThreads;
+  const topicCount = previewThreads.length;
+  const replyCount = previewThreads.reduce((total, thread) => total + getThreadReplies(thread).length, 0);
+  const gradeLabel = isTeacher() ? `Grade ${teacherColtCornerGrade}` : `Grade ${authSession.grade}`;
   return `
     <section class="colt-corner-preview">
       <div class="colt-corner-heading">
         <span class="feature-kicker">Class Forum</span>
-        <h2>Colt Corner</h2>
-        <p>Open the class message board to start topics, ask questions, and reply to classmates.</p>
+        <h2>${escapeHtml(gradeLabel)} Colt Corner</h2>
+        <p>Open your grade's private message board to start topics, ask questions, and reply to classmates.</p>
         <div class="colt-corner-stats">
           <span>${escapeHtml(`${topicCount} ${topicCount === 1 ? "Topic" : "Topics"}`)}</span>
           <span>${escapeHtml(`${replyCount} ${replyCount === 1 ? "Reply" : "Replies"}`)}</span>
@@ -2153,12 +2158,19 @@ function renderColtCorner() {
       </section>
     `;
   }
-  const visibleThreads = sortedThreads();
+  const visibleThreads = visibleColtCornerThreads();
+  const activeGrade = isTeacher() ? teacherColtCornerGrade : String(authSession.grade || "");
   return `
     <section class="colt-corner-card">
+      ${isTeacher() ? renderColtCornerGradeTabs() : `
+        <div class="colt-corner-grade-scope" role="status">
+          <strong>Grade ${escapeHtml(activeGrade)} Colt Corner</strong>
+          <span>Only Grade ${escapeHtml(activeGrade)} students and Mr. Nieves can see these topics and replies.</span>
+        </div>
+      `}
       <div class="colt-corner-heading">
         <span class="feature-kicker">Class Forum</span>
-        <h2>Colt Corner</h2>
+        <h2>Grade ${escapeHtml(activeGrade)} Colt Corner</h2>
         <p>Start a teacher-approved topic, ask a question, or respond respectfully to a classmate.</p>
         <section class="forum-rules-card" aria-label="Colt Corner forum rules">
           <h3>Forum Rules</h3>
@@ -2192,6 +2204,20 @@ function renderColtCorner() {
           <label for="threadBody">First post</label>
           <textarea id="threadBody" maxlength="360" placeholder="Start the conversation with a school-appropriate question or idea"></textarea>
         </div>
+        ${isTeacher() ? `
+          <fieldset class="colt-corner-grade-targets">
+            <legend>Share this topic with</legend>
+            <p>Each selected grade receives a separate topic and separate replies.</p>
+            <div>
+              ${["4", "5", "6", "7"].map(grade => `
+                <label>
+                  <input type="checkbox" name="threadGrade" value="${grade}" ${grade === teacherColtCornerGrade ? "checked" : ""}>
+                  Grade ${grade}
+                </label>
+              `).join("")}
+            </div>
+          </fieldset>
+        ` : ""}
         <button class="primary-btn" type="submit">Start Topic</button>
         ${!isTeacher() && pendingModeration.length ? `
           <p class="colt-corner-pending-note" role="status">
@@ -2211,8 +2237,13 @@ function renderColtCorner() {
 }
 
 function renderColtCornerPage() {
+  const subtitle = isTeacher()
+    ? `Managing Grade ${teacherColtCornerGrade} discussions.`
+    : isApprovedStudent()
+      ? `Your private Grade ${authSession.grade} discussion board.`
+      : "Start topics and reply to classmates.";
   return `
-    ${pageHeader("Colt Corner", "Start topics and reply to classmates.", true)}
+    ${pageHeader("Colt Corner", subtitle, true)}
     ${renderColtCorner()}
   `;
 }
@@ -8323,7 +8354,7 @@ function renderPendingModerationCard(item) {
         <div>
           <span class="feature-kicker">${item.type === "reply" ? "Pending Reply" : "Pending Topic"}</span>
           <h3>${escapeHtml(item.studentName || "Student")}</h3>
-          <p class="meta">${escapeHtml(forumRoleLabel(item.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
+          <p class="meta">Grade ${escapeHtml(item.audienceGrade || "—")} board • ${escapeHtml(forumRoleLabel(item.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
         </div>
         <span class="moderation-status-pill is-pending">Needs Review</span>
       </div>
@@ -8359,7 +8390,7 @@ function renderRecentModerationItem(item) {
       <div class="moderation-card-heading">
         <div>
           <strong>${escapeHtml(item.studentName || "Student")}</strong>
-          <p class="meta">${item.type === "reply" ? "Reply" : "Topic"}${moderated ? ` • ${escapeHtml(moderated)}` : ""}${item.moderatedBy ? ` • ${escapeHtml(item.moderatedBy)}` : ""}</p>
+          <p class="meta">Grade ${escapeHtml(item.audienceGrade || "—")} board • ${item.type === "reply" ? "Reply" : "Topic"}${moderated ? ` • ${escapeHtml(moderated)}` : ""}${item.moderatedBy ? ` • ${escapeHtml(item.moderatedBy)}` : ""}</p>
         </div>
         <span class="moderation-status-pill ${approved ? "is-approved" : "is-rejected"}">${approved ? "Approved" : "Rejected"}</span>
       </div>
@@ -8370,24 +8401,28 @@ function renderRecentModerationItem(item) {
 }
 
 function renderDashboardColtCorner() {
+  const gradeThreads = visibleColtCornerThreads();
+  const gradeModerationQueue = moderationQueue.filter(item => item.audienceGrade === teacherColtCornerGrade);
+  const gradeRecentlyModerated = recentlyModerated.filter(item => item.audienceGrade === teacherColtCornerGrade);
   return `
+    ${renderColtCornerGradeTabs()}
     <section class="moderation-dashboard" aria-labelledby="moderationQueueHeading">
       <div class="dashboard-subheading">
         <div><span class="feature-kicker">Server-Side Safety Review</span><h3 id="moderationQueueHeading">Colt Corner Moderation</h3></div>
-        <span class="dashboard-count">${moderationQueue.length}</span>
+        <span class="dashboard-count">${gradeModerationQueue.length}</span>
       </div>
       <p class="instruction">Messages held here are hidden from students until you approve them.</p>
       <p id="moderationDashboardStatus" class="request-message" aria-live="polite"></p>
       <div class="moderation-queue">
-        ${moderationQueue.length
-          ? moderationQueue.map(renderPendingModerationCard).join("")
+        ${gradeModerationQueue.length
+          ? gradeModerationQueue.map(renderPendingModerationCard).join("")
           : emptyCard("No Colt Corner messages are waiting for review.")}
       </div>
       <details class="moderation-recent">
-        <summary>Recently moderated posts (${recentlyModerated.length})</summary>
+        <summary>Recently moderated Grade ${escapeHtml(teacherColtCornerGrade)} posts (${gradeRecentlyModerated.length})</summary>
         <div class="teacher-list">
-          ${recentlyModerated.length
-            ? recentlyModerated.map(renderRecentModerationItem).join("")
+          ${gradeRecentlyModerated.length
+            ? gradeRecentlyModerated.map(renderRecentModerationItem).join("")
             : emptyCard("No recently moderated posts.")}
         </div>
       </details>
@@ -8395,11 +8430,11 @@ function renderDashboardColtCorner() {
     <div class="dashboard-split-view">
       <section>
         <div class="dashboard-subheading">
-          <div><span class="feature-kicker">Discussion Board</span><h3>Topics & Replies</h3></div>
-          <span class="dashboard-count">${classThreads.length}</span>
+          <div><span class="feature-kicker">Grade ${escapeHtml(teacherColtCornerGrade)} Discussion Board</span><h3>Topics & Replies</h3></div>
+          <span class="dashboard-count">${gradeThreads.length}</span>
         </div>
         <div class="teacher-list">
-          ${classThreads.length ? sortedThreads().map(renderTeacherThread).join("") : emptyCard("No Colt Corner topics yet.")}
+          ${gradeThreads.length ? gradeThreads.map(renderTeacherThread).join("") : emptyCard(`No Grade ${teacherColtCornerGrade} Colt Corner topics yet.`)}
         </div>
       </section>
       <aside>
@@ -8923,7 +8958,7 @@ function renderTeacherThread(thread) {
   return `
     <article class="teacher-card thread-teacher-card">
       <h3>${escapeHtml(thread.title)}</h3>
-      <p class="meta">Started by ${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
+      <p class="meta">Grade ${escapeHtml(coltCornerAudienceGrade(thread) || "—")} board • Started by ${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
       <p class="instruction">${escapeHtml(thread.body)}</p>
       ${replies.length ? `<div class="teacher-replies">${replies.map(reply => renderTeacherReply(thread, reply)).join("")}</div>` : ""}
       <div class="actions">
@@ -9095,6 +9130,35 @@ function updateHomeNavigationActive(targetId) {
     if (active) button.setAttribute("aria-current", "location");
     else button.removeAttribute("aria-current");
   });
+}
+
+function coltCornerAudienceGrade(thread) {
+  const audienceGrade = String(thread && thread.audienceGrade || "");
+  if (["4", "5", "6", "7"].includes(audienceGrade)) return audienceGrade;
+  const authorGrade = String(thread && thread.grade || "");
+  return ["4", "5", "6", "7"].includes(authorGrade) ? authorGrade : "";
+}
+
+function visibleColtCornerThreads() {
+  if (!isTeacher()) return sortedThreads();
+  return sortedThreads().filter(thread => coltCornerAudienceGrade(thread) === teacherColtCornerGrade);
+}
+
+function renderColtCornerGradeTabs() {
+  if (!isTeacher()) return "";
+  return `
+    <nav class="colt-corner-grade-tabs" aria-label="Choose a Colt Corner grade">
+      ${["4", "5", "6", "7"].map(grade => `
+        <button
+          type="button"
+          class="colt-corner-grade-tab ${teacherColtCornerGrade === grade ? "is-active" : ""}"
+          data-action="coltCornerGrade"
+          data-grade="${grade}"
+          ${teacherColtCornerGrade === grade ? 'aria-current="page"' : ""}
+        >Grade ${grade}</button>
+      `).join("")}
+    </nav>
+  `;
 }
 
 function setHomeNavigationMobileOpen(open) {
@@ -9891,6 +9955,9 @@ function attachThreadForm() {
       grade: isTeacher() ? "Teacher" : authSession.grade,
       title: document.getElementById("threadTitle").value.trim(),
       body: document.getElementById("threadBody").value.trim(),
+      grades: isTeacher()
+        ? [...threadForm.querySelectorAll('input[name="threadGrade"]:checked')].map(input => input.value)
+        : [String(authSession.grade || "")],
       createdAt: new Date().toISOString(),
       replies: []
     };
@@ -9915,10 +9982,14 @@ function attachThreadForm() {
       status.classList.toggle("error", result && result.moderationStatus === "blocked");
       status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
       status.classList.toggle("success", result && result.moderationStatus === "approved");
-      if (result && result.moderationStatus !== "blocked") threadForm.reset();
+      if (result && result.moderationStatus !== "blocked") {
+        threadForm.reset();
+        const activeGradeInput = threadForm.querySelector(`input[name="threadGrade"][value="${teacherColtCornerGrade}"]`);
+        if (activeGradeInput) activeGradeInput.checked = true;
+      }
       if (result && result.moderationStatus === "blocked") document.getElementById("threadBody").focus();
       const list = document.querySelector(".thread-list");
-      if (list) list.outerHTML = renderThreadTable(sortedThreads());
+      if (list) list.outerHTML = renderThreadTable(visibleColtCornerThreads());
     } catch (submissionError) {
       status.textContent = submissionError.message;
       status.classList.add("error");
@@ -9994,6 +10065,7 @@ function validateThreadTopic(thread) {
   if (!thread.grade) return "Please add your grade.";
   if (!thread.title) return "Please add a topic title.";
   if (!thread.body) return "Please write the first post.";
+  if (isTeacher() && (!Array.isArray(thread.grades) || !thread.grades.length)) return "Choose at least one grade for this topic.";
   if (thread.title.length > 80) return "Keep the title under 80 characters.";
   if (thread.body.length > 360) return "Keep the first post under 360 characters.";
   if (isStudentMuted(thread.studentName)) return "Posting is unavailable. Please check with Mr. Nieves.";
@@ -10093,6 +10165,11 @@ app.addEventListener("click", async event => {
     sessionStorage.setItem("teacherDashboardSection", dashboardSection);
     render();
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if (action === "coltCornerGrade") {
+    teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
+    if (screen.name === "thread") setScreen({ name: "coltCorner" });
+    else render();
   }
   if (action === "dashboardLinkPage") {
     dashboardLinkPage = Math.max(1, Number(target.dataset.page) || 1);

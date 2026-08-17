@@ -141,8 +141,34 @@ async function runIntegration() {
     secondStudentCookie = response.cookie;
 
     response = await request("/api/state", { cookie: studentCookie });
-    assert(response.payload.threads.some(thread => thread.id === "existing-topic"));
+    assert(!response.payload.threads.some(thread => thread.id === "existing-topic"));
     assert(!Object.hasOwn(response.payload, "moderation"));
+    response = await request("/api/state", { cookie: secondStudentCookie });
+    assert(response.payload.threads.some(thread => thread.id === "existing-topic"));
+
+    response = await request("/api/threads", {
+      method: "POST",
+      cookie: teacherCookie,
+      body: {
+        title: "Shared teacher prompt",
+        message: "Each grade receives a separate discussion copy.",
+        grades: ["5", "6"]
+      }
+    });
+    assert.equal(response.status, 200);
+    const teacherCopies = response.payload.threads.filter(thread => thread.title === "Shared teacher prompt");
+    assert.equal(teacherCopies.length, 2);
+    assert.deepEqual(new Set(teacherCopies.map(thread => thread.audienceGrade)), new Set(["5", "6"]));
+
+    response = await request("/api/state", { cookie: studentCookie });
+    const gradeSixCopies = response.payload.threads.filter(thread => thread.title === "Shared teacher prompt");
+    assert.equal(gradeSixCopies.length, 1);
+    assert.equal(gradeSixCopies[0].audienceGrade, "6");
+
+    response = await request("/api/state", { cookie: secondStudentCookie });
+    const gradeFiveCopies = response.payload.threads.filter(thread => thread.title === "Shared teacher prompt");
+    assert.equal(gradeFiveCopies.length, 1);
+    assert.equal(gradeFiveCopies[0].audienceGrade, "5");
 
     response = await request("/api/threads", {
       method: "POST",
@@ -152,6 +178,13 @@ async function runIntegration() {
     assert.equal(response.payload.moderationStatus, "approved");
     assert(response.payload.threads.some(thread => thread.title === "Homework question"));
     const homeworkThread = response.payload.threads.find(thread => thread.title === "Homework question");
+
+    const crossGradeReply = await request(`/api/threads/${homeworkThread.id}/replies`, {
+      method: "POST",
+      cookie: secondStudentCookie,
+      body: { message: "A different grade must not reach this topic." }
+    });
+    assert.equal(crossGradeReply.status, 404);
 
     response = await request(`/api/threads/${homeworkThread.id}/replies`, {
       method: "POST",

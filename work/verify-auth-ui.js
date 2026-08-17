@@ -315,12 +315,12 @@ async function run() {
     }
     await page.locator('[data-action="login"]').first().waitFor();
     const headerButtons = await page.locator(".header-actions button").allTextContents();
-    if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Student Login")) {
-      throw new Error("Header login button was not placed beside PlusPortal.");
+    if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Launchpad Login")) {
+      throw new Error("The header is missing PlusPortal or Launchpad Login.");
     }
     const lightHeaderColors = await page.locator(".portal-btn, .login-btn:not(.signed-in)").evaluateAll(buttons => buttons.map(button => getComputedStyle(button).backgroundColor));
     if (new Set(lightHeaderColors).size !== 1) {
-      throw new Error(`Light-mode PlusPortal and Student Login colors did not match: ${lightHeaderColors.join(", ")}.`);
+      throw new Error(`Light-mode PlusPortal and Launchpad Login colors did not match: ${lightHeaderColors.join(", ")}.`);
     }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkGuestStyles = await page.locator(".portal-btn, .login-btn:not(.signed-in), .mode-btn, .icon-btn").evaluateAll(buttons => buttons.map(button => {

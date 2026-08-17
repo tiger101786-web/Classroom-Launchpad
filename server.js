@@ -120,6 +120,12 @@ function isAllowedStudentEmail(email) {
 }
 
 const moderationStatuses = new Set(["approved", "needs_review", "blocked"]);
+const coltCornerGrades = ["4", "5", "6", "7"];
+
+function cleanColtCornerGrade(value) {
+  const grade = cleanGrade(value);
+  return coltCornerGrades.includes(grade) ? grade : "";
+}
 
 function validIsoDate(value, fallback = "") {
   return Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : fallback;
@@ -147,6 +153,7 @@ function normalizeModeratedPost(source, type) {
     id: cleanText(source && source.id, 100) || crypto.randomUUID(),
     studentName: cleanText(source && source.studentName, 80),
     grade: cleanGrade(source && source.grade),
+    audienceGrade: cleanColtCornerGrade(source && source.audienceGrade),
     createdAt,
     submittedAt,
     moderationStatus: status,
@@ -174,6 +181,29 @@ function normalizeModeratedPost(source, type) {
 function normalizeModeratedThreads(entries) {
   return (Array.isArray(entries) ? entries : []).slice(0, 1000)
     .map(thread => normalizeModeratedPost(thread, "topic"));
+}
+
+function migrateGradeScopedThreads(entries) {
+  return normalizeModeratedThreads(entries).flatMap(thread => {
+    if (thread.audienceGrade) return [thread];
+    const authorGrade = cleanColtCornerGrade(thread.grade);
+    if (authorGrade) return [{ ...thread, audienceGrade: authorGrade }];
+    const replyGrades = [...new Set((thread.replies || [])
+      .map(reply => cleanColtCornerGrade(reply.grade))
+      .filter(Boolean))];
+    const targetGrades = replyGrades.length ? replyGrades : coltCornerGrades;
+    return targetGrades.map(grade => ({
+      ...thread,
+      id: `${thread.id}-grade-${grade}`,
+      audienceGrade: grade,
+      replies: (thread.replies || []).filter(reply => (
+        String(reply.grade || "").toLowerCase() === "teacher"
+        || cleanColtCornerGrade(reply.grade) === grade
+      )).map(reply => String(reply.grade || "").toLowerCase() === "teacher"
+        ? { ...reply, id: `${reply.id}-grade-${grade}` }
+        : reply)
+    }));
+  });
 }
 
 function pruneModeratedThreads(entries, now = Date.now()) {
@@ -207,6 +237,7 @@ function publicPost(post, type) {
     id: post.id,
     studentName: post.studentName,
     grade: post.grade,
+    audienceGrade: post.audienceGrade || "",
     createdAt: post.createdAt
   };
   return type === "topic"
@@ -220,7 +251,21 @@ function publicPost(post, type) {
 }
 
 function publicApprovedThreads(entries) {
-  return normalizeModeratedThreads(entries).filter(isApprovedPost).map(thread => publicPost(thread, "topic"));
+  return migrateGradeScopedThreads(entries).filter(isApprovedPost).map(thread => publicPost(thread, "topic"));
+}
+
+function visibleApprovedThreads(entries, session) {
+  const threads = publicApprovedThreads(entries);
+  if (session && session.role === "teacher") return threads;
+  const grade = cleanColtCornerGrade(session && session.grade);
+  if (!grade) return [];
+  return threads.filter(thread => thread.audienceGrade === grade).map(thread => ({
+    ...thread,
+    replies: (thread.replies || []).filter(reply => (
+      String(reply.grade || "").toLowerCase() === "teacher"
+      || cleanColtCornerGrade(reply.grade) === grade
+    ))
+  }));
 }
 
 function moderationItem(post, type, threadId = "") {
@@ -230,6 +275,7 @@ function moderationItem(post, type, threadId = "") {
     threadId: threadId || (type === "topic" ? post.id : ""),
     studentName: post.studentName,
     grade: post.grade,
+    audienceGrade: post.audienceGrade || "",
     title: type === "topic" ? post.title : "",
     message: type === "topic" ? post.body : post.message,
     submittedAt: post.submittedAt || post.createdAt,
@@ -241,9 +287,12 @@ function moderationItem(post, type, threadId = "") {
 }
 
 function teacherModerationData(db) {
-  const all = normalizeModeratedThreads(db.threads).flatMap(thread => [
+  const all = migrateGradeScopedThreads(db.threads).flatMap(thread => [
     moderationItem(thread, "topic"),
-    ...(thread.replies || []).map(reply => moderationItem(reply, "reply", thread.id))
+    ...(thread.replies || []).map(reply => ({
+      ...moderationItem(reply, "reply", thread.id),
+      audienceGrade: thread.audienceGrade
+    }))
   ]);
   return {
     pending: all
@@ -259,7 +308,8 @@ function teacherModerationData(db) {
 function studentPendingModeration(db, session) {
   if (!session || session.role !== "student") return [];
   const authorKey = studentAuthorKey(session);
-  return normalizeModeratedThreads(db.threads).flatMap(thread => [
+  const grade = cleanColtCornerGrade(session.grade);
+  return migrateGradeScopedThreads(db.threads).filter(thread => thread.audienceGrade === grade).flatMap(thread => [
     ...(thread.authorKey === authorKey && thread.moderationStatus === "needs_review"
       ? [moderationItem(thread, "topic")]
       : []),
@@ -640,10 +690,12 @@ function withTeacherTestStudent(db) {
 function readDb() {
   ensureDb();
   try {
-    return withTeacherTestStudent({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
+    const db = withTeacherTestStudent({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
+    return { ...db, threads: migrateGradeScopedThreads(db.threads) };
   } catch {
     writeDb(defaultDb);
-    return withTeacherTestStudent({ ...defaultDb });
+    const db = withTeacherTestStudent({ ...defaultDb });
+    return { ...db, threads: migrateGradeScopedThreads(db.threads) };
   }
 }
 
@@ -651,7 +703,7 @@ function writeDb(db) {
   fs.mkdirSync(dataDir, { recursive: true });
   const next = {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
-    threads: pruneModeratedThreads(db.threads),
+    threads: pruneModeratedThreads(migrateGradeScopedThreads(db.threads)),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
@@ -862,7 +914,7 @@ function publicState(db, session) {
         : []);
   return {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
-    threads: signedIn ? publicApprovedThreads(db.threads) : [],
+    threads: signedIn ? visibleApprovedThreads(db.threads, session) : [],
     pendingModeration: session && session.role === "student" ? studentPendingModeration(db, session) : [],
     ...(teacher ? { moderation: teacherModerationData(db) } : {}),
     mutedStudents: teacher ? db.mutedStudents : [],
@@ -2214,7 +2266,7 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/threads") {
     const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
-    sendJson(res, 200, { threads: publicApprovedThreads(readDb().threads) });
+    sendJson(res, 200, { threads: visibleApprovedThreads(readDb().threads, allowed) });
     return true;
   }
 
@@ -2234,8 +2286,15 @@ async function handleApi(req, res, pathname) {
       if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
       const title = cleanText(body.title, 80);
       const message = cleanMultilineText(body.message || body.body, 360);
-      const grade = allowed.role === "teacher" ? "Teacher" : cleanGrade(allowed.grade);
-      if (!title || !message || !grade) throw new Error("Topic title and message are required.");
+      const grade = allowed.role === "teacher" ? "Teacher" : cleanColtCornerGrade(allowed.grade);
+      const requestedGrades = allowed.role === "teacher"
+        ? [...new Set((Array.isArray(body.grades) ? body.grades : coltCornerGrades)
+          .map(cleanColtCornerGrade)
+          .filter(Boolean))]
+        : [grade];
+      if (!title || !message || !grade || !requestedGrades.length) {
+        throw new Error("Topic title, message, and at least one grade are required.");
+      }
       const submittedAt = new Date().toISOString();
       const result = allowed.role === "teacher"
         ? moderateMessage(`${title}\n${message}`)
@@ -2246,32 +2305,36 @@ async function handleApi(req, res, pathname) {
           moderationStatus: "blocked",
           message: result.studentMessage,
           reasons: result.reasons.map(item => item.code),
-          threads: publicApprovedThreads(db.threads),
+          threads: visibleApprovedThreads(db.threads, allowed),
           pendingModeration: studentPendingModeration(db, allowed)
         });
         return true;
       }
-      const topic = {
+      const topics = requestedGrades.map(audienceGrade => ({
         id: crypto.randomUUID(),
         studentName: allowed.role === "teacher"
           ? cleanText(allowed.name || "Mr. Nieves", 80)
           : studentDisplayName(allowed),
         grade,
+        audienceGrade,
         title,
         body: message,
         createdAt: submittedAt,
         replies: [],
         ...moderationFields(result, allowed, submittedAt)
-      };
-      db.threads = [topic, ...normalizeModeratedThreads(db.threads)];
+      }));
+      const topic = topics[0];
+      db.threads = [...topics, ...migrateGradeScopedThreads(db.threads)];
       writeDb(db);
-      sendJson(res, result.status === "needs_review" ? 202 : 200, {
+      sendJson(res, topic.moderationStatus === "needs_review" ? 202 : 200, {
         ok: true,
         moderationStatus: topic.moderationStatus,
         message: topic.moderationStatus === "needs_review"
           ? result.studentMessage
-          : "Topic started.",
-        threads: publicApprovedThreads(db.threads),
+          : allowed.role === "teacher" && topics.length > 1
+            ? `Topic posted separately to ${topics.length} grades.`
+            : "Topic started.",
+        threads: visibleApprovedThreads(db.threads, allowed),
         pendingModeration: studentPendingModeration(db, allowed)
       });
     } catch (error) {
@@ -2290,13 +2353,17 @@ async function handleApi(req, res, pathname) {
       const db = readDb();
       if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
       const threadId = decodeURIComponent(replySubmission[1]);
-      const thread = normalizeModeratedThreads(db.threads).find(item => item.id === threadId);
+      const thread = migrateGradeScopedThreads(db.threads).find(item => item.id === threadId);
       if (!thread || !isApprovedPost(thread)) {
         sendJson(res, 404, { error: "That Colt Corner topic is not available." });
         return true;
       }
+      if (allowed.role === "student" && thread.audienceGrade !== cleanColtCornerGrade(allowed.grade)) {
+        sendJson(res, 404, { error: "That Colt Corner topic is not available." });
+        return true;
+      }
       const message = cleanMultilineText(body.message, 320);
-      const grade = allowed.role === "teacher" ? "Teacher" : cleanGrade(allowed.grade);
+      const grade = allowed.role === "teacher" ? "Teacher" : cleanColtCornerGrade(allowed.grade);
       if (!message || !grade) throw new Error("A reply message is required.");
       const submittedAt = new Date().toISOString();
       const result = allowed.role === "teacher"
@@ -2308,7 +2375,7 @@ async function handleApi(req, res, pathname) {
           moderationStatus: "blocked",
           message: result.studentMessage,
           reasons: result.reasons.map(item => item.code),
-          threads: publicApprovedThreads(db.threads),
+          threads: visibleApprovedThreads(db.threads, allowed),
           pendingModeration: studentPendingModeration(db, allowed)
         });
         return true;
@@ -2323,13 +2390,13 @@ async function handleApi(req, res, pathname) {
         createdAt: submittedAt,
         ...moderationFields(result, allowed, submittedAt)
       });
-      db.threads = normalizeModeratedThreads(db.threads).map(item => item.id === thread.id ? thread : item);
+      db.threads = migrateGradeScopedThreads(db.threads).map(item => item.id === thread.id ? thread : item);
       writeDb(db);
       sendJson(res, result.status === "needs_review" ? 202 : 200, {
         ok: true,
         moderationStatus: result.status,
         message: result.status === "needs_review" ? result.studentMessage : "Reply posted.",
-        threads: publicApprovedThreads(db.threads),
+        threads: visibleApprovedThreads(db.threads, allowed),
         pendingModeration: studentPendingModeration(db, allowed)
       });
     } catch (error) {
