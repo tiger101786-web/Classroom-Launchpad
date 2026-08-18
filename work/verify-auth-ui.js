@@ -494,6 +494,22 @@ async function run() {
     if (!await page.locator("#dailyLaunchForm").count() || !await page.locator("#classTimerForm").count()) {
       throw new Error("Classroom tools were not preserved in the redesigned dashboard.");
     }
+    if (await page.locator('[data-action="dailyLaunchGrade"]').count() !== 4) {
+      throw new Error("Today's Launch does not show all four grade tabs.");
+    }
+    await page.locator('[data-action="dailyLaunchGrade"][data-grade="5"]').click();
+    await page.locator("#dailyLaunchMessage").fill("Grade 5 browser test directions.");
+    await page.locator('input[name="dailyLaunchCopyGrade"][value="6"]').check();
+    const launchSave = page.waitForResponse(response => response.url().endsWith("/api/daily-launch") && response.request().method() === "PUT");
+    await page.locator('button[name="launchSaveMode"][value="selected"]').click();
+    const launchSaveResponse = await launchSave;
+    const launchSavePayload = await launchSaveResponse.json();
+    if (!launchSaveResponse.ok()
+      || launchSavePayload.dailyLaunch.grades["5"].message !== "Grade 5 browser test directions."
+      || launchSavePayload.dailyLaunch.grades["6"].message !== "Grade 5 browser test directions."
+      || launchSavePayload.dailyLaunch.grades["4"].message === "Grade 5 browser test directions.") {
+      throw new Error("Today's Launch grade save/copy controls did not keep grade messages separate.");
+    }
     await page.screenshot({ path: path.join(dataDir, "teacher-dashboard-ui-qa.png"), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
@@ -537,6 +553,7 @@ async function run() {
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
+      dailyLaunchGradeTabsAndCopyControlsWork: true,
       teacherFeedbackDashboardMatchesStudentForm: true,
       teacherDashboardAlwaysOpensOnOverview: true,
       mobileHorizontalOverflow: mobileOverflow

@@ -43,6 +43,7 @@ const DEFAULT_DAILY_LAUNCH = {
   message: "Check the board for today's first task, then choose a teacher-approved activity or resource.",
   updatedAt: ""
 };
+const CLASSROOM_GRADES = ["4", "5", "6", "7"];
 const DAILY_LAUNCH_REQUEST_ID = "__daily_launch__";
 const DEFAULT_CLASS_TIMER = {
   title: "Work Time",
@@ -310,20 +311,42 @@ function normalizeMutedStudents(items) {
 }
 
 function normalizeDailyLaunch(item) {
-  const message = item && typeof item.message === "string" ? item.message.trim() : "";
-  return {
-    message: message || DEFAULT_DAILY_LAUNCH.message,
+  const legacyMessage = item && typeof item.message === "string" ? item.message.trim() : "";
+  const legacy = {
+    message: legacyMessage || DEFAULT_DAILY_LAUNCH.message,
     updatedAt: item && typeof item.updatedAt === "string" ? item.updatedAt : ""
+  };
+  const incomingGrades = item && item.grades && typeof item.grades === "object" ? item.grades : {};
+  return {
+    grades: Object.fromEntries(CLASSROOM_GRADES.map(grade => {
+      const source = incomingGrades[grade];
+      const message = source && typeof source.message === "string" ? source.message.trim() : "";
+      return [grade, {
+        message: message || legacy.message,
+        updatedAt: source && typeof source.updatedAt === "string" ? source.updatedAt : legacy.updatedAt
+      }];
+    })),
+    activeGrade: CLASSROOM_GRADES.includes(String(item && item.activeGrade || "")) ? String(item.activeGrade) : "",
+    requiresLogin: Boolean(item && item.requiresLogin)
   };
 }
 
+function dailyLaunchRecord(grade = "") {
+  const normalized = normalizeDailyLaunch(dailyLaunch);
+  const selectedGrade = CLASSROOM_GRADES.includes(String(grade))
+    ? String(grade)
+    : (isTeacher() ? teacherDailyLaunchGrade : String(authSession.grade || ""));
+  return normalized.grades[selectedGrade] || { ...DEFAULT_DAILY_LAUNCH };
+}
+
 function dailyLaunchRequestMarker(launch = dailyLaunch) {
+  const record = dailyLaunchRecord(isTeacher() ? teacherDailyLaunchGrade : String(authSession.grade || ""));
   return {
     id: DAILY_LAUNCH_REQUEST_ID,
     studentName: "__system__",
     grade: "",
-    websiteName: normalizeDailyLaunch(launch).message,
-    createdAt: normalizeDailyLaunch(launch).updatedAt || new Date().toISOString()
+    websiteName: record.message,
+    createdAt: record.updatedAt || new Date().toISOString()
   };
 }
 
@@ -597,7 +620,10 @@ const sharedBackend = {
     return this.request(`/api/classroom-pass/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
   },
   saveDailyLaunch(launch) {
-    return this.request("/api/daily-launch", { method: "PUT", body: JSON.stringify({ message: launch.message }) });
+    return this.request("/api/daily-launch", {
+      method: "PUT",
+      body: JSON.stringify({ message: launch.message, grade: launch.grade, grades: launch.grades })
+    });
   },
   saveClassTimer(timer) {
     return this.request("/api/class-timer", { method: "PUT", body: JSON.stringify({ classTimer: timer }) });
@@ -1151,11 +1177,11 @@ const store = {
   },
   loadDailyLaunch() {
     const raw = localStorage.getItem(this.dailyLaunchKey);
-    if (!raw) return { ...DEFAULT_DAILY_LAUNCH };
+    if (!raw) return normalizeDailyLaunch(DEFAULT_DAILY_LAUNCH);
     try {
       return normalizeDailyLaunch(JSON.parse(raw));
     } catch {
-      return { ...DEFAULT_DAILY_LAUNCH };
+      return normalizeDailyLaunch(DEFAULT_DAILY_LAUNCH);
     }
   },
   saveDailyLaunch(launch) {
@@ -1310,6 +1336,7 @@ let dashboardGradebookGrade = "4";
 let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
 let teacherColtCornerGrade = "4";
+let teacherDailyLaunchGrade = "4";
 let classroomPassData = {
   config: { enabled: true, maxActive: 1, updatedAt: "" },
   destinations: [...CLASSROOM_PASS_DESTINATIONS],
@@ -1397,10 +1424,11 @@ function forumRoleLabel(grade = authSession.grade) {
 }
 
 function hasSharedData() {
+  const launchHasSharedData = CLASSROOM_GRADES.some(grade => dailyLaunchRecord(grade).message !== DEFAULT_DAILY_LAUNCH.message);
   return classThreads.length > 0
     || mutedStudents.length > 0
     || websiteRequests.length > 0
-    || dailyLaunch.message !== DEFAULT_DAILY_LAUNCH.message
+    || launchHasSharedData
     || classTimer.status !== DEFAULT_CLASS_TIMER.status
     || classTimer.title !== DEFAULT_CLASS_TIMER.title
     || classTimer.durationSeconds !== DEFAULT_CLASS_TIMER.durationSeconds
@@ -1547,14 +1575,30 @@ function saveClassThreads(next, shouldRender = true) {
   if (shouldRender) render();
 }
 
-function saveDailyLaunch(next, shouldRender = true) {
-  dailyLaunch = normalizeDailyLaunch(next);
+async function saveDailyLaunch(next, shouldRender = true) {
+  const current = normalizeDailyLaunch(dailyLaunch);
+  const targetGrades = Array.isArray(next.grades) && next.grades.length
+    ? [...new Set(next.grades.map(String).filter(grade => CLASSROOM_GRADES.includes(grade)))]
+    : [CLASSROOM_GRADES.includes(String(next.grade)) ? String(next.grade) : teacherDailyLaunchGrade];
+  const updatedAt = next.updatedAt || new Date().toISOString();
+  targetGrades.forEach(grade => {
+    current.grades[grade] = { message: next.message, updatedAt };
+  });
+  dailyLaunch = current;
   store.saveDailyLaunch(dailyLaunch);
   if (sharedBackend.enabled) {
-    sharedBackend.saveDailyLaunch(dailyLaunch)
-      .catch(() => sharedBackend.saveWebsiteRequests([dailyLaunchRequestMarker(dailyLaunch), classTimerRequestMarker(), randomActivityRequestMarker(), ...websiteRequests]).catch(() => {}));
+    try {
+      const result = await sharedBackend.saveDailyLaunch({ message: next.message, grade: next.grade, grades: targetGrades });
+      if (result && result.dailyLaunch) {
+        dailyLaunch = normalizeDailyLaunch(result.dailyLaunch);
+        store.saveDailyLaunch(dailyLaunch);
+      }
+    } catch {
+      await sharedBackend.saveWebsiteRequests([dailyLaunchRequestMarker(dailyLaunch), classTimerRequestMarker(), randomActivityRequestMarker(), ...websiteRequests]).catch(() => {});
+    }
   }
   if (shouldRender) render();
+  return dailyLaunch;
 }
 
 function saveClassTimer(next, shouldRender = true) {
@@ -1970,6 +2014,11 @@ function renderHome() {
 }
 
 function renderHomeDefault() {
+  const launchGrade = isTeacher() ? teacherDailyLaunchGrade : String(authSession.grade || "");
+  const launch = dailyLaunchRecord(launchGrade);
+  const launchMessage = isSignedIn()
+    ? sanitizeLaunchHtml(launch.message)
+    : "Log in to view today's instructions for your grade.";
   return `
     <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="Launch tools">
       <section class="daily-launch-card" aria-label="Today's Launch">
@@ -1980,7 +2029,8 @@ function renderHomeDefault() {
         <div class="daily-launch-copy">
           <span class="feature-kicker">Start Here</span>
           <h2>Today's Launch</h2>
-          <div class="daily-launch-message">${sanitizeLaunchHtml(dailyLaunch.message)}</div>
+          ${launchGrade ? `<span class="daily-launch-grade">Grade ${escapeHtml(launchGrade)}</span>` : ""}
+          <div class="daily-launch-message">${launchMessage}</div>
         </div>
       </section>
       ${renderRandomActivityCard()}
@@ -8088,6 +8138,7 @@ function renderApprovedStudentManager() {
 
 function renderLegacyDashboard() {
   const sorted = [...links].sort((a, b) => `${a.category}${a.title}`.localeCompare(`${b.category}${b.title}`));
+  const launchRecord = dailyLaunchRecord(teacherDailyLaunchGrade);
   return `
     ${pageHeader("Teacher Dashboard", "", true)}
     <section class="dashboard-actions">
@@ -8100,11 +8151,23 @@ function renderLegacyDashboard() {
       <div>
         <span class="feature-kicker">Homepage Message</span>
         <h2>Today's Launch</h2>
-        <p class="instruction">Update the message students see near the top of the homepage.</p>
+        <p class="instruction">Give each grade its own directions. Students only receive the message for their account's grade.</p>
       </div>
       <form id="dailyLaunchForm" class="form-grid">
+        <div class="daily-launch-grade-tabs" role="tablist" aria-label="Choose a grade to edit">
+          ${CLASSROOM_GRADES.map(grade => `
+            <button
+              type="button"
+              role="tab"
+              class="daily-launch-grade-tab ${grade === teacherDailyLaunchGrade ? "is-active" : ""}"
+              data-action="dailyLaunchGrade"
+              data-grade="${grade}"
+              ${grade === teacherDailyLaunchGrade ? 'aria-selected="true"' : 'aria-selected="false"'}
+            >Grade ${grade}</button>
+          `).join("")}
+        </div>
         <div class="field">
-          <label for="dailyLaunchMessage">Launch message</label>
+          <label for="dailyLaunchMessage">Grade ${escapeHtml(teacherDailyLaunchGrade)} launch message</label>
           <div class="mini-editor" aria-label="Today's Launch word processor">
             <div class="mini-editor-toolbar" aria-label="Formatting tools">
               <div class="editor-tool-group editor-select-group">
@@ -8163,11 +8226,21 @@ function renderLegacyDashboard() {
                 <button type="button" data-editor-command="justifyRight" title="Align right">☷</button>
               </div>
             </div>
-            <div id="dailyLaunchMessage" class="mini-editor-surface" contenteditable="true" role="textbox" aria-multiline="true">${sanitizeLaunchHtml(dailyLaunch.message)}</div>
+            <div id="dailyLaunchMessage" class="mini-editor-surface" contenteditable="true" role="textbox" aria-multiline="true">${sanitizeLaunchHtml(launchRecord.message)}</div>
           </div>
         </div>
+        <fieldset class="daily-launch-copy-options">
+          <legend>Also copy this message to</legend>
+          ${CLASSROOM_GRADES.filter(grade => grade !== teacherDailyLaunchGrade).map(grade => `
+            <label><input type="checkbox" name="dailyLaunchCopyGrade" value="${grade}"> Grade ${grade}</label>
+          `).join("")}
+        </fieldset>
+        <p class="daily-launch-updated">${launchRecord.updatedAt ? `Grade ${escapeHtml(teacherDailyLaunchGrade)} last updated ${escapeHtml(formatShortDate(launchRecord.updatedAt))}.` : `Grade ${escapeHtml(teacherDailyLaunchGrade)} is using the original launch message.`}</p>
         <p id="dailyLaunchStatus" class="request-message" aria-live="polite"></p>
-        <button class="primary-btn" type="submit">Save Today's Launch</button>
+        <div class="daily-launch-save-actions">
+          <button class="primary-btn" type="submit" name="launchSaveMode" value="selected">Save Grade ${escapeHtml(teacherDailyLaunchGrade)}</button>
+          <button class="outline-btn" type="submit" name="launchSaveMode" value="all">Use for All Grades</button>
+        </div>
       </form>
     </section>
     <section class="form-card class-timer-editor">
@@ -9588,7 +9661,7 @@ function attachScreenHandlers() {
         dailyLaunchForm.querySelectorAll("[data-editor-popover]").forEach(item => item.classList.remove("is-open"));
       });
     });
-    dailyLaunchForm.addEventListener("submit", event => {
+    dailyLaunchForm.addEventListener("submit", async event => {
       event.preventDefault();
       const message = sanitizeLaunchHtml(editor.innerHTML);
       const status = document.getElementById("dailyLaunchStatus");
@@ -9598,9 +9671,26 @@ function attachScreenHandlers() {
         return;
       }
       editor.innerHTML = message;
-      saveDailyLaunch({ message, updatedAt: new Date().toISOString() }, false);
-      status.textContent = "Today's Launch saved.";
+      const copyGrades = [...dailyLaunchForm.querySelectorAll('input[name="dailyLaunchCopyGrade"]:checked')].map(input => input.value);
+      const grades = event.submitter && event.submitter.value === "all"
+        ? [...CLASSROOM_GRADES]
+        : [...new Set([teacherDailyLaunchGrade, ...copyGrades])];
+      dailyLaunchForm.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = true; });
+      status.textContent = "Saving...";
       status.classList.remove("error");
+      try {
+        await saveDailyLaunch({ message, grade: teacherDailyLaunchGrade, grades, updatedAt: new Date().toISOString() }, false);
+        status.textContent = grades.length === 1
+          ? `Grade ${teacherDailyLaunchGrade} Today's Launch saved.`
+          : `Today's Launch saved for Grades ${grades.join(", ")}.`;
+        const updated = dailyLaunchForm.querySelector(".daily-launch-updated");
+        if (updated) updated.textContent = `Grade ${teacherDailyLaunchGrade} last updated just now.`;
+      } catch (error) {
+        status.textContent = error.message || "Today's Launch could not be saved.";
+        status.classList.add("error");
+      } finally {
+        dailyLaunchForm.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = false; });
+      }
     });
   }
 
@@ -10166,6 +10256,11 @@ app.addEventListener("click", async event => {
     render();
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  if (action === "dailyLaunchGrade") {
+    teacherDailyLaunchGrade = CLASSROOM_GRADES.includes(target.dataset.grade) ? target.dataset.grade : "4";
+    render();
+    requestAnimationFrame(() => document.getElementById("dailyLaunchMessage")?.focus());
+  }
   if (action === "coltCornerGrade") {
     teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
@@ -10579,7 +10674,8 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
     return [...CLASSROOM_EXPECTATIONS];
   },
   getTodayDirections() {
-    return getLaunchPlainText(dailyLaunch.message).slice(0, 1000);
+    if (!isSignedIn()) return "Log in to view today's instructions for your grade.";
+    return getLaunchPlainText(dailyLaunchRecord().message).slice(0, 1000);
   },
   getCurrentScreen() {
     return screen.name;

@@ -4213,6 +4213,86 @@ body[data-theme="night"] .colt-run-volume {
   margin-top: 8px;
 }
 
+.daily-launch-grade-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.daily-launch-grade-tab {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.daily-launch-grade-tab:hover,
+.daily-launch-grade-tab:focus-visible { border-color: var(--blue); }
+
+.daily-launch-grade-tab.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.daily-launch-copy-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.daily-launch-copy-options legend {
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+.daily-launch-copy-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+}
+
+.daily-launch-copy-options input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+}
+
+.daily-launch-updated {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.daily-launch-save-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.daily-launch-grade {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 0 7px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
 .class-timer-editor {
   display: grid;
   grid-template-columns: minmax(260px, 0.55fr) minmax(360px, 1fr);
@@ -7151,6 +7231,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
   .student-auth-grid {
     grid-template-columns: 1fr;
+  }
+
+  .daily-launch-grade-tabs,
+  .daily-launch-save-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .approved-student-row,

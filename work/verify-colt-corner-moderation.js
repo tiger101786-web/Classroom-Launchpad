@@ -57,7 +57,10 @@ async function runIntegration() {
     createdAt: "2026-01-01T12:00:00.000Z",
     replies: []
   };
-  fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringify({ threads: [existingThread] }));
+  fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringify({
+    threads: [existingThread],
+    dailyLaunch: { message: "Legacy launch message copied to every grade.", updatedAt: "2026-01-01T12:00:00.000Z" }
+  }));
 
   const child = spawn(process.execPath, [path.join(root, "server.js")], {
     cwd: root,
@@ -145,6 +148,45 @@ async function runIntegration() {
     assert(!Object.hasOwn(response.payload, "moderation"));
     response = await request("/api/state", { cookie: secondStudentCookie });
     assert(response.payload.threads.some(thread => thread.id === "existing-topic"));
+
+    response = await request("/api/daily-launch", {
+      method: "PUT",
+      cookie: teacherCookie,
+      body: { message: "Grade 5 should open the reading activity.", grades: ["5"] }
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.payload.dailyLaunch.grades["5"].message, "Grade 5 should open the reading activity.");
+
+    response = await request("/api/daily-launch", {
+      method: "PUT",
+      cookie: teacherCookie,
+      body: { message: "Grade 6 should open the math activity.", grade: "6" }
+    });
+    assert.equal(response.status, 200);
+
+    response = await request("/api/state", { cookie: teacherCookie });
+    assert.deepEqual(Object.keys(response.payload.dailyLaunch.grades).sort(), ["4", "5", "6", "7"]);
+    assert.equal(response.payload.dailyLaunch.grades["4"].message, "Legacy launch message copied to every grade.");
+    assert.equal(response.payload.dailyLaunch.grades["7"].message, "Legacy launch message copied to every grade.");
+
+    response = await request("/api/state", { cookie: secondStudentCookie });
+    assert.deepEqual(Object.keys(response.payload.dailyLaunch.grades), ["5"]);
+    assert.equal(response.payload.dailyLaunch.grades["5"].message, "Grade 5 should open the reading activity.");
+
+    response = await request("/api/state", { cookie: studentCookie });
+    assert.deepEqual(Object.keys(response.payload.dailyLaunch.grades), ["6"]);
+    assert.equal(response.payload.dailyLaunch.grades["6"].message, "Grade 6 should open the math activity.");
+
+    response = await request("/api/state");
+    assert.deepEqual(response.payload.dailyLaunch.grades, {});
+    assert.equal(response.payload.dailyLaunch.requiresLogin, true);
+
+    response = await request("/api/daily-launch", {
+      method: "PUT",
+      cookie: studentCookie,
+      body: { message: "Students cannot change launch directions.", grade: "6" }
+    });
+    assert.equal(response.status, 401);
 
     response = await request("/api/threads", {
       method: "POST",

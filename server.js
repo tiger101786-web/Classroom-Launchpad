@@ -122,6 +122,36 @@ function isAllowedStudentEmail(email) {
 const moderationStatuses = new Set(["approved", "needs_review", "blocked"]);
 const coltCornerGrades = ["4", "5", "6", "7"];
 
+function normalizeDailyLaunchRecord(source, fallback = defaultDb.dailyLaunch) {
+  const message = source && typeof source.message === "string" ? source.message.trim().slice(0, 3000) : "";
+  return {
+    message: message || fallback.message,
+    updatedAt: source && typeof source.updatedAt === "string" ? source.updatedAt : ""
+  };
+}
+
+function normalizeGradeDailyLaunch(source) {
+  const legacy = normalizeDailyLaunchRecord(source);
+  const sourceGrades = source && source.grades && typeof source.grades === "object" ? source.grades : {};
+  return {
+    grades: Object.fromEntries(coltCornerGrades.map(grade => [
+      grade,
+      normalizeDailyLaunchRecord(sourceGrades[grade], legacy)
+    ]))
+  };
+}
+
+function publicDailyLaunch(source, session) {
+  const launch = normalizeGradeDailyLaunch(source);
+  if (session && session.role === "teacher") return launch;
+  const grade = session && session.role === "student" ? cleanGrade(session.grade) : "";
+  return {
+    grades: grade && launch.grades[grade] ? { [grade]: launch.grades[grade] } : {},
+    activeGrade: grade,
+    requiresLogin: !grade
+  };
+}
+
 function cleanColtCornerGrade(value) {
   const grade = cleanGrade(value);
   return coltCornerGrades.includes(grade) ? grade : "";
@@ -691,11 +721,11 @@ function readDb() {
   ensureDb();
   try {
     const db = withTeacherTestStudent({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
-    return { ...db, threads: migrateGradeScopedThreads(db.threads) };
+    return { ...db, threads: migrateGradeScopedThreads(db.threads), dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch) };
   } catch {
     writeDb(defaultDb);
     const db = withTeacherTestStudent({ ...defaultDb });
-    return { ...db, threads: migrateGradeScopedThreads(db.threads) };
+    return { ...db, threads: migrateGradeScopedThreads(db.threads), dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch) };
   }
 }
 
@@ -715,12 +745,7 @@ function writeDb(db) {
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,
-    dailyLaunch: db.dailyLaunch && typeof db.dailyLaunch === "object"
-      ? {
-          message: typeof db.dailyLaunch.message === "string" ? db.dailyLaunch.message : defaultDb.dailyLaunch.message,
-          updatedAt: typeof db.dailyLaunch.updatedAt === "string" ? db.dailyLaunch.updatedAt : ""
-        }
-      : { ...defaultDb.dailyLaunch },
+    dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch),
     classTimer: db.classTimer && typeof db.classTimer === "object"
       ? {
           title: typeof db.classTimer.title === "string" ? db.classTimer.title : defaultDb.classTimer.title,
@@ -922,7 +947,7 @@ function publicState(db, session) {
     assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
     leaderboards: db.leaderboards,
-    dailyLaunch: db.dailyLaunch,
+    dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
     randomActivity: db.randomActivity,
     auth: publicSession(session),
@@ -2602,13 +2627,29 @@ async function handleApi(req, res, pathname) {
 
   if (req.method === "PUT" && ["/api/daily-launch", "/api/class-timer", "/api/random-activity"].includes(pathname)) {
     if (!requireSameOrigin(req, res)) return true;
-    if (!requireRole(req, res, ["teacher"])) return true;
+    const allowed = requireRole(req, res, ["teacher"]);
+    if (!allowed) return true;
     try {
       const body = await readBody(req);
       const db = readDb();
       if (pathname === "/api/daily-launch") {
         const message = typeof body.message === "string" ? body.message.trim().slice(0, 3000) : "";
-        db.dailyLaunch = { message: message || defaultDb.dailyLaunch.message, updatedAt: new Date().toISOString() };
+        const launch = normalizeGradeDailyLaunch(db.dailyLaunch);
+        const requestedGrades = Array.isArray(body.grades)
+          ? body.grades.map(cleanGrade).filter(grade => coltCornerGrades.includes(grade))
+          : [];
+        const singleGrade = cleanGrade(body.grade);
+        const targetGrades = [...new Set(requestedGrades.length
+          ? requestedGrades
+          : (coltCornerGrades.includes(singleGrade) ? [singleGrade] : coltCornerGrades))];
+        const updatedAt = new Date().toISOString();
+        targetGrades.forEach(grade => {
+          launch.grades[grade] = {
+            message: message || defaultDb.dailyLaunch.message,
+            updatedAt
+          };
+        });
+        db.dailyLaunch = launch;
       }
       if (pathname === "/api/class-timer") {
         const incoming = body.classTimer && typeof body.classTimer === "object" ? body.classTimer : {};
@@ -2628,7 +2669,9 @@ async function handleApi(req, res, pathname) {
         db.randomActivity = { locked: Boolean(incoming.locked), updatedAt: new Date().toISOString() };
       }
       writeDb(db);
-      sendJson(res, 200, { ok: true });
+      sendJson(res, 200, pathname === "/api/daily-launch"
+        ? { ok: true, dailyLaunch: publicDailyLaunch(db.dailyLaunch, allowed) }
+        : { ok: true });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
