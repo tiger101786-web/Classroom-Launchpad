@@ -4293,6 +4293,51 @@ body[data-theme="night"] .colt-run-volume {
   text-transform: uppercase;
 }
 
+.daily-launch-teacher-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  margin: 0 0 10px;
+}
+
+.daily-launch-teacher-preview > span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.daily-launch-teacher-preview > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.daily-launch-preview-tab {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.daily-launch-preview-tab:hover,
+.daily-launch-preview-tab:focus-visible {
+  border-color: var(--blue);
+}
+
+.daily-launch-preview-tab.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
 .class-timer-editor {
   display: grid;
   grid-template-columns: minmax(260px, 0.55fr) minmax(360px, 1fr);

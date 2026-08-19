@@ -405,6 +405,14 @@ async function run() {
     if (teacherLaunchBadge.trim() !== "TEACHER VIEW") {
       throw new Error(`Teacher homepage launch badge incorrectly shows ${teacherLaunchBadge}.`);
     }
+    if (await page.locator(".daily-launch-preview-tab").count() !== 4) {
+      throw new Error("Teacher homepage does not provide four grade preview buttons.");
+    }
+    await page.locator('.daily-launch-preview-tab[data-grade="7"]').click();
+    const activeLaunchPreview = await page.locator(".daily-launch-preview-tab.is-active").innerText();
+    if (activeLaunchPreview.trim() !== "Grade 7" || await page.locator(".daily-launch-grade").innerText() !== "TEACHER VIEW") {
+      throw new Error("Teacher homepage grade preview did not switch cleanly while preserving Teacher View.");
+    }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkTeacherStyles = await page.locator(".portal-btn, .login-btn, .mode-btn, .icon-btn").evaluateAll(buttons => buttons.map(button => {
       const style = getComputedStyle(button);
@@ -544,6 +552,7 @@ async function run() {
       darkModeGuestHeaderButtonsMatch: true,
       darkModeTeacherHeaderButtonsMatch: true,
       teacherHomepageLaunchBadgeIsNotAStudentGrade: true,
+      teacherHomepageCanPreviewEveryGradeLaunch: true,
       coltCornerShowsProtectedState: true,
       coltRunHowToPlayPanelComplete: true,
       coltRunUsesDedicatedLiveStatus: true,

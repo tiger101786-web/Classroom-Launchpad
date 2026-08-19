@@ -2031,6 +2031,23 @@ function renderHomeDefault() {
           <span class="feature-kicker">Start Here</span>
           <h2>Today's Launch</h2>
           ${launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
+          ${isTeacher() ? `
+            <div class="daily-launch-teacher-preview" aria-label="Preview Today's Launch by grade">
+              <span>Showing:</span>
+              <div role="tablist" aria-label="Choose a grade to preview">
+                ${CLASSROOM_GRADES.map(grade => `
+                  <button
+                    type="button"
+                    role="tab"
+                    class="daily-launch-preview-tab ${grade === teacherDailyLaunchGrade ? "is-active" : ""}"
+                    data-action="dailyLaunchGrade"
+                    data-grade="${grade}"
+                    aria-selected="${grade === teacherDailyLaunchGrade ? "true" : "false"}"
+                  >Grade ${grade}</button>
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
           <div class="daily-launch-message">${launchMessage}</div>
         </div>
       </section>
@@ -10260,7 +10277,11 @@ app.addEventListener("click", async event => {
   if (action === "dailyLaunchGrade") {
     teacherDailyLaunchGrade = CLASSROOM_GRADES.includes(target.dataset.grade) ? target.dataset.grade : "4";
     render();
-    requestAnimationFrame(() => document.getElementById("dailyLaunchMessage")?.focus());
+    requestAnimationFrame(() => {
+      const editor = document.getElementById("dailyLaunchMessage");
+      if (editor) editor.focus();
+      else document.querySelector(`.daily-launch-preview-tab[data-grade="${teacherDailyLaunchGrade}"]`)?.focus();
+    });
   }
   if (action === "coltCornerGrade") {
     teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
