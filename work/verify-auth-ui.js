@@ -401,6 +401,10 @@ async function run() {
       throw new Error(`Assignment heading gaps are too small: ${assignmentHeadingGaps.join(", ")}.`);
     }
     await page.locator('[data-action="back"]').first().click();
+    const teacherLaunchBadge = await page.locator(".daily-launch-grade").innerText();
+    if (teacherLaunchBadge.trim() !== "TEACHER VIEW") {
+      throw new Error(`Teacher homepage launch badge incorrectly shows ${teacherLaunchBadge}.`);
+    }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkTeacherStyles = await page.locator(".portal-btn, .login-btn, .mode-btn, .icon-btn").evaluateAll(buttons => buttons.map(button => {
       const style = getComputedStyle(button);
@@ -539,6 +543,7 @@ async function run() {
       loginBesidePlusPortal: true,
       darkModeGuestHeaderButtonsMatch: true,
       darkModeTeacherHeaderButtonsMatch: true,
+      teacherHomepageLaunchBadgeIsNotAStudentGrade: true,
       coltCornerShowsProtectedState: true,
       coltRunHowToPlayPanelComplete: true,
       coltRunUsesDedicatedLiveStatus: true,

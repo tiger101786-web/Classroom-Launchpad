@@ -2019,6 +2019,7 @@ function renderHomeDefault() {
   const launchMessage = isSignedIn()
     ? sanitizeLaunchHtml(launch.message)
     : "Log in to view today's instructions for your grade.";
+  const launchAudienceLabel = isTeacher() ? "Teacher View" : (launchGrade ? `Grade ${launchGrade}` : "");
   return `
     <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="Launch tools">
       <section class="daily-launch-card" aria-label="Today's Launch">
@@ -2029,7 +2030,7 @@ function renderHomeDefault() {
         <div class="daily-launch-copy">
           <span class="feature-kicker">Start Here</span>
           <h2>Today's Launch</h2>
-          ${launchGrade ? `<span class="daily-launch-grade">Grade ${escapeHtml(launchGrade)}</span>` : ""}
+          ${launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
           <div class="daily-launch-message">${launchMessage}</div>
         </div>
       </section>
