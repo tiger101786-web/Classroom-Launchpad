@@ -5184,6 +5184,7 @@ body[data-theme="night"] .assignment-card-status.is-reviewed { background: #2038
 .student-assignment-attachment strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .student-assignment-attachment small { color: var(--muted); }
 .student-assignment-attachment a { text-decoration: none; }
+.assignment-document-preview { max-height: 680px; min-height: 360px; margin: -4px 0 20px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; background: #303034; }
 .assignment-attachment-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; background: var(--blue); color: #fff; font-size: 1.45rem; font-weight: 900; }
 .student-upload-form { display: grid; gap: 16px; }
 .submission-method-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; padding: 5px; border: 1px solid var(--border); border-radius: 11px; background: var(--paper); }
@@ -5204,6 +5205,10 @@ body[data-theme="night"] .assignment-card-status.is-reviewed { background: #2038
 .student-upload-drop > span:not(.upload-icon):not(.outline-btn) { color: var(--muted); }
 .selected-upload-file { padding: 12px 14px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); }
 .selected-upload-file.has-file { border-color: var(--blue); color: var(--ink); font-weight: 800; }
+.selected-upload-file-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.selected-upload-file-row .selected-upload-file { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remove-selected-upload { min-height: 44px; }
+.remove-selected-upload[hidden] { display: none; }
 .pre-submit-preview { max-height: 560px; min-height: 300px; overflow: auto; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: #303034; }
 .pre-submit-preview[hidden] { display: none; }
 .text-file-preview { width: 100%; min-height: 280px; margin: 0; padding: 22px; overflow: auto; background: #fff; color: #1f1f22; white-space: pre-wrap; }
@@ -5374,6 +5379,8 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
   .submission-preview-frame { height: 380px; }
   .student-assignment-attachment { grid-template-columns: auto minmax(0, 1fr); }
   .student-assignment-attachment .actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr; }
+  .selected-upload-file-row { grid-template-columns: 1fr; }
+  .remove-selected-upload { width: 100%; }
   .current-assignment-attachment { align-items: stretch; flex-direction: column; }
   .assignment-schedule-grid { grid-template-columns: 1fr; }
   .pre-submit-preview,

@@ -177,6 +177,59 @@ async function run() {
       return fits;
     });
     if (!compactAssignmentTabsFit) throw new Error("Student assignment notification badges overflow the compact sidebar.");
+    const assignmentAttachmentPreviewFixture = await page.evaluate(() => {
+      const markup = renderAssignmentAttachment({
+        id: "assignment-docx-preview-fixture",
+        attachmentOriginalName: "Summer_Break_Assignment.docx",
+        attachmentExtension: ".docx",
+        attachmentSize: 49152
+      });
+      const fixture = new DOMParser().parseFromString(markup, "text/html");
+      return {
+        previewId: fixture.querySelector("[data-docx-assignment-preview]")?.dataset.docxAssignmentPreview,
+        title: fixture.querySelector("[data-docx-assignment-preview]")?.dataset.previewTitle,
+        downloadText: fixture.querySelector(".student-assignment-attachment .primary-btn")?.textContent.trim()
+      };
+    });
+    if (assignmentAttachmentPreviewFixture.previewId !== "assignment-docx-preview-fixture"
+      || assignmentAttachmentPreviewFixture.title !== "Summer_Break_Assignment.docx"
+      || assignmentAttachmentPreviewFixture.downloadText !== "Download File") {
+      throw new Error(`Student assignment document preview is incomplete: ${JSON.stringify(assignmentAttachmentPreviewFixture)}.`);
+    }
+    await page.evaluate(() => {
+      authSession = { authenticated: true, role: "student", name: "Student, UI", email: "ui.fixture@scscolts.org", grade: "5" };
+      assignments = [{
+        id: "remove-file-fixture", title: "Remove File Test", instructions: "Choose a file, then remove it.", grades: ["5"],
+        dueAt: "", acceptedTypes: [".txt"], maxFileSizeMb: 5, allowResubmissions: false, status: "open"
+      }];
+      submissions = [];
+      assignmentView = "todo";
+      selectedAssignmentId = "remove-file-fixture";
+      screen = { name: "assignments" };
+      render();
+    });
+    await page.locator("#studentSubmissionFile").setInputFiles({ name: "wrong-file.txt", mimeType: "text/plain", buffer: Buffer.from("Wrong assignment file") });
+    await page.locator("#removeStudentSubmissionFile").waitFor();
+    const selectedWrongFile = await page.locator("#selectedSubmissionFile").innerText();
+    if (!selectedWrongFile.includes("wrong-file.txt") || await page.locator("#studentPreSubmitPreview").isHidden()) {
+      throw new Error("The selected student file and its preview did not appear before submission.");
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileFileControlsOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    if (mobileFileControlsOverflow) throw new Error("Student file preview controls overflow on mobile.");
+    await page.locator("#removeStudentSubmissionFile").click();
+    const clearedStudentFile = await page.evaluate(() => ({
+      count: document.querySelector("#studentSubmissionFile").files.length,
+      label: document.querySelector("#selectedSubmissionFile").textContent.trim(),
+      removeHidden: document.querySelector("#removeStudentSubmissionFile").hidden,
+      previewHidden: document.querySelector("#studentPreSubmitPreview").hidden
+    }));
+    if (clearedStudentFile.count !== 0 || clearedStudentFile.label !== "No file selected"
+      || !clearedStudentFile.removeHidden || !clearedStudentFile.previewHidden) {
+      throw new Error(`Removing a selected student file did not reset the form: ${JSON.stringify(clearedStudentFile)}.`);
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.reload({ waitUntil: "networkidle" });
     const lateSubmissionFixture = await page.evaluate(() => {
       const dueAt = "2026-08-01T12:00:00.000Z";
       const assignment = { id: "late-assignment", title: "Late Work Test", dueAt };
@@ -560,6 +613,8 @@ async function run() {
       homepageQuickNavigationResponsive: true,
       studentAssignmentNotificationGroupsMatchTabs: true,
       studentAssignmentNotificationBadgesFitCompactScreens: true,
+      studentAssignmentDocumentPreviewRestored: true,
+      studentCanRemoveWrongFileBeforeSubmitting: true,
       teacherSubmissionLateDaysAppearInInboxAndPreview: true,
       launchpadFeedbackFormIncludesRequiredType: true,
       launchpadFeedbackFormFitsInsidePanel: true,

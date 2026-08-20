@@ -586,6 +586,17 @@ const sharedBackend = {
     }
     return response.blob();
   },
+  async loadAssignmentAttachment(id) {
+    const response = await fetch(`/api/assignments/${encodeURIComponent(id)}/attachment?view=inline`, {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload && payload.error ? payload.error : "This assignment document could not be loaded.");
+    }
+    return response.blob();
+  },
   submitAssignmentLink(id, project) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}/link-submissions`, {
       method: "POST",
@@ -7728,7 +7739,9 @@ async function renderFaithfulDocxPreview(source, target, title) {
     ignoreHeight: false,
     ignoreWidth: false,
     ignoreFonts: false,
-    ignoreLastRenderedPageBreak: false,
+    // Word may save a last-rendered break directly beside a real page break.
+    // Ignoring that saved layout marker prevents a duplicate blank preview page.
+    ignoreLastRenderedPageBreak: true,
     renderHeaders: true,
     renderFooters: true,
     renderFootnotes: true,
@@ -7771,8 +7784,19 @@ async function renderFaithfulDocxPreview(source, target, title) {
 }
 
 async function hydrateOfficeSubmissionPreviews() {
+  const assignmentDocxTargets = [...document.querySelectorAll("[data-docx-assignment-preview]")];
   const docxTargets = [...document.querySelectorAll("[data-docx-submission-preview]")];
   const officeTargets = [...document.querySelectorAll("[data-office-submission-preview]")];
+  await Promise.all(assignmentDocxTargets.map(async target => {
+    if (target.dataset.loading === "true") return;
+    target.dataset.loading = "true";
+    try {
+      const blob = await sharedBackend.loadAssignmentAttachment(target.dataset.docxAssignmentPreview);
+      await renderFaithfulDocxPreview(blob, target, target.dataset.previewTitle || "Assignment document");
+    } catch (error) {
+      target.innerHTML = `<div class="office-preview-message"><strong>Preview unavailable</strong><p>${escapeHtml(error.message)}</p></div>`;
+    }
+  }));
   await Promise.all(docxTargets.map(async target => {
     if (target.dataset.loading === "true") return;
     target.dataset.loading = "true";
@@ -7834,12 +7858,18 @@ function renderAssignmentAttachment(assignment) {
   if (!assignment || !assignment.attachmentOriginalName) return "";
   const previewable = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".txt"].includes(assignment.attachmentExtension);
   const fileUrl = `/api/assignments/${encodeURIComponent(assignment.id)}/attachment`;
+  const documentPreview = assignment.attachmentExtension === ".docx" ? `
+    <section class="assignment-document-preview faithful-docx-host" data-docx-assignment-preview="${escapeHtml(assignment.id)}" data-preview-title="${escapeHtml(assignment.attachmentOriginalName)}" aria-live="polite">
+      <div class="office-preview-message"><strong>Preparing full assignment preview…</strong><p>The file remains inside Classroom Launchpad.</p></div>
+    </section>
+  ` : "";
   return `
     <section class="student-assignment-attachment">
       <span class="assignment-attachment-icon" aria-hidden="true">▤</span>
       <span><span class="feature-kicker">File from Mr. Nieves</span><strong>${escapeHtml(assignment.attachmentOriginalName)}</strong><small>${formatFileSize(assignment.attachmentSize)}${[".doc", ".docx"].includes(assignment.attachmentExtension) ? " • Microsoft Word" : [".ppt", ".pptx"].includes(assignment.attachmentExtension) ? " • Microsoft PowerPoint" : ""}</small></span>
       <div class="actions">${previewable ? `<a class="outline-btn" href="${fileUrl}?view=inline" target="_blank" rel="noopener">Preview</a>` : ""}<a class="primary-btn" href="${fileUrl}">Download File</a></div>
     </section>
+    ${documentPreview}
   `;
 }
 
@@ -7914,7 +7944,10 @@ function renderAssignmentsPage() {
                 <span class="outline-btn">Choose File</span>
                 <input id="studentSubmissionFile" type="file" accept="${escapeHtml(selected.acceptedTypes.join(","))}" required>
               </label>
-              <div id="selectedSubmissionFile" class="selected-upload-file">No file selected</div>
+              <div class="selected-upload-file-row">
+                <div id="selectedSubmissionFile" class="selected-upload-file" aria-live="polite">No file selected</div>
+                <button id="removeStudentSubmissionFile" class="outline-btn remove-selected-upload" type="button" hidden>Remove File</button>
+              </div>
               <section id="studentPreSubmitPreview" class="pre-submit-preview" hidden aria-live="polite"></section>
               <label class="field"><span>Optional note</span><textarea id="studentSubmissionNote" maxlength="500" placeholder="Add a short note for Mr. Nieves"></textarea></label>
               <div class="student-submit-footer">
@@ -9847,12 +9880,38 @@ function attachScreenHandlers() {
 
   const studentSubmissionFile = document.getElementById("studentSubmissionFile");
   if (studentSubmissionFile) {
+    const removeStudentSubmissionFile = document.getElementById("removeStudentSubmissionFile");
+    let studentFilePreviewVersion = 0;
+    const clearSelectedStudentFile = () => {
+      studentFilePreviewVersion += 1;
+      studentSubmissionFile.value = "";
+      const display = document.getElementById("selectedSubmissionFile");
+      const preview = document.getElementById("studentPreSubmitPreview");
+      if (display) {
+        display.textContent = "No file selected";
+        display.classList.remove("has-file");
+      }
+      if (removeStudentSubmissionFile) removeStudentSubmissionFile.hidden = true;
+      if (studentPreviewObjectUrl) {
+        URL.revokeObjectURL(studentPreviewObjectUrl);
+        studentPreviewObjectUrl = "";
+      }
+      if (preview) {
+        preview.replaceChildren();
+        preview.hidden = true;
+      }
+    };
+    if (removeStudentSubmissionFile) {
+      removeStudentSubmissionFile.addEventListener("click", clearSelectedStudentFile);
+    }
     studentSubmissionFile.addEventListener("change", async () => {
+      const previewVersion = ++studentFilePreviewVersion;
       const file = studentSubmissionFile.files && studentSubmissionFile.files[0];
       const display = document.getElementById("selectedSubmissionFile");
       const preview = document.getElementById("studentPreSubmitPreview");
       display.textContent = file ? `${file.name} • ${formatFileSize(file.size)}` : "No file selected";
       display.classList.toggle("has-file", Boolean(file));
+      if (removeStudentSubmissionFile) removeStudentSubmissionFile.hidden = !file;
       if (studentPreviewObjectUrl) {
         URL.revokeObjectURL(studentPreviewObjectUrl);
         studentPreviewObjectUrl = "";
@@ -9883,6 +9942,10 @@ function attachScreenHandlers() {
         }
       } catch (error) {
         preview.innerHTML = `<div class="office-preview-message"><strong>Preview unavailable</strong><p>${escapeHtml(error.message)}</p></div>`;
+      }
+      if (previewVersion !== studentFilePreviewVersion) {
+        preview.replaceChildren();
+        preview.hidden = true;
       }
     });
   }
