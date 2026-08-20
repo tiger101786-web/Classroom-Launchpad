@@ -413,6 +413,23 @@ async function run() {
     if (activeLaunchPreview.trim() !== "Grade 7" || await page.locator(".daily-launch-grade").innerText() !== "TEACHER VIEW") {
       throw new Error("Teacher homepage grade preview did not switch cleanly while preserving Teacher View.");
     }
+    const longLaunchLayout = await page.locator(".daily-launch-card").evaluate(card => {
+      const message = card.querySelector(".daily-launch-message");
+      message.innerHTML = `<ol>${Array.from({ length: 14 }, (_, index) => `<li>Multi-step classroom direction ${index + 1}</li>`).join("")}</ol>`;
+      const cardBox = card.getBoundingClientRect();
+      const messageBox = message.getBoundingClientRect();
+      const randomBox = document.querySelector(".random-activity-card").getBoundingClientRect();
+      const nextSectionBox = document.querySelector("#home-expectations").getBoundingClientRect();
+      return {
+        cardHeight: Math.round(cardBox.height),
+        randomHeight: Math.round(randomBox.height),
+        contentFits: messageBox.bottom <= cardBox.bottom + 1,
+        nextSectionClearsCard: nextSectionBox.top >= cardBox.bottom
+      };
+    });
+    if (longLaunchLayout.cardHeight <= 300 || longLaunchLayout.randomHeight !== 300 || !longLaunchLayout.contentFits || !longLaunchLayout.nextSectionClearsCard) {
+      throw new Error(`Long Today's Launch directions do not expand cleanly: ${JSON.stringify(longLaunchLayout)}.`);
+    }
     await page.locator('[data-action="toggleTheme"]').first().click();
     const darkTeacherStyles = await page.locator(".portal-btn, .login-btn, .mode-btn, .icon-btn").evaluateAll(buttons => buttons.map(button => {
       const style = getComputedStyle(button);
@@ -553,6 +570,7 @@ async function run() {
       darkModeTeacherHeaderButtonsMatch: true,
       teacherHomepageLaunchBadgeIsNotAStudentGrade: true,
       teacherHomepageCanPreviewEveryGradeLaunch: true,
+      longDailyLaunchDirectionsExpandWithoutClipping: true,
       coltCornerShowsProtectedState: true,
       coltRunHowToPlayPanelComplete: true,
       coltRunUsesDedicatedLiveStatus: true,

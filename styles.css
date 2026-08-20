@@ -1152,7 +1152,7 @@ body[data-theme="night"] .school-photo {
   display: grid;
   grid-template-columns: minmax(0, 920px) minmax(280px, 360px);
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
   margin-bottom: 20px;
 }
 
@@ -1163,7 +1163,8 @@ body[data-theme="night"] .school-photo {
   gap: 18px;
   align-items: center;
   width: 100%;
-  height: 300px;
+  height: auto;
+  min-height: 300px;
   margin: 0;
   padding: 18px 22px;
   border-left: 8px solid var(--blue);
