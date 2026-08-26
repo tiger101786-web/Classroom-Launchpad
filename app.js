@@ -61,6 +61,7 @@ const DEFAULT_RANDOM_ACTIVITY_SETTINGS = {
 };
 const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
+const GOOGLE_CLASSROOM_URL = "https://classroom.google.com/";
 
 const HOME_PROFILE_VIDEOS = [
   "assets/mr-nieves-colts.mp4",
@@ -84,7 +85,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
-  { id: "home-assignments", label: "Assignments", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M8 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5H16"></path><path d="M9 5V3.8c0-.4.4-.8.8-.8h4.4c.4 0 .8.4.8.8V5H9Z"></path><path d="m8.5 13 2.2 2.2 4.8-5"></path></svg>' },
+  { id: "home-google-classroom", label: "Google Classroom", icon: '<img src="assets/google-classroom.svg" alt="">' },
   { id: "home-classroom-pass", label: "Classroom Pass", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4V7Z"></path><path d="M9 7v2M9 11v2M9 15v2"></path></svg>' },
   { id: "home-colt-corner", label: "Colt Corner", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="message-bubble" d="M3 4.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3.5 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2Z"></path><path class="message-bubble" d="M10 13.5h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v2l-2.5-2H10a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"></path><circle class="message-dot" cx="5" cy="8.5" r="1"></circle><circle class="message-dot" cx="9" cy="8.5" r="1"></circle><circle class="message-dot" cx="13" cy="8.5" r="1"></circle><circle class="message-dot" cx="12" cy="16.5" r=".85"></circle><circle class="message-dot" cx="15" cy="16.5" r=".85"></circle><circle class="message-dot" cx="18" cy="16.5" r=".85"></circle></svg>' },
   { id: "home-feedback", label: "Suggest or Report", icon: "&#9993;" }
@@ -1368,8 +1369,6 @@ let classroomPassRefreshTimer = 0;
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "assignments", label: "Assignments & Submissions", navLabel: "Student Work", icon: "▣" },
-  { id: "gradebooks", label: "Gradebooks", icon: "▦" },
   { id: "passes", label: "Classroom Pass Log", navLabel: "Classroom Pass", icon: "→" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
@@ -1378,7 +1377,8 @@ const dashboardSections = [
   { id: "websites", label: "Manage Websites", icon: "▦" },
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
-let dashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
+const savedDashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
+let dashboardSection = dashboardSections.some(section => section.id === savedDashboardSection) ? savedDashboardSection : "overview";
 let dashboardStudentSearch = "";
 let dashboardLinkSearch = "";
 let dashboardLinkCategory = "all";
@@ -1969,7 +1969,7 @@ function renderHomeNavigation() {
       <nav class="home-navigation-list">
         ${HOME_NAVIGATION_ITEMS.map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
-            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-assignments" ? "is-assignment-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
           </button>
         `).join("")}
@@ -2090,7 +2090,7 @@ function renderHomeDefault() {
         ${categories.map(category => categoryCard(category)).join("")}
       </section>
     </div>
-    <div id="home-assignments" class="home-navigation-anchor">${renderAssignmentsPreview()}</div>
+    <div id="home-google-classroom" class="home-navigation-anchor">${renderGoogleClassroomPreview()}</div>
     <div id="home-classroom-pass" class="home-navigation-anchor">${renderClassroomPassPreview()}</div>
     <div id="home-colt-corner" class="home-navigation-anchor">${renderColtCornerPreview()}</div>
     <div id="home-feedback" class="home-navigation-anchor">${renderStudentWebsiteRequest()}</div>
@@ -7631,23 +7631,16 @@ function renderPin() {
   `;
 }
 
-function renderAssignmentsPreview() {
-  const studentSubmissions = submissions.filter(item => item.studentEmail === authSession.email);
-  const remaining = assignments.filter(assignment => !studentSubmissions.some(item => item.assignmentId === assignment.id)).length;
+function renderGoogleClassroomPreview() {
   return `
-    <section class="assignments-home-card">
-      <div class="assignments-home-copy">
-        <span class="feature-kicker">Student Work</span>
-        <h2>Assignments &amp; Submissions</h2>
-        <p>${isApprovedStudent()
-          ? `${remaining} ${remaining === 1 ? "assignment is" : "assignments are"} waiting for you.`
-          : "Sign in to view assignments and submit your work to Mr. Nieves."}</p>
-        <div class="assignments-home-stats">
-          <span><strong>${isApprovedStudent() ? assignments.length : "—"}</strong> Assigned</span>
-          <span><strong>${isApprovedStudent() ? studentSubmissions.length : "—"}</strong> Submitted</span>
-        </div>
+    <section class="google-classroom-home-card">
+      <div class="google-classroom-home-icon" aria-hidden="true"><img src="assets/google-classroom.svg" alt=""></div>
+      <div class="google-classroom-home-copy">
+        <span class="feature-kicker">Class Assignments</span>
+        <h2>Google Classroom</h2>
+        <p>Open Google Classroom to view your classes, assignments, teacher feedback, and grades.</p>
       </div>
-      <button class="primary-btn" data-action="openAssignments">${isApprovedStudent() ? "Open Assignments" : "Launchpad Login"}</button>
+      <a class="primary-btn google-classroom-open-btn" href="${GOOGLE_CLASSROOM_URL}" target="_blank" rel="noopener noreferrer">Open Google Classroom</a>
     </section>
   `;
 }
@@ -8389,7 +8382,7 @@ function renderDashboardNavigation() {
             <span class="dashboard-nav-label">${escapeHtml(section.navLabel || section.label)}</span>
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
             ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
-            ${section.id === "assignments" && submissions.some(item => item.status === "submitted") ? `<b>${submissions.filter(item => item.status === "submitted").length}</b>` : ""}
+
             ${section.id === "passes" && classroomPassData.passes.some(item => item.status === "out") ? `<b>${classroomPassData.passes.filter(item => item.status === "out").length}</b>` : ""}
           </button>
         `).join("")}
@@ -8406,8 +8399,7 @@ function renderDashboardOverview() {
     ["Approved Students", approvedStudents.length, "students"],
     ["Registered", registered, "students"],
     ["Awaiting First Login", waiting, "students"],
-    ["Open Assignments", assignments.filter(item => item.status === "open").length, "assignments"],
-    ["New Submissions", submissions.filter(item => item.status === "submitted").length, "assignments"],
+
     ["Students Currently Out", classroomPassData.passes.filter(item => item.status === "out").length, "passes"],
     ["Colt Corner Topics", classThreads.length, "corner"],
     ["Posts Awaiting Review", moderationQueue.length, "corner"],
@@ -8433,7 +8425,7 @@ function renderDashboardOverview() {
         </div>
         <div class="dashboard-quick-actions">
           <button class="primary-btn" data-action="add">+ Add Website</button>
-          <button class="outline-btn" data-action="dashboardSection" data-section="assignments">Assignments & Submissions</button>
+          <button class="outline-btn" data-action="open" data-url="${GOOGLE_CLASSROOM_URL}">Open Google Classroom</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="passes">Classroom Pass Log</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="students">Manage Student Access</button>
           <button class="outline-btn" data-action="dashboardSection" data-section="tools">Open Classroom Tools</button>
@@ -9026,8 +9018,7 @@ function renderDashboardClassroomPasses() {
 }
 
 function renderDashboardSection() {
-  if (dashboardSection === "assignments") return renderDashboardAssignments();
-  if (dashboardSection === "gradebooks") return renderDashboardGradebooks();
+
   if (dashboardSection === "passes") return renderDashboardClassroomPasses();
   if (dashboardSection === "students") return renderApprovedStudentManager();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
@@ -10397,7 +10388,7 @@ app.addEventListener("click", async event => {
   }
   if (action === "toggleTheme") toggleTheme();
   if (action === "category") setScreen({ name: "category", category: target.dataset.category });
-  if (action === "openAssignments") setScreen({ name: isApprovedStudent() ? "assignments" : "login" });
+
   if (action === "openClassroomPass") {
     if (!isSignedIn()) setScreen({ name: "login" });
     else if (isTeacher()) {

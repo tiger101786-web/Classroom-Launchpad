@@ -59,8 +59,7 @@ async function run() {
         expectationsPaths: document.querySelectorAll(".home-navigation-icon.is-expectations-icon svg path").length,
         categoriesGlobe: Math.round(document.querySelector(".home-navigation-icon.is-categories-icon svg").getBoundingClientRect().width),
         categoriesParts: document.querySelectorAll(".home-navigation-icon.is-categories-icon svg circle, .home-navigation-icon.is-categories-icon svg path").length,
-        assignmentClipboard: Math.round(document.querySelector(".home-navigation-icon.is-assignment-icon svg").getBoundingClientRect().width),
-        assignmentPaths: document.querySelectorAll(".home-navigation-icon.is-assignment-icon svg path").length,
+        googleClassroomIcon: Math.round(document.querySelector(".home-navigation-icon.is-google-classroom-icon img").getBoundingClientRect().width),
         classroomPassTicket: Math.round(document.querySelector(".home-navigation-icon.is-pass-icon svg").getBoundingClientRect().width),
         classroomPassUsesCurrentColor: getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon svg path")).stroke === getComputedStyle(document.querySelector(".home-navigation-icon.is-pass-icon")).color,
         coltCornerMessages: Math.round(document.querySelector(".home-navigation-icon.is-corner-icon svg").getBoundingClientRect().width),
@@ -70,8 +69,24 @@ async function run() {
         logicLightbulbPaths: document.querySelectorAll(".card-icon .logic-lightbulb-icon path").length
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.assignmentClipboard < 21 || wideNavigation.assignmentPaths !== 3 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2) {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
+    }
+    const googleClassroomCard = await page.evaluate(() => {
+      const card = document.querySelector(".google-classroom-home-card");
+      const link = card && card.querySelector(".google-classroom-open-btn");
+      return {
+        heading: card && card.querySelector("h2")?.textContent.trim(),
+        label: link?.textContent.trim(),
+        href: link?.href,
+        target: link?.target,
+        oldAssignmentsVisible: Boolean(document.querySelector(".assignments-home-card"))
+      };
+    });
+    if (googleClassroomCard.heading !== "Google Classroom" || googleClassroomCard.label !== "Open Google Classroom"
+      || googleClassroomCard.href !== "https://classroom.google.com/" || googleClassroomCard.target !== "_blank"
+      || googleClassroomCard.oldAssignmentsVisible) {
+      throw new Error(`Google Classroom homepage card is incorrect: ${JSON.stringify(googleClassroomCard)}.`);
     }
     await page.locator('.home-navigation-button[data-target="home-launch"]').click();
     await page.waitForTimeout(700);
@@ -434,25 +449,19 @@ async function run() {
     await page.locator("#pinForm").evaluate(form => form.requestSubmit());
     await page.locator(".dashboard-nav").waitFor();
     const dashboardSections = await page.locator(".dashboard-nav-button").allTextContents();
-    if (dashboardSections.length < 8 || !dashboardSections.some(label => label.includes("Student Work")) || !dashboardSections.some(label => label.includes("Students & Access"))) {
-      throw new Error("Teacher dashboard navigation is incomplete.");
+    if (dashboardSections.length < 8 || !dashboardSections.some(label => label.includes("Students & Access"))
+      || dashboardSections.some(label => label.includes("Student Work") || label.includes("Gradebooks"))) {
+      throw new Error(`Teacher dashboard navigation did not retire the old assignment system: ${JSON.stringify(dashboardSections)}.`);
     }
+    const classroomQuickAction = await page.locator('.dashboard-quick-actions [data-url="https://classroom.google.com/"]').innerText();
+    if (classroomQuickAction.trim() !== "Open Google Classroom") throw new Error("The teacher Google Classroom shortcut is missing.");
     const quickHeadingGap = await page.locator(".dashboard-quick-panel").evaluate(panel => {
       const label = panel.querySelector(".feature-kicker").getBoundingClientRect();
       const heading = panel.querySelector("h3").getBoundingClientRect();
       return Math.round(heading.top - label.bottom);
     });
     if (quickHeadingGap < 8) throw new Error(`Quick Actions heading gap is too small: ${quickHeadingGap}.`);
-    await page.locator('[data-action="dashboardSection"][data-section="assignments"]').first().click();
-    await page.locator(".teacher-assignment-dashboard").waitFor();
-    const assignmentHeadingGaps = await page.locator(".assignment-list-heading, .submission-inbox-heading").evaluateAll(headings => headings.map(heading => {
-      const label = heading.querySelector(".feature-kicker").getBoundingClientRect();
-      const title = heading.querySelector("h3").getBoundingClientRect();
-      return Math.round(title.top - label.bottom);
-    }));
-    if (assignmentHeadingGaps.length !== 2 || assignmentHeadingGaps.some(gap => gap < 8)) {
-      throw new Error(`Assignment heading gaps are too small: ${assignmentHeadingGaps.join(", ")}.`);
-    }
+
     await page.locator('[data-action="back"]').first().click();
     const teacherLaunchBadge = await page.locator(".daily-launch-grade").innerText();
     if (teacherLaunchBadge.trim() !== "TEACHER VIEW") {
@@ -529,20 +538,7 @@ async function run() {
       throw new Error("Student manager search did not show its empty state.");
     }
     await page.locator("#dashboardStudentSearch").fill("");
-    await page.locator('[data-action="dashboardSection"][data-section="gradebooks"]').first().click();
-    await page.locator(".gradebook-student-row").first().waitFor();
-    const gradebookAlignment = await page.evaluate(() => {
-      const centers = elements => [...elements].map(element => {
-        const box = element.getBoundingClientRect();
-        return box.left + box.width / 2;
-      });
-      const header = centers(document.querySelectorAll(".gradebook-header > span"));
-      const row = centers(document.querySelectorAll(".gradebook-student-row:first-of-type > *"));
-      return header.map((center, index) => Math.abs(center - row[index]));
-    });
-    if (gradebookAlignment.length !== 8 || gradebookAlignment.some(offset => offset > 1)) {
-      throw new Error(`Gradebook headers and row values are not aligned: ${gradebookAlignment.join(", ")}.`);
-    }
+
     await page.locator('[data-action="dashboardSection"][data-section="websites"]').first().click();
     await page.locator("#dashboardLinkSearch").waitFor();
     await page.locator("#dashboardLinkSearch").fill("Google");
@@ -636,6 +632,8 @@ async function run() {
       studentManagerSearchWorks: true,
       teacherForumIdentityAutomatic: true,
       dashboardNavigationComplete: true,
+      googleClassroomReplacesLaunchpadAssignments: true,
+      retiredGradebookAndStudentWorkNavigationRemoved: true,
       websiteSearchWorks: true,
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,

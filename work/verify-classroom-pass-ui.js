@@ -87,10 +87,10 @@ async function run() {
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await studentPage.getByRole("heading", { name: "Classroom Pass", exact: true }).first().waitFor();
     const homepagePassLayout = await studentPage.evaluate(() => {
-      const assignments = document.querySelector(".assignments-home-card").getBoundingClientRect();
+      const googleClassroom = document.querySelector(".google-classroom-home-card").getBoundingClientRect();
       const classroomPass = document.querySelector(".classroom-pass-home-card").getBoundingClientRect();
       const icon = document.querySelector(".classroom-pass-home-icon svg").getBoundingClientRect();
-      return { gap: classroomPass.top - assignments.bottom, iconWidth: icon.width, iconHeight: icon.height };
+      return { gap: classroomPass.top - googleClassroom.bottom, iconWidth: icon.width, iconHeight: icon.height };
     });
     assert(homepagePassLayout.gap >= 20, JSON.stringify(homepagePassLayout));
     assert(homepagePassLayout.iconWidth >= 30 && homepagePassLayout.iconHeight >= 30, JSON.stringify(homepagePassLayout));

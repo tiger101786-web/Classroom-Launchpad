@@ -257,14 +257,11 @@ body.home-navigation-open {
   stroke-linejoin: round;
 }
 
-.home-navigation-icon.is-assignment-icon svg {
-  width: 21px;
-  height: 21px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.15;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.home-navigation-icon.is-google-classroom-icon img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .home-navigation-icon.is-categories-icon svg {
@@ -5113,12 +5110,12 @@ body[data-theme="night"] .class-timer-badge {
 
 }
 
-/* Assignments and student submissions */
-.assignments-home-card {
-  display: flex;
+/* Google Classroom */
+.google-classroom-home-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
   margin-top: 22px;
   padding: 24px 28px;
   border: 1px solid var(--border);
@@ -5128,7 +5125,24 @@ body[data-theme="night"] .class-timer-badge {
   box-shadow: var(--shadow);
 }
 
-.assignments-home-copy h2,
+.google-classroom-home-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--paper);
+}
+
+.google-classroom-home-icon img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.google-classroom-home-copy h2,
 .student-assignment-heading h2,
 .assignment-manager-heading h3,
 .assignment-editor-card h3,
@@ -5136,9 +5150,8 @@ body[data-theme="night"] .class-timer-badge {
   margin: 4px 0 8px;
 }
 
-.assignments-home-copy p { margin: 0; color: var(--muted); font-weight: 700; }
-.assignments-home-stats { display: flex; gap: 10px; margin-top: 14px; }
-.assignments-home-stats span { padding: 7px 11px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-dark); font-size: .82rem; font-weight: 800; }
+.google-classroom-home-copy p { margin: 0; color: var(--muted); font-weight: 700; line-height: 1.45; }
+.google-classroom-open-btn { text-decoration: none; text-align: center; white-space: nowrap; }
 
 .student-assignments-shell {
   display: grid;
@@ -5357,14 +5370,14 @@ body[data-theme="night"] .submission-late-badge.is-on-time { background: #203827
 }
 
 @media (max-width: 720px) {
-  .assignments-home-card,
+  .google-classroom-home-card,
   .student-assignment-heading,
   .student-submit-footer,
   .assignment-manager-heading,
   .teacher-assignment-row,
   .submission-file-heading { align-items: stretch; flex-direction: column; }
-  .assignments-home-card { display: grid; padding: 20px; }
-  .assignments-home-card .primary-btn { width: 100%; }
+  .google-classroom-home-card { grid-template-columns: auto minmax(0, 1fr); padding: 20px; }
+  .google-classroom-home-card .primary-btn { grid-column: 1 / -1; width: 100%; }
   .student-assignment-list,
   .assignment-metric-grid,
   .submission-filter-toolbar,
