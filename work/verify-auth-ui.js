@@ -48,10 +48,18 @@ async function run() {
     const wideNavigation = await page.evaluate(() => {
       const navigation = document.querySelector(".home-quick-navigation").getBoundingClientRect();
       const hero = document.querySelector(".hero-panel").getBoundingClientRect();
+      const profile = document.querySelector(".school-photo").getBoundingClientRect();
       return {
         itemCount: document.querySelectorAll(".home-navigation-list .home-navigation-button").length,
         navigationWidth: Math.round(navigation.width),
         heroWidth: Math.round(hero.width),
+        heroHeight: Math.round(hero.height),
+        profileTopRatio: Number(((profile.top - hero.top) / hero.height).toFixed(2)),
+        profileRightInset: Math.round(hero.right - profile.right),
+        profileContained: profile.top >= hero.top && profile.right <= hero.right && profile.bottom <= hero.bottom,
+        heroBackgroundPosition: getComputedStyle(document.querySelector(".hero-bg-video")).objectPosition,
+        homeFeatureChildren: document.querySelector(".home-feature").children.length,
+        retiredSearchCount: document.querySelectorAll("#studentSearch").length,
         labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none",
         homeCircle: Math.round(document.querySelector(".home-navigation-icon.is-home-icon").getBoundingClientRect().width),
         homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width),
@@ -69,9 +77,13 @@ async function run() {
         logicLightbulbPaths: document.querySelectorAll(".card-icon .logic-lightbulb-icon path").length
       };
     });
-    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2) {
+    if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2
+      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.45
+      || wideNavigation.profileRightInset < 280 || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
+      || wideNavigation.heroBackgroundPosition !== "50% 0%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
+    await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "compact-home-hero-desktop.png") });
     const googleClassroomCard = await page.evaluate(() => {
       const card = document.querySelector(".google-classroom-home-card");
       const link = card && card.querySelector(".google-classroom-open-btn");
@@ -139,6 +151,7 @@ async function run() {
     if (!mobileNavigation.triggerVisible || mobileNavigation.horizontalOverflow) {
       throw new Error(`Mobile homepage navigation is not responsive: ${JSON.stringify(mobileNavigation)}.`);
     }
+    await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "compact-home-hero-mobile.png") });
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.evaluate(() => localStorage.removeItem("classroomLaunchpadHomeNavigationCollapsedV1"));
     await page.reload({ waitUntil: "networkidle" });
@@ -558,11 +571,10 @@ async function run() {
     const secondContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const secondBrowserPage = await secondContext.newPage();
     await secondBrowserPage.goto("http://localhost:8098/", { waitUntil: "networkidle" });
-    await secondBrowserPage.locator("#studentSearch").fill("Cross Browser Website");
+    await secondBrowserPage.locator('.category-card[data-category="Computer Skills"]').click();
     if (!await secondBrowserPage.getByText("Cross Browser Website", { exact: true }).count()) {
       throw new Error("A website added by the teacher did not appear in a separate browser profile.");
     }
-    await secondBrowserPage.locator("#studentSearch").fill("Existing Browser Addition");
     if (!await secondBrowserPage.getByText("Existing Browser Addition", { exact: true }).count()) {
       throw new Error("The teacher's existing browser-only website additions were not migrated.");
     }
@@ -635,6 +647,8 @@ async function run() {
       googleClassroomReplacesLaunchpadAssignments: true,
       retiredGradebookAndStudentWorkNavigationRemoved: true,
       websiteSearchWorks: true,
+      outdatedHomepageSearchRemoved: true,
+      compactHomepageHeroPreservesHorseFaceClearance: true,
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,

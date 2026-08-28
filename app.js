@@ -2123,9 +2123,6 @@ function renderHome() {
         </div>`
       )}
       <section class="home-feature${homeProfileVideo.endsWith("home-profile-12.mp4") ? " home-feature--detail" : ""}">
-        <div class="search-wrap">
-          <input id="studentSearch" type="search" placeholder="Search approved links" autocomplete="off">
-        </div>
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
           <source data-src="${homeProfileVideo}?v=20260802-profile-rotation12-clean-detail" type="video/mp4">
         </video>
@@ -2570,17 +2567,6 @@ function categoryCard(category) {
       </span>
       <span class="card-arrow">›</span>
     </button>
-  `;
-}
-
-function renderSearchResults(query) {
-  const term = query.trim().toLowerCase();
-  const results = links.filter(link => link.active && [link.title, link.instruction, link.category].some(value => value.toLowerCase().includes(term)));
-  return `
-    <h2 class="section-title">Search Results</h2>
-    <section class="link-list">
-      ${results.length ? results.map(renderStudentLink).join("") : emptyCard("No approved links match your search.")}
-    </section>
   `;
 }
 
@@ -9906,22 +9892,6 @@ function attachScreenHandlers() {
       render();
     });
   }
-  const search = document.getElementById("studentSearch");
-  if (search) {
-    search.addEventListener("input", event => {
-      const body = document.getElementById("homeBody");
-      body.innerHTML = event.target.value.trim() ? renderSearchResults(event.target.value) : renderHomeDefault();
-      observeDeferredVideos(body);
-      attachStudentRequestForm();
-      attachThreadForm();
-      attachReplyForm();
-      attachForumProfileEditor();
-      startCalendarClock();
-      startClassTimerClock();
-      attachHomeNavigation();
-    });
-  }
-
   attachStudentRequestForm();
   attachThreadForm();
   attachReplyForm();
