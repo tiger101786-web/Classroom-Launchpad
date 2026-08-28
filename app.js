@@ -280,6 +280,11 @@ function normalizeRequests(items) {
   }));
 }
 
+function normalizeProfileAvatarUrl(value) {
+  const url = String(value || "");
+  return /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/.test(url) ? url : "";
+}
+
 function normalizeThreads(items) {
   return (Array.isArray(items) ? items : []).map(item => {
     const replies = Array.isArray(item.replies) ? item.replies.map(reply => ({
@@ -287,6 +292,7 @@ function normalizeThreads(items) {
       studentName: reply.studentName || "",
       grade: reply.grade || "",
       message: reply.message || "",
+      avatarUrl: normalizeProfileAvatarUrl(reply.avatarUrl),
       createdAt: reply.createdAt || new Date().toISOString()
     })) : [];
     return {
@@ -296,12 +302,12 @@ function normalizeThreads(items) {
       grade: item.grade || "",
       audienceGrade: String(item.audienceGrade || ""),
       body: item.body || item.message || "",
+      avatarUrl: normalizeProfileAvatarUrl(item.avatarUrl),
       replies,
       createdAt: item.createdAt || new Date().toISOString()
     };
   });
 }
-
 function normalizeMutedStudents(items) {
   return (Array.isArray(items) ? items : []).map(item => ({
     id: item.id || makeId(),
@@ -682,7 +688,20 @@ const sharedBackend = {
       body: JSON.stringify({ currentPassword, newPassword })
     });
   },
-  teacherLogin(pin) {
+  async uploadProfileAvatar(file) {
+    if (!this.enabled) return null;
+    const response = await fetch("/api/profile-avatar", {
+      method: "POST",
+      headers: { "Content-Type": "image/jpeg" },
+      body: file
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload && payload.error ? payload.error : "The profile picture could not be saved.");
+    return payload;
+  },
+  removeProfileAvatar() {
+    return this.request("/api/profile-avatar", { method: "DELETE", body: "{}" });
+  },  teacherLogin(pin) {
     return this.request("/api/auth/teacher", { method: "POST", body: JSON.stringify({ pin }) });
   },
   logout() {
@@ -1344,11 +1363,12 @@ let sharedSyncTimer = null;
 let randomActivity = null;
 let coltRunGame = null;
 let authConfig = { studentEmailDomain: "scscolts.org", studentLoginConfigured: false, teacherConfigured: false };
-let authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
+let authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "", avatarUrl: "" };
 let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
 let accountPasswordMessage = "";
+let profileAvatarMessage = "";
 let directMessages = [];
 let selectedMessageStudentEmail = "";
 let directMessageStatus = "";
@@ -1482,6 +1502,48 @@ function forumRoleLabel(grade = authSession.grade) {
   return value.toLowerCase() === "teacher" ? "Teacher" : `Grade ${value}`;
 }
 
+function forumInitials(name) {
+  const parts = String(name || "Student").trim().split(/\s+/).filter(Boolean);
+  return parts.slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase() || "S";
+}
+
+function renderForumAvatar(name, avatarUrl, extraClass = "") {
+  const safeUrl = normalizeProfileAvatarUrl(avatarUrl);
+  return safeUrl
+    ? `<img class="forum-avatar ${extraClass}" src="${escapeHtml(safeUrl)}" alt="${escapeHtml(`${name || "Student"}'s profile picture`)}">`
+    : `<span class="forum-avatar forum-avatar-initials ${extraClass}" aria-label="${escapeHtml(`${name || "Student"}'s profile picture`)}">${escapeHtml(forumInitials(name))}</span>`;
+}
+
+function renderForumAuthor(post, label = "Member") {
+  return `
+    <aside class="forum-post-author">
+      ${renderForumAvatar(post.studentName, post.avatarUrl)}
+      <strong>${escapeHtml(post.studentName || "Student")}</strong>
+      <span>${escapeHtml(forumRoleLabel(post.grade))}</span>
+      <small>${escapeHtml(label)}</small>
+    </aside>
+  `;
+}
+
+function renderForumProfileEditor(compact = false) {
+  if (!isApprovedStudent()) return "";
+  return `
+    <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
+      ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview")}
+      <div class="forum-profile-copy">
+        <span class="feature-kicker">Colt Corner Profile</span>
+        <h3 id="forumProfileHeading">Your profile picture</h3>
+        <p>Choose a school-appropriate JPG, PNG, or WebP image. It will be cropped to a square for the forum.</p>
+      </div>
+      <div class="forum-profile-actions">
+        <label class="primary-btn forum-profile-choose" for="forumProfileImage">${authSession.avatarUrl ? "Change Picture" : "Choose Picture"}</label>
+        <input id="forumProfileImage" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        ${authSession.avatarUrl ? '<button type="button" class="outline-btn" id="removeForumProfileImage">Remove</button>' : ""}
+      </div>
+      <p id="forumProfileStatus" class="request-message ${profileAvatarMessage ? "success" : ""}" aria-live="polite">${escapeHtml(profileAvatarMessage)}</p>
+    </section>
+  `;
+}
 function hasSharedData() {
   const launchHasSharedData = CLASSROOM_GRADES.some(grade => dailyLaunchRecord(grade).message !== DEFAULT_DAILY_LAUNCH.message);
   return classThreads.length > 0
@@ -2426,30 +2488,44 @@ function renderThreadDetail(threadId) {
     `;
   }
   const replies = getThreadReplies(thread);
+  const started = formatShortDate(thread.createdAt);
   return `
     ${pageHeader("Colt Corner", thread.title, true)}
-    <section class="thread-detail-card">
-      <article class="thread-starter">
-        <span class="feature-kicker">Topic Starter</span>
-        <h2>${escapeHtml(thread.title)}</h2>
-        <p>${escapeHtml(thread.body)}</p>
-        <p class="meta">${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${formatShortDate(thread.createdAt) ? ` • ${escapeHtml(formatShortDate(thread.createdAt))}` : ""}</p>
+    <section class="thread-detail-card forum-thread-view">
+      <div class="forum-thread-titlebar">
+        <span>Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")} Discussion</span>
+        <strong>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</strong>
+      </div>
+      <article class="thread-starter forum-post forum-post-starter">
+        ${renderForumAuthor(thread, "Topic Starter")}
+        <div class="forum-post-content">
+          <header class="forum-post-meta">
+            <span>Original Post</span>
+            ${started ? `<time>${escapeHtml(started)}</time>` : ""}
+          </header>
+          <h2>${escapeHtml(thread.title)}</h2>
+          <p class="forum-post-message">${escapeHtml(thread.body)}</p>
+        </div>
       </article>
       <section class="thread-reply-list" aria-label="Thread replies">
-        <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
-        ${replies.length ? replies.map(renderThreadReply).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}
+        <div class="forum-reply-heading">
+          <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
+          <span>Classmates in this grade only</span>
+        </div>
+        ${replies.length ? replies.map((reply, index) => renderThreadReply(reply, index + 1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}
       </section>
-      <form id="replyForm" class="reply-form" data-thread-id="${thread.id}">
-        <div class="field">
-          <label>Name</label>
-          <input value="${escapeHtml(authSession.name)}" readonly>
+      ${renderForumProfileEditor(true)}
+      <form id="replyForm" class="reply-form forum-reply-composer" data-thread-id="${thread.id}">
+        <div class="forum-reply-identity">
+          ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-reply-avatar")}
+          <div>
+            <span class="feature-kicker">Replying As</span>
+            <strong>${escapeHtml(authSession.name)}</strong>
+            <small>${escapeHtml(isTeacher() ? "Teacher" : `Grade ${authSession.grade}`)}</small>
+          </div>
         </div>
         <div class="field">
-          <label>Grade</label>
-          <input value="${escapeHtml(isTeacher() ? "Teacher" : authSession.grade)}" readonly>
-        </div>
-        <div class="field">
-          <label for="replyMessage">Reply</label>
+          <label for="replyMessage">Add your reply</label>
           <textarea id="replyMessage" maxlength="320" placeholder="Write a respectful question or response"></textarea>
         </div>
         <button class="primary-btn" type="submit">Post Reply</button>
@@ -2464,16 +2540,21 @@ function renderThreadDetail(threadId) {
   `;
 }
 
-function renderThreadReply(reply) {
+function renderThreadReply(reply, position = 1) {
   const submitted = formatShortDate(reply.createdAt);
   return `
-    <article class="thread-reply-post">
-      <p>${escapeHtml(reply.message)}</p>
-      <p class="meta">${escapeHtml(reply.studentName)} • ${escapeHtml(forumRoleLabel(reply.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}</p>
+    <article class="thread-reply-post forum-post">
+      ${renderForumAuthor(reply, "Classmate")}
+      <div class="forum-post-content">
+        <header class="forum-post-meta">
+          <span>Reply #${escapeHtml(String(position))}</span>
+          ${submitted ? `<time>${escapeHtml(submitted)}</time>` : ""}
+        </header>
+        <p class="forum-post-message">${escapeHtml(reply.message)}</p>
+      </div>
     </article>
   `;
 }
-
 function categoryCard(category) {
   const count = links.filter(link => link.active && link.category === category).length;
   return `
@@ -8160,6 +8241,7 @@ function renderAccount() {
         <button class="primary-btn" data-action="openMessages">Open Private Messages${unreadDirectMessageCount() ? ` (${unreadDirectMessageCount()} new)` : ""}</button>
         <button class="outline-btn" data-action="logout">Log Out</button>
       </div>
+      ${renderForumProfileEditor()}
       <section class="student-password-settings" aria-labelledby="changePasswordHeading">
         <span class="feature-kicker">Account Security</span>
         <h3 id="changePasswordHeading">Change Password</h3>
@@ -9832,6 +9914,7 @@ function attachScreenHandlers() {
       attachStudentRequestForm();
       attachThreadForm();
       attachReplyForm();
+      attachForumProfileEditor();
       startCalendarClock();
       startClassTimerClock();
       attachHomeNavigation();
@@ -9841,6 +9924,7 @@ function attachScreenHandlers() {
   attachStudentRequestForm();
   attachThreadForm();
   attachReplyForm();
+  attachForumProfileEditor();
   hydrateOfficeSubmissionPreviews();
   startCalendarClock();
   startClassTimerClock();
@@ -10537,7 +10621,7 @@ function attachReplyForm() {
         const replies = getThreadReplies(updated);
         list.innerHTML = `
           <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
-          ${replies.map(renderThreadReply).join("")}
+          ${replies.map((reply, index) => renderThreadReply(reply, index + 1)).join("")}
         `;
       }
     } catch (submissionError) {
@@ -10551,6 +10635,97 @@ function attachReplyForm() {
   });
 }
 
+function prepareForumProfileImage(file) {
+  return new Promise((resolve, reject) => {
+    const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+    if (!file || !allowedTypes.has(file.type)) {
+      reject(new Error("Choose a JPG, PNG, or WebP image."));
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error("Choose an image smaller than 5 MB."));
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const side = Math.min(image.naturalWidth, image.naturalHeight);
+        if (!side) throw new Error("That image could not be read.");
+        const sourceX = Math.max(0, (image.naturalWidth - side) / 2);
+        const sourceY = Math.max(0, (image.naturalHeight - side) / 2);
+        const canvas = document.createElement("canvas");
+        canvas.width = 384;
+        canvas.height = 384;
+        const context = canvas.getContext("2d", { alpha: false });
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, sourceX, sourceY, side, side, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(objectUrl);
+          if (!blob) reject(new Error("That image could not be prepared."));
+          else resolve(blob);
+        }, "image/jpeg", 0.88);
+      } catch (error) {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("That image could not be read."));
+    };
+    image.src = objectUrl;
+  });
+}
+
+function attachForumProfileEditor() {
+  const input = document.getElementById("forumProfileImage");
+  if (!input || input.dataset.ready === "true") return;
+  input.dataset.ready = "true";
+  input.addEventListener("change", async () => {
+    const status = document.getElementById("forumProfileStatus");
+    const file = input.files && input.files[0];
+    if (!file) return;
+    profileAvatarMessage = "";
+    status.textContent = "Preparing your profile picture...";
+    status.classList.remove("error", "success");
+    input.disabled = true;
+    try {
+      const avatar = await prepareForumProfileImage(file);
+      const result = await sharedBackend.uploadProfileAvatar(avatar);
+      authSession = result && result.session ? result.session : authSession;
+      classThreads = normalizeThreads(result && result.threads);
+      profileAvatarMessage = "Profile picture saved.";
+      render();
+    } catch (error) {
+      status.textContent = error.message;
+      status.classList.add("error");
+      input.value = "";
+      input.disabled = false;
+    }
+  });
+  const remove = document.getElementById("removeForumProfileImage");
+  if (remove) {
+    remove.addEventListener("click", async () => {
+      const status = document.getElementById("forumProfileStatus");
+      remove.disabled = true;
+      status.textContent = "Removing profile picture...";
+      status.classList.remove("error", "success");
+      try {
+        const result = await sharedBackend.removeProfileAvatar();
+        authSession = result && result.session ? result.session : authSession;
+        classThreads = normalizeThreads(result && result.threads);
+        profileAvatarMessage = "Profile picture removed.";
+        render();
+      } catch (error) {
+        status.textContent = error.message;
+        status.classList.add("error");
+        remove.disabled = false;
+      }
+    });
+  }
+}
 function validateThreadTopic(thread) {
   if (!isSignedIn()) return "Please log in with your approved Classroom Launchpad account.";
   if (postingBlocked) return "Posting is unavailable. Please check with Mr. Nieves.";
@@ -10755,7 +10930,7 @@ app.addEventListener("click", async event => {
     try {
       await sharedBackend.logout();
     } catch {}
-    authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
+    authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "", avatarUrl: "" };
     accountPasswordMessage = "";
     classThreads = [];
     directMessages = [];

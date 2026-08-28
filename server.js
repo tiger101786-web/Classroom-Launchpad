@@ -18,6 +18,7 @@ const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path
 const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
 const submissionDir = path.join(dataDir, "student-submissions");
 const assignmentFileDir = path.join(dataDir, "assignment-files");
+const profileAvatarDir = path.join(dataDir, "profile-avatars");
 const port = Number(process.env.PORT || 8080);
 const allowedStudentDomain = String(process.env.STUDENT_EMAIL_DOMAIN || "scscolts.org").trim().toLowerCase();
 const teacherTestStudentEmail = "tiger101786@gmail.com";
@@ -29,6 +30,7 @@ const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "
 const loginAttempts = new Map();
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
+const maxProfileAvatarBytes = 700 * 1024;
 const allowedSubmissionTypes = new Map([
   [".pdf", "application/pdf"],
   [".doc", "application/msword"],
@@ -212,7 +214,8 @@ function normalizeModeratedPost(source, type) {
     moderatedAt: validIsoDate(source && source.moderatedAt),
     moderatedBy: cleanText(source && source.moderatedBy, 80),
     normalizedMessageHash: cleanText(source && source.normalizedMessageHash, 128),
-    authorKey: cleanText(source && source.authorKey, 128)
+    authorKey: cleanText(source && source.authorKey, 128),
+    avatarUrl: cleanProfileAvatarUrl(source && source.avatarUrl)
   };
   if (type === "topic") {
     return {
@@ -279,6 +282,34 @@ function studentAuthorKey(session) {
   return crypto.createHash("sha256").update(normalizeEmail(session && session.email)).digest("hex");
 }
 
+function cleanProfileAvatarUrl(value) {
+  const url = String(value || "");
+  return /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/.test(url) ? url : "";
+}
+
+function profileAvatarUrlForStudent(student) {
+  if (!student || !student.email || !student.avatarUpdatedAt) return "";
+  const version = Date.parse(student.avatarUpdatedAt);
+  if (!Number.isFinite(version)) return "";
+  return `/api/profile-avatar/${studentAuthorKey({ email: student.email })}?v=${version}`;
+}
+
+function profileAvatarUrlForSession(session, db) {
+  if (!session || session.role !== "student") return "";
+  const student = normalizeApprovedStudents(db && db.approvedStudents)
+    .find(item => item.email === normalizeEmail(session.email));
+  return profileAvatarUrlForStudent(student);
+}
+
+function applyProfileAvatarToThreads(entries, authorKey, avatarUrl) {
+  return normalizeModeratedThreads(entries).map(thread => ({
+    ...thread,
+    ...(thread.authorKey === authorKey ? { avatarUrl } : {}),
+    replies: (thread.replies || []).map(reply => (
+      reply.authorKey === authorKey ? { ...reply, avatarUrl } : reply
+    ))
+  }));
+}
 function isApprovedPost(post) {
   return !post || !post.moderationStatus || post.moderationStatus === "approved";
 }
@@ -289,7 +320,8 @@ function publicPost(post, type) {
     studentName: post.studentName,
     grade: post.grade,
     audienceGrade: post.audienceGrade || "",
-    createdAt: post.createdAt
+    createdAt: post.createdAt,
+    avatarUrl: cleanProfileAvatarUrl(post.avatarUrl)
   };
   return type === "topic"
     ? {
@@ -453,6 +485,7 @@ function normalizeApprovedStudents(entries) {
       activationSalt: cleanText(source.activationSalt, 128),
       activationHash: cleanText(source.activationHash, 256),
       activationIssuedAt: Number.isFinite(Date.parse(source.activationIssuedAt)) ? new Date(source.activationIssuedAt).toISOString() : "",
+      avatarUpdatedAt: Number.isFinite(Date.parse(source.avatarUpdatedAt)) ? new Date(source.avatarUpdatedAt).toISOString() : "",
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
   }).sort((a, b) => a.email.localeCompare(b.email));
@@ -717,6 +750,7 @@ function ensureDb() {
   fs.mkdirSync(dataDir, { recursive: true });
   fs.mkdirSync(submissionDir, { recursive: true });
   fs.mkdirSync(assignmentFileDir, { recursive: true });
+  fs.mkdirSync(profileAvatarDir, { recursive: true });
   if (!fs.existsSync(dbPath)) writeDb(defaultDb);
 }
 
@@ -732,6 +766,7 @@ function withTeacherTestStudent(db) {
       activationSalt: "",
       activationHash: "",
       activationIssuedAt: "",
+      avatarUpdatedAt: "",
       createdAt: new Date().toISOString()
     });
   }
@@ -878,17 +913,18 @@ function clearSessionCookie(req) {
   return `${sessionCookieName}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${isSecureRequest(req) ? "; Secure" : ""}`;
 }
 
-function publicSession(session) {
+function publicSession(session, db = null) {
   if (!session) return { authenticated: false, role: "guest" };
+  const sourceDb = session.role === "student" ? (db || readDb()) : db;
   return {
     authenticated: true,
     role: session.role,
     name: session.name || (session.role === "teacher" ? "Mr. Nieves" : "Student"),
     email: session.role === "student" ? session.email : "",
-    grade: session.role === "student" ? session.grade || "" : "Teacher"
+    grade: session.role === "student" ? session.grade || "" : "Teacher",
+    avatarUrl: session.role === "student" ? profileAvatarUrlForSession(session, sourceDb) : ""
   };
 }
-
 function requireRole(req, res, roles) {
   const session = readSession(req);
   if (!session || !roles.includes(session.role)) {
@@ -982,7 +1018,7 @@ function publicState(db, session) {
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
     randomActivity: db.randomActivity,
-    auth: publicSession(session),
+    auth: publicSession(session, db),
     coltCornerLocked: !signedIn,
     postingBlocked: session && session.role === "student" ? isStudentMuted(db, session) : false
   };
@@ -2349,6 +2385,94 @@ async function handleApi(req, res, pathname) {
   if (await handleClassroomPassApi(req, res, pathname)) return true;
 
   const session = readSession(req);
+  const avatarRequest = pathname.match(/^\/api\/profile-avatar\/([a-f0-9]{64})$/);
+  if (req.method === "GET" && avatarRequest) {
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    const authorKey = avatarRequest[1];
+    const db = readDb();
+    const owner = normalizeApprovedStudents(db.approvedStudents).find(student => (
+      student.avatarUpdatedAt && studentAuthorKey({ email: student.email }) === authorKey
+    ));
+    const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
+    if (!owner || !fs.existsSync(avatarPath)) {
+      sendJson(res, 404, { error: "That profile picture is not available." });
+      return true;
+    }
+    const stats = fs.statSync(avatarPath);
+    res.writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Content-Length": stats.size,
+      "Cache-Control": "private, max-age=86400",
+      "X-Content-Type-Options": "nosniff"
+    });
+    fs.createReadStream(avatarPath).pipe(res);
+    return true;
+  }
+
+  if (pathname === "/api/profile-avatar" && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student"]);
+    if (!allowed) return true;
+    try {
+      if (String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase() !== "image/jpeg") {
+        throw new Error("Choose a JPG, PNG, or WebP image.");
+      }
+      const file = await readBinaryBody(req, maxProfileAvatarBytes, "That profile picture is too large.");
+      if (!fileMatchesExtension(file, ".jpg")) throw new Error("That profile picture could not be verified.");
+      const db = readDb();
+      const email = normalizeEmail(allowed.email);
+      const students = normalizeApprovedStudents(db.approvedStudents);
+      const student = students.find(item => item.email === email);
+      if (!student) throw new Error("Your approved student account could not be found.");
+      const authorKey = studentAuthorKey(allowed);
+      const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
+      const tempPath = `${avatarPath}.tmp`;
+      fs.writeFileSync(tempPath, file);
+      fs.renameSync(tempPath, avatarPath);
+      student.avatarUpdatedAt = new Date().toISOString();
+      db.approvedStudents = students.map(item => item.email === email ? student : item);
+      const avatarUrl = profileAvatarUrlForStudent(student);
+      db.threads = applyProfileAvatarToThreads(db.threads, authorKey, avatarUrl);
+      writeDb(db);
+      sendJson(res, 200, {
+        ok: true,
+        session: publicSession(allowed, db),
+        threads: visibleApprovedThreads(db.threads, allowed)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (pathname === "/api/profile-avatar" && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student"]);
+    if (!allowed) return true;
+    try {
+      const db = readDb();
+      const email = normalizeEmail(allowed.email);
+      const students = normalizeApprovedStudents(db.approvedStudents);
+      const student = students.find(item => item.email === email);
+      if (!student) throw new Error("Your approved student account could not be found.");
+      const authorKey = studentAuthorKey(allowed);
+      const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
+      if (fs.existsSync(avatarPath)) fs.unlinkSync(avatarPath);
+      student.avatarUpdatedAt = "";
+      db.approvedStudents = students.map(item => item.email === email ? student : item);
+      db.threads = applyProfileAvatarToThreads(db.threads, authorKey, "");
+      writeDb(db);
+      sendJson(res, 200, {
+        ok: true,
+        session: publicSession(allowed, db),
+        threads: visibleApprovedThreads(db.threads, allowed)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
   if (req.method === "GET" && pathname === "/api/state") {
     sendJson(res, 200, publicState(readDb(), session));
     return true;
@@ -2468,6 +2592,7 @@ async function handleApi(req, res, pathname) {
           ? cleanText(allowed.name || "Mr. Nieves", 80)
           : studentDisplayName(allowed),
         grade,
+        avatarUrl: profileAvatarUrlForSession(allowed, db),
         audienceGrade,
         title,
         body: message,
@@ -2538,6 +2663,7 @@ async function handleApi(req, res, pathname) {
           ? cleanText(allowed.name || "Mr. Nieves", 80)
           : studentDisplayName(allowed),
         grade,
+        avatarUrl: profileAvatarUrlForSession(allowed, db),
         message,
         createdAt: submittedAt,
         ...moderationFields(result, allowed, submittedAt)
@@ -2926,7 +3052,7 @@ function serveStatic(req, res, url) {
   });
 }
 
-function readBinaryBody(req, limit = maxSubmissionBytes) {
+function readBinaryBody(req, limit = maxSubmissionBytes, sizeError = "That file is larger than the assignment allows.") {
   return new Promise((resolve, reject) => {
     const chunks = [];
     let total = 0;
@@ -2936,7 +3062,7 @@ function readBinaryBody(req, limit = maxSubmissionBytes) {
       total += chunk.length;
       if (total > limit) {
         stopped = true;
-        reject(new Error("That file is larger than the assignment allows."));
+        reject(new Error(sizeError));
         req.destroy();
         return;
       }
