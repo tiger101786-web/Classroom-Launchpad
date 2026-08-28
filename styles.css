@@ -7718,3 +7718,43 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.student-password-settings {
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+  padding-top: 22px;
+}
+
+.student-password-settings h3 {
+  margin: 7px 0 5px;
+}
+
+.student-password-settings > p {
+  color: var(--muted);
+  margin: 0 0 17px;
+}
+
+.student-password-settings form {
+  max-width: 760px;
+}
+
+.student-new-password-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-change-password-button {
+  justify-self: start;
+  min-width: 190px;
+}
+
+@media (max-width: 650px) {
+  .student-new-password-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-change-password-button {
+    justify-self: stretch;
+    width: 100%;
+  }
+}

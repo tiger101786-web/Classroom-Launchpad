@@ -676,6 +676,12 @@ const sharedBackend = {
   loginStudent(email, password) {
     return this.request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
   },
+  changeStudentPassword(currentPassword, newPassword) {
+    return this.request("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+  },
   teacherLogin(pin) {
     return this.request("/api/auth/teacher", { method: "POST", body: JSON.stringify({ pin }) });
   },
@@ -1342,6 +1348,7 @@ let authSession = { authenticated: false, role: "guest", name: "", email: "", gr
 let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
+let accountPasswordMessage = "";
 let directMessages = [];
 let selectedMessageStudentEmail = "";
 let directMessageStatus = "";
@@ -8145,7 +8152,7 @@ function renderLogin() {
 function renderAccount() {
   return `
     ${pageHeader("Your Account", "", true)}
-    <section class="auth-card">
+    <section class="auth-card student-account-card">
       <span class="feature-kicker">Signed In</span>
       <h2>${escapeHtml(authSession.name || "Student")}</h2>
       <p>${escapeHtml(authSession.email || "")}</p>
@@ -8153,10 +8160,37 @@ function renderAccount() {
         <button class="primary-btn" data-action="openMessages">Open Private Messages${unreadDirectMessageCount() ? ` (${unreadDirectMessageCount()} new)` : ""}</button>
         <button class="outline-btn" data-action="logout">Log Out</button>
       </div>
+      <section class="student-password-settings" aria-labelledby="changePasswordHeading">
+        <span class="feature-kicker">Account Security</span>
+        <h3 id="changePasswordHeading">Change Password</h3>
+        <p>Enter your current Classroom Launchpad password, then create a new one.</p>
+        <form id="studentChangePasswordForm" class="form-grid">
+          <div class="field">
+            <label for="studentCurrentPassword">Current password</label>
+            <input id="studentCurrentPassword" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="student-new-password-grid">
+            <div class="field">
+              <label for="studentNewPassword">New password</label>
+              <input id="studentNewPassword" type="password" autocomplete="new-password" minlength="10" required>
+              <small>Use at least 10 characters. Do not reuse your Google password.</small>
+            </div>
+            <div class="field">
+              <label for="studentNewPasswordConfirm">Confirm new password</label>
+              <input id="studentNewPasswordConfirm" type="password" autocomplete="new-password" minlength="10" required>
+            </div>
+          </div>
+          <label class="password-visibility-control" for="showStudentChangePasswords">
+            <input id="showStudentChangePasswords" type="checkbox" data-password-visibility data-password-targets="studentCurrentPassword studentNewPassword studentNewPasswordConfirm" aria-controls="studentCurrentPassword studentNewPassword studentNewPasswordConfirm">
+            <span>Show passwords</span>
+          </label>
+          <button class="primary-btn student-change-password-button" type="submit">Update Password</button>
+          <p id="studentChangePasswordStatus" class="request-message" aria-live="polite">${escapeHtml(accountPasswordMessage)}</p>
+        </form>
+      </section>
     </section>
   `;
 }
-
 function formatDirectMessageTime(value) {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
@@ -9594,6 +9628,35 @@ function attachScreenHandlers() {
     });
   });
 
+  const studentChangePasswordForm = document.getElementById("studentChangePasswordForm");
+  if (studentChangePasswordForm) {
+    studentChangePasswordForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("studentChangePasswordStatus");
+      const currentPassword = document.getElementById("studentCurrentPassword").value;
+      const newPassword = document.getElementById("studentNewPassword").value;
+      const confirmation = document.getElementById("studentNewPasswordConfirm").value;
+      status.classList.remove("error");
+      if (newPassword !== confirmation) {
+        accountPasswordMessage = "The new password entries do not match.";
+        status.textContent = accountPasswordMessage;
+        status.classList.add("error");
+        return;
+      }
+      status.textContent = "Updating your password…";
+      try {
+        await sharedBackend.changeStudentPassword(currentPassword, newPassword);
+        accountPasswordMessage = "Your Classroom Launchpad password was updated.";
+        studentChangePasswordForm.reset();
+        status.textContent = accountPasswordMessage;
+      } catch (error) {
+        accountPasswordMessage = error.message;
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
+
   const directMessageForm = document.getElementById("directMessageForm");
   if (directMessageForm) {
     directMessageForm.addEventListener("submit", async event => {
@@ -10669,12 +10732,16 @@ app.addEventListener("click", async event => {
     authMessage = "";
     setScreen({ name: "login" });
   }
-  if (action === "account") setScreen({ name: "account" });
+  if (action === "account") {
+    accountPasswordMessage = "";
+    setScreen({ name: "account" });
+  }
   if (action === "logout") {
     try {
       await sharedBackend.logout();
     } catch {}
     authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
+    accountPasswordMessage = "";
     classThreads = [];
     directMessages = [];
     selectedMessageStudentEmail = "";

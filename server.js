@@ -1352,6 +1352,40 @@ async function handleAuthApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "POST" && pathname === "/api/auth/change-password") {
+    if (!requireSameOrigin(req, res)) return true;
+    const session = requireRole(req, res, ["student"]);
+    if (!session) return true;
+    try {
+      const body = await readBody(req);
+      const currentPassword = String(body.currentPassword || "");
+      const newPassword = String(body.newPassword || "");
+      if (newPassword.length < 10 || newPassword.length > 128) {
+        sendJson(res, 400, { error: "Create a password containing at least 10 characters." });
+        return true;
+      }
+      const db = readDb();
+      const approved = normalizeApprovedStudents(db.approvedStudents).find(student => student.email === normalizeEmail(session.email));
+      if (!approved || !approved.passwordHash || !verifyStudentSecret(currentPassword, approved.passwordSalt, approved.passwordHash)) {
+        sendJson(res, 401, { error: "The current password did not match.", code: "INVALID_CURRENT_PASSWORD" });
+        return true;
+      }
+      if (verifyStudentSecret(newPassword, approved.passwordSalt, approved.passwordHash)) {
+        sendJson(res, 400, { error: "Choose a new password that is different from the current password." });
+        return true;
+      }
+      const passwordRecord = hashStudentSecret(newPassword);
+      approved.passwordSalt = passwordRecord.salt;
+      approved.passwordHash = passwordRecord.hash;
+      db.approvedStudents = db.approvedStudents.map(student => normalizeEmail(student.email) === approved.email ? approved : student);
+      writeDb(db);
+      sendJson(res, 200, { ok: true });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
   if (req.method === "POST" && pathname === "/api/auth/teacher") {
     if (!requireSameOrigin(req, res)) return true;
     if (!rateLimitLogin(req)) {
