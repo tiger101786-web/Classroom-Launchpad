@@ -27,5 +27,10 @@ check(server.includes('return messages.filter(message => message.studentEmail ==
 check(server.includes('const allowed = requireRole(req, res, ["student", "teacher"]);'), "Private message endpoints require login.");
 check(styles.includes(".password-visibility-control"), "Password control styling is missing.");
 check(styles.includes(".teacher-message-center"), "Private message layout styling is missing.");
+check(app.includes('id="teacherMessageSearch"'), "Teacher student search is missing.");
+check(app.includes('data-action="messageGrade"'), "Grade-level message filters are missing.");
+check(app.includes('function renderDirectMessageNotification()'), "Unread response notification is missing.");
+check(app.includes('const cornerHeading = isTeacher() ? "Colt Corner"'), "Teacher homepage incorrectly uses a student grade label for Colt Corner.");
+check(styles.includes(".direct-message-notification"), "Unread notification styling is missing.");
 
 console.log("Private message security and password visibility checks passed.");

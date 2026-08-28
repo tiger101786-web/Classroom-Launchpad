@@ -7355,7 +7355,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .teacher-message-center {
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.8fr);
+  grid-template-columns: minmax(310px, 0.85fr) minmax(0, 1.8fr);
 }
 
 .teacher-message-roster,
@@ -7568,5 +7568,153 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .direct-message-composer > div {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+.teacher-message-search {
+  display: block;
+  margin-top: 14px;
+}
+
+.teacher-message-search input {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.teacher-message-search input:focus {
+  border-color: var(--blue);
+  outline: 3px solid rgba(123, 11, 49, 0.15);
+}
+
+.teacher-message-grade-tabs {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.teacher-message-grade-tabs button {
+  align-items: center;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-weight: 800;
+  gap: 5px;
+  justify-content: space-between;
+  min-height: 39px;
+  padding: 8px 10px;
+}
+
+.teacher-message-grade-tabs button:first-child {
+  grid-column: 1 / -1;
+}
+
+.teacher-message-grade-tabs button:hover,
+.teacher-message-grade-tabs button.is-active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.teacher-message-grade-tabs span {
+  align-items: center;
+  background: rgba(123, 11, 49, 0.12);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.75rem;
+  justify-content: center;
+  min-width: 24px;
+  padding: 3px 6px;
+}
+
+.teacher-message-grade-tabs button:hover span,
+.teacher-message-grade-tabs button.is-active span {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.teacher-message-empty {
+  color: var(--muted);
+  padding: 24px;
+  text-align: center;
+}
+
+.teacher-message-empty h3 {
+  color: var(--ink);
+  margin: 8px 0;
+}
+
+.direct-message-notification {
+  align-items: center;
+  background: var(--blue);
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 38px 1fr auto;
+  max-width: min(360px, calc(100vw - 30px));
+  padding: 11px 13px;
+  position: fixed;
+  right: 18px;
+  text-align: left;
+  top: 82px;
+  z-index: 19;
+}
+
+.direct-message-notification:hover {
+  background: var(--blue-dark);
+  transform: translateY(-1px);
+}
+
+.direct-message-notification-icon {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.17);
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 1.1rem;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.direct-message-notification strong,
+.direct-message-notification small {
+  display: block;
+}
+
+.direct-message-notification small {
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.direct-message-notification b {
+  align-items: center;
+  background: #fff;
+  border-radius: 999px;
+  color: var(--blue);
+  display: inline-flex;
+  height: 26px;
+  justify-content: center;
+  min-width: 26px;
+  padding: 0 7px;
+}
+
+@media (max-width: 820px) {
+  .direct-message-notification {
+    left: 15px;
+    right: 15px;
+    top: 72px;
+  }
+
+  .teacher-message-grade-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
