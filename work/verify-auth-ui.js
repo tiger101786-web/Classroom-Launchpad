@@ -60,6 +60,7 @@ async function run() {
         heroBackgroundPosition: getComputedStyle(document.querySelector(".hero-bg-video")).objectPosition,
         homeFeatureChildren: document.querySelector(".home-feature").children.length,
         retiredSearchCount: document.querySelectorAll("#studentSearch").length,
+        retiredSubtitleCount: document.querySelectorAll(".hero-panel .subtitle").length,
         labelsVisible: getComputedStyle(document.querySelector(".home-navigation-label")).display !== "none",
         homeCircle: Math.round(document.querySelector(".home-navigation-icon.is-home-icon").getBoundingClientRect().width),
         homeHouse: Math.round(document.querySelector(".home-navigation-icon.is-home-icon svg").getBoundingClientRect().width),
@@ -78,7 +79,7 @@ async function run() {
       };
     });
     if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2
-      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.45
+      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.45
       || wideNavigation.profileRightInset < 280 || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
       || wideNavigation.heroBackgroundPosition !== "50% 0%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
@@ -648,6 +649,7 @@ async function run() {
       retiredGradebookAndStudentWorkNavigationRemoved: true,
       websiteSearchWorks: true,
       outdatedHomepageSearchRemoved: true,
+      outdatedHomepageSubtitleRemoved: true,
       compactHomepageHeroPreservesHorseFaceClearance: true,
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,

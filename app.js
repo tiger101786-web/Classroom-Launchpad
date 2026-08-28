@@ -2112,7 +2112,7 @@ function renderHome() {
       </video>
       ${pageHeader(
         "Classroom Launchpad",
-        "Choose a teacher-approved activity or resource below.",
+        "",
         false,
         `<div class="header-actions">
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
