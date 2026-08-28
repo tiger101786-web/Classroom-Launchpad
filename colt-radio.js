@@ -24,6 +24,27 @@
       note: "Free, ad-free chill music streamed by Lofi Cafe. No account required."
     },
     {
+      id: "sleeping",
+      label: "Sleeping",
+      type: "embed",
+      source: "https://loficafe.net/embed/sleeping",
+      note: "Free, ad-free soft lofi streamed by Lofi Cafe for quiet work and calm classroom moments. No account required."
+    },
+    {
+      id: "gaming",
+      label: "Gaming Lofi",
+      type: "embed",
+      source: "https://loficafe.net/embed/gaming",
+      note: "Free, ad-free instrumental lofi with a little more energy, streamed by Lofi Cafe. No account required."
+    },
+    {
+      id: "japanese-lofi",
+      label: "Japanese Lofi",
+      type: "embed",
+      source: "https://loficafe.net/embed/japanese-lofi",
+      note: "Free, ad-free Japanese-inspired instrumental lofi streamed by Lofi Cafe. No account required."
+    },
+    {
       id: "lofi-fm",
       label: "Lofi FM",
       type: "playlist",
@@ -56,6 +77,22 @@
       source: "https://stream.nightride.fm/datawave.mp3",
       metadataMount: "/datawave.mp3",
       note: "Instrumental electronic and retro-computing music streamed by Nightride FM. No account required."
+    },
+    {
+      id: "nightride",
+      label: "Nightride",
+      type: "stream",
+      source: "https://stream.nightride.fm/nightride.mp3",
+      metadataMount: "/nightride.mp3",
+      note: "Synthwave, retrowave, and outrun music streamed live by Nightride FM. No account required."
+    },
+    {
+      id: "spacesynth",
+      label: "Spacesynth",
+      type: "stream",
+      source: "https://stream.nightride.fm/spacesynth.mp3",
+      metadataMount: "/spacesynth.mp3",
+      note: "Spacesynth, space disco, and retro electronic music streamed live by Nightride FM. No account required."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";

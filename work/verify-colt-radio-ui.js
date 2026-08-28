@@ -85,7 +85,9 @@ async function run() {
             icestats: {
               source: [
                 { listenurl: "https://stream.nightride.fm/chillsynth.mp3", title: "Test Artist - Chillsynth Song" },
-                { listenurl: "https://stream.nightride.fm/datawave.mp3", title: "Test Artist - Datawave Song" }
+                { listenurl: "https://stream.nightride.fm/datawave.mp3", title: "Test Artist - Datawave Song" },
+                { listenurl: "https://stream.nightride.fm/nightride.mp3", title: "Test Artist - Nightride Song" },
+                { listenurl: "https://stream.nightride.fm/spacesynth.mp3", title: "Test Artist - Spacesynth Song" }
               ]
             }
           })
@@ -137,7 +139,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Lofi FM", "Chillsynth", "Datawave"]
+      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -158,21 +160,31 @@ async function run() {
 
     await page.getByRole("button", { name: "Working", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
+    await page.getByRole("button", { name: "Sleeping", exact: true }).click();
+    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/sleeping");
+    await page.getByRole("button", { name: "Gaming Lofi", exact: true }).click();
+    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/gaming");
+    await page.getByRole("button", { name: "Japanese Lofi", exact: true }).click();
+    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/japanese-lofi");
     await page.evaluate(() => {
       window.__embeddedFrameBeforeDirectStation = document.querySelector(".colt-radio-player iframe");
     });
 
-    await page.getByRole("button", { name: "Chillsynth", exact: true }).click();
-    assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/chillsynth.mp3");
+    await page.getByRole("button", { name: "Nightride", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/nightride.mp3");
     assert(await audio.isHidden(), "The browser's progress and duration bar remained visible for Chillsynth.");
     assert(await page.locator(".colt-radio-stream-player").isVisible(), "The compact Chillsynth player did not appear.");
     assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
     assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
     assert(await page.getByRole("button", { name: "Mute Colt Radio" }).isVisible(), "The compact speaker button is missing.");
     assert(await iframe.isHidden(), "The Lofi Cafe player remained visible after switching to Chillsynth.");
-    assert.match(await page.locator(".colt-radio-note").innerText(), /Instrumental chillsynth/);
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Synthwave, retrowave/);
     assert(await page.evaluate(() => !window.__embeddedFrameBeforeDirectStation.isConnected), "The old Lofi Cafe player kept running after switching stations.");
-    await page.getByText("Test Artist - Chillsynth Song", { exact: true }).waitFor();
+    await page.getByText("Test Artist - Nightride Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Spacesynth", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/spacesynth.mp3");
+    await page.getByText("Test Artist - Spacesynth Song", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Lofi FM", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
@@ -246,7 +258,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Lofi FM", "Chillsynth", "Datawave"],
+      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
