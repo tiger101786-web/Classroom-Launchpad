@@ -81,6 +81,7 @@ const defaultDb = {
   leaderboards: [],
   approvedStudents: [],
   teacherPin: null,
+  teacherAvatarUpdatedAt: "",
   dailyLaunch: {
     message: "Check the board for today's first task, then choose a teacher-approved activity or resource.",
     updatedAt: ""
@@ -282,6 +283,8 @@ function studentAuthorKey(session) {
   return crypto.createHash("sha256").update(normalizeEmail(session && session.email)).digest("hex");
 }
 
+const teacherAuthorKey = crypto.createHash("sha256").update("classroom-launchpad-teacher").digest("hex");
+
 function cleanProfileAvatarUrl(value) {
   const url = String(value || "");
   return /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/.test(url) ? url : "";
@@ -295,7 +298,12 @@ function profileAvatarUrlForStudent(student) {
 }
 
 function profileAvatarUrlForSession(session, db) {
-  if (!session || session.role !== "student") return "";
+  if (!session) return "";
+  if (session.role === "teacher") {
+    const version = Date.parse(db && db.teacherAvatarUpdatedAt);
+    return Number.isFinite(version) ? `/api/profile-avatar/${teacherAuthorKey}?v=${version}` : "";
+  }
+  if (session.role !== "student") return "";
   const student = normalizeApprovedStudents(db && db.approvedStudents)
     .find(item => item.email === normalizeEmail(session.email));
   return profileAvatarUrlForStudent(student);
@@ -802,6 +810,9 @@ function writeDb(db) {
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,
+    teacherAvatarUpdatedAt: Number.isFinite(Date.parse(db.teacherAvatarUpdatedAt))
+      ? new Date(db.teacherAvatarUpdatedAt).toISOString()
+      : "",
     dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch),
     classTimer: db.classTimer && typeof db.classTimer === "object"
       ? {
@@ -915,14 +926,14 @@ function clearSessionCookie(req) {
 
 function publicSession(session, db = null) {
   if (!session) return { authenticated: false, role: "guest" };
-  const sourceDb = session.role === "student" ? (db || readDb()) : db;
+  const sourceDb = ["student", "teacher"].includes(session.role) ? (db || readDb()) : db;
   return {
     authenticated: true,
     role: session.role,
     name: session.name || (session.role === "teacher" ? "Mr. Nieves" : "Student"),
     email: session.role === "student" ? session.email : "",
     grade: session.role === "student" ? session.grade || "" : "Teacher",
-    avatarUrl: session.role === "student" ? profileAvatarUrlForSession(session, sourceDb) : ""
+    avatarUrl: profileAvatarUrlForSession(session, sourceDb)
   };
 }
 function requireRole(req, res, roles) {
@@ -2391,11 +2402,12 @@ async function handleApi(req, res, pathname) {
     if (!allowed) return true;
     const authorKey = avatarRequest[1];
     const db = readDb();
-    const owner = normalizeApprovedStudents(db.approvedStudents).find(student => (
+    const studentOwner = normalizeApprovedStudents(db.approvedStudents).find(student => (
       student.avatarUpdatedAt && studentAuthorKey({ email: student.email }) === authorKey
     ));
+    const teacherOwner = authorKey === teacherAuthorKey && Number.isFinite(Date.parse(db.teacherAvatarUpdatedAt));
     const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
-    if (!owner || !fs.existsSync(avatarPath)) {
+    if ((!studentOwner && !teacherOwner) || !fs.existsSync(avatarPath)) {
       sendJson(res, 404, { error: "That profile picture is not available." });
       return true;
     }
@@ -2412,7 +2424,7 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === "/api/profile-avatar" && req.method === "POST") {
     if (!requireSameOrigin(req, res)) return true;
-    const allowed = requireRole(req, res, ["student"]);
+    const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
     try {
       if (String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase() !== "image/jpeg") {
@@ -2421,19 +2433,27 @@ async function handleApi(req, res, pathname) {
       const file = await readBinaryBody(req, maxProfileAvatarBytes, "That profile picture is too large.");
       if (!fileMatchesExtension(file, ".jpg")) throw new Error("That profile picture could not be verified.");
       const db = readDb();
-      const email = normalizeEmail(allowed.email);
-      const students = normalizeApprovedStudents(db.approvedStudents);
-      const student = students.find(item => item.email === email);
-      if (!student) throw new Error("Your approved student account could not be found.");
-      const authorKey = studentAuthorKey(allowed);
+      const authorKey = allowed.role === "teacher" ? teacherAuthorKey : studentAuthorKey(allowed);
       const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
       const tempPath = `${avatarPath}.tmp`;
       fs.writeFileSync(tempPath, file);
       fs.renameSync(tempPath, avatarPath);
-      student.avatarUpdatedAt = new Date().toISOString();
-      db.approvedStudents = students.map(item => item.email === email ? student : item);
-      const avatarUrl = profileAvatarUrlForStudent(student);
-      db.threads = applyProfileAvatarToThreads(db.threads, authorKey, avatarUrl);
+      const updatedAt = new Date().toISOString();
+      let avatarUrl = "";
+      if (allowed.role === "teacher") {
+        db.teacherAvatarUpdatedAt = updatedAt;
+        avatarUrl = profileAvatarUrlForSession(allowed, db);
+      } else {
+        const email = normalizeEmail(allowed.email);
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(item => item.email === email);
+        if (!student) throw new Error("Your approved student account could not be found.");
+        student.avatarUpdatedAt = updatedAt;
+        db.approvedStudents = students.map(item => item.email === email ? student : item);
+        avatarUrl = profileAvatarUrlForStudent(student);
+      }
+      const threadAuthorKey = allowed.role === "teacher" ? "teacher" : authorKey;
+      db.threads = applyProfileAvatarToThreads(db.threads, threadAuthorKey, avatarUrl);
       writeDb(db);
       sendJson(res, 200, {
         ok: true,
@@ -2448,20 +2468,25 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === "/api/profile-avatar" && req.method === "DELETE") {
     if (!requireSameOrigin(req, res)) return true;
-    const allowed = requireRole(req, res, ["student"]);
+    const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
     try {
       const db = readDb();
-      const email = normalizeEmail(allowed.email);
-      const students = normalizeApprovedStudents(db.approvedStudents);
-      const student = students.find(item => item.email === email);
-      if (!student) throw new Error("Your approved student account could not be found.");
-      const authorKey = studentAuthorKey(allowed);
+      const authorKey = allowed.role === "teacher" ? teacherAuthorKey : studentAuthorKey(allowed);
       const avatarPath = path.join(profileAvatarDir, `${authorKey}.jpg`);
       if (fs.existsSync(avatarPath)) fs.unlinkSync(avatarPath);
-      student.avatarUpdatedAt = "";
-      db.approvedStudents = students.map(item => item.email === email ? student : item);
-      db.threads = applyProfileAvatarToThreads(db.threads, authorKey, "");
+      if (allowed.role === "teacher") {
+        db.teacherAvatarUpdatedAt = "";
+      } else {
+        const email = normalizeEmail(allowed.email);
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(item => item.email === email);
+        if (!student) throw new Error("Your approved student account could not be found.");
+        student.avatarUpdatedAt = "";
+        db.approvedStudents = students.map(item => item.email === email ? student : item);
+      }
+      const threadAuthorKey = allowed.role === "teacher" ? "teacher" : authorKey;
+      db.threads = applyProfileAvatarToThreads(db.threads, threadAuthorKey, "");
       writeDb(db);
       sendJson(res, 200, {
         ok: true,

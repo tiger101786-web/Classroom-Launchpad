@@ -100,6 +100,16 @@ async function run() {
       body: { title: "Forum layout test", message: "This first post checks the new two-column discussion layout." }
     });
     assert.equal(response.status, 200);
+    response = await request("/api/threads", {
+      method: "POST",
+      cookie: teacherCookie,
+      body: {
+        title: "Teacher profile test",
+        message: "This topic verifies the teacher profile picture controls.",
+        grades: ["4"]
+      }
+    });
+    assert.equal(response.status, 200);
 
     browser = await chromium.launch({
       headless: true,
@@ -137,11 +147,34 @@ async function run() {
     await page.locator("#forumProfileStatus").getByText("Profile picture removed.").waitFor();
     assert(await page.locator(".forum-profile-preview.forum-avatar-initials").isVisible());
 
+    const teacherContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const [teacherCookieName, teacherCookieValue] = teacherCookie.split("=");
+    await teacherContext.addCookies([{ name: teacherCookieName, value: teacherCookieValue, url: baseUrl }]);
+    const teacherPage = await teacherContext.newPage();
+    await teacherPage.goto(baseUrl, { waitUntil: "networkidle" });
+    await teacherPage.locator('[data-action="openColtCorner"]').first().click();
+    await teacherPage.locator('.colt-corner-grade-tab[data-grade="4"]').click();
+    assert(await teacherPage.locator(".colt-corner-card > .forum-profile-editor").isVisible());
+    await teacherPage.locator("#forumProfileImage").setInputFiles(avatarFixture);
+    await teacherPage.locator("#forumProfileStatus").getByText("Profile picture saved.").waitFor();
+    const teacherAvatarSrc = await teacherPage.locator("img.forum-profile-preview").getAttribute("src");
+    assert.match(teacherAvatarSrc, /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/);
+    assert.equal((await fetch(`${baseUrl}${teacherAvatarSrc}`, { headers: { Cookie: teacherCookie } })).status, 200);
+    await teacherPage.locator('[data-action="openThread"]').first().click();
+    assert(await teacherPage.locator(".forum-post-author img.forum-avatar").isVisible());
+    await teacherPage.locator("#removeForumProfileImage").click();
+    await teacherPage.locator("#forumProfileStatus").getByText("Profile picture removed.").waitFor();
+    assert(await teacherPage.locator(".forum-post-author .forum-avatar-initials").isVisible());
+    await teacherContext.close();
+
     console.log(JSON.stringify({
       forumDesktopTwoColumnLayout: true,
       forumMobileLayoutResponsive: true,
       studentProfilePictureUpload: true,
       studentProfilePictureRemoval: true,
+      teacherProfilePictureUpload: true,
+      teacherProfilePictureAppearsOnPosts: true,
+      teacherProfilePictureRemoval: true,
       profilePicturesRequireSignedInAccess: true,
       desktopScreenshot: path.join(dataDir, "forum-thread-desktop.png"),
       mobileScreenshot: path.join(dataDir, "forum-thread-mobile.png")

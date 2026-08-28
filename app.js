@@ -1526,7 +1526,7 @@ function renderForumAuthor(post, label = "Member") {
 }
 
 function renderForumProfileEditor(compact = false) {
-  if (!isApprovedStudent()) return "";
+  if (!isSignedIn()) return "";
   return `
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
       ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview")}
@@ -2365,6 +2365,7 @@ function renderColtCorner() {
           <span>Only Grade ${escapeHtml(activeGrade)} students and Mr. Nieves can see these topics and replies.</span>
         </div>
       `}
+      ${renderForumProfileEditor(true)}
       <div class="colt-corner-heading">
         <span class="feature-kicker">Class Forum</span>
         <h2>Grade ${escapeHtml(activeGrade)} Colt Corner</h2>

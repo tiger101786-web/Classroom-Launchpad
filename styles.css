@@ -8010,6 +8010,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   margin: 20px 20px 0;
 }
 
+.colt-corner-card > .forum-profile-editor {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .forum-profile-editor.is-compact {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
