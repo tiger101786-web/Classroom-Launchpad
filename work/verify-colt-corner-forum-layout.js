@@ -133,6 +133,25 @@ async function run() {
     const avatarSrc = await page.locator("img.forum-profile-preview").getAttribute("src");
     assert.match(avatarSrc, /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/);
     assert(await page.locator(".forum-post-author img.forum-avatar").isVisible());
+    const avatarLayout = await page.locator(".forum-post-author img.forum-avatar").evaluate(avatar => {
+      const styles = getComputedStyle(avatar);
+      return {
+        width: avatar.getBoundingClientRect().width,
+        height: avatar.getBoundingClientRect().height,
+        borderWidth: styles.borderWidth,
+        borderRadius: styles.borderRadius,
+        objectFit: styles.objectFit,
+        outlineWidth: styles.outlineWidth
+      };
+    });
+    assert.deepEqual(avatarLayout, {
+      width: 92,
+      height: 92,
+      borderWidth: "0px",
+      borderRadius: "50%",
+      objectFit: "cover",
+      outlineWidth: "3px"
+    });
     assert.equal((await fetch(`${baseUrl}${avatarSrc}`)).status, 401);
     assert.equal((await fetch(`${baseUrl}${avatarSrc}`, { headers: { Cookie: studentCookie } })).status, 200);
     await page.screenshot({ path: path.join(dataDir, "forum-thread-desktop.png"), fullPage: true });
@@ -175,6 +194,8 @@ async function run() {
       teacherProfilePictureUpload: true,
       teacherProfilePictureAppearsOnPosts: true,
       teacherProfilePictureRemoval: true,
+      profilePicturesFillEntireCircle: true,
+      innerAvatarRingRemoved: true,
       profilePicturesRequireSignedInAccess: true,
       desktopScreenshot: path.join(dataDir, "forum-thread-desktop.png"),
       mobileScreenshot: path.join(dataDir, "forum-thread-mobile.png")
