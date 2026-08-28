@@ -425,7 +425,7 @@ async function run() {
     await page.locator('[data-action="login"]').first().click();
     await page.locator(".auth-card").waitFor();
     const loginText = await page.locator(".auth-card").innerText();
-    if (!loginText.includes("one-time activation code") || !loginText.includes("Do not reuse your Google password")) {
+    if (!loginText.includes("one-time activation code") || !loginText.includes("You may use your school Google password") || !loginText.includes("Use at least 8 characters")) {
       throw new Error("Website account and password guidance was missing.");
     }
     await page.screenshot({ path: path.join(dataDir, "auth-login-ui-qa.png"), fullPage: true });

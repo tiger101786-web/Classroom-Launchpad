@@ -32,5 +32,8 @@ check(app.includes('data-action="messageGrade"'), "Grade-level message filters a
 check(app.includes('function renderDirectMessageNotification()'), "Unread response notification is missing.");
 check(app.includes('const cornerHeading = isTeacher() ? "Colt Corner"'), "Teacher homepage incorrectly uses a student grade label for Colt Corner.");
 check(styles.includes(".direct-message-notification"), "Unread notification styling is missing.");
+check(app.includes('data-action="clearMessageStudent"'), "Close Conversation control is missing.");
+check(app.includes('if (selectedMessageStudentEmail === nextStudentEmail)'), "Clicking the selected student does not close the conversation.");
+check(!app.includes('selectedMessageStudentEmail = students[0] ? students[0].email : "";'), "The inbox still automatically selects the first student.");
 
 console.log("Private message security and password visibility checks passed.");

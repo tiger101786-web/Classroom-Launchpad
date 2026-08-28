@@ -7435,9 +7435,18 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 
 .teacher-message-heading {
+  align-items: center;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
   margin-bottom: 15px;
   padding-bottom: 13px;
+}
+
+.teacher-message-close {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .teacher-message-heading h3,
@@ -7755,6 +7764,16 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
   .student-change-password-button {
     justify-self: stretch;
+    width: 100%;
+  }
+}
+@media (max-width: 620px) {
+  .teacher-message-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .teacher-message-close {
     width: 100%;
   }
 }

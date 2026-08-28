@@ -8092,7 +8092,7 @@ function renderLogin() {
     <section class="auth-card student-auth-card">
       <span class="feature-kicker">Protected Student Access</span>
       <h2>Classroom Launchpad Account</h2>
-      <p>Your first login requires a one-time activation code from Mr. Nieves. Classroom Launchpad passwords are separate from school Google passwords.</p>
+      <p>Your first login requires a one-time activation code from Mr. Nieves. You may use your school Google password for Classroom Launchpad.</p>
       <div class="student-auth-grid">
         <form id="studentLoginForm" class="form-grid auth-form-panel">
           <h3>Log In</h3>
@@ -8130,12 +8130,12 @@ function renderLogin() {
           </div>
           <div class="field">
             <label for="studentRegisterPassword">Create password</label>
-            <input id="studentRegisterPassword" type="password" autocomplete="new-password" minlength="10">
-            <small>Use at least 10 characters. Do not reuse your Google password.</small>
+            <input id="studentRegisterPassword" type="password" autocomplete="new-password" minlength="8">
+            <small>Use at least 8 characters. You may use your school Google password.</small>
           </div>
           <div class="field">
             <label for="studentRegisterPasswordConfirm">Confirm password</label>
-            <input id="studentRegisterPasswordConfirm" type="password" autocomplete="new-password" minlength="10">
+            <input id="studentRegisterPasswordConfirm" type="password" autocomplete="new-password" minlength="8">
           </div>
           <label class="password-visibility-control" for="showStudentRegisterPasswords">
             <input id="showStudentRegisterPasswords" type="checkbox" data-password-visibility data-password-targets="studentRegisterPassword studentRegisterPasswordConfirm" aria-controls="studentRegisterPassword studentRegisterPasswordConfirm">
@@ -8172,12 +8172,12 @@ function renderAccount() {
           <div class="student-new-password-grid">
             <div class="field">
               <label for="studentNewPassword">New password</label>
-              <input id="studentNewPassword" type="password" autocomplete="new-password" minlength="10" required>
-              <small>Use at least 10 characters. Do not reuse your Google password.</small>
+              <input id="studentNewPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <small>Use at least 8 characters. You may use your school Google password.</small>
             </div>
             <div class="field">
               <label for="studentNewPasswordConfirm">Confirm new password</label>
-              <input id="studentNewPasswordConfirm" type="password" autocomplete="new-password" minlength="10" required>
+              <input id="studentNewPasswordConfirm" type="password" autocomplete="new-password" minlength="8" required>
             </div>
           </div>
           <label class="password-visibility-control" for="showStudentChangePasswords">
@@ -8260,8 +8260,8 @@ function renderDashboardMessages() {
       unreadDirectMessageCount("teacher", b.email) - unreadDirectMessageCount("teacher", a.email)
       || String(a.name || a.email).localeCompare(String(b.name || b.email))
     ));
-  if (!selectedMessageStudentEmail || !students.some(student => student.email === selectedMessageStudentEmail)) {
-    selectedMessageStudentEmail = students[0] ? students[0].email : "";
+  if (selectedMessageStudentEmail && !students.some(student => student.email === selectedMessageStudentEmail)) {
+    selectedMessageStudentEmail = "";
   }
   const selected = students.find(student => student.email === selectedMessageStudentEmail);
   return `
@@ -8287,7 +8287,7 @@ function renderDashboardMessages() {
           ${students.length ? students.map(student => {
             const unread = unreadDirectMessageCount("teacher", student.email);
             return `
-              <button type="button" class="teacher-message-student ${student.email === selectedMessageStudentEmail ? "is-active" : ""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}">
+              <button type="button" class="teacher-message-student ${student.email === selectedMessageStudentEmail ? "is-active" : ""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}" aria-pressed="${student.email === selectedMessageStudentEmail}" title="${student.email === selectedMessageStudentEmail ? "Click again to close this conversation" : "Open private conversation"}">
                 <span>${escapeHtml((student.name || "S").charAt(0))}</span>
                 <strong>${escapeHtml(student.name || student.email)}<small>Grade ${escapeHtml(student.grade || "—")}</small></strong>
                 ${unread ? `<b title="${unread} unread ${unread === 1 ? "response" : "responses"}">${unread}</b>` : ""}
@@ -8299,9 +8299,12 @@ function renderDashboardMessages() {
       <div class="teacher-message-conversation">
         ${selected ? `
           <div class="teacher-message-heading">
-            <span class="feature-kicker">Direct Message</span>
-            <h3>${escapeHtml(selected.name || selected.email)}</h3>
-            <p>${escapeHtml(selected.email)} · Grade ${escapeHtml(selected.grade || "—")}</p>
+            <div>
+              <span class="feature-kicker">Direct Message</span>
+              <h3>${escapeHtml(selected.name || selected.email)}</h3>
+              <p>${escapeHtml(selected.email)} · Grade ${escapeHtml(selected.grade || "—")}</p>
+            </div>
+            <button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent" aria-label="Close conversation with ${escapeHtml(selected.name || selected.email)}">Close Conversation</button>
           </div>
           ${renderDirectMessageThread(selected.email, selected.name || selected.email)}
         ` : `
@@ -10668,11 +10671,23 @@ app.addEventListener("click", async event => {
     directMessageStatus = "";
     render();
   }
-  if (action === "selectMessageStudent") {
-    selectedMessageStudentEmail = String(target.dataset.email || "").toLowerCase();
+  if (action === "clearMessageStudent") {
+    selectedMessageStudentEmail = "";
     directMessageStatus = "";
-    await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
     render();
+  }
+  if (action === "selectMessageStudent") {
+    const nextStudentEmail = String(target.dataset.email || "").toLowerCase();
+    if (selectedMessageStudentEmail === nextStudentEmail) {
+      selectedMessageStudentEmail = "";
+      directMessageStatus = "";
+      render();
+    } else {
+      selectedMessageStudentEmail = nextStudentEmail;
+      directMessageStatus = "";
+      await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+      render();
+    }
   }
   if (action === "teacherDashboard") {
     await loadApprovedStudents();

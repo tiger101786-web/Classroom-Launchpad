@@ -1271,8 +1271,8 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(res, 403, { error: `Use an approved @${allowedStudentDomain} student email.`, code: "WRONG_DOMAIN" });
         return true;
       }
-      if (password.length < 10 || password.length > 128) {
-        sendJson(res, 400, { error: "Create a password containing at least 10 characters." });
+      if (password.length < 8 || password.length > 128) {
+        sendJson(res, 400, { error: "Create a password containing at least 8 characters." });
         return true;
       }
       if (!activationCode) {
@@ -1360,8 +1360,8 @@ async function handleAuthApi(req, res, pathname) {
       const body = await readBody(req);
       const currentPassword = String(body.currentPassword || "");
       const newPassword = String(body.newPassword || "");
-      if (newPassword.length < 10 || newPassword.length > 128) {
-        sendJson(res, 400, { error: "Create a password containing at least 10 characters." });
+      if (newPassword.length < 8 || newPassword.length > 128) {
+        sendJson(res, 400, { error: "Create a password containing at least 8 characters." });
         return true;
       }
       const db = readDb();
