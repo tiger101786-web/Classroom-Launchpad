@@ -65,6 +65,7 @@ const classroomPassDestinations = new Set([
 const defaultDb = {
   links: null,
   threads: [],
+  directMessages: [],
   mutedStudents: [],
   websiteRequests: [],
   assignments: [],
@@ -106,6 +107,26 @@ function cleanText(value, maxLength) {
 
 function cleanMultilineText(value, maxLength) {
   return String(value || "").trim().replace(/\r/g, "").slice(0, maxLength);
+}
+
+function normalizeDirectMessages(entries) {
+  return (Array.isArray(entries) ? entries : []).flatMap(entry => {
+    const studentEmail = normalizeEmail(entry && entry.studentEmail);
+    const senderRole = entry && entry.senderRole === "student" ? "student" : "teacher";
+    const message = cleanMultilineText(entry && entry.message, 1000);
+    if (!studentEmail || !message) return [];
+    return [{
+      id: cleanText(entry.id, 80) || crypto.randomUUID(),
+      studentEmail,
+      studentName: cleanText(entry.studentName, 80) || studentEmail.split("@")[0],
+      grade: cleanGrade(entry.grade),
+      senderRole,
+      message,
+      createdAt: Number.isFinite(Date.parse(entry.createdAt)) ? new Date(entry.createdAt).toISOString() : new Date().toISOString(),
+      readByTeacher: Boolean(entry.readByTeacher),
+      readByStudent: Boolean(entry.readByStudent)
+    }];
+  }).sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
 }
 
 function cleanGrade(value) {
@@ -734,6 +755,7 @@ function writeDb(db) {
   const next = {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: pruneModeratedThreads(migrateGradeScopedThreads(db.threads)),
+    directMessages: normalizeDirectMessages(db.directMessages),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
@@ -918,6 +940,15 @@ function isStudentMuted(db, session) {
   ));
 }
 
+function visibleDirectMessages(entries, session) {
+  const messages = normalizeDirectMessages(entries);
+  if (!session) return [];
+  if (session.role === "teacher") return messages;
+  if (session.role !== "student") return [];
+  const email = normalizeEmail(session.email);
+  return messages.filter(message => message.studentEmail === email);
+}
+
 function publicState(db, session) {
   const signedIn = session && ["student", "teacher"].includes(session.role);
   const teacher = session && session.role === "teacher";
@@ -940,6 +971,7 @@ function publicState(db, session) {
   return {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: signedIn ? visibleApprovedThreads(db.threads, session) : [],
+    directMessages: signedIn ? visibleDirectMessages(db.directMessages, session) : [],
     pendingModeration: session && session.role === "student" ? studentPendingModeration(db, session) : [],
     ...(teacher ? { moderation: teacherModerationData(db) } : {}),
     mutedStudents: teacher ? db.mutedStudents : [],
@@ -2285,6 +2317,67 @@ async function handleApi(req, res, pathname) {
   const session = readSession(req);
   if (req.method === "GET" && pathname === "/api/state") {
     sendJson(res, 200, publicState(readDb(), session));
+    return true;
+  }
+
+  if (pathname === "/api/direct-messages" && req.method === "GET") {
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    sendJson(res, 200, { directMessages: visibleDirectMessages(readDb().directMessages, allowed) });
+    return true;
+  }
+
+  if (pathname === "/api/direct-messages" && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      const approved = normalizeApprovedStudents(db.approvedStudents);
+      const studentEmail = allowed.role === "student" ? normalizeEmail(allowed.email) : normalizeEmail(body.studentEmail);
+      const student = approved.find(item => item.email === studentEmail);
+      const message = cleanMultilineText(body.message, 1000);
+      if (!student) throw new Error("Choose an approved student.");
+      if (!message) throw new Error("Please type a message.");
+      const record = {
+        id: crypto.randomUUID(),
+        studentEmail,
+        studentName: student.name || studentEmail.split("@")[0],
+        grade: student.grade,
+        senderRole: allowed.role,
+        message,
+        createdAt: new Date().toISOString(),
+        readByTeacher: allowed.role === "teacher",
+        readByStudent: allowed.role === "student"
+      };
+      db.directMessages = [...normalizeDirectMessages(db.directMessages), record];
+      writeDb(db);
+      sendJson(res, 200, { ok: true, directMessages: visibleDirectMessages(db.directMessages, allowed) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (pathname === "/api/direct-messages/read" && req.method === "PATCH") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      const studentEmail = allowed.role === "student" ? normalizeEmail(allowed.email) : normalizeEmail(body.studentEmail);
+      db.directMessages = normalizeDirectMessages(db.directMessages).map(message => (
+        message.studentEmail === studentEmail
+          ? { ...message, [allowed.role === "teacher" ? "readByTeacher" : "readByStudent"]: true }
+          : message
+      ));
+      writeDb(db);
+      sendJson(res, 200, { ok: true, directMessages: visibleDirectMessages(db.directMessages, allowed) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

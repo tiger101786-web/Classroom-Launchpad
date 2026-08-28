@@ -475,6 +475,18 @@ const sharedBackend = {
   saveThreads(threads) {
     return this.request("/api/threads", { method: "PUT", body: JSON.stringify({ threads }) });
   },
+  sendDirectMessage(studentEmail, message) {
+    return this.request("/api/direct-messages", {
+      method: "POST",
+      body: JSON.stringify({ studentEmail, message })
+    });
+  },
+  markDirectMessagesRead(studentEmail) {
+    return this.request("/api/direct-messages/read", {
+      method: "PATCH",
+      body: JSON.stringify({ studentEmail })
+    });
+  },
   submitTopic(topic) {
     return this.request("/api/threads", {
       method: "POST",
@@ -1330,6 +1342,9 @@ let authSession = { authenticated: false, role: "guest", name: "", email: "", gr
 let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
+let directMessages = [];
+let selectedMessageStudentEmail = "";
+let directMessageStatus = "";
 let activationCodeResults = [];
 let assignments = [];
 let submissions = [];
@@ -1369,6 +1384,7 @@ let classroomPassRefreshTimer = 0;
 let approvedLinksReady = !sharedBackend.enabled;
 const dashboardSections = [
   { id: "overview", label: "Overview", icon: "⌂" },
+  { id: "messages", label: "Student Messages", navLabel: "Messages", icon: "✉" },
   { id: "passes", label: "Classroom Pass Log", navLabel: "Classroom Pass", icon: "→" },
   { id: "students", label: "Students & Access", icon: "♙" },
   { id: "tools", label: "Classroom Tools", icon: "◷" },
@@ -1421,6 +1437,29 @@ function normalizePendingModeration(items) {
   })).filter(item => item.id);
 }
 
+function normalizeDirectMessages(entries) {
+  return (Array.isArray(entries) ? entries : []).map(item => ({
+    id: String(item && item.id || ""),
+    studentEmail: String(item && item.studentEmail || "").toLowerCase(),
+    studentName: String(item && item.studentName || "Student"),
+    grade: String(item && item.grade || ""),
+    senderRole: item && item.senderRole === "student" ? "student" : "teacher",
+    message: String(item && item.message || ""),
+    createdAt: String(item && item.createdAt || ""),
+    readByTeacher: Boolean(item && item.readByTeacher),
+    readByStudent: Boolean(item && item.readByStudent)
+  })).filter(item => item.id && item.studentEmail && item.message);
+}
+
+function unreadDirectMessageCount(role = authSession.role, studentEmail = authSession.email) {
+  const email = String(studentEmail || "").toLowerCase();
+  return directMessages.filter(message => (
+    role === "teacher"
+      ? (!email || message.studentEmail === email) && message.senderRole === "student" && !message.readByTeacher
+      : message.studentEmail === email && message.senderRole === "teacher" && !message.readByStudent
+  )).length;
+}
+
 function isTeacher() {
   return isSignedIn() && authSession.role === "teacher";
 }
@@ -1455,6 +1494,7 @@ function sharedSnapshot() {
   return JSON.stringify({
     links,
     classThreads,
+    directMessages,
     mutedStudents,
     websiteRequests,
     assignments,
@@ -1476,6 +1516,7 @@ async function loadSharedState(shouldRender = true) {
     if (state && state.auth) authSession = state.auth;
     postingBlocked = Boolean(state && state.postingBlocked);
     const incomingThreads = normalizeThreads(state && state.threads);
+    const incomingDirectMessages = normalizeDirectMessages(state && state.directMessages);
     const incomingMuted = normalizeMutedStudents(state && state.mutedStudents);
     const incomingPendingModeration = normalizePendingModeration(state && state.pendingModeration);
     const incomingModerationQueue = normalizeModerationItems(state && state.moderation && state.moderation.pending);
@@ -1501,6 +1542,7 @@ async function loadSharedState(shouldRender = true) {
       approvedLinksReady = false;
     }
     classThreads = incomingThreads;
+    directMessages = incomingDirectMessages;
     mutedStudents = incomingMuted;
     pendingModeration = incomingPendingModeration;
     moderationQueue = incomingModerationQueue;
@@ -1895,10 +1937,12 @@ function renderAuthButton() {
         : firstName.length <= 10
           ? firstName
           : "Student";
+    const messageCount = unreadDirectMessageCount();
     return `
       <button class="login-btn signed-in" data-action="${isTeacher() ? "teacherDashboard" : "account"}" title="${escapeHtml(authSession.email || authSession.name)}">
         ${escapeHtml(isTeacher() ? "Teacher" : studentLabel)}
       </button>
+      <button class="login-btn header-messages-btn" data-action="openMessages">Messages${messageCount ? ` (${messageCount})` : ""}</button>
       <button class="logout-btn" data-action="logout">Log Out</button>
     `;
   }
@@ -8048,6 +8092,10 @@ function renderLogin() {
             <label for="studentLoginPassword">Classroom Launchpad password</label>
             <input id="studentLoginPassword" type="password" autocomplete="current-password">
           </div>
+          <label class="password-visibility-control" for="showStudentLoginPassword">
+            <input id="showStudentLoginPassword" type="checkbox" data-password-visibility data-password-targets="studentLoginPassword" aria-controls="studentLoginPassword">
+            <span>Show password</span>
+          </label>
           <button class="primary-btn" type="submit">Log In</button>
         </form>
         <form id="studentRegisterForm" class="form-grid auth-form-panel">
@@ -8077,6 +8125,10 @@ function renderLogin() {
             <label for="studentRegisterPasswordConfirm">Confirm password</label>
             <input id="studentRegisterPasswordConfirm" type="password" autocomplete="new-password" minlength="10">
           </div>
+          <label class="password-visibility-control" for="showStudentRegisterPasswords">
+            <input id="showStudentRegisterPasswords" type="checkbox" data-password-visibility data-password-targets="studentRegisterPassword studentRegisterPasswordConfirm" aria-controls="studentRegisterPassword studentRegisterPasswordConfirm">
+            <span>Show passwords</span>
+          </label>
           <button class="primary-btn" type="submit">Create Account</button>
         </form>
       </div>
@@ -8092,7 +8144,106 @@ function renderAccount() {
       <span class="feature-kicker">Signed In</span>
       <h2>${escapeHtml(authSession.name || "Student")}</h2>
       <p>${escapeHtml(authSession.email || "")}</p>
-      <button class="outline-btn" data-action="logout">Log Out</button>
+      <div class="account-actions">
+        <button class="primary-btn" data-action="openMessages">Open Private Messages${unreadDirectMessageCount() ? ` (${unreadDirectMessageCount()} new)` : ""}</button>
+        <button class="outline-btn" data-action="logout">Log Out</button>
+      </div>
+    </section>
+  `;
+}
+
+function formatDirectMessageTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function directMessageConversation(studentEmail) {
+  const email = String(studentEmail || "").toLowerCase();
+  return directMessages.filter(message => message.studentEmail === email);
+}
+
+function renderDirectMessageThread(studentEmail, studentName = "Student") {
+  const conversation = directMessageConversation(studentEmail);
+  return `
+    <section class="direct-message-thread" aria-label="Private conversation with ${escapeHtml(studentName)}">
+      <div class="direct-message-privacy">
+        <strong>Private conversation</strong>
+        <span>Only Mr. Nieves and ${escapeHtml(studentName)} can view these messages.</span>
+      </div>
+      <div class="direct-message-history" aria-live="polite">
+        ${conversation.length ? conversation.map(message => {
+          const own = (isTeacher() && message.senderRole === "teacher") || (!isTeacher() && message.senderRole === "student");
+          return `
+            <article class="direct-message-bubble ${own ? "is-own" : "is-other"}">
+              <strong>${escapeHtml(message.senderRole === "teacher" ? "Mr. Nieves" : message.studentName)}</strong>
+              <p>${escapeHtml(message.message)}</p>
+              <time datetime="${escapeHtml(message.createdAt)}">${escapeHtml(formatDirectMessageTime(message.createdAt))}</time>
+            </article>
+          `;
+        }).join("") : '<div class="empty-card"><p>No messages yet. Start the private conversation below.</p></div>'}
+      </div>
+      <form id="directMessageForm" class="direct-message-composer" data-student-email="${escapeHtml(studentEmail)}">
+        <label for="directMessageText">${isTeacher() ? `Message ${escapeHtml(studentName)}` : "Reply to Mr. Nieves"}</label>
+        <textarea id="directMessageText" maxlength="1000" rows="4" placeholder="Type a private message…" required></textarea>
+        <div>
+          <small>Only you and ${isTeacher() ? escapeHtml(studentName) : "Mr. Nieves"} can see this conversation.</small>
+          <button class="primary-btn" type="submit">Send Message</button>
+        </div>
+        <p id="directMessageStatus" class="request-message" aria-live="polite">${escapeHtml(directMessageStatus)}</p>
+      </form>
+    </section>
+  `;
+}
+
+function renderStudentMessages() {
+  if (!isApprovedStudent()) return `${pageHeader("Private Messages", "Student login is required.", true)}${renderLogin()}`;
+  return `
+    ${pageHeader("Private Messages", "Message Mr. Nieves directly.", true)}
+    <section class="auth-card direct-message-page">
+      <span class="feature-kicker">Teacher & Student</span>
+      <h2>Your Conversation with Mr. Nieves</h2>
+      ${renderDirectMessageThread(authSession.email, authSession.name || "Student")}
+    </section>
+  `;
+}
+
+function renderDashboardMessages() {
+  const students = [...approvedStudents].sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+  if (!selectedMessageStudentEmail || !students.some(student => student.email === selectedMessageStudentEmail)) {
+    selectedMessageStudentEmail = students[0] ? students[0].email : "";
+  }
+  const selected = students.find(student => student.email === selectedMessageStudentEmail);
+  return `
+    <section class="teacher-message-center">
+      <div class="teacher-message-roster" aria-label="Approved students">
+        <div class="assignment-manager-heading">
+          <div><span class="feature-kicker">Private Inbox</span><h3>Students</h3></div>
+          <span class="dashboard-count">${students.length}</span>
+        </div>
+        <div class="teacher-message-student-list">
+          ${students.length ? students.map(student => {
+            const unread = unreadDirectMessageCount("teacher", student.email);
+            return `
+              <button type="button" class="teacher-message-student ${student.email === selectedMessageStudentEmail ? "is-active" : ""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}">
+                <span>${escapeHtml((student.name || "S").charAt(0))}</span>
+                <strong>${escapeHtml(student.name || student.email)}<small>Grade ${escapeHtml(student.grade || "—")}</small></strong>
+                ${unread ? `<b>${unread}</b>` : ""}
+              </button>
+            `;
+          }).join("") : '<div class="empty-card"><p>Add approved students before sending a message.</p></div>'}
+        </div>
+      </div>
+      <div class="teacher-message-conversation">
+        ${selected ? `
+          <div class="teacher-message-heading">
+            <span class="feature-kicker">Direct Message</span>
+            <h3>${escapeHtml(selected.name || selected.email)}</h3>
+            <p>${escapeHtml(selected.email)} · Grade ${escapeHtml(selected.grade || "—")}</p>
+          </div>
+          ${renderDirectMessageThread(selected.email, selected.name || selected.email)}
+        ` : ""}
+      </div>
     </section>
   `;
 }
@@ -8382,6 +8533,7 @@ function renderDashboardNavigation() {
             <span class="dashboard-nav-label">${escapeHtml(section.navLabel || section.label)}</span>
             ${section.id === "requests" && websiteRequests.length ? `<b>${websiteRequests.length}</b>` : ""}
             ${section.id === "corner" && moderationQueue.length ? `<b>${moderationQueue.length}</b>` : ""}
+            ${section.id === "messages" && unreadDirectMessageCount("teacher", "") ? `<b>${unreadDirectMessageCount("teacher", "")}</b>` : ""}
 
             ${section.id === "passes" && classroomPassData.passes.some(item => item.status === "out") ? `<b>${classroomPassData.passes.filter(item => item.status === "out").length}</b>` : ""}
           </button>
@@ -9019,6 +9171,7 @@ function renderDashboardClassroomPasses() {
 
 function renderDashboardSection() {
 
+  if (dashboardSection === "messages") return renderDashboardMessages();
   if (dashboardSection === "passes") return renderDashboardClassroomPasses();
   if (dashboardSection === "students") return renderApprovedStudentManager();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
@@ -9222,6 +9375,7 @@ function render() {
   if (screen.name === "pin") html = renderPin();
   if (screen.name === "login") html = renderLogin();
   if (screen.name === "account") html = renderAccount();
+  if (screen.name === "messages") html = renderStudentMessages();
   if (screen.name === "assignments") html = renderAssignmentsPage();
   if (screen.name === "classroomPass") html = renderClassroomPassPage();
   if (screen.name === "dashboard") html = renderDashboard();
@@ -9324,6 +9478,18 @@ function attachHomeNavigation() {
   sections.forEach(section => homeNavigationObserver.observe(section));
 }
 
+async function markCurrentDirectMessagesRead(studentEmail) {
+  if (!sharedBackend.enabled || !isSignedIn() || !studentEmail) return;
+  try {
+    const result = await sharedBackend.markDirectMessagesRead(studentEmail);
+    if (result && Array.isArray(result.directMessages)) {
+      directMessages = normalizeDirectMessages(result.directMessages);
+    }
+  } catch (error) {
+    directMessageStatus = error.message;
+  }
+}
+
 async function loadApprovedStudents() {
   if (!sharedBackend.enabled || !isTeacher()) return;
   try {
@@ -9369,6 +9535,43 @@ function startClassroomPassTimers() {
 
 function attachScreenHandlers() {
   attachHomeNavigation();
+  document.querySelectorAll("[data-password-visibility]").forEach(control => {
+    control.addEventListener("change", event => {
+      const visible = event.target.checked;
+      String(event.target.dataset.passwordTargets || "").split(/\s+/).filter(Boolean).forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.type = visible ? "text" : "password";
+      });
+    });
+  });
+
+  const directMessageForm = document.getElementById("directMessageForm");
+  if (directMessageForm) {
+    directMessageForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = document.getElementById("directMessageStatus");
+      const textarea = document.getElementById("directMessageText");
+      const message = textarea.value.trim();
+      if (!message) return;
+      status.textContent = "Sending…";
+      status.classList.remove("error");
+      try {
+        const result = await sharedBackend.sendDirectMessage(directMessageForm.dataset.studentEmail, message);
+        directMessages = normalizeDirectMessages(result && result.directMessages);
+        directMessageStatus = "Message sent.";
+        render();
+        requestAnimationFrame(() => {
+          const history = document.querySelector(".direct-message-history");
+          if (history) history.scrollTop = history.scrollHeight;
+        });
+      } catch (error) {
+        directMessageStatus = error.message;
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
+
   const passSearch = document.getElementById("classroomPassSearch");
   if (passSearch) {
     passSearch.addEventListener("input", event => {
@@ -10307,7 +10510,7 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
-    else if (["dashboard", "category", "pin", "login", "account", "assignments", "classroomPass", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
   if (action === "teacher") {
@@ -10315,6 +10518,31 @@ app.addEventListener("click", async event => {
       await loadApprovedStudents();
       await openTeacherDashboard();
     } else setScreen({ name: "pin" });
+  }
+  if (action === "openMessages") {
+    directMessageStatus = "";
+    if (isTeacher()) {
+      await loadApprovedStudents();
+      dashboardSection = "messages";
+      sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+      setScreen({ name: "dashboard" });
+      if (selectedMessageStudentEmail) {
+        await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+        render();
+      }
+    } else if (isApprovedStudent()) {
+      setScreen({ name: "messages" });
+      await markCurrentDirectMessagesRead(authSession.email);
+      render();
+    } else {
+      setScreen({ name: "login" });
+    }
+  }
+  if (action === "selectMessageStudent") {
+    selectedMessageStudentEmail = String(target.dataset.email || "").toLowerCase();
+    directMessageStatus = "";
+    await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+    render();
   }
   if (action === "teacherDashboard") {
     await loadApprovedStudents();
@@ -10326,6 +10554,10 @@ app.addEventListener("click", async event => {
     dashboardSection = nextSection;
     sessionStorage.setItem("teacherDashboardSection", dashboardSection);
     render();
+    if (nextSection === "messages" && selectedMessageStudentEmail) {
+      await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+      render();
+    }
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (action === "dailyLaunchGrade") {
@@ -10345,6 +10577,10 @@ app.addEventListener("click", async event => {
   if (action === "dashboardLinkPage") {
     dashboardLinkPage = Math.max(1, Number(target.dataset.page) || 1);
     render();
+    if (nextSection === "messages" && selectedMessageStudentEmail) {
+      await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+      render();
+    }
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (action === "gradebookGrade") {
@@ -10362,6 +10598,10 @@ app.addEventListener("click", async event => {
     selectedSubmissionId = "";
     sessionStorage.setItem("teacherDashboardSection", dashboardSection);
     render();
+    if (nextSection === "messages" && selectedMessageStudentEmail) {
+      await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+      render();
+    }
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (action === "login") {
@@ -10375,6 +10615,9 @@ app.addEventListener("click", async event => {
     } catch {}
     authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "" };
     classThreads = [];
+    directMessages = [];
+    selectedMessageStudentEmail = "";
+    directMessageStatus = "";
     mutedStudents = [];
     websiteRequests = [];
     approvedStudents = [];
