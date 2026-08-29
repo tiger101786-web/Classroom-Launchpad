@@ -4,49 +4,49 @@
   const stations = [
     {
       id: "studying",
-      label: "Studying",
+      label: "Lo-Fi • Study",
       type: "embed",
       source: "https://loficafe.net/embed/studying",
       note: "Free, ad-free study music streamed by Lofi Cafe. No account required."
     },
     {
       id: "working",
-      label: "Working",
+      label: "Lo-Fi • Focus",
       type: "embed",
       source: "https://loficafe.net/embed/working",
       note: "Free, ad-free work music streamed by Lofi Cafe. No account required."
     },
     {
       id: "chilling",
-      label: "Chilling",
+      label: "Lo-Fi • Chill",
       type: "embed",
       source: "https://loficafe.net/embed/chilling",
       note: "Free, ad-free chill music streamed by Lofi Cafe. No account required."
     },
     {
       id: "sleeping",
-      label: "Sleeping",
+      label: "Lo-Fi • Sleep",
       type: "embed",
       source: "https://loficafe.net/embed/sleeping",
       note: "Free, ad-free soft lofi streamed by Lofi Cafe for quiet work and calm classroom moments. No account required."
     },
     {
       id: "gaming",
-      label: "Gaming Lofi",
+      label: "Lo-Fi • Gaming",
       type: "embed",
       source: "https://loficafe.net/embed/gaming",
       note: "Free, ad-free instrumental lofi with a little more energy, streamed by Lofi Cafe. No account required."
     },
     {
       id: "japanese-lofi",
-      label: "Japanese Lofi",
+      label: "Lo-Fi • Japan",
       type: "embed",
       source: "https://loficafe.net/embed/japanese-lofi",
       note: "Free, ad-free Japanese-inspired instrumental lofi streamed by Lofi Cafe. No account required."
     },
     {
       id: "lofi-fm",
-      label: "Lo-fi Hip Hop",
+      label: "Lo-Fi • Hip-Hop",
       type: "playlist",
       sources: [
         "https://lofi.radio/songs/42.mp3",
@@ -64,7 +64,7 @@
     },
     {
       id: "chillsynth",
-      label: "Chillsynth",
+      label: "Synth • Chill",
       type: "stream",
       source: "https://stream.nightride.fm/chillsynth.mp3",
       metadataMount: "/chillsynth.mp3",
@@ -72,7 +72,7 @@
     },
     {
       id: "datawave",
-      label: "Datawave",
+      label: "Synth • Datawave",
       type: "stream",
       source: "https://stream.nightride.fm/datawave.mp3",
       metadataMount: "/datawave.mp3",
@@ -80,7 +80,7 @@
     },
     {
       id: "nightride",
-      label: "Nightride",
+      label: "Synth • Nightdrive",
       type: "stream",
       source: "https://stream.nightride.fm/nightride.mp3",
       metadataMount: "/nightride.mp3",
@@ -88,7 +88,7 @@
     },
     {
       id: "spacesynth",
-      label: "Spacesynth",
+      label: "Synth • Space",
       type: "stream",
       source: "https://stream.nightride.fm/spacesynth.mp3",
       provider: "Nightride FM",
@@ -98,7 +98,7 @@
     },
     {
       id: "cotn-radio",
-      label: "COTN Radio",
+      label: "Electronic • Lounge",
       type: "stream",
       source: "https://streaming.smartradio.ch:8510/stream",
       provider: "COTN Radio",
@@ -108,7 +108,7 @@
     },
     {
       id: "ssr-electronica",
-      label: "SSR Electronica",
+      label: "Electronic • Dance",
       type: "stream",
       source: "https://systrum.net:8443/SSR2",
       provider: "Systrum Sistum",
@@ -118,7 +118,7 @@
     },
     {
       id: "radio-abf",
-      label: "Radio ABF",
+      label: "Electronic • Club",
       type: "stream",
       source: "https://stream.radioabf.com/abf-sd.mp3",
       provider: "Radio ABF",
@@ -128,7 +128,7 @@
     },
     {
       id: "chill-house",
-      label: "Chill House",
+      label: "House • Chill",
       type: "stream",
       source: "https://stream.chillhouse-live.com/live",
       provider: "Chillhouse Live",
@@ -136,7 +136,7 @@
     },
     {
       id: "icf-worship",
-      label: "ICF Worship",
+      label: "Worship • Modern",
       type: "stream",
       source: "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac",
       provider: "ICF Radio",
@@ -146,7 +146,7 @@
     },
     {
       id: "god-radio",
-      label: "GOD Radio",
+      label: "Worship • Faith",
       type: "stream",
       source: "https://stream.wildfm.nl/GOD_Radio",
       provider: "GOD Media Network",
@@ -159,9 +159,58 @@
       metadataBody: "{}",
       metadataFormat: "simpleTrack",
       note: "Worship music, Bible teaching, testimonies, and prayer streamed by GOD Radio. Free, no account required, and supported by donations and partners."
+    },
+    {
+      id: "game-soundtracks",
+      label: "Games • Soundtracks",
+      type: "stream",
+      source: "https://icecast.gttradio.com/mp3_320k",
+      provider: "Game That Tune Radio",
+      metadataEndpoint: "https://icecast.gttradio.com/status-json.xsl",
+      metadataMount: "/mp3_320k",
+      note: "Video game music from more than 1,000 soundtracks, streamed by Game That Tune Radio. No Colt Radio account required."
+    },
+    {
+      id: "laid-back-jazz",
+      label: "Jazz • Laid-Back",
+      type: "stream",
+      source: "https://west-mp3-128.streamthejazzgroove.com/stream",
+      provider: "The Jazz Groove",
+      note: "Hand-selected, laid-back jazz streamed by the nonprofit, listener-supported Jazz Groove."
+    },
+    {
+      id: "jazz-funk-soul",
+      label: "Jazz • Funk & Soul",
+      type: "stream",
+      source: "https://stream.nucrooze.com/listen/nucrooze/radio.mp3",
+      provider: "NUCROOZE",
+      metadataEndpoint: "https://core.nucrooze.com/api/nowplaying/nucrooze",
+      metadataFormat: "azuraNowPlaying",
+      note: "Smooth jazz, funk, soul, Latin, and lounge music streamed by the independent, ad-free NUCROOZE station."
+    },
+    {
+      id: "fantasy-adventure",
+      label: "Fantasy • Adventure",
+      type: "stream",
+      source: "https://play.radiorivendell.com/radio/8000/radio.mp3",
+      provider: "Radio Rivendell",
+      metadataEndpoint: "/api/radio-metadata/rivendell",
+      metadataFormat: "simpleTrack",
+      note: "Fantasy, Celtic, film-style, and game-inspired music streamed by Radio Rivendell, with an emphasis on instrumentals."
+    },
+    {
+      id: "oldies-jukebox",
+      label: "Oldies • Jukebox",
+      type: "stream",
+      source: "https://manager11.streamradio.fr:2485/stream",
+      provider: "Majestic Jukebox Radio",
+      metadataEndpoint: "https://manager11.streamradio.fr:2485/status-json.xsl",
+      metadataMount: "/stream",
+      note: "Clean-version oldies, blues, jazz, swing, rock and roll, country, doo-wop, and big-band music from Majestic Jukebox Radio. Commercial-free."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
+  const guestFavoritesKey = "classroomLaunchpadColtRadioFavoritesGuestV1";
   const hiddenScreens = new Set(["coltRun", "pin", "login", "account", "dashboard", "edit", "changePin"]);
 
   function buildElement(tag, className, text) {
@@ -211,16 +260,39 @@
     headerActions.append(minimize, stop);
     header.append(heading, headerActions);
 
+    const stationFilters = buildElement("div", "colt-radio-filters");
+    const allStationsFilter = buildElement("button", "colt-radio-filter is-active", "All Stations");
+    allStationsFilter.type = "button";
+    allStationsFilter.dataset.filter = "all";
+    allStationsFilter.setAttribute("aria-pressed", "true");
+    const favoritesFilter = buildElement("button", "colt-radio-filter", "Favorites (0)");
+    favoritesFilter.type = "button";
+    favoritesFilter.dataset.filter = "favorites";
+    favoritesFilter.setAttribute("aria-pressed", "false");
+    stationFilters.append(allStationsFilter, favoritesFilter);
+
     const stationNav = buildElement("nav", "colt-radio-stations");
     stationNav.setAttribute("aria-label", "Choose a Colt Radio station");
     const stationButtons = stations.map(station => {
+      const item = buildElement("div", "colt-radio-station-item");
+      item.dataset.stationItem = station.id;
       const button = buildElement("button", "colt-radio-station", station.label);
       button.type = "button";
       button.dataset.station = station.id;
       button.setAttribute("aria-pressed", "false");
-      stationNav.append(button);
+      const favorite = buildElement("button", "colt-radio-favorite", "☆");
+      favorite.type = "button";
+      favorite.dataset.favoriteStation = station.id;
+      favorite.setAttribute("aria-label", `Add ${station.label} to favorites`);
+      favorite.setAttribute("aria-pressed", "false");
+      favorite.title = "Add to favorites";
+      item.append(button, favorite);
+      stationNav.append(item);
       return button;
     });
+    const favoritesEmpty = buildElement("p", "colt-radio-favorites-empty", "No favorites yet. Select All Stations, then use a star to pin one here.");
+    favoritesEmpty.hidden = true;
+    stationNav.append(favoritesEmpty);
 
     const playerWrap = buildElement("div", "colt-radio-player");
     const placeholder = buildElement("p", "colt-radio-placeholder", "Choose a station, then press Play in the radio player.");
@@ -264,12 +336,16 @@
     playerWrap.append(placeholder, iframe, nowPlaying, audio);
 
     const note = buildElement("p", "colt-radio-note", "Free, ad-free music streamed by Lofi Cafe. No account required.");
-    panel.append(header, stationNav, playerWrap, note);
+    panel.append(header, stationFilters, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
     let activeStation = "";
     let playlistTrackIndex = -1;
     let metadataTimer = 0;
+    let favoriteStationIds = new Set();
+    let favoritesOnly = false;
+    let favoritesAccountKey = "";
+    let favoritesRequestVersion = 0;
 
     function preferredStation() {
       try {
@@ -284,6 +360,95 @@
       try {
         localStorage.setItem(preferredStationKey, stationId);
       } catch (error) {}
+    }
+
+    function validFavoriteIds(values) {
+      const knownIds = new Set(stations.map(station => station.id));
+      return [...new Set((Array.isArray(values) ? values : []).filter(id => knownIds.has(id)))];
+    }
+
+    function renderFavorites() {
+      const favoriteButtons = stationNav.querySelectorAll("[data-favorite-station]");
+      favoriteButtons.forEach(button => {
+        const selected = favoriteStationIds.has(button.dataset.favoriteStation);
+        const station = stations.find(item => item.id === button.dataset.favoriteStation);
+        button.textContent = selected ? "★" : "☆";
+        button.classList.toggle("is-favorite", selected);
+        button.setAttribute("aria-pressed", String(selected));
+        button.setAttribute("aria-label", `${selected ? "Remove" : "Add"} ${station.label} ${selected ? "from" : "to"} favorites`);
+        button.title = selected ? "Remove from favorites" : "Add to favorites";
+      });
+      stationNav.querySelectorAll("[data-station-item]").forEach(item => {
+        item.hidden = favoritesOnly && !favoriteStationIds.has(item.dataset.stationItem);
+      });
+      favoritesEmpty.hidden = !(favoritesOnly && favoriteStationIds.size === 0);
+      favoritesFilter.textContent = `Favorites (${favoriteStationIds.size})`;
+      allStationsFilter.classList.toggle("is-active", !favoritesOnly);
+      favoritesFilter.classList.toggle("is-active", favoritesOnly);
+      allStationsFilter.setAttribute("aria-pressed", String(!favoritesOnly));
+      favoritesFilter.setAttribute("aria-pressed", String(favoritesOnly));
+    }
+
+    function guestFavorites() {
+      try {
+        return validFavoriteIds(JSON.parse(localStorage.getItem(guestFavoritesKey) || "[]"));
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function accountKey(auth) {
+      if (!auth?.authenticated) return "guest";
+      if (auth.role === "teacher") return "teacher";
+      return auth.role === "student" && auth.email ? `student:${String(auth.email).toLowerCase()}` : "guest";
+    }
+
+    async function syncFavorites(auth) {
+      const nextAccountKey = accountKey(auth);
+      if (nextAccountKey === favoritesAccountKey) return;
+      favoritesAccountKey = nextAccountKey;
+      const requestVersion = ++favoritesRequestVersion;
+      if (nextAccountKey === "guest") {
+        favoriteStationIds = new Set(guestFavorites());
+        renderFavorites();
+        return;
+      }
+      try {
+        const response = await fetch("/api/radio-favorites", { cache: "no-store" });
+        if (!response.ok) throw new Error("Favorites unavailable");
+        const payload = await response.json();
+        if (requestVersion !== favoritesRequestVersion) return;
+        favoriteStationIds = new Set(validFavoriteIds(payload.favorites));
+      } catch (error) {
+        if (requestVersion !== favoritesRequestVersion) return;
+        favoriteStationIds = new Set();
+      }
+      renderFavorites();
+    }
+
+    async function saveFavorites() {
+      const favorites = [...favoriteStationIds];
+      if (favoritesAccountKey === "guest") {
+        try {
+          localStorage.setItem(guestFavoritesKey, JSON.stringify(favorites));
+        } catch (error) {}
+        return;
+      }
+      try {
+        await fetch("/api/radio-favorites", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ favorites })
+        });
+      } catch (error) {}
+    }
+
+    function toggleFavorite(stationId) {
+      if (!stations.some(station => station.id === stationId)) return;
+      if (favoriteStationIds.has(stationId)) favoriteStationIds.delete(stationId);
+      else favoriteStationIds.add(stationId);
+      renderFavorites();
+      saveFavorites();
     }
 
     function clearAudioStream() {
@@ -355,6 +520,12 @@
         if (station.metadataFormat === "samCloudNowPlaying") {
           const currentTrack = payload?.m_Item2;
           const title = [currentTrack?.Artist, currentTrack?.Title].filter(Boolean).join(" - ");
+          if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
+          return;
+        }
+        if (station.metadataFormat === "azuraNowPlaying") {
+          const currentTrack = payload?.now_playing?.song;
+          const title = [currentTrack?.artist, currentTrack?.title].filter(Boolean).join(" - ") || currentTrack?.text;
           if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
           return;
         }
@@ -465,6 +636,7 @@
 
     function updateVisibility(event) {
       const screen = event?.detail?.screen || "home";
+      syncFavorites(event?.detail?.auth);
       const shouldHide = hiddenScreens.has(screen);
       root.hidden = shouldHide;
       root.classList.toggle("has-class-timer", Boolean(document.querySelector(".class-timer-badge")));
@@ -478,7 +650,20 @@
     launcher.addEventListener("click", openPanel);
     minimize.addEventListener("click", () => minimizePanel());
     stop.addEventListener("click", () => stopRadio());
+    stationFilters.addEventListener("click", event => {
+      const button = event.target.closest("[data-filter]");
+      if (!button) return;
+      favoritesOnly = button.dataset.filter === "favorites";
+      renderFavorites();
+      const firstVisibleStation = stationNav.querySelector("[data-station-item]:not([hidden]) .colt-radio-station");
+      firstVisibleStation?.focus();
+    });
     stationNav.addEventListener("click", event => {
+      const favoriteButton = event.target.closest("[data-favorite-station]");
+      if (favoriteButton) {
+        toggleFavorite(favoriteButton.dataset.favoriteStation);
+        return;
+      }
       const button = event.target.closest("[data-station]");
       if (button) selectStation(button.dataset.station);
     });
@@ -508,6 +693,7 @@
     globalObject.addEventListener("classroom-launchpad-rendered", updateVisibility);
 
     updateVisibility({ detail: { screen: "home" } });
+    renderFavorites();
     setLauncherState();
   }
 

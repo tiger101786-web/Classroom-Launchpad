@@ -68,6 +68,7 @@ const defaultDb = {
   links: null,
   threads: [],
   directMessages: [],
+  radioFavorites: {},
   mutedStudents: [],
   websiteRequests: [],
   assignments: [],
@@ -136,6 +137,25 @@ function cleanGrade(value) {
   const cleaned = cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
   const classroomGrade = cleaned.match(/\b([4-7])(?:th)?\b/i);
   return classroomGrade ? classroomGrade[1] : cleaned;
+}
+
+function normalizeRadioFavorites(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([accountKey, stationIds]) => {
+    const key = cleanText(accountKey, 180).toLowerCase();
+    if (!key || !Array.isArray(stationIds)) return [];
+    const favorites = [...new Set(stationIds
+      .map(id => String(id || "").trim().toLowerCase())
+      .filter(id => /^[a-z0-9][a-z0-9-]{0,49}$/.test(id)))]
+      .slice(0, 40);
+    return [[key, favorites]];
+  }));
+}
+
+function radioFavoritesAccountKey(session) {
+  return session && session.role === "teacher"
+    ? "teacher"
+    : `student:${normalizeEmail(session && session.email)}`;
 }
 
 function isAllowedStudentEmail(email) {
@@ -799,6 +819,7 @@ function writeDb(db) {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: pruneModeratedThreads(migrateGradeScopedThreads(db.threads)),
     directMessages: normalizeDirectMessages(db.directMessages),
+    radioFavorites: normalizeRadioFavorites(db.radioFavorites),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
@@ -2503,10 +2524,56 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "GET" && pathname === "/api/radio-metadata/rivendell") {
+    try {
+      const response = await fetch("https://radiorivendell.com/api/v1/radio/now-playing?channel=radio_rivendell", {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!response.ok) throw new Error("Radio Rivendell metadata is unavailable.");
+      const payload = await response.json();
+      sendJson(res, 200, {
+        artist: cleanText(payload.artist, 160),
+        title: cleanText(payload.title, 200)
+      });
+    } catch {
+      sendJson(res, 502, { error: "Radio Rivendell metadata is temporarily unavailable." });
+    }
+    return true;
+  }
+
   if (pathname === "/api/direct-messages" && req.method === "GET") {
     const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
     sendJson(res, 200, { directMessages: visibleDirectMessages(readDb().directMessages, allowed) });
+    return true;
+  }
+
+  if (pathname === "/api/radio-favorites" && req.method === "GET") {
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    const favoritesByAccount = normalizeRadioFavorites(readDb().radioFavorites);
+    sendJson(res, 200, { favorites: favoritesByAccount[radioFavoritesAccountKey(allowed)] || [] });
+    return true;
+  }
+
+  if (pathname === "/api/radio-favorites" && req.method === "PUT") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const normalized = normalizeRadioFavorites({ favorites: body.favorites }).favorites || [];
+      const db = readDb();
+      db.radioFavorites = {
+        ...normalizeRadioFavorites(db.radioFavorites),
+        [radioFavoritesAccountKey(allowed)]: normalized
+      };
+      writeDb(db);
+      sendJson(res, 200, { ok: true, favorites: normalized });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

@@ -53,5 +53,5 @@ Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
 
 ## Colt Radio
 
-Colt Radio embeds the free Lofi Cafe Studying, Working, and Chilling stations directly inside Classroom Launchpad. It has no outbound navigation link, does not require an account, does not store listening history, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. The school network must allow `loficafe.net` for the embedded stations to play.
+Colt Radio keeps a single in-page player while offering genre-labeled stations from Lofi Cafe and selected direct-stream providers. Signed-in students and the teacher can pin stations to an account-specific Favorites category; only station IDs are stored, never listening history. Guest favorites stay in that browser. Colt Radio has no outbound navigation links, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. School filtering must allow the selected streaming domains for playback.
 

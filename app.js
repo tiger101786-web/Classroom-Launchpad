@@ -9541,7 +9541,14 @@ function render() {
   startClassroomPassTimers();
   observeDeferredVideos(app);
   window.dispatchEvent(new CustomEvent("classroom-launchpad-rendered", {
-    detail: { screen: screen.name }
+    detail: {
+      screen: screen.name,
+      auth: {
+        authenticated: Boolean(authSession.authenticated),
+        role: authSession.role || "guest",
+        email: authSession.email || ""
+      }
+    }
   }));
 }
 

@@ -56,7 +56,9 @@ async function run() {
         heroHeight: Math.round(hero.height),
         profileTopRatio: Number(((profile.top - hero.top) / hero.height).toFixed(2)),
         profileSize: Math.round(profile.width),
+        profileLeftInset: Math.round(profile.left - hero.left),
         profileRightInset: Math.round(hero.right - profile.right),
+        profileClearOfTitle: profile.left >= document.querySelector(".hero-panel h1").getBoundingClientRect().right,
         profileContained: profile.top >= hero.top && profile.right <= hero.right && profile.bottom <= hero.bottom,
         heroBackgroundPosition: getComputedStyle(document.querySelector(".hero-bg-video")).objectPosition,
         homeFeatureChildren: document.querySelector(".home-feature").children.length,
@@ -80,8 +82,8 @@ async function run() {
       };
     });
     if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2
-      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.45
-      || wideNavigation.profileSize < 220 || wideNavigation.profileRightInset < 400 || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
+      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.3
+      || wideNavigation.profileSize < 300 || wideNavigation.profileLeftInset > 430 || wideNavigation.profileRightInset < 350 || !wideNavigation.profileClearOfTitle || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
       || wideNavigation.heroBackgroundPosition !== "50% 0%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }

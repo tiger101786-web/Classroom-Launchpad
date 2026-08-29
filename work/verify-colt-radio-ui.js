@@ -148,6 +148,43 @@ async function run() {
         body: JSON.stringify({ artist: "Test GOD Radio Artist", title: "Test GOD Radio Program" })
       });
     });
+    await page.route("https://icecast.gttradio.com/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ icestats: { source: [{ listenurl: "https://icecast.gttradio.com/mp3_320k", title: "Test Game - Test Soundtrack" }] } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
+    await page.route("https://west-mp3-128.streamthejazzgroove.com/stream", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://stream.nucrooze.com/listen/nucrooze/radio.mp3", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://core.nucrooze.com/api/nowplaying/nucrooze", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ now_playing: { song: { artist: "Test Jazz Artist", title: "Test Funk Song" } } })
+    }));
+    await page.route("https://play.radiorivendell.com/radio/8000/radio.mp3", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("**/api/radio-metadata/rivendell", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ artist: "Test Fantasy Artist", title: "Test Adventure Song" })
+    }));
+    await page.route("https://manager11.streamradio.fr:2485/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ icestats: { source: { listenurl: "https://manager11.streamradio.fr:2485/stream", title: "Test Oldies Artist - Test Jukebox Song" } } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -187,7 +224,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship", "GOD Radio"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -206,19 +243,19 @@ async function run() {
     assert(croppedPlayerLayout.clippedOverflow);
     assert(croppedPlayerLayout.extraFrameWidth >= 38, JSON.stringify(croppedPlayerLayout));
 
-    await page.getByRole("button", { name: "Working", exact: true }).click();
+    await page.getByRole("button", { name: "Lo-Fi • Focus", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
-    await page.getByRole("button", { name: "Sleeping", exact: true }).click();
+    await page.getByRole("button", { name: "Lo-Fi • Sleep", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/sleeping");
-    await page.getByRole("button", { name: "Gaming Lofi", exact: true }).click();
+    await page.getByRole("button", { name: "Lo-Fi • Gaming", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/gaming");
-    await page.getByRole("button", { name: "Japanese Lofi", exact: true }).click();
+    await page.getByRole("button", { name: "Lo-Fi • Japan", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/japanese-lofi");
     await page.evaluate(() => {
       window.__embeddedFrameBeforeDirectStation = document.querySelector(".colt-radio-player iframe");
     });
 
-    await page.getByRole("button", { name: "Nightride", exact: true }).click();
+    await page.getByRole("button", { name: "Synth • Nightdrive", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/nightride.mp3");
     assert(await audio.isHidden(), "The browser's progress and duration bar remained visible for Chillsynth.");
     assert(await page.locator(".colt-radio-stream-player").isVisible(), "The compact Chillsynth player did not appear.");
@@ -230,39 +267,66 @@ async function run() {
     assert(await page.evaluate(() => !window.__embeddedFrameBeforeDirectStation.isConnected), "The old Lofi Cafe player kept running after switching stations.");
     await page.getByText("Test Artist - Nightride Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Spacesynth", exact: true }).click();
+    await page.getByRole("button", { name: "Synth • Space", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/spacesynth.mp3");
     await page.getByText("Test Artist - Spacesynth Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "COTN Radio", exact: true }).click();
+    await page.getByRole("button", { name: "Electronic • Lounge", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.smartradio.ch:8510/stream");
     await page.getByText("Test Artist - COTN Song", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-stream-label").innerText(), /COTN RADIO/);
 
-    await page.getByRole("button", { name: "SSR Electronica", exact: true }).click();
+    await page.getByRole("button", { name: "Electronic • Dance", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://systrum.net:8443/SSR2");
     await page.getByText("Test Artist - SSR Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Radio ABF", exact: true }).click();
+    await page.getByRole("button", { name: "Electronic • Club", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.radioabf.com/abf-sd.mp3");
     await page.getByText("Test Artist - ABF Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Chill House", exact: true }).click();
+    await page.getByRole("button", { name: "House • Chill", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.chillhouse-live.com/live");
-    await page.getByText("Chill House live stream", { exact: true }).waitFor();
+    await page.getByText("House • Chill live stream", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /No ads, no presenters/);
 
-    await page.getByRole("button", { name: "ICF Worship", exact: true }).click();
+    await page.getByRole("button", { name: "Worship • Modern", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac");
     await page.getByText("Test Worship Artist - Test Worship Song", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Curated, ad-free/);
 
-    await page.getByRole("button", { name: "GOD Radio", exact: true }).click();
+    await page.getByRole("button", { name: "Worship • Faith", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.wildfm.nl/GOD_Radio");
     await page.getByText("Test GOD Radio Artist - Test GOD Radio Program", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Bible teaching, testimonies, and prayer/);
 
-    await page.getByRole("button", { name: "Lo-fi Hip Hop", exact: true }).click();
+    await page.getByRole("button", { name: "Games • Soundtracks", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://icecast.gttradio.com/mp3_320k");
+    await page.getByText("Test Game - Test Soundtrack", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Jazz • Laid-Back", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://west-mp3-128.streamthejazzgroove.com/stream");
+
+    await page.getByRole("button", { name: "Jazz • Funk & Soul", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.nucrooze.com/listen/nucrooze/radio.mp3");
+    await page.getByText("Test Jazz Artist - Test Funk Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Fantasy • Adventure", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://play.radiorivendell.com/radio/8000/radio.mp3");
+    await page.getByText("Test Fantasy Artist - Test Adventure Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Oldies • Jukebox", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://manager11.streamradio.fr:2485/stream");
+    await page.getByText("Test Oldies Artist - Test Jukebox Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
+    assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
+    assert.deepEqual(JSON.parse(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioFavoritesGuestV1"))), ["game-soundtracks"]);
+    await page.getByRole("button", { name: "Favorites (1)", exact: true }).click();
+    assert.equal(await page.locator("[data-station-item]:not([hidden])").count(), 1);
+    assert(await page.getByRole("button", { name: "Games • Soundtracks", exact: true }).isVisible());
+    await page.getByRole("button", { name: "All Stations", exact: true }).click();
+
+    await page.getByRole("button", { name: "Lo-Fi • Hip-Hop", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
     assert.match(firstLofiTrack, /^https:\/\/lofi\.radio\/songs\//);
     assert(await audio.isHidden(), "Lo-fi Hip Hop exposed a progress bar or song duration.");
@@ -271,12 +335,12 @@ async function run() {
     await audio.evaluate(element => element.dispatchEvent(new Event("ended")));
     assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lo-fi Hip Hop repeated the same track immediately.");
 
-    await page.getByRole("button", { name: "Working", exact: true }).click();
+    await page.getByRole("button", { name: "Lo-Fi • Focus", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
     assert.equal(await audio.getAttribute("src"), null);
     assert(await audio.isHidden(), "The direct stream remained visible after returning to Lofi Cafe.");
 
-    await page.getByRole("button", { name: "Datawave", exact: true }).click();
+    await page.getByRole("button", { name: "Synth • Datawave", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/datawave.mp3");
     await page.getByRole("button", { name: "Stop Colt Radio" }).click();
     await radioLauncher.click();
@@ -334,7 +398,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship", "GOD Radio"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
