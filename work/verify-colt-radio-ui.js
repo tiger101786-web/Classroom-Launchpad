@@ -302,6 +302,14 @@ async function run() {
     await page.getByRole("button", { name: "Games • Soundtracks", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://icecast.gttradio.com/mp3_320k");
     await page.getByText("Test Game - Test Soundtrack", { exact: true }).waitFor();
+    const wrappingTrackText = await page.evaluate(() => ({
+      labelWhiteSpace: getComputedStyle(document.querySelector(".colt-radio-stream-label")).whiteSpace,
+      titleWhiteSpace: getComputedStyle(document.querySelector(".colt-radio-now-playing strong")).whiteSpace,
+      playerMinimumHeight: parseFloat(getComputedStyle(document.querySelector(".colt-radio-now-playing")).minHeight)
+    }));
+    assert.equal(wrappingTrackText.labelWhiteSpace, "normal", "The station and provider name is still truncated to one line.");
+    assert.equal(wrappingTrackText.titleWhiteSpace, "normal", "The current track title is still truncated to one line.");
+    assert(wrappingTrackText.playerMinimumHeight >= 110, "The player did not gain enough room for wrapped track information.");
 
     await page.getByRole("button", { name: "Jazz • Laid-Back", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://west-mp3-128.streamthejazzgroove.com/stream");
