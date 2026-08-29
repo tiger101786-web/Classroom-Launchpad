@@ -202,25 +202,21 @@ async function run() {
     await page.evaluate(() => {
       document.body.dataset.theme = "night";
     });
-    const badgeStyles = await page.evaluate(() => {
+    const radioVisuals = await page.evaluate(() => {
       const radio = getComputedStyle(document.querySelector(".colt-radio-heading .feature-kicker"));
-      const assistant = getComputedStyle(document.querySelector(".colt-assistant-heading .feature-kicker"));
       return {
-        radio: {
-          color: radio.color,
-          backgroundColor: radio.backgroundColor,
-          fontSize: radio.fontSize,
-          padding: radio.padding
-        },
-        assistant: {
-          color: assistant.color,
-          backgroundColor: assistant.backgroundColor,
-          fontSize: assistant.fontSize,
-          padding: assistant.padding
-        }
+        kickerColor: radio.color,
+        panelBackground: getComputedStyle(document.querySelector(".colt-radio-panel")).backgroundColor,
+        stationIcons: document.querySelectorAll(".colt-radio-station-icon svg").length,
+        equalizerBars: document.querySelectorAll(".colt-radio-equalizer i").length,
+        artwork: document.querySelector(".colt-radio-stream-artwork img")?.getAttribute("src") || ""
       };
     });
-    assert.deepEqual(badgeStyles.radio, badgeStyles.assistant, JSON.stringify(badgeStyles));
+    assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 22, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
+    assert.match(radioVisuals.artwork, /colt-run-idle\.png/, JSON.stringify(radioVisuals));
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),

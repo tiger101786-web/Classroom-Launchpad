@@ -220,6 +220,41 @@
     return element;
   }
 
+  const stationIconPaths = {
+    studying: '<path d="M6 4h9a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2Z"/><path d="M8 4v5h8V4M8 14h6"/>',
+    working: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',
+    chilling: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/>',
+    sleeping: '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
+    gaming: '<path d="M8 8h8a5 5 0 0 1 4.7 6.8l-1 2.7a2 2 0 0 1-3.2.8L14.8 17H9.2l-1.7 1.3a2 2 0 0 1-3.2-.8l-1-2.7A5 5 0 0 1 8 8Z"/><path d="M8 11v4m-2-2h4m6-1h.01m2 2h.01"/>',
+    "japanese-lofi": '<path d="M4 6h16M6 6v3m12-3v3M5 9h14M7 9v11m10-11v11M4 20h16"/>',
+    "lofi-fm": '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M7 5V3h10v2M7 9h10M8 14h.01m3 0h6m-9 3h.01m3 0h6"/>',
+    chillsynth: '<path d="M3 12h3l2-6 3 12 3-10 2 4h5"/>',
+    datawave: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="m9 4 3 3 3-3M8 10h8v6H8zm2 9h4"/>',
+    nightride: '<path d="M5 21 9 3m10 18L15 3M10 9h4m-5 5h6m-7 5h8"/>',
+    spacesynth: '<circle cx="12" cy="12" r="5"/><path d="M3 15c2.5 2 7.2 2.2 11.7.3 4.4-1.8 7.2-4.6 6.2-6.1-.8-1.2-3-.9-5.6.2"/><path d="m18 4 .4 1.2L20 6l-1.6.8L18 8l-.4-1.2L16 6l1.6-.8Z"/>',
+    "cotn-radio": '<path d="M5 13h14l2 7H3l2-7Z"/><path d="M8 13V7a3 3 0 0 1 6 0v6m1 0 2-7"/>',
+    "ssr-electronica": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18m0-18a15 15 0 0 0 0 18"/>',
+    "radio-abf": '<path d="m4 8 4 3 4-6 4 6 4-3-2 10H6L4 8Z"/><path d="M7 21h10"/>',
+    "chill-house": '<path d="M4 20V10l8-6 8 6v10M8 20v-6h8v6"/><path d="M3 7c2-3 4-3 6-1M21 7c-2-3-4-3-6-1"/>',
+    "icf-worship": '<path d="M5 21V9l7-6 7 6v12M9 21v-6h6v6M12 7v5m-2-3h4"/>',
+    "god-radio": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/>',
+    "game-soundtracks": '<path d="M8 8h8a5 5 0 0 1 4.7 6.8l-1 2.7a2 2 0 0 1-3.2.8L14.8 17H9.2l-1.7 1.3a2 2 0 0 1-3.2-.8l-1-2.7A5 5 0 0 1 8 8Z"/><path d="M8 11v4m-2-2h4m6-1h.01m2 2h.01"/>',
+    "laid-back-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
+    "jazz-funk-soul": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M19 5v8m-2-6h4"/>',
+    "fantasy-adventure": '<path d="M5 21V9l3 2V6l4 3 4-3v5l3-2v12M9 21v-5h6v5"/><path d="M4 21h16"/>',
+    "oldies-jukebox": '<path d="M7 21h10V10a5 5 0 0 0-10 0v11Z"/><path d="M9 11h6v5H9zm0 8h6M9 8h6"/>'
+  };
+
+  function iconSvg(paths, className = "") {
+    return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+
+  function stationIcon(stationId) {
+    const icon = buildElement("span", "colt-radio-station-icon");
+    icon.innerHTML = iconSvg(stationIconPaths[stationId] || stationIconPaths["lofi-fm"]);
+    return icon;
+  }
+
   function mountRadio() {
     const root = document.getElementById("coltRadioRoot");
     if (!root) return;
@@ -241,8 +276,12 @@
 
     const header = buildElement("header", "colt-radio-header");
     const heading = buildElement("div", "colt-radio-heading");
-    const headingMark = buildElement("span", "colt-radio-heading-mark", "♫");
-    headingMark.setAttribute("aria-hidden", "true");
+    const headingMark = buildElement("span", "colt-radio-heading-mark");
+    const headingHorse = document.createElement("img");
+    headingHorse.src = "assets/colt-run-idle.png?v=20260829-radio-redesign";
+    headingHorse.alt = "";
+    headingHorse.setAttribute("aria-hidden", "true");
+    headingMark.append(headingHorse);
     const headingText = buildElement("div");
     const kicker = buildElement("span", "feature-kicker", "Classroom Music");
     const title = buildElement("h2", "", "Colt Radio");
@@ -261,14 +300,16 @@
     header.append(heading, headerActions);
 
     const stationFilters = buildElement("div", "colt-radio-filters");
-    const allStationsFilter = buildElement("button", "colt-radio-filter is-active", "All Stations");
+    const allStationsFilter = buildElement("button", "colt-radio-filter is-active");
     allStationsFilter.type = "button";
     allStationsFilter.dataset.filter = "all";
     allStationsFilter.setAttribute("aria-pressed", "true");
-    const favoritesFilter = buildElement("button", "colt-radio-filter", "Favorites (0)");
+    allStationsFilter.innerHTML = `${iconSvg('<path d="M5 6h14v12H5zM8 3h8v3M8 10h8M8 14h5"/>', "colt-radio-filter-icon")}<span>All Stations</span>`;
+    const favoritesFilter = buildElement("button", "colt-radio-filter");
     favoritesFilter.type = "button";
     favoritesFilter.dataset.filter = "favorites";
     favoritesFilter.setAttribute("aria-pressed", "false");
+    favoritesFilter.innerHTML = `${iconSvg('<path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0L12 6.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z"/>', "colt-radio-filter-icon")}<span data-favorites-label>Favorites (0)</span>`;
     stationFilters.append(allStationsFilter, favoritesFilter);
 
     const stationNav = buildElement("nav", "colt-radio-stations");
@@ -276,10 +317,12 @@
     const stationButtons = stations.map(station => {
       const item = buildElement("div", "colt-radio-station-item");
       item.dataset.stationItem = station.id;
-      const button = buildElement("button", "colt-radio-station", station.label);
+      const button = buildElement("button", "colt-radio-station");
       button.type = "button";
       button.dataset.station = station.id;
       button.setAttribute("aria-pressed", "false");
+      const stationName = buildElement("span", "colt-radio-station-name", station.label);
+      button.append(stationIcon(station.id), stationName);
       const favorite = buildElement("button", "colt-radio-favorite", "☆");
       favorite.type = "button";
       favorite.dataset.favoriteStation = station.id;
@@ -299,12 +342,19 @@
     const nowPlaying = buildElement("div", "colt-radio-now-playing colt-radio-stream-player");
     nowPlaying.hidden = true;
     nowPlaying.setAttribute("aria-live", "polite");
-    const streamArtwork = buildElement("span", "colt-radio-stream-artwork", "\u266b");
+    const streamArtwork = buildElement("span", "colt-radio-stream-artwork");
     streamArtwork.setAttribute("aria-hidden", "true");
+    const streamArtworkImage = document.createElement("img");
+    streamArtworkImage.src = "assets/colt-run-idle.png?v=20260829-radio-redesign";
+    streamArtworkImage.alt = "";
+    streamArtwork.append(streamArtworkImage);
     const streamDetails = buildElement("span", "colt-radio-stream-details");
     const nowPlayingLabel = buildElement("span", "colt-radio-stream-label", "Now Playing");
     const nowPlayingTitle = buildElement("strong", "", "Loading track information...");
-    streamDetails.append(nowPlayingLabel, nowPlayingTitle);
+    const liveBadge = buildElement("span", "colt-radio-live-badge", "● LIVE");
+    const equalizer = buildElement("span", "colt-radio-equalizer");
+    for (let index = 0; index < 24; index += 1) equalizer.append(buildElement("i"));
+    streamDetails.append(nowPlayingLabel, nowPlayingTitle, liveBadge, equalizer);
     const muteStream = buildElement("button", "colt-radio-stream-control colt-radio-mute", "\ud83d\udd0a");
     muteStream.type = "button";
     muteStream.setAttribute("aria-label", "Mute Colt Radio");
@@ -390,7 +440,8 @@
         item.hidden = favoritesOnly && !favoriteStationIds.has(item.dataset.stationItem);
       });
       favoritesEmpty.hidden = !(favoritesOnly && favoriteStationIds.size === 0);
-      favoritesFilter.textContent = `Favorites (${favoriteStationIds.size})`;
+      const favoritesLabel = favoritesFilter.querySelector("[data-favorites-label]");
+      if (favoritesLabel) favoritesLabel.textContent = `Favorites (${favoriteStationIds.size})`;
       allStationsFilter.classList.toggle("is-active", !favoritesOnly);
       favoritesFilter.classList.toggle("is-active", favoritesOnly);
       allStationsFilter.setAttribute("aria-pressed", String(!favoritesOnly));

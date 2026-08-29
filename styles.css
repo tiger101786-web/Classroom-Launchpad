@@ -6420,6 +6420,588 @@ body[data-theme="night"] .colt-radio-station.is-active {
   color: #ffffff;
 }
 
+/* Colt Radio — illustrated crimson player */
+.colt-radio-panel,
+body[data-theme="night"] .colt-radio-panel {
+  width: min(430px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  border: 1px solid #381118;
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 84% 6%, rgba(176, 9, 30, 0.16), transparent 24%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 5px),
+    #050505;
+  color: #f7f2f2;
+  box-shadow:
+    0 0 0 1px #050505,
+    0 0 22px rgba(190, 12, 34, 0.24),
+    0 28px 80px rgba(0, 0, 0, 0.78);
+}
+
+.colt-radio-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.84);
+}
+
+.colt-radio-header {
+  position: relative;
+  min-height: 116px;
+  padding: 20px 16px 16px;
+  overflow: hidden;
+  border-bottom: 1px solid #4b111a;
+  background:
+    linear-gradient(90deg, rgba(3, 3, 3, 0.97) 0%, rgba(7, 3, 4, 0.78) 43%, rgba(22, 2, 5, 0.24) 76%),
+    url("assets/hero-panel-bg.jpg?v=20260829-radio-redesign") 10% 58% / 168% auto no-repeat;
+  color: #ffffff;
+}
+
+.colt-radio-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 65%, #050505 112%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 -18px 30px rgba(0, 0, 0, 0.65);
+}
+
+.colt-radio-heading,
+.colt-radio-header-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.colt-radio-heading {
+  align-items: center;
+  gap: 10px;
+}
+
+.colt-radio-heading-mark {
+  width: 56px;
+  height: 64px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  filter: drop-shadow(0 0 9px rgba(224, 22, 42, 0.5));
+}
+
+.colt-radio-heading-mark img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  object-position: center;
+  transform: translateX(-7px);
+  filter: saturate(1.15) contrast(1.1);
+}
+
+.colt-radio-heading .feature-kicker,
+body[data-theme="night"] .colt-radio-heading .feature-kicker {
+  margin: 0 0 5px;
+  padding: 4px 8px;
+  border: 1px solid #74131d;
+  border-radius: 3px;
+  background: rgba(8, 3, 4, 0.72);
+  color: #ef4452;
+  box-shadow: inset 0 0 10px rgba(171, 6, 28, 0.16);
+  font-size: 0.54rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.colt-radio-heading h2 {
+  margin: 0;
+  color: #d8d5d2;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black", sans-serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: 0.015em;
+  line-height: 0.95;
+  text-shadow:
+    1px 1px 0 #4b4a48,
+    0 2px 0 #171717,
+    0 0 12px rgba(255, 255, 255, 0.12);
+}
+
+.colt-radio-header-actions {
+  gap: 7px;
+  align-self: center;
+}
+
+.colt-radio-icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #8f2430;
+  border-radius: 4px;
+  background: linear-gradient(145deg, rgba(20, 10, 11, 0.96), rgba(2, 2, 2, 0.96));
+  color: #f5f1f1;
+  box-shadow:
+    inset 0 0 8px rgba(228, 22, 42, 0.12),
+    0 0 7px rgba(192, 15, 34, 0.18);
+}
+
+.colt-radio-icon-btn:hover {
+  border-color: #ff3348;
+  box-shadow: inset 0 0 11px rgba(255, 29, 50, 0.22), 0 0 10px rgba(255, 29, 50, 0.3);
+}
+
+.colt-radio-filters {
+  gap: 8px;
+  padding: 10px 14px 7px;
+  background: linear-gradient(180deg, #080808, #050505);
+}
+
+.colt-radio-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #29292b;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #101012, #070708);
+  color: #a7a4a6;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018), 0 3px 8px rgba(0, 0, 0, 0.7);
+  font-size: 0.79rem;
+  letter-spacing: 0.01em;
+}
+
+.colt-radio-filter-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.colt-radio-filter.is-active {
+  border-color: #c52234;
+  background:
+    linear-gradient(90deg, rgba(74, 2, 11, 0.42), rgba(27, 7, 9, 0.95), rgba(74, 2, 11, 0.42));
+  color: #ffffff;
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+  box-shadow:
+    inset 0 0 14px rgba(248, 25, 48, 0.22),
+    0 0 8px rgba(248, 25, 48, 0.35);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.22);
+}
+
+.colt-radio-filter.is-active .colt-radio-filter-icon {
+  color: #ef2c40;
+  filter: drop-shadow(0 0 4px rgba(255, 26, 49, 0.8));
+}
+
+.colt-radio-stations {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  max-height: min(344px, calc(100dvh - 378px));
+  padding: 5px 14px 10px;
+  background: #050505;
+  scrollbar-width: thin;
+  scrollbar-color: #71111c #090909;
+}
+
+.colt-radio-station-item {
+  min-height: 57px;
+}
+
+.colt-radio-station {
+  display: grid;
+  grid-template-columns: 35px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 57px;
+  padding: 6px 23px 6px 6px;
+  border: 1px solid #28282a;
+  border-radius: 5px;
+  background:
+    linear-gradient(145deg, rgba(18, 18, 19, 0.98), rgba(6, 6, 7, 0.98));
+  color: #efebec;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.014),
+    inset 0 -10px 20px rgba(0, 0, 0, 0.35),
+    0 3px 7px rgba(0, 0, 0, 0.55);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  text-align: left;
+}
+
+body[data-theme="night"] .colt-radio-station {
+  border-color: #28282a;
+  background: linear-gradient(145deg, rgba(18, 18, 19, 0.98), rgba(6, 6, 7, 0.98));
+  color: #efebec;
+}
+
+.colt-radio-station-icon {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border: 1px solid #451017;
+  border-radius: 6px;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(139, 8, 24, 0.22), transparent 66%),
+    #090708;
+  color: #ba2334;
+  box-shadow: inset 0 0 9px rgba(192, 19, 38, 0.12);
+}
+
+.colt-radio-station-icon svg {
+  width: 23px;
+  height: 23px;
+  filter: drop-shadow(0 0 4px rgba(225, 24, 44, 0.3));
+}
+
+.colt-radio-station-name {
+  min-width: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.colt-radio-station:hover {
+  border-color: #6f1a24;
+  background: linear-gradient(145deg, #1d1113, #080708);
+}
+
+.colt-radio-station.is-active,
+body[data-theme="night"] .colt-radio-station.is-active {
+  border-color: #ef2c40;
+  background:
+    radial-gradient(circle at 76% 28%, rgba(198, 16, 37, 0.3), transparent 38%),
+    linear-gradient(145deg, #24070b, #090506);
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 18px rgba(220, 15, 38, 0.2),
+    0 0 10px rgba(239, 30, 54, 0.58);
+}
+
+.colt-radio-station.is-active .colt-radio-station-icon {
+  border-color: #d2283b;
+  color: #ff344b;
+  box-shadow: inset 0 0 12px rgba(236, 30, 54, 0.25), 0 0 7px rgba(239, 30, 54, 0.38);
+}
+
+.colt-radio-favorite {
+  right: 3px;
+  width: 24px;
+  height: 32px;
+  color: #d42a3e;
+  font-size: 1.08rem;
+  text-shadow: 0 0 5px rgba(221, 33, 55, 0.45);
+}
+
+.colt-radio-favorite:hover,
+.colt-radio-favorite.is-favorite {
+  background: transparent;
+  color: #ffffff;
+  text-shadow: 0 0 5px #fff, 0 0 12px #ff1d3a, 0 0 20px #ff1d3a;
+}
+
+.colt-radio-station.is-active + .colt-radio-favorite {
+  color: #ffffff;
+  text-shadow: 0 0 6px #fff, 0 0 12px #ff1d3a;
+}
+
+.colt-radio-favorites-empty {
+  border-color: #56121a;
+  background: #0b0809;
+  color: #a9a4a5;
+}
+
+.colt-radio-player {
+  min-height: 128px;
+  margin: 0 14px;
+  border: 1px solid #67141d;
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(107, 5, 18, 0.24), transparent 32%),
+    linear-gradient(145deg, #0e090a, #050505);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.78), 0 0 8px rgba(183, 14, 34, 0.18);
+}
+
+.colt-radio-player iframe {
+  width: calc(100% + 42px);
+  height: 128px;
+  background: #050505;
+}
+
+.colt-radio-now-playing {
+  position: relative;
+  grid-template-columns: 94px minmax(0, 1fr) 27px 48px;
+  gap: 10px;
+  min-height: 128px;
+  padding: 10px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.94), rgba(12, 5, 7, 0.88)),
+    url("assets/hero-panel-bg.jpg?v=20260829-radio-redesign") center / cover;
+}
+
+.colt-radio-now-playing::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  bottom: -45px;
+  width: 190px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(176, 9, 28, 0.22), transparent 68%);
+  pointer-events: none;
+}
+
+.colt-radio-stream-artwork {
+  position: relative;
+  z-index: 1;
+  width: 94px;
+  height: 105px;
+  overflow: hidden;
+  border: 1px solid #801824;
+  border-radius: 6px;
+  background: #0b0507;
+  box-shadow: inset 0 0 15px #000, 0 0 8px rgba(207, 23, 43, 0.2);
+}
+
+.colt-radio-stream-artwork img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
+  filter: saturate(1.15) contrast(1.18) brightness(0.72);
+  transform: scale(1.8);
+  transform-origin: 74% 23%;
+}
+
+.colt-radio-stream-details {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  align-content: center;
+  gap: 5px;
+}
+
+.colt-radio-stream-label {
+  color: #ef3449;
+  font-size: 0.54rem;
+  letter-spacing: 0.075em;
+  line-height: 1.25;
+}
+
+.colt-radio-now-playing strong {
+  color: #ffffff;
+  font-size: 0.86rem;
+  line-height: 1.3;
+  text-shadow: 0 1px 5px #000;
+}
+
+.colt-radio-live-badge {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 3px 6px;
+  border: 1px solid #9f1d2d;
+  border-radius: 3px;
+  background: rgba(103, 6, 19, 0.72);
+  color: #ff3b50;
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 6px rgba(239, 35, 58, 0.24);
+}
+
+.colt-radio-equalizer {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  width: 100%;
+  height: 20px;
+  margin-top: 1px;
+  overflow: hidden;
+}
+
+.colt-radio-equalizer i {
+  flex: 1 1 2px;
+  min-width: 1px;
+  height: 20%;
+  background: #a91428;
+  box-shadow: 0 0 3px rgba(239, 34, 56, 0.35);
+  animation: colt-radio-levels 1.05s ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+.colt-radio-equalizer i:nth-child(3n) { animation-delay: -0.72s; }
+.colt-radio-equalizer i:nth-child(4n) { animation-delay: -0.31s; }
+.colt-radio-equalizer i:nth-child(5n) { animation-delay: -0.55s; }
+.colt-radio-equalizer i:nth-child(7n) { animation-delay: -0.18s; }
+
+@keyframes colt-radio-levels {
+  0% { transform: scaleY(0.18); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+.colt-radio-stream-control {
+  position: relative;
+  z-index: 1;
+  color: #bab7b8;
+}
+
+.colt-radio-mute {
+  width: 27px;
+  height: 32px;
+  align-self: start;
+  margin-top: 9px;
+  font-size: 0.78rem;
+}
+
+.colt-radio-play {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #ff2e45;
+  background: radial-gradient(circle, #aa1128 0%, #430713 58%, #090506 72%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 9px rgba(255, 255, 255, 0.15),
+    0 0 7px #ff1c38,
+    0 0 18px rgba(255, 15, 47, 0.7);
+  font-size: 1rem;
+}
+
+.colt-radio-play:hover {
+  background: radial-gradient(circle, #d01835 0%, #610818 60%, #0b0506 74%);
+  box-shadow: inset 0 0 10px rgba(255,255,255,.2), 0 0 9px #ff3048, 0 0 24px rgba(255, 15, 47, 0.85);
+}
+
+.colt-radio-placeholder {
+  min-height: 128px;
+  color: #c9c4c5;
+}
+
+.colt-radio-note {
+  position: relative;
+  margin: 0 14px;
+  padding: 14px 24px 16px;
+  color: #777274;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.colt-radio-note::before,
+.colt-radio-note::after {
+  content: "♞";
+  position: absolute;
+  top: 13px;
+  color: #69101c;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.colt-radio-note::before { left: 6px; }
+.colt-radio-note::after { right: 6px; transform: scaleX(-1); }
+
+.colt-radio-launcher {
+  border-color: #9e2434;
+  background:
+    linear-gradient(135deg, rgba(8, 5, 6, 0.98), rgba(93, 6, 20, 0.98));
+  box-shadow: 0 0 10px rgba(230, 24, 48, 0.35), 0 14px 30px rgba(0, 0, 0, 0.48);
+}
+
+.colt-radio-launcher-mark {
+  border-color: #d12b3f;
+  background: #080506;
+  color: #ed3046;
+  box-shadow: inset 0 0 9px rgba(229, 27, 49, 0.25);
+}
+
+@media (max-width: 720px) {
+  .colt-radio-panel,
+  body[data-theme="night"] .colt-radio-panel {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .colt-radio-stations {
+    max-height: min(344px, calc(100dvh - 378px));
+  }
+}
+
+@media (max-width: 420px) {
+  .colt-radio-header {
+    min-height: 102px;
+    padding-inline: 12px;
+  }
+
+  .colt-radio-heading-mark {
+    width: 48px;
+  }
+
+  .colt-radio-heading-mark img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .colt-radio-heading h2 {
+    font-size: 1.55rem;
+  }
+
+  .colt-radio-panel .colt-radio-stations {
+    gap: 5px;
+    padding-inline: 9px;
+  }
+
+  .colt-radio-panel .colt-radio-station {
+    grid-template-columns: 31px minmax(0, 1fr);
+    gap: 5px;
+    min-height: 54px;
+    padding-left: 5px;
+    font-size: 0.64rem;
+  }
+
+  .colt-radio-station-icon {
+    width: 31px;
+    height: 31px;
+  }
+
+  .colt-radio-station-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .colt-radio-panel .colt-radio-player {
+    margin-inline: 9px;
+  }
+
+  .colt-radio-now-playing {
+    grid-template-columns: 78px minmax(0, 1fr) 24px 42px;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .colt-radio-stream-artwork {
+    width: 78px;
+    height: 98px;
+  }
+
+  .colt-radio-play {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 350px) {
+  .colt-radio-stations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .colt-radio-equalizer i {
+    animation: none;
+    transform: scaleY(0.55);
+  }
+}
+
 /* Colt Assistant */
 .colt-assistant-root[hidden] {
   display: none;
