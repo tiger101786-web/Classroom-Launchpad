@@ -321,6 +321,7 @@ async function run() {
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
     assert.deepEqual(JSON.parse(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioFavoritesGuestV1"))), ["game-soundtracks"]);
+    assert.equal(await page.locator("[data-station-item]").first().getAttribute("data-station-item"), "game-soundtracks", "Pinned favorites did not move to the top of All Stations.");
     await page.getByRole("button", { name: "Favorites (1)", exact: true }).click();
     assert.equal(await page.locator("[data-station-item]:not([hidden])").count(), 1);
     assert(await page.getByRole("button", { name: "Games • Soundtracks", exact: true }).isVisible());

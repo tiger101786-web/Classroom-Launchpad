@@ -378,7 +378,15 @@
         button.setAttribute("aria-label", `${selected ? "Remove" : "Add"} ${station.label} ${selected ? "from" : "to"} favorites`);
         button.title = selected ? "Remove from favorites" : "Add to favorites";
       });
-      stationNav.querySelectorAll("[data-station-item]").forEach(item => {
+      const stationOrder = new Map(stations.map((station, index) => [station.id, index]));
+      const stationItems = [...stationNav.querySelectorAll("[data-station-item]")];
+      stationItems.sort((left, right) => {
+        const favoriteDifference = Number(favoriteStationIds.has(right.dataset.stationItem))
+          - Number(favoriteStationIds.has(left.dataset.stationItem));
+        return favoriteDifference || stationOrder.get(left.dataset.stationItem) - stationOrder.get(right.dataset.stationItem);
+      });
+      stationItems.forEach(item => stationNav.insertBefore(item, favoritesEmpty));
+      stationItems.forEach(item => {
         item.hidden = favoritesOnly && !favoriteStationIds.has(item.dataset.stationItem);
       });
       favoritesEmpty.hidden = !(favoritesOnly && favoriteStationIds.size === 0);
