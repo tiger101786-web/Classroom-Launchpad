@@ -46,7 +46,7 @@
     },
     {
       id: "lofi-fm",
-      label: "Lofi FM",
+      label: "Lo-fi Hip Hop",
       type: "playlist",
       sources: [
         "https://lofi.radio/songs/42.mp3",
@@ -60,7 +60,7 @@
         "https://lofi.radio/songs/All Curled Up.mp3",
         "https://lofi.radio/songs/Alley Cat.mp3"
       ],
-      note: "Free, ad-free lofi by Purrple Cat through Lofi FM. Tracks change automatically. No account required."
+      note: "Free, ad-free lo-fi hip hop by Purrple Cat. Tracks change automatically. No account required."
     },
     {
       id: "chillsynth",
@@ -125,6 +125,24 @@
       metadataEndpoint: "https://stream.radioabf.com/status-json.xsl",
       metadataMount: "/abf-sd.mp3",
       note: "Modern house, techno, electronic music, and DJ mixes streamed by Radio ABF. Ad-free and no account required."
+    },
+    {
+      id: "chill-house",
+      label: "Chill House",
+      type: "stream",
+      source: "https://stream.chillhouse-live.com/live",
+      provider: "Chillhouse Live",
+      note: "Warm deep-house and chill-house background music streamed by Chillhouse Live. No ads, no presenters, and no account required."
+    },
+    {
+      id: "icf-worship",
+      label: "ICF Worship",
+      type: "stream",
+      source: "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac",
+      provider: "ICF Radio",
+      metadataEndpoint: "https://listen.samcloud.com/webapi/station/139286/history/npe?token=0fadd322e13a4d70b77795d1fdbb0156d14371ff&format=json",
+      metadataFormat: "samCloudNowPlaying",
+      note: "Modern worship music streamed by ICF Radio. Curated, ad-free, free of charge, and no account required."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -274,7 +292,7 @@
     }
 
     function trackNameFromSource(source) {
-      const filename = decodeURIComponent(source.split("/").pop() || "Lofi FM");
+      const filename = decodeURIComponent(source.split("/").pop() || "Lo-fi Hip Hop");
       return filename.replace(/\.mp3$/i, "");
     }
 
@@ -300,12 +318,23 @@
     async function refreshNowPlaying(station) {
       if (activeStation !== station.id) return;
       try {
-        const response = await fetch(station.metadataEndpoint || "https://stream.nightride.fm/status-json.xsl", { cache: "no-store" });
+        const metadataEndpoint = station.metadataEndpoint || (station.metadataMount ? "https://stream.nightride.fm/status-json.xsl" : "");
+        if (!metadataEndpoint) {
+          nowPlayingTitle.textContent = `${station.label} live stream`;
+          return;
+        }
+        const response = await fetch(metadataEndpoint, { cache: "no-store" });
         if (!response.ok) throw new Error("Metadata unavailable");
         const payload = await response.json();
         if (station.metadataFormat === "onlineRadioBox") {
           const currentTrack = payload?.playlist?.[0]?.name;
           if (activeStation === station.id) nowPlayingTitle.textContent = currentTrack || `${station.label} live stream`;
+          return;
+        }
+        if (station.metadataFormat === "samCloudNowPlaying") {
+          const currentTrack = payload?.m_Item2;
+          const title = [currentTrack?.Artist, currentTrack?.Title].filter(Boolean).join(" - ");
+          if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
           return;
         }
         const stream = metadataSources(payload).find(item => {
@@ -328,7 +357,7 @@
     }
 
     function updateStreamLabel(station) {
-      const provider = station.provider || (station.type === "playlist" ? "Lofi FM" : "Nightride FM");
+      const provider = station.provider || (station.type === "playlist" ? "Lo-fi Hip Hop" : "Nightride FM");
       nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
     }
 

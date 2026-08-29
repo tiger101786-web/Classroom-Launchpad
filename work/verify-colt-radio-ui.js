@@ -129,6 +129,14 @@ async function run() {
       }
       return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
     });
+    await page.route("https://stream.chillhouse-live.com/live", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac", route => route.fulfill({ status: 206, contentType: "audio/aacp", body: Buffer.from([]) }));
+    await page.route("https://listen.samcloud.com/webapi/station/139286/history/npe**", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ m_Item2: { Artist: "Test Worship Artist", Title: "Test Worship Song" } })
+    }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -168,7 +176,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF"]
+      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -228,14 +236,24 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://stream.radioabf.com/abf-sd.mp3");
     await page.getByText("Test Artist - ABF Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Lofi FM", exact: true }).click();
+    await page.getByRole("button", { name: "Chill House", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.chillhouse-live.com/live");
+    await page.getByText("Chill House live stream", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-note").innerText(), /No ads, no presenters/);
+
+    await page.getByRole("button", { name: "ICF Worship", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac");
+    await page.getByText("Test Worship Artist - Test Worship Song", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Curated, ad-free/);
+
+    await page.getByRole("button", { name: "Lo-fi Hip Hop", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
     assert.match(firstLofiTrack, /^https:\/\/lofi\.radio\/songs\//);
-    assert(await audio.isHidden(), "Lofi FM exposed a progress bar or song duration.");
-    assert(await page.locator(".colt-radio-stream-player").isVisible(), "Lofi FM did not use the compact Colt Radio player.");
+    assert(await audio.isHidden(), "Lo-fi Hip Hop exposed a progress bar or song duration.");
+    assert(await page.locator(".colt-radio-stream-player").isVisible(), "Lo-fi Hip Hop did not use the compact Colt Radio player.");
     assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /^Purrple Cat - /);
     await audio.evaluate(element => element.dispatchEvent(new Event("ended")));
-    assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lofi FM repeated the same track immediately.");
+    assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lo-fi Hip Hop repeated the same track immediately.");
 
     await page.getByRole("button", { name: "Working", exact: true }).click();
     assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
@@ -300,7 +318,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF"],
+      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
