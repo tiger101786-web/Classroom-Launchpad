@@ -137,6 +137,17 @@ async function run() {
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ m_Item2: { Artist: "Test Worship Artist", Title: "Test Worship Song" } })
     }));
+    await page.route("https://stream.wildfm.nl/GOD_Radio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://ycpycskjlwukfsuizfnw.supabase.co/functions/v1/now-playing", route => {
+      assert.equal(route.request().method(), "POST");
+      assert(route.request().headers().apikey, "GOD Radio metadata request omitted its public API key.");
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ artist: "Test GOD Radio Artist", title: "Test GOD Radio Program" })
+      });
+    });
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -176,7 +187,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship"]
+      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship", "GOD Radio"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -245,6 +256,11 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac");
     await page.getByText("Test Worship Artist - Test Worship Song", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Curated, ad-free/);
+
+    await page.getByRole("button", { name: "GOD Radio", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.wildfm.nl/GOD_Radio");
+    await page.getByText("Test GOD Radio Artist - Test GOD Radio Program", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Bible teaching, testimonies, and prayer/);
 
     await page.getByRole("button", { name: "Lo-fi Hip Hop", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
@@ -318,7 +334,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship"],
+      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lo-fi Hip Hop", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF", "Chill House", "ICF Worship", "GOD Radio"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

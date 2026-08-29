@@ -143,6 +143,22 @@
       metadataEndpoint: "https://listen.samcloud.com/webapi/station/139286/history/npe?token=0fadd322e13a4d70b77795d1fdbb0156d14371ff&format=json",
       metadataFormat: "samCloudNowPlaying",
       note: "Modern worship music streamed by ICF Radio. Curated, ad-free, free of charge, and no account required."
+    },
+    {
+      id: "god-radio",
+      label: "GOD Radio",
+      type: "stream",
+      source: "https://stream.wildfm.nl/GOD_Radio",
+      provider: "GOD Media Network",
+      metadataEndpoint: "https://ycpycskjlwukfsuizfnw.supabase.co/functions/v1/now-playing",
+      metadataMethod: "POST",
+      metadataHeaders: {
+        apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljcHljc2tqbHd1a2ZzdWl6Zm53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTU0NjYsImV4cCI6MjA5MDI3MTQ2Nn0.U96v8k9IbBUI6H_mp4lXtOU5-IFi7dBuYao_XMAWX5c",
+        "Content-Type": "application/json"
+      },
+      metadataBody: "{}",
+      metadataFormat: "simpleTrack",
+      note: "Worship music, Bible teaching, testimonies, and prayer streamed by GOD Radio. Free, no account required, and supported by donations and partners."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -323,7 +339,12 @@
           nowPlayingTitle.textContent = `${station.label} live stream`;
           return;
         }
-        const response = await fetch(metadataEndpoint, { cache: "no-store" });
+        const response = await fetch(metadataEndpoint, {
+          cache: "no-store",
+          method: station.metadataMethod || "GET",
+          headers: station.metadataHeaders,
+          body: station.metadataBody
+        });
         if (!response.ok) throw new Error("Metadata unavailable");
         const payload = await response.json();
         if (station.metadataFormat === "onlineRadioBox") {
@@ -334,6 +355,11 @@
         if (station.metadataFormat === "samCloudNowPlaying") {
           const currentTrack = payload?.m_Item2;
           const title = [currentTrack?.Artist, currentTrack?.Title].filter(Boolean).join(" - ");
+          if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
+          return;
+        }
+        if (station.metadataFormat === "simpleTrack") {
+          const title = [payload?.artist, payload?.title].filter(Boolean).join(" - ");
           if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
           return;
         }
