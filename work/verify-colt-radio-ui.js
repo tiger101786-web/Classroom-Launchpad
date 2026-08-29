@@ -100,6 +100,35 @@ async function run() {
       contentType: "audio/mpeg",
       body: Buffer.from([])
     }));
+    await page.route("https://onlineradiobox.com/json/ch/reaturesfightadio/playlist", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ playlist: [{ name: "Test Artist - COTN Song" }] })
+    }));
+    await page.route("https://streaming.smartradio.ch:8510/stream", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
+    await page.route("https://systrum.net:8443/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ icestats: { source: [{ listenurl: "https://systrum.net:8443/SSR2", title: "Test Artist - SSR Song" }] } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
+    await page.route("https://stream.radioabf.com/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ icestats: { source: [{ listenurl: "https://stream.radioabf.com/abf-sd.mp3", title: "Test Artist - ABF Song" }] } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -139,7 +168,7 @@ async function run() {
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
-      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth"]
+      ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -185,6 +214,19 @@ async function run() {
     await page.getByRole("button", { name: "Spacesynth", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/spacesynth.mp3");
     await page.getByText("Test Artist - Spacesynth Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "COTN Radio", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.smartradio.ch:8510/stream");
+    await page.getByText("Test Artist - COTN Song", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-stream-label").innerText(), /COTN RADIO/);
+
+    await page.getByRole("button", { name: "SSR Electronica", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://systrum.net:8443/SSR2");
+    await page.getByText("Test Artist - SSR Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Radio ABF", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.radioabf.com/abf-sd.mp3");
+    await page.getByText("Test Artist - ABF Song", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Lofi FM", exact: true }).click();
     const firstLofiTrack = await audio.getAttribute("src");
@@ -258,7 +300,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth"],
+      stations: ["Studying", "Working", "Chilling", "Sleeping", "Gaming Lofi", "Japanese Lofi", "Lofi FM", "Chillsynth", "Datawave", "Nightride", "Spacesynth", "COTN Radio", "SSR Electronica", "Radio ABF"],
       freeLofiCafeEmbed: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

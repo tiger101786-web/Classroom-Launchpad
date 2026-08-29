@@ -91,8 +91,40 @@
       label: "Spacesynth",
       type: "stream",
       source: "https://stream.nightride.fm/spacesynth.mp3",
+      provider: "Nightride FM",
+      metadataEndpoint: "https://stream.nightride.fm/status-json.xsl",
       metadataMount: "/spacesynth.mp3",
       note: "Spacesynth, space disco, and retro electronic music streamed live by Nightride FM. No account required."
+    },
+    {
+      id: "cotn-radio",
+      label: "COTN Radio",
+      type: "stream",
+      source: "https://streaming.smartradio.ch:8510/stream",
+      provider: "COTN Radio",
+      metadataEndpoint: "https://onlineradiobox.com/json/ch/reaturesfightadio/playlist",
+      metadataFormat: "onlineRadioBox",
+      note: "Modern lounge, chillout, ambient, chillhouse, and deep-house music streamed by COTN Radio. Free, ad-free, and no account required."
+    },
+    {
+      id: "ssr-electronica",
+      label: "SSR Electronica",
+      type: "stream",
+      source: "https://systrum.net:8443/SSR2",
+      provider: "Systrum Sistum",
+      metadataEndpoint: "https://systrum.net:8443/status-json.xsl",
+      metadataMount: "/SSR2",
+      note: "Modern electronica and dance music streamed by the nonprofit Systrum Sistum station. No account required."
+    },
+    {
+      id: "radio-abf",
+      label: "Radio ABF",
+      type: "stream",
+      source: "https://stream.radioabf.com/abf-sd.mp3",
+      provider: "Radio ABF",
+      metadataEndpoint: "https://stream.radioabf.com/status-json.xsl",
+      metadataMount: "/abf-sd.mp3",
+      note: "Modern house, techno, electronic music, and DJ mixes streamed by Radio ABF. Ad-free and no account required."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -268,9 +300,14 @@
     async function refreshNowPlaying(station) {
       if (activeStation !== station.id) return;
       try {
-        const response = await fetch("https://stream.nightride.fm/status-json.xsl", { cache: "no-store" });
+        const response = await fetch(station.metadataEndpoint || "https://stream.nightride.fm/status-json.xsl", { cache: "no-store" });
         if (!response.ok) throw new Error("Metadata unavailable");
         const payload = await response.json();
+        if (station.metadataFormat === "onlineRadioBox") {
+          const currentTrack = payload?.playlist?.[0]?.name;
+          if (activeStation === station.id) nowPlayingTitle.textContent = currentTrack || `${station.label} live stream`;
+          return;
+        }
         const stream = metadataSources(payload).find(item => {
           try {
             return new URL(item.listenurl).pathname === station.metadataMount;
@@ -291,7 +328,7 @@
     }
 
     function updateStreamLabel(station) {
-      const provider = station.type === "playlist" ? "Lofi FM" : "Nightride FM";
+      const provider = station.provider || (station.type === "playlist" ? "Lofi FM" : "Nightride FM");
       nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
     }
 
