@@ -278,7 +278,7 @@
     const heading = buildElement("div", "colt-radio-heading");
     const headingMark = buildElement("span", "colt-radio-heading-mark");
     const headingHorse = document.createElement("img");
-    headingHorse.src = "assets/colt-radio-horse-portrait.png?v=20260829-radio-artwork";
+    headingHorse.src = "assets/colt-radio-header-portrait.png?v=20260829-radio-header";
     headingHorse.alt = "";
     headingHorse.setAttribute("aria-hidden", "true");
     headingMark.append(headingHorse);
@@ -321,7 +321,15 @@
       button.type = "button";
       button.dataset.station = station.id;
       button.setAttribute("aria-pressed", "false");
-      const stationName = buildElement("span", "colt-radio-station-name", station.label);
+      const [stationFamily, stationStyle = ""] = station.label.split(" • ");
+      const stationName = buildElement("span", "colt-radio-station-name");
+      stationName.append(
+        buildElement("span", "colt-radio-station-family", stationFamily),
+        document.createTextNode(" "),
+        buildElement("span", "colt-radio-station-style", stationStyle)
+      );
+      if (stationFamily.length > 9 || stationStyle.length > 9) item.classList.add("has-long-name");
+      button.setAttribute("aria-label", station.label);
       button.append(stationIcon(station.id), stationName);
       const favorite = buildElement("button", "colt-radio-favorite", "☆");
       favorite.type = "button";

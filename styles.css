@@ -6479,18 +6479,18 @@ body[data-theme="night"] .colt-radio-panel {
 
 .colt-radio-heading {
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .colt-radio-heading-mark {
   position: relative;
-  width: 54px;
-  height: 66px;
+  width: 68px;
+  height: 68px;
   overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  filter: drop-shadow(0 0 9px rgba(224, 22, 42, 0.5));
+  border: 1px solid rgba(188, 24, 43, 0.8);
+  border-radius: 50%;
+  background: #070405;
+  box-shadow: inset 0 0 10px #000, 0 0 10px rgba(224, 22, 42, 0.42);
 }
 
 .colt-radio-heading-mark img {
@@ -6498,9 +6498,9 @@ body[data-theme="night"] .colt-radio-panel {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: right center;
-  filter: saturate(1.06) contrast(1.08) brightness(0.92);
+  object-fit: contain;
+  object-position: center;
+  filter: saturate(1.04) contrast(1.06) brightness(1.04);
 }
 
 .colt-radio-heading .feature-kicker,
@@ -6519,16 +6519,17 @@ body[data-theme="night"] .colt-radio-heading .feature-kicker {
 
 .colt-radio-heading h2 {
   margin: 0;
-  color: #d8d5d2;
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black", sans-serif;
-  font-size: 1.82rem;
+  color: #d6d1ca;
+  font-family: "Rockwell Extra Bold", Rockwell, Georgia, serif;
+  font-size: 1.68rem;
   font-weight: 900;
-  letter-spacing: 0.015em;
-  line-height: 0.95;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  -webkit-text-stroke: 0.25px #77716b;
   text-shadow:
-    1px 1px 0 #4b4a48,
-    0 2px 0 #171717,
-    0 0 12px rgba(255, 255, 255, 0.12);
+    1px 1px 0 #3e3a37,
+    0 2px 0 #111,
+    0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .colt-radio-header-actions {
@@ -6614,11 +6615,11 @@ body[data-theme="night"] .colt-radio-heading .feature-kicker {
 
 .colt-radio-station {
   display: grid;
-  grid-template-columns: 35px minmax(0, 1fr);
+  grid-template-columns: 30px minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
+  gap: 4px;
   min-height: 51px;
-  padding: 6px 23px 6px 6px;
+  padding: 6px 24px 6px 5px;
   border: 1px solid #28282a;
   border-radius: 5px;
   background:
@@ -6628,8 +6629,8 @@ body[data-theme="night"] .colt-radio-heading .feature-kicker {
     inset 0 0 0 1px rgba(255, 255, 255, 0.014),
     inset 0 -10px 20px rgba(0, 0, 0, 0.35),
     0 3px 7px rgba(0, 0, 0, 0.55);
-  font-size: 0.7rem;
-  line-height: 1.25;
+  font-size: 0.67rem;
+  line-height: 1.12;
   text-align: left;
 }
 
@@ -6641,8 +6642,8 @@ body[data-theme="night"] .colt-radio-station {
 
 .colt-radio-station-icon {
   display: grid;
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
   place-items: center;
   border: 1px solid #451017;
   border-radius: 6px;
@@ -6660,9 +6661,24 @@ body[data-theme="night"] .colt-radio-station {
 }
 
 .colt-radio-station-name {
+  display: grid;
+  gap: 2px;
   min-width: 0;
+  max-width: 100%;
   overflow-wrap: normal;
   word-break: normal;
+}
+
+.colt-radio-station-family,
+.colt-radio-station-style {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.colt-radio-station-item.has-long-name .colt-radio-station-name {
+  font-size: 0.55rem;
+  letter-spacing: -0.025em;
 }
 
 .colt-radio-station:hover {
@@ -6689,8 +6705,8 @@ body[data-theme="night"] .colt-radio-station.is-active {
 }
 
 .colt-radio-favorite {
-  right: 3px;
-  width: 24px;
+  right: 1px;
+  width: 22px;
   height: 32px;
   color: #d42a3e;
   font-size: 1.08rem;

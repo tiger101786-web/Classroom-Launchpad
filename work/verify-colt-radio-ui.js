@@ -217,7 +217,7 @@ async function run() {
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.stationIcons, 22, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
-    assert.match(radioVisuals.headingArtwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
+    assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
     const matchedPanelLayout = await page.evaluate(() => {
       const panel = document.querySelector(".colt-radio-panel").getBoundingClientRect();
@@ -233,8 +233,18 @@ async function run() {
     assert.equal(matchedPanelLayout.headerHeight, 112, JSON.stringify(matchedPanelLayout));
     assert.equal(matchedPanelLayout.stationHeight, 51, JSON.stringify(matchedPanelLayout));
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
+    const visibleStationNames = await page.locator(".colt-radio-station").allTextContents();
+    assert(!visibleStationNames.some(name => name.includes("•")), JSON.stringify(visibleStationNames));
+    const stationLabelLayout = await page.locator(".colt-radio-station-item").evaluateAll(items => items.map(item => {
+      const name = item.querySelector(".colt-radio-station-name").getBoundingClientRect();
+      const favorite = item.querySelector(".colt-radio-favorite").getBoundingClientRect();
+      const linesFit = [...item.querySelectorAll(".colt-radio-station-family, .colt-radio-station-style")]
+        .every(line => line.scrollWidth <= line.clientWidth + 1);
+      return { nameRight: name.right, favoriteLeft: favorite.left, linesFit };
+    }));
+    assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
-      await page.locator(".colt-radio-station").allTextContents(),
+      visibleStationNames.map(name => name.replace(" ", " • ")),
       ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"]
     );
     const iframe = radioPanel.locator("iframe");
