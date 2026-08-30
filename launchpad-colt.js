@@ -6,6 +6,10 @@
   if (!root) return;
 
   const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
+  const VIDEO_ASSETS = {
+    idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
+    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-colt-video-poses"
+  };
   const POSE_ASSETS = {
     greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
     pointing: "assets/launchpad-colt-pointing.png?v=20260830-colt-poses",
@@ -46,12 +50,12 @@
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
-        <img class="launchpad-colt-pose" data-pose="idle" src="${ASSET_URL}" alt="" aria-hidden="true" draggable="false">
+        <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="pointing" src="${POSE_ASSETS.pointing}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
-        <img class="launchpad-colt-pose" data-pose="sleeping" src="${POSE_ASSETS.sleeping}" alt="" aria-hidden="true" draggable="false">
+        <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" poster="${POSE_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>

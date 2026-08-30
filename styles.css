@@ -10168,12 +10168,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   cursor: grabbing;
 }
 
-.launchpad-colt-root.is-dragging .launchpad-colt-character img {
+.launchpad-colt-root.is-dragging .launchpad-colt-pose {
   animation: none;
   transform: rotate(-5deg) translateY(-5px) scale(1.04);
 }
 
-.launchpad-colt-character img {
+.launchpad-colt-character .launchpad-colt-pose {
   position: absolute;
   inset: 0;
   display: block;
@@ -10204,8 +10204,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   opacity: 1;
 }
 
-.launchpad-colt-character:hover img,
-.launchpad-colt-character:focus-visible img {
+.launchpad-colt-character:hover .launchpad-colt-pose,
+.launchpad-colt-character:focus-visible .launchpad-colt-pose {
   filter: drop-shadow(0 8px 9px rgba(0, 0, 0, 0.72)) drop-shadow(0 0 9px rgba(255, 34, 76, 0.6));
 }
 
@@ -10225,7 +10225,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   height: 122px;
 }
 
-.launchpad-colt-root[data-size="small"]:not(.is-minimized) .launchpad-colt-character img {
+.launchpad-colt-root[data-size="small"]:not(.is-minimized) .launchpad-colt-pose {
   width: 120px;
   height: 114px;
 }
@@ -10243,7 +10243,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   height: 166px;
 }
 
-.launchpad-colt-root[data-size="large"]:not(.is-minimized) .launchpad-colt-character img {
+.launchpad-colt-root[data-size="large"]:not(.is-minimized) .launchpad-colt-pose {
   width: 164px;
   height: 156px;
 }
@@ -10317,27 +10317,27 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   animation: launchpad-colt-spark 2.6s ease-in-out infinite;
 }
 
-.launchpad-colt-companion[data-state="directions"] .launchpad-colt-character img,
-.launchpad-colt-companion[data-state="explore"] .launchpad-colt-character img {
+.launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose,
+.launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose {
   animation: launchpad-colt-point 650ms ease-in-out 2;
 }
 
-.launchpad-colt-companion[data-state="message"] .launchpad-colt-character img,
-.launchpad-colt-companion[data-state="corner"] .launchpad-colt-character img {
+.launchpad-colt-companion[data-state="message"] .launchpad-colt-pose,
+.launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose {
   animation: launchpad-colt-hop 620ms ease-in-out 2;
 }
 
-.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-character img,
-.launchpad-colt-companion[data-state="success"] .launchpad-colt-character img,
-.launchpad-colt-companion[data-state="classroom"] .launchpad-colt-character img {
+.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose,
+.launchpad-colt-companion[data-state="success"] .launchpad-colt-pose,
+.launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose {
   animation: launchpad-colt-greeting 760ms cubic-bezier(0.2, 0.8, 0.3, 1.15) 2;
 }
 
-.launchpad-colt-companion[data-state="radio"] .launchpad-colt-character img {
+.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose {
   animation: launchpad-colt-groove 720ms ease-in-out infinite;
 }
 
-.launchpad-colt-companion[data-state="sleep"] .launchpad-colt-character img {
+.launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose {
   animation: launchpad-colt-sleep-breathe 2.8s ease-in-out infinite;
   transform: translateY(5px) scale(1.04);
   filter: saturate(0.72) brightness(0.72) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.65));
@@ -10421,7 +10421,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   display: none;
 }
 
-.launchpad-colt-root.is-minimized .launchpad-colt-character img {
+.launchpad-colt-root.is-minimized .launchpad-colt-pose {
   width: 74px;
   height: 70px;
   transform: translateY(6px) scale(1.22);
@@ -10536,7 +10536,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     height: 62px;
   }
 
-  .launchpad-colt-root[data-size]:not(.is-minimized) .launchpad-colt-character img {
+  .launchpad-colt-root[data-size]:not(.is-minimized) .launchpad-colt-pose {
     width: 72px;
     height: 68px;
   }
@@ -10565,7 +10565,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     display: none;
   }
 
-  .launchpad-colt-root.is-auto-compact .launchpad-colt-character img {
+  .launchpad-colt-root.is-auto-compact .launchpad-colt-pose {
     width: 72px;
     height: 68px;
     transform: translateY(6px) scale(1.22);

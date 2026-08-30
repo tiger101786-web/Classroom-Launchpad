@@ -26,6 +26,9 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
+  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm"].forEach(filename => {
+    assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
+  });
   const browser = await chromium.launch({
     headless: true,
     executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
@@ -39,10 +42,12 @@ async function run() {
     await authenticate(page);
     await page.waitForSelector(".launchpad-colt-character:visible");
 
-    const image = page.locator('.launchpad-colt-character img[data-pose="idle"]');
-    assert.match(await image.getAttribute("src"), /launchpad-colt-companion\.png/);
+    const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
+    assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
+    assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
     assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
-    assert.equal(await image.getAttribute("draggable"), "false");
+    assert.equal(await image.getAttribute("muted"), "");
+    assert.equal(await image.getAttribute("loop"), "");
     const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
     await greetingImage.evaluate(element => {
       element.style.transition = "none";
@@ -63,6 +68,8 @@ async function run() {
     await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
     const sleepingImage = page.locator('.launchpad-colt-pose[data-pose="sleeping"]');
+    assert.equal(await sleepingImage.evaluate(element => element.tagName), "VIDEO");
+    assert.match(await sleepingImage.getAttribute("src"), /launchpad-colt-sleeping\.webm/);
     await sleepingImage.evaluate(element => { element.style.transition = "none"; });
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
