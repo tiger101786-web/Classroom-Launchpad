@@ -27,7 +27,9 @@
   let panelObserver = null;
   let currentState = "idle";
   let controlsOpen = false;
-  let prefs = { minimized: false, motion: true, hidden: false };
+  let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
+  let dragSession = null;
+  let suppressCharacterClick = false;
 
   root.innerHTML = `
     <aside class="launchpad-colt-companion" data-state="idle" aria-label="Launchpad Colt companion">
@@ -35,7 +37,7 @@
         <strong>Launchpad Colt</strong>
         <span></span>
       </div>
-      <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls" aria-expanded="false">
+      <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <img src="${ASSET_URL}" alt="Launchpad Colt, the Classroom Launchpad horse companion">
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
@@ -43,6 +45,8 @@
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize">Minimize</button>
         <button type="button" data-colt-control="motion">Pause motion</button>
+        <button type="button" data-colt-control="size">Size: Medium</button>
+        <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
       </div>
     </aside>
@@ -60,6 +64,7 @@
   const restoreButton = root.querySelector(".launchpad-colt-restore");
   const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
   const motionButton = controls.querySelector('[data-colt-control="motion"]');
+  const sizeButton = controls.querySelector('[data-colt-control="size"]');
 
   function preferenceKey() {
     const account = session.email || session.role || "guest";
@@ -72,10 +77,14 @@
       prefs = {
         minimized: Boolean(stored.minimized),
         motion: stored.motion !== false,
-        hidden: Boolean(stored.hidden)
+        hidden: Boolean(stored.hidden),
+        position: stored.position && Number.isFinite(stored.position.x) && Number.isFinite(stored.position.y)
+          ? { x: stored.position.x, y: stored.position.y }
+          : null,
+        size: ["small", "medium", "large"].includes(stored.size) ? stored.size : "medium"
       };
     } catch {
-      prefs = { minimized: false, motion: true, hidden: false };
+      prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
     }
     applyPreferences();
   }
@@ -89,11 +98,37 @@
   function applyPreferences() {
     root.classList.toggle("is-minimized", prefs.minimized);
     root.classList.toggle("is-motion-paused", !prefs.motion);
+    root.dataset.size = prefs.size;
     companion.hidden = prefs.hidden;
     restoreButton.hidden = !prefs.hidden;
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
     motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
+    sizeButton.textContent = `Size: ${prefs.size.charAt(0).toUpperCase()}${prefs.size.slice(1)}`;
+    applySavedPosition();
     if (prefs.hidden) closeControls();
+  }
+
+  function clampPosition(x, y) {
+    const width = root.offsetWidth || (prefs.minimized || globalObject.innerWidth < 1120 ? 68 : 154);
+    const height = root.offsetHeight || (prefs.minimized || globalObject.innerWidth < 1120 ? 68 : 154);
+    return {
+      x: Math.max(6, Math.min(globalObject.innerWidth - width - 6, Number(x) || 6)),
+      y: Math.max(6, Math.min(globalObject.innerHeight - height - 6, Number(y) || 6))
+    };
+  }
+
+  function applySavedPosition() {
+    if (!prefs.position) {
+      root.classList.remove("is-user-positioned");
+      root.style.removeProperty("left");
+      root.style.removeProperty("top");
+      return;
+    }
+    const next = clampPosition(prefs.position.x, prefs.position.y);
+    prefs.position = next;
+    root.classList.add("is-user-positioned");
+    root.style.left = `${next.x}px`;
+    root.style.top = `${next.y}px`;
   }
 
   function closeControls() {
@@ -109,6 +144,7 @@
   function syncVisibility() {
     root.hidden = !shouldShow();
     if (root.hidden) closeControls();
+    else applySavedPosition();
     syncPanelCollision();
   }
 
@@ -224,7 +260,52 @@
     grid.append(card);
   }
 
+  characterButton.addEventListener("pointerdown", event => {
+    if (event.button !== 0) return;
+    const rect = root.getBoundingClientRect();
+    dragSession = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      rootX: rect.left,
+      rootY: rect.top,
+      moved: false
+    };
+    characterButton.setPointerCapture(event.pointerId);
+  });
+
+  characterButton.addEventListener("pointermove", event => {
+    if (!dragSession || dragSession.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - dragSession.startX;
+    const deltaY = event.clientY - dragSession.startY;
+    if (!dragSession.moved && Math.hypot(deltaX, deltaY) < 6) return;
+    dragSession.moved = true;
+    root.classList.add("is-dragging", "is-user-positioned");
+    closeControls();
+    speech.hidden = true;
+    const next = clampPosition(dragSession.rootX + deltaX, dragSession.rootY + deltaY);
+    root.style.left = `${next.x}px`;
+    root.style.top = `${next.y}px`;
+    prefs.position = next;
+  });
+
+  function finishDrag(event) {
+    if (!dragSession || dragSession.pointerId !== event.pointerId) return;
+    if (dragSession.moved) {
+      suppressCharacterClick = true;
+      savePreferences();
+      globalObject.setTimeout(() => { suppressCharacterClick = false; }, 0);
+      react("success", "This is my new spot!", 2300);
+    }
+    root.classList.remove("is-dragging");
+    dragSession = null;
+  }
+
+  characterButton.addEventListener("pointerup", finishDrag);
+  characterButton.addEventListener("pointercancel", finishDrag);
+
   characterButton.addEventListener("click", () => {
+    if (suppressCharacterClick) return;
     if (prefs.minimized) {
       prefs.minimized = false;
       savePreferences();
@@ -244,6 +325,11 @@
     const action = button.dataset.coltControl;
     if (action === "minimize") prefs.minimized = !prefs.minimized;
     if (action === "motion") prefs.motion = !prefs.motion;
+    if (action === "size") {
+      const sizes = ["small", "medium", "large"];
+      prefs.size = sizes[(sizes.indexOf(prefs.size) + 1) % sizes.length];
+    }
+    if (action === "reset-position") prefs.position = null;
     if (action === "hide") prefs.hidden = true;
     savePreferences();
     applyPreferences();
@@ -273,7 +359,10 @@
   ["pointerdown", "keydown", "scroll"].forEach(eventName => {
     globalObject.addEventListener(eventName, resetSleepTimer, { passive: true });
   });
-  globalObject.addEventListener("resize", () => root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120));
+  globalObject.addEventListener("resize", () => {
+    root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120);
+    applySavedPosition();
+  });
   globalObject.addEventListener("colt-radio-opened", syncPanelCollision);
   globalObject.addEventListener("colt-assistant-opened", syncPanelCollision);
   globalObject.addEventListener("classroom-launchpad-rendered", event => {

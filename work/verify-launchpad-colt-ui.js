@@ -37,16 +37,34 @@ async function run() {
     const image = page.locator(".launchpad-colt-character img");
     assert.match(await image.getAttribute("src"), /launchpad-colt-companion\.png/);
     assert.equal(await image.getAttribute("alt"), "Launchpad Colt, the Classroom Launchpad horse companion");
+    await page.locator(".launchpad-colt-companion").evaluate(element => { element.dataset.state = "welcome"; });
+    assert.match(await image.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-greeting/);
 
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Pause motion", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Reset position", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Size: Medium", exact: true }).click();
+    assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "large");
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
     await page.getByRole("button", { name: "Minimize", exact: true }).click();
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
 
     await page.locator(".launchpad-colt-character").click();
     assert(!(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized"))));
+
+    const beforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    await page.mouse.move(beforeDrag.x + 80, beforeDrag.y + 70);
+    await page.mouse.down();
+    await page.mouse.move(beforeDrag.x - 130, beforeDrag.y + 90, { steps: 8 });
+    await page.mouse.up();
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-user-positioned")));
+    assert(await page.evaluate(() => {
+      const raw = localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local");
+      const stored = raw ? JSON.parse(raw) : {};
+      return Number.isFinite(stored.position && stored.position.x) && Number.isFinite(stored.position && stored.position.y);
+    }));
 
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");
