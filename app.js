@@ -80,6 +80,7 @@ const HOME_PROFILE_VIDEOS = [
 const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
 const HOME_PROFILE_LAST_KEY = "classroomLaunchpadHomeProfileLastV1";
 const HOME_NAVIGATION_COLLAPSED_KEY = "classroomLaunchpadHomeNavigationCollapsedV1";
+const COLT_CORNER_SEEN_TOPICS_KEY = "classroomLaunchpadColtCornerSeenTopicsV1";
 const HOME_NAVIGATION_ITEMS = [
   { id: "home-top", label: "Home", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"></path></svg>' },
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
@@ -1489,6 +1490,49 @@ function unreadDirectMessageCount(role = authSession.role, studentEmail = authSe
   )).length;
 }
 
+function coltCornerSeenTopicsStorageKey() {
+  const email = String(authSession.email || "").trim().toLowerCase();
+  return email ? `${COLT_CORNER_SEEN_TOPICS_KEY}:${email}` : "";
+}
+
+function loadSeenColtCornerTopicIds() {
+  const key = coltCornerSeenTopicsStorageKey();
+  if (!key) return new Set();
+  try {
+    const ids = JSON.parse(localStorage.getItem(key) || "[]");
+    return new Set(Array.isArray(ids) ? ids.map(String).filter(Boolean) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function unreadColtCornerTopics() {
+  if (!isApprovedStudent()) return [];
+  const seen = loadSeenColtCornerTopicIds();
+  const grade = String(authSession.grade || "");
+  return classThreads.filter(thread => (
+    thread.id
+    && coltCornerAudienceGrade(thread) === grade
+    && !seen.has(String(thread.id))
+  ));
+}
+
+function markVisibleColtCornerTopicsSeen() {
+  if (!isApprovedStudent()) return;
+  const key = coltCornerSeenTopicsStorageKey();
+  if (!key) return;
+  const seen = loadSeenColtCornerTopicIds();
+  const grade = String(authSession.grade || "");
+  classThreads.forEach(thread => {
+    if (thread.id && coltCornerAudienceGrade(thread) === grade) seen.add(String(thread.id));
+  });
+  try {
+    localStorage.setItem(key, JSON.stringify([...seen].slice(-500)));
+  } catch {
+    // The notification remains non-blocking if browser storage is unavailable.
+  }
+}
+
 function isTeacher() {
   return isSignedIn() && authSession.role === "teacher";
 }
@@ -2115,6 +2159,7 @@ function categoryTopbar() {
 }
 
 function renderHomeNavigation() {
+  const newColtCornerTopics = unreadColtCornerTopics().length;
   return `
     <button class="home-nav-mobile-trigger" type="button" data-action="toggleHomeNavigation" aria-controls="homeQuickNavigation" aria-expanded="${homeNavigationMobileOpen ? "true" : "false"}">
       <span aria-hidden="true">&#9776;</span><strong>Quick Navigation</strong>
@@ -2132,6 +2177,7 @@ function renderHomeNavigation() {
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
             <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
+            ${item.id === "home-colt-corner" && newColtCornerTopics ? `<b class="home-navigation-count" aria-label="${newColtCornerTopics} new ${newColtCornerTopics === 1 ? "topic" : "topics"}">${newColtCornerTopics > 99 ? "99+" : newColtCornerTopics}</b>` : ""}
           </button>
         `).join("")}
       </nav>
@@ -2299,6 +2345,7 @@ function renderColtCornerPreview() {
   const previewThreads = classThreads;
   const topicCount = previewThreads.length;
   const replyCount = previewThreads.reduce((total, thread) => total + getThreadReplies(thread).length, 0);
+  const newTopicCount = unreadColtCornerTopics().length;
   const cornerHeading = isTeacher() ? "Colt Corner" : `Grade ${authSession.grade} Colt Corner`;
   const cornerDescription = isTeacher()
     ? "Open a grade's private message board to view topics, responses, and student activity."
@@ -2307,6 +2354,7 @@ function renderColtCornerPreview() {
     <section class="colt-corner-preview">
       <div class="colt-corner-heading">
         <span class="feature-kicker">${isTeacher() ? "Teacher View" : "Class Forum"}</span>
+        ${newTopicCount ? `<span class="colt-corner-new-topic-badge">${newTopicCount} New ${newTopicCount === 1 ? "Topic" : "Topics"}</span>` : ""}
         <h2>${escapeHtml(cornerHeading)}</h2>
         <p>${escapeHtml(cornerDescription)}</p>
         <div class="colt-corner-stats">
@@ -9536,6 +9584,18 @@ function renderDirectMessageNotification() {
   `;
 }
 
+function renderColtCornerTopicNotification() {
+  const count = unreadColtCornerTopics().length;
+  if (!count) return "";
+  return `
+    <button type="button" class="direct-message-notification colt-corner-topic-notification" data-action="openColtCorner" role="status" aria-live="polite">
+      <span class="direct-message-notification-icon" aria-hidden="true">&#128172;</span>
+      <span><strong>New in Colt Corner</strong><small>${count} new ${count === 1 ? "topic is" : "topics are"} waiting for your grade</small></span>
+      <b>${count > 99 ? "99+" : count}</b>
+    </button>
+  `;
+}
+
 function renderModal() {
   if (!modal) return "";
   return `
@@ -9554,6 +9614,7 @@ function renderModal() {
 
 function render() {
   stopColtRunGame();
+  if (["coltCorner", "thread"].includes(screen.name)) markVisibleColtCornerTopicsSeen();
   if (homeNavigationObserver) homeNavigationObserver.disconnect();
   if (screen.name !== "home") {
     homeNavigationMobileOpen = false;
@@ -9576,7 +9637,7 @@ function render() {
   if (screen.name === "dashboard") html = renderDashboard();
   if (screen.name === "edit") html = renderEdit(screen.id);
   if (screen.name === "changePin") html = renderChangePin();
-  app.innerHTML = html + renderDirectMessageNotification() + renderClassTimerBadge() + renderModal();
+  app.innerHTML = html + renderDirectMessageNotification() + renderColtCornerTopicNotification() + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
   startClassroomPassTimers();
   observeDeferredVideos(app);

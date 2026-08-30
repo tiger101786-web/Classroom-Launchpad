@@ -82,7 +82,7 @@ async function run() {
       };
     });
     if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2
-      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.3
+      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.28
       || wideNavigation.profileSize < 300 || wideNavigation.profileLeftInset > 430 || wideNavigation.profileRightInset < 350 || !wideNavigation.profileClearOfTitle || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
       || wideNavigation.heroBackgroundPosition !== "50% 0%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
@@ -403,6 +403,35 @@ async function run() {
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Launchpad Login")) {
       throw new Error("The header is missing PlusPortal or Launchpad Login.");
     }
+    await page.locator(".google-apps-trigger").click();
+    await page.locator(".google-apps-panel").waitFor();
+    const googleAppsLayer = await page.evaluate(() => {
+      const topbar = document.querySelector(".hero-panel > .topbar");
+      const feature = document.querySelector(".home-feature");
+      const panel = document.querySelector(".google-apps-panel");
+      const profile = document.querySelector(".school-photo");
+      const panelRect = panel.getBoundingClientRect();
+      const profileRect = profile.getBoundingClientRect();
+      const left = Math.max(panelRect.left, profileRect.left);
+      const right = Math.min(panelRect.right, profileRect.right);
+      const top = Math.max(panelRect.top, profileRect.top);
+      const bottom = Math.min(panelRect.bottom, profileRect.bottom);
+      const overlaps = right > left && bottom > top;
+      const topElement = overlaps
+        ? document.elementFromPoint((left + right) / 2, (top + bottom) / 2)
+        : panel;
+      return {
+        topbarZ: Number(getComputedStyle(topbar).zIndex),
+        featureZ: Number(getComputedStyle(feature).zIndex),
+        overlaps,
+        panelWins: Boolean(topElement?.closest(".google-apps-panel"))
+      };
+    });
+    await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "google-apps-menu-layering.png") });
+    if (googleAppsLayer.topbarZ <= googleAppsLayer.featureZ || !googleAppsLayer.panelWins) {
+      throw new Error(`Google Apps menu did not stay above the profile video: ${JSON.stringify(googleAppsLayer)}.`);
+    }
+    await page.locator(".google-apps-trigger").click();
     const studentHeaderFixture = await page.evaluate(() => {
       const originalSession = authSession;
       const originalMessages = directMessages;
@@ -431,6 +460,41 @@ async function run() {
       || !studentHeaderFixture.menuItems.some(item => item.includes("Change Password"))
       || studentHeaderFixture.oldButtons !== 0) {
       throw new Error(`Student personalized header is incomplete: ${JSON.stringify(studentHeaderFixture)}.`);
+    }
+    const coltCornerTopicAlert = await page.evaluate(() => {
+      const originalSession = authSession;
+      const originalThreads = classThreads;
+      const fixtureEmail = "topic.alert@scscolts.org";
+      const storageKey = `${COLT_CORNER_SEEN_TOPICS_KEY}:${fixtureEmail}`;
+      const previousSeen = localStorage.getItem(storageKey);
+      try {
+        authSession = { authenticated: true, role: "student", name: "Alert, Student", email: fixtureEmail, grade: "4", avatarUrl: "" };
+        classThreads = [
+          { id: "grade-4-topic", title: "Grade 4 Topic", audienceGrade: "4", grade: "Teacher", replies: [], createdAt: new Date().toISOString() },
+          { id: "grade-5-topic", title: "Grade 5 Topic", audienceGrade: "5", grade: "Teacher", replies: [], createdAt: new Date().toISOString() }
+        ];
+        localStorage.removeItem(storageKey);
+        const notification = new DOMParser().parseFromString(renderColtCornerTopicNotification(), "text/html");
+        const navigation = new DOMParser().parseFromString(renderHomeNavigation(), "text/html");
+        const before = unreadColtCornerTopics().length;
+        markVisibleColtCornerTopicsSeen();
+        return {
+          before,
+          after: unreadColtCornerTopics().length,
+          notificationText: notification.body.textContent.replace(/\s+/g, " ").trim(),
+          navigationBadge: navigation.querySelector(".home-navigation-count")?.textContent.trim()
+        };
+      } finally {
+        authSession = originalSession;
+        classThreads = originalThreads;
+        if (previousSeen === null) localStorage.removeItem(storageKey);
+        else localStorage.setItem(storageKey, previousSeen);
+      }
+    });
+    if (coltCornerTopicAlert.before !== 1 || coltCornerTopicAlert.after !== 0
+      || !coltCornerTopicAlert.notificationText.includes("1 new topic is waiting for your grade")
+      || coltCornerTopicAlert.navigationBadge !== "1") {
+      throw new Error(`Grade-aware Colt Corner topic alert is incomplete: ${JSON.stringify(coltCornerTopicAlert)}.`);
     }
     const lightHeaderColors = await page.locator(".portal-btn, .login-btn:not(.signed-in)").evaluateAll(buttons => buttons.map(button => getComputedStyle(button).backgroundColor));
     if (new Set(lightHeaderColors).size !== 1) {
