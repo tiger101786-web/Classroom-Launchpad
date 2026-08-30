@@ -263,6 +263,14 @@
       source: "https://stream.zeno.fm/hs2dndb7ydnuv",
       provider: "Urban Heat Radio",
       note: "Hip-hop, rap, R&B, jazz-hop, chill-hop, and trap streamed by Urban Heat Radio. No Colt Radio account required."
+    },
+    {
+      id: "nova-instrumental",
+      label: "Instrumental • Brazil",
+      type: "stream",
+      source: "https://streaming.radioempresabrasil.com.br/proxy/novainstrumental/stream",
+      provider: "Rádio Nova Instrumental",
+      note: "Instrumental favorites streamed from Brazil by Rádio Nova Instrumental. No Colt Radio account required."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -303,7 +311,8 @@
     "smooth-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
     "celtic-traditional": '<path d="M12 3c-3 3-4.5 6-4 9 1 5 7 6 9 2 1.5-3-.5-6-5-6-5 0-8 5-7 9 .8 3.2 4 5.5 7 5.5"/><path d="M12 8c2 2 3 4 2 6-1 2-4 2-5 0"/>',
     "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
-    "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>'
+    "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>',
+    "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>'
   };
 
   function iconSvg(paths, className = "") {
