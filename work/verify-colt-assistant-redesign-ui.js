@@ -70,6 +70,28 @@ async function run() {
       body: JSON.stringify({ answer: guidedAnswer, mode: "guided-learning" })
     }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    const launcherStyles = await page.evaluate(() => {
+      function snapshot(selector) {
+        const element = document.querySelector(selector);
+        const mark = element.querySelector(`${selector}-mark`);
+        const style = getComputedStyle(element);
+        const markStyle = getComputedStyle(mark);
+        return {
+          backgroundImage: style.backgroundImage,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow,
+          markBackground: markStyle.backgroundColor,
+          markBorderColor: markStyle.borderColor,
+          markColor: markStyle.color,
+          markShadow: markStyle.boxShadow
+        };
+      }
+      return {
+        assistant: snapshot(".colt-assistant-launcher"),
+        radio: snapshot(".colt-radio-launcher")
+      };
+    });
+    assert.deepEqual(launcherStyles.assistant, launcherStyles.radio, JSON.stringify(launcherStyles));
     await page.getByRole("button", { name: "Open Colt Assistant" }).click();
     const panel = page.locator(".colt-assistant-panel");
     await panel.waitFor();
