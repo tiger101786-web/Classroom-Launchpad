@@ -403,6 +403,35 @@ async function run() {
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Launchpad Login")) {
       throw new Error("The header is missing PlusPortal or Launchpad Login.");
     }
+    const studentHeaderFixture = await page.evaluate(() => {
+      const originalSession = authSession;
+      const originalMessages = directMessages;
+      try {
+        authSession = { authenticated: true, role: "student", name: "Amari, Liam", email: "liam.amari@scscolts.org", grade: "4", avatarUrl: "" };
+        directMessages = [{
+          id: "header-message", studentEmail: authSession.email, studentName: authSession.name, grade: "4",
+          senderRole: "teacher", message: "Welcome", createdAt: new Date().toISOString(), readByTeacher: true, readByStudent: false
+        }];
+        const fixture = new DOMParser().parseFromString(renderHomeHeaderControls(), "text/html");
+        return {
+          summary: fixture.querySelector(".header-account-summary")?.textContent.replace(/\s+/g, " ").trim(),
+          initials: fixture.querySelector(".header-account-initials")?.textContent.trim(),
+          badge: fixture.querySelector(".header-message-badge")?.textContent.trim(),
+          menuItems: [...fixture.querySelectorAll(".header-account-links button")].map(button => button.textContent.replace(/\s+/g, " ").trim()),
+          oldButtons: fixture.querySelectorAll(".header-messages-btn, .logout-btn").length
+        };
+      } finally {
+        authSession = originalSession;
+        directMessages = originalMessages;
+      }
+    });
+    if (!studentHeaderFixture.summary.includes("Hi, Liam") || !studentHeaderFixture.summary.includes("Grade 4")
+      || studentHeaderFixture.initials !== "AL" || studentHeaderFixture.badge !== "1"
+      || !studentHeaderFixture.menuItems.some(item => item.includes("My Profile"))
+      || !studentHeaderFixture.menuItems.some(item => item.includes("Change Password"))
+      || studentHeaderFixture.oldButtons !== 0) {
+      throw new Error(`Student personalized header is incomplete: ${JSON.stringify(studentHeaderFixture)}.`);
+    }
     const lightHeaderColors = await page.locator(".portal-btn, .login-btn:not(.signed-in)").evaluateAll(buttons => buttons.map(button => getComputedStyle(button).backgroundColor));
     if (new Set(lightHeaderColors).size !== 1) {
       throw new Error(`Light-mode PlusPortal and Launchpad Login colors did not match: ${lightHeaderColors.join(", ")}.`);
@@ -509,23 +538,51 @@ async function run() {
     if (longLaunchLayout.cardHeight <= 300 || longLaunchLayout.randomHeight !== 300 || !longLaunchLayout.contentFits || !longLaunchLayout.nextSectionClearsCard) {
       throw new Error(`Long Today's Launch directions do not expand cleanly: ${JSON.stringify(longLaunchLayout)}.`);
     }
-    await page.locator('[data-action="toggleTheme"]').first().click();
-    const darkTeacherStyles = await page.locator(".portal-btn, .login-btn, .mode-btn, .icon-btn").evaluateAll(buttons => buttons.map(button => {
-      const style = getComputedStyle(button);
-      return [style.backgroundColor, style.color].join("|");
+    const personalizedTeacherHeader = await page.evaluate(() => ({
+      rail: Boolean(document.querySelector(".home-header-rail")),
+      accountText: document.querySelector(".header-account-summary")?.innerText || "",
+      bellCount: document.querySelectorAll(".header-message-control svg").length,
+      standaloneLogoutCount: document.querySelectorAll(".home-header-rail > .logout-btn").length,
+      heroOverflow: document.querySelector(".hero-panel").scrollWidth > document.querySelector(".hero-panel").clientWidth
     }));
-    if (new Set(darkTeacherStyles).size !== 1) {
-      throw new Error(`Dark-mode teacher header buttons did not match: ${darkTeacherStyles.join(", ")}.`);
+    if (!personalizedTeacherHeader.rail || !personalizedTeacherHeader.accountText.includes("Mr. Nieves")
+      || !personalizedTeacherHeader.accountText.includes("Teacher") || personalizedTeacherHeader.bellCount !== 1
+      || personalizedTeacherHeader.standaloneLogoutCount !== 0 || personalizedTeacherHeader.heroOverflow) {
+      throw new Error(`Teacher personalized header is incomplete: ${JSON.stringify(personalizedTeacherHeader)}.`);
     }
-    await page.locator('[data-action="toggleTheme"]').first().click();
-    await page.locator('[data-action="openColtCorner"]').first().click();
+    await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "personalized-teacher-header.png") });
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobilePersonalizedHeader = await page.evaluate(() => {
+      const rail = document.querySelector(".home-header-rail");
+      const account = document.querySelector(".header-account-summary");
+      const hero = document.querySelector(".hero-panel");
+      const railBox = rail.getBoundingClientRect();
+      const accountBox = account.getBoundingClientRect();
+      return {
+        railFits: rail.scrollWidth <= rail.clientWidth && railBox.left >= hero.getBoundingClientRect().left && railBox.right <= hero.getBoundingClientRect().right,
+        accountVisible: accountBox.width > 100 && accountBox.right <= railBox.right + 1,
+        pageOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+      };
+    });
+    if (!mobilePersonalizedHeader.railFits || !mobilePersonalizedHeader.accountVisible || mobilePersonalizedHeader.pageOverflow) {
+      throw new Error(`Mobile personalized header does not fit: ${JSON.stringify(mobilePersonalizedHeader)}.`);
+    }
+    await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "personalized-teacher-header-mobile.png") });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.locator(".header-account-summary").click();
+    await page.locator('.header-account-panel [data-action="toggleTheme"]').click();
+    if (await page.locator("body").getAttribute("data-theme") !== "night") throw new Error("Account-menu theme control did not enable night mode.");
+    await page.locator(".header-account-summary").click();
+    await page.locator('.header-account-panel [data-action="toggleTheme"]').click();
+    await page.locator(".colt-corner-open").click();
     const identityLabels = await page.locator("#threadForm .field label").allTextContents();
     const identityValues = await page.locator("#threadForm input[readonly]").evaluateAll(inputs => inputs.map(input => input.value));
     if (identityLabels.includes("Posting as") || identityValues[0] !== "Mr. Nieves" || identityValues[1] !== "Teacher") {
       throw new Error("Teacher Colt Corner identity was not filled automatically.");
     }
     await page.locator('[data-action="back"]').first().click();
-    await page.locator('[data-action="teacher"]').first().click();
+    await page.locator(".header-account-summary").click();
+    await page.locator('.header-account-panel [data-action="teacherDashboard"]').click();
     await page.locator(".dashboard-nav").waitFor();
     await page.locator('[data-action="dashboardSection"][data-section="students"]').first().click();
     await page.locator("#approvedStudentEmails").waitFor();
@@ -614,7 +671,8 @@ async function run() {
       throw new Error(`Teacher feedback dashboard wording does not match the student form: ${JSON.stringify(requestDashboardText)}.`);
     }
     await page.locator('[data-action="back"]').first().click();
-    await page.locator('[data-action="teacher"]').first().click();
+    await page.locator(".header-account-summary").click();
+    await page.locator('.header-account-panel [data-action="teacherDashboard"]').click();
     const defaultDashboardSection = await page.locator(".dashboard-nav-button.is-active").innerText();
     if (!defaultDashboardSection.includes("Overview")) {
       throw new Error(`Teacher Dashboard reopened on ${defaultDashboardSection} instead of Overview.`);

@@ -2000,24 +2000,66 @@ function classroomPassDuration(start, end = Date.now()) {
 function renderAuthButton() {
   if (isSignedIn()) {
     const fullName = String(authSession.name || "Student").trim();
-    const firstName = fullName.split(/\s+/)[0] || "Student";
-    const studentLabel = String(authSession.email || "").toLowerCase() === "tiger101786@gmail.com"
-      ? "Test Account"
-      : fullName.length <= 11
-        ? fullName
-        : firstName.length <= 10
-          ? firstName
-          : "Student";
+    const commaName = fullName.split(",");
+    const firstName = (commaName.length > 1 ? commaName[1] : commaName[0]).trim().split(/\s+/)[0] || "Student";
+    const displayName = isTeacher() ? (fullName || "Mr. Nieves") : firstName;
+    const roleLabel = isTeacher() ? "Teacher" : `Grade ${authSession.grade || "Student"}`;
     const messageCount = unreadDirectMessageCount();
+    const safeAvatar = normalizeProfileAvatarUrl(authSession.avatarUrl);
+    const avatar = safeAvatar
+      ? `<img class="header-account-avatar" src="${escapeHtml(safeAvatar)}" alt="">`
+      : `<span class="header-account-avatar header-account-initials" aria-hidden="true">${escapeHtml(forumInitials(fullName))}</span>`;
+    const bellIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>`;
+    const chevron = `<svg class="header-account-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5"></path></svg>`;
     return `
-      <button class="login-btn signed-in" data-action="${isTeacher() ? "teacherDashboard" : "account"}" title="${escapeHtml(authSession.email || authSession.name)}">
-        ${escapeHtml(isTeacher() ? "Teacher" : studentLabel)}
+      <button class="header-message-control" type="button" data-action="openMessages" aria-label="${messageCount ? `${messageCount} unread ${messageCount === 1 ? "message" : "messages"}` : "Open private messages"}" title="Private Messages">
+        ${bellIcon}
+        ${messageCount ? `<span class="header-message-badge" aria-hidden="true">${messageCount > 99 ? "99+" : messageCount}</span>` : ""}
       </button>
-      <button class="login-btn header-messages-btn" data-action="openMessages">Messages${messageCount ? ` (${messageCount})` : ""}</button>
-      <button class="logout-btn" data-action="logout">Log Out</button>
+      <details class="header-account-menu">
+        <summary class="header-account-summary" aria-label="Open account menu for ${escapeHtml(displayName)}">
+          ${avatar}
+          <span class="header-account-copy"><strong>${isTeacher() ? escapeHtml(displayName) : `Hi, ${escapeHtml(displayName)}`}</strong><small>${escapeHtml(roleLabel)}</small></span>
+          ${chevron}
+        </summary>
+        <div class="header-account-panel">
+          <div class="header-account-identity">
+            ${avatar}
+            <span><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(roleLabel)}</small></span>
+          </div>
+          <div class="header-account-links">
+            <button type="button" data-action="${isTeacher() ? "openColtCorner" : "account"}"><span aria-hidden="true">&#9673;</span>My Profile</button>
+            ${isTeacher()
+              ? `<button type="button" data-action="teacherDashboard"><span aria-hidden="true">&#9638;</span>Teacher Dashboard</button>
+                 <button type="button" data-action="teacherSettings"><span aria-hidden="true">&#9881;</span>Settings</button>`
+              : `<button type="button" data-action="account"><span aria-hidden="true">&#9679;</span>Change Password</button>`}
+            <button type="button" data-action="openMessages"><span aria-hidden="true">&#9993;</span>Private Messages${messageCount ? `<b>${messageCount}</b>` : ""}</button>
+            <button type="button" data-action="toggleTheme"><span aria-hidden="true">${theme === "night" ? "&#9728;" : "&#9790;"}</span>Switch to ${theme === "night" ? "Light" : "Night"} Mode</button>
+            <button type="button" class="header-account-logout" data-action="logout"><span aria-hidden="true">&#10140;</span>Log Out</button>
+          </div>
+        </div>
+      </details>
     `;
   }
-  return `<button class="login-btn" data-action="login">Launchpad Login</button>`;
+  return `
+    <button class="login-btn" data-action="login">Launchpad Login</button>
+    <button class="header-utility-control" type="button" title="Switch color mode" aria-label="Switch color mode" data-action="toggleTheme">${theme === "night" ? "&#9728;" : "&#9790;"}</button>
+    <button class="header-utility-control" type="button" title="Teacher Login" aria-label="Teacher Login" data-action="teacher">&#9881;</button>
+  `;
+}
+
+function renderHomeHeaderControls() {
+  return `
+    <div class="header-actions home-header-actions">
+      <nav class="home-header-rail" aria-label="Classroom Launchpad account and apps">
+        <div class="home-header-apps">
+          <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
+          ${renderGoogleHeaderControls()}
+        </div>
+        <div class="home-header-user">${renderAuthButton()}</div>
+      </nav>
+    </div>
+  `;
 }
 
 function renderGoogleHeaderControls() {
@@ -2043,6 +2085,10 @@ function renderGoogleHeaderControls() {
           <strong>Google Apps</strong>
           <span>Open in a new tab</span>
         </div>
+        <button class="google-app-link header-mobile-portal-link" type="button" data-action="open" data-url="https://www.plusportals.com/StCletus">
+          <span class="google-app-icon" aria-hidden="true"><img src="assets/st-cletus-logo-night.png" alt="" loading="eager" decoding="async"></span>
+          <span>PlusPortal</span>
+        </button>
         ${googleApps.map(appItem => `
           <button class="google-app-link" type="button" data-action="openGoogleApp" data-url="${escapeHtml(appItem.url)}">
             <span class="google-app-icon" aria-hidden="true">
@@ -2114,13 +2160,7 @@ function renderHome() {
         "Classroom Launchpad",
         "",
         false,
-        `<div class="header-actions">
-          <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
-          ${renderGoogleHeaderControls()}
-          ${renderAuthButton()}
-          <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
-          <button class="icon-btn" title="Teacher Mode" data-action="teacher">⚙</button>
-        </div>`
+        renderHomeHeaderControls()
       )}
       <section class="home-feature${homeProfileVideo.endsWith("home-profile-12.mp4") ? " home-feature--detail" : ""}">
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
@@ -10755,11 +10795,14 @@ app.addEventListener("keydown", event => {
   if (event.key !== "Escape") return;
   if (homeNavigationMobileOpen) setHomeNavigationMobileOpen(false);
   document.querySelectorAll(".google-apps-menu[open]").forEach(menu => menu.removeAttribute("open"));
+  document.querySelectorAll(".header-account-menu[open]").forEach(menu => menu.removeAttribute("open"));
 });
 
 document.addEventListener("click", event => {
-  if (event.target.closest(".google-apps-menu")) return;
-  document.querySelectorAll(".google-apps-menu[open]").forEach(menu => menu.removeAttribute("open"));
+  const googleMenu = event.target.closest(".google-apps-menu");
+  const accountMenu = event.target.closest(".header-account-menu");
+  if (!googleMenu) document.querySelectorAll(".google-apps-menu[open]").forEach(menu => menu.removeAttribute("open"));
+  if (!accountMenu) document.querySelectorAll(".header-account-menu[open]").forEach(menu => menu.removeAttribute("open"));
 });
 
 window.addEventListener("resize", () => {
@@ -10845,6 +10888,12 @@ app.addEventListener("click", async event => {
   if (action === "teacherDashboard") {
     await loadApprovedStudents();
     await openTeacherDashboard();
+  }
+  if (action === "teacherSettings") {
+    await loadApprovedStudents();
+    dashboardSection = "settings";
+    sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+    setScreen({ name: "dashboard" });
   }
   if (action === "dashboardSection") {
     const nextSection = dashboardSections.some(section => section.id === target.dataset.section) ? target.dataset.section : "overview";
