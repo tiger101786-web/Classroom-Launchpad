@@ -10451,3 +10451,51 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     transition-duration: 0.01ms !important;
   }
 }
+.student-password-reset-entry {
+  display: grid;
+  gap: 7px;
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(176, 22, 68, 0.24);
+  text-align: center;
+}
+
+.student-password-reset-entry .outline-btn {
+  width: 100%;
+}
+
+.student-password-reset-entry small {
+  color: var(--muted, #8e8589);
+  line-height: 1.35;
+}
+
+.student-password-reset-hint {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(196, 19, 77, 0.5);
+  border-radius: 10px;
+  background: rgba(196, 19, 77, 0.09);
+}
+
+.student-password-reset-hint[hidden] {
+  display: none !important;
+}
+
+.student-password-reset-hint strong,
+.student-password-reset-hint span {
+  display: block;
+}
+
+.student-password-reset-hint .text-btn {
+  width: fit-content;
+  margin-top: 5px;
+  padding: 0;
+  border: 0;
+  color: #c4134d;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}

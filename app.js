@@ -8298,22 +8298,31 @@ function renderLogin() {
             <span>Show password</span>
           </label>
           <button class="primary-btn" type="submit">Log In</button>
+          <div class="student-password-reset-entry">
+            <button class="outline-btn" type="button" data-action="showStudentPasswordReset">Create a New Password</button>
+            <small>Forgot your password? Ask Mr. Nieves for a one-time reset code first.</small>
+          </div>
         </form>
         <form id="studentRegisterForm" class="form-grid auth-form-panel">
-          <h3>First Login</h3>
+          <h3 id="studentRegisterHeading">First Login</h3>
+          <div id="studentPasswordResetHint" class="student-password-reset-hint" hidden>
+            <strong>Create a new password</strong>
+            <span>Enter the one-time reset code from Mr. Nieves. Your saved name and grade will stay the same.</span>
+            <button class="text-btn" type="button" data-action="showStudentFirstLogin">Use First Login Instead</button>
+          </div>
           <div class="field">
             <label for="studentRegisterEmail">Approved school email</label>
             <input id="studentRegisterEmail" type="email" autocomplete="username" placeholder="student@${escapeHtml(authConfig.studentEmailDomain)}">
           </div>
           <div class="field">
-            <label for="studentActivationCode">One-time activation code</label>
+            <label id="studentActivationCodeLabel" for="studentActivationCode">One-time activation code</label>
             <input id="studentActivationCode" autocomplete="one-time-code" maxlength="14">
           </div>
-          <div class="field">
+          <div id="studentRegisterNameField" class="field">
             <label for="studentRegisterName">First and last name</label>
             <input id="studentRegisterName" autocomplete="name" maxlength="80">
           </div>
-          <div class="field">
+          <div id="studentRegisterGradeField" class="field">
             <label for="studentRegisterGrade">Grade</label>
             <input id="studentRegisterGrade" autocomplete="off" maxlength="12">
           </div>
@@ -8330,7 +8339,7 @@ function renderLogin() {
             <input id="showStudentRegisterPasswords" type="checkbox" data-password-visibility data-password-targets="studentRegisterPassword studentRegisterPasswordConfirm" aria-controls="studentRegisterPassword studentRegisterPasswordConfirm">
             <span>Show passwords</span>
           </label>
-          <button class="primary-btn" type="submit">Create Account</button>
+          <button id="studentRegisterSubmit" class="primary-btn" type="submit">Create Account</button>
         </form>
       </div>
       <p id="authStatus" class="request-message ${authMessage ? "error" : ""}" aria-live="polite">${escapeHtml(authMessage)}</p>
@@ -10981,6 +10990,36 @@ app.addEventListener("click", async event => {
       await loadApprovedStudents();
       await openTeacherDashboard();
     } else setScreen({ name: "pin" });
+  }
+  if (action === "showStudentPasswordReset") {
+    const registerForm = document.getElementById("studentRegisterForm");
+    const loginEmail = document.getElementById("studentLoginEmail");
+    const registerEmail = document.getElementById("studentRegisterEmail");
+    if (registerForm) {
+      registerForm.dataset.mode = "password-reset";
+      document.getElementById("studentRegisterHeading").textContent = "Create a New Password";
+      document.getElementById("studentPasswordResetHint").hidden = false;
+      document.getElementById("studentActivationCodeLabel").textContent = "One-time password reset code";
+      document.getElementById("studentRegisterNameField").hidden = true;
+      document.getElementById("studentRegisterGradeField").hidden = true;
+      document.getElementById("studentRegisterSubmit").textContent = "Save New Password";
+      if (registerEmail && loginEmail && loginEmail.value.trim()) registerEmail.value = loginEmail.value.trim();
+      registerForm.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.setTimeout(() => document.getElementById("studentActivationCode")?.focus(), 320);
+    }
+  }
+  if (action === "showStudentFirstLogin") {
+    const registerForm = document.getElementById("studentRegisterForm");
+    if (registerForm) {
+      registerForm.dataset.mode = "first-login";
+      document.getElementById("studentRegisterHeading").textContent = "First Login";
+      document.getElementById("studentPasswordResetHint").hidden = true;
+      document.getElementById("studentActivationCodeLabel").textContent = "One-time activation code";
+      document.getElementById("studentRegisterNameField").hidden = false;
+      document.getElementById("studentRegisterGradeField").hidden = false;
+      document.getElementById("studentRegisterSubmit").textContent = "Create Account";
+      registerForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
   if (action === "openMessages") {
     directMessageStatus = "";
