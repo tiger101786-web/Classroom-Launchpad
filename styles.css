@@ -7366,6 +7366,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .colt-assistant-tool:focus-visible,
 .colt-assistant-choice:focus-visible,
 .colt-assistant-clear:focus-visible,
+.colt-assistant-show-full:focus-visible,
 .colt-assistant-recommendation button:focus-visible,
 .colt-assistant-form button:focus-visible,
 .colt-assistant-input:focus-visible {
@@ -7555,6 +7556,44 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   border-right: 3px solid #ec2440;
   border-bottom-right-radius: 2px;
   background: linear-gradient(145deg, #7f0b25, #3b0713);
+}
+
+.colt-assistant-message-revealing {
+  min-height: 64px;
+}
+
+.colt-assistant-message-revealing .colt-assistant-reveal-text p:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.2em;
+  border-radius: 2px;
+  background: #ef4452;
+  vertical-align: -0.15em;
+  animation: colt-assistant-caret 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes colt-assistant-caret {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+.colt-assistant-show-full {
+  margin-top: 9px;
+  padding: 6px 9px;
+  border: 1px solid #67202b;
+  border-radius: 5px;
+  background: #210a0f;
+  color: #f2a2af;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.colt-assistant-show-full:hover {
+  border-color: #dc2c42;
+  background: #330b13;
+  color: #ffffff;
 }
 
 .colt-assistant-loading {
@@ -7766,6 +7805,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .colt-radio-panel {
     scroll-behavior: auto;
     transition: none;
+  }
+
+  .colt-assistant-message-revealing .colt-assistant-reveal-text p:last-child::after {
+    animation: none;
   }
 }
 

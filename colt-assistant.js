@@ -718,6 +718,73 @@
       scrollConversation();
     }
 
+    function appendAnimatedAssistantResponse(text) {
+      const fullText = String(text || knowledge.responses.unknown).trim();
+      const row = buildElement("div", "colt-assistant-message-row is-assistant");
+      const bubble = buildElement("div", "colt-assistant-message is-assistant colt-assistant-message-revealing");
+      const accessibleText = buildElement("span", "sr-only", fullText);
+      const visualText = buildElement("div", "colt-assistant-reveal-text");
+      visualText.setAttribute("aria-hidden", "true");
+      const lines = fullText.split(/\n+/).map(line => line.trim()).filter(Boolean);
+      const paragraphs = (lines.length ? lines : [fullText]).map(() => buildElement("p"));
+      paragraphs.forEach(paragraph => visualText.append(paragraph));
+      const showFull = buildElement("button", "colt-assistant-show-full", "Show Full Response");
+      showFull.type = "button";
+      bubble.append(accessibleText, visualText, showFull);
+      row.append(bubble);
+      conversation.append(row);
+      scrollConversation();
+
+      const completeImmediately = Boolean(globalObject.matchMedia && globalObject.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      const tokenGroups = (lines.length ? lines : [fullText]).map(line => line.match(/\S+\s*/g) || []);
+
+      return new Promise(resolve => {
+        let finished = false;
+        let paragraphIndex = 0;
+        let tokenIndex = 0;
+        let timer = 0;
+
+        function finish() {
+          if (finished) return;
+          finished = true;
+          if (timer) globalObject.clearTimeout(timer);
+          paragraphs.forEach((paragraph, index) => {
+            paragraph.textContent = (lines.length ? lines : [fullText])[index] || "";
+          });
+          showFull.remove();
+          bubble.classList.remove("colt-assistant-message-revealing");
+          lastReadableText = fullText;
+          scrollConversation();
+          resolve();
+        }
+
+        showFull.addEventListener("click", finish, { once: true });
+        if (completeImmediately) {
+          finish();
+          return;
+        }
+
+        function revealNextGroup() {
+          if (finished) return;
+          const tokens = tokenGroups[paragraphIndex] || [];
+          paragraphs[paragraphIndex].textContent += tokens.slice(tokenIndex, tokenIndex + 3).join("");
+          tokenIndex += 3;
+          if (tokenIndex >= tokens.length) {
+            paragraphIndex += 1;
+            tokenIndex = 0;
+          }
+          scrollConversation();
+          if (paragraphIndex >= tokenGroups.length) {
+            finish();
+            return;
+          }
+          timer = globalObject.setTimeout(revealNextGroup, 42);
+        }
+
+        revealNextGroup();
+      });
+    }
+
     function appendLoadingMessage(text) {
       const row = buildElement("div", "colt-assistant-message-row is-assistant colt-assistant-loading-row");
       const bubble = buildElement("div", "colt-assistant-message is-assistant colt-assistant-loading", text);
@@ -806,7 +873,8 @@
           body: JSON.stringify({ prompt, history: guidedHistory.slice(-8) })
         });
         loading.remove();
-        appendAssistantResponse({ text: payload.answer });
+        readAloud.disabled = true;
+        await appendAnimatedAssistantResponse(payload.answer);
         guidedHistory.push({ role: "user", content: prompt }, { role: "assistant", content: payload.answer });
         if (guidedHistory.length > 16) guidedHistory.splice(0, guidedHistory.length - 16);
       } catch (error) {
@@ -816,6 +884,7 @@
         requestInProgress = false;
         send.disabled = false;
         input.disabled = false;
+        readAloud.disabled = false;
         input.focus();
       }
     }

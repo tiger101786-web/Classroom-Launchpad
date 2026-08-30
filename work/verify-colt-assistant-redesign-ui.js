@@ -63,6 +63,12 @@ async function run() {
     });
     assert.equal(login.status(), 200);
     const page = await context.newPage();
+    const guidedAnswer = "Start with one small idea and explain it in your own words. Then add one example that shows what you mean. Keep the example connected to the lesson. What idea would you like to explain first?";
+    await page.route("**/api/colt-assistant/chat", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ answer: guidedAnswer, mode: "guided-learning" })
+    }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Open Colt Assistant" }).click();
     const panel = page.locator(".colt-assistant-panel");
@@ -88,6 +94,26 @@ async function run() {
     assert.equal(await page.getByRole("button", { name: "Guided AI", exact: true }).getAttribute("aria-pressed"), "true");
     assert.equal(await page.getByRole("button", { name: "Create Image", exact: true }).count(), 0);
     assert.equal(await page.locator("#coltAssistantInput").getAttribute("placeholder"), "What are you learning?");
+
+    await page.locator("#coltAssistantInput").fill("Help me organize my explanation.");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    const showFull = page.getByRole("button", { name: "Show Full Response", exact: true });
+    await showFull.waitFor();
+    const partialText = await page.locator(".colt-assistant-reveal-text").last().innerText();
+    assert(partialText.length > 0 && partialText.length < guidedAnswer.length, partialText);
+    await showFull.click();
+    assert.equal(await page.locator(".colt-assistant-reveal-text").last().innerText(), guidedAnswer);
+    assert.equal(await showFull.count(), 0);
+    assert.equal(await page.getByRole("button", { name: /Read the latest Colt Assistant response aloud/i }).isDisabled(), false);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.locator("#coltAssistantInput").fill("Give me one more step.");
+    await page.locator(".colt-assistant-form button[type='submit']").click();
+    await page.waitForFunction(answer => {
+      const replies = document.querySelectorAll(".colt-assistant-reveal-text");
+      return replies.length >= 2 && replies[replies.length - 1].textContent === answer;
+    }, guidedAnswer);
+    assert.equal(await page.getByRole("button", { name: "Show Full Response", exact: true }).count(), 0);
 
     if (process.env.COLT_ASSISTANT_SCREENSHOT) {
       await panel.screenshot({ path: process.env.COLT_ASSISTANT_SCREENSHOT });
