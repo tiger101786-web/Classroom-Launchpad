@@ -486,6 +486,7 @@ async function run() {
         selectedMessageStudentEmail = "";
         const all = new DOMParser().parseFromString(renderDashboardMessages(), "text/html");
         const rows = [...all.querySelectorAll(".teacher-message-student")];
+        const thread = new DOMParser().parseFromString(renderDirectMessageThread("lucas.song@scscolts.org", "Lucas, Song"), "text/html");
         teacherMessageHistoryFilter = "messaged";
         const messaged = new DOMParser().parseFromString(renderDashboardMessages(), "text/html");
         return {
@@ -493,6 +494,7 @@ async function run() {
           noConversationBell: Boolean(rows[0]?.querySelector(".teacher-message-conversation-bell")),
           existingConversationBell: Boolean(rows[1]?.querySelector(".teacher-message-conversation-bell:not(.has-unread)")),
           unreadBellCount: rows[2]?.querySelector(".teacher-message-conversation-bell.has-unread b")?.textContent.trim(),
+          studentReplyAuthor: thread.querySelector(".direct-message-bubble strong")?.textContent.trim(),
           messagedCount: messaged.querySelectorAll(".teacher-message-student").length,
           filterLabels: [...all.querySelectorAll(".teacher-message-history-filter button")].map(button => button.textContent.replace(/\s+/g, " ").trim())
         };
@@ -509,6 +511,7 @@ async function run() {
     if (teacherMessageRosterFixture.names.join("|") !== "Andy, Le|Emily, Leite|Lucas, Song"
       || teacherMessageRosterFixture.noConversationBell || !teacherMessageRosterFixture.existingConversationBell
       || teacherMessageRosterFixture.unreadBellCount !== "1" || teacherMessageRosterFixture.messagedCount !== 2
+      || teacherMessageRosterFixture.studentReplyAuthor !== "Lucas, Song"
       || !teacherMessageRosterFixture.filterLabels.some(label => label.startsWith("Messaged"))) {
       throw new Error(`Teacher message roster indicators are incomplete: ${JSON.stringify(teacherMessageRosterFixture)}.`);
     }

@@ -8398,7 +8398,7 @@ function renderDirectMessageThread(studentEmail, studentName = "Student") {
           const own = (isTeacher() && message.senderRole === "teacher") || (!isTeacher() && message.senderRole === "student");
           return `
             <article class="direct-message-bubble ${own ? "is-own" : "is-other"}">
-              <strong>${escapeHtml(message.senderRole === "teacher" ? "Mr. Nieves" : message.studentName)}</strong>
+              <strong>${escapeHtml(message.senderRole === "teacher" ? "Mr. Nieves" : formatStudentFirstLast(message.studentName))}</strong>
               <p>${escapeHtml(message.message)}</p>
               <time datetime="${escapeHtml(message.createdAt)}">${escapeHtml(formatDirectMessageTime(message.createdAt))}</time>
             </article>
@@ -8425,7 +8425,7 @@ function renderStudentMessages() {
     <section class="auth-card direct-message-page">
       <span class="feature-kicker">Teacher & Student</span>
       <h2>Your Conversation with Mr. Nieves</h2>
-      ${renderDirectMessageThread(authSession.email, authSession.name || "Student")}
+      ${renderDirectMessageThread(authSession.email, formatStudentFirstLast(authSession.name || "Student"))}
     </section>
   `;
 }
