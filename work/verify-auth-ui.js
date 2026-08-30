@@ -88,6 +88,35 @@ async function run() {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "compact-home-hero-desktop.png") });
+    const expectationsRedesign = await page.evaluate(() => {
+      const panel = document.querySelector(".rules-card");
+      const image = document.querySelector(".expectations-colt video source");
+      const calendar = document.querySelector(".calendar-card");
+      const panelBox = panel.getBoundingClientRect();
+      const calendarBox = calendar.getBoundingClientRect();
+      return {
+        kicker: document.querySelector(".expectations-kicker")?.textContent.replace(/\s+/g, " ").trim(),
+        heading: document.querySelector(".expectations-rules h3")?.textContent.trim(),
+        ruleCount: document.querySelectorAll(".expectations-rules li").length,
+        checkCount: document.querySelectorAll(".expectation-check").length,
+        imageSource: image?.getAttribute("data-src") || image?.getAttribute("src"),
+        weekday: document.querySelector("#calendarDay")?.textContent.trim(),
+        date: document.querySelector("#calendarDate")?.textContent.trim(),
+        year: document.querySelector("#calendarYear")?.textContent.trim(),
+        time: document.querySelector("#calendarTime")?.textContent.trim(),
+        live: document.querySelector(".calendar-live")?.textContent.trim(),
+        calendarWidth: Math.round(calendarBox.width),
+        contained: calendarBox.right <= panelBox.right && calendarBox.bottom <= panelBox.bottom
+      };
+    });
+    if (!expectationsRedesign.kicker.includes("Classroom Standards") || expectationsRedesign.heading !== "Classroom Launchpad Expectations"
+      || expectationsRedesign.ruleCount !== 6 || expectationsRedesign.checkCount !== 6
+      || expectationsRedesign.imageSource !== "assets/expectations-colt.mp4" || !expectationsRedesign.weekday
+      || !expectationsRedesign.date || !expectationsRedesign.year || !expectationsRedesign.time
+      || expectationsRedesign.live !== "Live" || expectationsRedesign.calendarWidth < 220 || !expectationsRedesign.contained) {
+      throw new Error(`Expectations redesign is incomplete: ${JSON.stringify(expectationsRedesign)}.`);
+    }
+    await page.locator(".rules-card").screenshot({ path: path.join(dataDir, "expectations-redesign-desktop.png") });
     const googleClassroomCard = await page.evaluate(() => {
       const card = document.querySelector(".google-classroom-home-card");
       const link = card && card.querySelector(".google-classroom-open-btn");
@@ -155,6 +184,21 @@ async function run() {
     if (!mobileNavigation.triggerVisible || mobileNavigation.horizontalOverflow) {
       throw new Error(`Mobile homepage navigation is not responsive: ${JSON.stringify(mobileNavigation)}.`);
     }
+    const mobileExpectations = await page.evaluate(() => {
+      const panel = document.querySelector(".rules-card");
+      const rules = document.querySelector(".expectations-rules").getBoundingClientRect();
+      const image = document.querySelector(".expectations-colt").getBoundingClientRect();
+      const calendar = document.querySelector(".calendar-card").getBoundingClientRect();
+      return {
+        stacked: image.top >= rules.bottom && calendar.top >= image.bottom,
+        panelOverflow: panel.scrollWidth > panel.clientWidth,
+        pageOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
+      };
+    });
+    if (!mobileExpectations.stacked || mobileExpectations.panelOverflow || mobileExpectations.pageOverflow) {
+      throw new Error(`Mobile expectations redesign is not contained: ${JSON.stringify(mobileExpectations)}.`);
+    }
+    await page.locator(".rules-card").screenshot({ path: path.join(dataDir, "expectations-redesign-mobile.png") });
     await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "compact-home-hero-mobile.png") });
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.evaluate(() => localStorage.removeItem("classroomLaunchpadHomeNavigationCollapsedV1"));
@@ -866,6 +910,8 @@ async function run() {
       homepageRendersBeforeAccountChecks: true,
       homepageQuickNavigationPreservesContentSize: true,
       homepageQuickNavigationResponsive: true,
+      expectationsPanelRedesignedWithLiveCalendar: true,
+      expectationsPanelResponsive: true,
       studentAssignmentNotificationGroupsMatchTabs: true,
       studentAssignmentNotificationBadgesFitCompactScreens: true,
       studentAssignmentDocumentPreviewRestored: true,

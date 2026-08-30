@@ -2287,10 +2287,11 @@ function renderHomeDefault() {
     </section>
     <section id="home-expectations" class="rules-card home-navigation-anchor">
       <div class="expectations-copy">
-        <div>
-          <h3>Classroom Launchpad Expectations:</h3>
-          <ol>
-            ${CLASSROOM_EXPECTATIONS.map(rule => `<li>${escapeHtml(rule)}</li>`).join("")}
+        <div class="expectations-rules">
+          <span class="expectations-kicker"><span aria-hidden="true">&#10003;</span>Classroom Standards</span>
+          <h3>Classroom Launchpad Expectations</h3>
+          <ol aria-label="Classroom Launchpad expectations">
+            ${CLASSROOM_EXPECTATIONS.map((rule, index) => `<li><span class="expectation-check" aria-hidden="true">&#10003;</span><span class="expectation-number">${index + 1}.</span><span>${escapeHtml(rule)}</span></li>`).join("")}
           </ol>
         </div>
         <figure class="expectations-colt">
@@ -2299,9 +2300,15 @@ function renderHomeDefault() {
           </video>
         </figure>
         <section class="calendar-card" aria-label="Current date and time">
-          <span id="calendarDay" class="calendar-day">Today</span>
+          <div class="calendar-card-top">
+            <span class="calendar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 2v3M18 2v3M3.5 8h17M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"></path><path d="M7 12h2M11 12h2M15 12h2M7 16h2M11 16h2M15 16h2"></path></svg></span>
+            <span id="calendarDay" class="calendar-day">Today</span>
+          </div>
           <span id="calendarDate" class="calendar-date"></span>
+          <span id="calendarYear" class="calendar-year"></span>
+          <span class="calendar-divider" aria-hidden="true"></span>
           <span id="calendarTime" class="calendar-time"></span>
+          <span class="calendar-live"><i aria-hidden="true"></i>Live</span>
         </section>
       </div>
     </section>
@@ -10627,13 +10634,15 @@ function startCalendarClock() {
   }
   const day = document.getElementById("calendarDay");
   const date = document.getElementById("calendarDate");
+  const year = document.getElementById("calendarYear");
   const time = document.getElementById("calendarTime");
-  if (!day || !date || !time) return;
+  if (!day || !date || !year || !time) return;
 
   const update = () => {
     const now = new Date();
     day.textContent = new Intl.DateTimeFormat([], { weekday: "long" }).format(now);
-    date.textContent = new Intl.DateTimeFormat([], { month: "long", day: "numeric", year: "numeric" }).format(now);
+    date.textContent = new Intl.DateTimeFormat([], { month: "long", day: "numeric" }).format(now);
+    year.textContent = new Intl.DateTimeFormat([], { year: "numeric" }).format(now);
     time.textContent = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(now);
   };
   update();
