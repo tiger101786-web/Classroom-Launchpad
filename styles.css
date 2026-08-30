@@ -1865,8 +1865,9 @@ body[data-theme="night"] .category-card::after {
   z-index: 2;
   display: grid;
   gap: 4px;
+  width: min(245px, 44%);
   min-width: 0;
-  max-width: min(145px, calc(100% - 54px));
+  max-width: calc(100% - clamp(170px, 38%, 220px));
   padding: 6px 8px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);

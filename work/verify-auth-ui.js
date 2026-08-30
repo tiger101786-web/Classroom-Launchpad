@@ -87,6 +87,21 @@ async function run() {
       || wideNavigation.heroBackgroundPosition !== "50% 0%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
+    const wideCategoryPanels = await page.evaluate(() => [...document.querySelectorAll(".category-card")].map(card => {
+      const cardBox = card.getBoundingClientRect();
+      const copyBox = card.querySelector(".category-copy").getBoundingClientRect();
+      const arrowBox = card.querySelector(".card-arrow").getBoundingClientRect();
+      return {
+        width: Math.round(copyBox.width),
+        artworkClearance: Math.round(cardBox.right - copyBox.right),
+        clearsArrow: copyBox.right < arrowBox.left,
+        contained: copyBox.left >= cardBox.left && copyBox.right <= cardBox.right
+      };
+    }));
+    if (!wideCategoryPanels.length || wideCategoryPanels.some(panel => panel.width < 230
+      || panel.artworkClearance < 190 || !panel.clearsArrow || !panel.contained)) {
+      throw new Error(`Website category text panels do not preserve the horse artwork zone: ${JSON.stringify(wideCategoryPanels)}.`);
+    }
     await page.locator(".hero-panel").screenshot({ path: path.join(dataDir, "compact-home-hero-desktop.png") });
     const expectationsRedesign = await page.evaluate(() => {
       const panel = document.querySelector(".rules-card");
@@ -183,6 +198,21 @@ async function run() {
     }));
     if (!mobileNavigation.triggerVisible || mobileNavigation.horizontalOverflow) {
       throw new Error(`Mobile homepage navigation is not responsive: ${JSON.stringify(mobileNavigation)}.`);
+    }
+    const mobileCategoryPanels = await page.evaluate(() => [...document.querySelectorAll(".category-card")].map(card => {
+      const cardBox = card.getBoundingClientRect();
+      const copyBox = card.querySelector(".category-copy").getBoundingClientRect();
+      const arrowBox = card.querySelector(".card-arrow").getBoundingClientRect();
+      return {
+        width: Math.round(copyBox.width),
+        artworkClearance: Math.round(cardBox.right - copyBox.right),
+        clearsArrow: copyBox.right < arrowBox.left,
+        contained: copyBox.left >= cardBox.left && copyBox.right <= cardBox.right
+      };
+    }));
+    if (!mobileCategoryPanels.length || mobileCategoryPanels.some(panel => panel.width < 130
+      || panel.artworkClearance < 150 || !panel.clearsArrow || !panel.contained)) {
+      throw new Error(`Mobile website category text panels are not safely contained: ${JSON.stringify(mobileCategoryPanels)}.`);
     }
     const mobileExpectations = await page.evaluate(() => {
       const panel = document.querySelector(".rules-card");
