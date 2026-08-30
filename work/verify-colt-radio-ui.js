@@ -198,6 +198,31 @@ async function run() {
       }
       return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
     });
+    await page.route("https://443-1.autopo.st/171/stream/1/", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://relaxingjazz.com/nowplaying.php?type=current", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ artist: "Test Smooth Artist", title: "Test Smooth Song" })
+    }));
+    await page.route("https://listen.ceol.fm/**", route => {
+      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ icestats: { source: { listenurl: "https://listen.ceol.fm/auto", title: "Test Celtic Artist - Test Celtic Tune" } } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
+    await page.route("https://cdn.onlyhitsradio.net/**", route => {
+      if (new URL(route.request().url()).pathname.startsWith("/currentsong/kpop")) {
+        return route.fulfill({ status: 200, contentType: "text/plain", headers: { "Access-Control-Allow-Origin": "*" }, body: "Test K-Pop Artist - Test K-Pop Song" });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
+    await page.route("https://stream.zeno.fm/hs2dndb7ydnuv", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -228,7 +253,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 22, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 26, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -258,7 +283,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -371,6 +396,22 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://manager11.streamradio.fr:2485/stream");
     await page.getByText("Test Oldies Artist - Test Jukebox Song", { exact: true }).waitFor();
 
+    await page.getByRole("button", { name: "Jazz • Smooth", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://443-1.autopo.st/171/stream/1/");
+    await page.getByText("Test Smooth Artist - Test Smooth Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Celtic • Traditional", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://listen.ceol.fm/auto");
+    await page.getByText("Test Celtic Artist - Test Celtic Tune", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "K-Pop • Hits", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://cdn.onlyhitsradio.net/kpop");
+    await page.getByText("Test K-Pop Artist - Test K-Pop Song", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Hip-Hop • Urban Heat", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.zeno.fm/hs2dndb7ydnuv");
+    await page.getByText("Hip-Hop • Urban Heat live stream", { exact: true }).waitFor();
+
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
     assert.deepEqual(JSON.parse(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioFavoritesGuestV1"))), ["game-soundtracks"]);
@@ -453,7 +494,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

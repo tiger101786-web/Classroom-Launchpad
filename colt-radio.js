@@ -225,6 +225,44 @@
       metadataEndpoint: "https://manager11.streamradio.fr:2485/status-json.xsl",
       metadataMount: "/stream",
       note: "Clean-version oldies, blues, jazz, swing, rock and roll, country, doo-wop, and big-band music from Majestic Jukebox Radio. Commercial-free."
+    },
+    {
+      id: "smooth-jazz",
+      label: "Jazz • Smooth",
+      type: "stream",
+      source: "https://443-1.autopo.st/171/stream/1/",
+      provider: "RelaxingJazz.com",
+      metadataEndpoint: "https://relaxingjazz.com/nowplaying.php?type=current",
+      metadataFormat: "simpleTrack",
+      note: "Commercial-free smooth jazz streamed by RelaxingJazz.com. No account required."
+    },
+    {
+      id: "celtic-traditional",
+      label: "Celtic • Traditional",
+      type: "stream",
+      source: "https://listen.ceol.fm/auto",
+      provider: "Ceol FM",
+      metadataEndpoint: "https://listen.ceol.fm/status-json.xsl",
+      metadataMount: "/auto",
+      note: "Irish traditional and folk music streamed by the listener-supported Ceol FM. No account required."
+    },
+    {
+      id: "kpop-hits",
+      label: "K-Pop • Hits",
+      type: "stream",
+      source: "https://cdn.onlyhitsradio.net/kpop",
+      provider: "OnlyHit K-Pop",
+      metadataEndpoint: "https://cdn.onlyhitsradio.net/currentsong/kpop",
+      metadataFormat: "plainText",
+      note: "K-pop hits, Korean R&B, and K-hip-hop streamed by OnlyHit K-Pop. No account required."
+    },
+    {
+      id: "urban-heat",
+      label: "Hip-Hop • Urban Heat",
+      type: "stream",
+      source: "https://stream.zeno.fm/hs2dndb7ydnuv",
+      provider: "Urban Heat Radio",
+      note: "Hip-hop, rap, R&B, jazz-hop, chill-hop, and trap streamed by Urban Heat Radio. No Colt Radio account required."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -261,7 +299,11 @@
     "laid-back-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
     "jazz-funk-soul": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M19 5v8m-2-6h4"/>',
     "fantasy-adventure": '<path d="M5 21V9l3 2V6l4 3 4-3v5l3-2v12M9 21v-5h6v5"/><path d="M4 21h16"/>',
-    "oldies-jukebox": '<path d="M7 21h10V10a5 5 0 0 0-10 0v11Z"/><path d="M9 11h6v5H9zm0 8h6M9 8h6"/>'
+    "oldies-jukebox": '<path d="M7 21h10V10a5 5 0 0 0-10 0v11Z"/><path d="M9 11h6v5H9zm0 8h6M9 8h6"/>',
+    "smooth-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
+    "celtic-traditional": '<path d="M12 3c-3 3-4.5 6-4 9 1 5 7 6 9 2 1.5-3-.5-6-5-6-5 0-8 5-7 9 .8 3.2 4 5.5 7 5.5"/><path d="M12 8c2 2 3 4 2 6-1 2-4 2-5 0"/>',
+    "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
+    "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>'
   };
 
   function iconSvg(paths, className = "") {
@@ -649,7 +691,14 @@
           body: station.metadataBody
         });
         if (!response.ok) throw new Error("Metadata unavailable");
-        const payload = await response.json();
+        const payload = station.metadataFormat === "plainText"
+          ? await response.text()
+          : await response.json();
+        if (station.metadataFormat === "plainText") {
+          const title = String(payload || "").trim();
+          if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
+          return;
+        }
         if (station.metadataFormat === "onlineRadioBox") {
           const currentTrack = payload?.playlist?.[0]?.name;
           if (activeStation === station.id) nowPlayingTitle.textContent = currentTrack || `${station.label} live stream`;
