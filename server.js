@@ -739,6 +739,7 @@ const mimeTypes = {
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
   ".mp4": "video/mp4",
+  ".webm": "video/webm",
   ".mp3": "audio/mpeg",
   ".ogg": "audio/ogg",
   ".wav": "audio/wav",
