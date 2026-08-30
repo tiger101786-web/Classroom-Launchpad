@@ -209,6 +209,7 @@ async function run() {
         panelBackground: getComputedStyle(document.querySelector(".colt-radio-panel")).backgroundColor,
         stationIcons: document.querySelectorAll(".colt-radio-station-icon svg").length,
         equalizerBars: document.querySelectorAll(".colt-radio-equalizer i").length,
+        headingArtwork: document.querySelector(".colt-radio-heading-mark img")?.getAttribute("src") || "",
         artwork: document.querySelector(".colt-radio-stream-artwork img")?.getAttribute("src") || ""
       };
     });
@@ -216,7 +217,8 @@ async function run() {
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.stationIcons, 22, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
-    assert.match(radioVisuals.artwork, /colt-run-idle\.png/, JSON.stringify(radioVisuals));
+    assert.match(radioVisuals.headingArtwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
+    assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
     const matchedPanelLayout = await page.evaluate(() => {
       const panel = document.querySelector(".colt-radio-panel").getBoundingClientRect();
       const header = document.querySelector(".colt-radio-header").getBoundingClientRect();
@@ -297,6 +299,9 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://stream.chillhouse-live.com/live");
     await page.getByText("House • Chill live stream", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /No ads, no presenters/);
+    if (process.env.COLT_RADIO_SCREENSHOT) {
+      await radioPanel.screenshot({ path: process.env.COLT_RADIO_SCREENSHOT });
+    }
 
     await page.getByRole("button", { name: "Worship • Modern", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R4750372.aac");

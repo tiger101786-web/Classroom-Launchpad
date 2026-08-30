@@ -6495,14 +6495,12 @@ body[data-theme="night"] .colt-radio-panel {
 
 .colt-radio-heading-mark img {
   position: absolute;
-  top: -2%;
-  left: -108%;
-  width: 210%;
-  height: 210%;
-  max-width: none;
-  object-fit: contain;
-  object-position: center;
-  filter: saturate(1.15) contrast(1.1);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  filter: saturate(1.06) contrast(1.08) brightness(0.92);
 }
 
 .colt-radio-heading .feature-kicker,
@@ -6772,14 +6770,12 @@ body[data-theme="night"] .colt-radio-station.is-active {
 
 .colt-radio-stream-artwork img {
   position: absolute;
-  top: 0;
-  left: -133%;
-  width: 233%;
-  height: 233%;
-  max-width: none;
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   object-position: center;
-  filter: saturate(1.15) contrast(1.18) brightness(0.72);
+  filter: saturate(1.06) contrast(1.08) brightness(0.9);
 }
 
 .colt-radio-stream-details {
@@ -6941,11 +6937,6 @@ body[data-theme="night"] .colt-radio-station.is-active {
 
   .colt-radio-heading-mark {
     width: 48px;
-  }
-
-  .colt-radio-heading-mark img {
-    width: 60px;
-    height: 60px;
   }
 
   .colt-radio-heading h2 {
