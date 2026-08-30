@@ -10204,6 +10204,16 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   opacity: 1;
 }
 
+.launchpad-colt-root.has-pointing-video .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose[data-pose="pointing"],
+.launchpad-colt-root.has-pointing-video .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose[data-pose="pointing"] {
+  opacity: 0;
+}
+
+.launchpad-colt-root.has-pointing-video .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pointing-canvas,
+.launchpad-colt-root.has-pointing-video .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pointing-canvas {
+  opacity: 1;
+}
+
 .launchpad-colt-character:hover .launchpad-colt-pose,
 .launchpad-colt-character:focus-visible .launchpad-colt-pose {
   filter: drop-shadow(0 8px 9px rgba(0, 0, 0, 0.72)) drop-shadow(0 0 9px rgba(255, 34, 76, 0.6));
@@ -10250,6 +10260,24 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .launchpad-colt-root[data-size="large"]:not(.is-minimized) .launchpad-colt-speech {
   right: 140px;
+}
+
+.launchpad-colt-root[data-size="extra-large"]:not(.is-minimized) {
+  width: 220px;
+}
+
+.launchpad-colt-root[data-size="extra-large"]:not(.is-minimized) .launchpad-colt-character {
+  width: 210px;
+  height: 208px;
+}
+
+.launchpad-colt-root[data-size="extra-large"]:not(.is-minimized) .launchpad-colt-pose {
+  width: 204px;
+  height: 196px;
+}
+
+.launchpad-colt-root[data-size="extra-large"]:not(.is-minimized) .launchpad-colt-speech {
+  right: 178px;
 }
 
 .launchpad-colt-speech {

@@ -26,7 +26,7 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-animation.mp4"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   const browser = await chromium.launch({
@@ -45,7 +45,9 @@ async function run() {
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
-    assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 7);
+    assert.match(await page.locator(".launchpad-colt-pointing-source").getAttribute("src"), /launchpad-colt-pointing-animation\.mp4/);
+    assert.equal(await page.locator('.launchpad-colt-pose[data-pose="pointing-video"]').evaluate(element => element.tagName), "CANVAS");
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
     const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
@@ -64,6 +66,10 @@ async function run() {
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     await page.getByRole("button", { name: "Size: Medium", exact: true }).click();
     assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "large");
+    await page.getByRole("button", { name: "Size: Large", exact: true }).click();
+    assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "extra-large");
+    assert(await page.getByRole("button", { name: "Size: Extra Large", exact: true }).isVisible());
+    assert((await page.locator(".launchpad-colt-character").boundingBox()).width >= 200);
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
     await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");

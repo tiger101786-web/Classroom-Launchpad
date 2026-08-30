@@ -8,7 +8,8 @@
   const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
   const VIDEO_ASSETS = {
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
-    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-colt-video-poses"
+    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-colt-video-poses",
+    pointing: "assets/launchpad-colt-pointing-animation.mp4?v=20260830-pointing-replacement-v2"
   };
   const POSE_ASSETS = {
     greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
@@ -28,6 +29,12 @@
     explore: { icon: "➜", text: "Great choice—let's explore!" },
     success: { icon: "✓", text: "Nice work!" },
     sleep: { icon: "Zz", text: "" }
+  };
+  const SIZE_LABELS = {
+    small: "Small",
+    medium: "Medium",
+    large: "Large",
+    "extra-large": "Extra Large"
   };
 
   let session = { authenticated: false, role: "guest", email: "" };
@@ -53,6 +60,8 @@
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="pointing" src="${POSE_ASSETS.pointing}" alt="" aria-hidden="true" draggable="false">
+        <canvas class="launchpad-colt-pose launchpad-colt-pointing-canvas" data-pose="pointing-video" width="240" height="240" aria-hidden="true"></canvas>
+        <video class="launchpad-colt-pointing-source" src="${VIDEO_ASSETS.pointing}" muted loop playsinline preload="metadata" hidden aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" poster="${POSE_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -82,6 +91,10 @@
   const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
   const motionButton = controls.querySelector('[data-colt-control="motion"]');
   const sizeButton = controls.querySelector('[data-colt-control="size"]');
+  const pointingVideo = root.querySelector(".launchpad-colt-pointing-source");
+  const pointingCanvas = root.querySelector(".launchpad-colt-pointing-canvas");
+  const pointingContext = pointingCanvas.getContext("2d", { willReadFrequently: true });
+  let pointingAnimationFrame = 0;
 
   function preferenceKey() {
     const account = session.email || session.role || "guest";
@@ -98,7 +111,7 @@
         position: stored.position && Number.isFinite(stored.position.x) && Number.isFinite(stored.position.y)
           ? { x: stored.position.x, y: stored.position.y }
           : null,
-        size: ["small", "medium", "large"].includes(stored.size) ? stored.size : "medium"
+        size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium"
       };
     } catch {
       prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
@@ -120,9 +133,10 @@
     restoreButton.hidden = !prefs.hidden;
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
     motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
-    sizeButton.textContent = `Size: ${prefs.size.charAt(0).toUpperCase()}${prefs.size.slice(1)}`;
+    sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
     applySavedPosition();
     if (prefs.hidden) closeControls();
+    syncPointingAnimation();
   }
 
   function clampPosition(x, y) {
@@ -163,6 +177,7 @@
     if (root.hidden) closeControls();
     else applySavedPosition();
     syncPanelCollision();
+    syncPointingAnimation();
   }
 
   function react(name, customText, duration = 4200) {
@@ -174,14 +189,81 @@
     prop.textContent = reaction.icon;
     speechText.textContent = typeof customText === "string" ? customText : reaction.text;
     speech.hidden = !speechText.textContent;
+    syncPointingAnimation();
     if (duration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
         currentState = "idle";
         companion.dataset.state = "idle";
         prop.textContent = "";
         speech.hidden = true;
+        syncPointingAnimation();
       }, duration);
     }
+  }
+
+  function pointingStateActive() {
+    return ["directions", "explore"].includes(currentState)
+      && shouldShow()
+      && !prefs.hidden
+      && prefs.motion
+      && !root.classList.contains("is-panel-open");
+  }
+
+  function stopPointingAnimation() {
+    globalObject.cancelAnimationFrame(pointingAnimationFrame);
+    pointingAnimationFrame = 0;
+    pointingVideo.pause();
+    root.classList.remove("has-pointing-video");
+  }
+
+  function drawPointingFrame() {
+    if (!pointingStateActive()) {
+      stopPointingAnimation();
+      return;
+    }
+    if (pointingVideo.readyState < 2 || !pointingVideo.videoWidth) {
+      pointingAnimationFrame = globalObject.requestAnimationFrame(drawPointingFrame);
+      return;
+    }
+    try {
+      const width = pointingCanvas.width;
+      const height = pointingCanvas.height;
+      const scale = Math.min(width / pointingVideo.videoWidth, height / pointingVideo.videoHeight);
+      const drawWidth = pointingVideo.videoWidth * scale;
+      const drawHeight = pointingVideo.videoHeight * scale;
+      pointingContext.clearRect(0, 0, width, height);
+      pointingContext.drawImage(pointingVideo, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+      const frame = pointingContext.getImageData(0, 0, width, height);
+      const pixels = frame.data;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const red = pixels[index];
+        const green = pixels[index + 1];
+        const blue = pixels[index + 2];
+        const excessGreen = green - Math.max(red, blue);
+        if (green > 65 && excessGreen > 24) {
+          pixels[index + 3] = excessGreen >= 82
+            ? 0
+            : Math.min(pixels[index + 3], Math.round(255 * (82 - excessGreen) / 58));
+          pixels[index + 1] = Math.min(green, Math.max(red, blue) + 12);
+        }
+      }
+      pointingContext.putImageData(frame, 0, 0);
+      root.classList.add("has-pointing-video");
+    } catch {
+      stopPointingAnimation();
+      return;
+    }
+    pointingAnimationFrame = globalObject.requestAnimationFrame(drawPointingFrame);
+  }
+
+  function syncPointingAnimation() {
+    if (!pointingStateActive()) {
+      stopPointingAnimation();
+      return;
+    }
+    globalObject.cancelAnimationFrame(pointingAnimationFrame);
+    pointingVideo.play().catch(() => {});
+    pointingAnimationFrame = globalObject.requestAnimationFrame(drawPointingFrame);
   }
 
   function resetSleepTimer() {
@@ -206,6 +288,7 @@
       speech.hidden = true;
       closeControls();
     }
+    syncPointingAnimation();
   }
 
   function watchPanels() {
@@ -350,7 +433,7 @@
     if (action === "minimize") prefs.minimized = !prefs.minimized;
     if (action === "motion") prefs.motion = !prefs.motion;
     if (action === "size") {
-      const sizes = ["small", "medium", "large"];
+      const sizes = ["small", "medium", "large", "extra-large"];
       prefs.size = sizes[(sizes.indexOf(prefs.size) + 1) % sizes.length];
     }
     if (action === "reset-position") prefs.position = null;
