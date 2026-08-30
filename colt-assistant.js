@@ -587,15 +587,13 @@
     modeNav.setAttribute("aria-label", "Choose a Colt Assistant mode");
     const helpMode = buildElement("button", "colt-assistant-mode is-active", "Classroom Help");
     const guidedMode = buildElement("button", "colt-assistant-mode", "Guided AI");
-    const imageMode = buildElement("button", "colt-assistant-mode", "Create Image");
-    [helpMode, guidedMode, imageMode].forEach(button => {
+    [helpMode, guidedMode].forEach(button => {
       button.type = "button";
       button.setAttribute("aria-pressed", button === helpMode ? "true" : "false");
     });
     helpMode.dataset.assistantMode = "help";
     guidedMode.dataset.assistantMode = "guided";
-    imageMode.dataset.assistantMode = "image";
-    modeNav.append(helpMode, guidedMode, imageMode);
+    modeNav.append(helpMode, guidedMode);
 
     const conversation = buildElement("div", "colt-assistant-conversation");
     conversation.setAttribute("aria-live", "polite");
@@ -644,11 +642,6 @@
     }
 
     function saveConversationStep() {
-      if (activeMode === "image") {
-        conversationHistory.length = 0;
-        updateBackButton();
-        return;
-      }
       conversationHistory.push({
         nodes: Array.from(conversation.childNodes).map(node => node.cloneNode(true)),
         context: responder.getContextSnapshot(),
@@ -735,30 +728,6 @@
       return row;
     }
 
-    function appendGeneratedImage(payload) {
-      const card = buildElement("article", "colt-assistant-image-card");
-      const image = document.createElement("img");
-      image.src = String(payload.image || "");
-      image.alt = String(payload.label || "AI-generated classroom image");
-      const details = buildElement("div", "colt-assistant-image-details");
-      details.append(
-        buildElement("span", "feature-kicker", "AI-Generated"),
-        buildElement("strong", "", "Classroom Image Creator"),
-        buildElement("p", "", String(payload.prompt || ""))
-      );
-      const download = document.createElement("a");
-      download.className = "primary-btn colt-assistant-image-download";
-      download.href = image.src;
-      download.download = "colt-assistant-image.png";
-      download.textContent = "Download Image";
-      details.append(download);
-      card.append(image, details);
-      conversation.append(card);
-      lastReadableText = "Your classroom image is ready. AI-generated images can make mistakes, so review it before using it in schoolwork.";
-      conversation.append(buildElement("p", "colt-assistant-reminder", lastReadableText));
-      scrollConversation();
-    }
-
     async function fetchAssistantJson(path, options = {}) {
       const response = await fetch(path, {
         credentials: "same-origin",
@@ -782,13 +751,12 @@
       try {
         aiConfig = await fetchAssistantJson("/api/colt-assistant/config", { method: "GET", headers: {} });
       } catch (error) {
-        aiConfig = { enabled: false, imageEnabled: false, error: error.message };
+        aiConfig = { enabled: false, error: error.message };
       }
       // A signed-out request can fail before a student logs in. Keep the tabs
       // available in that case so the configuration can be retried after login.
       if (!aiConfig.error) {
         guidedMode.disabled = !aiConfig.enabled;
-        imageMode.disabled = !aiConfig.imageEnabled;
       }
       return aiConfig;
     }
@@ -805,18 +773,12 @@
         });
         return;
       }
-      if (activeMode === "image") {
-        appendAssistantResponse({
-          text: "Describe a school-appropriate educational image, diagram, poster, background, or story scene. Do not include private information or photographs of students."
-        });
-        return;
-      }
       appendAssistantResponse({ text: knowledge.welcomeMessage });
       appendHomeMenu();
     }
 
     async function submitPrompt(value) {
-      const prompt = String(value || "").trim().slice(0, activeMode === "image" ? 400 : 600);
+      const prompt = String(value || "").trim().slice(0, 600);
       if (!prompt || requestInProgress) return;
       saveConversationStep();
       input.value = "";
@@ -837,25 +799,16 @@
       requestInProgress = true;
       send.disabled = true;
       input.disabled = true;
-      const loading = appendLoadingMessage(activeMode === "image" ? "Creating a classroom-safe image…" : "Thinking of a helpful next step…");
+      const loading = appendLoadingMessage("Thinking of a helpful next step…");
       try {
-        if (activeMode === "image") {
-          const payload = await fetchAssistantJson("/api/colt-assistant/image", {
-            method: "POST",
-            body: JSON.stringify({ prompt })
-          });
-          loading.remove();
-          appendGeneratedImage(payload);
-        } else {
-          const payload = await fetchAssistantJson("/api/colt-assistant/chat", {
-            method: "POST",
-            body: JSON.stringify({ prompt, history: guidedHistory.slice(-8) })
-          });
-          loading.remove();
-          appendAssistantResponse({ text: payload.answer });
-          guidedHistory.push({ role: "user", content: prompt }, { role: "assistant", content: payload.answer });
-          if (guidedHistory.length > 16) guidedHistory.splice(0, guidedHistory.length - 16);
-        }
+        const payload = await fetchAssistantJson("/api/colt-assistant/chat", {
+          method: "POST",
+          body: JSON.stringify({ prompt, history: guidedHistory.slice(-8) })
+        });
+        loading.remove();
+        appendAssistantResponse({ text: payload.answer });
+        guidedHistory.push({ role: "user", content: prompt }, { role: "assistant", content: payload.answer });
+        if (guidedHistory.length > 16) guidedHistory.splice(0, guidedHistory.length - 16);
       } catch (error) {
         loading.remove();
         appendAssistantResponse({ text: error.message });
@@ -868,12 +821,12 @@
     }
 
     async function changeMode(mode) {
-      if (!new Set(["help", "guided", "image"]).has(mode) || requestInProgress) return;
+      if (!new Set(["help", "guided"]).has(mode) || requestInProgress) return;
       if (mode !== "help") {
         const config = await loadAiConfig();
-        if ((mode === "guided" && !config.enabled) || (mode === "image" && !config.imageEnabled)) {
+        if (!config.enabled) {
           conversation.replaceChildren();
-          appendAssistantResponse({ text: config.error || "This private AI mode is not available until Mr. Nieves finishes connecting the Windows AI service." });
+          appendAssistantResponse({ text: config.error || "Guided AI is not available until Mr. Nieves finishes the free Cloudflare connection." });
           return;
         }
       }
@@ -888,10 +841,8 @@
       responder.resetContext();
       input.placeholder = mode === "guided"
         ? "What are you learning?"
-        : mode === "image"
-          ? "Describe an educational image…"
-          : "Ask a classroom question…";
-      send.textContent = mode === "image" ? "Create" : "Send";
+        : "Ask a classroom question…";
+      send.textContent = "Send";
       addWelcome();
       updateBackButton();
       input.focus();

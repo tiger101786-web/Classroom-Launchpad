@@ -27,11 +27,6 @@ function readJson(req) {
   });
 }
 
-function sendJson(res, status, payload) {
-  res.writeHead(status, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(payload));
-}
-
 async function waitForServer(baseUrl) {
   for (let attempt = 0; attempt < 80; attempt += 1) {
     try {
@@ -44,38 +39,23 @@ async function waitForServer(baseUrl) {
 
 async function run() {
   const root = path.resolve(__dirname, "..");
-  const [appPort, textPort, imagePort] = await Promise.all([availablePort(), availablePort(), availablePort()]);
+  const [appPort, aiPort] = await Promise.all([availablePort(), availablePort()]);
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "colt-assistant-ai-"));
-  let receivedTextRequest = null;
-  let receivedImageWorkflow = null;
-  const tinyPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+  let receivedRequest = null;
+  let receivedAuthorization = "";
+  let receivedPath = "";
 
-  const textServer = http.createServer(async (req, res) => {
-    receivedTextRequest = await readJson(req);
-    sendJson(res, 200, { message: { role: "assistant", content: "Let’s break this into one small step. What have you tried so far?" } });
+  const aiServer = http.createServer(async (req, res) => {
+    receivedPath = req.url;
+    receivedAuthorization = req.headers.authorization || "";
+    receivedRequest = await readJson(req);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      success: true,
+      result: { response: "Let’s break this into one small step. What have you tried so far?" }
+    }));
   });
-  const imageServer = http.createServer(async (req, res) => {
-    const url = new URL(req.url, `http://127.0.0.1:${imagePort}`);
-    if (req.method === "POST" && url.pathname === "/prompt") {
-      receivedImageWorkflow = await readJson(req);
-      sendJson(res, 200, { prompt_id: "classroom-test" });
-      return;
-    }
-    if (url.pathname === "/history/classroom-test") {
-      sendJson(res, 200, { "classroom-test": { outputs: { "9": { images: [{ filename: "test.png", subfolder: "", type: "output" }] } } } });
-      return;
-    }
-    if (url.pathname === "/view") {
-      res.writeHead(200, { "Content-Type": "image/png" });
-      res.end(tinyPng);
-      return;
-    }
-    sendJson(res, 404, { error: "Not found" });
-  });
-  await Promise.all([
-    new Promise(resolve => textServer.listen(textPort, "127.0.0.1", resolve)),
-    new Promise(resolve => imageServer.listen(imagePort, "127.0.0.1", resolve))
-  ]);
+  await new Promise(resolve => aiServer.listen(aiPort, "127.0.0.1", resolve));
 
   const child = spawn(process.execPath, [path.join(root, "server.js")], {
     cwd: root,
@@ -87,19 +67,18 @@ async function run() {
       TEACHER_PIN: "123456",
       NODE_ENV: "test",
       COLT_AI_ENABLED: "true",
-      COLT_AI_IMAGE_ENABLED: "true",
-      COLT_AI_TEXT_ENDPOINT: `http://127.0.0.1:${textPort}/api/chat`,
-      COLT_AI_TEXT_MODEL: "classroom-test-model",
-      COLT_AI_IMAGE_ENDPOINT: `http://127.0.0.1:${imagePort}`,
-      COLT_AI_IMAGE_MODEL: "classroom-test-image-model.safetensors"
+      CLOUDFLARE_ACCOUNT_ID: "classroom-account",
+      CLOUDFLARE_AI_API_TOKEN: "private-test-token",
+      CLOUDFLARE_AI_API_BASE: `http://127.0.0.1:${aiPort}`,
+      COLT_AI_TEXT_MODEL: "@cf/meta/classroom-test-model"
     },
     stdio: ["ignore", "pipe", "pipe"]
   });
   const baseUrl = `http://127.0.0.1:${appPort}`;
+
   try {
     await waitForServer(baseUrl);
-    const unauthenticated = await fetch(`${baseUrl}/api/colt-assistant/config`);
-    assert.equal(unauthenticated.status, 401);
+    assert.equal((await fetch(`${baseUrl}/api/colt-assistant/config`)).status, 401);
 
     const login = await fetch(`${baseUrl}/api/auth/teacher`, {
       method: "POST",
@@ -113,8 +92,9 @@ async function run() {
     const configResponse = await fetch(`${baseUrl}/api/colt-assistant/config`, { headers: { Cookie: cookie } });
     const config = await configResponse.json();
     assert.equal(config.enabled, true);
-    assert.equal(config.imageEnabled, true);
+    assert.equal(Object.hasOwn(config, "imageEnabled"), false);
     assert.equal(config.mode, "guided-learning");
+    assert.match(config.privacy, /Cloudflare Workers AI/i);
     assert.match(config.privacy, /not saved/i);
 
     const privateResponse = await fetch(`${baseUrl}/api/colt-assistant/chat`, {
@@ -132,39 +112,26 @@ async function run() {
     });
     assert.equal(chatResponse.status, 200);
     assert.match((await chatResponse.json()).answer, /small step/i);
-    assert.equal(receivedTextRequest.model, "classroom-test-model");
-    assert.match(receivedTextRequest.messages[0].content, /Guide the learner toward an answer/i);
-    assert.match(receivedTextRequest.messages[0].content, /Never invent a citation/i);
-    assert.equal(receivedTextRequest.messages.at(-1).content, "How should I research volcanoes?");
+    assert.equal(receivedAuthorization, "Bearer private-test-token");
+    assert.match(receivedPath, /accounts\/classroom-account\/ai\/run\/@cf\/meta\/classroom-test-model/);
+    assert.match(receivedRequest.messages[0].content, /Guide the learner toward an answer/i);
+    assert.match(receivedRequest.messages[0].content, /Never invent a citation/i);
+    assert.equal(receivedRequest.messages.at(-1).content, "How should I research volcanoes?");
+    assert.equal(receivedRequest.max_tokens, 420);
 
-    const blockedImage = await fetch(`${baseUrl}/api/colt-assistant/image`, {
+    const removedImageRoute = await fetch(`${baseUrl}/api/colt-assistant/image`, {
       method: "POST",
       headers: requestHeaders,
-      body: JSON.stringify({ prompt: "Make a graphic violence scene" })
+      body: JSON.stringify({ prompt: "A water cycle" })
     });
-    assert.equal(blockedImage.status, 400);
-    assert.equal((await blockedImage.json()).code, "AI_IMAGE_BLOCKED");
-
-    const imageResponse = await fetch(`${baseUrl}/api/colt-assistant/image`, {
-      method: "POST",
-      headers: requestHeaders,
-      body: JSON.stringify({ prompt: "A labeled diagram of the water cycle" })
-    });
-    assert.equal(imageResponse.status, 200);
-    const imagePayload = await imageResponse.json();
-    assert.match(imagePayload.image, /^data:image\/png;base64,/);
-    assert.match(receivedImageWorkflow.prompt["6"].inputs.text, /school-appropriate educational illustration/i);
-    assert.equal(receivedImageWorkflow.prompt["4"].inputs.ckpt_name, "classroom-test-image-model.safetensors");
+    assert.equal(removedImageRoute.status, 404);
 
     const databaseText = fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8");
-    assert.doesNotMatch(databaseText, /volcanoes|water cycle|secret123/i);
-    console.log("Colt Assistant guided AI verification passed.");
+    assert.doesNotMatch(databaseText, /volcanoes|secret123|small step/i);
+    console.log("Colt Assistant free hosted Guided AI verification passed.");
   } finally {
     child.kill();
-    await Promise.all([
-      new Promise(resolve => textServer.close(resolve)),
-      new Promise(resolve => imageServer.close(resolve))
-    ]);
+    await new Promise(resolve => aiServer.close(resolve));
     fs.rmSync(dataDir, { recursive: true, force: true });
   }
 }

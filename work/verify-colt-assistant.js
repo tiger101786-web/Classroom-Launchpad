@@ -154,9 +154,9 @@ const assistantSource = fs.readFileSync(path.join(root, "colt-assistant.js"), "u
 const knowledgeSource = fs.readFileSync(path.join(root, "colt-assistant-knowledge.js"), "utf8");
 assert(!/[âÃ�]/.test(knowledgeSource));
 assert.match(assistantSource, /\/api\/colt-assistant\/chat/);
-assert.match(assistantSource, /\/api\/colt-assistant\/image/);
+assert.doesNotMatch(assistantSource, /\/api\/colt-assistant\/image/);
 assert.match(assistantSource, /Guided AI/);
-assert.match(assistantSource, /Create Image/);
+assert.doesNotMatch(assistantSource, /Create Image/);
 assert.match(assistantSource, /looksSensitive\(prompt\)/);
 assert(!/\bXMLHttpRequest\b/.test(assistantSource));
 assert(!/\bWebSocket\b/.test(assistantSource));

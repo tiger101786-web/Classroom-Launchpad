@@ -44,7 +44,8 @@ async function run() {
       TEACHER_PIN: "123456",
       NODE_ENV: "test",
       COLT_AI_ENABLED: "true",
-      COLT_AI_IMAGE_ENABLED: "true"
+      CLOUDFLARE_ACCOUNT_ID: "classroom-test-account",
+      CLOUDFLARE_AI_API_TOKEN: "classroom-test-token"
     },
     stdio: ["ignore", "pipe", "pipe"]
   });
@@ -78,16 +79,15 @@ async function run() {
     assert.equal(visual.width, 440, JSON.stringify(visual));
     assert.equal(visual.background, "rgb(5, 5, 5)", JSON.stringify(visual));
     assert.match(visual.portrait, /colt-radio-header-portrait\.png/, JSON.stringify(visual));
-    assert.equal(visual.modes, 3, JSON.stringify(visual));
+    assert.equal(visual.modes, 2, JSON.stringify(visual));
     assert.equal(visual.activeMode, "Classroom Help", JSON.stringify(visual));
     assert.equal(visual.footerVisible, true, JSON.stringify(visual));
 
     await page.getByRole("button", { name: "Guided AI", exact: true }).click();
     await page.getByText(/Guided AI helps you think through schoolwork/i).waitFor();
     assert.equal(await page.getByRole("button", { name: "Guided AI", exact: true }).getAttribute("aria-pressed"), "true");
-    await page.getByRole("button", { name: "Create Image", exact: true }).click();
-    await page.getByText(/Describe a school-appropriate educational image/i).waitFor();
-    assert.equal(await page.locator("#coltAssistantInput").getAttribute("placeholder"), "Describe an educational image…");
+    assert.equal(await page.getByRole("button", { name: "Create Image", exact: true }).count(), 0);
+    assert.equal(await page.locator("#coltAssistantInput").getAttribute("placeholder"), "What are you learning?");
 
     if (process.env.COLT_ASSISTANT_SCREENSHOT) {
       await panel.screenshot({ path: process.env.COLT_ASSISTANT_SCREENSHOT });

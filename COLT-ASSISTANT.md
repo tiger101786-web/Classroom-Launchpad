@@ -1,8 +1,8 @@
 # Colt Assistant
 
-Colt Assistant combines its original free, keyword-based classroom helper with two optional teacher-configured local AI modes: Guided AI and Classroom Image Creator. Students stay inside Classroom Launchpad and do not need an outside AI account or website.
+Colt Assistant combines its original free, keyword-based Classroom Help mode with responsive Guided AI communication. Students stay inside Classroom Launchpad and do not need an outside AI account or website.
 
-Classroom Help questions are handled in the browser. Guided AI questions are sent through the authenticated Classroom Launchpad server only to the teacher-configured local Windows AI service. Classroom Launchpad does not place conversations, prompts, or generated images in browser storage or the server database.
+Classroom Help questions are handled in the browser. Guided AI questions are sent through the authenticated Classroom Launchpad server to Cloudflare Workers AI. Classroom Launchpad does not place conversations or prompts in browser storage or the server database.
 
 It can also handle basic classroom-safe conversation, including greetings, thanks, goodbyes, simple jokes, encouragement, questions about what it can do, and follow-ups such as “show me more.” Follow-up memory is temporary and is cleared with the conversation or when the page refreshes.
 
@@ -74,15 +74,13 @@ Use `\n` inside a response when you want a new line.
 
 Login, password, private-record, or unresolved technical issues should continue to direct students to Mr. Nieves.
 
-## Guided AI and image generation
+## Guided AI
 
 Guided AI is an academic coaching mode. Its protected system instructions require short grade-appropriate explanations, hints, research strategies, source evaluation, similar examples, and questions that help students take the next step. It is instructed not to complete graded work or invent sources.
 
-Classroom Image Creator sends a school-safe prompt to a teacher-configured local ComfyUI service and returns the result inside Colt Assistant. It blocks common unsafe requests and private information before contacting the image service. Each account is limited to four image requests per hour by default.
+Guided AI requires a signed-in student or teacher account. It uses Cloudflare Workers AI's free daily allowance and stops when that allowance is exhausted instead of creating a charge. Classroom Help remains available at all times.
 
-The AI modes require a signed-in student or teacher account. If the private Windows services are not running, Colt Assistant keeps Classroom Help available and clearly explains that Guided AI or Image Creator is not connected.
-
-See `COLT-AI-WINDOWS-SETUP.md` for Windows installation, environment variables, deployment choices, and security requirements.
+See `COLT-AI-CLOUDFLARE-SETUP.md` for the one-time free Cloudflare and Render configuration.
 
 ## Privacy and safety
 
@@ -90,10 +88,10 @@ Colt Assistant:
 
 - Does not request or store names, emails, passwords, grades, or private records.
 - Hides a student message when it appears to contain sensitive information.
-- Does not save Guided AI conversations, prompts, or generated images in the Classroom Launchpad database.
-- Sends AI requests only to the endpoints configured by the teacher or school administrator.
+- Does not save Guided AI conversations or prompts in the Classroom Launchpad database.
+- Sends Guided AI requests only to Cloudflare Workers AI through the server.
 - Requires authentication and verifies the request origin before accepting AI prompts.
-- Rate-limits text and image requests by account.
+- Rate-limits Guided AI requests by account.
 - Rejects common private-information patterns before contacting a model.
 - Does not execute commands or modify website data.
 - Does not browse the internet.
@@ -116,8 +114,8 @@ npm test
 npm run build
 ```
 
-The build command checks the JavaScript files. The test command verifies the required student prompts, private-information response, approved-link restrictions, recommendation limit, and local-only implementation.
+The build command checks the JavaScript files. The test command verifies the required student prompts, private-information response, approved-link restrictions, recommendation limit, and protected Guided AI connection.
 
 ## Limitations
 
-Classroom Help remains a predictable local helper. Guided AI and Image Creator depend on separately installed local models and suitable Windows hardware. AI responses and images can still contain mistakes, so students must review results and Mr. Nieves should verify important facts. Automated safeguards reduce risk but do not replace teacher supervision or school technology approval.
+Classroom Help remains a predictable local helper. Guided AI depends on Cloudflare's free daily allowance and can still make mistakes, so students must review responses and Mr. Nieves should verify important facts. Automated safeguards reduce risk but do not replace teacher supervision or school technology approval.
