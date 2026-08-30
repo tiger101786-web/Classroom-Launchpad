@@ -160,6 +160,7 @@ assert.doesNotMatch(assistantSource, /Create Image/);
 assert.match(assistantSource, /Show Full Response/);
 assert.match(assistantSource, /prefers-reduced-motion: reduce/);
 assert.match(assistantSource, /appendAnimatedAssistantResponse/);
+assert.match(assistantSource, /65 \+ punctuationPause/);
 assert.match(assistantSource, /looksSensitive\(prompt\)/);
 assert(!/\bXMLHttpRequest\b/.test(assistantSource));
 assert(!/\bWebSocket\b/.test(assistantSource));

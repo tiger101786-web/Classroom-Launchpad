@@ -78,7 +78,7 @@ Login, password, private-record, or unresolved technical issues should continue 
 
 Guided AI is an academic coaching mode. Its protected system instructions require short grade-appropriate explanations, hints, research strategies, source evaluation, similar examples, and questions that help students take the next step. It is instructed not to complete graded work or invent sources.
 
-Guided AI responses are intentionally brief and appear in small word groups so students are not presented with a wall of text. Students can choose **Show Full Response** at any time. Devices configured for reduced motion display the complete response immediately.
+Guided AI responses are intentionally brief and appear one word at a time at a quick conversational pace so students are not presented with a wall of text. A short pause follows sentence-ending punctuation. Students can choose **Show Full Response** at any time. Devices configured for reduced motion display the complete response immediately.
 
 Guided AI requires a signed-in student or teacher account. It uses Cloudflare Workers AI's free daily allowance and stops when that allowance is exhausted instead of creating a charge. Classroom Help remains available at all times.
 

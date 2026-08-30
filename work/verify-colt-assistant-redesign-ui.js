@@ -99,6 +99,8 @@ async function run() {
     await page.locator(".colt-assistant-form button[type='submit']").click();
     const showFull = page.getByRole("button", { name: "Show Full Response", exact: true });
     await showFull.waitFor();
+    await page.waitForTimeout(250);
+    assert(await showFull.isVisible(), "Guided AI reveal completed too quickly to be noticeable.");
     const partialText = await page.locator(".colt-assistant-reveal-text").last().innerText();
     assert(partialText.length > 0 && partialText.length < guidedAnswer.length, partialText);
     await showFull.click();

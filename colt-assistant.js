@@ -767,8 +767,9 @@
         function revealNextGroup() {
           if (finished) return;
           const tokens = tokenGroups[paragraphIndex] || [];
-          paragraphs[paragraphIndex].textContent += tokens.slice(tokenIndex, tokenIndex + 3).join("");
-          tokenIndex += 3;
+          const nextToken = tokens[tokenIndex] || "";
+          paragraphs[paragraphIndex].textContent += nextToken;
+          tokenIndex += 1;
           if (tokenIndex >= tokens.length) {
             paragraphIndex += 1;
             tokenIndex = 0;
@@ -778,7 +779,8 @@
             finish();
             return;
           }
-          timer = globalObject.setTimeout(revealNextGroup, 42);
+          const punctuationPause = /[.!?][”"']?\s*$/.test(nextToken) ? 85 : 0;
+          timer = globalObject.setTimeout(revealNextGroup, 65 + punctuationPause);
         }
 
         revealNextGroup();
