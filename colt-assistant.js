@@ -728,9 +728,7 @@
       const lines = fullText.split(/\n+/).map(line => line.trim()).filter(Boolean);
       const paragraphs = (lines.length ? lines : [fullText]).map(() => buildElement("p"));
       paragraphs.forEach(paragraph => visualText.append(paragraph));
-      const showFull = buildElement("button", "colt-assistant-show-full", "Show Full Response");
-      showFull.type = "button";
-      bubble.append(accessibleText, visualText, showFull);
+      bubble.append(accessibleText, visualText);
       row.append(bubble);
       conversation.append(row);
       scrollConversation();
@@ -750,14 +748,12 @@
           paragraphs.forEach((paragraph, index) => {
             paragraph.textContent = (lines.length ? lines : [fullText])[index] || "";
           });
-          showFull.remove();
           bubble.classList.remove("colt-assistant-message-revealing");
           lastReadableText = fullText;
           scrollConversation();
           resolve();
         }
 
-        showFull.addEventListener("click", finish, { once: true });
         function revealNextGroup() {
           if (finished) return;
           const tokens = tokenGroups[paragraphIndex] || [];

@@ -7421,7 +7421,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .colt-assistant-tool:focus-visible,
 .colt-assistant-choice:focus-visible,
 .colt-assistant-clear:focus-visible,
-.colt-assistant-show-full:focus-visible,
 .colt-assistant-recommendation button:focus-visible,
 .colt-assistant-form button:focus-visible,
 .colt-assistant-input:focus-visible {
@@ -7632,23 +7631,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 @keyframes colt-assistant-caret {
   from { opacity: 0.25; }
   to { opacity: 1; }
-}
-
-.colt-assistant-show-full {
-  margin-top: 9px;
-  padding: 6px 9px;
-  border: 1px solid #67202b;
-  border-radius: 5px;
-  background: #210a0f;
-  color: #f2a2af;
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.colt-assistant-show-full:hover {
-  border-color: #dc2c42;
-  background: #330b13;
-  color: #ffffff;
 }
 
 .colt-assistant-loading {

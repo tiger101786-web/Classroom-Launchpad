@@ -98,24 +98,28 @@ async function run() {
     await page.locator("#coltAssistantInput").fill("Help me organize my explanation.");
     await page.locator(".colt-assistant-form button[type='submit']").click();
     const showFull = page.getByRole("button", { name: "Show Full Response", exact: true });
-    await showFull.waitFor();
+    assert.equal(await showFull.count(), 0);
     await page.waitForTimeout(250);
-    assert(await showFull.isVisible(), "Guided AI reveal completed too quickly to be noticeable.");
     const partialText = await page.locator(".colt-assistant-reveal-text").last().innerText();
     assert(partialText.length > 0 && partialText.length < guidedAnswer.length, partialText);
-    await showFull.click();
+    await page.waitForFunction(answer => {
+      const responses = document.querySelectorAll(".colt-assistant-reveal-text");
+      return responses.length && responses[responses.length - 1].innerText === answer;
+    }, guidedAnswer);
     assert.equal(await page.locator(".colt-assistant-reveal-text").last().innerText(), guidedAnswer);
-    assert.equal(await showFull.count(), 0);
     assert.equal(await page.getByRole("button", { name: /Read the latest Colt Assistant response aloud/i }).isDisabled(), false);
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.locator("#coltAssistantInput").fill("Give me one more step.");
     await page.locator(".colt-assistant-form button[type='submit']").click();
-    await showFull.waitFor();
+    assert.equal(await showFull.count(), 0);
     await page.waitForTimeout(250);
     const reducedMotionPartial = await page.locator(".colt-assistant-reveal-text").last().innerText();
     assert(reducedMotionPartial.length > 0 && reducedMotionPartial.length < guidedAnswer.length, reducedMotionPartial);
-    await showFull.click();
+    await page.waitForFunction(answer => {
+      const responses = document.querySelectorAll(".colt-assistant-reveal-text");
+      return responses.length && responses[responses.length - 1].innerText === answer;
+    }, guidedAnswer);
     assert.equal(await page.locator(".colt-assistant-reveal-text").last().innerText(), guidedAnswer);
 
     if (process.env.COLT_ASSISTANT_SCREENSHOT) {
