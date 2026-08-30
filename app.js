@@ -1423,6 +1423,7 @@ const dashboardSections = [
   { id: "websites", label: "Manage Websites", icon: "▦" },
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
+dashboardSections.splice(4, 0, { id: "registered", label: "Registered Students", icon: "&#10003;" });
 const savedDashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
 let dashboardSection = dashboardSections.some(section => section.id === savedDashboardSection) ? savedDashboardSection : "overview";
 let dashboardStudentSearch = "";
@@ -1491,6 +1492,7 @@ function unreadDirectMessageCount(role = authSession.role, studentEmail = authSe
 }
 
 function coltCornerSeenTopicsStorageKey() {
+  if (isTeacher()) return `${COLT_CORNER_SEEN_TOPICS_KEY}:teacher`;
   const email = String(authSession.email || "").trim().toLowerCase();
   return email ? `${COLT_CORNER_SEEN_TOPICS_KEY}:${email}` : "";
 }
@@ -1507,8 +1509,16 @@ function loadSeenColtCornerTopicIds() {
 }
 
 function unreadColtCornerTopics() {
-  if (!isApprovedStudent()) return [];
+  if (!isSignedIn()) return [];
   const seen = loadSeenColtCornerTopicIds();
+  if (isTeacher()) {
+    return classThreads.filter(thread => (
+      thread.id
+      && String(thread.grade || "").toLowerCase() !== "teacher"
+      && !seen.has(String(thread.id))
+    ));
+  }
+  if (!isApprovedStudent()) return [];
   const grade = String(authSession.grade || "");
   return classThreads.filter(thread => (
     thread.id
@@ -1518,13 +1528,13 @@ function unreadColtCornerTopics() {
 }
 
 function markVisibleColtCornerTopicsSeen() {
-  if (!isApprovedStudent()) return;
+  if (!isSignedIn()) return;
   const key = coltCornerSeenTopicsStorageKey();
   if (!key) return;
   const seen = loadSeenColtCornerTopicIds();
   const grade = String(authSession.grade || "");
   classThreads.forEach(thread => {
-    if (thread.id && coltCornerAudienceGrade(thread) === grade) seen.add(String(thread.id));
+    if (thread.id && (isTeacher() || coltCornerAudienceGrade(thread) === grade)) seen.add(String(thread.id));
   });
   try {
     localStorage.setItem(key, JSON.stringify([...seen].slice(-500)));
@@ -2351,8 +2361,13 @@ function renderColtCornerPreview() {
   return `
     <section class="colt-corner-preview">
       <div class="colt-corner-heading">
-        <span class="feature-kicker">${isTeacher() ? "Teacher View" : "Class Forum"}</span>
-        ${newTopicCount ? `<span class="colt-corner-new-topic-badge">${newTopicCount} New ${newTopicCount === 1 ? "Topic" : "Topics"}</span>` : ""}
+        <div class="colt-corner-kicker-row">
+          <span class="feature-kicker">${isTeacher() ? "Teacher View" : "Class Forum"}</span>
+          <button class="colt-corner-topic-bell" type="button" data-action="openColtCorner" aria-label="${newTopicCount ? `${newTopicCount} new Colt Corner ${newTopicCount === 1 ? "topic" : "topics"}` : "No new Colt Corner topics"}" title="${newTopicCount ? `${newTopicCount} new ${newTopicCount === 1 ? "topic" : "topics"}` : "No new topics"}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
+            ${newTopicCount ? `<b>${newTopicCount > 99 ? "99+" : newTopicCount}</b>` : ""}
+          </button>
+        </div>
         <h2>${escapeHtml(cornerHeading)}</h2>
         <p>${escapeHtml(cornerDescription)}</p>
         <div class="colt-corner-stats">
@@ -8556,6 +8571,48 @@ function renderApprovedStudentManager() {
   `;
 }
 
+function renderRegisteredStudents() {
+  const registeredStudents = approvedStudents
+    .filter(student => student.registered)
+    .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+  const gradeGroups = CLASSROOM_GRADES.map(grade => ({
+    grade,
+    students: registeredStudents.filter(student => String(student.grade || "") === grade)
+  }));
+  const otherStudents = registeredStudents.filter(student => !CLASSROOM_GRADES.includes(String(student.grade || "")));
+  if (otherStudents.length) gradeGroups.push({ grade: "Other", students: otherStudents });
+  return `
+    <section class="form-card registered-student-roster">
+      <header class="registered-student-roster-heading">
+        <div>
+          <span class="feature-kicker">Activated Accounts</span>
+          <h2>Students Who Have Registered</h2>
+          <p class="instruction">Only students who completed account activation appear here.</p>
+        </div>
+        <strong class="registered-student-total">${registeredStudents.length}</strong>
+      </header>
+      ${registeredStudents.length ? `
+        <div class="registered-student-grade-grid">
+          ${gradeGroups.filter(group => group.students.length).map(group => `
+            <section class="registered-student-grade-card">
+              <header><h3>${group.grade === "Other" ? "Other Accounts" : `Grade ${escapeHtml(group.grade)}`}</h3><span>${group.students.length}</span></header>
+              <ol>
+                ${group.students.map(student => `
+                  <li class="registered-student-name">
+                    <span aria-hidden="true">${escapeHtml(forumInitials(student.name || student.email))}</span>
+                    <strong>${escapeHtml(student.name || student.email)}</strong>
+                    ${student.teacherTestAccount ? `<small>Teacher Test Account</small>` : ""}
+                  </li>
+                `).join("")}
+              </ol>
+            </section>
+          `).join("")}
+        </div>
+      ` : emptyCard("No students have activated their accounts yet.")}
+    </section>
+  `;
+}
+
 function renderLegacyDashboard() {
   const sorted = [...links].sort((a, b) => `${a.category}${a.title}`.localeCompare(`${b.category}${b.title}`));
   const launchRecord = dailyLaunchRecord(teacherDailyLaunchGrade);
@@ -8774,7 +8831,7 @@ function renderDashboardOverview() {
   const activeLinks = links.filter(link => link.active).length;
   const metrics = [
     ["Approved Students", approvedStudents.length, "students"],
-    ["Registered", registered, "students"],
+    ["Registered", registered, "registered"],
     ["Awaiting First Login", waiting, "students"],
 
     ["Students Currently Out", classroomPassData.passes.filter(item => item.status === "out").length, "passes"],
@@ -9399,6 +9456,7 @@ function renderDashboardSection() {
   if (dashboardSection === "messages") return renderDashboardMessages();
   if (dashboardSection === "passes") return renderDashboardClassroomPasses();
   if (dashboardSection === "students") return renderApprovedStudentManager();
+  if (dashboardSection === "registered") return renderRegisteredStudents();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
   if (dashboardSection === "corner") return renderDashboardColtCorner();
   if (dashboardSection === "requests") return renderDashboardRequests();

@@ -467,6 +467,8 @@ async function run() {
       const fixtureEmail = "topic.alert@scscolts.org";
       const storageKey = `${COLT_CORNER_SEEN_TOPICS_KEY}:${fixtureEmail}`;
       const previousSeen = localStorage.getItem(storageKey);
+      const teacherStorageKey = `${COLT_CORNER_SEEN_TOPICS_KEY}:teacher`;
+      const previousTeacherSeen = localStorage.getItem(teacherStorageKey);
       try {
         authSession = { authenticated: true, role: "student", name: "Alert, Student", email: fixtureEmail, grade: "4", avatarUrl: "" };
         classThreads = [
@@ -477,10 +479,21 @@ async function run() {
         const preview = new DOMParser().parseFromString(renderColtCornerPreview(), "text/html");
         const before = unreadColtCornerTopics().length;
         markVisibleColtCornerTopicsSeen();
+        const seenPreview = new DOMParser().parseFromString(renderColtCornerPreview(), "text/html");
+        authSession = { authenticated: true, role: "teacher", name: "Mr. Nieves", email: "", grade: "Teacher", avatarUrl: "" };
+        classThreads = [
+          { id: "student-topic", title: "Student Topic", audienceGrade: "4", grade: "4", replies: [], createdAt: new Date().toISOString() },
+          { id: "teacher-topic", title: "Teacher Topic", audienceGrade: "4", grade: "Teacher", replies: [], createdAt: new Date().toISOString() }
+        ];
+        localStorage.removeItem(teacherStorageKey);
+        const teacherPreview = new DOMParser().parseFromString(renderColtCornerPreview(), "text/html");
         return {
           before,
-          after: unreadColtCornerTopics().length,
-          sectionBadge: preview.querySelector(".colt-corner-new-topic-badge")?.textContent.replace(/\s+/g, " ").trim(),
+          after: seenPreview.querySelector(".colt-corner-topic-bell b")?.textContent.trim() || "",
+          studentBellBadge: preview.querySelector(".colt-corner-topic-bell b")?.textContent.trim(),
+          studentBellAlwaysVisible: Boolean(seenPreview.querySelector(".colt-corner-topic-bell")),
+          teacherUnread: unreadColtCornerTopics().length,
+          teacherBellBadge: teacherPreview.querySelector(".colt-corner-topic-bell b")?.textContent.trim(),
           floatingNotificationCount: document.querySelectorAll(".colt-corner-topic-notification").length
         };
       } finally {
@@ -488,10 +501,13 @@ async function run() {
         classThreads = originalThreads;
         if (previousSeen === null) localStorage.removeItem(storageKey);
         else localStorage.setItem(storageKey, previousSeen);
+        if (previousTeacherSeen === null) localStorage.removeItem(teacherStorageKey);
+        else localStorage.setItem(teacherStorageKey, previousTeacherSeen);
       }
     });
-    if (coltCornerTopicAlert.before !== 1 || coltCornerTopicAlert.after !== 0
-      || coltCornerTopicAlert.sectionBadge !== "1 New Topic"
+    if (coltCornerTopicAlert.before !== 1 || coltCornerTopicAlert.after !== ""
+      || coltCornerTopicAlert.studentBellBadge !== "1" || !coltCornerTopicAlert.studentBellAlwaysVisible
+      || coltCornerTopicAlert.teacherUnread !== 1 || coltCornerTopicAlert.teacherBellBadge !== "1"
       || coltCornerTopicAlert.floatingNotificationCount !== 0) {
       throw new Error(`Grade-aware Colt Corner topic alert is incomplete: ${JSON.stringify(coltCornerTopicAlert)}.`);
     }
@@ -676,6 +692,31 @@ async function run() {
     }
     await page.locator("#dashboardStudentSearch").fill("");
 
+    await page.evaluate(() => {
+      approvedStudents = [...approvedStudents, {
+        email: "activated.ui@scscolts.org", name: "Activated, UI", grade: "5",
+        registered: true, activationReady: false, teacherTestAccount: false
+      }];
+      render();
+    });
+    await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
+    await page.locator(".dashboard-metric-card").filter({ has: page.getByText("Registered", { exact: true }) }).click();
+    await page.locator(".registered-student-roster").waitFor();
+    const registeredRoster = await page.evaluate(() => ({
+      names: [...document.querySelectorAll(".registered-student-name strong")].map(item => item.textContent.trim()),
+      unregisteredStudentVisible: [...document.querySelectorAll(".registered-student-name strong")].some(item => item.textContent.trim() === "Student, UI"),
+      heading: document.querySelector(".registered-student-roster h2")?.textContent.trim(),
+      gradeCards: document.querySelectorAll(".registered-student-grade-card").length
+    }));
+    if (!registeredRoster.names.includes("Activated, UI") || registeredRoster.unregisteredStudentVisible
+      || registeredRoster.heading !== "Students Who Have Registered" || !registeredRoster.gradeCards) {
+      throw new Error(`Registered-student details did not isolate activated accounts: ${JSON.stringify(registeredRoster)}.`);
+    }
+    await page.evaluate(() => {
+      approvedStudents = approvedStudents.filter(student => student.email !== "activated.ui@scscolts.org");
+      render();
+    });
+
     await page.locator('[data-action="dashboardSection"][data-section="websites"]').first().click();
     await page.locator("#dashboardLinkSearch").waitFor();
     await page.locator("#dashboardLinkSearch").fill("Google");
@@ -767,7 +808,9 @@ async function run() {
       teacherCanGenerateActivationCodes: true,
       privateRosterNamesDisplay: true,
       studentManagerSearchWorks: true,
+      registeredStudentDetailsShowOnlyActivatedAccounts: true,
       teacherForumIdentityAutomatic: true,
+      coltCornerBellIsPermanentAndGradeAware: true,
       dashboardNavigationComplete: true,
       googleClassroomReplacesLaunchpadAssignments: true,
       retiredGradebookAndStudentWorkNavigationRemoved: true,

@@ -1877,17 +1877,57 @@ body[data-theme="night"] .request-spirit {
   align-content: start;
 }
 
-.colt-corner-new-topic-badge {
-  justify-self: start;
-  padding: 6px 10px;
-  border: 1px solid color-mix(in srgb, var(--blue) 55%, transparent);
+.colt-corner-kicker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.colt-corner-topic-bell {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--blue) 68%, var(--border));
+  border-radius: 11px;
+  background: var(--paper);
+  color: var(--blue);
+}
+
+.colt-corner-topic-bell:hover {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.colt-corner-topic-bell svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.colt-corner-topic-bell b {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 6px;
+  border: 2px solid var(--white);
   border-radius: 999px;
   background: var(--blue);
   color: #fff;
-  font-size: .72rem;
-  font-weight: 900;
-  letter-spacing: .025em;
-  text-transform: uppercase;
+  font-size: .68rem;
+  line-height: 1;
 }
 
 .colt-corner-heading h2 {
@@ -3992,6 +4032,112 @@ body[data-theme="night"] .colt-run-volume {
 
 .dashboard-metric-card small {
   color: var(--blue);
+  font-weight: 800;
+}
+
+.registered-student-roster {
+  display: grid;
+  gap: 18px;
+}
+
+.registered-student-roster-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.registered-student-roster-heading h2 {
+  margin: 7px 0 3px;
+  color: var(--blue-dark);
+}
+
+.registered-student-total {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  min-width: 66px;
+  height: 66px;
+  padding: 0 12px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 1.75rem;
+}
+
+.registered-student-grade-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.registered-student-grade-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--paper);
+}
+
+.registered-student-grade-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--blue-soft);
+}
+
+.registered-student-grade-card h3 {
+  margin: 0;
+  color: var(--blue-dark);
+}
+
+.registered-student-grade-card > header span {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.registered-student-grade-card ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.registered-student-name {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 13px;
+  border-top: 1px solid var(--border);
+}
+
+.registered-student-name > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.registered-student-name small {
+  color: var(--muted);
+  font-size: .7rem;
   font-weight: 800;
 }
 
@@ -8738,6 +8884,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .dashboard-settings-grid,
   .dashboard-manager-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .registered-student-grade-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .registered-student-roster-heading {
+    align-items: flex-start;
   }
 
   .dashboard-quick-actions {
