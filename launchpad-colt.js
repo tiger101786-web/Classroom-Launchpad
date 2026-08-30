@@ -9,7 +9,7 @@
   const VIDEO_ASSETS = {
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-colt-video-poses",
-    pointing: "assets/launchpad-colt-pointing.mp4?v=20260830-pointing-direct-v3"
+    pointing: "assets/launchpad-colt-pointing.mp4?v=20260830-pointing-only-v5"
   };
   const POSE_ASSETS = {
     greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",

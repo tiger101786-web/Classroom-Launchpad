@@ -22,12 +22,17 @@ async function authenticate(page, role = "student") {
 }
 
 async function run() {
+  const serverSource = fs.readFileSync(path.resolve(__dirname, "..", "server.js"), "utf8");
+  assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
   ["companion", "greeting", "excited", "dancing", "sleeping"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
   ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
+  });
+  ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm"].forEach(filename => {
+    assert(!fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Obsolete static/fallback pointing asset still exists: ${filename}`);
   });
   const browser = await chromium.launch({
     headless: true,
@@ -50,6 +55,7 @@ async function run() {
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing\.mp4/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
+    assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
     await page.evaluate(() => {
