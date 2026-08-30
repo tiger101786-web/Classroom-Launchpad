@@ -6,6 +6,13 @@
   if (!root) return;
 
   const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
+  const POSE_ASSETS = {
+    greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
+    pointing: "assets/launchpad-colt-pointing.png?v=20260830-colt-poses",
+    excited: "assets/launchpad-colt-excited.png?v=20260830-colt-poses",
+    dancing: "assets/launchpad-colt-dancing.png?v=20260830-colt-poses",
+    sleeping: "assets/launchpad-colt-sleeping.png?v=20260830-colt-poses"
+  };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
@@ -39,13 +46,19 @@
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
-        <img src="${ASSET_URL}" alt="Launchpad Colt, the Classroom Launchpad horse companion">
+        <img class="launchpad-colt-pose" data-pose="idle" src="${ASSET_URL}" alt="" aria-hidden="true" draggable="false">
+        <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
+        <img class="launchpad-colt-pose" data-pose="pointing" src="${POSE_ASSETS.pointing}" alt="" aria-hidden="true" draggable="false">
+        <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
+        <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
+        <img class="launchpad-colt-pose" data-pose="sleeping" src="${POSE_ASSETS.sleeping}" alt="" aria-hidden="true" draggable="false">
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize">Minimize</button>
         <button type="button" data-colt-control="motion">Pause motion</button>
         <button type="button" data-colt-control="size">Size: Medium</button>
+        <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
       </div>
@@ -262,6 +275,7 @@
 
   characterButton.addEventListener("pointerdown", event => {
     if (event.button !== 0) return;
+    event.preventDefault();
     const rect = root.getBoundingClientRect();
     dragSession = {
       pointerId: event.pointerId,
@@ -303,6 +317,7 @@
 
   characterButton.addEventListener("pointerup", finishDrag);
   characterButton.addEventListener("pointercancel", finishDrag);
+  characterButton.addEventListener("dragstart", event => event.preventDefault());
 
   characterButton.addEventListener("click", () => {
     if (suppressCharacterClick) return;
@@ -323,6 +338,11 @@
     const button = event.target.closest("[data-colt-control]");
     if (!button) return;
     const action = button.dataset.coltControl;
+    if (action === "sleep") {
+      closeControls();
+      react("sleep", "", 0);
+      return;
+    }
     if (action === "minimize") prefs.minimized = !prefs.minimized;
     if (action === "motion") prefs.motion = !prefs.motion;
     if (action === "size") {

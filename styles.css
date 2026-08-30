@@ -10174,6 +10174,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 
 .launchpad-colt-character img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 140px;
   height: 132px;
@@ -10182,6 +10184,24 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 5px rgba(236, 23, 68, 0.32));
   transform-origin: 60% 84%;
   animation: launchpad-colt-breathe 2.4s ease-in-out infinite;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 130ms ease;
+}
+
+.launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
+.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="greeting"],
+.launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greeting"],
+.launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greeting"],
+.launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose[data-pose="pointing"],
+.launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose[data-pose="pointing"],
+.launchpad-colt-companion[data-state="message"] .launchpad-colt-pose[data-pose="excited"],
+.launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="excited"],
+.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="dancing"],
+.launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
+  opacity: 1;
 }
 
 .launchpad-colt-character:hover img,
@@ -10318,9 +10338,13 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-character img {
-  animation: none;
-  transform: rotate(2deg) translateY(4px) scale(0.98);
+  animation: launchpad-colt-sleep-breathe 2.8s ease-in-out infinite;
+  transform: translateY(5px) scale(1.04);
   filter: saturate(0.72) brightness(0.72) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.65));
+}
+
+.launchpad-colt-companion[data-state="sleep"] .launchpad-colt-prop {
+  animation: launchpad-colt-zzz 1.8s ease-in-out infinite;
 }
 
 .launchpad-colt-controls {
@@ -10457,6 +10481,17 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   28% { transform: translateY(-13px) rotate(-4deg) scale(1.04); }
   58% { transform: translateY(-4px) rotate(4deg) scale(1.02); }
   78% { transform: translateY(-9px) rotate(-2deg) scale(1.03); }
+}
+
+@keyframes launchpad-colt-sleep-breathe {
+  0%, 100% { transform: translateY(7px) scale(1.02, 1); filter: saturate(0.72) brightness(0.72) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.65)); }
+  50% { transform: translateY(4px) scale(1.035, 1.025); filter: saturate(0.76) brightness(0.78) drop-shadow(0 9px 9px rgba(0, 0, 0, 0.68)); }
+}
+
+@keyframes launchpad-colt-zzz {
+  0% { opacity: 0.25; transform: translate(5px, 6px) scale(0.72); }
+  55% { opacity: 1; transform: translate(-3px, -7px) scale(1); }
+  100% { opacity: 0; transform: translate(-8px, -15px) scale(1.12); }
 }
 
 @keyframes launchpad-colt-hop {

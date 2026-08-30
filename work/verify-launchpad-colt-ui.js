@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { chromium } = require("playwright");
@@ -21,6 +22,10 @@ async function authenticate(page, role = "student") {
 }
 
 async function run() {
+  ["companion", "greeting", "pointing", "excited", "dancing", "sleeping"].forEach(pose => {
+    const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
+    assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
+  });
   const browser = await chromium.launch({
     headless: true,
     executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
@@ -34,20 +39,35 @@ async function run() {
     await authenticate(page);
     await page.waitForSelector(".launchpad-colt-character:visible");
 
-    const image = page.locator(".launchpad-colt-character img");
+    const image = page.locator('.launchpad-colt-character img[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-companion\.png/);
-    assert.equal(await image.getAttribute("alt"), "Launchpad Colt, the Classroom Launchpad horse companion");
-    await page.locator(".launchpad-colt-companion").evaluate(element => { element.dataset.state = "welcome"; });
-    assert.match(await image.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-greeting/);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
+    assert.equal(await image.getAttribute("draggable"), "false");
+    const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
+    await greetingImage.evaluate(element => {
+      element.style.transition = "none";
+      element.closest(".launchpad-colt-companion").dataset.state = "welcome";
+    });
+    assert.equal(await greetingImage.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.match(await greetingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-greeting/);
 
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Pause motion", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Reset position", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     await page.getByRole("button", { name: "Size: Medium", exact: true }).click();
     assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "large");
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
+    const sleepingImage = page.locator('.launchpad-colt-pose[data-pose="sleeping"]');
+    await sleepingImage.evaluate(element => { element.style.transition = "none"; });
+    assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
+    await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
     await page.getByRole("button", { name: "Minimize", exact: true }).click();
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
 
@@ -65,6 +85,13 @@ async function run() {
       const stored = raw ? JSON.parse(raw) : {};
       return Number.isFinite(stored.position && stored.position.x) && Number.isFinite(stored.position && stored.position.y);
     }));
+    const afterFirstDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    await page.mouse.move(afterFirstDrag.x + 70, afterFirstDrag.y + 65);
+    await page.mouse.down();
+    await page.mouse.move(afterFirstDrag.x + 145, afterFirstDrag.y + 20, { steps: 7 });
+    await page.mouse.up();
+    const afterSecondDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    assert(Math.abs(afterSecondDrag.x - afterFirstDrag.x) > 30, "The Colt could not be immediately dragged a second time.");
 
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");
