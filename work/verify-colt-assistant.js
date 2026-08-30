@@ -158,7 +158,7 @@ assert.doesNotMatch(assistantSource, /\/api\/colt-assistant\/image/);
 assert.match(assistantSource, /Guided AI/);
 assert.doesNotMatch(assistantSource, /Create Image/);
 assert.match(assistantSource, /Show Full Response/);
-assert.match(assistantSource, /prefers-reduced-motion: reduce/);
+assert.doesNotMatch(assistantSource, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
 assert.match(assistantSource, /appendAnimatedAssistantResponse/);
 assert.match(assistantSource, /65 \+ punctuationPause/);
 assert.match(assistantSource, /looksSensitive\(prompt\)/);

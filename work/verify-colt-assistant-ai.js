@@ -116,10 +116,11 @@ async function run() {
     assert.match(receivedPath, /accounts\/classroom-account\/ai\/run\/@cf\/meta\/classroom-test-model/);
     assert.match(receivedRequest.messages[0].content, /Guide the learner toward an answer/i);
     assert.match(receivedRequest.messages[0].content, /Never invent a citation/i);
-    assert.match(receivedRequest.messages[0].content, /40 to 90 words/i);
+    assert.match(receivedRequest.messages[0].content, /25 to 70 words/i);
+    assert.match(receivedRequest.messages[0].content, /fewer than 25 words/i);
     assert.match(receivedRequest.messages[0].content, /wall of information/i);
     assert.equal(receivedRequest.messages.at(-1).content, "How should I research volcanoes?");
-    assert.equal(receivedRequest.max_tokens, 260);
+    assert.equal(receivedRequest.max_tokens, 200);
 
     const removedImageRoute = await fetch(`${baseUrl}/api/colt-assistant/image`, {
       method: "POST",

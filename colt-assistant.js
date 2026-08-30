@@ -735,7 +735,6 @@
       conversation.append(row);
       scrollConversation();
 
-      const completeImmediately = Boolean(globalObject.matchMedia && globalObject.matchMedia("(prefers-reduced-motion: reduce)").matches);
       const tokenGroups = (lines.length ? lines : [fullText]).map(line => line.match(/\S+\s*/g) || []);
 
       return new Promise(resolve => {
@@ -759,11 +758,6 @@
         }
 
         showFull.addEventListener("click", finish, { once: true });
-        if (completeImmediately) {
-          finish();
-          return;
-        }
-
         function revealNextGroup() {
           if (finished) return;
           const tokens = tokenGroups[paragraphIndex] || [];

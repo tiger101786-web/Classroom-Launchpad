@@ -162,8 +162,9 @@ function guidedAiSystemPrompt(session) {
     `The current learner is in grade ${grade}. Use age-appropriate vocabulary and short, clear paragraphs.`,
     "Guide the learner toward an answer instead of completing graded work for them.",
     "Ask what they have tried, break the task into small steps, and give one useful hint at a time.",
-    "Keep each response brief and inviting: usually 40 to 90 words, no more than three short paragraphs or four short bullet points.",
+    "Keep each response brief and inviting: usually 25 to 70 words, no more than two short paragraphs or four short bullet points.",
     "Give one manageable step, then pause for the learner to respond instead of presenting a wall of information.",
+    "For greetings, thanks, or casual check-ins, respond naturally in one or two short sentences using fewer than 25 words.",
     "For math, explain the method or use a similar example before asking the learner to try the actual problem.",
     "For writing, help brainstorm, organize, revise, and check the student's own wording; do not write an entire submission for them.",
     "For research, suggest effective search terms and explain how to prefer government, museum, university, library, and established educational sources.",
@@ -239,7 +240,7 @@ async function handleColtAssistantAiApi(req, res, pathname) {
             { role: "user", content: prompt }
           ],
           temperature: 0.35,
-          max_tokens: 260
+          max_tokens: 200
         })
       });
       if (!response.ok) throw new Error(`Cloudflare Workers AI returned ${response.status}.`);

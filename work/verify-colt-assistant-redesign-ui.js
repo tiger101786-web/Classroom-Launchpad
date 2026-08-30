@@ -111,11 +111,12 @@ async function run() {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.locator("#coltAssistantInput").fill("Give me one more step.");
     await page.locator(".colt-assistant-form button[type='submit']").click();
-    await page.waitForFunction(answer => {
-      const replies = document.querySelectorAll(".colt-assistant-reveal-text");
-      return replies.length >= 2 && replies[replies.length - 1].textContent === answer;
-    }, guidedAnswer);
-    assert.equal(await page.getByRole("button", { name: "Show Full Response", exact: true }).count(), 0);
+    await showFull.waitFor();
+    await page.waitForTimeout(250);
+    const reducedMotionPartial = await page.locator(".colt-assistant-reveal-text").last().innerText();
+    assert(reducedMotionPartial.length > 0 && reducedMotionPartial.length < guidedAnswer.length, reducedMotionPartial);
+    await showFull.click();
+    assert.equal(await page.locator(".colt-assistant-reveal-text").last().innerText(), guidedAnswer);
 
     if (process.env.COLT_ASSISTANT_SCREENSHOT) {
       await panel.screenshot({ path: process.env.COLT_ASSISTANT_SCREENSHOT });
