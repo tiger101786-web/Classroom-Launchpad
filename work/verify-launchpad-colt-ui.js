@@ -22,11 +22,11 @@ async function authenticate(page, role = "student") {
 }
 
 async function run() {
-  ["companion", "greeting", "pointing", "excited", "dancing", "sleeping"].forEach(pose => {
+  ["companion", "greeting", "excited", "dancing", "sleeping"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   const browser = await chromium.launch({
@@ -48,7 +48,7 @@ async function run() {
     assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing\.webm/);
+    assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing\.mp4/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
