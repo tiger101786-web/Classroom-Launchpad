@@ -117,6 +117,11 @@ async function run() {
     await page.mouse.move(beforeDrag.x - 130, beforeDrag.y + 90, { steps: 8 });
     await page.mouse.up();
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-user-positioned")));
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "move");
+    await page.waitForTimeout(180);
+    assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.equal(await greetingImage.evaluate(element => getComputedStyle(element).opacity), "0");
+    assert.equal(await pointingVideo.evaluate(element => element.paused), false);
     assert(await page.evaluate(() => {
       const raw = localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local");
       const stored = raw ? JSON.parse(raw) : {};

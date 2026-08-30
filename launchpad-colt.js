@@ -26,6 +26,7 @@
     radio: { icon: "♫", text: "Colt Radio is ready. Pick your focus music!" },
     classroom: { icon: "▤", text: "Google Classroom is opening." },
     explore: { icon: "➜", text: "Great choice—let's explore!" },
+    move: { icon: "✓", text: "This is my new spot!" },
     success: { icon: "✓", text: "Nice work!" },
     sleep: { icon: "Zz", text: "" }
   };
@@ -95,6 +96,7 @@
       idle: "idle",
       directions: "pointing",
       explore: "pointing",
+      move: "pointing",
       sleep: "sleeping"
     };
     const activePose = poseByState[state] || "";
@@ -344,7 +346,7 @@
       suppressCharacterClick = true;
       savePreferences();
       globalObject.setTimeout(() => { suppressCharacterClick = false; }, 0);
-      react("success", "This is my new spot!", 2300);
+      react("move", "This is my new spot!", 2300);
     }
     root.classList.remove("is-dragging");
     dragSession = null;
