@@ -59,7 +59,7 @@
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
-        <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" poster="${POSE_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" poster="${POSE_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -89,6 +89,28 @@
   const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
   const motionButton = controls.querySelector('[data-colt-control="motion"]');
   const sizeButton = controls.querySelector('[data-colt-control="size"]');
+  const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
+
+  function syncPoseVideos(state = currentState, restart = false) {
+    const poseByState = {
+      idle: "idle",
+      directions: "pointing",
+      explore: "pointing",
+      sleep: "sleeping"
+    };
+    const activePose = poseByState[state] || "";
+    poseVideos.forEach(video => {
+      const active = prefs.motion && video.dataset.pose === activePose;
+      if (!active) {
+        video.pause();
+        return;
+      }
+      if (restart) {
+        try { video.currentTime = 0; } catch {}
+      }
+      video.play().catch(() => {});
+    });
+  }
 
   function preferenceKey() {
     const account = session.email || session.role || "guest";
@@ -130,6 +152,7 @@
     sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
     applySavedPosition();
     if (prefs.hidden) closeControls();
+    syncPoseVideos();
   }
 
   function clampPosition(x, y) {
@@ -181,12 +204,14 @@
     prop.textContent = reaction.icon;
     speechText.textContent = typeof customText === "string" ? customText : reaction.text;
     speech.hidden = !speechText.textContent;
+    syncPoseVideos(name, true);
     if (duration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
         currentState = "idle";
         companion.dataset.state = "idle";
         prop.textContent = "";
         speech.hidden = true;
+        syncPoseVideos("idle", true);
       }, duration);
     }
   }

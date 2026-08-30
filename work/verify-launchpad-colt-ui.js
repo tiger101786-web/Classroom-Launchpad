@@ -49,8 +49,25 @@ async function run() {
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing\.webm/);
+    assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
+    await page.evaluate(() => {
+      const target = document.createElement("button");
+      target.dataset.action = "homeNavigate";
+      target.dataset.target = "home-launch";
+      document.body.append(target);
+      target.click();
+      target.remove();
+    });
+    await pointingVideo.evaluate(element => new Promise(resolve => {
+      if (element.readyState >= 3) resolve();
+      else element.addEventListener("canplay", resolve, { once: true });
+    }));
+    const pointingTime = await pointingVideo.evaluate(element => element.currentTime);
+    await page.waitForTimeout(350);
+    assert.equal(await pointingVideo.evaluate(element => element.paused), false);
+    assert((await pointingVideo.evaluate(element => element.currentTime)) > pointingTime);
     const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
     await greetingImage.evaluate(element => {
       element.style.transition = "none";
