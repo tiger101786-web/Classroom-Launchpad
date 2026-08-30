@@ -543,6 +543,7 @@ async function run() {
           after: seenPreview.querySelector(".colt-corner-topic-bell b")?.textContent.trim() || "",
           studentBellBadge: preview.querySelector(".colt-corner-topic-bell b")?.textContent.trim(),
           studentBellAlwaysVisible: Boolean(seenPreview.querySelector(".colt-corner-topic-bell")),
+          studentBellInStats: Boolean(preview.querySelector(".colt-corner-stats > .colt-corner-topic-bell")),
           teacherUnread: unreadColtCornerTopics().length,
           teacherBellBadge: teacherPreview.querySelector(".colt-corner-topic-bell b")?.textContent.trim(),
           floatingNotificationCount: document.querySelectorAll(".colt-corner-topic-notification").length
@@ -557,7 +558,7 @@ async function run() {
       }
     });
     if (coltCornerTopicAlert.before !== 1 || coltCornerTopicAlert.after !== ""
-      || coltCornerTopicAlert.studentBellBadge !== "1" || !coltCornerTopicAlert.studentBellAlwaysVisible
+      || coltCornerTopicAlert.studentBellBadge !== "1" || !coltCornerTopicAlert.studentBellAlwaysVisible || !coltCornerTopicAlert.studentBellInStats
       || coltCornerTopicAlert.teacherUnread !== 1 || coltCornerTopicAlert.teacherBellBadge !== "1"
       || coltCornerTopicAlert.floatingNotificationCount !== 0) {
       throw new Error(`Grade-aware Colt Corner topic alert is incomplete: ${JSON.stringify(coltCornerTopicAlert)}.`);
@@ -667,6 +668,22 @@ async function run() {
     });
     if (longLaunchLayout.cardHeight <= 300 || longLaunchLayout.randomHeight !== 300 || !longLaunchLayout.contentFits || !longLaunchLayout.nextSectionClearsCard) {
       throw new Error(`Long Today's Launch directions do not expand cleanly: ${JSON.stringify(longLaunchLayout)}.`);
+    }
+    const coltCornerBellLayout = await page.evaluate(() => {
+      const stats = document.querySelector(".colt-corner-stats");
+      const replies = stats?.querySelector("span:nth-of-type(2)");
+      const bell = stats?.querySelector(".colt-corner-topic-bell");
+      if (!stats || !replies || !bell) return null;
+      const replyBox = replies.getBoundingClientRect();
+      const bellBox = bell.getBoundingClientRect();
+      return {
+        sameRow: Math.abs(replyBox.top - bellBox.top) <= 2,
+        adjacent: bellBox.left >= replyBox.right,
+        heightDifference: Math.abs(replyBox.height - bellBox.height)
+      };
+    });
+    if (!coltCornerBellLayout || !coltCornerBellLayout.sameRow || !coltCornerBellLayout.adjacent || coltCornerBellLayout.heightDifference > 2) {
+      throw new Error(`Colt Corner bell does not align with the topic and reply bubbles: ${JSON.stringify(coltCornerBellLayout)}.`);
     }
     const personalizedTeacherHeader = await page.evaluate(() => ({
       rail: Boolean(document.querySelector(".home-header-rail")),
@@ -873,6 +890,7 @@ async function run() {
       teacherMessageRosterUsesFirstNamesAndConversationBells: true,
       teacherForumIdentityAutomatic: true,
       coltCornerBellIsPermanentAndGradeAware: true,
+      coltCornerBellMatchesReplyBubbleRow: true,
       dashboardNavigationComplete: true,
       googleClassroomReplacesLaunchpadAssignments: true,
       retiredGradebookAndStudentWorkNavigationRemoved: true,

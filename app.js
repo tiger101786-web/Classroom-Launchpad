@@ -2376,18 +2376,16 @@ function renderColtCornerPreview() {
   return `
     <section class="colt-corner-preview">
       <div class="colt-corner-heading">
-        <div class="colt-corner-kicker-row">
-          <span class="feature-kicker">${isTeacher() ? "Teacher View" : "Class Forum"}</span>
-          <button class="colt-corner-topic-bell" type="button" data-action="openColtCorner" aria-label="${newTopicCount ? `${newTopicCount} new Colt Corner ${newTopicCount === 1 ? "topic" : "topics"}` : "No new Colt Corner topics"}" title="${newTopicCount ? `${newTopicCount} new ${newTopicCount === 1 ? "topic" : "topics"}` : "No new topics"}">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
-            ${newTopicCount ? `<b>${newTopicCount > 99 ? "99+" : newTopicCount}</b>` : ""}
-          </button>
-        </div>
+        <span class="feature-kicker">${isTeacher() ? "Teacher View" : "Class Forum"}</span>
         <h2>${escapeHtml(cornerHeading)}</h2>
         <p>${escapeHtml(cornerDescription)}</p>
         <div class="colt-corner-stats">
           <span>${escapeHtml(`${topicCount} ${topicCount === 1 ? "Topic" : "Topics"}`)}</span>
           <span>${escapeHtml(`${replyCount} ${replyCount === 1 ? "Reply" : "Replies"}`)}</span>
+          <button class="colt-corner-topic-bell" type="button" data-action="openColtCorner" aria-label="${newTopicCount ? `${newTopicCount} new Colt Corner ${newTopicCount === 1 ? "topic" : "topics"}` : "No new Colt Corner topics"}" title="${newTopicCount ? `${newTopicCount} new ${newTopicCount === 1 ? "topic" : "topics"}` : "No new topics"}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
+            ${newTopicCount ? `<b>${newTopicCount > 99 ? "99+" : newTopicCount}</b>` : ""}
+          </button>
         </div>
         <button class="primary-btn colt-corner-open" data-action="openColtCorner">Open Colt Corner</button>
         <figure class="colt-corner-banner">
