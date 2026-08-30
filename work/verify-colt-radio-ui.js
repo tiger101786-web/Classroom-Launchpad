@@ -107,6 +107,19 @@ async function run() {
       body: JSON.stringify({ playlist: [{ name: "Test Artist - COTN Song" }] })
     }));
     await page.route("https://streaming.smartradio.ch:8510/stream", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
+    await page.route("https://radio.loficafe.net/**", route => {
+      const pathname = new URL(route.request().url()).pathname;
+      if (pathname.startsWith("/api/nowplaying/")) {
+        const slug = pathname.split("/").pop();
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ now_playing: { song: { artist: "Test Lofi Artist", title: `Test ${slug} Song` } } })
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
+    });
     await page.route("https://systrum.net:8443/**", route => {
       if (new URL(route.request().url()).pathname === "/status-json.xsl") {
         return route.fulfill({
@@ -249,31 +262,23 @@ async function run() {
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/studying");
+    assert.equal(await iframe.getAttribute("src"), null);
     assert.equal(await iframe.getAttribute("sandbox"), "allow-scripts allow-same-origin");
     assert.equal(await iframe.getAttribute("allow"), "autoplay");
-    const croppedPlayerLayout = await page.locator(".colt-radio-player").evaluate(player => {
-      const frame = player.querySelector("iframe");
-      const playerBox = player.getBoundingClientRect();
-      const frameBox = frame.getBoundingClientRect();
-      return {
-        clippedOverflow: getComputedStyle(player).overflow === "hidden",
-        extraFrameWidth: frameBox.width - playerBox.width
-      };
-    });
-    assert(croppedPlayerLayout.clippedOverflow);
-    assert(croppedPlayerLayout.extraFrameWidth >= 38, JSON.stringify(croppedPlayerLayout));
+    assert(await iframe.isHidden(), "The external Lofi Cafe interface should stay hidden.");
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/studying/radio.mp3");
+    assert(await page.locator(".colt-radio-stream-player").isVisible(), "The Colt Radio player did not appear for Lofi Cafe.");
 
-    await page.getByRole("button", { name: "Lo-Fi • Focus", exact: true }).click();
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
-    await page.getByRole("button", { name: "Lo-Fi • Sleep", exact: true }).click();
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/sleeping");
-    await page.getByRole("button", { name: "Lo-Fi • Gaming", exact: true }).click();
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/gaming");
-    await page.getByRole("button", { name: "Lo-Fi • Japan", exact: true }).click();
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/japanese-lofi");
+    await page.locator('[data-station="working"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/working/radio.mp3");
+    await page.locator('[data-station="sleeping"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/sleeping/radio.mp3");
+    await page.locator('[data-station="gaming"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/gaming/radio.mp3");
+    await page.locator('[data-station="japanese-lofi"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/japanese-lofi/radio.mp3");
     await page.evaluate(() => {
-      window.__embeddedFrameBeforeDirectStation = document.querySelector(".colt-radio-player iframe");
+      window.__consistentPlayerBeforeDirectStation = document.querySelector(".colt-radio-stream-player");
     });
 
     await page.getByRole("button", { name: "Synth • Nightdrive", exact: true }).click();
@@ -283,9 +288,9 @@ async function run() {
     assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
     assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
     assert(await page.getByRole("button", { name: "Mute Colt Radio" }).isVisible(), "The compact speaker button is missing.");
-    assert(await iframe.isHidden(), "The Lofi Cafe player remained visible after switching to Chillsynth.");
+    assert(await iframe.isHidden(), "The external player interface became visible after switching stations.");
     assert.match(await page.locator(".colt-radio-note").innerText(), /Synthwave, retrowave/);
-    assert(await page.evaluate(() => !window.__embeddedFrameBeforeDirectStation.isConnected), "The old Lofi Cafe player kept running after switching stations.");
+    assert(await page.evaluate(() => window.__consistentPlayerBeforeDirectStation === document.querySelector(".colt-radio-stream-player")), "Colt Radio replaced its player interface while switching stations.");
     await page.getByText("Test Artist - Nightride Song", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Synth • Space", exact: true }).click();
@@ -369,9 +374,9 @@ async function run() {
     assert.notEqual(await audio.getAttribute("src"), firstLofiTrack, "Lo-fi Hip Hop repeated the same track immediately.");
 
     await page.getByRole("button", { name: "Lo-Fi • Focus", exact: true }).click();
-    assert.equal(await iframe.getAttribute("src"), "https://loficafe.net/embed/working");
-    assert.equal(await audio.getAttribute("src"), null);
-    assert(await audio.isHidden(), "The direct stream remained visible after returning to Lofi Cafe.");
+    assert.equal(await iframe.getAttribute("src"), null);
+    assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/working/radio.mp3");
+    assert(await page.locator(".colt-radio-stream-player").isVisible(), "The Colt Radio interface changed after returning to Lofi Cafe.");
 
     await page.getByRole("button", { name: "Synth • Datawave", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/datawave.mp3");
@@ -432,13 +437,13 @@ async function run() {
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
       stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox"],
-      freeLofiCafeEmbed: true,
+      directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
       liveTrackTitles: true,
       compactControlsMatchOriginalStations: true,
       progressAndDurationHidden: true,
-      embeddedPlayerDestroyedOnSwitch: true,
+      consistentPlayerInterface: true,
       onePlayerAtATime: true,
       stationPreferenceRemembered: true,
       assistantCollisionPrevented: true,

@@ -5,43 +5,61 @@
     {
       id: "studying",
       label: "Lo-Fi • Study",
-      type: "embed",
-      source: "https://loficafe.net/embed/studying",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/studying/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/studying",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free study music streamed by Lofi Cafe. No account required."
     },
     {
       id: "working",
       label: "Lo-Fi • Focus",
-      type: "embed",
-      source: "https://loficafe.net/embed/working",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/working/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/working",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free work music streamed by Lofi Cafe. No account required."
     },
     {
       id: "chilling",
       label: "Lo-Fi • Chill",
-      type: "embed",
-      source: "https://loficafe.net/embed/chilling",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/chilling/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/chilling",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free chill music streamed by Lofi Cafe. No account required."
     },
     {
       id: "sleeping",
       label: "Lo-Fi • Sleep",
-      type: "embed",
-      source: "https://loficafe.net/embed/sleeping",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/sleeping/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/sleeping",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free soft lofi streamed by Lofi Cafe for quiet work and calm classroom moments. No account required."
     },
     {
       id: "gaming",
       label: "Lo-Fi • Gaming",
-      type: "embed",
-      source: "https://loficafe.net/embed/gaming",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/gaming/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/gaming",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free instrumental lofi with a little more energy, streamed by Lofi Cafe. No account required."
     },
     {
       id: "japanese-lofi",
       label: "Lo-Fi • Japan",
-      type: "embed",
-      source: "https://loficafe.net/embed/japanese-lofi",
+      type: "stream",
+      source: "https://radio.loficafe.net/listen/japanese-lofi/radio.mp3",
+      provider: "Lofi Cafe",
+      metadataEndpoint: "https://radio.loficafe.net/api/nowplaying/japanese-lofi",
+      metadataFormat: "azuraNowPlaying",
       note: "Free, ad-free Japanese-inspired instrumental lofi streamed by Lofi Cafe. No account required."
     },
     {

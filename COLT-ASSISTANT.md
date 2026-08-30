@@ -1,8 +1,8 @@
 # Colt Assistant
 
-Colt Assistant is a free, keyword-based classroom helper built directly into Classroom Launchpad. It does not use an AI service, language model, search engine, analytics service, or outside message system.
+Colt Assistant combines its original free, keyword-based classroom helper with two optional teacher-configured local AI modes: Guided AI and Classroom Image Creator. Students stay inside Classroom Launchpad and do not need an outside AI account or website.
 
-Student questions are handled in the browser. Conversations last only while the current page is open and are never placed in browser storage or the server database.
+Classroom Help questions are handled in the browser. Guided AI questions are sent through the authenticated Classroom Launchpad server only to the teacher-configured local Windows AI service. Classroom Launchpad does not place conversations, prompts, or generated images in browser storage or the server database.
 
 It can also handle basic classroom-safe conversation, including greetings, thanks, goodbyes, simple jokes, encouragement, questions about what it can do, and follow-ups such as “show me more.” Follow-up memory is temporary and is cleared with the conversation or when the page refreshes.
 
@@ -74,13 +74,27 @@ Use `\n` inside a response when you want a new line.
 
 Login, password, private-record, or unresolved technical issues should continue to direct students to Mr. Nieves.
 
+## Guided AI and image generation
+
+Guided AI is an academic coaching mode. Its protected system instructions require short grade-appropriate explanations, hints, research strategies, source evaluation, similar examples, and questions that help students take the next step. It is instructed not to complete graded work or invent sources.
+
+Classroom Image Creator sends a school-safe prompt to a teacher-configured local ComfyUI service and returns the result inside Colt Assistant. It blocks common unsafe requests and private information before contacting the image service. Each account is limited to four image requests per hour by default.
+
+The AI modes require a signed-in student or teacher account. If the private Windows services are not running, Colt Assistant keeps Classroom Help available and clearly explains that Guided AI or Image Creator is not connected.
+
+See `COLT-AI-WINDOWS-SETUP.md` for Windows installation, environment variables, deployment choices, and security requirements.
+
 ## Privacy and safety
 
 Colt Assistant:
 
 - Does not request or store names, emails, passwords, grades, or private records.
 - Hides a student message when it appears to contain sensitive information.
-- Does not send chat messages to the Classroom Launchpad server or any outside service.
+- Does not save Guided AI conversations, prompts, or generated images in the Classroom Launchpad database.
+- Sends AI requests only to the endpoints configured by the teacher or school administrator.
+- Requires authentication and verifies the request origin before accepting AI prompts.
+- Rate-limits text and image requests by account.
+- Rejects common private-information patterns before contacting a model.
 - Does not execute commands or modify website data.
 - Does not browse the internet.
 - Opens only a currently active approved website selected from Classroom Launchpad.
@@ -106,4 +120,4 @@ The build command checks the JavaScript files. The test command verifies the req
 
 ## Limitations
 
-Colt Assistant is not a general-purpose AI. It recognizes approved keywords, common phrases, website titles, categories, and minor spelling mistakes. Unexpected or unrelated questions are deliberately sent to Mr. Nieves instead of being guessed.
+Classroom Help remains a predictable local helper. Guided AI and Image Creator depend on separately installed local models and suitable Windows hardware. AI responses and images can still contain mistakes, so students must review results and Mr. Nieves should verify important facts. Automated safeguards reduce risk but do not replace teacher supervision or school technology approval.

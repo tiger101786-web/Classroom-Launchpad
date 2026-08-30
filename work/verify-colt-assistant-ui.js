@@ -22,7 +22,7 @@ async function run() {
     await page.goto(indexUrl, { waitUntil: "domcontentloaded" });
     await page.waitForSelector(".colt-assistant-launcher:visible");
 
-    assert(await page.locator("text=Website Categories").isVisible());
+    assert(await page.getByRole("heading", { name: "Website Categories", exact: true }).isVisible());
     await page.locator(".colt-assistant-launcher").click();
     assert(await page.locator(".colt-assistant-panel").isVisible());
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /approved activity/i);
