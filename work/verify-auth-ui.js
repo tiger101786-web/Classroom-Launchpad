@@ -474,15 +474,14 @@ async function run() {
           { id: "grade-5-topic", title: "Grade 5 Topic", audienceGrade: "5", grade: "Teacher", replies: [], createdAt: new Date().toISOString() }
         ];
         localStorage.removeItem(storageKey);
-        const notification = new DOMParser().parseFromString(renderColtCornerTopicNotification(), "text/html");
-        const navigation = new DOMParser().parseFromString(renderHomeNavigation(), "text/html");
+        const preview = new DOMParser().parseFromString(renderColtCornerPreview(), "text/html");
         const before = unreadColtCornerTopics().length;
         markVisibleColtCornerTopicsSeen();
         return {
           before,
           after: unreadColtCornerTopics().length,
-          notificationText: notification.body.textContent.replace(/\s+/g, " ").trim(),
-          navigationBadge: navigation.querySelector(".home-navigation-count")?.textContent.trim()
+          sectionBadge: preview.querySelector(".colt-corner-new-topic-badge")?.textContent.replace(/\s+/g, " ").trim(),
+          floatingNotificationCount: document.querySelectorAll(".colt-corner-topic-notification").length
         };
       } finally {
         authSession = originalSession;
@@ -492,8 +491,8 @@ async function run() {
       }
     });
     if (coltCornerTopicAlert.before !== 1 || coltCornerTopicAlert.after !== 0
-      || !coltCornerTopicAlert.notificationText.includes("1 new topic is waiting for your grade")
-      || coltCornerTopicAlert.navigationBadge !== "1") {
+      || coltCornerTopicAlert.sectionBadge !== "1 New Topic"
+      || coltCornerTopicAlert.floatingNotificationCount !== 0) {
       throw new Error(`Grade-aware Colt Corner topic alert is incomplete: ${JSON.stringify(coltCornerTopicAlert)}.`);
     }
     const lightHeaderColors = await page.locator(".portal-btn, .login-btn:not(.signed-in)").evaluateAll(buttons => buttons.map(button => getComputedStyle(button).backgroundColor));

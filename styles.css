@@ -202,7 +202,6 @@ body.home-navigation-open {
 }
 
 .home-navigation-button {
-  position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
@@ -217,30 +216,6 @@ body.home-navigation-open {
   text-align: left;
   font-size: .84rem;
   font-weight: 900;
-}
-
-.home-navigation-count {
-  position: absolute;
-  top: 5px;
-  right: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border: 2px solid var(--paper);
-  border-radius: 999px;
-  background: var(--blue);
-  color: #fff;
-  font-size: .68rem;
-  line-height: 1;
-}
-
-.home-navigation-button.is-active .home-navigation-count {
-  border-color: var(--blue);
-  background: #fff;
-  color: var(--blue);
 }
 
 .home-navigation-button:hover {
@@ -9230,23 +9205,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   padding: 0 7px;
 }
 
-.direct-message-notification + .colt-corner-topic-notification {
-  top: 174px;
-}
-
-.colt-corner-topic-notification {
-  background: linear-gradient(135deg, var(--blue-dark), var(--blue));
-}
-
 @media (max-width: 820px) {
   .direct-message-notification {
     left: 15px;
     right: 15px;
     top: 72px;
-  }
-
-  .direct-message-notification + .colt-corner-topic-notification {
-    top: 164px;
   }
 
   .teacher-message-grade-tabs {

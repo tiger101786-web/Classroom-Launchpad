@@ -2159,7 +2159,6 @@ function categoryTopbar() {
 }
 
 function renderHomeNavigation() {
-  const newColtCornerTopics = unreadColtCornerTopics().length;
   return `
     <button class="home-nav-mobile-trigger" type="button" data-action="toggleHomeNavigation" aria-controls="homeQuickNavigation" aria-expanded="${homeNavigationMobileOpen ? "true" : "false"}">
       <span aria-hidden="true">&#9776;</span><strong>Quick Navigation</strong>
@@ -2177,7 +2176,6 @@ function renderHomeNavigation() {
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
             <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
-            ${item.id === "home-colt-corner" && newColtCornerTopics ? `<b class="home-navigation-count" aria-label="${newColtCornerTopics} new ${newColtCornerTopics === 1 ? "topic" : "topics"}">${newColtCornerTopics > 99 ? "99+" : newColtCornerTopics}</b>` : ""}
           </button>
         `).join("")}
       </nav>
@@ -9584,18 +9582,6 @@ function renderDirectMessageNotification() {
   `;
 }
 
-function renderColtCornerTopicNotification() {
-  const count = unreadColtCornerTopics().length;
-  if (!count) return "";
-  return `
-    <button type="button" class="direct-message-notification colt-corner-topic-notification" data-action="openColtCorner" role="status" aria-live="polite">
-      <span class="direct-message-notification-icon" aria-hidden="true">&#128172;</span>
-      <span><strong>New in Colt Corner</strong><small>${count} new ${count === 1 ? "topic is" : "topics are"} waiting for your grade</small></span>
-      <b>${count > 99 ? "99+" : count}</b>
-    </button>
-  `;
-}
-
 function renderModal() {
   if (!modal) return "";
   return `
@@ -9637,7 +9623,7 @@ function render() {
   if (screen.name === "dashboard") html = renderDashboard();
   if (screen.name === "edit") html = renderEdit(screen.id);
   if (screen.name === "changePin") html = renderChangePin();
-  app.innerHTML = html + renderDirectMessageNotification() + renderColtCornerTopicNotification() + renderClassTimerBadge() + renderModal();
+  app.innerHTML = html + renderDirectMessageNotification() + renderClassTimerBadge() + renderModal();
   attachScreenHandlers();
   startClassroomPassTimers();
   observeDeferredVideos(app);
