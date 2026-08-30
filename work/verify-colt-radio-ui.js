@@ -217,6 +217,19 @@ async function run() {
     assert.equal(radioVisuals.stationIcons, 22, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-run-idle\.png/, JSON.stringify(radioVisuals));
+    const matchedPanelLayout = await page.evaluate(() => {
+      const panel = document.querySelector(".colt-radio-panel").getBoundingClientRect();
+      const header = document.querySelector(".colt-radio-header").getBoundingClientRect();
+      const station = document.querySelector(".colt-radio-station").getBoundingClientRect();
+      return {
+        panelWidth: Math.round(panel.width),
+        headerHeight: Math.round(header.height),
+        stationHeight: Math.round(station.height)
+      };
+    });
+    assert.equal(matchedPanelLayout.panelWidth, 414, JSON.stringify(matchedPanelLayout));
+    assert.equal(matchedPanelLayout.headerHeight, 112, JSON.stringify(matchedPanelLayout));
+    assert.equal(matchedPanelLayout.stationHeight, 51, JSON.stringify(matchedPanelLayout));
     assert.equal(await page.locator(".colt-radio-root a").count(), 0, "Colt Radio contains an external navigation link.");
     assert.deepEqual(
       await page.locator(".colt-radio-station").allTextContents(),
