@@ -1375,6 +1375,7 @@ let selectedMessageStudentEmail = "";
 let directMessageStatus = "";
 let teacherMessageSearch = "";
 let teacherMessageGrade = "all";
+let teacherMessageHistoryFilter = "all";
 let activationCodeResults = [];
 let assignments = [];
 let submissions = [];
@@ -8433,17 +8434,18 @@ function renderStudentMessages() {
 
 function renderDashboardMessages() {
   const query = teacherMessageSearch.trim().toLowerCase();
+  const hasConversation = student => directMessageConversation(student.email).length > 0;
+  const messagedCount = approvedStudents.filter(hasConversation).length;
   const gradeCounts = Object.fromEntries(["4", "5", "6", "7"].map(grade => [
     grade,
     approvedStudents.filter(student => studentGradeNumber(student) === grade).length
   ]));
   const students = approvedStudents
     .filter(student => teacherMessageGrade === "all" || studentGradeNumber(student) === teacherMessageGrade)
+    .filter(student => teacherMessageHistoryFilter !== "messaged" || hasConversation(student))
     .filter(student => !query || [student.name, student.email].some(value => String(value || "").toLowerCase().includes(query)))
-    .sort((a, b) => (
-      unreadDirectMessageCount("teacher", b.email) - unreadDirectMessageCount("teacher", a.email)
-      || String(a.name || a.email).localeCompare(String(b.name || b.email))
-    ));
+    .map(student => ({ ...student, messageDisplayName: formatStudentFirstLast(student.name || student.email) }))
+    .sort((a, b) => a.messageDisplayName.localeCompare(b.messageDisplayName, undefined, { sensitivity: "base" }));
   if (selectedMessageStudentEmail && !students.some(student => student.email === selectedMessageStudentEmail)) {
     selectedMessageStudentEmail = "";
   }
@@ -8459,6 +8461,10 @@ function renderDashboardMessages() {
           <span class="sr-only">Search students</span>
           <input id="teacherMessageSearch" type="search" value="${escapeHtml(teacherMessageSearch)}" placeholder="Search students…" autocomplete="off">
         </label>
+        <div class="teacher-message-history-filter" role="group" aria-label="Filter by conversation history">
+          <button type="button" class="${teacherMessageHistoryFilter === "all" ? "is-active" : ""}" data-action="messageHistoryFilter" data-filter="all">All Students <span>${approvedStudents.length}</span></button>
+          <button type="button" class="${teacherMessageHistoryFilter === "messaged" ? "is-active" : ""}" data-action="messageHistoryFilter" data-filter="messaged">Messaged <span>${messagedCount}</span></button>
+        </div>
         <nav class="teacher-message-grade-tabs" aria-label="Filter messages by grade">
           <button type="button" class="${teacherMessageGrade === "all" ? "is-active" : ""}" data-action="messageGrade" data-grade="all">All <span>${approvedStudents.length}</span></button>
           ${["4", "5", "6", "7"].map(grade => `
@@ -8470,11 +8476,17 @@ function renderDashboardMessages() {
         <div class="teacher-message-student-list">
           ${students.length ? students.map(student => {
             const unread = unreadDirectMessageCount("teacher", student.email);
+            const conversationStarted = hasConversation(student);
             return `
               <button type="button" class="teacher-message-student ${student.email === selectedMessageStudentEmail ? "is-active" : ""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}" aria-pressed="${student.email === selectedMessageStudentEmail}" title="${student.email === selectedMessageStudentEmail ? "Click again to close this conversation" : "Open private conversation"}">
-                <span>${escapeHtml((student.name || "S").charAt(0))}</span>
-                <strong>${escapeHtml(student.name || student.email)}<small>Grade ${escapeHtml(student.grade || "—")}</small></strong>
-                ${unread ? `<b title="${unread} unread ${unread === 1 ? "response" : "responses"}">${unread}</b>` : ""}
+                <span>${escapeHtml(forumInitials(student.messageDisplayName))}</span>
+                <strong>${escapeHtml(student.messageDisplayName)}<small>Grade ${escapeHtml(student.grade || "—")}</small></strong>
+                ${conversationStarted ? `
+                  <span class="teacher-message-conversation-bell ${unread ? "has-unread" : ""}" title="${unread ? `${unread} unread ${unread === 1 ? "response" : "responses"}` : "Conversation started"}" aria-label="${unread ? `${unread} unread ${unread === 1 ? "response" : "responses"}` : "Conversation started"}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
+                    ${unread ? `<b>${unread > 99 ? "99+" : unread}</b>` : ""}
+                  </span>
+                ` : ""}
               </button>
             `;
           }).join("") : '<div class="empty-card"><p>No students match this search and grade.</p></div>'}
@@ -8485,12 +8497,12 @@ function renderDashboardMessages() {
           <div class="teacher-message-heading">
             <div>
               <span class="feature-kicker">Direct Message</span>
-              <h3>${escapeHtml(selected.name || selected.email)}</h3>
+              <h3>${escapeHtml(selected.messageDisplayName)}</h3>
               <p>${escapeHtml(selected.email)} · Grade ${escapeHtml(selected.grade || "—")}</p>
             </div>
-            <button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent" aria-label="Close conversation with ${escapeHtml(selected.name || selected.email)}">Close Conversation</button>
+            <button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent" aria-label="Close conversation with ${escapeHtml(selected.messageDisplayName)}">Close Conversation</button>
           </div>
-          ${renderDirectMessageThread(selected.email, selected.name || selected.email)}
+          ${renderDirectMessageThread(selected.email, selected.messageDisplayName)}
         ` : `
           <div class="teacher-message-empty">
             <span class="feature-kicker">Direct Message</span>
@@ -10987,6 +10999,11 @@ app.addEventListener("click", async event => {
     directMessageStatus = "";
     render();
   }
+  if (action === "messageHistoryFilter") {
+    teacherMessageHistoryFilter = target.dataset.filter === "messaged" ? "messaged" : "all";
+    directMessageStatus = "";
+    render();
+  }
   if (action === "clearMessageStudent") {
     selectedMessageStudentEmail = "";
     directMessageStatus = "";
@@ -11084,6 +11101,7 @@ app.addEventListener("click", async event => {
     selectedMessageStudentEmail = "";
     teacherMessageSearch = "";
     teacherMessageGrade = "all";
+    teacherMessageHistoryFilter = "all";
     directMessageStatus = "";
     mutedStudents = [];
     websiteRequests = [];

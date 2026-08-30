@@ -461,6 +461,57 @@ async function run() {
       || studentHeaderFixture.oldButtons !== 0) {
       throw new Error(`Student personalized header is incomplete: ${JSON.stringify(studentHeaderFixture)}.`);
     }
+    const teacherMessageRosterFixture = await page.evaluate(() => {
+      const originalSession = authSession;
+      const originalStudents = approvedStudents;
+      const originalMessages = directMessages;
+      const originalGrade = teacherMessageGrade;
+      const originalHistoryFilter = teacherMessageHistoryFilter;
+      const originalSearch = teacherMessageSearch;
+      const originalSelected = selectedMessageStudentEmail;
+      try {
+        authSession = { authenticated: true, role: "teacher", name: "Mr. Nieves", email: "", grade: "Teacher", avatarUrl: "" };
+        approvedStudents = [
+          { email: "andy.le@scscolts.org", name: "Le, Andy", grade: "6", registered: true },
+          { email: "emily.leite@scscolts.org", name: "Leite, Emily", grade: "6", registered: true },
+          { email: "lucas.song@scscolts.org", name: "Lucas Song", grade: "6", registered: true }
+        ];
+        directMessages = [
+          { id: "sent-emily", studentEmail: "emily.leite@scscolts.org", studentName: "Leite, Emily", grade: "6", senderRole: "teacher", message: "Hello", createdAt: new Date().toISOString(), readByTeacher: true, readByStudent: false },
+          { id: "reply-lucas", studentEmail: "lucas.song@scscolts.org", studentName: "Lucas Song", grade: "6", senderRole: "student", message: "Reply", createdAt: new Date().toISOString(), readByTeacher: false, readByStudent: true }
+        ];
+        teacherMessageGrade = "6";
+        teacherMessageHistoryFilter = "all";
+        teacherMessageSearch = "";
+        selectedMessageStudentEmail = "";
+        const all = new DOMParser().parseFromString(renderDashboardMessages(), "text/html");
+        const rows = [...all.querySelectorAll(".teacher-message-student")];
+        teacherMessageHistoryFilter = "messaged";
+        const messaged = new DOMParser().parseFromString(renderDashboardMessages(), "text/html");
+        return {
+          names: rows.map(row => row.querySelector("strong")?.childNodes[0]?.textContent.trim()),
+          noConversationBell: Boolean(rows[0]?.querySelector(".teacher-message-conversation-bell")),
+          existingConversationBell: Boolean(rows[1]?.querySelector(".teacher-message-conversation-bell:not(.has-unread)")),
+          unreadBellCount: rows[2]?.querySelector(".teacher-message-conversation-bell.has-unread b")?.textContent.trim(),
+          messagedCount: messaged.querySelectorAll(".teacher-message-student").length,
+          filterLabels: [...all.querySelectorAll(".teacher-message-history-filter button")].map(button => button.textContent.replace(/\s+/g, " ").trim())
+        };
+      } finally {
+        authSession = originalSession;
+        approvedStudents = originalStudents;
+        directMessages = originalMessages;
+        teacherMessageGrade = originalGrade;
+        teacherMessageHistoryFilter = originalHistoryFilter;
+        teacherMessageSearch = originalSearch;
+        selectedMessageStudentEmail = originalSelected;
+      }
+    });
+    if (teacherMessageRosterFixture.names.join("|") !== "Andy, Le|Emily, Leite|Lucas, Song"
+      || teacherMessageRosterFixture.noConversationBell || !teacherMessageRosterFixture.existingConversationBell
+      || teacherMessageRosterFixture.unreadBellCount !== "1" || teacherMessageRosterFixture.messagedCount !== 2
+      || !teacherMessageRosterFixture.filterLabels.some(label => label.startsWith("Messaged"))) {
+      throw new Error(`Teacher message roster indicators are incomplete: ${JSON.stringify(teacherMessageRosterFixture)}.`);
+    }
     const coltCornerTopicAlert = await page.evaluate(() => {
       const originalSession = authSession;
       const originalThreads = classThreads;
@@ -819,6 +870,7 @@ async function run() {
       privateRosterNamesDisplay: true,
       studentManagerSearchWorks: true,
       registeredStudentDetailsShowOnlyActivatedAccounts: true,
+      teacherMessageRosterUsesFirstNamesAndConversationBells: true,
       teacherForumIdentityAutomatic: true,
       coltCornerBellIsPermanentAndGradeAware: true,
       dashboardNavigationComplete: true,
