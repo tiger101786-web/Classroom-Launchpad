@@ -86,6 +86,10 @@ const defaultDb = {
     maxActive: 1,
     updatedAt: ""
   },
+  launchpadColt: {
+    enabled: true,
+    updatedAt: ""
+  },
   leaderboards: [],
   approvedStudents: [],
   teacherPin: null,
@@ -978,6 +982,12 @@ function writeDb(db) {
     submissions: normalizeSubmissions(db.submissions),
     classroomPasses: normalizeClassroomPasses(db.classroomPasses),
     classroomPassConfig: normalizeClassroomPassConfig(db.classroomPassConfig),
+    launchpadColt: db.launchpadColt && typeof db.launchpadColt === "object"
+      ? {
+          enabled: db.launchpadColt.enabled !== false,
+          updatedAt: typeof db.launchpadColt.updatedAt === "string" ? db.launchpadColt.updatedAt : ""
+        }
+      : { ...defaultDb.launchpadColt },
     leaderboards: normalizeLeaderboards(db.leaderboards),
     approvedStudents: normalizeApprovedStudents(db.approvedStudents),
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
@@ -1202,6 +1212,9 @@ function publicState(db, session) {
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
     randomActivity: db.randomActivity,
+    launchpadColt: db.launchpadColt && typeof db.launchpadColt === "object"
+      ? { enabled: db.launchpadColt.enabled !== false, updatedAt: String(db.launchpadColt.updatedAt || "") }
+      : { ...defaultDb.launchpadColt },
     auth: publicSession(session, db),
     coltCornerLocked: !signedIn,
     postingBlocked: session && session.role === "student" ? isStudentMuted(db, session) : false
@@ -2674,6 +2687,30 @@ async function handleApi(req, res, pathname) {
   }
   if (req.method === "GET" && pathname === "/api/state") {
     sendJson(res, 200, publicState(readDb(), session));
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/launchpad-colt/config") {
+    const config = readDb().launchpadColt;
+    sendJson(res, 200, {
+      enabled: !config || config.enabled !== false,
+      updatedAt: config && typeof config.updatedAt === "string" ? config.updatedAt : ""
+    });
+    return true;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/launchpad-colt/config") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (!requireRole(req, res, ["teacher"])) return true;
+    try {
+      const body = await readBody(req);
+      const db = readDb();
+      db.launchpadColt = { enabled: body.enabled !== false, updatedAt: new Date().toISOString() };
+      writeDb(db);
+      sendJson(res, 200, { ok: true, launchpadColt: db.launchpadColt });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return true;
   }
 

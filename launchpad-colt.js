@@ -1,0 +1,320 @@
+(function initializeLaunchpadColt(globalObject) {
+  "use strict";
+
+  const documentObject = globalObject.document;
+  const root = documentObject.getElementById("launchpadColtRoot");
+  if (!root) return;
+
+  const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
+  const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
+  const REACTIONS = {
+    welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
+    directions: { icon: "☝", text: "Today's directions are ready." },
+    message: { icon: "✉", text: "You have a new private message!" },
+    corner: { icon: "💬", text: "There's something new in Colt Corner." },
+    radio: { icon: "♫", text: "Colt Radio is ready. Pick your focus music!" },
+    classroom: { icon: "▤", text: "Google Classroom is opening." },
+    explore: { icon: "➜", text: "Great choice—let's explore!" },
+    success: { icon: "✓", text: "Nice work!" },
+    sleep: { icon: "Zz", text: "" }
+  };
+
+  let session = { authenticated: false, role: "guest", email: "" };
+  let screen = documentObject.body.dataset.screen || "home";
+  let globallyEnabled = true;
+  let reactionTimer = 0;
+  let sleepTimer = 0;
+  let panelObserver = null;
+  let currentState = "idle";
+  let controlsOpen = false;
+  let prefs = { minimized: false, motion: true, hidden: false };
+
+  root.innerHTML = `
+    <aside class="launchpad-colt-companion" data-state="idle" aria-label="Launchpad Colt companion">
+      <div class="launchpad-colt-speech" role="status" aria-live="polite" hidden>
+        <strong>Launchpad Colt</strong>
+        <span></span>
+      </div>
+      <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls" aria-expanded="false">
+        <span class="launchpad-colt-prop" aria-hidden="true"></span>
+        <img src="${ASSET_URL}" alt="Launchpad Colt, the Classroom Launchpad horse companion">
+        <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
+      </button>
+      <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
+        <button type="button" data-colt-control="minimize">Minimize</button>
+        <button type="button" data-colt-control="motion">Pause motion</button>
+        <button type="button" data-colt-control="hide">Hide Colt</button>
+      </div>
+    </aside>
+    <button class="launchpad-colt-restore" type="button" aria-label="Show Launchpad Colt" title="Show Launchpad Colt" hidden>
+      <img src="${ASSET_URL}" alt="">
+    </button>
+  `;
+
+  const companion = root.querySelector(".launchpad-colt-companion");
+  const characterButton = root.querySelector(".launchpad-colt-character");
+  const speech = root.querySelector(".launchpad-colt-speech");
+  const speechText = speech.querySelector("span");
+  const prop = root.querySelector(".launchpad-colt-prop");
+  const controls = root.querySelector(".launchpad-colt-controls");
+  const restoreButton = root.querySelector(".launchpad-colt-restore");
+  const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
+  const motionButton = controls.querySelector('[data-colt-control="motion"]');
+
+  function preferenceKey() {
+    const account = session.email || session.role || "guest";
+    return `classroomLaunchpadColtPrefsV1:${account}`;
+  }
+
+  function loadPreferences() {
+    try {
+      const stored = JSON.parse(globalObject.localStorage.getItem(preferenceKey()) || "{}");
+      prefs = {
+        minimized: Boolean(stored.minimized),
+        motion: stored.motion !== false,
+        hidden: Boolean(stored.hidden)
+      };
+    } catch {
+      prefs = { minimized: false, motion: true, hidden: false };
+    }
+    applyPreferences();
+  }
+
+  function savePreferences() {
+    try {
+      globalObject.localStorage.setItem(preferenceKey(), JSON.stringify(prefs));
+    } catch {}
+  }
+
+  function applyPreferences() {
+    root.classList.toggle("is-minimized", prefs.minimized);
+    root.classList.toggle("is-motion-paused", !prefs.motion);
+    companion.hidden = prefs.hidden;
+    restoreButton.hidden = !prefs.hidden;
+    minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
+    motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
+    if (prefs.hidden) closeControls();
+  }
+
+  function closeControls() {
+    controlsOpen = false;
+    controls.hidden = true;
+    characterButton.setAttribute("aria-expanded", "false");
+  }
+
+  function shouldShow() {
+    return globallyEnabled && session.authenticated && !HIDDEN_SCREENS.has(screen);
+  }
+
+  function syncVisibility() {
+    root.hidden = !shouldShow();
+    if (root.hidden) closeControls();
+    syncPanelCollision();
+  }
+
+  function react(name, customText, duration = 4200) {
+    if (!shouldShow() || prefs.hidden || root.classList.contains("is-panel-open")) return;
+    const reaction = REACTIONS[name] || REACTIONS.success;
+    globalObject.clearTimeout(reactionTimer);
+    currentState = name;
+    companion.dataset.state = name;
+    prop.textContent = reaction.icon;
+    speechText.textContent = typeof customText === "string" ? customText : reaction.text;
+    speech.hidden = !speechText.textContent;
+    if (duration > 0) {
+      reactionTimer = globalObject.setTimeout(() => {
+        currentState = "idle";
+        companion.dataset.state = "idle";
+        prop.textContent = "";
+        speech.hidden = true;
+      }, duration);
+    }
+  }
+
+  function resetSleepTimer() {
+    globalObject.clearTimeout(sleepTimer);
+    if (currentState === "sleep") react("welcome", "I'm awake—what are we doing next?", 2600);
+    sleepTimer = globalObject.setTimeout(() => {
+      if (!controlsOpen) react("sleep", "", 0);
+    }, 60000);
+  }
+
+  function openPanels() {
+    return [
+      documentObject.querySelector(".colt-radio-panel"),
+      documentObject.querySelector(".colt-assistant-panel")
+    ].filter(panel => panel && !panel.hidden);
+  }
+
+  function syncPanelCollision() {
+    const blocked = openPanels().length > 0;
+    root.classList.toggle("is-panel-open", blocked);
+    if (blocked) {
+      speech.hidden = true;
+      closeControls();
+    }
+  }
+
+  function watchPanels() {
+    if (panelObserver) panelObserver.disconnect();
+    panelObserver = new MutationObserver(syncPanelCollision);
+    [documentObject.querySelector(".colt-radio-panel"), documentObject.querySelector(".colt-assistant-panel")]
+      .filter(Boolean)
+      .forEach(panel => panelObserver.observe(panel, { attributes: true, attributeFilter: ["hidden"] }));
+    syncPanelCollision();
+  }
+
+  function noticeNewActivity() {
+    const messageBadge = documentObject.querySelector(".header-message-badge, .direct-message-notification");
+    const cornerBadge = documentObject.querySelector(".colt-corner-topic-bell b");
+    if (messageBadge) {
+      const marker = `launchpadColtMessageNotice:${session.email}:${messageBadge.textContent.trim()}`;
+      if (!globalObject.sessionStorage.getItem(marker)) {
+        globalObject.sessionStorage.setItem(marker, "1");
+        react("message");
+      }
+    } else if (cornerBadge) {
+      const marker = `launchpadColtCornerNotice:${session.email}:${cornerBadge.textContent.trim()}`;
+      if (!globalObject.sessionStorage.getItem(marker)) {
+        globalObject.sessionStorage.setItem(marker, "1");
+        react("corner");
+      }
+    }
+  }
+
+  function injectTeacherSetting() {
+    const grid = documentObject.querySelector(".dashboard-settings-grid");
+    if (!grid || session.role !== "teacher" || grid.querySelector(".launchpad-colt-setting-card")) return;
+    const card = documentObject.createElement("section");
+    card.className = "form-card dashboard-setting-card launchpad-colt-setting-card";
+    card.innerHTML = `
+      <span class="feature-kicker">Student Companion</span>
+      <h3>Launchpad Colt</h3>
+      <p class="instruction">Show or hide the privacy-safe reactive colt for all signed-in students.</p>
+      <label class="launchpad-colt-setting-toggle">
+        <input type="checkbox" ${globallyEnabled ? "checked" : ""}>
+        <span>${globallyEnabled ? "Enabled for students" : "Hidden from students"}</span>
+      </label>
+      <small class="launchpad-colt-setting-status" aria-live="polite"></small>
+    `;
+    const checkbox = card.querySelector("input");
+    const label = card.querySelector(".launchpad-colt-setting-toggle span");
+    const status = card.querySelector(".launchpad-colt-setting-status");
+    checkbox.addEventListener("change", async () => {
+      checkbox.disabled = true;
+      status.textContent = "Saving…";
+      try {
+        const response = await fetch("/api/launchpad-colt/config", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: checkbox.checked })
+        });
+        if (!response.ok) throw new Error("Could not save the setting.");
+        globallyEnabled = checkbox.checked;
+        label.textContent = globallyEnabled ? "Enabled for students" : "Hidden from students";
+        status.textContent = "Saved";
+        syncVisibility();
+      } catch (error) {
+        checkbox.checked = globallyEnabled;
+        status.textContent = error.message;
+      } finally {
+        checkbox.disabled = false;
+      }
+    });
+    grid.append(card);
+  }
+
+  characterButton.addEventListener("click", () => {
+    if (prefs.minimized) {
+      prefs.minimized = false;
+      savePreferences();
+      applyPreferences();
+      react("welcome", "Launchpad Colt is back!", 2200);
+      return;
+    }
+    controlsOpen = !controlsOpen;
+    controls.hidden = !controlsOpen;
+    characterButton.setAttribute("aria-expanded", String(controlsOpen));
+    speech.hidden = true;
+  });
+
+  controls.addEventListener("click", event => {
+    const button = event.target.closest("[data-colt-control]");
+    if (!button) return;
+    const action = button.dataset.coltControl;
+    if (action === "minimize") prefs.minimized = !prefs.minimized;
+    if (action === "motion") prefs.motion = !prefs.motion;
+    if (action === "hide") prefs.hidden = true;
+    savePreferences();
+    applyPreferences();
+  });
+
+  restoreButton.addEventListener("click", () => {
+    prefs.hidden = false;
+    prefs.minimized = false;
+    savePreferences();
+    applyPreferences();
+    react("welcome", "Welcome back!", 2400);
+  });
+
+  documentObject.addEventListener("click", event => {
+    const target = event.target.closest("[data-action], .colt-radio-play");
+    if (!target) return;
+    const action = target.dataset.action || "";
+    if (target.matches(".colt-radio-play")) react("radio");
+    else if (action === "openMessages") react("message", "Opening your private messages.");
+    else if (action === "openColtCorner") react("corner", "Let's check Colt Corner.");
+    else if (action === "openGoogleApp" && /classroom\.google\.com/i.test(target.dataset.url || "")) react("classroom");
+    else if (action === "randomActivity") react("explore", "Let's find something new!");
+    else if (action === "category") react("explore", "Choose a teacher-approved website.");
+    else if (action === "homeNavigate" && target.dataset.target === "home-launch") react("directions");
+  }, true);
+
+  ["pointerdown", "keydown", "scroll"].forEach(eventName => {
+    globalObject.addEventListener(eventName, resetSleepTimer, { passive: true });
+  });
+  globalObject.addEventListener("resize", () => root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120));
+  globalObject.addEventListener("colt-radio-opened", syncPanelCollision);
+  globalObject.addEventListener("colt-assistant-opened", syncPanelCollision);
+  globalObject.addEventListener("classroom-launchpad-rendered", event => {
+    screen = event.detail && event.detail.screen ? event.detail.screen : (documentObject.body.dataset.screen || screen);
+    const nextAuth = event.detail && event.detail.auth ? event.detail.auth : session;
+    const accountChanged = (nextAuth.email || nextAuth.role) !== (session.email || session.role);
+    session = { ...session, ...nextAuth };
+    if (accountChanged) loadPreferences();
+    syncVisibility();
+    injectTeacherSetting();
+    globalObject.setTimeout(() => {
+      watchPanels();
+      noticeNewActivity();
+    }, 0);
+  });
+
+  async function start() {
+    try {
+      const response = await fetch("/api/state", { headers: { Accept: "application/json" } });
+      if (response.ok) {
+        const state = await response.json();
+        session = { ...session, ...(state.auth || {}) };
+        globallyEnabled = !state.launchpadColt || state.launchpadColt.enabled !== false;
+      }
+    } catch {}
+    screen = documentObject.body.dataset.screen || screen;
+    loadPreferences();
+    root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120);
+    syncVisibility();
+    watchPanels();
+    injectTeacherSetting();
+    resetSleepTimer();
+    if (shouldShow()) {
+      const marker = `launchpadColtWelcome:${session.email || session.role}`;
+      if (!globalObject.sessionStorage.getItem(marker)) {
+        globalObject.sessionStorage.setItem(marker, "1");
+        globalObject.setTimeout(() => react("welcome"), 550);
+      }
+      noticeNewActivity();
+    }
+  }
+
+  start();
+})(window);

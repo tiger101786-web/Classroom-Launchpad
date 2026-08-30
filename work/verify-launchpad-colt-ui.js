@@ -1,0 +1,68 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const path = require("node:path");
+const { pathToFileURL } = require("node:url");
+const { chromium } = require("playwright");
+
+async function authenticate(page, role = "student") {
+  await page.evaluate(activeRole => {
+    window.dispatchEvent(new CustomEvent("classroom-launchpad-rendered", {
+      detail: {
+        screen: "home",
+        auth: {
+          authenticated: true,
+          role: activeRole,
+          email: activeRole === "teacher" ? "teacher@local" : "student@local"
+        }
+      }
+    }));
+  }, role);
+}
+
+async function run() {
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+  });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const indexUrl = pathToFileURL(path.resolve(__dirname, "..", "index.html")).href;
+    await page.goto(indexUrl, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".launchpad-colt-character", { state: "attached" });
+    await page.waitForSelector(".colt-radio-launcher:visible");
+    await authenticate(page);
+    await page.waitForSelector(".launchpad-colt-character:visible");
+
+    const image = page.locator(".launchpad-colt-character img");
+    assert.match(await image.getAttribute("src"), /launchpad-colt-companion\.png/);
+    assert.equal(await image.getAttribute("alt"), "Launchpad Colt, the Classroom Launchpad horse companion");
+
+    await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Pause motion", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Minimize", exact: true }).click();
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
+
+    await page.locator(".launchpad-colt-character").click();
+    assert(!(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized"))));
+
+    await page.locator(".colt-radio-launcher").click();
+    await page.waitForSelector(".colt-radio-panel:visible");
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-panel-open")));
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-auto-compact")));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+  } finally {
+    await browser.close();
+  }
+  console.log("Launchpad Colt UI verification passed.");
+}
+
+run().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
