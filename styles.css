@@ -6750,7 +6750,7 @@ body[data-theme="night"] .colt-radio-station.is-active {
 
 .colt-radio-now-playing {
   position: relative;
-  grid-template-columns: 94px minmax(0, 1fr) 27px 48px;
+  grid-template-columns: 94px minmax(0, 1fr) 48px;
   gap: 10px;
   min-height: 129px;
   padding: 10px;
@@ -6867,11 +6867,66 @@ body[data-theme="night"] .colt-radio-station.is-active {
 }
 
 .colt-radio-mute {
-  width: 27px;
-  height: 32px;
-  align-self: start;
-  margin-top: 9px;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
   font-size: 0.78rem;
+}
+
+.colt-radio-volume {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+}
+
+.colt-radio-volume-slider {
+  --radio-volume: 65%;
+  width: 100%;
+  min-width: 58px;
+  height: 25px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.colt-radio-volume-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #ef2b43 0 var(--radio-volume), #3c2d31 var(--radio-volume) 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 5px rgba(239, 43, 67, 0.2);
+}
+
+.colt-radio-volume-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #ef2b43 0 var(--radio-volume), #3c2d31 var(--radio-volume) 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 0 5px rgba(239, 43, 67, 0.2);
+}
+
+.colt-radio-volume-slider::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  border: 2px solid #ff6a7d;
+  border-radius: 50%;
+  appearance: none;
+  background: #c5112d;
+  box-shadow: 0 0 7px rgba(255, 39, 70, 0.78);
+}
+
+.colt-radio-volume-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ff6a7d;
+  border-radius: 50%;
+  background: #c5112d;
+  box-shadow: 0 0 7px rgba(255, 39, 70, 0.78);
 }
 
 .colt-radio-play {
@@ -6987,7 +7042,7 @@ body[data-theme="night"] .colt-radio-station.is-active {
   }
 
   .colt-radio-now-playing {
-    grid-template-columns: 78px minmax(0, 1fr) 24px 42px;
+    grid-template-columns: 78px minmax(0, 1fr) 42px;
     gap: 7px;
     padding: 8px;
   }
@@ -7682,7 +7737,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .colt-radio-icon-btn:focus-visible,
 .colt-radio-station:focus-visible,
 .colt-radio-filter:focus-visible,
-.colt-radio-favorite:focus-visible {
+.colt-radio-favorite:focus-visible,
+.colt-radio-volume-slider:focus-visible {
   outline: 3px solid #f9a8c0;
   outline-offset: 3px;
 }

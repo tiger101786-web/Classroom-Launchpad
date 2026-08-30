@@ -228,6 +228,7 @@
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
+  const preferredVolumeKey = "classroomLaunchpadColtRadioVolumeV1";
   const guestFavoritesKey = "classroomLaunchpadColtRadioFavoritesGuestV1";
   const hiddenScreens = new Set(["coltRun", "pin", "login", "account", "dashboard", "edit", "changePin"]);
 
@@ -380,14 +381,25 @@
     const liveBadge = buildElement("span", "colt-radio-live-badge", "● LIVE");
     const equalizer = buildElement("span", "colt-radio-equalizer");
     for (let index = 0; index < 24; index += 1) equalizer.append(buildElement("i"));
-    streamDetails.append(nowPlayingLabel, nowPlayingTitle, liveBadge, equalizer);
+    const volumeControl = buildElement("span", "colt-radio-volume");
     const muteStream = buildElement("button", "colt-radio-stream-control colt-radio-mute", "\ud83d\udd0a");
     muteStream.type = "button";
     muteStream.setAttribute("aria-label", "Mute Colt Radio");
+    const volumeSlider = document.createElement("input");
+    volumeSlider.className = "colt-radio-volume-slider";
+    volumeSlider.type = "range";
+    volumeSlider.min = "0";
+    volumeSlider.max = "100";
+    volumeSlider.step = "1";
+    volumeSlider.value = "65";
+    volumeSlider.setAttribute("aria-label", "Colt Radio volume");
+    volumeSlider.title = "Colt Radio volume: 65%";
+    volumeControl.append(muteStream, volumeSlider);
+    streamDetails.append(nowPlayingLabel, nowPlayingTitle, liveBadge, equalizer, volumeControl);
     const toggleStream = buildElement("button", "colt-radio-stream-control colt-radio-play", "\u25b6");
     toggleStream.type = "button";
     toggleStream.setAttribute("aria-label", "Play Colt Radio");
-    nowPlaying.append(streamArtwork, streamDetails, muteStream, toggleStream);
+    nowPlaying.append(streamArtwork, streamDetails, toggleStream);
     function createPlayerFrame() {
       const frame = document.createElement("iframe");
       frame.title = "Lofi Cafe radio player";
@@ -422,6 +434,35 @@
     let favoritesOnly = false;
     let favoritesAccountKey = "";
     let favoritesRequestVersion = 0;
+
+    function preferredVolume() {
+      try {
+        const storedVolume = localStorage.getItem(preferredVolumeKey);
+        if (storedVolume === null || storedVolume === "") return 65;
+        const savedVolume = Number(storedVolume);
+        return Number.isFinite(savedVolume) && savedVolume >= 0 && savedVolume <= 100 ? savedVolume : 65;
+      } catch (error) {
+        return 65;
+      }
+    }
+
+    function setVolume(value, { remember = true } = {}) {
+      const volume = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+      audio.volume = volume / 100;
+      audio.muted = volume === 0;
+      volumeSlider.value = String(volume);
+      volumeSlider.style.setProperty("--radio-volume", `${volume}%`);
+      volumeSlider.title = `Colt Radio volume: ${volume}%`;
+      muteStream.textContent = volume === 0 ? "\ud83d\udd07" : volume < 45 ? "\ud83d\udd09" : "\ud83d\udd0a";
+      muteStream.setAttribute("aria-label", audio.muted ? "Unmute Colt Radio" : "Mute Colt Radio");
+      if (remember) {
+        try {
+          localStorage.setItem(preferredVolumeKey, String(volume));
+        } catch (error) {}
+      }
+    }
+
+    setVolume(preferredVolume(), { remember: false });
 
     function preferredStation() {
       try {
@@ -762,10 +803,18 @@
       if (audio.paused) audio.play().catch(() => updatePlaybackButton());
       else audio.pause();
     });
+    volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));
     muteStream.addEventListener("click", () => {
-      audio.muted = !audio.muted;
-      muteStream.textContent = audio.muted ? "\ud83d\udd07" : "\ud83d\udd0a";
-      muteStream.setAttribute("aria-label", audio.muted ? "Unmute Colt Radio" : "Mute Colt Radio");
+      const selectedVolume = Number(volumeSlider.value);
+      if (audio.muted && selectedVolume > 0) {
+        setVolume(selectedVolume, { remember: false });
+      } else if (audio.muted) {
+        setVolume(65);
+      } else {
+        audio.muted = true;
+        muteStream.textContent = "\ud83d\udd07";
+        muteStream.setAttribute("aria-label", "Unmute Colt Radio");
+      }
     });
     panel.addEventListener("keydown", event => {
       if (event.key === "Escape") {

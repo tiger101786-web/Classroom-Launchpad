@@ -288,6 +288,17 @@ async function run() {
     assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
     assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
     assert(await page.getByRole("button", { name: "Mute Colt Radio" }).isVisible(), "The compact speaker button is missing.");
+    const volumeSlider = page.getByRole("slider", { name: "Colt Radio volume" });
+    assert(await volumeSlider.isVisible(), "The Colt Radio volume slider is missing.");
+    assert.equal(await volumeSlider.inputValue(), "65");
+    assert.equal(await audio.evaluate(element => element.volume), 0.65);
+    await volumeSlider.fill("35");
+    assert.equal(await audio.evaluate(element => element.volume), 0.35);
+    assert.equal(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioVolumeV1")), "35");
+    await page.getByRole("button", { name: "Mute Colt Radio" }).click();
+    assert.equal(await audio.evaluate(element => element.muted), true);
+    await page.getByRole("button", { name: "Unmute Colt Radio" }).click();
+    assert.equal(await audio.evaluate(element => element.muted), false);
     assert(await iframe.isHidden(), "The external player interface became visible after switching stations.");
     assert.match(await page.locator(".colt-radio-note").innerText(), /Synthwave, retrowave/);
     assert(await page.evaluate(() => window.__consistentPlayerBeforeDirectStation === document.querySelector(".colt-radio-stream-player")), "Colt Radio replaced its player interface while switching stations.");
@@ -295,6 +306,7 @@ async function run() {
 
     await page.getByRole("button", { name: "Synth • Space", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/spacesynth.mp3");
+    assert.equal(await audio.evaluate(element => element.volume), 0.35, "Volume did not remain set after changing stations.");
     await page.getByText("Test Artist - Spacesynth Song", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Electronic • Lounge", exact: true }).click();
@@ -442,6 +454,8 @@ async function run() {
       lofiFmAutomaticPlaylist: true,
       liveTrackTitles: true,
       compactControlsMatchOriginalStations: true,
+      volumeSlider: true,
+      volumeRememberedAcrossStations: true,
       progressAndDurationHidden: true,
       consistentPlayerInterface: true,
       onePlayerAtATime: true,
