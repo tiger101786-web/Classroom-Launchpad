@@ -1,6 +1,6 @@
 # Colt Assistant
 
-Colt Assistant combines its original free, keyword-based Classroom Help mode with responsive Guided AI communication. Students stay inside Classroom Launchpad and do not need an outside AI account or website.
+Colt Assistant opens in Guided AI mode and keeps its original free, keyword-based Classroom Help mode available as the second tab. Students stay inside Classroom Launchpad and do not need an outside AI account or website.
 
 Classroom Help questions are handled in the browser. Guided AI questions are sent through the authenticated Classroom Launchpad server to Cloudflare Workers AI. Classroom Launchpad does not place conversations or prompts in browser storage or the server database.
 

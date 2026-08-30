@@ -287,7 +287,10 @@ async function run() {
     assert(await page.locator(".colt-radio-stream-player").isVisible(), "The compact Chillsynth player did not appear.");
     assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
     assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
-    assert(await page.getByRole("button", { name: "Mute Colt Radio" }).isVisible(), "The compact speaker button is missing.");
+    const muteButton = page.getByRole("button", { name: "Mute Colt Radio" });
+    assert(await muteButton.isVisible(), "The compact speaker button is missing.");
+    assert.equal(await muteButton.locator(".colt-radio-volume-icon").count(), 1, "The crimson speaker artwork is missing.");
+    assert.equal(await muteButton.evaluate(element => getComputedStyle(element).color), "rgb(237, 48, 70)");
     const volumeSlider = page.getByRole("slider", { name: "Colt Radio volume" });
     assert(await volumeSlider.isVisible(), "The Colt Radio volume slider is missing.");
     assert.equal(await volumeSlider.inputValue(), "65");
@@ -297,6 +300,7 @@ async function run() {
     assert.equal(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioVolumeV1")), "35");
     await page.getByRole("button", { name: "Mute Colt Radio" }).click();
     assert.equal(await audio.evaluate(element => element.muted), true);
+    assert.equal(await page.getByRole("button", { name: "Unmute Colt Radio" }).locator(".colt-radio-volume-icon").count(), 1);
     await page.getByRole("button", { name: "Unmute Colt Radio" }).click();
     assert.equal(await audio.evaluate(element => element.muted), false);
     assert(await iframe.isHidden(), "The external player interface became visible after switching stations.");
@@ -392,6 +396,7 @@ async function run() {
 
     await page.getByRole("button", { name: "Synth • Datawave", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/datawave.mp3");
+    assert.equal(await page.getByRole("button", { name: "Stop Colt Radio" }).innerText(), "×");
     await page.getByRole("button", { name: "Stop Colt Radio" }).click();
     await radioLauncher.click();
     assert.equal(await audio.getAttribute("src"), "https://stream.nightride.fm/datawave.mp3");

@@ -268,6 +268,17 @@
     return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
   }
 
+  function volumeIconSvg(volume, muted = false) {
+    const speaker = '<path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/>';
+    if (muted || volume === 0) {
+      return iconSvg(`${speaker}<path d="m16 9 5 6m0-6-5 6"/>`, "colt-radio-volume-icon");
+    }
+    const waves = volume < 45
+      ? '<path d="M15 9.5a4 4 0 0 1 0 5"/>'
+      : '<path d="M15 9.5a4 4 0 0 1 0 5M18 7a7.5 7.5 0 0 1 0 10"/>';
+    return iconSvg(`${speaker}${waves}`, "colt-radio-volume-icon");
+  }
+
   function stationIcon(stationId) {
     const icon = buildElement("span", "colt-radio-station-icon");
     icon.innerHTML = iconSvg(stationIconPaths[stationId] || stationIconPaths["lofi-fm"]);
@@ -312,7 +323,7 @@
     const minimize = buildElement("button", "colt-radio-icon-btn", "−");
     minimize.type = "button";
     minimize.setAttribute("aria-label", "Minimize Colt Radio");
-    const stop = buildElement("button", "colt-radio-icon-btn", "■");
+    const stop = buildElement("button", "colt-radio-icon-btn", "×");
     stop.type = "button";
     stop.setAttribute("aria-label", "Stop Colt Radio");
     headerActions.append(minimize, stop);
@@ -382,9 +393,10 @@
     const equalizer = buildElement("span", "colt-radio-equalizer");
     for (let index = 0; index < 24; index += 1) equalizer.append(buildElement("i"));
     const volumeControl = buildElement("span", "colt-radio-volume");
-    const muteStream = buildElement("button", "colt-radio-stream-control colt-radio-mute", "\ud83d\udd0a");
+    const muteStream = buildElement("button", "colt-radio-stream-control colt-radio-mute");
     muteStream.type = "button";
     muteStream.setAttribute("aria-label", "Mute Colt Radio");
+    muteStream.innerHTML = volumeIconSvg(65);
     const volumeSlider = document.createElement("input");
     volumeSlider.className = "colt-radio-volume-slider";
     volumeSlider.type = "range";
@@ -453,7 +465,7 @@
       volumeSlider.value = String(volume);
       volumeSlider.style.setProperty("--radio-volume", `${volume}%`);
       volumeSlider.title = `Colt Radio volume: ${volume}%`;
-      muteStream.textContent = volume === 0 ? "\ud83d\udd07" : volume < 45 ? "\ud83d\udd09" : "\ud83d\udd0a";
+      muteStream.innerHTML = volumeIconSvg(volume, audio.muted);
       muteStream.setAttribute("aria-label", audio.muted ? "Unmute Colt Radio" : "Mute Colt Radio");
       if (remember) {
         try {
@@ -812,7 +824,7 @@
         setVolume(65);
       } else {
         audio.muted = true;
-        muteStream.textContent = "\ud83d\udd07";
+        muteStream.innerHTML = volumeIconSvg(selectedVolume, true);
         muteStream.setAttribute("aria-label", "Unmute Colt Radio");
       }
     });

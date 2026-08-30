@@ -585,15 +585,15 @@
 
     const modeNav = buildElement("nav", "colt-assistant-modes");
     modeNav.setAttribute("aria-label", "Choose a Colt Assistant mode");
-    const helpMode = buildElement("button", "colt-assistant-mode is-active", "Classroom Help");
-    const guidedMode = buildElement("button", "colt-assistant-mode", "Guided AI");
-    [helpMode, guidedMode].forEach(button => {
+    const guidedMode = buildElement("button", "colt-assistant-mode is-active", "Guided AI");
+    const helpMode = buildElement("button", "colt-assistant-mode", "Classroom Help");
+    [guidedMode, helpMode].forEach(button => {
       button.type = "button";
-      button.setAttribute("aria-pressed", button === helpMode ? "true" : "false");
+      button.setAttribute("aria-pressed", button === guidedMode ? "true" : "false");
     });
     helpMode.dataset.assistantMode = "help";
     guidedMode.dataset.assistantMode = "guided";
-    modeNav.append(helpMode, guidedMode);
+    modeNav.append(guidedMode, helpMode);
 
     const conversation = buildElement("div", "colt-assistant-conversation");
     conversation.setAttribute("aria-live", "polite");
@@ -610,7 +610,7 @@
     input.type = "text";
     input.maxLength = 600;
     input.autocomplete = "off";
-    input.placeholder = "Ask a classroom question…";
+    input.placeholder = "What are you learning?";
     const send = buildElement("button", "primary-btn", "Send");
     send.type = "submit";
     form.append(label, input, send);
@@ -620,7 +620,7 @@
 
     const conversationHistory = [];
     const guidedHistory = [];
-    let activeMode = "help";
+    let activeMode = "guided";
     let aiConfig = null;
     let requestInProgress = false;
     let lastReadableText = "";

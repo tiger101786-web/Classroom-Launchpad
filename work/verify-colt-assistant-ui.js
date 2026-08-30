@@ -25,6 +25,13 @@ async function run() {
     assert(await page.getByRole("heading", { name: "Website Categories", exact: true }).isVisible());
     await page.locator(".colt-assistant-launcher").click();
     assert(await page.locator(".colt-assistant-panel").isVisible());
+    assert.deepEqual(
+      await page.locator(".colt-assistant-mode").allTextContents(),
+      ["Guided AI", "Classroom Help"]
+    );
+    assert.equal(await page.getByRole("button", { name: "Guided AI", exact: true }).getAttribute("aria-pressed"), "true");
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /Guided AI helps you think through schoolwork/i);
+    await page.getByRole("button", { name: "Classroom Help", exact: true }).click();
     assert.match(await page.locator(".colt-assistant-conversation").innerText(), /approved activity/i);
     assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);
     assert.equal(await page.getByRole("button", { name: "More Help", exact: true }).count(), 1);

@@ -108,10 +108,13 @@ async function run() {
     assert.equal(visual.background, "rgb(5, 5, 5)", JSON.stringify(visual));
     assert.match(visual.portrait, /colt-radio-header-portrait\.png/, JSON.stringify(visual));
     assert.equal(visual.modes, 2, JSON.stringify(visual));
-    assert.equal(visual.activeMode, "Classroom Help", JSON.stringify(visual));
+    assert.equal(visual.activeMode, "Guided AI", JSON.stringify(visual));
     assert.equal(visual.footerVisible, true, JSON.stringify(visual));
 
-    await page.getByRole("button", { name: "Guided AI", exact: true }).click();
+    assert.deepEqual(
+      await page.locator(".colt-assistant-mode").allTextContents(),
+      ["Guided AI", "Classroom Help"]
+    );
     await page.getByText(/Guided AI helps you think through schoolwork/i).waitFor();
     assert.equal(await page.getByRole("button", { name: "Guided AI", exact: true }).getAttribute("aria-pressed"), "true");
     assert.equal(await page.getByRole("button", { name: "Create Image", exact: true }).count(), 0);
