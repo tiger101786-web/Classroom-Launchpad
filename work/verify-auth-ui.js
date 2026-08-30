@@ -696,6 +696,12 @@ async function run() {
       approvedStudents = [...approvedStudents, {
         email: "activated.ui@scscolts.org", name: "Activated, UI", grade: "5",
         registered: true, activationReady: false, teacherTestAccount: false
+      }, {
+        email: "cody.nieves@scscolts.org", name: "Nieves, Cody", grade: "5",
+        registered: true, activationReady: false, teacherTestAccount: false
+      }, {
+        email: "avery.adams@scscolts.org", name: "Avery Adams", grade: "5",
+        registered: true, activationReady: false, teacherTestAccount: false
       }];
       render();
     });
@@ -708,12 +714,16 @@ async function run() {
       heading: document.querySelector(".registered-student-roster h2")?.textContent.trim(),
       gradeCards: document.querySelectorAll(".registered-student-grade-card").length
     }));
-    if (!registeredRoster.names.includes("Activated, UI") || registeredRoster.unregisteredStudentVisible
+    if (!registeredRoster.names.includes("UI, Activated") || !registeredRoster.names.includes("Cody, Nieves")
+      || !registeredRoster.names.includes("Avery, Adams")
+      || registeredRoster.names.indexOf("Avery, Adams") > registeredRoster.names.indexOf("Cody, Nieves")
+      || registeredRoster.names.indexOf("Cody, Nieves") > registeredRoster.names.indexOf("UI, Activated")
+      || registeredRoster.unregisteredStudentVisible
       || registeredRoster.heading !== "Students Who Have Registered" || !registeredRoster.gradeCards) {
       throw new Error(`Registered-student details did not isolate activated accounts: ${JSON.stringify(registeredRoster)}.`);
     }
     await page.evaluate(() => {
-      approvedStudents = approvedStudents.filter(student => student.email !== "activated.ui@scscolts.org");
+      approvedStudents = approvedStudents.filter(student => !["activated.ui@scscolts.org", "cody.nieves@scscolts.org", "avery.adams@scscolts.org"].includes(student.email));
       render();
     });
 

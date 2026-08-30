@@ -1561,6 +1561,20 @@ function forumInitials(name) {
   return parts.slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase() || "S";
 }
 
+function formatStudentFirstLast(name) {
+  const value = String(name || "").trim().replace(/\s+/g, " ");
+  if (!value) return "Name not added";
+  if (value.includes(",")) {
+    const [lastName, ...firstNameParts] = value.split(",");
+    const firstName = firstNameParts.join(",").trim();
+    return firstName && lastName.trim() ? `${firstName}, ${lastName.trim()}` : value;
+  }
+  const parts = value.split(" ");
+  if (parts.length < 2) return value;
+  const lastName = parts.pop();
+  return `${parts.join(" ")}, ${lastName}`;
+}
+
 function renderForumAvatar(name, avatarUrl, extraClass = "") {
   const safeUrl = normalizeProfileAvatarUrl(avatarUrl);
   return safeUrl
@@ -8574,7 +8588,8 @@ function renderApprovedStudentManager() {
 function renderRegisteredStudents() {
   const registeredStudents = approvedStudents
     .filter(student => student.registered)
-    .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+    .map(student => ({ ...student, rosterDisplayName: formatStudentFirstLast(student.name || student.email) }))
+    .sort((a, b) => a.rosterDisplayName.localeCompare(b.rosterDisplayName, undefined, { sensitivity: "base" }));
   const gradeGroups = CLASSROOM_GRADES.map(grade => ({
     grade,
     students: registeredStudents.filter(student => String(student.grade || "") === grade)
@@ -8599,8 +8614,8 @@ function renderRegisteredStudents() {
               <ol>
                 ${group.students.map(student => `
                   <li class="registered-student-name">
-                    <span aria-hidden="true">${escapeHtml(forumInitials(student.name || student.email))}</span>
-                    <strong>${escapeHtml(student.name || student.email)}</strong>
+                    <span aria-hidden="true">${escapeHtml(forumInitials(student.rosterDisplayName))}</span>
+                    <strong>${escapeHtml(student.rosterDisplayName)}</strong>
                     ${student.teacherTestAccount ? `<small>Teacher Test Account</small>` : ""}
                   </li>
                 `).join("")}
