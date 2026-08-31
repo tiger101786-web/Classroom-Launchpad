@@ -28,15 +28,16 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
-  ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm"].forEach(filename => {
+  ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
     assert(!fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Obsolete static/fallback pointing asset still exists: ${filename}`);
   });
   const browser = await chromium.launch({
     headless: true,
-    executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+    executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    args: ["--allow-file-access-from-files"]
   });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -53,7 +54,7 @@ async function run() {
     assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing\.mp4/);
+    assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
     assert.equal(await image.getAttribute("muted"), "");
@@ -74,6 +75,17 @@ async function run() {
     await page.waitForTimeout(350);
     assert.equal(await pointingVideo.evaluate(element => element.paused), false);
     assert((await pointingVideo.evaluate(element => element.currentTime)) > pointingTime);
+    const cornerAlpha = await pointingVideo.evaluate(async element => {
+      element.currentTime = 3;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(cornerAlpha < 8, `The pointing animation background is not transparent (corner alpha: ${cornerAlpha}).`);
     const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
     await greetingImage.evaluate(element => {
       element.style.transition = "none";
