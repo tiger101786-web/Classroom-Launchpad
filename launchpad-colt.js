@@ -11,14 +11,12 @@
     welcome: "assets/launchpad-colt-welcome.webm?v=20260830-welcome-alpha-v1",
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
-    radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1"
-  };
-  const POSE_ASSETS = {
-    greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
-    excited: "assets/launchpad-colt-excited.png?v=20260830-colt-poses"
+    radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1",
+    greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const WELCOME_REACTION_DURATION_MS = 10_100;
+  const GREETING_EXCITED_REACTION_DURATION_MS = 6_100;
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
     directions: { icon: "☝", text: "Today's directions are ready." },
@@ -61,9 +59,8 @@
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
+        <video class="launchpad-colt-pose" data-pose="greetingExcited" src="${VIDEO_ASSETS.greetingExcited}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
         <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
@@ -101,6 +98,10 @@
       directions: "pointing",
       explore: "pointing",
       move: "pointing",
+      message: "greetingExcited",
+      corner: "greetingExcited",
+      success: "greetingExcited",
+      classroom: "greetingExcited",
       radio: "radioDance",
       sleep: "sleeping"
     };
@@ -212,11 +213,18 @@
     speechText.textContent = typeof customText === "string" ? customText : reaction.text;
     speech.hidden = !speechText.textContent;
     syncPoseVideos(name, true);
+    const greetingExcitedState = ["success", "classroom", "message", "corner"].includes(name);
     const reactionDuration = name === "welcome"
       ? Math.max(duration, WELCOME_REACTION_DURATION_MS)
-      : duration;
+      : greetingExcitedState
+        ? Math.max(duration, GREETING_EXCITED_REACTION_DURATION_MS)
+        : duration;
     if (reactionDuration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
+        if (radioPlaybackActive && name !== "radio") {
+          react("radio", "", 0);
+          return;
+        }
         currentState = "idle";
         root.classList.remove("is-radio-dancing");
         companion.dataset.state = "idle";

@@ -658,6 +658,20 @@ async function run() {
     await page.locator('[data-action="category"][data-category="Logic Games"]').first().click();
     await page.locator('[data-action="openColtRun"]').first().click();
     await page.locator(".colt-run-character-panel").waitFor();
+    await page.waitForFunction(() => {
+      const canvas = document.getElementById("coltRunSelectMrsLevandoske");
+      if (!canvas) return false;
+      const pixels = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+      for (let index = 3; index < pixels.length; index += 4) {
+        if (pixels[index] > 20) return true;
+      }
+      return false;
+    }, null, { timeout: 10_000 });
+    const mrsLevandoskeCard = page.locator('[data-character="mrsLevandoske"]');
+    const mrsLevandoskeCardText = (await mrsLevandoskeCard.innerText()).toLowerCase();
+    if (!await mrsLevandoskeCard.isDisabled() || !(mrsLevandoskeCardText.includes("mrs. levandoske") && mrsLevandoskeCardText.includes("coming soon"))) {
+      throw new Error("Mrs. Levandoske is not presented as a disabled Coming Soon character with a rendered idle animation.");
+    }
     const howToPlayCards = await page.locator(".colt-run-control-card").count();
     const howToPlayText = await page.locator(".colt-run-how-to-play").innerText();
     const gameStatusText = await page.locator(".colt-run-status-panel").innerText();

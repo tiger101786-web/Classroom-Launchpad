@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "check": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-radio.js && node --check launchpad-colt.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js",
-    "test": "node work/verify-colt-assistant.js && node work/verify-colt-assistant-ai.js && node work/verify-colt-assistant-ui.js && node work/verify-colt-assistant-redesign-ui.js && node work/verify-colt-corner-moderation.js && node work/verify-assignments.js && node work/verify-teacher-test-account.js && node work/verify-launchpad-colt-ui.js && node work/verify-student-password-reset-ui.js && node work/verify-student-password-change.js",
+    "test": "node work/verify-colt-assistant.js && node work/verify-colt-assistant-ai.js && node work/verify-colt-assistant-ui.js && node work/verify-colt-assistant-redesign-ui.js && node work/verify-colt-corner-moderation.js && node work/verify-assignments.js && node work/verify-teacher-test-account.js && node work/verify-launchpad-colt-ui.js && node work/verify-student-password-reset-ui.js && node work/verify-student-password-change.js && node work/verify-mrs-levandoske-coming-soon.js",
     "build": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-radio.js && node --check launchpad-colt.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js"
   },
   "engines": {

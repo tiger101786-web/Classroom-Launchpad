@@ -3486,7 +3486,7 @@ body[data-theme="night"] .colt-run-stats span {
 
 .colt-run-character-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -3528,6 +3528,12 @@ body[data-theme="night"] .colt-run-stats span {
   --colt-run-character-card-bg: url("assets/colt-run-character-select-mr-nieves-bg.png?v=20260719-character-card-backgrounds1");
 }
 
+.colt-run-character-grid button[data-character="mrsLevandoske"] {
+  --colt-run-character-card-bg:
+    radial-gradient(circle at 50% 38%, rgba(168, 23, 71, 0.46), transparent 42%),
+    linear-gradient(145deg, #35101d, #151116 72%);
+}
+
 .colt-run-character-grid button > * {
   position: relative;
   z-index: 1;
@@ -3547,7 +3553,7 @@ body[data-theme="night"] .colt-run-stats span {
 
 .colt-run-character-grid button.is-placeholder {
   cursor: default;
-  opacity: 0.62;
+  opacity: 0.82;
 }
 
 .colt-run-character-grid button.is-placeholder:hover,
@@ -3559,6 +3565,21 @@ body[data-theme="night"] .colt-run-stats span {
 .colt-run-character-grid canvas {
   width: min(300px, 100%);
   aspect-ratio: 3 / 2;
+}
+
+.colt-run-coming-soon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 213, 138, 0.52);
+  border-radius: 999px;
+  background: rgba(123, 11, 49, 0.86);
+  color: #fff4df;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .colt-run-character-empty {
@@ -10202,14 +10223,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 
 .launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
-.launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greeting"],
-.launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greeting"],
+.launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greetingExcited"],
+.launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greetingExcited"],
 .launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="welcome"],
 .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="move"] .launchpad-colt-pose[data-pose="pointing"],
-.launchpad-colt-companion[data-state="message"] .launchpad-colt-pose[data-pose="excited"],
-.launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="excited"],
+.launchpad-colt-companion[data-state="message"] .launchpad-colt-pose[data-pose="greetingExcited"],
+.launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="greetingExcited"],
 .launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDance"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   opacity: 1 !important;

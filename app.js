@@ -2952,6 +2952,11 @@ function renderColtRun() {
                 <canvas id="coltRunSelectMrNieves" width="300" height="200" aria-hidden="true"></canvas>
                 <span>Mr. Nieves</span>
               </button>
+              <button type="button" class="is-placeholder" data-character="mrsLevandoske" disabled aria-disabled="true" aria-label="Mrs. Levandoske, coming soon">
+                <canvas id="coltRunSelectMrsLevandoske" width="300" height="200" aria-hidden="true"></canvas>
+                <span>Mrs. Levandoske</span>
+                <strong class="colt-run-coming-soon">Coming Soon</strong>
+              </button>
             </div>
           </div>
         </div>
@@ -3057,6 +3062,7 @@ function startColtRunGame() {
   const characterButtons = shell ? Array.from(shell.querySelectorAll("[data-character]")) : [];
   const selectColtCanvas = document.getElementById("coltRunSelectColt");
   const selectMrNievesCanvas = document.getElementById("coltRunSelectMrNieves");
+  const selectMrsLevandoskeCanvas = document.getElementById("coltRunSelectMrsLevandoske");
   const characterStorageKey = "coltRunCharacterV1";
   const characterNames = {
     colt: "Colt",
@@ -3945,6 +3951,15 @@ function startColtRunGame() {
   let mrNievesIdleIndex = 0;
   let lastMrNievesIdleIndex = -1;
   const getMrNievesIdleVideo = () => mrNievesIdleVideos[mrNievesIdleIndex];
+  const mrsLevandoskeIdleVideos = [
+    createDeferredVideo("assets/colt-run-mrs-levandoske-idle.webm?v=20260831-idle-alpha1"),
+    createDeferredVideo("assets/colt-run-mrs-levandoske-idle-02.webm?v=20260831-idle-alpha1")
+  ];
+  mrsLevandoskeIdleVideos.forEach(video => {
+    video.loop = false;
+  });
+  let mrsLevandoskeIdleIndex = 0;
+  const getMrsLevandoskeIdleVideo = () => mrsLevandoskeIdleVideos[mrsLevandoskeIdleIndex];
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideos = [
     createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1"),
@@ -4633,6 +4648,22 @@ function startColtRunGame() {
     if (mrNievesIdleVideo.paused) mrNievesIdleVideo.play().catch(() => {});
   };
 
+  const keepMrsLevandoskeIdleVideoPlaying = () => {
+    const video = getMrsLevandoskeIdleVideo();
+    ensureMediaSource(video);
+    if (video.paused) video.play().catch(() => {});
+  };
+
+  const chooseMrsLevandoskeIdleVideo = () => {
+    mrsLevandoskeIdleIndex = (mrsLevandoskeIdleIndex + 1) % mrsLevandoskeIdleVideos.length;
+    const video = getMrsLevandoskeIdleVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
+  };
+
   const keepMrNievesRunVideoPlaying = () => {
     ensureMediaSource(mrNievesRunVideo);
     if (!mrNievesRunVideo.paused) return;
@@ -4721,6 +4752,7 @@ function startColtRunGame() {
     leapVideo,
     coltCelebrationVideo,
     ...mrNievesIdleVideos,
+    ...mrsLevandoskeIdleVideos,
     mrNievesRunVideo,
     ...mrNievesInAirVideos,
     ...mrNievesCelebrationVideos,
@@ -4733,8 +4765,8 @@ function startColtRunGame() {
     let nextKey = "hidden";
     if (!document.hidden) {
       if (characterSelectOpen) {
-        nextKey = `character-select:${coltIdleIndex}:${mrNievesIdleIndex}`;
-        activeVideos = [getColtIdleVideo(), getMrNievesIdleVideo()];
+        nextKey = `character-select:${coltIdleIndex}:${mrNievesIdleIndex}:${mrsLevandoskeIdleIndex}`;
+        activeVideos = [getColtIdleVideo(), getMrNievesIdleVideo(), getMrsLevandoskeIdleVideo()];
       } else if (lost) {
         nextKey = selectedCharacter === "mrNieves"
           ? `death:mrNieves:${mrNievesDeathIndex}`
@@ -4798,6 +4830,14 @@ function startColtRunGame() {
     video.addEventListener("ended", () => {
       if (video !== getMrNievesIdleVideo()) return;
       chooseMrNievesIdleVideo();
+      characterPlaybackKey = "";
+      syncCharacterVideoPlayback(true);
+    });
+  });
+  mrsLevandoskeIdleVideos.forEach(video => {
+    video.addEventListener("ended", () => {
+      if (video !== getMrsLevandoskeIdleVideo()) return;
+      chooseMrsLevandoskeIdleVideo();
       characterPlaybackKey = "";
       syncCharacterVideoPlayback(true);
     });
@@ -7191,8 +7231,10 @@ function startColtRunGame() {
     if (!characterSelectOpen) return;
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
+    keepMrsLevandoskeIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
+    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, 2);
   };
 
   const coverDrawRectCache = new WeakMap();
@@ -7798,6 +7840,7 @@ function startColtRunGame() {
   updateLeaderboardPromptToggle();
   ensureMediaSource(getColtIdleVideo());
   chooseMrNievesIdleVideo();
+  ensureMediaSource(getMrsLevandoskeIdleVideo());
   scheduleMediaLoad(coinVideo, 1800);
   scheduleMediaLoad(flagVideo, 2600);
   scheduleMediaLoad(coinPickupAudio, 900);
