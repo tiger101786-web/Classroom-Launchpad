@@ -8,14 +8,13 @@
   const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
   const VIDEO_ASSETS = {
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
-    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-colt-video-poses",
+    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7"
   };
   const POSE_ASSETS = {
     greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
     excited: "assets/launchpad-colt-excited.png?v=20260830-colt-poses",
-    dancing: "assets/launchpad-colt-dancing.png?v=20260830-colt-poses",
-    sleeping: "assets/launchpad-colt-sleeping.png?v=20260830-colt-poses"
+    dancing: "assets/launchpad-colt-dancing.png?v=20260830-colt-poses"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const REACTIONS = {
@@ -62,7 +61,7 @@
         <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
         <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
-        <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" poster="${POSE_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>

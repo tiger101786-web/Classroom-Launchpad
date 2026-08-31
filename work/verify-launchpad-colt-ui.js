@@ -24,7 +24,7 @@ async function authenticate(page, role = "student") {
 async function run() {
   const serverSource = fs.readFileSync(path.resolve(__dirname, "..", "server.js"), "utf8");
   assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
-  ["companion", "greeting", "excited", "dancing", "sleeping"].forEach(pose => {
+  ["companion", "greeting", "excited", "dancing"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
@@ -34,6 +34,7 @@ async function run() {
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
     assert(!fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Obsolete static/fallback pointing asset still exists: ${filename}`);
   });
+  assert(!fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-sleeping.png")), "The obsolete static sleeping poster still exists.");
   const browser = await chromium.launch({
     headless: true,
     executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
@@ -116,6 +117,18 @@ async function run() {
     const sleepingImage = page.locator('.launchpad-colt-pose[data-pose="sleeping"]');
     assert.equal(await sleepingImage.evaluate(element => element.tagName), "VIDEO");
     assert.match(await sleepingImage.getAttribute("src"), /launchpad-colt-sleeping\.webm/);
+    assert.equal(await sleepingImage.getAttribute("poster"), null);
+    const sleepingCornerAlpha = await sleepingImage.evaluate(async element => {
+      element.currentTime = 3;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(sleepingCornerAlpha < 8, `The sleeping animation background is not transparent (corner alpha: ${sleepingCornerAlpha}).`);
     await sleepingImage.evaluate(element => { element.style.transition = "none"; });
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
