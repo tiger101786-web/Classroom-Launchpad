@@ -642,6 +642,7 @@
 
     function clearAudioStream() {
       audio.pause();
+      globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
       audio.removeAttribute("src");
       audio.load();
       audio.hidden = true;
@@ -867,8 +868,16 @@
       const station = stations.find(item => item.id === activeStation);
       if (station?.type === "playlist") loadNextPlaylistTrack(station, { autoplay: true });
     });
-    audio.addEventListener("play", updatePlaybackButton);
-    audio.addEventListener("pause", updatePlaybackButton);
+    audio.addEventListener("play", () => {
+      updatePlaybackButton();
+      globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", {
+        detail: { playing: true, station: activeStation }
+      }));
+    });
+    audio.addEventListener("pause", () => {
+      updatePlaybackButton();
+      globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
+    });
     toggleStream.addEventListener("click", () => {
       if (audio.paused) audio.play().catch(() => updatePlaybackButton());
       else audio.pause();

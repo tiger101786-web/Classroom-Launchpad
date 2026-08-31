@@ -252,7 +252,7 @@
       closeControls();
     } else if (pendingRadioReaction) {
       pendingRadioReaction = false;
-      globalObject.setTimeout(() => react("radio", "Now playing—enjoy the music!", 6000), 120);
+      globalObject.setTimeout(() => react("radio", "Now playing—enjoy the music!", 0), 120);
     }
   }
 
@@ -413,15 +413,29 @@
     welcome("Welcome back!");
   });
 
+  globalObject.addEventListener("colt-radio-playback", event => {
+    const playing = Boolean(event.detail?.playing);
+    if (playing) {
+      if (root.classList.contains("is-panel-open")) pendingRadioReaction = true;
+      else react("radio", "Now playing—enjoy the music!", 0);
+      return;
+    }
+    pendingRadioReaction = false;
+    if (currentState === "radio") {
+      globalObject.clearTimeout(reactionTimer);
+      currentState = "idle";
+      companion.dataset.state = "idle";
+      prop.textContent = "";
+      speech.hidden = true;
+      syncPoseVideos("idle", true);
+    }
+  });
+
   documentObject.addEventListener("click", event => {
-    const target = event.target.closest("[data-action], .colt-radio-play");
+    const target = event.target.closest("[data-action]");
     if (!target) return;
     const action = target.dataset.action || "";
-    if (target.matches(".colt-radio-play")) {
-      if (root.classList.contains("is-panel-open")) pendingRadioReaction = true;
-      else react("radio", undefined, 6000);
-    }
-    else if (action === "openMessages") react("message", "Opening your private messages.");
+    if (action === "openMessages") react("message", "Opening your private messages.");
     else if (action === "openColtCorner") react("corner", "Let's check Colt Corner.");
     else if (action === "openGoogleApp" && /classroom\.google\.com/i.test(target.dataset.url || "")) react("classroom");
     else if (action === "randomActivity") react("explore", "Let's find something new!");

@@ -26,6 +26,8 @@ async function run() {
   const coltSource = fs.readFileSync(path.resolve(__dirname, "..", "launchpad-colt.js"), "utf8");
   assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
   assert.match(coltSource, /WELCOME_REACTION_DURATION_MS\s*=\s*10_100/, "The complete ten-second welcome animation must remain visible.");
+  assert.match(coltSource, /react\("radio", "Now playing—enjoy the music!", 0\)/, "The radio dance must not have a short reaction timer.");
+  assert.match(coltSource, /addEventListener\("colt-radio-playback"/, "The Colt must follow Colt Radio playback state.");
   ["companion", "greeting", "excited"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
@@ -209,6 +211,14 @@ async function run() {
     assert(Math.abs(hiddenAfterDrag.x - hiddenBeforeDrag.x) > 30, "The hidden Colt restore icon could not be dragged.");
     await page.locator(".launchpad-colt-restore").click();
     await page.waitForSelector(".launchpad-colt-character:visible");
+
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: true, station: "test" } })));
+    await page.waitForTimeout(4400);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio", "The Colt radio dance stopped while playback was still active.");
+    assert.equal(await radioDanceVideo.evaluate(element => element.paused), false, "The Colt radio dance video is not playing.");
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } })));
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not stop dancing when radio playback paused.");
 
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");
