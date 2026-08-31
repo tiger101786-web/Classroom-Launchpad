@@ -45,6 +45,7 @@
   let sleepTimer = 0;
   let panelObserver = null;
   let currentState = "idle";
+  let radioPlaybackActive = false;
   let controlsOpen = false;
   let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
   let dragSession = null;
@@ -238,17 +239,15 @@
     }, 60000);
   }
 
-  function openPanels() {
-    return [
-      documentObject.querySelector(".colt-radio-panel"),
-      documentObject.querySelector(".colt-assistant-panel")
-    ].filter(panel => panel && !panel.hidden);
-  }
-
   function syncPanelCollision() {
-    const blocked = openPanels().length > 0;
+    const radioPanel = documentObject.querySelector(".colt-radio-panel");
+    const assistantPanel = documentObject.querySelector(".colt-assistant-panel");
+    const radioOpen = Boolean(radioPanel && !radioPanel.hidden);
+    const assistantOpen = Boolean(assistantPanel && !assistantPanel.hidden);
+    const blocked = assistantOpen;
     root.classList.toggle("is-panel-open", blocked);
-    if (blocked) {
+    root.classList.toggle("is-radio-panel-open", radioOpen);
+    if (blocked || radioOpen) {
       speech.hidden = true;
       closeControls();
     }
@@ -413,6 +412,7 @@
 
   globalObject.addEventListener("colt-radio-playback", event => {
     const playing = Boolean(event.detail?.playing);
+    radioPlaybackActive = playing;
     if (playing) {
       react("radio", "Now playing—enjoy the music!", 0);
       return;
@@ -426,6 +426,17 @@
       speech.hidden = true;
       syncPoseVideos("idle", true);
     }
+  });
+
+  globalObject.addEventListener("colt-radio-opened", () => {
+    if (radioPlaybackActive) return;
+    globalObject.clearTimeout(reactionTimer);
+    currentState = "idle";
+    root.classList.remove("is-radio-dancing");
+    companion.dataset.state = "idle";
+    prop.textContent = "";
+    speech.hidden = true;
+    syncPoseVideos("idle", true);
   });
 
   documentObject.addEventListener("click", event => {

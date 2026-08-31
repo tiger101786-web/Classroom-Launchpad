@@ -222,12 +222,17 @@ async function run() {
 
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");
-    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-panel-open")));
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-radio-panel-open")));
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-panel-open")), false, "Opening Colt Radio still hides the pet as a blocked panel.");
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt is not idle before radio playback starts.");
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => getComputedStyle(element).opacity), "1", "The idle Colt disappeared when Colt Radio opened.");
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: true, station: "test" } })));
     await page.waitForTimeout(180);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio");
     assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => getComputedStyle(element).opacity), "1", "The dancing Colt disappeared while the radio panel was open.");
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } })));
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle when radio playback stopped.");
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => window.dispatchEvent(new Event("resize")));
