@@ -3529,9 +3529,7 @@ body[data-theme="night"] .colt-run-stats span {
 }
 
 .colt-run-character-grid button[data-character="mrsLevandoske"] {
-  --colt-run-character-card-bg:
-    radial-gradient(circle at 50% 38%, rgba(168, 23, 71, 0.46), transparent 42%),
-    linear-gradient(145deg, #35101d, #151116 72%);
+  --colt-run-character-card-bg: url("assets/colt-run-character-select-mr-nieves-bg.png?v=20260719-character-card-backgrounds1");
 }
 
 .colt-run-character-grid button > * {
@@ -3580,6 +3578,15 @@ body[data-theme="night"] .colt-run-stats span {
   font-weight: 1000;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.colt-run-character-grid .colt-run-coming-soon {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .colt-run-character-empty {

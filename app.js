@@ -2953,9 +2953,9 @@ function renderColtRun() {
                 <span>Mr. Nieves</span>
               </button>
               <button type="button" class="is-placeholder" data-character="mrsLevandoske" disabled aria-disabled="true" aria-label="Mrs. Levandoske, coming soon">
+                <strong class="colt-run-coming-soon">Coming Soon</strong>
                 <canvas id="coltRunSelectMrsLevandoske" width="300" height="200" aria-hidden="true"></canvas>
                 <span>Mrs. Levandoske</span>
-                <strong class="colt-run-coming-soon">Coming Soon</strong>
               </button>
             </div>
           </div>
