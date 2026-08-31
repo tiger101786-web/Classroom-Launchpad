@@ -683,10 +683,10 @@ const sharedBackend = {
   loginStudent(email, password) {
     return this.request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
   },
-  changeStudentPassword(currentPassword, newPassword) {
+  changeStudentPassword(newPassword) {
     return this.request("/api/auth/change-password", {
       method: "POST",
-      body: JSON.stringify({ currentPassword, newPassword })
+      body: JSON.stringify({ newPassword })
     });
   },
   async uploadProfileAvatar(file) {
@@ -8300,7 +8300,7 @@ function renderLogin() {
           <button class="primary-btn" type="submit">Log In</button>
           <div class="student-password-reset-entry">
             <button class="outline-btn" type="button" data-action="showStudentPasswordReset">Create a New Password</button>
-            <small>Forgot your password? Ask Mr. Nieves for a one-time reset code first.</small>
+            <small>Signed in already? Open Your Account to change your password anytime without a code. A reset code is only needed if you are fully signed out.</small>
           </div>
         </form>
         <form id="studentRegisterForm" class="form-grid auth-form-panel">
@@ -8362,12 +8362,8 @@ function renderAccount() {
       <section class="student-password-settings" aria-labelledby="changePasswordHeading">
         <span class="feature-kicker">Account Security</span>
         <h3 id="changePasswordHeading">Change Password</h3>
-        <p>Enter your current Classroom Launchpad password, then create a new one.</p>
+        <p>Because you are signed in, you can create a new password whenever you want. No activation code or old password is needed.</p>
         <form id="studentChangePasswordForm" class="form-grid">
-          <div class="field">
-            <label for="studentCurrentPassword">Current password</label>
-            <input id="studentCurrentPassword" type="password" autocomplete="current-password" required>
-          </div>
           <div class="student-new-password-grid">
             <div class="field">
               <label for="studentNewPassword">New password</label>
@@ -8380,7 +8376,7 @@ function renderAccount() {
             </div>
           </div>
           <label class="password-visibility-control" for="showStudentChangePasswords">
-            <input id="showStudentChangePasswords" type="checkbox" data-password-visibility data-password-targets="studentCurrentPassword studentNewPassword studentNewPasswordConfirm" aria-controls="studentCurrentPassword studentNewPassword studentNewPasswordConfirm">
+            <input id="showStudentChangePasswords" type="checkbox" data-password-visibility data-password-targets="studentNewPassword studentNewPasswordConfirm" aria-controls="studentNewPassword studentNewPasswordConfirm">
             <span>Show passwords</span>
           </label>
           <button class="primary-btn student-change-password-button" type="submit">Update Password</button>
@@ -9898,7 +9894,6 @@ function attachScreenHandlers() {
     studentChangePasswordForm.addEventListener("submit", async event => {
       event.preventDefault();
       const status = document.getElementById("studentChangePasswordStatus");
-      const currentPassword = document.getElementById("studentCurrentPassword").value;
       const newPassword = document.getElementById("studentNewPassword").value;
       const confirmation = document.getElementById("studentNewPasswordConfirm").value;
       status.classList.remove("error");
@@ -9910,7 +9905,7 @@ function attachScreenHandlers() {
       }
       status.textContent = "Updating your password…";
       try {
-        await sharedBackend.changeStudentPassword(currentPassword, newPassword);
+        await sharedBackend.changeStudentPassword(newPassword);
         accountPasswordMessage = "Your Classroom Launchpad password was updated.";
         studentChangePasswordForm.reset();
         status.textContent = accountPasswordMessage;

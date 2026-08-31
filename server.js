@@ -27,7 +27,7 @@ const sessionSecret = configuredSessionSecret || crypto.randomBytes(48).toString
 const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_ENV === "production" ? "" : "1017"));
 const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
-const loginAttempts = new Map();
+const teacherLoginAttempts = new Map();
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
@@ -1149,12 +1149,12 @@ function clientAddress(req) {
   return String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
 }
 
-function rateLimitLogin(req) {
+function rateLimitTeacherLogin(req) {
   const key = clientAddress(req);
   const now = Date.now();
-  const recent = (loginAttempts.get(key) || []).filter(time => now - time < 10 * 60 * 1000);
+  const recent = (teacherLoginAttempts.get(key) || []).filter(time => now - time < 10 * 60 * 1000);
   recent.push(now);
-  loginAttempts.set(key, recent);
+  teacherLoginAttempts.set(key, recent);
   return recent.length <= 20;
 }
 
@@ -1486,10 +1486,6 @@ async function handleAuthApi(req, res, pathname) {
 
   if (req.method === "POST" && pathname === "/api/auth/register") {
     if (!requireSameOrigin(req, res)) return true;
-    if (!rateLimitLogin(req)) {
-      sendJson(res, 429, { error: "Too many registration attempts. Please wait and try again." });
-      return true;
-    }
     if (!configuredSessionSecret) {
       sendJson(res, 503, { error: "Student login has not been configured yet.", code: "AUTH_NOT_CONFIGURED" });
       return true;
@@ -1559,10 +1555,6 @@ async function handleAuthApi(req, res, pathname) {
 
   if (req.method === "POST" && pathname === "/api/auth/login") {
     if (!requireSameOrigin(req, res)) return true;
-    if (!rateLimitLogin(req)) {
-      sendJson(res, 429, { error: "Too many login attempts. Please wait and try again." });
-      return true;
-    }
     try {
       const body = await readBody(req);
       const email = normalizeEmail(body.email);
@@ -1592,7 +1584,6 @@ async function handleAuthApi(req, res, pathname) {
     if (!session) return true;
     try {
       const body = await readBody(req);
-      const currentPassword = String(body.currentPassword || "");
       const newPassword = String(body.newPassword || "");
       if (newPassword.length < 8 || newPassword.length > 128) {
         sendJson(res, 400, { error: "Create a password containing at least 8 characters." });
@@ -1600,8 +1591,8 @@ async function handleAuthApi(req, res, pathname) {
       }
       const db = readDb();
       const approved = normalizeApprovedStudents(db.approvedStudents).find(student => student.email === normalizeEmail(session.email));
-      if (!approved || !approved.passwordHash || !verifyStudentSecret(currentPassword, approved.passwordSalt, approved.passwordHash)) {
-        sendJson(res, 401, { error: "The current password did not match.", code: "INVALID_CURRENT_PASSWORD" });
+      if (!approved || !approved.passwordHash) {
+        sendJson(res, 404, { error: "Your student account could not be found." });
         return true;
       }
       if (verifyStudentSecret(newPassword, approved.passwordSalt, approved.passwordHash)) {
@@ -1622,8 +1613,8 @@ async function handleAuthApi(req, res, pathname) {
 
   if (req.method === "POST" && pathname === "/api/auth/teacher") {
     if (!requireSameOrigin(req, res)) return true;
-    if (!rateLimitLogin(req)) {
-      sendJson(res, 429, { error: "Too many login attempts. Please wait and try again." });
+    if (!rateLimitTeacherLogin(req)) {
+      sendJson(res, 429, { error: "Too many teacher sign-in attempts. Please wait and try again." });
       return true;
     }
     try {

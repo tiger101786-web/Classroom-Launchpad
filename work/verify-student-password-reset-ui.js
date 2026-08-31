@@ -8,7 +8,7 @@ const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
 
 assert.match(app, /data-action="showStudentPasswordReset">Create a New Password/);
-assert.match(app, /Forgot your password\? Ask Mr\. Nieves for a one-time reset code first\./);
+assert.match(app, /Open Your Account to change your password anytime without a code/);
 assert.match(app, /One-time password reset code/);
 assert.match(app, /Save New Password/);
 assert.match(app, /registerEmail\.value = loginEmail\.value\.trim\(\)/);
