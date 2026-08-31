@@ -26,11 +26,11 @@ async function run() {
   const coltSource = fs.readFileSync(path.resolve(__dirname, "..", "launchpad-colt.js"), "utf8");
   assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
   assert.match(coltSource, /WELCOME_REACTION_DURATION_MS\s*=\s*10_100/, "The complete ten-second welcome animation must remain visible.");
-  ["companion", "greeting", "excited", "dancing"].forEach(pose => {
+  ["companion", "greeting", "excited"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
@@ -64,6 +64,10 @@ async function run() {
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
+    const radioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDance"]');
+    assert.equal(await radioDanceVideo.evaluate(element => element.tagName), "VIDEO");
+    assert.match(await radioDanceVideo.getAttribute("src"), /launchpad-colt-radio-dance\.webm/);
+    assert.equal(await page.locator('.launchpad-colt-pose[data-pose="dancing"]').count(), 0, "The old static radio-dance pose must not render.");
     await page.waitForSelector('.launchpad-colt-companion[data-state="welcome"]');
     await page.waitForTimeout(180);
     assert.equal(await welcomeVideo.evaluate(element => getComputedStyle(element).opacity), "1");

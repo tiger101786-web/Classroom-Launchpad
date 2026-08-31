@@ -10200,7 +10200,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="move"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="message"] .launchpad-colt-pose[data-pose="excited"],
 .launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="excited"],
-.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="dancing"],
+.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDance"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   opacity: 1 !important;
 }

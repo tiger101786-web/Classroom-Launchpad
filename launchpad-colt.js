@@ -10,12 +10,12 @@
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
     welcome: "assets/launchpad-colt-welcome.webm?v=20260830-welcome-alpha-v1",
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
-    pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7"
+    pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
+    radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1"
   };
   const POSE_ASSETS = {
     greeting: "assets/launchpad-colt-greeting.png?v=20260830-colt-poses",
-    excited: "assets/launchpad-colt-excited.png?v=20260830-colt-poses",
-    dancing: "assets/launchpad-colt-dancing.png?v=20260830-colt-poses"
+    excited: "assets/launchpad-colt-excited.png?v=20260830-colt-poses"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const WELCOME_REACTION_DURATION_MS = 10_100;
@@ -45,6 +45,7 @@
   let sleepTimer = 0;
   let panelObserver = null;
   let currentState = "idle";
+  let pendingRadioReaction = false;
   let controlsOpen = false;
   let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
   let dragSession = null;
@@ -63,7 +64,7 @@
         <img class="launchpad-colt-pose" data-pose="greeting" src="${POSE_ASSETS.greeting}" alt="" aria-hidden="true" draggable="false">
         <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <img class="launchpad-colt-pose" data-pose="excited" src="${POSE_ASSETS.excited}" alt="" aria-hidden="true" draggable="false">
-        <img class="launchpad-colt-pose" data-pose="dancing" src="${POSE_ASSETS.dancing}" alt="" aria-hidden="true" draggable="false">
+        <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
       </button>
@@ -100,6 +101,7 @@
       directions: "pointing",
       explore: "pointing",
       move: "pointing",
+      radio: "radioDance",
       sleep: "sleeping"
     };
     const activePose = poseByState[state] || "";
@@ -248,6 +250,9 @@
     if (blocked) {
       speech.hidden = true;
       closeControls();
+    } else if (pendingRadioReaction) {
+      pendingRadioReaction = false;
+      globalObject.setTimeout(() => react("radio", "Now playing—enjoy the music!", 6000), 120);
     }
   }
 
@@ -412,7 +417,10 @@
     const target = event.target.closest("[data-action], .colt-radio-play");
     if (!target) return;
     const action = target.dataset.action || "";
-    if (target.matches(".colt-radio-play")) react("radio");
+    if (target.matches(".colt-radio-play")) {
+      if (root.classList.contains("is-panel-open")) pendingRadioReaction = true;
+      else react("radio", undefined, 6000);
+    }
     else if (action === "openMessages") react("message", "Opening your private messages.");
     else if (action === "openColtCorner") react("corner", "Let's check Colt Corner.");
     else if (action === "openGoogleApp" && /classroom\.google\.com/i.test(target.dataset.url || "")) react("classroom");
