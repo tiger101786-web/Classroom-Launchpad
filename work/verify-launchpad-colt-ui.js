@@ -23,7 +23,9 @@ async function authenticate(page, role = "student") {
 
 async function run() {
   const serverSource = fs.readFileSync(path.resolve(__dirname, "..", "server.js"), "utf8");
+  const coltSource = fs.readFileSync(path.resolve(__dirname, "..", "launchpad-colt.js"), "utf8");
   assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
+  assert.match(coltSource, /WELCOME_REACTION_DURATION_MS\s*=\s*10_100/, "The complete ten-second welcome animation must remain visible.");
   ["companion", "greeting", "excited", "dancing"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
@@ -152,8 +154,18 @@ async function run() {
     assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
     await page.getByRole("button", { name: "Minimize", exact: true }).click();
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
-
+    const minimizedBeforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    await page.mouse.move(minimizedBeforeDrag.x + 32, minimizedBeforeDrag.y + 32);
+    await page.mouse.down();
+    await page.mouse.move(minimizedBeforeDrag.x - 85, minimizedBeforeDrag.y + 45, { steps: 7 });
+    await page.mouse.up();
+    const minimizedAfterDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    assert(Math.abs(minimizedAfterDrag.x - minimizedBeforeDrag.x) > 30, "The minimized Colt icon could not be dragged.");
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
     await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Make larger", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Make larger", exact: true }).click();
     assert(!(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized"))));
 
     const beforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
@@ -179,6 +191,20 @@ async function run() {
     await page.mouse.up();
     const afterSecondDrag = await page.locator("#launchpadColtRoot").boundingBox();
     assert(Math.abs(afterSecondDrag.x - afterFirstDrag.x) > 30, "The Colt could not be immediately dragged a second time.");
+
+    await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Hide Colt", exact: true }).click();
+    await page.waitForSelector(".launchpad-colt-restore:visible");
+    const hiddenBeforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    const restoreBox = await page.locator(".launchpad-colt-restore").boundingBox();
+    await page.mouse.move(restoreBox.x + 27, restoreBox.y + 27);
+    await page.mouse.down();
+    await page.mouse.move(restoreBox.x - 80, restoreBox.y - 35, { steps: 7 });
+    await page.mouse.up();
+    const hiddenAfterDrag = await page.locator("#launchpadColtRoot").boundingBox();
+    assert(Math.abs(hiddenAfterDrag.x - hiddenBeforeDrag.x) > 30, "The hidden Colt restore icon could not be dragged.");
+    await page.locator(".launchpad-colt-restore").click();
+    await page.waitForSelector(".launchpad-colt-character:visible");
 
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");

@@ -10410,7 +10410,15 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   border-radius: 50%;
   background: radial-gradient(circle, #34101c, #0c0a0c 72%);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(218, 20, 69, 0.3);
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.launchpad-colt-root.is-minimized .launchpad-colt-controls {
+  top: 0;
+  right: 72px;
 }
 
 .launchpad-colt-restore img {

@@ -18,6 +18,7 @@
     dancing: "assets/launchpad-colt-dancing.png?v=20260830-colt-poses"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
+  const WELCOME_REACTION_DURATION_MS = 10_100;
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
     directions: { icon: "☝", text: "Today's directions are ready." },
@@ -208,20 +209,27 @@
     speechText.textContent = typeof customText === "string" ? customText : reaction.text;
     speech.hidden = !speechText.textContent;
     syncPoseVideos(name, true);
-    if (duration > 0) {
+    const reactionDuration = name === "welcome"
+      ? Math.max(duration, WELCOME_REACTION_DURATION_MS)
+      : duration;
+    if (reactionDuration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
         currentState = "idle";
         companion.dataset.state = "idle";
         prop.textContent = "";
         speech.hidden = true;
         syncPoseVideos("idle", true);
-      }, duration);
+      }, reactionDuration);
     }
+  }
+
+  function welcome(customText) {
+    react("welcome", customText, WELCOME_REACTION_DURATION_MS);
   }
 
   function resetSleepTimer() {
     globalObject.clearTimeout(sleepTimer);
-    if (currentState === "sleep") react("welcome", "I'm awake—what are we doing next?", 2600);
+    if (currentState === "sleep") welcome("I'm awake—what are we doing next?");
     sleepTimer = globalObject.setTimeout(() => {
       if (!controlsOpen) react("sleep", "", 0);
     }, 60000);
@@ -312,7 +320,7 @@
     grid.append(card);
   }
 
-  characterButton.addEventListener("pointerdown", event => {
+  function beginDrag(event) {
     if (event.button !== 0) return;
     event.preventDefault();
     const rect = root.getBoundingClientRect();
@@ -324,10 +332,10 @@
       rootY: rect.top,
       moved: false
     };
-    characterButton.setPointerCapture(event.pointerId);
-  });
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
 
-  characterButton.addEventListener("pointermove", event => {
+  function moveDrag(event) {
     if (!dragSession || dragSession.pointerId !== event.pointerId) return;
     const deltaX = event.clientX - dragSession.startX;
     const deltaY = event.clientY - dragSession.startY;
@@ -340,7 +348,7 @@
     root.style.left = `${next.x}px`;
     root.style.top = `${next.y}px`;
     prefs.position = next;
-  });
+  }
 
   function finishDrag(event) {
     if (!dragSession || dragSession.pointerId !== event.pointerId) return;
@@ -354,19 +362,16 @@
     dragSession = null;
   }
 
-  characterButton.addEventListener("pointerup", finishDrag);
-  characterButton.addEventListener("pointercancel", finishDrag);
-  characterButton.addEventListener("dragstart", event => event.preventDefault());
+  [characterButton, restoreButton].forEach(handle => {
+    handle.addEventListener("pointerdown", beginDrag);
+    handle.addEventListener("pointermove", moveDrag);
+    handle.addEventListener("pointerup", finishDrag);
+    handle.addEventListener("pointercancel", finishDrag);
+    handle.addEventListener("dragstart", event => event.preventDefault());
+  });
 
   characterButton.addEventListener("click", () => {
     if (suppressCharacterClick) return;
-    if (prefs.minimized) {
-      prefs.minimized = false;
-      savePreferences();
-      applyPreferences();
-      react("welcome", "Launchpad Colt is back!", 2200);
-      return;
-    }
     controlsOpen = !controlsOpen;
     controls.hidden = !controlsOpen;
     characterButton.setAttribute("aria-expanded", String(controlsOpen));
@@ -395,11 +400,12 @@
   });
 
   restoreButton.addEventListener("click", () => {
+    if (suppressCharacterClick) return;
     prefs.hidden = false;
     prefs.minimized = false;
     savePreferences();
     applyPreferences();
-    react("welcome", "Welcome back!", 2400);
+    welcome("Welcome back!");
   });
 
   documentObject.addEventListener("click", event => {
@@ -437,7 +443,7 @@
       const marker = `launchpadColtWelcome:${session.email || session.role}`;
       if (!globalObject.sessionStorage.getItem(marker)) {
         globalObject.sessionStorage.setItem(marker, "1");
-        globalObject.setTimeout(() => react("welcome"), 120);
+        globalObject.setTimeout(() => welcome(), 120);
       }
     }
     globalObject.setTimeout(() => {
@@ -466,7 +472,7 @@
       const marker = `launchpadColtWelcome:${session.email || session.role}`;
       if (!globalObject.sessionStorage.getItem(marker)) {
         globalObject.sessionStorage.setItem(marker, "1");
-        globalObject.setTimeout(() => react("welcome"), 550);
+        globalObject.setTimeout(() => welcome(), 550);
       }
       noticeNewActivity();
     }
