@@ -94,6 +94,7 @@
   function syncPoseVideos(state = currentState, restart = false) {
     const poseByState = {
       idle: "idle",
+      welcome: "pointing",
       directions: "pointing",
       explore: "pointing",
       move: "pointing",
@@ -425,11 +426,19 @@
   globalObject.addEventListener("classroom-launchpad-rendered", event => {
     screen = event.detail && event.detail.screen ? event.detail.screen : (documentObject.body.dataset.screen || screen);
     const nextAuth = event.detail && event.detail.auth ? event.detail.auth : session;
+    const becameAuthenticated = !session.authenticated && Boolean(nextAuth.authenticated);
     const accountChanged = (nextAuth.email || nextAuth.role) !== (session.email || session.role);
     session = { ...session, ...nextAuth };
     if (accountChanged) loadPreferences();
     syncVisibility();
     injectTeacherSetting();
+    if (becameAuthenticated && shouldShow()) {
+      const marker = `launchpadColtWelcome:${session.email || session.role}`;
+      if (!globalObject.sessionStorage.getItem(marker)) {
+        globalObject.sessionStorage.setItem(marker, "1");
+        globalObject.setTimeout(() => react("welcome"), 120);
+      }
+    }
     globalObject.setTimeout(() => {
       watchPanels();
       noticeNewActivity();

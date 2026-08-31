@@ -57,6 +57,10 @@ async function run() {
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
+    await page.waitForSelector('.launchpad-colt-companion[data-state="welcome"]');
+    await page.waitForTimeout(180);
+    assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.equal(await pointingVideo.evaluate(element => element.paused), false);
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
     await page.evaluate(() => {
@@ -89,7 +93,7 @@ async function run() {
     const greetingImage = page.locator('.launchpad-colt-pose[data-pose="greeting"]');
     await greetingImage.evaluate(element => {
       element.style.transition = "none";
-      element.closest(".launchpad-colt-companion").dataset.state = "welcome";
+      element.closest(".launchpad-colt-companion").dataset.state = "classroom";
     });
     assert.equal(await greetingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await greetingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-greeting/);

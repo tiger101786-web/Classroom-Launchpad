@@ -10188,13 +10188,13 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  transition: opacity 130ms ease;
+  transition: none;
 }
 
 .launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
-.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="greeting"],
 .launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greeting"],
 .launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greeting"],
+.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="move"] .launchpad-colt-pose[data-pose="pointing"],
@@ -10202,7 +10202,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="excited"],
 .launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="dancing"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .launchpad-colt-character:hover .launchpad-colt-pose,
@@ -10346,7 +10346,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   animation: launchpad-colt-hop 620ms ease-in-out 2;
 }
 
-.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose,
 .launchpad-colt-companion[data-state="success"] .launchpad-colt-pose,
 .launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose {
   animation: launchpad-colt-greeting 760ms cubic-bezier(0.2, 0.8, 0.3, 1.15) 2;
