@@ -28,7 +28,7 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4"].forEach(filename => {
@@ -52,7 +52,11 @@ async function run() {
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
-    assert.equal(await page.locator(".launchpad-colt-pose").count(), 6);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 7);
+    const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
+    assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
+    assert.match(await welcomeVideo.getAttribute("src"), /launchpad-colt-welcome\.webm/);
+    assert.equal(await welcomeVideo.getAttribute("poster"), null);
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
@@ -60,8 +64,20 @@ async function run() {
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
     await page.waitForSelector('.launchpad-colt-companion[data-state="welcome"]');
     await page.waitForTimeout(180);
-    assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
-    assert.equal(await pointingVideo.evaluate(element => element.paused), false);
+    assert.equal(await welcomeVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).opacity), "0");
+    assert.equal(await welcomeVideo.evaluate(element => element.paused), false);
+    const welcomeCornerAlpha = await welcomeVideo.evaluate(async element => {
+      element.currentTime = 3;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(welcomeCornerAlpha < 8, `The welcome animation background is not transparent (corner alpha: ${welcomeCornerAlpha}).`);
     assert.equal(await image.getAttribute("muted"), "");
     assert.equal(await image.getAttribute("loop"), "");
     await page.evaluate(() => {

@@ -10194,7 +10194,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
 .launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greeting"],
 .launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greeting"],
-.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="pointing"],
+.launchpad-colt-companion[data-state="welcome"] .launchpad-colt-pose[data-pose="welcome"],
 .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="move"] .launchpad-colt-pose[data-pose="pointing"],
