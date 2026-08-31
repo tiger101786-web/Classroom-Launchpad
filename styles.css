@@ -10106,6 +10106,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   transform: translate(24px, -50%) scale(0.82);
 }
 
+.launchpad-colt-root.is-panel-open.is-radio-dancing {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%) scale(1);
+}
+
 .launchpad-colt-root.is-user-positioned {
   right: auto;
   transform: none;
@@ -10113,6 +10119,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .launchpad-colt-root.is-user-positioned.is-panel-open {
   transform: translateX(24px) scale(0.82);
+}
+
+.launchpad-colt-root.is-user-positioned.is-panel-open.is-radio-dancing {
+  transform: none;
 }
 
 .launchpad-colt-companion {

@@ -45,7 +45,6 @@
   let sleepTimer = 0;
   let panelObserver = null;
   let currentState = "idle";
-  let pendingRadioReaction = false;
   let controlsOpen = false;
   let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
   let dragSession = null;
@@ -202,10 +201,11 @@
   }
 
   function react(name, customText, duration = 4200) {
-    if (!shouldShow() || prefs.hidden || root.classList.contains("is-panel-open")) return;
+    if (!shouldShow() || prefs.hidden || (root.classList.contains("is-panel-open") && name !== "radio")) return;
     const reaction = REACTIONS[name] || REACTIONS.success;
     globalObject.clearTimeout(reactionTimer);
     currentState = name;
+    root.classList.toggle("is-radio-dancing", name === "radio");
     companion.dataset.state = name;
     prop.textContent = reaction.icon;
     speechText.textContent = typeof customText === "string" ? customText : reaction.text;
@@ -217,6 +217,7 @@
     if (reactionDuration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
         currentState = "idle";
+        root.classList.remove("is-radio-dancing");
         companion.dataset.state = "idle";
         prop.textContent = "";
         speech.hidden = true;
@@ -250,9 +251,6 @@
     if (blocked) {
       speech.hidden = true;
       closeControls();
-    } else if (pendingRadioReaction) {
-      pendingRadioReaction = false;
-      globalObject.setTimeout(() => react("radio", "Now playing—enjoy the music!", 0), 120);
     }
   }
 
@@ -416,11 +414,10 @@
   globalObject.addEventListener("colt-radio-playback", event => {
     const playing = Boolean(event.detail?.playing);
     if (playing) {
-      if (root.classList.contains("is-panel-open")) pendingRadioReaction = true;
-      else react("radio", "Now playing—enjoy the music!", 0);
+      react("radio", "Now playing—enjoy the music!", 0);
       return;
     }
-    pendingRadioReaction = false;
+    root.classList.remove("is-radio-dancing");
     if (currentState === "radio") {
       globalObject.clearTimeout(reactionTimer);
       currentState = "idle";

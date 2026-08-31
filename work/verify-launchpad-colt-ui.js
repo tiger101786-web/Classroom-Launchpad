@@ -223,6 +223,11 @@ async function run() {
     await page.locator(".colt-radio-launcher").click();
     await page.waitForSelector(".colt-radio-panel:visible");
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-panel-open")));
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: true, station: "test" } })));
+    await page.waitForTimeout(180);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio");
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => getComputedStyle(element).opacity), "1", "The dancing Colt disappeared while the radio panel was open.");
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } })));
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => window.dispatchEvent(new Event("resize")));
