@@ -3583,7 +3583,8 @@ body[data-theme="night"] .colt-run-stats span {
 .colt-run-character-grid .colt-run-coming-soon {
   position: absolute;
   z-index: 2;
-  top: 14px;
+  top: auto;
+  bottom: 58px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;

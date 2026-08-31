@@ -19,9 +19,10 @@ assert.match(app, /colt-run-mrs-levandoske-idle\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-idle-02\.webm/);
 assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mrsLevandoskeIdleVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
+assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 130, 198, -6\)/, "Mrs. Levandoske should sit slightly lower on the character-select platform.");
 assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(3,/);
 assert.match(styles, /\.colt-run-coming-soon/);
-assert.match(styles, /\.colt-run-character-grid \.colt-run-coming-soon \{[\s\S]*?position: absolute;[\s\S]*?top: 14px;/);
+assert.match(styles, /\.colt-run-character-grid \.colt-run-coming-soon \{[\s\S]*?position: absolute;[\s\S]*?top: auto;[\s\S]*?bottom: 58px;/);
 assert.match(
   styles,
   /button\[data-character="mrsLevandoske"\] \{[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,

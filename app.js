@@ -7234,7 +7234,7 @@ function startColtRunGame() {
     keepMrsLevandoskeIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
-    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, 2);
+    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, -6);
   };
 
   const coverDrawRectCache = new WeakMap();
