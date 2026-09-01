@@ -27,7 +27,10 @@ async function run() {
   assert.match(serverSource, /"\.webm":\s*"video\/webm"/, "The production server must send Colt animations with the video/webm MIME type.");
   assert.match(coltSource, /WELCOME_REACTION_DURATION_MS\s*=\s*10_100/, "The complete ten-second welcome animation must remain visible.");
   assert.match(coltSource, /GREETING_EXCITED_REACTION_DURATION_MS\s*=\s*6_100/, "The complete greeting and excited animation must remain visible.");
-  assert.match(coltSource, /react\("radio", "Now playing—enjoy the music!", 0\)/, "The radio dance must not have a short reaction timer.");
+  assert.match(coltSource, /RADIO_MESSAGE_DURATION_MS\s*=\s*4_200/, "The radio announcement must have a short display time.");
+  assert.match(coltSource, /react\("radio", showMessage \? "Now playing—enjoy the music!" : "", 0\)/, "The radio dance must not have a short reaction timer.");
+  assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt Up" : "Put Colt to Sleep"/, "The sleep control must switch to a wake control.");
+  assert.match(coltSource, /if \(prefs\.asleep\) return;[\s\S]*?if \(currentState === "sleep"\) welcome\("I'm awake—what are we doing next\?"\);[\s\S]*?60000/, "The original automatic nap and activity-based wake behavior must remain unchanged.");
   assert.match(coltSource, /addEventListener\("colt-radio-playback"/, "The Colt must follow Colt Radio playback state.");
   ["companion"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
@@ -174,6 +177,7 @@ async function run() {
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
     await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local") || "{}").asleep), true);
     const sleepingImage = page.locator('.launchpad-colt-pose[data-pose="sleeping"]');
     assert.equal(await sleepingImage.evaluate(element => element.tagName), "VIDEO");
     assert.match(await sleepingImage.getAttribute("src"), /launchpad-colt-sleeping\.webm/);
@@ -192,7 +196,18 @@ async function run() {
     await sleepingImage.evaluate(element => { element.style.transition = "none"; });
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
+    await page.keyboard.press("A");
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep", "Keyboard activity woke a manually sleeping Colt.");
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-opened")));
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep", "Opening Colt Radio woke a manually sleeping Colt.");
     await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Wake Colt Up", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Wake Colt Up", exact: true }).click();
+    assert.notEqual(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
+    await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
     await page.getByRole("button", { name: "Minimize", exact: true }).click();
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
@@ -274,7 +289,11 @@ async function run() {
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: true, station: "test" } })));
     await page.waitForTimeout(180);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio");
+    assert.equal(await page.locator(".launchpad-colt-speech span").textContent(), "Now playing—enjoy the music!");
     assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => getComputedStyle(element).opacity), "1", "The dancing Colt disappeared while the radio panel was open.");
+    await page.waitForTimeout(4300);
+    assert.equal(await page.locator(".launchpad-colt-speech").isHidden(), true, "The now-playing announcement did not disappear.");
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio", "Hiding the announcement stopped the radio dance.");
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } })));
     await page.waitForTimeout(120);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle when radio playback stopped.");

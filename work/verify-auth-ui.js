@@ -851,6 +851,21 @@ async function run() {
     }
     await page.locator("#dashboardStudentSearch").fill("");
 
+    const managedStudentRow = page.locator(".approved-student-row").filter({ hasText: "ui.test@scscolts.org" });
+    await managedStudentRow.getByRole("button", { name: "Set Password", exact: true }).click();
+    const teacherPasswordForm = page.locator(".teacher-student-password-form");
+    await teacherPasswordForm.waitFor();
+    if (await teacherPasswordForm.locator('input[name="newPassword"]').getAttribute("minlength") !== null) {
+      throw new Error("Teacher-set student passwords still have a minimum-length restriction.");
+    }
+    await teacherPasswordForm.locator('input[name="newPassword"]').fill("7");
+    await teacherPasswordForm.locator('input[name="confirmation"]').fill("7");
+    await teacherPasswordForm.evaluate(form => form.requestSubmit());
+    await page.getByText("Password changed for ui.test@scscolts.org.", { exact: true }).waitFor();
+    if (!await page.locator(".approved-student-row").filter({ hasText: "ui.test@scscolts.org" }).getByRole("button", { name: "Change Password", exact: true }).count()) {
+      throw new Error("Teacher password management did not update the student's registered state.");
+    }
+
     await page.evaluate(() => {
       approvedStudents = [...approvedStudents, {
         email: "activated.ui@scscolts.org", name: "Activated, UI", grade: "5",
@@ -977,6 +992,7 @@ async function run() {
       coltRunHowToPlayResponsive: true,
       activationAndPasswordGuidancePresent: true,
       teacherCanGenerateActivationCodes: true,
+      teacherCanSetStudentPasswordWithoutCode: true,
       privateRosterNamesDisplay: true,
       studentManagerSearchWorks: true,
       registeredStudentDetailsShowOnlyActivatedAccounts: true,

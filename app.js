@@ -724,6 +724,12 @@ const sharedBackend = {
   resetStudentCode(email) {
     return this.request(`/api/approved-students/${encodeURIComponent(email)}/reset-code`, { method: "POST", body: "{}" });
   },
+  setStudentPassword(email, newPassword) {
+    return this.request(`/api/approved-students/${encodeURIComponent(email)}/password`, {
+      method: "PUT",
+      body: JSON.stringify({ newPassword })
+    });
+  },
   regenerateStudentCodes() {
     return this.request("/api/approved-students/regenerate-codes", { method: "POST", body: "{}" });
   }
@@ -1428,6 +1434,8 @@ dashboardSections.splice(4, 0, { id: "registered", label: "Registered Students",
 const savedDashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
 let dashboardSection = dashboardSections.some(section => section.id === savedDashboardSection) ? savedDashboardSection : "overview";
 let dashboardStudentSearch = "";
+let teacherPasswordStudentEmail = "";
+let teacherPasswordMessage = "";
 let dashboardLinkSearch = "";
 let dashboardLinkCategory = "all";
 let dashboardLinkStatus = "all";
@@ -8631,7 +8639,7 @@ function renderApprovedStudentManager() {
           </label>
         </div>
         <div class="approved-student-list">
-          ${visibleStudents.length ? visibleStudents.map(student => `
+          ${visibleStudents.length ? visibleStudents.map((student, index) => `
             <div class="approved-student-row">
               <span class="approved-student-identity">
                 <strong>${escapeHtml(student.name || "Name not added")}${student.teacherTestAccount ? ` <span class="test-account-badge">Teacher Test Account</span>` : ""}</strong>
@@ -8639,9 +8647,39 @@ function renderApprovedStudentManager() {
                 <small>${student.registered ? "Registered" : student.activationReady ? "Waiting for first login" : student.teacherTestAccount ? "Click New Code to create the first-login access code" : "Needs activation code"}</small>
               </span>
               <div class="actions">
-                <button class="outline-btn" data-action="resetStudentCode" data-email="${escapeHtml(student.email)}">${student.registered ? "Reset Password" : "New Code"}</button>
+                <button class="primary-btn" data-action="manageStudentPassword" data-email="${escapeHtml(student.email)}">${student.registered ? "Change Password" : "Set Password"}</button>
+                <button class="outline-btn" data-action="resetStudentCode" data-email="${escapeHtml(student.email)}">${student.registered ? "Create Reset Code" : "New Code"}</button>
                 ${student.teacherTestAccount ? "" : `<button class="danger-btn" data-action="removeApprovedStudent" data-email="${escapeHtml(student.email)}">Remove</button>`}
               </div>
+              ${teacherPasswordStudentEmail === student.email ? `
+                <form class="teacher-student-password-form" data-student-email="${escapeHtml(student.email)}">
+                  <div class="teacher-student-password-heading">
+                    <div>
+                      <strong>Choose a password for ${escapeHtml(student.name || student.email)}</strong>
+                      <small>No activation code, old password, or minimum length is required.</small>
+                    </div>
+                    <button class="text-btn" type="button" data-action="cancelTeacherStudentPassword">Cancel</button>
+                  </div>
+                  <div class="teacher-student-password-fields">
+                    <label class="field" for="teacherStudentPassword-${index}">
+                      <span>New password</span>
+                      <input id="teacherStudentPassword-${index}" name="newPassword" type="password" autocomplete="new-password" spellcheck="false" required>
+                    </label>
+                    <label class="field" for="teacherStudentPasswordConfirm-${index}">
+                      <span>Confirm password</span>
+                      <input id="teacherStudentPasswordConfirm-${index}" name="confirmation" type="password" autocomplete="new-password" spellcheck="false" required>
+                    </label>
+                  </div>
+                  <label class="password-visibility-control" for="showTeacherStudentPassword-${index}">
+                    <input id="showTeacherStudentPassword-${index}" type="checkbox" data-password-visibility data-password-targets="teacherStudentPassword-${index} teacherStudentPasswordConfirm-${index}" aria-controls="teacherStudentPassword-${index} teacherStudentPasswordConfirm-${index}">
+                    <span>Show passwords</span>
+                  </label>
+                  <div class="teacher-student-password-actions">
+                    <button class="primary-btn" type="submit">Save Student Password</button>
+                    <p class="request-message" aria-live="polite">${escapeHtml(teacherPasswordMessage)}</p>
+                  </div>
+                </form>
+              ` : ""}
             </div>
           `).join("") : `<p class="instruction">${approvedStudents.length ? "No students match this search." : "No student emails have been imported yet."}</p>`}
         </div>
@@ -9931,6 +9969,34 @@ function attachScreenHandlers() {
       });
     });
   });
+
+  const teacherStudentPasswordForm = document.querySelector(".teacher-student-password-form");
+  if (teacherStudentPasswordForm) {
+    teacherStudentPasswordForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = teacherStudentPasswordForm.querySelector(".request-message");
+      const newPassword = teacherStudentPasswordForm.elements.newPassword.value;
+      const confirmation = teacherStudentPasswordForm.elements.confirmation.value;
+      status.classList.remove("error");
+      if (newPassword !== confirmation) {
+        teacherPasswordMessage = "The password entries do not match.";
+        status.textContent = teacherPasswordMessage;
+        status.classList.add("error");
+        return;
+      }
+      status.textContent = "Saving the student's password…";
+      try {
+        const result = await sharedBackend.setStudentPassword(teacherStudentPasswordForm.dataset.studentEmail, newPassword);
+        approvedStudents = result.students || approvedStudents;
+        teacherPasswordMessage = `Password changed for ${result.email}.`;
+        render();
+      } catch (error) {
+        teacherPasswordMessage = error.message;
+        status.textContent = error.message;
+        status.classList.add("error");
+      }
+    });
+  }
 
   const studentChangePasswordForm = document.getElementById("studentChangePasswordForm");
   if (studentChangePasswordForm) {
@@ -11358,6 +11424,17 @@ app.addEventListener("click", async event => {
   if (action === "add") setScreen({ name: "edit", id: null });
   if (action === "edit") setScreen({ name: "edit", id: target.dataset.id });
   if (action === "changePin") setScreen({ name: "changePin" });
+  if (action === "manageStudentPassword") {
+    teacherPasswordStudentEmail = target.dataset.email || "";
+    teacherPasswordMessage = "";
+    render();
+    window.setTimeout(() => document.querySelector(".teacher-student-password-form input[name='newPassword']")?.focus(), 0);
+  }
+  if (action === "cancelTeacherStudentPassword") {
+    teacherPasswordStudentEmail = "";
+    teacherPasswordMessage = "";
+    render();
+  }
   if (action === "removeApprovedStudent") {
     try {
       const result = await sharedBackend.removeApprovedStudent(target.dataset.email);

@@ -1811,6 +1811,44 @@ async function handleApprovedStudentsApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "PUT" && pathname.endsWith("/password")) {
+    try {
+      const encodedEmail = pathname.slice("/api/approved-students/".length, -"/password".length);
+      const email = normalizeEmail(decodeURIComponent(encodedEmail));
+      const body = await readBody(req);
+      const newPassword = String(body.newPassword ?? "");
+      if (!newPassword.length) {
+        sendJson(res, 400, { error: "Enter a new password." });
+        return true;
+      }
+      const students = normalizeApprovedStudents(db.approvedStudents);
+      const student = students.find(item => item.email === email);
+      if (!student) {
+        sendJson(res, 404, { error: "Approved student not found." });
+        return true;
+      }
+      const passwordRecord = hashStudentSecret(newPassword);
+      const updatedStudent = {
+        ...student,
+        passwordSalt: passwordRecord.salt,
+        passwordHash: passwordRecord.hash,
+        activationSalt: "",
+        activationHash: "",
+        activationIssuedAt: ""
+      };
+      db.approvedStudents = students.map(item => item.email === email ? updatedStudent : item);
+      writeDb(db);
+      sendJson(res, 200, {
+        ok: true,
+        email,
+        students: publicApprovedStudents(db.approvedStudents)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
   if (req.method === "DELETE" && pathname.startsWith("/api/approved-students/")) {
     const email = normalizeEmail(decodeURIComponent(pathname.slice("/api/approved-students/".length)));
     db.approvedStudents = normalizeApprovedStudents(db.approvedStudents).filter(student => student.email !== email);

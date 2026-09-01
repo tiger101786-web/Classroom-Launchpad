@@ -17,6 +17,7 @@
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const WELCOME_REACTION_DURATION_MS = 10_100;
   const GREETING_EXCITED_REACTION_DURATION_MS = 6_100;
+  const RADIO_MESSAGE_DURATION_MS = 4_200;
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
     directions: { icon: "☝", text: "Today's directions are ready." },
@@ -40,12 +41,13 @@
   let screen = documentObject.body.dataset.screen || "home";
   let globallyEnabled = true;
   let reactionTimer = 0;
+  let speechTimer = 0;
   let sleepTimer = 0;
   let panelObserver = null;
   let currentState = "idle";
   let radioPlaybackActive = false;
   let controlsOpen = false;
-  let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
+  let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
   let dragSession = null;
   let suppressCharacterClick = false;
 
@@ -89,6 +91,7 @@
   const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
   const motionButton = controls.querySelector('[data-colt-control="motion"]');
   const sizeButton = controls.querySelector('[data-colt-control="size"]');
+  const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
 
   function syncPoseVideos(state = currentState, restart = false) {
@@ -124,6 +127,18 @@
     return `classroomLaunchpadColtPrefsV1:${account}`;
   }
 
+  function showSleepingState(restart = false) {
+    globalObject.clearTimeout(reactionTimer);
+    globalObject.clearTimeout(speechTimer);
+    currentState = "sleep";
+    root.classList.remove("is-radio-dancing");
+    companion.dataset.state = "sleep";
+    prop.textContent = REACTIONS.sleep.icon;
+    speechText.textContent = "";
+    speech.hidden = true;
+    syncPoseVideos("sleep", restart);
+  }
+
   function loadPreferences() {
     try {
       const stored = JSON.parse(globalObject.localStorage.getItem(preferenceKey()) || "{}");
@@ -134,10 +149,11 @@
         position: stored.position && Number.isFinite(stored.position.x) && Number.isFinite(stored.position.y)
           ? { x: stored.position.x, y: stored.position.y }
           : null,
-        size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium"
+        size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium",
+        asleep: Boolean(stored.asleep)
       };
     } catch {
-      prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium" };
+      prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
     }
     applyPreferences();
   }
@@ -157,9 +173,11 @@
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
     motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
     sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
+    sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
     applySavedPosition();
     if (prefs.hidden) closeControls();
-    syncPoseVideos();
+    if (prefs.asleep) showSleepingState();
+    else syncPoseVideos();
   }
 
   function clampPosition(x, y) {
@@ -204,8 +222,10 @@
 
   function react(name, customText, duration = 4200) {
     if (!shouldShow() || prefs.hidden || (root.classList.contains("is-panel-open") && name !== "radio")) return;
+    if (prefs.asleep && name !== "sleep") return;
     const reaction = REACTIONS[name] || REACTIONS.success;
     globalObject.clearTimeout(reactionTimer);
+    globalObject.clearTimeout(speechTimer);
     currentState = name;
     root.classList.toggle("is-radio-dancing", name === "radio");
     companion.dataset.state = name;
@@ -239,8 +259,19 @@
     react("welcome", customText, WELCOME_REACTION_DURATION_MS);
   }
 
+  function startRadioDance(showMessage = true) {
+    react("radio", showMessage ? "Now playing—enjoy the music!" : "", 0);
+    if (!showMessage || prefs.asleep || currentState !== "radio") return;
+    speechTimer = globalObject.setTimeout(() => {
+      if (currentState !== "radio") return;
+      speechText.textContent = "";
+      speech.hidden = true;
+    }, RADIO_MESSAGE_DURATION_MS);
+  }
+
   function resetSleepTimer() {
     globalObject.clearTimeout(sleepTimer);
+    if (prefs.asleep) return;
     if (currentState === "sleep") welcome("I'm awake—what are we doing next?");
     sleepTimer = globalObject.setTimeout(() => {
       if (!controlsOpen) react("sleep", "", 0);
@@ -394,7 +425,17 @@
     const action = button.dataset.coltControl;
     if (action === "sleep") {
       closeControls();
-      react("sleep", "", 0);
+      prefs.asleep = !prefs.asleep;
+      savePreferences();
+      applyPreferences();
+      if (prefs.asleep) {
+        globalObject.clearTimeout(sleepTimer);
+        showSleepingState(true);
+      } else {
+        resetSleepTimer();
+        if (radioPlaybackActive) startRadioDance(false);
+        else welcome("I'm awake—what are we doing next?");
+      }
       return;
     }
     if (action === "minimize") prefs.minimized = !prefs.minimized;
@@ -422,7 +463,7 @@
     const playing = Boolean(event.detail?.playing);
     radioPlaybackActive = playing;
     if (playing) {
-      react("radio", "Now playing—enjoy the music!", 0);
+      if (!prefs.asleep) startRadioDance(true);
       return;
     }
     root.classList.remove("is-radio-dancing");
@@ -437,7 +478,7 @@
   });
 
   globalObject.addEventListener("colt-radio-opened", () => {
-    if (radioPlaybackActive) return;
+    if (radioPlaybackActive || prefs.asleep) return;
     globalObject.clearTimeout(reactionTimer);
     currentState = "idle";
     root.classList.remove("is-radio-dancing");

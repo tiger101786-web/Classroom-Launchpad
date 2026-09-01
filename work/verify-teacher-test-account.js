@@ -87,6 +87,22 @@ async function waitForServer() {
     assert.equal(register.payload.session.name, "Mr. Nieves Test Student");
     assert.equal(register.payload.session.grade, "4");
 
+    const teacherPasswordChange = await request(`/api/approved-students/${encodeURIComponent(testEmail)}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
+      body: JSON.stringify({ newPassword: "7" })
+    });
+    assert.equal(teacherPasswordChange.response.status, 200);
+    assert.equal(teacherPasswordChange.payload.email, testEmail);
+
+    const loginWithTeacherPassword = await request("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: origin },
+      body: JSON.stringify({ email: testEmail, password: "7" })
+    });
+    assert.equal(loginWithTeacherPassword.response.status, 200, "The teacher-set one-character password should work without activation or minimum-length rules.");
+    assert.equal(loginWithTeacherPassword.payload.session.email, testEmail);
+
     const outsideGmail = await request("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json", Origin: origin },

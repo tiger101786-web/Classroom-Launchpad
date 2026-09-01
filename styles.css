@@ -952,6 +952,7 @@ body[data-theme="night"] .auth-notice {
 
 .approved-student-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -996,6 +997,62 @@ body[data-theme="night"] .auth-notice {
 
 .approved-student-row .actions {
   flex: 0 0 auto;
+}
+
+.teacher-student-password-form {
+  display: grid;
+  flex: 0 0 100%;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid rgba(176, 22, 68, 0.36);
+  border-radius: 10px;
+  background: rgba(176, 22, 68, 0.07);
+}
+
+.teacher-student-password-heading,
+.teacher-student-password-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.teacher-student-password-heading strong,
+.teacher-student-password-heading small {
+  display: block;
+}
+
+.teacher-student-password-heading small {
+  margin-top: 4px;
+}
+
+.teacher-student-password-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.teacher-student-password-actions .request-message {
+  margin: 0;
+  text-align: right;
+}
+
+@media (max-width: 680px) {
+  .teacher-student-password-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-student-password-heading,
+  .teacher-student-password-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .teacher-student-password-actions .request-message {
+    text-align: left;
+  }
 }
 
 .roster-import-panel {
