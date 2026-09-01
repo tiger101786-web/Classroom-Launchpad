@@ -12,11 +12,13 @@
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
     radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1",
-    greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1"
+    greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1",
+    feeding: "assets/launchpad-colt-feeding.webm?v=20260901-feeding-alpha-v1"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const WELCOME_REACTION_DURATION_MS = 10_100;
   const GREETING_EXCITED_REACTION_DURATION_MS = 6_100;
+  const FEEDING_REACTION_DURATION_MS = 6_200;
   const RADIO_MESSAGE_DURATION_MS = 4_200;
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
@@ -28,6 +30,7 @@
     explore: { icon: "➜", text: "Great choice—let's explore!" },
     move: { icon: "✓", text: "This is my new spot!" },
     success: { icon: "✓", text: "Nice work!" },
+    feeding: { icon: "", text: "Snack time!" },
     sleep: { icon: "Zz", text: "" }
   };
   const SIZE_LABELS = {
@@ -64,6 +67,7 @@
         <video class="launchpad-colt-pose" data-pose="greetingExcited" src="${VIDEO_ASSETS.greetingExcited}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="feeding" src="${VIDEO_ASSETS.feeding}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
       </button>
@@ -71,6 +75,7 @@
         <button type="button" data-colt-control="minimize">Minimize</button>
         <button type="button" data-colt-control="motion">Pause motion</button>
         <button type="button" data-colt-control="size">Size: Medium</button>
+        <button type="button" data-colt-control="feed">Feed Me</button>
         <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
@@ -91,7 +96,9 @@
   const minimizeButton = controls.querySelector('[data-colt-control="minimize"]');
   const motionButton = controls.querySelector('[data-colt-control="motion"]');
   const sizeButton = controls.querySelector('[data-colt-control="size"]');
+  const feedButton = controls.querySelector('[data-colt-control="feed"]');
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
+  const feedingVideo = root.querySelector('video[data-pose="feeding"]');
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
 
   function syncPoseVideos(state = currentState, restart = false) {
@@ -106,6 +113,7 @@
       success: "greetingExcited",
       classroom: "greetingExcited",
       radio: "radioDance",
+      feeding: "feeding",
       sleep: "sleeping"
     };
     const activePose = poseByState[state] || "";
@@ -173,6 +181,8 @@
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
     motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
     sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
+    feedButton.disabled = prefs.asleep;
+    feedButton.title = prefs.asleep ? "Wake the Colt before feeding him" : "Play the feeding animation";
     sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
     applySavedPosition();
     if (prefs.hidden) closeControls();
@@ -241,7 +251,7 @@
         : duration;
     if (reactionDuration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
-        if (radioPlaybackActive && name !== "radio") {
+        if (radioPlaybackActive && name !== "radio" && name !== "feeding") {
           react("radio", "", 0);
           return;
         }
@@ -268,6 +278,20 @@
       speech.hidden = true;
     }, RADIO_MESSAGE_DURATION_MS);
   }
+
+  function finishFeeding() {
+    if (currentState !== "feeding") return;
+    globalObject.clearTimeout(reactionTimer);
+    currentState = "idle";
+    root.classList.remove("is-radio-dancing");
+    companion.dataset.state = "idle";
+    prop.textContent = "";
+    speech.hidden = true;
+    syncPoseVideos("idle", true);
+    resetSleepTimer();
+  }
+
+  feedingVideo.addEventListener("ended", finishFeeding);
 
   function resetSleepTimer() {
     globalObject.clearTimeout(sleepTimer);
@@ -423,6 +447,12 @@
     const button = event.target.closest("[data-colt-control]");
     if (!button) return;
     const action = button.dataset.coltControl;
+    if (action === "feed") {
+      if (prefs.asleep) return;
+      closeControls();
+      react("feeding", undefined, FEEDING_REACTION_DURATION_MS);
+      return;
+    }
     if (action === "sleep") {
       closeControls();
       prefs.asleep = !prefs.asleep;
