@@ -472,6 +472,9 @@ async function run() {
     if (!manifestResponse.ok() || manifest.icons?.length !== 2) {
       throw new Error("The favicon web manifest is incomplete.");
     }
+    if (manifest.launch_handler?.client_mode !== "focus-existing") {
+      throw new Error("The installed app is not configured to reuse its existing window.");
+    }
     await page.locator('[data-action="login"]').first().waitFor();
     const headerButtons = await page.locator(".header-actions button").allTextContents();
     if (!headerButtons.includes("PlusPortal") || !headerButtons.includes("Launchpad Login")) {
