@@ -297,50 +297,6 @@
       metadataEndpoint: "https://funkids-feed-data.s3-eu-west-1.amazonaws.com/now-playing/fun-kids-soundtracks.json",
       metadataFormat: "simpleTrack",
       note: "Kid-friendly songs from Disney classics, Frozen, Trolls, High School Musical, and other TV and film soundtracks, streamed by Fun Kids."
-    },
-    {
-      id: "mrg-ambient",
-      label: "Ambient • Calm",
-      type: "stream",
-      source: "https://str3.openstream.co/1808",
-      streamConfigEndpoint: "https://listen.openstream.co/5505/config",
-      provider: "AmbientRadio (MRG.fm)",
-      metadataEndpoint: "https://listen.openstream.co/5505/metadata",
-      metadataFormat: "simpleTrack",
-      note: "Ambient, space ambient, downtempo, new age, and meditation music streamed by MRG.fm. The free stream may include station or support breaks."
-    },
-    {
-      id: "mrg-classical",
-      label: "Classical • Focus",
-      type: "stream",
-      source: "https://str3.openstream.co/1032",
-      streamConfigEndpoint: "https://listen.openstream.co/5582/config",
-      provider: "ClassicalRadio (MRG.fm)",
-      metadataEndpoint: "https://listen.openstream.co/5582/metadata",
-      metadataFormat: "simpleTrack",
-      note: "Baroque, Classical-period, Romantic-era, modern, and contemporary classical music streamed by MRG.fm. The free stream may include station or support breaks."
-    },
-    {
-      id: "mrg-drone",
-      label: "Ambient • Drone",
-      type: "stream",
-      source: "https://str3.openstream.co/1835",
-      streamConfigEndpoint: "https://listen.openstream.co/5515/config",
-      provider: "DroneRadio (MRG.fm)",
-      metadataEndpoint: "https://listen.openstream.co/5515/metadata",
-      metadataFormat: "simpleTrack",
-      note: "Zero-beat drone and ambient music streamed by MRG.fm. The free stream may include station or support breaks."
-    },
-    {
-      id: "mrg-zero-beat",
-      label: "Ambient • Zero Beat",
-      type: "stream",
-      source: "https://str3.openstream.co/1843",
-      streamConfigEndpoint: "https://listen.openstream.co/5523/config",
-      provider: "Zero Beat Zone (MRG.fm)",
-      metadataEndpoint: "https://listen.openstream.co/5523/metadata",
-      metadataFormat: "simpleTrack",
-      note: "Deep ambient, space, electronic, and experimental zero-beat music streamed by MRG.fm. The free stream may include station or support breaks."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -385,11 +341,7 @@
     "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
     "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>',
     "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>',
-    "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
-    "mrg-ambient": '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>',
-    "mrg-classical": '<path d="M4 20h16M6 17h12M8 17V9m4 8V9m4 8V9M5 8h14L12 3 5 8Z"/>',
-    "mrg-drone": '<path d="M4 12c2-4 4-4 6 0s4 4 6 0 4-4 5 0M4 17c2-3 4-3 6 0s4 3 6 0 4-3 5 0"/>',
-    "mrg-zero-beat": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>'
+    "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>'
   };
 
   function iconSvg(paths, className = "") {
@@ -832,22 +784,6 @@
       nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
     }
 
-    async function connectStream(station) {
-      let source = station.source;
-      if (station.streamConfigEndpoint) {
-        try {
-          const response = await fetch(station.streamConfigEndpoint, { cache: "no-store" });
-          if (!response.ok) throw new Error("Stream configuration unavailable");
-          const config = await response.json();
-          source = config?.streamUrl || source;
-        } catch (error) {}
-      }
-      if (activeStation !== station.id) return;
-      audio.src = source;
-      audio.load();
-      startNowPlayingUpdates(station);
-    }
-
     function updatePlaybackButton() {
       const playing = !audio.paused && !audio.ended;
       toggleStream.textContent = playing ? "\u275a\u275a" : "\u25b6";
@@ -896,12 +832,13 @@
         updateStreamLabel(station);
         loadNextPlaylistTrack(station);
       } else {
+        audio.src = station.source;
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
         audio.hidden = false;
         nowPlaying.hidden = false;
         updateStreamLabel(station);
-        nowPlayingTitle.textContent = station.streamConfigEndpoint ? "Connecting…" : `${station.label} live stream`;
-        connectStream(station);
+        audio.load();
+        startNowPlayingUpdates(station);
       }
       placeholder.hidden = true;
       note.textContent = station.note;
