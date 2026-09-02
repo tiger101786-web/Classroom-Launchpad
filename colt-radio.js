@@ -297,6 +297,30 @@
       metadataEndpoint: "https://funkids-feed-data.s3-eu-west-1.amazonaws.com/now-playing/fun-kids-soundtracks.json",
       metadataFormat: "simpleTrack",
       note: "Kid-friendly songs from Disney classics, Frozen, Trolls, High School Musical, and other TV and film soundtracks, streamed by Fun Kids."
+    },
+    {
+      id: "wcpe-classical",
+      label: "Classical • WCPE",
+      type: "stream",
+      source: "https://audio-mp3.ibiblio.org/wcpe.mp3",
+      provider: "WCPE The Classical Station",
+      note: "Classical music streamed by the independent, listener-supported, noncommercial WCPE The Classical Station. No account required."
+    },
+    {
+      id: "ambient-sleeping-pill",
+      label: "Ambient • Sleeping Pill",
+      type: "stream",
+      source: "https://radio.stereoscenic.com/asp-h",
+      provider: "Ambient Sleeping Pill",
+      note: "Ad-free, beat-free ambient music for quiet work, reading, meditation, or relaxation, streamed by Ambient Sleeping Pill. No account required."
+    },
+    {
+      id: "chilltrax",
+      label: "Electronic • Chilltrax",
+      type: "stream",
+      source: "https://streamssl.chilltrax.com",
+      provider: "Chilltrax",
+      note: "Modern downtempo, electronica, and chillout music streamed by the nonprofit Chilltrax. The station states that its music is 100% free of advertising."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -341,7 +365,10 @@
     "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
     "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>',
     "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>',
-    "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>'
+    "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
+    "wcpe-classical": '<path d="M4 20h16M6 17h12M8 17V9m4 8V9m4 8V9M5 8h14L12 3 5 8Z"/>',
+    "ambient-sleeping-pill": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
+    chilltrax: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>'
   };
 
   function iconSvg(paths, className = "") {
