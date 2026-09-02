@@ -28,6 +28,7 @@ async function run() {
   assert.match(coltSource, /WELCOME_REACTION_DURATION_MS\s*=\s*10_100/, "The complete ten-second welcome animation must remain visible.");
   assert.match(coltSource, /GREETING_EXCITED_REACTION_DURATION_MS\s*=\s*6_100/, "The complete greeting and excited animation must remain visible.");
   assert.match(coltSource, /FEEDING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete feeding animation must remain visible.");
+  assert.match(coltSource, /PETTING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete petting animation must remain visible.");
   assert.match(coltSource, /RADIO_MESSAGE_DURATION_MS\s*=\s*4_200/, "The radio announcement must have a short display time.");
   assert.match(coltSource, /react\("radio", showMessage \? "Now playing—enjoy the music!" : "", 0\)/, "The radio dance must not have a short reaction timer.");
   assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt Up" : "Put Colt to Sleep"/, "The sleep control must switch to a wake control.");
@@ -37,7 +38,7 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4", "launchpad-colt-greeting.png", "launchpad-colt-excited.png"].forEach(filename => {
@@ -61,7 +62,7 @@ async function run() {
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
-    assert.equal(await page.locator(".launchpad-colt-pose").count(), 7);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 8);
     const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
     assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await welcomeVideo.getAttribute("src"), /launchpad-colt-welcome\.webm/);
@@ -194,6 +195,32 @@ async function run() {
     assert(feedingCornerAlpha < 8, `The feeding animation background is not transparent (corner alpha: ${feedingCornerAlpha}).`);
     await feedingVideo.dispatchEvent("ended");
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after feeding.");
+    await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Pet Me", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Pet Me", exact: true }).click();
+    const pettingVideo = page.locator('.launchpad-colt-pose[data-pose="petting"]');
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "petting");
+    assert.match(await pettingVideo.getAttribute("src"), /launchpad-colt-petting\.webm/);
+    assert.equal(await pettingVideo.getAttribute("muted"), "");
+    assert.equal(await pettingVideo.getAttribute("loop"), null, "The petting animation must play once rather than loop.");
+    await pettingVideo.evaluate(element => new Promise(resolve => {
+      if (element.readyState >= 3) resolve();
+      else element.addEventListener("canplay", resolve, { once: true });
+    }));
+    assert.equal(await pettingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    const pettingCornerAlpha = await pettingVideo.evaluate(async element => {
+      element.currentTime = 2;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(pettingCornerAlpha < 8, `The petting animation background is not transparent (corner alpha: ${pettingCornerAlpha}).`);
+    await pettingVideo.dispatchEvent("ended");
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after petting.");
     await page.locator(".launchpad-colt-character").click();
     await page.getByRole("button", { name: "Size: Medium", exact: true }).click();
     assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "large");

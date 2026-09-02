@@ -151,6 +151,7 @@ async function run() {
       body: JSON.stringify({ m_Item2: { Artist: "Test Worship Artist", Title: "Test Worship Song" } })
     }));
     await page.route("https://stream.wildfm.nl/GOD_Radio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://us2.maindigitalstream.com/ssl/7739", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://ycpycskjlwukfsuizfnw.supabase.co/functions/v1/now-playing", route => {
       assert.equal(route.request().method(), "POST");
       assert(route.request().headers().apikey, "GOD Radio metadata request omitted its public API key.");
@@ -224,6 +225,45 @@ async function run() {
     });
     await page.route("https://stream.zeno.fm/hs2dndb7ydnuv", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://streaming.radioempresabrasil.com.br/proxy/novainstrumental/stream", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://stream.rcs.revma.com/x8wbda03tm0uv", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://funkids-feed-data.s3-eu-west-1.amazonaws.com/now-playing/fun-kids-soundtracks.json", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ artist: "Test Movie Artist", song: "Test Movie Song" })
+    }));
+    await page.route("https://str3.openstream.co/**", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://listen.openstream.co/**/config", route => {
+      const stationId = new URL(route.request().url()).pathname.split("/")[1];
+      const sources = {
+        5505: "https://str3.openstream.co/1808",
+        5582: "https://str3.openstream.co/1032",
+        5515: "https://str3.openstream.co/1835",
+        5523: "https://str3.openstream.co/1843"
+      };
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ streamUrl: sources[stationId] })
+      });
+    });
+    await page.route("https://listen.openstream.co/**/metadata", route => {
+      const stationId = new URL(route.request().url()).pathname.split("/")[1];
+      const tracks = {
+        5505: { artist: "Test Ambient Artist", title: "Test Calm Track" },
+        5582: { artist: "Test Classical Artist", title: "Test Focus Track" },
+        5515: { artist: "Test Drone Artist", title: "Test Drone Track" },
+        5523: { artist: "Test Zero Beat Artist", title: "Test Zero Beat Track" }
+      };
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify(tracks[stationId] || {})
+      });
+    });
+    await page.route("https://rtn.cdnstream1.com/2579_96.aac", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -254,7 +294,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 27, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 34, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -284,7 +324,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Ambient • Calm", "Classical • Focus", "Ambient • Drone", "Ambient • Zero Beat"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -370,6 +410,16 @@ async function run() {
     await page.getByText("Test GOD Radio Artist - Test GOD Radio Program", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Bible teaching, testimonies, and prayer/);
 
+    await page.getByRole("button", { name: "Worship • Bluegrass", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://us2.maindigitalstream.com/ssl/7739");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /commercial-free/);
+    assert.match(await page.locator(".colt-radio-note").innerText(), /do not air indecent, vulgar, or offensive language/);
+
+    await page.getByRole("button", { name: "Christian • JOY FM", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://rtn.cdnstream1.com/2579_96.aac");
+    await page.getByText("Christian • JOY FM live stream", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-note").innerText(), /family-friendly main channel/);
+
     await page.getByRole("button", { name: "Games • Soundtracks", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://icecast.gttradio.com/mp3_320k");
     await page.getByText("Test Game - Test Soundtrack", { exact: true }).waitFor();
@@ -416,6 +466,27 @@ async function run() {
     await page.getByRole("button", { name: "Instrumental • Brazil", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.radioempresabrasil.com.br/proxy/novainstrumental/stream");
     await page.getByText("Instrumental • Brazil live stream", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Movies • Soundtracks", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.rcs.revma.com/x8wbda03tm0uv");
+    await page.getByText("Test Movie Artist - Test Movie Song", { exact: true }).waitFor();
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Disney classics/);
+
+    await page.getByRole("button", { name: "Ambient • Calm", exact: true }).click();
+    await page.getByText("Test Ambient Artist - Test Calm Track", { exact: true }).waitFor();
+    assert.equal(await audio.getAttribute("src"), "https://str3.openstream.co/1808");
+
+    await page.getByRole("button", { name: "Classical • Focus", exact: true }).click();
+    await page.getByText("Test Classical Artist - Test Focus Track", { exact: true }).waitFor();
+    assert.equal(await audio.getAttribute("src"), "https://str3.openstream.co/1032");
+
+    await page.getByRole("button", { name: "Ambient • Drone", exact: true }).click();
+    await page.getByText("Test Drone Artist - Test Drone Track", { exact: true }).waitFor();
+    assert.equal(await audio.getAttribute("src"), "https://str3.openstream.co/1835");
+
+    await page.getByRole("button", { name: "Ambient • Zero Beat", exact: true }).click();
+    await page.getByText("Test Zero Beat Artist - Test Zero Beat Track", { exact: true }).waitFor();
+    assert.equal(await audio.getAttribute("src"), "https://str3.openstream.co/1843");
 
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
@@ -499,7 +570,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Ambient • Calm", "Classical • Focus", "Ambient • Drone", "Ambient • Zero Beat"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

@@ -179,6 +179,22 @@
       note: "Worship music, Bible teaching, testimonies, and prayer streamed by GOD Radio. Free, no account required, and supported by donations and partners."
     },
     {
+      id: "hpr4-bluegrass-gospel",
+      label: "Worship • Bluegrass",
+      type: "stream",
+      source: "https://us2.maindigitalstream.com/ssl/7739",
+      provider: "HPR4 Bluegrass Gospel",
+      note: "Bluegrass Gospel music streamed commercial-free by listener-supported Heartland Public Radio. HPR states that its channels do not air indecent, vulgar, or offensive language."
+    },
+    {
+      id: "joy-fm-main",
+      label: "Christian • JOY FM",
+      type: "stream",
+      source: "https://rtn.cdnstream1.com/2579_96.aac",
+      provider: "The JOY FM",
+      note: "Contemporary Christian music and encouraging programs from The JOY FM's family-friendly main channel. Listener-supported and free to hear without a Colt Radio account."
+    },
+    {
       id: "game-soundtracks",
       label: "Games • Soundtracks",
       type: "stream",
@@ -271,6 +287,60 @@
       source: "https://streaming.radioempresabrasil.com.br/proxy/novainstrumental/stream",
       provider: "Rádio Nova Instrumental",
       note: "Instrumental favorites streamed from Brazil by Rádio Nova Instrumental. No Colt Radio account required."
+    },
+    {
+      id: "fun-kids-soundtracks",
+      label: "Movies • Soundtracks",
+      type: "stream",
+      source: "https://stream.rcs.revma.com/x8wbda03tm0uv",
+      provider: "Fun Kids Soundtracks",
+      metadataEndpoint: "https://funkids-feed-data.s3-eu-west-1.amazonaws.com/now-playing/fun-kids-soundtracks.json",
+      metadataFormat: "simpleTrack",
+      note: "Kid-friendly songs from Disney classics, Frozen, Trolls, High School Musical, and other TV and film soundtracks, streamed by Fun Kids."
+    },
+    {
+      id: "mrg-ambient",
+      label: "Ambient • Calm",
+      type: "stream",
+      source: "https://str3.openstream.co/1808",
+      streamConfigEndpoint: "https://listen.openstream.co/5505/config",
+      provider: "AmbientRadio (MRG.fm)",
+      metadataEndpoint: "https://listen.openstream.co/5505/metadata",
+      metadataFormat: "simpleTrack",
+      note: "Ambient, space ambient, downtempo, new age, and meditation music streamed by MRG.fm. The free stream may include station or support breaks."
+    },
+    {
+      id: "mrg-classical",
+      label: "Classical • Focus",
+      type: "stream",
+      source: "https://str3.openstream.co/1032",
+      streamConfigEndpoint: "https://listen.openstream.co/5582/config",
+      provider: "ClassicalRadio (MRG.fm)",
+      metadataEndpoint: "https://listen.openstream.co/5582/metadata",
+      metadataFormat: "simpleTrack",
+      note: "Baroque, Classical-period, Romantic-era, modern, and contemporary classical music streamed by MRG.fm. The free stream may include station or support breaks."
+    },
+    {
+      id: "mrg-drone",
+      label: "Ambient • Drone",
+      type: "stream",
+      source: "https://str3.openstream.co/1835",
+      streamConfigEndpoint: "https://listen.openstream.co/5515/config",
+      provider: "DroneRadio (MRG.fm)",
+      metadataEndpoint: "https://listen.openstream.co/5515/metadata",
+      metadataFormat: "simpleTrack",
+      note: "Zero-beat drone and ambient music streamed by MRG.fm. The free stream may include station or support breaks."
+    },
+    {
+      id: "mrg-zero-beat",
+      label: "Ambient • Zero Beat",
+      type: "stream",
+      source: "https://str3.openstream.co/1843",
+      streamConfigEndpoint: "https://listen.openstream.co/5523/config",
+      provider: "Zero Beat Zone (MRG.fm)",
+      metadataEndpoint: "https://listen.openstream.co/5523/metadata",
+      metadataFormat: "simpleTrack",
+      note: "Deep ambient, space, electronic, and experimental zero-beat music streamed by MRG.fm. The free stream may include station or support breaks."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -303,6 +373,8 @@
     "chill-house": '<path d="M4 20V10l8-6 8 6v10M8 20v-6h8v6"/><path d="M3 7c2-3 4-3 6-1M21 7c-2-3-4-3-6-1"/>',
     "icf-worship": '<path d="M5 21V9l7-6 7 6v12M9 21v-6h6v6M12 7v5m-2-3h4"/>',
     "god-radio": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/>',
+    "hpr4-bluegrass-gospel": '<circle cx="8" cy="15" r="4"/><circle cx="8" cy="15" r="1.5"/><path d="m11 12 7-8 2 2-8 7M16 6l2 2M5 19l-2 2"/>',
+    "joy-fm-main": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/><path d="m18 3 .5 1.5L20 5l-1.5.5L18 7l-.5-1.5L16 5l1.5-.5Z"/>',
     "game-soundtracks": '<path d="M8 8h8a5 5 0 0 1 4.7 6.8l-1 2.7a2 2 0 0 1-3.2.8L14.8 17H9.2l-1.7 1.3a2 2 0 0 1-3.2-.8l-1-2.7A5 5 0 0 1 8 8Z"/><path d="M8 11v4m-2-2h4m6-1h.01m2 2h.01"/>',
     "laid-back-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
     "jazz-funk-soul": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M19 5v8m-2-6h4"/>',
@@ -312,7 +384,12 @@
     "celtic-traditional": '<path d="M12 3c-3 3-4.5 6-4 9 1 5 7 6 9 2 1.5-3-.5-6-5-6-5 0-8 5-7 9 .8 3.2 4 5.5 7 5.5"/><path d="M12 8c2 2 3 4 2 6-1 2-4 2-5 0"/>',
     "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
     "urban-heat": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/>',
-    "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>'
+    "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>',
+    "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
+    "mrg-ambient": '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>',
+    "mrg-classical": '<path d="M4 20h16M6 17h12M8 17V9m4 8V9m4 8V9M5 8h14L12 3 5 8Z"/>',
+    "mrg-drone": '<path d="M4 12c2-4 4-4 6 0s4 4 6 0 4-4 5 0M4 17c2-3 4-3 6 0s4 3 6 0 4-3 5 0"/>',
+    "mrg-zero-beat": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>'
   };
 
   function iconSvg(paths, className = "") {
@@ -727,7 +804,7 @@
           return;
         }
         if (station.metadataFormat === "simpleTrack") {
-          const title = [payload?.artist, payload?.title].filter(Boolean).join(" - ");
+          const title = [payload?.artist, payload?.title || payload?.song].filter(Boolean).join(" - ");
           if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
           return;
         }
@@ -753,6 +830,22 @@
     function updateStreamLabel(station) {
       const provider = station.provider || (station.type === "playlist" ? "Lo-fi Hip Hop" : "Nightride FM");
       nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
+    }
+
+    async function connectStream(station) {
+      let source = station.source;
+      if (station.streamConfigEndpoint) {
+        try {
+          const response = await fetch(station.streamConfigEndpoint, { cache: "no-store" });
+          if (!response.ok) throw new Error("Stream configuration unavailable");
+          const config = await response.json();
+          source = config?.streamUrl || source;
+        } catch (error) {}
+      }
+      if (activeStation !== station.id) return;
+      audio.src = source;
+      audio.load();
+      startNowPlayingUpdates(station);
     }
 
     function updatePlaybackButton() {
@@ -803,13 +896,12 @@
         updateStreamLabel(station);
         loadNextPlaylistTrack(station);
       } else {
-        audio.src = station.source;
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
         audio.hidden = false;
         nowPlaying.hidden = false;
         updateStreamLabel(station);
-        audio.load();
-        startNowPlayingUpdates(station);
+        nowPlayingTitle.textContent = station.streamConfigEndpoint ? "Connecting…" : `${station.label} live stream`;
+        connectStream(station);
       }
       placeholder.hidden = true;
       note.textContent = station.note;
