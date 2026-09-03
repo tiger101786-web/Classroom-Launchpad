@@ -235,6 +235,11 @@ async function run() {
     await page.route("https://audio-mp3.ibiblio.org/wcpe.mp3", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://radio.stereoscenic.com/asp-h", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://streamssl.chilltrax.com/", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber/forkidzpophits/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://stream.revma.ihrhls.com/zc7014", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber/forkidzmoviesoundtracks/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber/forkidzkidzbop/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber/calmkids/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://rtn.cdnstream1.com/2579_96.aac", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
@@ -266,7 +271,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 33, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 38, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -296,7 +301,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -459,6 +464,26 @@ async function run() {
     await page.getByText("Electronic • Chilltrax live stream", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /100% free of advertising/);
 
+    await page.getByRole("button", { name: "Kids • Pop", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber/forkidzpophits/icecast.audio");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Commercial-free, kid-friendly/);
+
+    await page.getByRole("button", { name: "Country • Family", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.revma.ihrhls.com/zc7014");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Family-friendly, commercial-free/);
+
+    await page.getByRole("button", { name: "Kids • Movie Music", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber/forkidzmoviesoundtracks/icecast.audio");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /family-friendly songs from animated films/);
+
+    await page.getByRole("button", { name: "Kids • Kidz Bop", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber/forkidzkidzbop/icecast.audio");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /family-friendly versions of popular songs/);
+
+    await page.getByRole("button", { name: "Kids • Calm", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber/calmkids/icecast.audio");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /quiet classroom work/);
+
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
     assert.deepEqual(JSON.parse(await page.evaluate(() => localStorage.getItem("classroomLaunchpadColtRadioFavoritesGuestV1"))), ["game-soundtracks"]);
@@ -541,7 +566,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

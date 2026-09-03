@@ -321,6 +321,46 @@
       source: "https://streamssl.chilltrax.com",
       provider: "Chilltrax",
       note: "Modern downtempo, electronica, and chillout music streamed by the nonprofit Chilltrax. The station states that its music is 100% free of advertising."
+    },
+    {
+      id: "youradio-pop-kids",
+      label: "Kids • Pop",
+      type: "stream",
+      source: "https://drive.uber.radio/uber/forkidzpophits/icecast.audio",
+      provider: "YouRadio Pop Kids",
+      note: "Commercial-free, kid-friendly pop hits curated for young listeners by YouRadio. No DJs, interruptions, or account required."
+    },
+    {
+      id: "iheartcountry-family",
+      label: "Country • Family",
+      type: "stream",
+      source: "https://stream.revma.ihrhls.com/zc7014",
+      provider: "iHeartCountry Family",
+      note: "Family-friendly, commercial-free country music streamed by iHeartCountry Family. No Colt Radio account required."
+    },
+    {
+      id: "youradio-kids-movie-soundtracks",
+      label: "Kids • Movie Music",
+      type: "stream",
+      source: "https://drive.uber.radio/uber/forkidzmoviesoundtracks/icecast.audio",
+      provider: "YouRadio Movie Soundtracks",
+      note: "Ad-free, family-friendly songs from animated films and children's movie soundtracks, streamed by YouRadio."
+    },
+    {
+      id: "youradio-kidz-bop",
+      label: "Kids • Kidz Bop",
+      type: "stream",
+      source: "https://drive.uber.radio/uber/forkidzkidzbop/icecast.audio",
+      provider: "YouRadio Kidz Bop",
+      note: "Ad-free, family-friendly versions of popular songs performed for young listeners, streamed by YouRadio."
+    },
+    {
+      id: "youradio-calm-kids",
+      label: "Kids • Calm",
+      type: "stream",
+      source: "https://drive.uber.radio/uber/calmkids/icecast.audio",
+      provider: "YouRadio Calm Kids",
+      note: "Ad-free calm, gentle music for quiet classroom work, reading, and relaxation, streamed by YouRadio."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -368,7 +408,12 @@
     "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
     "wcpe-classical": '<path d="M4 20h16M6 17h12M8 17V9m4 8V9m4 8V9M5 8h14L12 3 5 8Z"/>',
     "ambient-sleeping-pill": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
-    chilltrax: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>'
+    chilltrax: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>',
+    "youradio-pop-kids": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',
+    "iheartcountry-family": '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/><path d="M8 4h8M9 4l1-2m5 2-1-2"/>',
+    "youradio-kids-movie-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
+    "youradio-kidz-bop": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
+    "youradio-calm-kids": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>'
   };
 
   function iconSvg(paths, className = "") {
