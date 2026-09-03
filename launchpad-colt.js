@@ -45,8 +45,7 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
-  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Launchpad Colt", accessories: [] });
-  const ACCESSORY_IDS = ["nameplate", "red-glow", "platform", "lightning-frame"];
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Launchpad Colt" });
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -61,6 +60,7 @@
   let radioDanceSwitchToken = 0;
   let radioDanceRecoveryTimer = 0;
   let controlsOpen = false;
+  let customizationRevision = 0;
   let prefs = {
     minimized: false,
     motion: true,
@@ -68,10 +68,9 @@
     position: null,
     size: "medium",
     asleep: false,
-    coltName: DEFAULT_CUSTOMIZATION.name,
-    accessories: []
+    coltName: DEFAULT_CUSTOMIZATION.name
   };
-  let customizationDraft = { ...DEFAULT_CUSTOMIZATION, accessories: [] };
+  let customizationDraft = { ...DEFAULT_CUSTOMIZATION };
   let dragSession = null;
   let suppressCharacterClick = false;
 
@@ -82,8 +81,6 @@
         <span></span>
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
-        <span class="launchpad-colt-effect launchpad-colt-lightning-frame" aria-hidden="true"></span>
-        <span class="launchpad-colt-effect launchpad-colt-platform" aria-hidden="true"></span>
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -95,7 +92,7 @@
         <video class="launchpad-colt-pose" data-pose="petting" src="${VIDEO_ASSETS.petting}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
-        <span class="launchpad-colt-nameplate" aria-hidden="true"><small>MY COLT</small><strong>Launchpad Colt</strong></span>
+        <span class="launchpad-colt-nameplate" aria-hidden="true"><i></i><small>LAUNCHPAD COLT</small><strong>Launchpad Colt</strong><i></i></span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize">Minimize</button>
@@ -103,7 +100,7 @@
         <button type="button" data-colt-control="size">Size: Medium</button>
         <button type="button" data-colt-control="feed">Feed Me</button>
         <button type="button" data-colt-control="pet">Pet Me</button>
-        <button type="button" data-colt-control="customize">Customize Colt</button>
+        <button type="button" data-colt-control="customize">Name Your Colt</button>
         <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
@@ -120,7 +117,7 @@
   customizer.setAttribute("aria-label", "Customize your Colt");
   customizer.innerHTML = `
     <header>
-      <div><span>Personal Companion</span><h2>Customize Your Colt</h2></div>
+      <div><span>Personal Companion</span><h2>Name Your Colt</h2></div>
       <button type="button" class="launchpad-colt-customizer-close" data-colt-customizer="close" aria-label="Close Colt customization">×</button>
     </header>
     <div class="launchpad-colt-name-editor">
@@ -129,21 +126,12 @@
         <input id="launchpadColtName" maxlength="16" autocomplete="off" spellcheck="false" aria-describedby="launchpadColtNameHint">
         <button type="button" data-colt-customizer="save-name">Save Name</button>
       </div>
-      <small id="launchpadColtNameHint">Use 2–16 school-appropriate letters or numbers.</small>
+      <small id="launchpadColtNameHint">Use 2–16 school-appropriate letters or numbers. Your Colt's new name appears on his signature nameplate.</small>
     </div>
-    <fieldset class="launchpad-colt-accessories">
-      <legend>Universal accessories</legend>
-      <div>
-        <button type="button" data-colt-accessory="nameplate" aria-pressed="false"><i aria-hidden="true"></i><strong>Nameplate</strong><small>Show the Colt's name</small></button>
-        <button type="button" data-colt-accessory="red-glow" aria-pressed="false"><i aria-hidden="true"></i><strong>Red Glow</strong><small>Animated crimson aura</small></button>
-        <button type="button" data-colt-accessory="platform" aria-pressed="false"><i aria-hidden="true"></i><strong>Colt Platform</strong><small>Glowing launch pad</small></button>
-        <button type="button" data-colt-accessory="lightning-frame" aria-pressed="false"><i aria-hidden="true"></i><strong>Lightning Frame</strong><small>Electric corner accents</small></button>
-      </div>
-    </fieldset>
+    <div class="launchpad-colt-nameplate-preview" aria-hidden="true"><i></i><small>LAUNCHPAD COLT</small><strong>Launchpad Colt</strong><i></i></div>
     <p class="launchpad-colt-customizer-status" role="status" aria-live="polite"></p>
     <footer>
-      <button type="button" data-colt-customizer="save-look">Save Look</button>
-      <button type="button" data-colt-customizer="restore">Restore Default</button>
+      <button type="button" data-colt-customizer="restore">Use Default Name</button>
     </footer>
   `;
   documentObject.body.append(customizer);
@@ -163,6 +151,7 @@
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
   const customizeButton = controls.querySelector('[data-colt-control="customize"]');
   const nameplate = root.querySelector(".launchpad-colt-nameplate strong");
+  const nameplatePreview = customizer.querySelector(".launchpad-colt-nameplate-preview strong");
   const customizerName = customizer.querySelector("#launchpadColtName");
   const customizerStatus = customizer.querySelector(".launchpad-colt-customizer-status");
   const feedingVideo = root.querySelector('video[data-pose="feeding"]');
@@ -257,10 +246,7 @@
   function normalizeCustomization(value) {
     const source = value && typeof value === "object" ? value : {};
     const name = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
-    const accessories = [...new Set((Array.isArray(source.accessories) ? source.accessories : [])
-      .map(item => String(item || "").trim().toLowerCase())
-      .filter(item => ACCESSORY_IDS.includes(item)))];
-    return { name: name || DEFAULT_CUSTOMIZATION.name, accessories };
+    return { name: name || DEFAULT_CUSTOMIZATION.name };
   }
 
   function defaultPreferences() {
@@ -271,15 +257,14 @@
       position: null,
       size: "medium",
       asleep: false,
-      coltName: DEFAULT_CUSTOMIZATION.name,
-      accessories: []
+      coltName: DEFAULT_CUSTOMIZATION.name
     };
   }
 
   function applyCustomization(value = prefs) {
     const customization = normalizeCustomization(value);
-    ACCESSORY_IDS.forEach(accessory => root.classList.toggle(`has-${accessory}`, customization.accessories.includes(accessory)));
     nameplate.textContent = customization.name;
+    nameplatePreview.textContent = customization.name;
     speech.querySelector("strong").textContent = customization.name;
     companion.setAttribute("aria-label", `${customization.name}, Launchpad Colt companion`);
     characterButton.setAttribute("aria-label", `Open ${customization.name} controls. Drag to move the Colt.`);
@@ -288,17 +273,18 @@
   function applyRemoteCustomization(value) {
     const customization = normalizeCustomization(value);
     prefs.coltName = customization.name;
-    prefs.accessories = customization.accessories;
     savePreferences();
     applyPreferences();
   }
 
   async function loadRemoteCustomization() {
     if (!session.authenticated) return;
+    const revision = customizationRevision;
     try {
       const response = await fetch("/api/launchpad-colt/customization", { headers: { Accept: "application/json" } });
       if (!response.ok) return;
       const result = await response.json();
+      if (revision !== customizationRevision) return;
       applyRemoteCustomization(result.customization);
     } catch {}
   }
@@ -328,8 +314,7 @@
           : null,
         size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium",
         asleep: Boolean(stored.asleep),
-        coltName: customization.name,
-        accessories: customization.accessories
+        coltName: customization.name
       };
     } catch {
       prefs = defaultPreferences();
@@ -396,11 +381,6 @@
   function renderCustomizationDraft() {
     const customization = normalizeCustomization(customizationDraft);
     customizerName.value = customization.name;
-    customizer.querySelectorAll("[data-colt-accessory]").forEach(button => {
-      const selected = customization.accessories.includes(button.dataset.coltAccessory);
-      button.classList.toggle("is-selected", selected);
-      button.setAttribute("aria-pressed", String(selected));
-    });
     applyCustomization(customization);
   }
 
@@ -421,10 +401,8 @@
   }
 
   async function saveCustomization(successMessage) {
-    const customization = normalizeCustomization({
-      name: customizerName.value,
-      accessories: customizationDraft.accessories
-    });
+    const customization = normalizeCustomization({ name: customizerName.value });
+    customizationRevision += 1;
     customizerStatus.textContent = "Saving…";
     customizer.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
     try {
@@ -437,7 +415,6 @@
       if (!response.ok) throw new Error(result.error || "The Colt customization could not be saved.");
       const saved = normalizeCustomization(result.customization || customization);
       prefs.coltName = saved.name;
-      prefs.accessories = saved.accessories;
       customizationDraft = saved;
       savePreferences();
       applyPreferences();
@@ -756,17 +733,6 @@
   });
 
   customizer.addEventListener("click", event => {
-    const accessoryButton = event.target.closest("[data-colt-accessory]");
-    if (accessoryButton) {
-      const accessory = accessoryButton.dataset.coltAccessory;
-      const selected = new Set(customizationDraft.accessories);
-      if (selected.has(accessory)) selected.delete(accessory);
-      else selected.add(accessory);
-      customizationDraft = { ...customizationDraft, accessories: [...selected] };
-      customizerStatus.textContent = "Previewing—choose Save Look to keep these accessories.";
-      renderCustomizationDraft();
-      return;
-    }
     const actionButton = event.target.closest("[data-colt-customizer]");
     if (!actionButton) return;
     const action = actionButton.dataset.coltCustomizer;
@@ -775,13 +741,12 @@
       return;
     }
     if (action === "restore") {
-      customizationDraft = { ...DEFAULT_CUSTOMIZATION, accessories: [] };
+      customizationDraft = { ...DEFAULT_CUSTOMIZATION };
       renderCustomizationDraft();
-      saveCustomization("The default Colt name and look were restored.");
+      saveCustomization("The default Colt name was restored.");
       return;
     }
     if (action === "save-name") saveCustomization("Your Colt's name was saved.");
-    if (action === "save-look") saveCustomization("Your Colt's look was saved.");
   });
 
   customizerName.addEventListener("input", () => {

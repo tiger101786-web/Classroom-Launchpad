@@ -57,34 +57,31 @@ async function waitForServer() {
     const headers = { "Content-Type": "application/json", Origin: origin, Cookie: cookie };
 
     const initial = await request("/api/launchpad-colt/customization", { headers });
-    assert.deepEqual(initial.payload.customization, { name: "Launchpad Colt", accessories: [] });
+    assert.deepEqual(initial.payload.customization, { name: "Launchpad Colt" });
 
     const saved = await request("/api/launchpad-colt/customization", {
       method: "PUT",
       headers,
-      body: JSON.stringify({
-        name: "Blaze",
-        accessories: ["nameplate", "red-glow", "platform", "lightning-frame", "not-allowed"]
-      })
+      body: JSON.stringify({ name: "Blaze" })
     });
     assert.equal(saved.response.status, 200);
     assert.equal(saved.payload.customization.name, "Blaze");
-    assert.deepEqual(saved.payload.customization.accessories, ["nameplate", "red-glow", "platform", "lightning-frame"]);
+    assert.equal(Object.hasOwn(saved.payload.customization, "accessories"), false);
 
     const state = await request("/api/state", { headers });
     assert.equal(state.payload.coltCustomization.name, "Blaze");
-    assert.deepEqual(state.payload.coltCustomization.accessories, ["nameplate", "red-glow", "platform", "lightning-frame"]);
+    assert.equal(Object.hasOwn(state.payload.coltCustomization, "accessories"), false);
 
     const invalid = await request("/api/launchpad-colt/customization", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ name: "X", accessories: [] })
+      body: JSON.stringify({ name: "X" })
     });
     assert.equal(invalid.response.status, 400);
 
     const persisted = JSON.parse(fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8"));
     assert.equal(persisted.coltCustomizations.teacher.name, "Blaze");
-    assert.deepEqual(persisted.coltCustomizations.teacher.accessories, ["nameplate", "red-glow", "platform", "lightning-frame"]);
+    assert.equal(Object.hasOwn(persisted.coltCustomizations.teacher, "accessories"), false);
     console.log("Launchpad Colt customization verification passed.");
   } finally {
     server.kill();

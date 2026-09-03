@@ -315,21 +315,15 @@ function radioFavoritesAccountKey(session) {
     : `student:${normalizeEmail(session && session.email)}`;
 }
 
-const coltAccessoryIds = new Set(["nameplate", "red-glow", "platform", "lightning-frame"]);
 const defaultColtCustomization = Object.freeze({
-  name: "Launchpad Colt",
-  accessories: []
+  name: "Launchpad Colt"
 });
 
 function normalizeColtCustomization(value) {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const name = cleanText(source.name, 16);
-  const accessories = [...new Set((Array.isArray(source.accessories) ? source.accessories : [])
-    .map(item => String(item || "").trim().toLowerCase())
-    .filter(item => coltAccessoryIds.has(item)))];
   return {
     name: name || defaultColtCustomization.name,
-    accessories,
     updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""
   };
 }
@@ -2810,7 +2804,6 @@ async function handleApi(req, res, pathname) {
       if (inappropriateName) throw new Error("Please choose a school-appropriate Colt name.");
       const customization = normalizeColtCustomization({
         name,
-        accessories: body.accessories,
         updatedAt: new Date().toISOString()
       });
       const db = readDb();

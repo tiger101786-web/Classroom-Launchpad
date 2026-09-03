@@ -62,7 +62,7 @@ async function run() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.addInitScript(() => {
       const nativeFetch = window.fetch.bind(window);
-      let customization = { name: "Launchpad Colt", accessories: [] };
+      let customization = { name: "Launchpad Colt" };
       window.fetch = async (input, init = {}) => {
         const url = String(input);
         if (url.includes("/api/launchpad-colt/customization")) {
@@ -217,17 +217,14 @@ async function run() {
     assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
-    assert(await page.getByRole("button", { name: "Customize Colt", exact: true }).isVisible());
-    await page.getByRole("button", { name: "Customize Colt", exact: true }).click();
+    assert(await page.getByRole("button", { name: "Name Your Colt", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");
     await page.locator("#launchpadColtName").fill("Blaze");
-    for (const accessory of ["nameplate", "red-glow", "platform", "lightning-frame"]) {
-      await page.locator(`[data-colt-accessory="${accessory}"]`).click();
-      assert(await page.locator(`#launchpadColtRoot`).evaluate((element, name) => element.classList.contains(`has-${name}`), accessory));
-    }
-    await page.getByRole("button", { name: "Save Look", exact: true }).click();
+    assert.equal(await page.locator(".launchpad-colt-nameplate-preview strong").textContent(), "Blaze");
+    assert.equal(await page.locator("[data-colt-accessory]").count(), 0, "Obsolete accessory choices are still present.");
+    await page.getByRole("button", { name: "Save Name", exact: true }).click();
     await page.waitForFunction(() => window.__savedColtCustomization?.name === "Blaze");
-    assert.deepEqual(await page.evaluate(() => window.__savedColtCustomization.accessories.sort()), ["lightning-frame", "nameplate", "platform", "red-glow"]);
     assert.equal(await page.locator(".launchpad-colt-nameplate strong").textContent(), "Blaze");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local") || "{}").coltName), "Blaze");
     await page.getByRole("button", { name: "Close Colt customization", exact: true }).click();
@@ -257,7 +254,7 @@ async function run() {
     assert(feedingCornerAlpha < 8, `The feeding animation background is not transparent (corner alpha: ${feedingCornerAlpha}).`);
     await feedingVideo.dispatchEvent("ended");
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after feeding.");
-    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("has-platform")), "The saved platform disappeared during a Colt animation.");
+    assert.equal(await page.locator(".launchpad-colt-nameplate strong").textContent(), "Blaze", "The saved nameplate disappeared during a Colt animation.");
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Pet Me", exact: true }).isVisible());
     await page.getByRole("button", { name: "Pet Me", exact: true }).click();
@@ -436,7 +433,7 @@ async function run() {
     await page.evaluate(() => window.dispatchEvent(new Event("resize")));
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-auto-compact")));
     await page.locator(".launchpad-colt-character").click();
-    await page.getByRole("button", { name: "Customize Colt", exact: true }).click();
+    await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     const mobileCustomizer = await page.locator(".launchpad-colt-customizer").boundingBox();
     assert(mobileCustomizer.x >= 0 && mobileCustomizer.x + mobileCustomizer.width <= 390, "The Colt customizer overflows the mobile viewport.");
     assert(mobileCustomizer.y >= 0 && mobileCustomizer.y + mobileCustomizer.height <= 844, "The Colt customizer is not vertically contained on mobile.");

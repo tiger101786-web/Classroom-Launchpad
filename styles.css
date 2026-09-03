@@ -10267,89 +10267,83 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   animation: launchpad-colt-shadow 2.4s ease-in-out infinite;
 }
 
-.launchpad-colt-effect,
 .launchpad-colt-nameplate {
   position: absolute;
   pointer-events: none;
 }
 
-.launchpad-colt-platform {
-  z-index: -1;
-  right: 5%;
-  bottom: 1%;
-  width: 88%;
-  height: 19%;
-  opacity: 0;
-  border: 1px solid #ff315d;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255, 35, 82, .28), rgba(124, 7, 40, .12) 46%, transparent 70%);
-  box-shadow: 0 0 9px #e01345, inset 0 0 9px rgba(255, 48, 91, .68);
-  transform: perspective(90px) rotateX(54deg);
-  transition: opacity 180ms ease;
-}
-
-.launchpad-colt-lightning-frame {
-  z-index: -1;
-  inset: 4% 1% 5% 4%;
-  opacity: 0;
-  border: 1px solid rgba(255, 44, 88, .82);
-  border-radius: 13px;
-  background:
-    linear-gradient(135deg, #ff315d 0 10px, transparent 10px) top left,
-    linear-gradient(225deg, #ff315d 0 10px, transparent 10px) top right,
-    linear-gradient(45deg, #ff315d 0 10px, transparent 10px) bottom left,
-    linear-gradient(315deg, #ff315d 0 10px, transparent 10px) bottom right;
-  background-repeat: no-repeat;
-  background-size: 24px 24px;
-  box-shadow: 0 0 12px rgba(239, 25, 72, .38);
-  transition: opacity 180ms ease;
-}
-
-.launchpad-colt-nameplate {
+.launchpad-colt-nameplate,
+.launchpad-colt-nameplate-preview {
   z-index: 5;
   right: 50%;
-  bottom: -8px;
+  bottom: -12px;
   display: grid;
-  min-width: 84px;
-  max-width: 132px;
-  padding: 4px 11px 5px;
-  opacity: 0;
-  border: 1px solid #e31b50;
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(91, 11, 37, .98), rgba(28, 9, 16, .98));
-  box-shadow: 0 5px 12px rgba(0, 0, 0, .52), inset 0 0 9px rgba(255, 55, 99, .14);
+  grid-template-columns: 11px minmax(72px, auto) 11px;
+  grid-template-rows: auto auto;
+  min-width: 116px;
+  max-width: 164px;
+  padding: 5px 12px 6px;
+  border: 1px solid #f12a5e;
+  border-radius: 4px 4px 10px 10px;
+  background:
+    linear-gradient(90deg, transparent 0 8px, rgba(255, 255, 255, .06) 8px 9px, transparent 9px calc(100% - 9px), rgba(255, 255, 255, .06) calc(100% - 9px) calc(100% - 8px), transparent calc(100% - 8px)),
+    linear-gradient(160deg, #660f2b, #220810 58%, #090609);
+  box-shadow: 0 7px 15px rgba(0, 0, 0, .58), 0 0 9px rgba(226, 23, 72, .38), inset 0 1px 0 rgba(255, 181, 200, .24);
   color: #fff2f6;
   line-height: 1.05;
   text-align: center;
+  text-shadow: 0 1px 2px #000;
   transform: translateX(50%);
-  transition: opacity 180ms ease;
+  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, calc(100% - 7px) 100%, 7px 100%, 0 7px);
 }
 
-.launchpad-colt-nameplate small {
-  color: #ff7899;
-  font-size: .48rem;
+.launchpad-colt-nameplate::before,
+.launchpad-colt-nameplate-preview::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: 16px;
+  left: 16px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #ff2d61 24%, #fff0f4 50%, #ff2d61 76%, transparent);
+  box-shadow: 0 0 7px #ef174e;
+}
+
+.launchpad-colt-nameplate i,
+.launchpad-colt-nameplate-preview i {
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #ff668b;
+  background: #b81240;
+  box-shadow: 0 0 5px #ef174e;
+  transform: rotate(45deg);
+}
+
+.launchpad-colt-nameplate i:last-child,
+.launchpad-colt-nameplate-preview i:last-child {
+  justify-self: end;
+}
+
+.launchpad-colt-nameplate small,
+.launchpad-colt-nameplate-preview small {
+  grid-column: 2;
+  color: #ff7799;
+  font-size: .43rem;
   font-weight: 900;
-  letter-spacing: .09em;
+  letter-spacing: .15em;
 }
 
-.launchpad-colt-nameplate strong {
+.launchpad-colt-nameplate strong,
+.launchpad-colt-nameplate-preview strong {
+  grid-column: 2;
   overflow: hidden;
-  font-size: .67rem;
+  font-size: .76rem;
+  font-weight: 950;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.launchpad-colt-root.has-platform .launchpad-colt-platform,
-.launchpad-colt-root.has-lightning-frame .launchpad-colt-lightning-frame,
-.launchpad-colt-root.has-nameplate .launchpad-colt-nameplate {
-  opacity: 1;
-}
-
-.launchpad-colt-root.has-red-glow .launchpad-colt-character::before {
-  border-color: rgba(255, 46, 91, .92);
-  background: radial-gradient(circle at 50% 58%, rgba(234, 21, 72, .4), rgba(73, 5, 25, .05) 70%);
-  box-shadow: 0 0 19px rgba(255, 34, 79, .72), inset 0 0 18px rgba(255, 45, 89, .26);
-  animation: launchpad-colt-aura 2.2s ease-in-out infinite;
 }
 
 .launchpad-colt-root.is-dragging .launchpad-colt-character {
@@ -10632,8 +10626,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 
 .launchpad-colt-customizer header span,
-.launchpad-colt-name-editor label,
-.launchpad-colt-accessories legend {
+.launchpad-colt-name-editor label {
   color: #ff6d91;
   font-size: .68rem;
   font-weight: 950;
@@ -10694,69 +10687,29 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   padding: 8px 13px;
 }
 
-.launchpad-colt-name-editor small,
-.launchpad-colt-accessories small {
+.launchpad-colt-name-editor small {
   color: #b9aab0;
   font-size: .68rem;
 }
 
-.launchpad-colt-accessories {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.launchpad-colt-accessories > div {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.launchpad-colt-accessories button {
+.launchpad-colt-nameplate-preview {
   position: relative;
-  display: grid;
-  min-width: 0;
-  min-height: 82px;
-  gap: 3px;
-  align-content: center;
-  justify-items: start;
-  padding: 10px 12px;
-  text-align: left;
+  right: auto;
+  bottom: auto;
+  justify-self: center;
+  width: min(220px, 86%);
+  max-width: none;
+  min-height: 58px;
+  padding: 9px 18px 10px;
+  transform: none;
 }
 
-.launchpad-colt-accessories button i {
-  width: 25px;
-  height: 18px;
-  margin-bottom: 2px;
-  border: 1px solid #db194e;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(229, 26, 76, .5);
+.launchpad-colt-nameplate-preview small {
+  font-size: .54rem;
 }
 
-.launchpad-colt-accessories button strong {
-  font-size: .78rem;
-}
-
-.launchpad-colt-accessories button.is-selected {
-  border-color: #ff315d;
-  background: radial-gradient(circle at 85% 12%, rgba(255, 36, 82, .25), transparent 34%), #310d19;
-  box-shadow: inset 0 0 15px rgba(223, 22, 69, .14), 0 0 9px rgba(227, 20, 70, .24);
-}
-
-.launchpad-colt-accessories button.is-selected::after {
-  content: "✓";
-  position: absolute;
-  top: 7px;
-  right: 8px;
-  display: grid;
-  width: 20px;
-  height: 20px;
-  place-items: center;
-  border-radius: 50%;
-  background: #c7164c;
-  color: #fff;
+.launchpad-colt-nameplate-preview strong {
+  font-size: 1rem;
 }
 
 .launchpad-colt-customizer-status {
@@ -10766,7 +10719,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   font-size: .72rem;
 }
 
-.launchpad-colt-customizer footer button:first-child,
 .launchpad-colt-name-editor button {
   border-color: #e4285c;
   background: linear-gradient(180deg, #a81340, #680923);
@@ -10822,7 +10774,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-root.is-minimized .launchpad-colt-character::before,
 .launchpad-colt-root.is-minimized .launchpad-colt-spark,
 .launchpad-colt-root.is-minimized .launchpad-colt-prop,
-.launchpad-colt-root.is-minimized .launchpad-colt-effect,
 .launchpad-colt-root.is-minimized .launchpad-colt-nameplate {
   display: none;
 }
@@ -10880,11 +10831,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 @keyframes launchpad-colt-shadow {
   0%, 100% { opacity: 0.52; transform: scaleX(1); }
   55% { opacity: 0.28; transform: scaleX(0.84); }
-}
-
-@keyframes launchpad-colt-aura {
-  0%, 100% { opacity: .72; transform: scale(.94); }
-  50% { opacity: 1; transform: scale(1.05); }
 }
 
 @keyframes launchpad-colt-greeting {
@@ -10973,7 +10919,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .launchpad-colt-root.is-auto-compact .launchpad-colt-character::before,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-spark,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-prop,
-  .launchpad-colt-root.is-auto-compact .launchpad-colt-effect,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-nameplate {
     display: none;
   }
