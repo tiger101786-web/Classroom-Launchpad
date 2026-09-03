@@ -11,8 +11,8 @@
     welcome: "assets/launchpad-colt-welcome.webm?v=20260830-welcome-alpha-v1",
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
-    radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1",
-    radioDanceAlternate: "assets/launchpad-colt-radio-dance-alternate.webm?v=20260902-radio-dance-alpha-v1",
+    radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260903-radio-dance-optimized-v2",
+    radioDanceAlternate: "assets/launchpad-colt-radio-dance-alternate.webm?v=20260903-radio-dance-optimized-v2",
     greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1",
     feeding: "assets/launchpad-colt-feeding.webm?v=20260901-feeding-alpha-v1",
     petting: "assets/launchpad-colt-petting.webm?v=20260901-petting-alpha-v1"
@@ -23,6 +23,8 @@
   const FEEDING_REACTION_DURATION_MS = 6_200;
   const PETTING_REACTION_DURATION_MS = 6_200;
   const RADIO_MESSAGE_DURATION_MS = 4_200;
+  const RADIO_DANCE_READY_TIMEOUT_MS = 2_500;
+  const RADIO_DANCE_STALL_TIMEOUT_MS = 1_400;
   const REACTIONS = {
     welcome: { icon: "✓", text: "Welcome back! Ready to launch?" },
     directions: { icon: "☝", text: "Today's directions are ready." },
@@ -54,6 +56,8 @@
   let currentState = "idle";
   let radioPlaybackActive = false;
   let activeRadioDancePose = "radioDance";
+  let radioDanceSwitchToken = 0;
+  let radioDanceRecoveryTimer = 0;
   let controlsOpen = false;
   let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
   let dragSession = null;
@@ -110,8 +114,10 @@
   const feedingVideo = root.querySelector('video[data-pose="feeding"]');
   const pettingVideo = root.querySelector('video[data-pose="petting"]');
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
+  const radioDanceVideos = poseVideos.filter(video => video.dataset.pose === "radioDance" || video.dataset.pose === "radioDanceAlternate");
 
   function syncPoseVideos(state = currentState, restart = false) {
+    if (state !== "radio") globalObject.clearTimeout(radioDanceRecoveryTimer);
     const poseByState = {
       idle: "idle",
       welcome: "welcome",
@@ -138,8 +144,55 @@
       if (restart) {
         try { video.currentTime = 0; } catch {}
       }
-      video.play().catch(() => {});
+      video.play().catch(() => {
+        if (state === "radio" && radioPlaybackActive) recoverStalledRadioDance(video);
+      });
     });
+  }
+
+  function warmRadioDanceVideos() {
+    radioDanceVideos.forEach(video => {
+      video.preload = "auto";
+      if (video.networkState === globalObject.HTMLMediaElement.NETWORK_EMPTY) video.load();
+    });
+  }
+
+  function switchRadioDanceWhenReady(nextPose, fallbackPose) {
+    const target = radioDanceVideos.find(video => video.dataset.pose === nextPose);
+    if (!target || !radioPlaybackActive || currentState !== "radio") return;
+    const token = ++radioDanceSwitchToken;
+    let settled = false;
+    const activate = () => {
+      if (settled || token !== radioDanceSwitchToken || !radioPlaybackActive || currentState !== "radio") return;
+      settled = true;
+      globalObject.clearTimeout(radioDanceRecoveryTimer);
+      activeRadioDancePose = nextPose;
+      syncPoseVideos("radio", true);
+    };
+    if (target.readyState >= globalObject.HTMLMediaElement.HAVE_FUTURE_DATA) {
+      activate();
+      return;
+    }
+    target.addEventListener("canplay", activate, { once: true });
+    target.load();
+    globalObject.clearTimeout(radioDanceRecoveryTimer);
+    radioDanceRecoveryTimer = globalObject.setTimeout(() => {
+      if (settled || token !== radioDanceSwitchToken || !radioPlaybackActive || currentState !== "radio") return;
+      settled = true;
+      activeRadioDancePose = fallbackPose;
+      syncPoseVideos("radio", true);
+    }, RADIO_DANCE_READY_TIMEOUT_MS);
+  }
+
+  function recoverStalledRadioDance(video) {
+    if (!radioPlaybackActive || currentState !== "radio" || video.dataset.pose !== activeRadioDancePose) return;
+    globalObject.clearTimeout(radioDanceRecoveryTimer);
+    radioDanceRecoveryTimer = globalObject.setTimeout(() => {
+      if (!radioPlaybackActive || currentState !== "radio" || video.dataset.pose !== activeRadioDancePose) return;
+      if (!video.paused && video.readyState >= globalObject.HTMLMediaElement.HAVE_FUTURE_DATA) return;
+      const fallbackPose = video.dataset.pose === "radioDance" ? "radioDanceAlternate" : "radioDance";
+      switchRadioDanceWhenReady(fallbackPose, video.dataset.pose);
+    }, RADIO_DANCE_STALL_TIMEOUT_MS);
   }
 
   function preferenceKey() {
@@ -284,6 +337,9 @@
   }
 
   function startRadioDance(showMessage = true) {
+    radioDanceSwitchToken += 1;
+    globalObject.clearTimeout(radioDanceRecoveryTimer);
+    warmRadioDanceVideos();
     react("radio", showMessage ? "Now playing—enjoy the music!" : "", 0);
     if (!showMessage || prefs.asleep || currentState !== "radio") return;
     speechTimer = globalObject.setTimeout(() => {
@@ -319,14 +375,14 @@
 
   feedingVideo.addEventListener("ended", finishFeeding);
   pettingVideo.addEventListener("ended", finishPetting);
-  poseVideos
-    .filter(video => video.dataset.pose === "radioDance" || video.dataset.pose === "radioDanceAlternate")
-    .forEach(video => {
+  radioDanceVideos.forEach(video => {
       video.addEventListener("ended", () => {
         if (!radioPlaybackActive || currentState !== "radio" || prefs.asleep || !prefs.motion) return;
-        activeRadioDancePose = video.dataset.pose === "radioDance" ? "radioDanceAlternate" : "radioDance";
-        syncPoseVideos("radio", true);
+        const nextPose = video.dataset.pose === "radioDance" ? "radioDanceAlternate" : "radioDance";
+        switchRadioDanceWhenReady(nextPose, video.dataset.pose);
       });
+      video.addEventListener("waiting", () => recoverStalledRadioDance(video));
+      video.addEventListener("stalled", () => recoverStalledRadioDance(video));
     });
 
   function resetSleepTimer() {
@@ -538,6 +594,8 @@
       if (!prefs.asleep) startRadioDance(true);
       return;
     }
+    radioDanceSwitchToken += 1;
+    globalObject.clearTimeout(radioDanceRecoveryTimer);
     root.classList.remove("is-radio-dancing");
     if (currentState === "radio") {
       globalObject.clearTimeout(reactionTimer);

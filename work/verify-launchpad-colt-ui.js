@@ -30,6 +30,9 @@ async function run() {
   assert.match(coltSource, /FEEDING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete feeding animation must remain visible.");
   assert.match(coltSource, /PETTING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete petting animation must remain visible.");
   assert.match(coltSource, /RADIO_MESSAGE_DURATION_MS\s*=\s*4_200/, "The radio announcement must have a short display time.");
+  assert.match(coltSource, /RADIO_DANCE_READY_TIMEOUT_MS\s*=\s*2_500/, "The alternate dance must have a buffering fallback.");
+  assert.match(coltSource, /addEventListener\("stalled", \(\) => recoverStalledRadioDance\(video\)\)/, "A stalled dance must recover instead of freezing.");
+  assert.match(coltSource, /target\.addEventListener\("canplay", activate, \{ once: true \}\)/, "Dance switching must wait for the next video to be playable.");
   assert.match(coltSource, /react\("radio", showMessage \? "Now playing—enjoy the music!" : "", 0\)/, "The radio dance must not have a short reaction timer.");
   assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt Up" : "Put Colt to Sleep"/, "The sleep control must switch to a wake control.");
   assert.match(coltSource, /if \(prefs\.asleep\) return;[\s\S]*?if \(currentState === "sleep"\) welcome\("I'm awake—what are we doing next\?"\);[\s\S]*?60000/, "The original automatic nap and activity-based wake behavior must remain unchanged.");
@@ -40,6 +43,10 @@ async function run() {
   });
   ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
+  });
+  ["launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm"].forEach(filename => {
+    const size = fs.statSync(path.resolve(__dirname, "..", "assets", filename)).size;
+    assert(size < 3_500_000, `${filename} is too large for reliable playback on school laptops (${size} bytes).`);
   });
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4", "launchpad-colt-greeting.png", "launchpad-colt-excited.png"].forEach(filename => {
     assert(!fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Obsolete static/fallback pointing asset still exists: ${filename}`);
@@ -94,6 +101,7 @@ async function run() {
       return context.getImageData(0, 0, 1, 1).data[3];
     });
     assert(alternateDanceCornerAlpha < 8, `The second radio dance still has a visible green-screen background (corner alpha: ${alternateDanceCornerAlpha}).`);
+    assert.equal(await alternateRadioDanceVideo.evaluate(element => element.videoWidth), 480, "The second dance was not optimized for the pet's display size.");
     assert.equal(await page.locator('.launchpad-colt-pose[data-pose="dancing"]').count(), 0, "The old static radio-dance pose must not render.");
     await page.waitForSelector('.launchpad-colt-companion[data-state="welcome"]');
     await page.waitForTimeout(180);
