@@ -35,7 +35,8 @@ async function run() {
   assert.match(coltSource, /target\.addEventListener\("canplay", activate, \{ once: true \}\)/, "Dance switching must wait for the next video to be playable.");
   assert.match(coltSource, /react\("radio", showMessage \? "Now playing—enjoy the music!" : "", 0\)/, "The radio dance must not have a short reaction timer.");
   assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt Up" : "Put Colt to Sleep"/, "The sleep control must switch to a wake control.");
-  assert.match(coltSource, /if \(prefs\.asleep\) return;[\s\S]*?if \(currentState === "sleep"\) welcome\("I'm awake—what are we doing next\?"\);[\s\S]*?60000/, "The original automatic nap and activity-based wake behavior must remain unchanged.");
+  assert.match(coltSource, /if \(prefs\.asleep \|\| radioPlaybackActive\) return;[\s\S]*?if \(currentState === "sleep"\) welcome\("I'm awake—what are we doing next\?"\);[\s\S]*?60000/, "The automatic nap must remain activity-based and stay disabled during radio playback.");
+  assert.match(coltSource, /if \(prefs\.asleep \|\| radioPlaybackActive\) return;/, "Automatic sleep must stay disabled while Colt Radio is playing.");
   assert.match(coltSource, /addEventListener\("colt-radio-playback"/, "The Colt must follow Colt Radio playback state.");
   ["companion"].forEach(pose => {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
@@ -59,6 +60,24 @@ async function run() {
   });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript(() => {
+      const nativeFetch = window.fetch.bind(window);
+      let customization = { name: "Launchpad Colt", accessories: [] };
+      window.fetch = async (input, init = {}) => {
+        const url = String(input);
+        if (url.includes("/api/launchpad-colt/customization")) {
+          if (String(init.method || "GET").toUpperCase() === "PUT") {
+            customization = JSON.parse(init.body || "{}");
+            window.__savedColtCustomization = customization;
+          }
+          return new Response(JSON.stringify({ ok: true, customization }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+        return nativeFetch(input, init);
+      };
+    });
     const indexUrl = pathToFileURL(path.resolve(__dirname, "..", "index.html")).href;
     await page.goto(indexUrl, { waitUntil: "domcontentloaded" });
     await page.waitForSelector(".launchpad-colt-character", { state: "attached" });
@@ -198,6 +217,22 @@ async function run() {
     assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Customize Colt", exact: true }).isVisible());
+    await page.getByRole("button", { name: "Customize Colt", exact: true }).click();
+    await page.waitForSelector(".launchpad-colt-customizer:visible");
+    await page.locator("#launchpadColtName").fill("Blaze");
+    for (const accessory of ["nameplate", "red-glow", "platform", "lightning-frame"]) {
+      await page.locator(`[data-colt-accessory="${accessory}"]`).click();
+      assert(await page.locator(`#launchpadColtRoot`).evaluate((element, name) => element.classList.contains(`has-${name}`), accessory));
+    }
+    await page.getByRole("button", { name: "Save Look", exact: true }).click();
+    await page.waitForFunction(() => window.__savedColtCustomization?.name === "Blaze");
+    assert.deepEqual(await page.evaluate(() => window.__savedColtCustomization.accessories.sort()), ["lightning-frame", "nameplate", "platform", "red-glow"]);
+    assert.equal(await page.locator(".launchpad-colt-nameplate strong").textContent(), "Blaze");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local") || "{}").coltName), "Blaze");
+    await page.getByRole("button", { name: "Close Colt customization", exact: true }).click();
+    assert.equal(await page.locator(".launchpad-colt-customizer").isHidden(), true);
+    await page.locator(".launchpad-colt-character").click();
     await page.getByRole("button", { name: "Feed Me", exact: true }).click();
     const feedingVideo = page.locator('.launchpad-colt-pose[data-pose="feeding"]');
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "feeding");
@@ -222,6 +257,7 @@ async function run() {
     assert(feedingCornerAlpha < 8, `The feeding animation background is not transparent (corner alpha: ${feedingCornerAlpha}).`);
     await feedingVideo.dispatchEvent("ended");
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after feeding.");
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("has-platform")), "The saved platform disappeared during a Colt animation.");
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Pet Me", exact: true }).isVisible());
     await page.getByRole("button", { name: "Pet Me", exact: true }).click();
@@ -346,6 +382,14 @@ async function run() {
 
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: true, station: "test" } })));
     await page.waitForTimeout(180);
+    await page.locator(".launchpad-colt-character").click();
+    assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isEnabled(), "Manual sleep was disabled during music playback.");
+    await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep", "Manual sleep did not override radio dancing.");
+    await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Wake Colt Up", exact: true }).click();
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio", "The Colt did not resume dancing after a manual wake-up.");
     const radioDragStart = await page.locator("#launchpadColtRoot").boundingBox();
     await page.mouse.move(radioDragStart.x + 70, radioDragStart.y + 65);
     await page.mouse.down();
@@ -387,9 +431,15 @@ async function run() {
     await page.waitForTimeout(120);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle when radio playback stopped.");
 
+    await page.getByRole("button", { name: "Minimize Colt Radio", exact: true }).click();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => window.dispatchEvent(new Event("resize")));
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-auto-compact")));
+    await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Customize Colt", exact: true }).click();
+    const mobileCustomizer = await page.locator(".launchpad-colt-customizer").boundingBox();
+    assert(mobileCustomizer.x >= 0 && mobileCustomizer.x + mobileCustomizer.width <= 390, "The Colt customizer overflows the mobile viewport.");
+    assert(mobileCustomizer.y >= 0 && mobileCustomizer.y + mobileCustomizer.height <= 844, "The Colt customizer is not vertically contained on mobile.");
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   } finally {
     await browser.close();

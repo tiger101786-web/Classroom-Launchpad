@@ -45,6 +45,8 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Launchpad Colt", accessories: [] });
+  const ACCESSORY_IDS = ["nameplate", "red-glow", "platform", "lightning-frame"];
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -59,7 +61,17 @@
   let radioDanceSwitchToken = 0;
   let radioDanceRecoveryTimer = 0;
   let controlsOpen = false;
-  let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
+  let prefs = {
+    minimized: false,
+    motion: true,
+    hidden: false,
+    position: null,
+    size: "medium",
+    asleep: false,
+    coltName: DEFAULT_CUSTOMIZATION.name,
+    accessories: []
+  };
+  let customizationDraft = { ...DEFAULT_CUSTOMIZATION, accessories: [] };
   let dragSession = null;
   let suppressCharacterClick = false;
 
@@ -70,6 +82,8 @@
         <span></span>
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
+        <span class="launchpad-colt-effect launchpad-colt-lightning-frame" aria-hidden="true"></span>
+        <span class="launchpad-colt-effect launchpad-colt-platform" aria-hidden="true"></span>
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -81,6 +95,7 @@
         <video class="launchpad-colt-pose" data-pose="petting" src="${VIDEO_ASSETS.petting}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
+        <span class="launchpad-colt-nameplate" aria-hidden="true"><small>MY COLT</small><strong>Launchpad Colt</strong></span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize">Minimize</button>
@@ -88,6 +103,7 @@
         <button type="button" data-colt-control="size">Size: Medium</button>
         <button type="button" data-colt-control="feed">Feed Me</button>
         <button type="button" data-colt-control="pet">Pet Me</button>
+        <button type="button" data-colt-control="customize">Customize Colt</button>
         <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
@@ -97,6 +113,40 @@
       <img src="${ASSET_URL}" alt="">
     </button>
   `;
+
+  const customizer = documentObject.createElement("section");
+  customizer.className = "launchpad-colt-customizer";
+  customizer.hidden = true;
+  customizer.setAttribute("aria-label", "Customize your Colt");
+  customizer.innerHTML = `
+    <header>
+      <div><span>Personal Companion</span><h2>Customize Your Colt</h2></div>
+      <button type="button" class="launchpad-colt-customizer-close" data-colt-customizer="close" aria-label="Close Colt customization">×</button>
+    </header>
+    <div class="launchpad-colt-name-editor">
+      <label for="launchpadColtName">Colt name</label>
+      <div>
+        <input id="launchpadColtName" maxlength="16" autocomplete="off" spellcheck="false" aria-describedby="launchpadColtNameHint">
+        <button type="button" data-colt-customizer="save-name">Save Name</button>
+      </div>
+      <small id="launchpadColtNameHint">Use 2–16 school-appropriate letters or numbers.</small>
+    </div>
+    <fieldset class="launchpad-colt-accessories">
+      <legend>Universal accessories</legend>
+      <div>
+        <button type="button" data-colt-accessory="nameplate" aria-pressed="false"><i aria-hidden="true"></i><strong>Nameplate</strong><small>Show the Colt's name</small></button>
+        <button type="button" data-colt-accessory="red-glow" aria-pressed="false"><i aria-hidden="true"></i><strong>Red Glow</strong><small>Animated crimson aura</small></button>
+        <button type="button" data-colt-accessory="platform" aria-pressed="false"><i aria-hidden="true"></i><strong>Colt Platform</strong><small>Glowing launch pad</small></button>
+        <button type="button" data-colt-accessory="lightning-frame" aria-pressed="false"><i aria-hidden="true"></i><strong>Lightning Frame</strong><small>Electric corner accents</small></button>
+      </div>
+    </fieldset>
+    <p class="launchpad-colt-customizer-status" role="status" aria-live="polite"></p>
+    <footer>
+      <button type="button" data-colt-customizer="save-look">Save Look</button>
+      <button type="button" data-colt-customizer="restore">Restore Default</button>
+    </footer>
+  `;
+  documentObject.body.append(customizer);
 
   const companion = root.querySelector(".launchpad-colt-companion");
   const characterButton = root.querySelector(".launchpad-colt-character");
@@ -111,6 +161,10 @@
   const feedButton = controls.querySelector('[data-colt-control="feed"]');
   const petButton = controls.querySelector('[data-colt-control="pet"]');
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
+  const customizeButton = controls.querySelector('[data-colt-control="customize"]');
+  const nameplate = root.querySelector(".launchpad-colt-nameplate strong");
+  const customizerName = customizer.querySelector("#launchpadColtName");
+  const customizerStatus = customizer.querySelector(".launchpad-colt-customizer-status");
   const feedingVideo = root.querySelector('video[data-pose="feeding"]');
   const pettingVideo = root.querySelector('video[data-pose="petting"]');
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
@@ -200,6 +254,55 @@
     return `classroomLaunchpadColtPrefsV1:${account}`;
   }
 
+  function normalizeCustomization(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const name = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
+    const accessories = [...new Set((Array.isArray(source.accessories) ? source.accessories : [])
+      .map(item => String(item || "").trim().toLowerCase())
+      .filter(item => ACCESSORY_IDS.includes(item)))];
+    return { name: name || DEFAULT_CUSTOMIZATION.name, accessories };
+  }
+
+  function defaultPreferences() {
+    return {
+      minimized: false,
+      motion: true,
+      hidden: false,
+      position: null,
+      size: "medium",
+      asleep: false,
+      coltName: DEFAULT_CUSTOMIZATION.name,
+      accessories: []
+    };
+  }
+
+  function applyCustomization(value = prefs) {
+    const customization = normalizeCustomization(value);
+    ACCESSORY_IDS.forEach(accessory => root.classList.toggle(`has-${accessory}`, customization.accessories.includes(accessory)));
+    nameplate.textContent = customization.name;
+    speech.querySelector("strong").textContent = customization.name;
+    companion.setAttribute("aria-label", `${customization.name}, Launchpad Colt companion`);
+    characterButton.setAttribute("aria-label", `Open ${customization.name} controls. Drag to move the Colt.`);
+  }
+
+  function applyRemoteCustomization(value) {
+    const customization = normalizeCustomization(value);
+    prefs.coltName = customization.name;
+    prefs.accessories = customization.accessories;
+    savePreferences();
+    applyPreferences();
+  }
+
+  async function loadRemoteCustomization() {
+    if (!session.authenticated) return;
+    try {
+      const response = await fetch("/api/launchpad-colt/customization", { headers: { Accept: "application/json" } });
+      if (!response.ok) return;
+      const result = await response.json();
+      applyRemoteCustomization(result.customization);
+    } catch {}
+  }
+
   function showSleepingState(restart = false) {
     globalObject.clearTimeout(reactionTimer);
     globalObject.clearTimeout(speechTimer);
@@ -215,6 +318,7 @@
   function loadPreferences() {
     try {
       const stored = JSON.parse(globalObject.localStorage.getItem(preferenceKey()) || "{}");
+      const customization = normalizeCustomization(stored);
       prefs = {
         minimized: Boolean(stored.minimized),
         motion: stored.motion !== false,
@@ -223,10 +327,12 @@
           ? { x: stored.position.x, y: stored.position.y }
           : null,
         size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium",
-        asleep: Boolean(stored.asleep)
+        asleep: Boolean(stored.asleep),
+        coltName: customization.name,
+        accessories: customization.accessories
       };
     } catch {
-      prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
+      prefs = defaultPreferences();
     }
     applyPreferences();
   }
@@ -251,6 +357,7 @@
     petButton.disabled = prefs.asleep;
     petButton.title = prefs.asleep ? "Wake the Colt before petting him" : "Play the petting animation";
     sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
+    applyCustomization();
     applySavedPosition();
     if (prefs.hidden) closeControls();
     if (prefs.asleep) showSleepingState();
@@ -286,13 +393,74 @@
     characterButton.setAttribute("aria-expanded", "false");
   }
 
+  function renderCustomizationDraft() {
+    const customization = normalizeCustomization(customizationDraft);
+    customizerName.value = customization.name;
+    customizer.querySelectorAll("[data-colt-accessory]").forEach(button => {
+      const selected = customization.accessories.includes(button.dataset.coltAccessory);
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    applyCustomization(customization);
+  }
+
+  function openCustomizer() {
+    customizationDraft = normalizeCustomization(prefs);
+    customizerStatus.textContent = "";
+    renderCustomizationDraft();
+    customizer.hidden = false;
+    root.classList.add("is-customizing");
+    closeControls();
+    globalObject.setTimeout(() => customizerName.focus(), 0);
+  }
+
+  function closeCustomizer({ restorePreview = true } = {}) {
+    customizer.hidden = true;
+    root.classList.remove("is-customizing");
+    if (restorePreview) applyCustomization();
+  }
+
+  async function saveCustomization(successMessage) {
+    const customization = normalizeCustomization({
+      name: customizerName.value,
+      accessories: customizationDraft.accessories
+    });
+    customizerStatus.textContent = "Saving…";
+    customizer.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
+    try {
+      const response = await fetch("/api/launchpad-colt/customization", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(customization)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "The Colt customization could not be saved.");
+      const saved = normalizeCustomization(result.customization || customization);
+      prefs.coltName = saved.name;
+      prefs.accessories = saved.accessories;
+      customizationDraft = saved;
+      savePreferences();
+      applyPreferences();
+      renderCustomizationDraft();
+      customizerStatus.textContent = successMessage;
+    } catch (error) {
+      customizerStatus.textContent = error.message;
+      applyCustomization(customizationDraft);
+    } finally {
+      customizer.querySelectorAll("button, input").forEach(control => { control.disabled = false; });
+    }
+  }
+
   function shouldShow() {
     return globallyEnabled && session.authenticated && !HIDDEN_SCREENS.has(screen);
   }
 
   function syncVisibility() {
     root.hidden = !shouldShow();
-    if (root.hidden) closeControls();
+    if (root.hidden) {
+      closeControls();
+      closeCustomizer();
+    }
     else applySavedPosition();
     syncPanelCollision();
   }
@@ -387,7 +555,7 @@
 
   function resetSleepTimer() {
     globalObject.clearTimeout(sleepTimer);
-    if (prefs.asleep) return;
+    if (prefs.asleep || radioPlaybackActive) return;
     if (currentState === "sleep") welcome("I'm awake—what are we doing next?");
     sleepTimer = globalObject.setTimeout(() => {
       if (!controlsOpen) react("sleep", "", 0);
@@ -405,6 +573,7 @@
     if (blocked || radioOpen) {
       speech.hidden = true;
       closeControls();
+      closeCustomizer();
     }
   }
 
@@ -529,6 +698,10 @@
 
   characterButton.addEventListener("click", () => {
     if (suppressCharacterClick) return;
+    if (!customizer.hidden) {
+      closeCustomizer();
+      return;
+    }
     controlsOpen = !controlsOpen;
     controls.hidden = !controlsOpen;
     characterButton.setAttribute("aria-expanded", String(controlsOpen));
@@ -539,6 +712,10 @@
     const button = event.target.closest("[data-colt-control]");
     if (!button) return;
     const action = button.dataset.coltControl;
+    if (action === "customize") {
+      openCustomizer();
+      return;
+    }
     if (action === "feed") {
       if (prefs.asleep) return;
       closeControls();
@@ -578,6 +755,45 @@
     applyPreferences();
   });
 
+  customizer.addEventListener("click", event => {
+    const accessoryButton = event.target.closest("[data-colt-accessory]");
+    if (accessoryButton) {
+      const accessory = accessoryButton.dataset.coltAccessory;
+      const selected = new Set(customizationDraft.accessories);
+      if (selected.has(accessory)) selected.delete(accessory);
+      else selected.add(accessory);
+      customizationDraft = { ...customizationDraft, accessories: [...selected] };
+      customizerStatus.textContent = "Previewing—choose Save Look to keep these accessories.";
+      renderCustomizationDraft();
+      return;
+    }
+    const actionButton = event.target.closest("[data-colt-customizer]");
+    if (!actionButton) return;
+    const action = actionButton.dataset.coltCustomizer;
+    if (action === "close") {
+      closeCustomizer();
+      return;
+    }
+    if (action === "restore") {
+      customizationDraft = { ...DEFAULT_CUSTOMIZATION, accessories: [] };
+      renderCustomizationDraft();
+      saveCustomization("The default Colt name and look were restored.");
+      return;
+    }
+    if (action === "save-name") saveCustomization("Your Colt's name was saved.");
+    if (action === "save-look") saveCustomization("Your Colt's look was saved.");
+  });
+
+  customizerName.addEventListener("input", () => {
+    customizationDraft = { ...customizationDraft, name: customizerName.value };
+    customizerStatus.textContent = "Previewing—choose Save Name to keep this name.";
+    applyCustomization(customizationDraft);
+  });
+
+  documentObject.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !customizer.hidden) closeCustomizer();
+  });
+
   restoreButton.addEventListener("click", () => {
     if (suppressCharacterClick) return;
     prefs.hidden = false;
@@ -591,6 +807,7 @@
     const playing = Boolean(event.detail?.playing);
     radioPlaybackActive = playing;
     if (playing) {
+      globalObject.clearTimeout(sleepTimer);
       if (!prefs.asleep) startRadioDance(true);
       return;
     }
@@ -605,6 +822,7 @@
       speech.hidden = true;
       syncPoseVideos("idle", true);
     }
+    resetSleepTimer();
   });
 
   globalObject.addEventListener("colt-radio-opened", () => {
@@ -645,7 +863,10 @@
     const becameAuthenticated = !session.authenticated && Boolean(nextAuth.authenticated);
     const accountChanged = (nextAuth.email || nextAuth.role) !== (session.email || session.role);
     session = { ...session, ...nextAuth };
-    if (accountChanged) loadPreferences();
+    if (accountChanged) {
+      loadPreferences();
+      loadRemoteCustomization();
+    }
     syncVisibility();
     injectTeacherSetting();
     if (becameAuthenticated && shouldShow()) {
@@ -662,16 +883,19 @@
   });
 
   async function start() {
+    let initialCustomization = null;
     try {
       const response = await fetch("/api/state", { headers: { Accept: "application/json" } });
       if (response.ok) {
         const state = await response.json();
         session = { ...session, ...(state.auth || {}) };
         globallyEnabled = !state.launchpadColt || state.launchpadColt.enabled !== false;
+        initialCustomization = state.coltCustomization || null;
       }
     } catch {}
     screen = documentObject.body.dataset.screen || screen;
     loadPreferences();
+    if (initialCustomization) applyRemoteCustomization(initialCustomization);
     root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120);
     syncVisibility();
     watchPanels();

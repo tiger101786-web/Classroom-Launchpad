@@ -76,6 +76,7 @@ const defaultDb = {
   threads: [],
   directMessages: [],
   radioFavorites: {},
+  coltCustomizations: {},
   mutedStudents: [],
   websiteRequests: [],
   assignments: [],
@@ -309,6 +310,39 @@ function normalizeRadioFavorites(value) {
 }
 
 function radioFavoritesAccountKey(session) {
+  return session && session.role === "teacher"
+    ? "teacher"
+    : `student:${normalizeEmail(session && session.email)}`;
+}
+
+const coltAccessoryIds = new Set(["nameplate", "red-glow", "platform", "lightning-frame"]);
+const defaultColtCustomization = Object.freeze({
+  name: "Launchpad Colt",
+  accessories: []
+});
+
+function normalizeColtCustomization(value) {
+  const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const name = cleanText(source.name, 16);
+  const accessories = [...new Set((Array.isArray(source.accessories) ? source.accessories : [])
+    .map(item => String(item || "").trim().toLowerCase())
+    .filter(item => coltAccessoryIds.has(item)))];
+  return {
+    name: name || defaultColtCustomization.name,
+    accessories,
+    updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""
+  };
+}
+
+function normalizeColtCustomizations(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([accountKey, customization]) => {
+    const key = cleanText(accountKey, 180).toLowerCase();
+    return key ? [[key, normalizeColtCustomization(customization)]] : [];
+  }));
+}
+
+function coltCustomizationAccountKey(session) {
   return session && session.role === "teacher"
     ? "teacher"
     : `student:${normalizeEmail(session && session.email)}`;
@@ -977,6 +1011,7 @@ function writeDb(db) {
     threads: pruneModeratedThreads(migrateGradeScopedThreads(db.threads)),
     directMessages: normalizeDirectMessages(db.directMessages),
     radioFavorites: normalizeRadioFavorites(db.radioFavorites),
+    coltCustomizations: normalizeColtCustomizations(db.coltCustomizations),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
@@ -1216,6 +1251,9 @@ function publicState(db, session) {
     launchpadColt: db.launchpadColt && typeof db.launchpadColt === "object"
       ? { enabled: db.launchpadColt.enabled !== false, updatedAt: String(db.launchpadColt.updatedAt || "") }
       : { ...defaultDb.launchpadColt },
+    coltCustomization: signedIn
+      ? normalizeColtCustomizations(db.coltCustomizations)[coltCustomizationAccountKey(session)] || { ...defaultColtCustomization }
+      : { ...defaultColtCustomization },
     auth: publicSession(session, db),
     coltCornerLocked: !signedIn,
     postingBlocked: session && session.role === "student" ? isStudentMuted(db, session) : false
@@ -2738,6 +2776,50 @@ async function handleApi(req, res, pathname) {
       db.launchpadColt = { enabled: body.enabled !== false, updatedAt: new Date().toISOString() };
       writeDb(db);
       sendJson(res, 200, { ok: true, launchpadColt: db.launchpadColt });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/launchpad-colt/customization") {
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    const customizations = normalizeColtCustomizations(readDb().coltCustomizations);
+    sendJson(res, 200, {
+      customization: customizations[coltCustomizationAccountKey(allowed)] || { ...defaultColtCustomization }
+    });
+    return true;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/launchpad-colt/customization") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      const name = cleanText(body.name, 16);
+      if (name.length < 2 || !/^[a-z0-9][a-z0-9 .'-]{1,15}$/i.test(name)) {
+        throw new Error("Use 2 to 16 letters or numbers for your Colt's name.");
+      }
+      const moderation = moderateMessage(name);
+      const inappropriateName = moderation.reasons.some(reason => [
+        "personal_information", "social_contact", "external_link", "unsafe_markup", "profanity",
+        "sexual_content", "hate_speech", "threat", "bullying"
+      ].includes(reason.code));
+      if (inappropriateName) throw new Error("Please choose a school-appropriate Colt name.");
+      const customization = normalizeColtCustomization({
+        name,
+        accessories: body.accessories,
+        updatedAt: new Date().toISOString()
+      });
+      const db = readDb();
+      db.coltCustomizations = {
+        ...normalizeColtCustomizations(db.coltCustomizations),
+        [coltCustomizationAccountKey(allowed)]: customization
+      };
+      writeDb(db);
+      sendJson(res, 200, { ok: true, customization });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
