@@ -1717,6 +1717,12 @@ body[data-theme="night"] .expectations-colt {
   font-weight: 950;
   letter-spacing: .015em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.calendar-date.is-long-month {
+  font-size: clamp(1.42rem, 2vw, 1.58rem);
+  letter-spacing: 0;
 }
 
 .calendar-year {

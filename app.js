@@ -10753,8 +10753,10 @@ function startCalendarClock() {
 
   const update = () => {
     const now = new Date();
+    const monthName = new Intl.DateTimeFormat([], { month: "long" }).format(now);
     day.textContent = new Intl.DateTimeFormat([], { weekday: "long" }).format(now);
-    date.textContent = new Intl.DateTimeFormat([], { month: "long", day: "numeric" }).format(now);
+    date.textContent = `${monthName} ${now.getDate()}`;
+    date.classList.toggle("is-long-month", monthName.length >= 9);
     year.textContent = new Intl.DateTimeFormat([], { year: "numeric" }).format(now);
     time.textContent = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(now);
   };

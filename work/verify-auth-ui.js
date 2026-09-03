@@ -107,8 +107,12 @@ async function run() {
       const panel = document.querySelector(".rules-card");
       const image = document.querySelector(".expectations-colt video source");
       const calendar = document.querySelector(".calendar-card");
+      const calendarDate = document.querySelector("#calendarDate");
       const panelBox = panel.getBoundingClientRect();
       const calendarBox = calendar.getBoundingClientRect();
+      const dateRange = document.createRange();
+      dateRange.selectNodeContents(calendarDate);
+      const dateTextBox = dateRange.getBoundingClientRect();
       return {
         kicker: document.querySelector(".expectations-kicker")?.textContent.replace(/\s+/g, " ").trim(),
         heading: document.querySelector(".expectations-rules h3")?.textContent.trim(),
@@ -121,6 +125,7 @@ async function run() {
         time: document.querySelector("#calendarTime")?.textContent.trim(),
         live: document.querySelector(".calendar-live")?.textContent.trim(),
         calendarWidth: Math.round(calendarBox.width),
+        dateFits: dateTextBox.right <= calendarBox.right - 15,
         contained: calendarBox.right <= panelBox.right && calendarBox.bottom <= panelBox.bottom
       };
     });
@@ -128,7 +133,8 @@ async function run() {
       || expectationsRedesign.ruleCount !== 6 || expectationsRedesign.checkCount !== 6
       || expectationsRedesign.imageSource !== "assets/expectations-colt.mp4" || !expectationsRedesign.weekday
       || !expectationsRedesign.date || !expectationsRedesign.year || !expectationsRedesign.time
-      || expectationsRedesign.live !== "Live" || expectationsRedesign.calendarWidth < 220 || !expectationsRedesign.contained) {
+      || expectationsRedesign.live !== "Live" || expectationsRedesign.calendarWidth < 220 || !expectationsRedesign.dateFits
+      || !expectationsRedesign.contained) {
       throw new Error(`Expectations redesign is incomplete: ${JSON.stringify(expectationsRedesign)}.`);
     }
     await page.locator(".rules-card").screenshot({ path: path.join(dataDir, "expectations-redesign-desktop.png") });
