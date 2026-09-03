@@ -12,6 +12,7 @@
     sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
     radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260831-radio-dance-alpha-v1",
+    radioDanceAlternate: "assets/launchpad-colt-radio-dance-alternate.webm?v=20260902-radio-dance-alpha-v1",
     greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1",
     feeding: "assets/launchpad-colt-feeding.webm?v=20260901-feeding-alpha-v1",
     petting: "assets/launchpad-colt-petting.webm?v=20260901-petting-alpha-v1"
@@ -52,6 +53,7 @@
   let panelObserver = null;
   let currentState = "idle";
   let radioPlaybackActive = false;
+  let activeRadioDancePose = "radioDance";
   let controlsOpen = false;
   let prefs = { minimized: false, motion: true, hidden: false, position: null, size: "medium", asleep: false };
   let dragSession = null;
@@ -69,7 +71,8 @@
         <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="greetingExcited" src="${VIDEO_ASSETS.greetingExcited}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="radioDanceAlternate" src="${VIDEO_ASSETS.radioDanceAlternate}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="feeding" src="${VIDEO_ASSETS.feeding}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="petting" src="${VIDEO_ASSETS.petting}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -119,7 +122,7 @@
       corner: "greetingExcited",
       success: "greetingExcited",
       classroom: "greetingExcited",
-      radio: "radioDance",
+      radio: activeRadioDancePose,
       feeding: "feeding",
       petting: "petting",
       sleep: "sleeping"
@@ -127,6 +130,7 @@
     const activePose = poseByState[state] || "";
     poseVideos.forEach(video => {
       const active = prefs.motion && video.dataset.pose === activePose;
+      video.dataset.active = String(active);
       if (!active) {
         video.pause();
         return;
@@ -315,6 +319,15 @@
 
   feedingVideo.addEventListener("ended", finishFeeding);
   pettingVideo.addEventListener("ended", finishPetting);
+  poseVideos
+    .filter(video => video.dataset.pose === "radioDance" || video.dataset.pose === "radioDanceAlternate")
+    .forEach(video => {
+      video.addEventListener("ended", () => {
+        if (!radioPlaybackActive || currentState !== "radio" || prefs.asleep || !prefs.motion) return;
+        activeRadioDancePose = video.dataset.pose === "radioDance" ? "radioDanceAlternate" : "radioDance";
+        syncPoseVideos("radio", true);
+      });
+    });
 
   function resetSleepTimer() {
     globalObject.clearTimeout(sleepTimer);

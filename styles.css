@@ -10296,7 +10296,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="move"] .launchpad-colt-pose[data-pose="pointing"],
 .launchpad-colt-companion[data-state="message"] .launchpad-colt-pose[data-pose="greetingExcited"],
 .launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose[data-pose="greetingExcited"],
-.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDance"],
+.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDance"][data-active="true"],
+.launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDanceAlternate"][data-active="true"],
 .launchpad-colt-companion[data-state="feeding"] .launchpad-colt-pose[data-pose="feeding"],
 .launchpad-colt-companion[data-state="petting"] .launchpad-colt-pose[data-pose="petting"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {

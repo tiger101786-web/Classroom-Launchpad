@@ -38,7 +38,7 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   ["launchpad-colt-pointing.png", "launchpad-colt-pointing.webm", "launchpad-colt-pointing.mp4", "launchpad-colt-greeting.png", "launchpad-colt-excited.png"].forEach(filename => {
@@ -62,7 +62,7 @@ async function run() {
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
-    assert.equal(await page.locator(".launchpad-colt-pose").count(), 8);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 9);
     const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
     assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await welcomeVideo.getAttribute("src"), /launchpad-colt-welcome\.webm/);
@@ -75,6 +75,25 @@ async function run() {
     const radioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDance"]');
     assert.equal(await radioDanceVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await radioDanceVideo.getAttribute("src"), /launchpad-colt-radio-dance\.webm/);
+    const alternateRadioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDanceAlternate"]');
+    assert.equal(await alternateRadioDanceVideo.evaluate(element => element.tagName), "VIDEO");
+    assert.match(await alternateRadioDanceVideo.getAttribute("src"), /launchpad-colt-radio-dance-alternate\.webm/);
+    assert.equal(await alternateRadioDanceVideo.getAttribute("loop"), null);
+    const alternateDanceCornerAlpha = await alternateRadioDanceVideo.evaluate(async element => {
+      await new Promise(resolve => {
+        if (element.readyState >= 2) resolve();
+        else element.addEventListener("loadeddata", resolve, { once: true });
+      });
+      element.currentTime = 1;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(alternateDanceCornerAlpha < 8, `The second radio dance still has a visible green-screen background (corner alpha: ${alternateDanceCornerAlpha}).`);
     assert.equal(await page.locator('.launchpad-colt-pose[data-pose="dancing"]').count(), 0, "The old static radio-dance pose must not render.");
     await page.waitForSelector('.launchpad-colt-companion[data-state="welcome"]');
     await page.waitForTimeout(180);
@@ -330,6 +349,14 @@ async function run() {
     await page.waitForTimeout(2200);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio", "The Colt radio dance stopped while playback was still active.");
     assert.equal(await radioDanceVideo.evaluate(element => element.paused), false, "The Colt radio dance video is not playing.");
+    await radioDanceVideo.evaluate(element => element.dispatchEvent(new Event("ended")));
+    await page.waitForTimeout(120);
+    assert.equal(await radioDanceVideo.evaluate(element => element.paused), true, "The first dance kept playing after it ended.");
+    assert.equal(await alternateRadioDanceVideo.evaluate(element => element.paused), false, "The second dance did not start after the first dance ended.");
+    assert.equal(await alternateRadioDanceVideo.evaluate(element => getComputedStyle(element).opacity), "1", "The second dance is not visible.");
+    await alternateRadioDanceVideo.evaluate(element => element.dispatchEvent(new Event("ended")));
+    await page.waitForTimeout(120);
+    assert.equal(await radioDanceVideo.evaluate(element => element.paused), false, "The first dance did not resume after the second dance ended.");
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } })));
     await page.waitForTimeout(150);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not stop dancing when radio playback paused.");
