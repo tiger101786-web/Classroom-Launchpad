@@ -10272,6 +10272,27 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   pointer-events: none;
 }
 
+.launchpad-colt-platform {
+  position: absolute;
+  z-index: 0;
+  right: 50%;
+  bottom: 1%;
+  width: 125%;
+  aspect-ratio: 3 / 1;
+  pointer-events: none;
+  background: url("assets/launchpad-colt-platform.png?v=20260904") center / contain no-repeat;
+  filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .58)) drop-shadow(0 0 8px rgba(234, 24, 70, .34));
+  transform: translateX(50%);
+}
+
+.launchpad-colt-root.is-platform-hidden .launchpad-colt-platform {
+  display: none;
+}
+
+.launchpad-colt-root:not(.is-platform-hidden) .launchpad-colt-nameplate {
+  bottom: -36%;
+}
+
 .launchpad-colt-nameplate,
 .launchpad-colt-nameplate-preview {
   z-index: 5;
@@ -10344,6 +10365,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   user-select: none;
   -webkit-user-drag: none;
   transition: none;
+  z-index: 1;
 }
 
 .launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
@@ -10540,7 +10562,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   top: 105px;
   right: 98px;
   display: grid;
-  width: 136px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 276px;
   gap: 5px;
   padding: 7px;
   border: 1px solid rgba(218, 29, 75, 0.58);
@@ -10752,6 +10775,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-root.is-minimized .launchpad-colt-character::before,
 .launchpad-colt-root.is-minimized .launchpad-colt-spark,
 .launchpad-colt-root.is-minimized .launchpad-colt-prop,
+.launchpad-colt-root.is-minimized .launchpad-colt-platform,
 .launchpad-colt-root.is-minimized .launchpad-colt-nameplate {
   display: none;
 }
@@ -10897,6 +10921,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .launchpad-colt-root.is-auto-compact .launchpad-colt-character::before,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-spark,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-prop,
+  .launchpad-colt-root.is-auto-compact .launchpad-colt-platform,
   .launchpad-colt-root.is-auto-compact .launchpad-colt-nameplate {
     display: none;
   }
@@ -10918,6 +10943,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .launchpad-colt-controls {
     top: 62px;
     right: 8px;
+    grid-template-columns: 1fr;
+    width: 136px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
   }
 
   .launchpad-colt-customizer {

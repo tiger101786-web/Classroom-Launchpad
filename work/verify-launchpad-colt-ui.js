@@ -46,6 +46,7 @@ async function run() {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-nameplate.png")), "Missing the custom Colt nameplate artwork.");
+  assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-platform.png")), "Missing the transparent Colt platform artwork.");
   ["launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm"].forEach(filename => {
     const size = fs.statSync(path.resolve(__dirname, "..", "assets", filename)).size;
     assert(size < 3_500_000, `${filename} is too large for reliable playback on school laptops (${size} bytes).`);
@@ -63,7 +64,7 @@ async function run() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.addInitScript(() => {
       const nativeFetch = window.fetch.bind(window);
-      let customization = { name: "Colt", nameplateVisible: true };
+      let customization = { name: "Colt", nameplateVisible: true, platformVisible: true };
       window.fetch = async (input, init = {}) => {
         const url = String(input);
         if (url.includes("/api/launchpad-colt/customization")) {
@@ -222,6 +223,7 @@ async function run() {
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Name Your Colt", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Hide Platform", exact: true }).isVisible());
     await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");
     await page.locator("#launchpadColtName").fill("Blaze");
@@ -236,6 +238,15 @@ async function run() {
     assert(Math.abs((nameplateBounds.width / nameplateBounds.height) - 3) < 0.08, "The custom nameplate artwork is distorted.");
     assert(nameplateBounds.width <= characterBounds.width * 1.08, "The custom nameplate is too wide for the Colt.");
     assert(Math.abs((nameplateBounds.x + nameplateBounds.width / 2) - (characterBounds.x + characterBounds.width / 2)) < 3, "The custom nameplate is not centered under the Colt.");
+    const platform = page.locator(".launchpad-colt-platform");
+    const platformBounds = await platform.boundingBox();
+    assert(platformBounds, "The Colt platform is not visible by default.");
+    assert(Math.abs((platformBounds.width / platformBounds.height) - 3) < 0.08, "The Colt platform artwork is distorted.");
+    assert(platformBounds.width <= characterBounds.width * 1.27, "The Colt platform is too wide for the character.");
+    assert(Math.abs((platformBounds.x + platformBounds.width / 2) - (characterBounds.x + characterBounds.width / 2)) < 3, "The platform is not centered beneath the Colt.");
+    assert.equal(await platform.evaluate(element => getComputedStyle(element).zIndex), "0");
+    assert(Number(await page.locator(".launchpad-colt-nameplate").evaluate(element => getComputedStyle(element).zIndex)) > 0, "The nameplate must stay above the platform.");
+    assert(platformBounds.y + platformBounds.height <= nameplateBounds.y + 2, "The platform overlaps the Colt nameplate.");
     const savedColtPreferences = await page.evaluate(() => Object.fromEntries(
       Object.keys(localStorage)
         .filter(key => key.startsWith("classroomLaunchpadColtPrefsV1:"))
@@ -252,6 +263,13 @@ async function run() {
     await page.getByRole("button", { name: "Show Nameplate", exact: true }).click();
     await page.waitForFunction(() => window.__savedColtCustomization?.nameplateVisible === true);
     assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-nameplate-hidden")), false);
+    await page.getByRole("button", { name: "Hide Platform", exact: true }).click();
+    await page.waitForFunction(() => window.__savedColtCustomization?.platformVisible === false);
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-platform-hidden")));
+    assert.equal(await page.getByRole("button", { name: "Place Platform", exact: true }).isVisible(), true);
+    await page.getByRole("button", { name: "Place Platform", exact: true }).click();
+    await page.waitForFunction(() => window.__savedColtCustomization?.platformVisible === true);
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-platform-hidden")), false);
     await page.getByRole("button", { name: "Feed Me", exact: true }).click();
     const feedingVideo = page.locator('.launchpad-colt-pose[data-pose="feeding"]');
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "feeding");
@@ -278,6 +296,7 @@ async function run() {
     await feedingVideo.dispatchEvent("ended");
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after feeding.");
     assert.equal(await page.locator(".launchpad-colt-nameplate strong").textContent(), "Blaze", "The saved nameplate disappeared during a Colt animation.");
+    assert.equal(await platform.evaluate(element => getComputedStyle(element).display), "block", "The platform disappeared during a Colt animation.");
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Pet Me", exact: true }).isVisible());
     await page.getByRole("button", { name: "Pet Me", exact: true }).click();

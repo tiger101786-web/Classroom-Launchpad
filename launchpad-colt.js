@@ -45,7 +45,7 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
-  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt", nameplateVisible: true });
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt", nameplateVisible: true, platformVisible: true });
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -69,7 +69,8 @@
     size: "medium",
     asleep: false,
     coltName: DEFAULT_CUSTOMIZATION.name,
-    nameplateVisible: true
+    nameplateVisible: true,
+    platformVisible: true
   };
   let customizationDraft = { ...DEFAULT_CUSTOMIZATION };
   let dragSession = null;
@@ -82,6 +83,7 @@
         <span></span>
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
+        <span class="launchpad-colt-platform" aria-hidden="true"></span>
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
@@ -103,6 +105,7 @@
         <button type="button" data-colt-control="pet">Pet Me</button>
         <button type="button" data-colt-control="customize">Name Your Colt</button>
         <button type="button" data-colt-control="nameplate">Hide Nameplate</button>
+        <button type="button" data-colt-control="platform">Hide Platform</button>
         <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
@@ -153,6 +156,7 @@
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
   const customizeButton = controls.querySelector('[data-colt-control="customize"]');
   const nameplateButton = controls.querySelector('[data-colt-control="nameplate"]');
+  const platformButton = controls.querySelector('[data-colt-control="platform"]');
   const nameplate = root.querySelector(".launchpad-colt-nameplate strong");
   const nameplatePreview = customizer.querySelector(".launchpad-colt-nameplate-preview strong");
   const customizerName = customizer.querySelector("#launchpadColtName");
@@ -250,7 +254,11 @@
     const source = value && typeof value === "object" ? value : {};
     const enteredName = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
     const name = enteredName.toLowerCase() === "launchpad colt" ? DEFAULT_CUSTOMIZATION.name : enteredName;
-    return { name: name || DEFAULT_CUSTOMIZATION.name, nameplateVisible: source.nameplateVisible !== false };
+    return {
+      name: name || DEFAULT_CUSTOMIZATION.name,
+      nameplateVisible: source.nameplateVisible !== false,
+      platformVisible: source.platformVisible !== false
+    };
   }
 
   function defaultPreferences() {
@@ -262,7 +270,8 @@
       size: "medium",
       asleep: false,
       coltName: DEFAULT_CUSTOMIZATION.name,
-      nameplateVisible: true
+      nameplateVisible: true,
+      platformVisible: true
     };
   }
 
@@ -271,6 +280,7 @@
     nameplate.textContent = customization.name;
     nameplatePreview.textContent = customization.name;
     root.classList.toggle("is-nameplate-hidden", !customization.nameplateVisible);
+    root.classList.toggle("is-platform-hidden", !customization.platformVisible);
     speech.querySelector("strong").textContent = customization.name;
     companion.setAttribute("aria-label", `${customization.name}, Launchpad Colt companion`);
     characterButton.setAttribute("aria-label", `Open ${customization.name} controls. Drag to move the Colt.`);
@@ -280,6 +290,7 @@
     const customization = normalizeCustomization(value);
     prefs.coltName = customization.name;
     prefs.nameplateVisible = customization.nameplateVisible;
+    prefs.platformVisible = customization.platformVisible;
     savePreferences();
     applyPreferences();
   }
@@ -322,7 +333,8 @@
         size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium",
         asleep: Boolean(stored.asleep),
         coltName: customization.name,
-        nameplateVisible: customization.nameplateVisible
+        nameplateVisible: customization.nameplateVisible,
+        platformVisible: customization.platformVisible
       };
     } catch {
       prefs = defaultPreferences();
@@ -351,6 +363,7 @@
     petButton.title = prefs.asleep ? "Wake the Colt before petting him" : "Play the petting animation";
     sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
     nameplateButton.textContent = prefs.nameplateVisible ? "Hide Nameplate" : "Show Nameplate";
+    platformButton.textContent = prefs.platformVisible ? "Hide Platform" : "Place Platform";
     applyCustomization();
     applySavedPosition();
     if (prefs.hidden) closeControls();
@@ -411,7 +424,11 @@
   }
 
   async function saveCustomization(successMessage) {
-    const customization = normalizeCustomization({ name: customizerName.value, nameplateVisible: prefs.nameplateVisible });
+    const customization = normalizeCustomization({
+      name: customizerName.value,
+      nameplateVisible: prefs.nameplateVisible,
+      platformVisible: prefs.platformVisible
+    });
     customizationRevision += 1;
     customizerStatus.textContent = "Saving…";
     customizer.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
@@ -438,7 +455,7 @@
     }
   }
 
-  async function saveNameplateVisibility() {
+  async function saveAppearancePreferences() {
     customizationRevision += 1;
     const revision = customizationRevision;
     savePreferences();
@@ -723,7 +740,12 @@
     }
     if (action === "nameplate") {
       prefs.nameplateVisible = !prefs.nameplateVisible;
-      saveNameplateVisibility();
+      saveAppearancePreferences();
+      return;
+    }
+    if (action === "platform") {
+      prefs.platformVisible = !prefs.platformVisible;
+      saveAppearancePreferences();
       return;
     }
     if (action === "feed") {

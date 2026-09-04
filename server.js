@@ -317,7 +317,8 @@ function radioFavoritesAccountKey(session) {
 
 const defaultColtCustomization = Object.freeze({
   name: "Colt",
-  nameplateVisible: true
+  nameplateVisible: true,
+  platformVisible: true
 });
 
 function normalizeColtCustomization(value) {
@@ -327,6 +328,7 @@ function normalizeColtCustomization(value) {
   return {
     name: name || defaultColtCustomization.name,
     nameplateVisible: source.nameplateVisible !== false,
+    platformVisible: source.platformVisible !== false,
     updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""
   };
 }
@@ -2808,6 +2810,7 @@ async function handleApi(req, res, pathname) {
       const customization = normalizeColtCustomization({
         name,
         nameplateVisible: body.nameplateVisible,
+        platformVisible: body.platformVisible,
         updatedAt: new Date().toISOString()
       });
       const db = readDb();
