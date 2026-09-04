@@ -247,6 +247,8 @@ async function run() {
     assert.equal(await platform.evaluate(element => getComputedStyle(element).zIndex), "0");
     assert(Number(await page.locator(".launchpad-colt-nameplate").evaluate(element => getComputedStyle(element).zIndex)) > 0, "The nameplate must stay above the platform.");
     assert(platformBounds.y + platformBounds.height <= nameplateBounds.y + 2, "The platform overlaps the Colt nameplate.");
+    assert(parseFloat(await image.evaluate(element => getComputedStyle(element).top)) < 0, "The Colt is not moved back onto the platform surface.");
+    assert(parseFloat(await page.locator('.launchpad-colt-pose[data-pose="sleeping"]').evaluate(element => getComputedStyle(element).top)) < parseFloat(await image.evaluate(element => getComputedStyle(element).top)), "The sleeping Colt needs the deeper platform alignment adjustment.");
     const savedColtPreferences = await page.evaluate(() => Object.fromEntries(
       Object.keys(localStorage)
         .filter(key => key.startsWith("classroomLaunchpadColtPrefsV1:"))
@@ -266,10 +268,12 @@ async function run() {
     await page.getByRole("button", { name: "Hide Platform", exact: true }).click();
     await page.waitForFunction(() => window.__savedColtCustomization?.platformVisible === false);
     assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-platform-hidden")));
+    assert.equal(parseFloat(await image.evaluate(element => getComputedStyle(element).top)), 0, "The Colt position changed even though the platform is hidden.");
     assert.equal(await page.getByRole("button", { name: "Place Platform", exact: true }).isVisible(), true);
     await page.getByRole("button", { name: "Place Platform", exact: true }).click();
     await page.waitForFunction(() => window.__savedColtCustomization?.platformVisible === true);
     assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-platform-hidden")), false);
+    assert(parseFloat(await image.evaluate(element => getComputedStyle(element).top)) < 0, "The Colt was not realigned after placing the platform again.");
     await page.getByRole("button", { name: "Feed Me", exact: true }).click();
     const feedingVideo = page.locator('.launchpad-colt-pose[data-pose="feeding"]');
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "feeding");

@@ -10293,6 +10293,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   bottom: -36%;
 }
 
+.launchpad-colt-root:not(.is-platform-hidden):not(.is-minimized):not(.is-auto-compact) .launchpad-colt-pose {
+  top: -9%;
+}
+
+.launchpad-colt-root:not(.is-platform-hidden):not(.is-minimized):not(.is-auto-compact) .launchpad-colt-pose[data-pose="sleeping"] {
+  top: -14%;
+}
+
 .launchpad-colt-nameplate,
 .launchpad-colt-nameplate-preview {
   z-index: 5;
