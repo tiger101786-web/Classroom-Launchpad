@@ -47,6 +47,7 @@ async function run() {
   });
   assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-nameplate.png")), "Missing the custom Colt nameplate artwork.");
   assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-platform.png")), "Missing the transparent Colt platform artwork.");
+  assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-controls-panel.png")), "Missing the transparent Colt controls-panel artwork.");
   ["launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm"].forEach(filename => {
     const size = fs.statSync(path.resolve(__dirname, "..", "assets", filename)).size;
     assert(size < 3_500_000, `${filename} is too large for reliable playback on school laptops (${size} bytes).`);
@@ -224,6 +225,12 @@ async function run() {
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Name Your Colt", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Hide Platform", exact: true }).isVisible());
+    const controlsPanel = page.locator(".launchpad-colt-controls");
+    const controlsBounds = await controlsPanel.boundingBox();
+    assert.match(await controlsPanel.evaluate(element => getComputedStyle(element).backgroundImage), /launchpad-colt-controls-panel\.png/);
+    assert.equal(await controlsPanel.locator("button").count(), 11, "The redesigned panel lost a Colt control.");
+    assert(Math.abs((controlsBounds.width / controlsBounds.height) - (1672 / 941)) < 0.08, "The Colt controls artwork is distorted.");
+    assert.equal(await page.getByRole("button", { name: "Minimize", exact: true }).evaluate(element => getComputedStyle(element).position), "absolute", "Minimize must remain available without consuming an artwork slot.");
     await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");
     await page.locator("#launchpadColtName").fill("Blaze");
@@ -248,7 +255,14 @@ async function run() {
     assert(Number(await page.locator(".launchpad-colt-nameplate").evaluate(element => getComputedStyle(element).zIndex)) > 0, "The nameplate must stay above the platform.");
     assert(platformBounds.y + platformBounds.height <= nameplateBounds.y + 2, "The platform overlaps the Colt nameplate.");
     assert(parseFloat(await image.evaluate(element => getComputedStyle(element).top)) < 0, "The Colt is not moved back onto the platform surface.");
-    assert(parseFloat(await page.locator('.launchpad-colt-pose[data-pose="sleeping"]').evaluate(element => getComputedStyle(element).top)) < parseFloat(await image.evaluate(element => getComputedStyle(element).top)), "The sleeping Colt needs the deeper platform alignment adjustment.");
+    const idlePlatformTop = parseFloat(await image.evaluate(element => getComputedStyle(element).top));
+    for (const pose of ["feeding", "petting", "radioDance", "radioDanceAlternate", "sleeping"]) {
+      const poseTop = parseFloat(await page.locator(`.launchpad-colt-pose[data-pose="${pose}"]`).evaluate(element => getComputedStyle(element).top));
+      assert(poseTop < idlePlatformTop, `${pose} needs its own higher platform alignment.`);
+    }
+    const sleepingPlatformTop = parseFloat(await page.locator('.launchpad-colt-pose[data-pose="sleeping"]').evaluate(element => getComputedStyle(element).top));
+    const feedingPlatformTop = parseFloat(await page.locator('.launchpad-colt-pose[data-pose="feeding"]').evaluate(element => getComputedStyle(element).top));
+    assert(sleepingPlatformTop < feedingPlatformTop, "The sleeping Colt needs the deepest platform alignment adjustment.");
     const savedColtPreferences = await page.evaluate(() => Object.fromEntries(
       Object.keys(localStorage)
         .filter(key => key.startsWith("classroomLaunchpadColtPrefsV1:"))

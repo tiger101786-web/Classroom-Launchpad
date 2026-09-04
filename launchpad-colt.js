@@ -98,7 +98,7 @@
         <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
-        <button type="button" data-colt-control="minimize">Minimize</button>
+        <button type="button" data-colt-control="minimize" aria-label="Minimize" title="Minimize Colt">Minimize</button>
         <button type="button" data-colt-control="motion">Pause motion</button>
         <button type="button" data-colt-control="size">Size: Medium</button>
         <button type="button" data-colt-control="feed">Feed Me</button>
@@ -355,6 +355,8 @@
     companion.hidden = prefs.hidden;
     restoreButton.hidden = !prefs.hidden;
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
+    minimizeButton.setAttribute("aria-label", minimizeButton.textContent);
+    minimizeButton.title = prefs.minimized ? "Restore Colt size" : "Minimize Colt";
     motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
     sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
     feedButton.disabled = prefs.asleep;
