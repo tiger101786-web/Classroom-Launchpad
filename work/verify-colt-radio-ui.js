@@ -308,6 +308,7 @@ async function run() {
     assert.equal(await iframe.getAttribute("src"), null);
     assert.equal(await iframe.getAttribute("sandbox"), "allow-scripts allow-same-origin");
     assert.equal(await iframe.getAttribute("allow"), "autoplay");
+    assert.equal(await audio.getAttribute("preload"), "auto", "The selected station is not prepared ahead of Play.");
     assert(await iframe.isHidden(), "The external Lofi Cafe interface should stay hidden.");
     assert.equal(await audio.getAttribute("src"), "https://radio.loficafe.net/listen/studying/radio.mp3");
     assert(await page.locator(".colt-radio-stream-player").isVisible(), "The Colt Radio player did not appear for Lofi Cafe.");
@@ -330,6 +331,31 @@ async function run() {
     assert(await page.locator(".colt-radio-stream-player").isVisible(), "The compact Chillsynth player did not appear.");
     assert.equal(await audio.evaluate(element => element.controls), false, "Native audio controls exposed a song timeline.");
     assert(await page.getByRole("button", { name: "Play Colt Radio" }).isVisible(), "The compact Play button is missing.");
+    assert.equal(await page.locator(".colt-radio-live-badge").innerText(), "READY");
+    await audio.evaluate(element => {
+      element.__coltRadioNativePlay = element.play;
+      element.play = () => Promise.resolve();
+    });
+    await page.getByRole("button", { name: "Play Colt Radio" }).click();
+    assert.equal(await page.locator(".colt-radio-live-badge").innerText(), "CONNECTING...");
+    assert(await page.getByRole("button", { name: "Cancel Colt Radio connection" }).isVisible());
+    await audio.evaluate(element => element.dispatchEvent(new Event("playing")));
+    assert.equal(await page.locator(".colt-radio-live-badge").innerText(), "● LIVE");
+    assert(await page.locator(".colt-radio-now-playing").evaluate(element => element.classList.contains("is-playing")));
+    await audio.evaluate(element => element.dispatchEvent(new Event("waiting")));
+    assert.equal(await page.locator(".colt-radio-live-badge").innerText(), "BUFFERING...");
+    await page.getByRole("button", { name: "Cancel Colt Radio connection" }).click();
+    assert.equal(await page.locator(".colt-radio-live-badge").innerText(), "READY");
+    await audio.evaluate(element => {
+      element.play = () => Promise.reject(new DOMException("Test stream failure", "NotSupportedError"));
+    });
+    await page.getByRole("button", { name: "Play Colt Radio" }).click();
+    await page.getByText("UNAVAILABLE", { exact: true }).waitFor();
+    assert(await page.getByRole("button", { name: "Retry Colt Radio" }).isVisible());
+    await audio.evaluate(element => {
+      element.play = element.__coltRadioNativePlay;
+      delete element.__coltRadioNativePlay;
+    });
     const muteButton = page.getByRole("button", { name: "Mute Colt Radio" });
     assert(await muteButton.isVisible(), "The compact speaker button is missing.");
     assert.equal(await muteButton.locator(".colt-radio-volume-icon").count(), 1, "The crimson speaker artwork is missing.");

@@ -7315,8 +7315,30 @@ body[data-theme="night"] .colt-radio-station.is-active {
   height: 20%;
   background: #a91428;
   box-shadow: 0 0 3px rgba(239, 34, 56, 0.35);
-  animation: colt-radio-levels 1.05s ease-in-out infinite alternate;
+  animation: colt-radio-levels 1.05s ease-in-out infinite alternate paused;
   transform-origin: bottom;
+  transform: scaleY(0.18);
+  opacity: 0.45;
+}
+
+.colt-radio-now-playing.is-playing .colt-radio-equalizer i {
+  animation-play-state: running;
+}
+
+.colt-radio-now-playing.is-connecting .colt-radio-live-badge {
+  animation: colt-radio-connecting 0.9s ease-in-out infinite alternate;
+}
+
+.colt-radio-now-playing.has-playback-error .colt-radio-live-badge {
+  border-color: #d98a21;
+  background: rgba(91, 48, 4, 0.8);
+  color: #ffd080;
+  box-shadow: 0 0 7px rgba(239, 152, 38, 0.28);
+}
+
+@keyframes colt-radio-connecting {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
 }
 
 .colt-radio-equalizer i:nth-child(3n) { animation-delay: -0.72s; }

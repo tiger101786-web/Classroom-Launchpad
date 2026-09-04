@@ -541,7 +541,9 @@
     const streamDetails = buildElement("span", "colt-radio-stream-details");
     const nowPlayingLabel = buildElement("span", "colt-radio-stream-label", "Now Playing");
     const nowPlayingTitle = buildElement("strong", "", "Loading track information...");
-    const liveBadge = buildElement("span", "colt-radio-live-badge", "● LIVE");
+    const liveBadge = buildElement("span", "colt-radio-live-badge", "READY");
+    liveBadge.setAttribute("role", "status");
+    liveBadge.setAttribute("aria-live", "polite");
     const equalizer = buildElement("span", "colt-radio-equalizer");
     for (let index = 0; index < 24; index += 1) equalizer.append(buildElement("i"));
     const volumeControl = buildElement("span", "colt-radio-volume");
@@ -577,7 +579,7 @@
     function createAudioPlayer() {
       const audio = document.createElement("audio");
       audio.className = "colt-radio-audio";
-      audio.preload = "none";
+      audio.preload = "auto";
       audio.disableRemotePlayback = true;
       audio.setAttribute("aria-label", "Colt Radio audio controls");
       audio.hidden = true;
@@ -598,6 +600,12 @@
     let favoritesOnly = false;
     let favoritesAccountKey = "";
     let favoritesRequestVersion = 0;
+    let connectionTimer = 0;
+    let playbackRequestVersion = 0;
+    let playbackAttempt = 0;
+    let wantsPlayback = false;
+    let suppressPauseState = false;
+    const connectionTimeoutMs = 7000;
 
     function preferredVolume() {
       try {
@@ -741,15 +749,106 @@
       saveFavorites();
     }
 
+    function clearConnectionTimer() {
+      if (connectionTimer) globalObject.clearTimeout(connectionTimer);
+      connectionTimer = 0;
+    }
+
+    function setPlaybackState(state) {
+      nowPlaying.dataset.playbackState = state;
+      nowPlaying.classList.toggle("is-playing", state === "playing");
+      nowPlaying.classList.toggle("is-connecting", state === "connecting" || state === "retrying" || state === "buffering");
+      nowPlaying.classList.toggle("has-playback-error", state === "error");
+      const labels = {
+        idle: "READY",
+        ready: "READY",
+        connecting: "CONNECTING...",
+        retrying: "RETRYING...",
+        buffering: "BUFFERING...",
+        playing: "● LIVE",
+        error: "UNAVAILABLE"
+      };
+      liveBadge.textContent = labels[state] || labels.ready;
+      if (state === "playing") {
+        toggleStream.textContent = "\u275a\u275a";
+        toggleStream.setAttribute("aria-label", "Pause Colt Radio");
+      } else if (state === "connecting" || state === "retrying" || state === "buffering") {
+        toggleStream.textContent = "\u275a\u275a";
+        toggleStream.setAttribute("aria-label", "Cancel Colt Radio connection");
+      } else {
+        toggleStream.textContent = "\u25b6";
+        toggleStream.setAttribute("aria-label", state === "error" ? "Retry Colt Radio" : "Play Colt Radio");
+      }
+    }
+
+    function markPlaybackUnavailable(requestVersion) {
+      if (requestVersion !== playbackRequestVersion) return;
+      clearConnectionTimer();
+      wantsPlayback = false;
+      suppressPauseState = true;
+      audio.pause();
+      suppressPauseState = false;
+      setPlaybackState("error");
+    }
+
+    function startPlaybackAttempt(requestVersion) {
+      if (requestVersion !== playbackRequestVersion || !wantsPlayback) return;
+      clearConnectionTimer();
+      setPlaybackState(playbackAttempt ? "retrying" : "connecting");
+      const attemptNumber = playbackAttempt;
+      connectionTimer = globalObject.setTimeout(() => {
+        if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+        if (playbackAttempt === 0) {
+          playbackAttempt = 1;
+          audio.load();
+          startPlaybackAttempt(requestVersion);
+          return;
+        }
+        markPlaybackUnavailable(requestVersion);
+      }, connectionTimeoutMs);
+      const playPromise = audio.play();
+      if (playPromise?.catch) {
+        playPromise.catch(() => {
+          if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+          if (playbackAttempt === 0) {
+            playbackAttempt = 1;
+            audio.load();
+            startPlaybackAttempt(requestVersion);
+            return;
+          }
+          markPlaybackUnavailable(requestVersion);
+        });
+      }
+    }
+
+    function requestPlayback() {
+      if (!audio.getAttribute("src")) return;
+      wantsPlayback = true;
+      playbackAttempt = 0;
+      playbackRequestVersion += 1;
+      startPlaybackAttempt(playbackRequestVersion);
+    }
+
+    function cancelPlayback() {
+      wantsPlayback = false;
+      playbackRequestVersion += 1;
+      clearConnectionTimer();
+      audio.pause();
+      setPlaybackState("ready");
+    }
+
     function clearAudioStream() {
+      wantsPlayback = false;
+      playbackAttempt = 0;
+      playbackRequestVersion += 1;
+      clearConnectionTimer();
       audio.pause();
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
       audio.removeAttribute("src");
       audio.load();
       audio.hidden = true;
       nowPlaying.hidden = true;
-      toggleStream.textContent = "\u25b6";
-      toggleStream.setAttribute("aria-label", "Play Colt Radio");
+      setPlaybackState("idle");
       nowPlayingTitle.textContent = "Loading track information...";
       if (metadataTimer) globalObject.clearInterval(metadataTimer);
       metadataTimer = 0;
@@ -779,7 +878,7 @@
       audio.src = source;
       nowPlayingTitle.textContent = `Purrple Cat - ${trackNameFromSource(source)}`;
       audio.load();
-      if (autoplay) audio.play().catch(() => {});
+      if (autoplay) requestPlayback();
     }
 
     function metadataSources(payload) {
@@ -856,12 +955,6 @@
       nowPlayingLabel.textContent = `${station.label} \u00b7 ${provider}`;
     }
 
-    function updatePlaybackButton() {
-      const playing = !audio.paused && !audio.ended;
-      toggleStream.textContent = playing ? "\u275a\u275a" : "\u25b6";
-      toggleStream.setAttribute("aria-label", playing ? "Pause Colt Radio" : "Play Colt Radio");
-    }
-
     function setLauncherState() {
       launcherLabel.textContent = activeStation ? "Colt Radio • On" : "Colt Radio";
       launcher.classList.toggle("is-playing", Boolean(activeStation));
@@ -903,6 +996,7 @@
         nowPlaying.hidden = false;
         updateStreamLabel(station);
         loadNextPlaylistTrack(station);
+        setPlaybackState("ready");
       } else {
         audio.src = station.source;
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
@@ -910,6 +1004,7 @@
         nowPlaying.hidden = false;
         updateStreamLabel(station);
         audio.load();
+        setPlaybackState("ready");
         startNowPlayingUpdates(station);
       }
       placeholder.hidden = true;
@@ -970,18 +1065,57 @@
       if (station?.type === "playlist") loadNextPlaylistTrack(station, { autoplay: true });
     });
     audio.addEventListener("play", () => {
-      updatePlaybackButton();
+      if (wantsPlayback) setPlaybackState(playbackAttempt ? "retrying" : "connecting");
+    });
+    audio.addEventListener("playing", () => {
+      if (!wantsPlayback) return;
+      clearConnectionTimer();
+      playbackAttempt = 0;
+      setPlaybackState("playing");
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", {
         detail: { playing: true, station: activeStation }
       }));
     });
     audio.addEventListener("pause", () => {
-      updatePlaybackButton();
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
+      if (suppressPauseState) return;
+      if (wantsPlayback) setPlaybackState("buffering");
+      else if (nowPlaying.dataset.playbackState !== "error") setPlaybackState("ready");
+    });
+    audio.addEventListener("canplay", () => {
+      if (!wantsPlayback && nowPlaying.dataset.playbackState !== "error") setPlaybackState("ready");
+    });
+    ["waiting", "stalled"].forEach(eventName => audio.addEventListener(eventName, () => {
+      if (!wantsPlayback) return;
+      setPlaybackState("buffering");
+      clearConnectionTimer();
+      const requestVersion = playbackRequestVersion;
+      const attemptNumber = playbackAttempt;
+      connectionTimer = globalObject.setTimeout(() => {
+        if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+        if (playbackAttempt === 0) {
+          playbackAttempt = 1;
+          audio.load();
+          startPlaybackAttempt(requestVersion);
+          return;
+        }
+        markPlaybackUnavailable(requestVersion);
+      }, connectionTimeoutMs);
+    }));
+    audio.addEventListener("error", () => {
+      if (!wantsPlayback) return;
+      const requestVersion = playbackRequestVersion;
+      if (playbackAttempt === 0) {
+        playbackAttempt = 1;
+        audio.load();
+        startPlaybackAttempt(requestVersion);
+        return;
+      }
+      markPlaybackUnavailable(requestVersion);
     });
     toggleStream.addEventListener("click", () => {
-      if (audio.paused) audio.play().catch(() => updatePlaybackButton());
-      else audio.pause();
+      if (wantsPlayback || !audio.paused) cancelPlayback();
+      else requestPlayback();
     });
     volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));
     muteStream.addEventListener("click", () => {
