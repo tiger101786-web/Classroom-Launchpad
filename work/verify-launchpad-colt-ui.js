@@ -89,15 +89,18 @@ async function run() {
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
+    assert.equal(await image.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the idle animation.");
     assert.equal(await page.locator(".launchpad-colt-pose").count(), 9);
     const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
     assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await welcomeVideo.getAttribute("src"), /launchpad-colt-welcome\.webm/);
     assert.equal(await welcomeVideo.getAttribute("poster"), null);
+    assert.equal(await welcomeVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the welcome animation.");
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
+    assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the pointing animation.");
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
     const radioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDance"]');
     assert.equal(await radioDanceVideo.evaluate(element => element.tagName), "VIDEO");
@@ -260,6 +263,7 @@ async function run() {
       else element.addEventListener("canplay", resolve, { once: true });
     }));
     assert.equal(await feedingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.equal(await feedingVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the feeding animation.");
     const feedingCornerAlpha = await feedingVideo.evaluate(async element => {
       element.currentTime = 2;
       await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
@@ -287,6 +291,7 @@ async function run() {
       else element.addEventListener("canplay", resolve, { once: true });
     }));
     assert.equal(await pettingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.equal(await pettingVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the petting animation.");
     const pettingCornerAlpha = await pettingVideo.evaluate(async element => {
       element.currentTime = 2;
       await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
@@ -426,6 +431,7 @@ async function run() {
     assert.equal(await radioDanceVideo.evaluate(element => element.paused), true, "The first dance kept playing after it ended.");
     assert.equal(await alternateRadioDanceVideo.evaluate(element => element.paused), false, "The second dance did not start after the first dance ended.");
     assert.equal(await alternateRadioDanceVideo.evaluate(element => getComputedStyle(element).opacity), "1", "The second dance is not visible.");
+    assert.equal(await alternateRadioDanceVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto a dancing animation.");
     await alternateRadioDanceVideo.evaluate(element => element.dispatchEvent(new Event("ended")));
     await page.waitForTimeout(120);
     assert.equal(await radioDanceVideo.evaluate(element => element.paused), false, "The first dance did not resume after the second dance ended.");

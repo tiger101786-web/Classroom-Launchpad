@@ -10361,6 +10361,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="petting"] .launchpad-colt-pose[data-pose="petting"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   opacity: 1 !important;
+}
+
+.launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0 7%, rgba(0, 0, 0, .12) 16%, rgba(0, 0, 0, .4) 27%, rgba(0, 0, 0, .76) 37%, #000 46% 100%);
   mask-image: linear-gradient(to bottom, transparent 0 7%, rgba(0, 0, 0, .12) 16%, rgba(0, 0, 0, .4) 27%, rgba(0, 0, 0, .76) 37%, #000 46% 100%);
 }
