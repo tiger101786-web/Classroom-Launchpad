@@ -10276,74 +10276,43 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-nameplate-preview {
   z-index: 5;
   right: 50%;
-  bottom: -12px;
+  bottom: -22%;
   display: grid;
-  grid-template-columns: 11px minmax(72px, auto) 11px;
-  grid-template-rows: auto auto;
-  min-width: 116px;
-  max-width: 164px;
-  padding: 5px 12px 6px;
-  border: 1px solid #f12a5e;
-  border-radius: 4px 4px 10px 10px;
-  background:
-    linear-gradient(90deg, transparent 0 8px, rgba(255, 255, 255, .06) 8px 9px, transparent 9px calc(100% - 9px), rgba(255, 255, 255, .06) calc(100% - 9px) calc(100% - 8px), transparent calc(100% - 8px)),
-    linear-gradient(160deg, #660f2b, #220810 58%, #090609);
-  box-shadow: 0 7px 15px rgba(0, 0, 0, .58), 0 0 9px rgba(226, 23, 72, .38), inset 0 1px 0 rgba(255, 181, 200, .24);
+  width: 106%;
+  aspect-ratio: 3 / 1;
+  padding: 0 22%;
+  place-items: center;
+  background: url("assets/launchpad-colt-nameplate.png?v=20260903") center / contain no-repeat;
+  filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .62));
   color: #fff2f6;
-  line-height: 1.05;
+  line-height: 1;
   text-align: center;
-  text-shadow: 0 1px 2px #000;
+  text-shadow: 0 2px 3px #000, 0 0 7px rgba(243, 38, 88, .8);
   transform: translateX(50%);
-  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, calc(100% - 7px) 100%, 7px 100%, 0 7px);
-}
-
-.launchpad-colt-nameplate::before,
-.launchpad-colt-nameplate-preview::before {
-  content: "";
-  position: absolute;
-  top: -4px;
-  right: 16px;
-  left: 16px;
-  height: 3px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, transparent, #ff2d61 24%, #fff0f4 50%, #ff2d61 76%, transparent);
-  box-shadow: 0 0 7px #ef174e;
-}
-
-.launchpad-colt-nameplate i,
-.launchpad-colt-nameplate-preview i {
-  grid-row: 1 / span 2;
-  align-self: center;
-  width: 7px;
-  height: 7px;
-  border: 1px solid #ff668b;
-  background: #b81240;
-  box-shadow: 0 0 5px #ef174e;
-  transform: rotate(45deg);
-}
-
-.launchpad-colt-nameplate i:last-child,
-.launchpad-colt-nameplate-preview i:last-child {
-  justify-self: end;
-}
-
-.launchpad-colt-nameplate small,
-.launchpad-colt-nameplate-preview small {
-  grid-column: 2;
-  color: #ff7799;
-  font-size: .43rem;
-  font-weight: 900;
-  letter-spacing: .15em;
 }
 
 .launchpad-colt-nameplate strong,
 .launchpad-colt-nameplate-preview strong {
-  grid-column: 2;
+  display: block;
+  max-width: 100%;
   overflow: hidden;
-  font-size: .76rem;
+  font-size: .82rem;
   font-weight: 950;
+  letter-spacing: .015em;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.launchpad-colt-root[data-size="small"] .launchpad-colt-nameplate strong {
+  font-size: .68rem;
+}
+
+.launchpad-colt-root[data-size="large"] .launchpad-colt-nameplate strong {
+  font-size: .95rem;
+}
+
+.launchpad-colt-root[data-size="extra-large"] .launchpad-colt-nameplate strong {
+  font-size: 1.12rem;
 }
 
 .launchpad-colt-root.is-dragging .launchpad-colt-character {
@@ -10697,19 +10666,15 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   right: auto;
   bottom: auto;
   justify-self: center;
-  width: min(220px, 86%);
+  width: min(280px, 94%);
   max-width: none;
-  min-height: 58px;
-  padding: 9px 18px 10px;
+  min-height: 0;
+  padding: 0 22%;
   transform: none;
 }
 
-.launchpad-colt-nameplate-preview small {
-  font-size: .54rem;
-}
-
 .launchpad-colt-nameplate-preview strong {
-  font-size: 1rem;
+  font-size: 1.12rem;
 }
 
 .launchpad-colt-customizer-status {

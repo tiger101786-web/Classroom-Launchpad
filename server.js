@@ -316,12 +316,13 @@ function radioFavoritesAccountKey(session) {
 }
 
 const defaultColtCustomization = Object.freeze({
-  name: "Launchpad Colt"
+  name: "Colt"
 });
 
 function normalizeColtCustomization(value) {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  const name = cleanText(source.name, 16);
+  const enteredName = cleanText(source.name, 16);
+  const name = enteredName.toLowerCase() === "launchpad colt" ? defaultColtCustomization.name : enteredName;
   return {
     name: name || defaultColtCustomization.name,
     updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""

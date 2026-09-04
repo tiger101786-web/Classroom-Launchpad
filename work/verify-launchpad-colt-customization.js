@@ -57,7 +57,7 @@ async function waitForServer() {
     const headers = { "Content-Type": "application/json", Origin: origin, Cookie: cookie };
 
     const initial = await request("/api/launchpad-colt/customization", { headers });
-    assert.deepEqual(initial.payload.customization, { name: "Launchpad Colt" });
+    assert.deepEqual(initial.payload.customization, { name: "Colt" });
 
     const saved = await request("/api/launchpad-colt/customization", {
       method: "PUT",

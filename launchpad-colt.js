@@ -9,7 +9,7 @@
   const VIDEO_ASSETS = {
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
     welcome: "assets/launchpad-colt-welcome.webm?v=20260830-welcome-alpha-v1",
-    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260830-sleeping-alpha-v2",
+    sleeping: "assets/launchpad-colt-sleeping.webm?v=20260903-sleeping-alpha-v3",
     pointing: "assets/launchpad-colt-pointing-transparent.webm?v=20260830-pointing-alpha-v7",
     radioDance: "assets/launchpad-colt-radio-dance.webm?v=20260903-radio-dance-optimized-v2",
     radioDanceAlternate: "assets/launchpad-colt-radio-dance-alternate.webm?v=20260903-radio-dance-optimized-v2",
@@ -37,7 +37,7 @@
     success: { icon: "✓", text: "Nice work!" },
     feeding: { icon: "", text: "Snack time!" },
     petting: { icon: "", text: "That feels nice!" },
-    sleep: { icon: "Zz", text: "" }
+    sleep: { icon: "", text: "" }
   };
   const SIZE_LABELS = {
     small: "Small",
@@ -45,7 +45,7 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
-  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Launchpad Colt" });
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt" });
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -77,7 +77,7 @@
   root.innerHTML = `
     <aside class="launchpad-colt-companion" data-state="idle" aria-label="Launchpad Colt companion">
       <div class="launchpad-colt-speech" role="status" aria-live="polite" hidden>
-        <strong>Launchpad Colt</strong>
+        <strong>Colt</strong>
         <span></span>
       </div>
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
@@ -92,7 +92,7 @@
         <video class="launchpad-colt-pose" data-pose="petting" src="${VIDEO_ASSETS.petting}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
-        <span class="launchpad-colt-nameplate" aria-hidden="true"><i></i><small>LAUNCHPAD COLT</small><strong>Launchpad Colt</strong><i></i></span>
+        <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize">Minimize</button>
@@ -114,11 +114,11 @@
   const customizer = documentObject.createElement("section");
   customizer.className = "launchpad-colt-customizer";
   customizer.hidden = true;
-  customizer.setAttribute("aria-label", "Customize your Colt");
+  customizer.setAttribute("aria-label", "Name your Colt");
   customizer.innerHTML = `
     <header>
       <div><span>Personal Companion</span><h2>Name Your Colt</h2></div>
-      <button type="button" class="launchpad-colt-customizer-close" data-colt-customizer="close" aria-label="Close Colt customization">×</button>
+      <button type="button" class="launchpad-colt-customizer-close" data-colt-customizer="close" aria-label="Close Colt naming panel">×</button>
     </header>
     <div class="launchpad-colt-name-editor">
       <label for="launchpadColtName">Colt name</label>
@@ -128,7 +128,7 @@
       </div>
       <small id="launchpadColtNameHint">Use 2–16 school-appropriate letters or numbers. Your Colt's new name appears on his signature nameplate.</small>
     </div>
-    <div class="launchpad-colt-nameplate-preview" aria-hidden="true"><i></i><small>LAUNCHPAD COLT</small><strong>Launchpad Colt</strong><i></i></div>
+    <div class="launchpad-colt-nameplate-preview" aria-hidden="true"><strong>Colt</strong></div>
     <p class="launchpad-colt-customizer-status" role="status" aria-live="polite"></p>
     <footer>
       <button type="button" data-colt-customizer="restore">Use Default Name</button>
@@ -245,7 +245,8 @@
 
   function normalizeCustomization(value) {
     const source = value && typeof value === "object" ? value : {};
-    const name = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
+    const enteredName = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
+    const name = enteredName.toLowerCase() === "launchpad colt" ? DEFAULT_CUSTOMIZATION.name : enteredName;
     return { name: name || DEFAULT_CUSTOMIZATION.name };
   }
 
@@ -284,7 +285,7 @@
       const response = await fetch("/api/launchpad-colt/customization", { headers: { Accept: "application/json" } });
       if (!response.ok) return;
       const result = await response.json();
-      if (revision !== customizationRevision) return;
+      if (revision !== customizationRevision || !customizer.hidden) return;
       applyRemoteCustomization(result.customization);
     } catch {}
   }
@@ -385,6 +386,7 @@
   }
 
   function openCustomizer() {
+    customizationRevision += 1;
     customizationDraft = normalizeCustomization(prefs);
     customizerStatus.textContent = "";
     renderCustomizationDraft();

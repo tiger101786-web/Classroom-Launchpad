@@ -45,6 +45,7 @@ async function run() {
   ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
+  assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-nameplate.png")), "Missing the custom Colt nameplate artwork.");
   ["launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm"].forEach(filename => {
     const size = fs.statSync(path.resolve(__dirname, "..", "assets", filename)).size;
     assert(size < 3_500_000, `${filename} is too large for reliable playback on school laptops (${size} bytes).`);
@@ -62,7 +63,7 @@ async function run() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.addInitScript(() => {
       const nativeFetch = window.fetch.bind(window);
-      let customization = { name: "Launchpad Colt" };
+      let customization = { name: "Colt" };
       window.fetch = async (input, init = {}) => {
         const url = String(input);
         if (url.includes("/api/launchpad-colt/customization")) {
@@ -225,9 +226,20 @@ async function run() {
     assert.equal(await page.locator("[data-colt-accessory]").count(), 0, "Obsolete accessory choices are still present.");
     await page.getByRole("button", { name: "Save Name", exact: true }).click();
     await page.waitForFunction(() => window.__savedColtCustomization?.name === "Blaze");
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local") || "{}").coltName === "Blaze");
     assert.equal(await page.locator(".launchpad-colt-nameplate strong").textContent(), "Blaze");
-    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("classroomLaunchpadColtPrefsV1:student@local") || "{}").coltName), "Blaze");
-    await page.getByRole("button", { name: "Close Colt customization", exact: true }).click();
+    const characterBounds = await page.locator(".launchpad-colt-character").boundingBox();
+    const nameplateBounds = await page.locator(".launchpad-colt-nameplate").boundingBox();
+    assert(Math.abs((nameplateBounds.width / nameplateBounds.height) - 3) < 0.08, "The custom nameplate artwork is distorted.");
+    assert(nameplateBounds.width <= characterBounds.width * 1.08, "The custom nameplate is too wide for the Colt.");
+    assert(Math.abs((nameplateBounds.x + nameplateBounds.width / 2) - (characterBounds.x + characterBounds.width / 2)) < 3, "The custom nameplate is not centered under the Colt.");
+    const savedColtPreferences = await page.evaluate(() => Object.fromEntries(
+      Object.keys(localStorage)
+        .filter(key => key.startsWith("classroomLaunchpadColtPrefsV1:"))
+        .map(key => [key, JSON.parse(localStorage.getItem(key) || "{}")])
+    ));
+    assert.equal(savedColtPreferences["classroomLaunchpadColtPrefsV1:student@local"]?.coltName, "Blaze", JSON.stringify(savedColtPreferences));
+    await page.getByRole("button", { name: "Close Colt naming panel", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-customizer").isHidden(), true);
     await page.locator(".launchpad-colt-character").click();
     await page.getByRole("button", { name: "Feed Me", exact: true }).click();
@@ -307,6 +319,8 @@ async function run() {
       return context.getImageData(0, 0, 1, 1).data[3];
     });
     assert(sleepingCornerAlpha < 8, `The sleeping animation background is not transparent (corner alpha: ${sleepingCornerAlpha}).`);
+    assert.equal(await sleepingImage.evaluate(element => element.videoWidth), 940);
+    assert.equal(await sleepingImage.evaluate(element => element.videoHeight), 820);
     await sleepingImage.evaluate(element => { element.style.transition = "none"; });
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
