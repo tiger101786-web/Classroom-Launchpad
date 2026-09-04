@@ -316,7 +316,8 @@ function radioFavoritesAccountKey(session) {
 }
 
 const defaultColtCustomization = Object.freeze({
-  name: "Colt"
+  name: "Colt",
+  nameplateVisible: true
 });
 
 function normalizeColtCustomization(value) {
@@ -325,6 +326,7 @@ function normalizeColtCustomization(value) {
   const name = enteredName.toLowerCase() === "launchpad colt" ? defaultColtCustomization.name : enteredName;
   return {
     name: name || defaultColtCustomization.name,
+    nameplateVisible: source.nameplateVisible !== false,
     updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""
   };
 }
@@ -2805,6 +2807,7 @@ async function handleApi(req, res, pathname) {
       if (inappropriateName) throw new Error("Please choose a school-appropriate Colt name.");
       const customization = normalizeColtCustomization({
         name,
+        nameplateVisible: body.nameplateVisible,
         updatedAt: new Date().toISOString()
       });
       const db = readDb();

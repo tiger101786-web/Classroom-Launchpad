@@ -63,7 +63,7 @@ async function run() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.addInitScript(() => {
       const nativeFetch = window.fetch.bind(window);
-      let customization = { name: "Colt" };
+      let customization = { name: "Colt", nameplateVisible: true };
       window.fetch = async (input, init = {}) => {
         const url = String(input);
         if (url.includes("/api/launchpad-colt/customization")) {
@@ -242,6 +242,13 @@ async function run() {
     await page.getByRole("button", { name: "Close Colt naming panel", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-customizer").isHidden(), true);
     await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Hide Nameplate", exact: true }).click();
+    await page.waitForFunction(() => window.__savedColtCustomization?.nameplateVisible === false);
+    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-nameplate-hidden")));
+    assert.equal(await page.getByRole("button", { name: "Show Nameplate", exact: true }).isVisible(), true);
+    await page.getByRole("button", { name: "Show Nameplate", exact: true }).click();
+    await page.waitForFunction(() => window.__savedColtCustomization?.nameplateVisible === true);
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-nameplate-hidden")), false);
     await page.getByRole("button", { name: "Feed Me", exact: true }).click();
     const feedingVideo = page.locator('.launchpad-colt-pose[data-pose="feeding"]');
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "feeding");
@@ -323,6 +330,8 @@ async function run() {
     assert.equal(await sleepingImage.evaluate(element => element.videoHeight), 820);
     await sleepingImage.evaluate(element => { element.style.transition = "none"; });
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
+    assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), /linear-gradient/);
+    assert.equal(await page.locator(".launchpad-colt-prop").evaluate(element => getComputedStyle(element).display), "none", "The empty red reaction bubble is still visible during sleep.");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
     await page.keyboard.press("A");
     await page.waitForTimeout(120);

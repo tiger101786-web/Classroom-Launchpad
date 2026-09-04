@@ -10303,6 +10303,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   white-space: nowrap;
 }
 
+.launchpad-colt-root.is-nameplate-hidden .launchpad-colt-nameplate {
+  display: none;
+}
+
 .launchpad-colt-root[data-size="small"] .launchpad-colt-nameplate strong {
   font-size: .68rem;
 }
@@ -10357,6 +10361,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="petting"] .launchpad-colt-pose[data-pose="petting"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   opacity: 1 !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .35) 5%, #000 14%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .35) 5%, #000 14%, #000 100%);
 }
 
 .launchpad-colt-character:hover .launchpad-colt-pose,
@@ -10475,6 +10481,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   opacity: 0;
   transform: scale(0.68);
   transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.launchpad-colt-prop:empty {
+  display: none;
 }
 
 .launchpad-colt-companion:not([data-state="idle"]) .launchpad-colt-prop {

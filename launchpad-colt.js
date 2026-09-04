@@ -45,7 +45,7 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
-  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt" });
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt", nameplateVisible: true });
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -68,7 +68,8 @@
     position: null,
     size: "medium",
     asleep: false,
-    coltName: DEFAULT_CUSTOMIZATION.name
+    coltName: DEFAULT_CUSTOMIZATION.name,
+    nameplateVisible: true
   };
   let customizationDraft = { ...DEFAULT_CUSTOMIZATION };
   let dragSession = null;
@@ -101,6 +102,7 @@
         <button type="button" data-colt-control="feed">Feed Me</button>
         <button type="button" data-colt-control="pet">Pet Me</button>
         <button type="button" data-colt-control="customize">Name Your Colt</button>
+        <button type="button" data-colt-control="nameplate">Hide Nameplate</button>
         <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
         <button type="button" data-colt-control="reset-position">Reset position</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
@@ -150,6 +152,7 @@
   const petButton = controls.querySelector('[data-colt-control="pet"]');
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
   const customizeButton = controls.querySelector('[data-colt-control="customize"]');
+  const nameplateButton = controls.querySelector('[data-colt-control="nameplate"]');
   const nameplate = root.querySelector(".launchpad-colt-nameplate strong");
   const nameplatePreview = customizer.querySelector(".launchpad-colt-nameplate-preview strong");
   const customizerName = customizer.querySelector("#launchpadColtName");
@@ -247,7 +250,7 @@
     const source = value && typeof value === "object" ? value : {};
     const enteredName = String(source.name || source.coltName || "").trim().replace(/\s+/g, " ").slice(0, 16);
     const name = enteredName.toLowerCase() === "launchpad colt" ? DEFAULT_CUSTOMIZATION.name : enteredName;
-    return { name: name || DEFAULT_CUSTOMIZATION.name };
+    return { name: name || DEFAULT_CUSTOMIZATION.name, nameplateVisible: source.nameplateVisible !== false };
   }
 
   function defaultPreferences() {
@@ -258,7 +261,8 @@
       position: null,
       size: "medium",
       asleep: false,
-      coltName: DEFAULT_CUSTOMIZATION.name
+      coltName: DEFAULT_CUSTOMIZATION.name,
+      nameplateVisible: true
     };
   }
 
@@ -266,6 +270,7 @@
     const customization = normalizeCustomization(value);
     nameplate.textContent = customization.name;
     nameplatePreview.textContent = customization.name;
+    root.classList.toggle("is-nameplate-hidden", !customization.nameplateVisible);
     speech.querySelector("strong").textContent = customization.name;
     companion.setAttribute("aria-label", `${customization.name}, Launchpad Colt companion`);
     characterButton.setAttribute("aria-label", `Open ${customization.name} controls. Drag to move the Colt.`);
@@ -274,6 +279,7 @@
   function applyRemoteCustomization(value) {
     const customization = normalizeCustomization(value);
     prefs.coltName = customization.name;
+    prefs.nameplateVisible = customization.nameplateVisible;
     savePreferences();
     applyPreferences();
   }
@@ -315,7 +321,8 @@
           : null,
         size: Object.hasOwn(SIZE_LABELS, stored.size) ? stored.size : "medium",
         asleep: Boolean(stored.asleep),
-        coltName: customization.name
+        coltName: customization.name,
+        nameplateVisible: customization.nameplateVisible
       };
     } catch {
       prefs = defaultPreferences();
@@ -343,6 +350,7 @@
     petButton.disabled = prefs.asleep;
     petButton.title = prefs.asleep ? "Wake the Colt before petting him" : "Play the petting animation";
     sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
+    nameplateButton.textContent = prefs.nameplateVisible ? "Hide Nameplate" : "Show Nameplate";
     applyCustomization();
     applySavedPosition();
     if (prefs.hidden) closeControls();
@@ -403,7 +411,7 @@
   }
 
   async function saveCustomization(successMessage) {
-    const customization = normalizeCustomization({ name: customizerName.value });
+    const customization = normalizeCustomization({ name: customizerName.value, nameplateVisible: prefs.nameplateVisible });
     customizationRevision += 1;
     customizerStatus.textContent = "Saving…";
     customizer.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
@@ -428,6 +436,24 @@
     } finally {
       customizer.querySelectorAll("button, input").forEach(control => { control.disabled = false; });
     }
+  }
+
+  async function saveNameplateVisibility() {
+    customizationRevision += 1;
+    const revision = customizationRevision;
+    savePreferences();
+    applyPreferences();
+    try {
+      const response = await fetch("/api/launchpad-colt/customization", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(normalizeCustomization(prefs))
+      });
+      if (!response.ok) return;
+      const result = await response.json();
+      if (revision !== customizationRevision) return;
+      applyRemoteCustomization(result.customization);
+    } catch {}
   }
 
   function shouldShow() {
@@ -693,6 +719,11 @@
     const action = button.dataset.coltControl;
     if (action === "customize") {
       openCustomizer();
+      return;
+    }
+    if (action === "nameplate") {
+      prefs.nameplateVisible = !prefs.nameplateVisible;
+      saveNameplateVisibility();
       return;
     }
     if (action === "feed") {
