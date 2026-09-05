@@ -45,14 +45,7 @@
     large: "Large",
     "extra-large": "Extra Large"
   };
-  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt", nameplateVisible: true, platformVisible: true, glassesVisible: false });
-  const IDLE_GLASSES_TRACK = Object.freeze([
-    { time: 0, x: 34.5, y: 17, scale: 0.65, rotate: -7, yaw: 55 },
-    { time: 2.5, x: 36.5, y: 11.5, scale: 0.65, rotate: 1, yaw: 7 },
-    { time: 5, x: 31.5, y: 9.5, scale: 0.62, rotate: -10, yaw: 60 },
-    { time: 7.5, x: 33.5, y: 16.5, scale: 0.65, rotate: -8, yaw: 54 },
-    { time: 10.04, x: 34.5, y: 17, scale: 0.65, rotate: -7, yaw: 55 }
-  ]);
+  const DEFAULT_CUSTOMIZATION = Object.freeze({ name: "Colt", nameplateVisible: true, platformVisible: true });
 
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
@@ -77,8 +70,7 @@
     asleep: false,
     coltName: DEFAULT_CUSTOMIZATION.name,
     nameplateVisible: true,
-    platformVisible: true,
-    glassesVisible: false
+    platformVisible: true
   };
   let customizationDraft = { ...DEFAULT_CUSTOMIZATION };
   let dragSession = null;
@@ -102,7 +94,6 @@
         <video class="launchpad-colt-pose" data-pose="feeding" data-src="${VIDEO_ASSETS.feeding}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="petting" data-src="${VIDEO_ASSETS.petting}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" data-src="${VIDEO_ASSETS.sleeping}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
-        <img class="launchpad-colt-sunglasses" src="assets/launchpad-colt-sunglasses.png?v=20260905-idle-prototype1" alt="" aria-hidden="true">
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
         <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
       </button>
@@ -146,7 +137,6 @@
     <p class="launchpad-colt-customizer-status" role="status" aria-live="polite"></p>
     <footer>
       <button type="button" data-colt-customizer="restore">Use Default Name</button>
-      <button type="button" data-colt-customizer="glasses" aria-pressed="false">Glasses On</button>
     </footer>
   `;
   documentObject.body.append(customizer);
@@ -167,9 +157,6 @@
   const customizeButton = controls.querySelector('[data-colt-control="customize"]');
   const nameplateButton = controls.querySelector('[data-colt-control="nameplate"]');
   const platformButton = controls.querySelector('[data-colt-control="platform"]');
-  const glassesButton = customizer.querySelector('[data-colt-customizer="glasses"]');
-  const sunglasses = root.querySelector(".launchpad-colt-sunglasses");
-  const idleVideo = root.querySelector('video[data-pose="idle"]');
   const nameplate = root.querySelector(".launchpad-colt-nameplate strong");
   const nameplatePreview = customizer.querySelector(".launchpad-colt-nameplate-preview strong");
   const customizerName = customizer.querySelector("#launchpadColtName");
@@ -184,36 +171,6 @@
     video.preload = preload;
     video.src = video.dataset.src;
     video.load();
-  }
-
-  function idleGlassesFrame(time) {
-    const duration = IDLE_GLASSES_TRACK[IDLE_GLASSES_TRACK.length - 1].time;
-    const loopTime = Number.isFinite(time) ? ((time % duration) + duration) % duration : 0;
-    let nextIndex = IDLE_GLASSES_TRACK.findIndex(frame => frame.time >= loopTime);
-    if (nextIndex <= 0) nextIndex = 1;
-    const previous = IDLE_GLASSES_TRACK[nextIndex - 1];
-    const next = IDLE_GLASSES_TRACK[nextIndex];
-    const progress = Math.max(0, Math.min(1, (loopTime - previous.time) / (next.time - previous.time || 1)));
-    const mix = property => previous[property] + ((next[property] - previous[property]) * progress);
-    return {
-      x: mix("x"),
-      y: mix("y"),
-      scale: mix("scale"),
-      rotate: mix("rotate"),
-      yaw: mix("yaw")
-    };
-  }
-
-  function trackIdleGlasses() {
-    const visible = prefs.glassesVisible && currentState === "idle" && !prefs.hidden;
-    sunglasses.hidden = !visible;
-    if (visible) {
-      const frame = idleGlassesFrame(idleVideo.currentTime);
-      sunglasses.style.left = `${frame.x}%`;
-      sunglasses.style.top = `${frame.y}%`;
-      sunglasses.style.transform = `translate(-50%, -50%) perspective(180px) rotateZ(${frame.rotate}deg) rotateY(${frame.yaw}deg) scale(${frame.scale})`;
-    }
-    globalObject.requestAnimationFrame(trackIdleGlasses);
   }
 
   function syncPoseVideos(state = currentState, restart = false) {
@@ -234,7 +191,6 @@
       sleep: "sleeping"
     };
     const activePose = poseByState[state] || "";
-    sunglasses.hidden = !(prefs.glassesVisible && state === "idle" && !prefs.hidden);
     poseVideos.forEach(video => {
       const selected = video.dataset.pose === activePose;
       video.dataset.active = String(selected);
@@ -311,8 +267,7 @@
     return {
       name: name || DEFAULT_CUSTOMIZATION.name,
       nameplateVisible: source.nameplateVisible !== false,
-      platformVisible: source.platformVisible !== false,
-      glassesVisible: Boolean(source.glassesVisible)
+      platformVisible: source.platformVisible !== false
     };
   }
 
@@ -326,8 +281,7 @@
       asleep: false,
       coltName: DEFAULT_CUSTOMIZATION.name,
       nameplateVisible: true,
-      platformVisible: true,
-      glassesVisible: false
+      platformVisible: true
     };
   }
 
@@ -337,7 +291,6 @@
     nameplatePreview.textContent = customization.name;
     root.classList.toggle("is-nameplate-hidden", !customization.nameplateVisible);
     root.classList.toggle("is-platform-hidden", !customization.platformVisible);
-    root.classList.toggle("is-glasses-enabled", customization.glassesVisible);
     speech.querySelector("strong").textContent = customization.name;
     companion.setAttribute("aria-label", `${customization.name}, Launchpad Colt companion`);
     characterButton.setAttribute("aria-label", `Open ${customization.name} controls. Drag to move the Colt.`);
@@ -348,7 +301,6 @@
     prefs.coltName = customization.name;
     prefs.nameplateVisible = customization.nameplateVisible;
     prefs.platformVisible = customization.platformVisible;
-    prefs.glassesVisible = customization.glassesVisible;
     savePreferences();
     applyPreferences();
   }
@@ -392,8 +344,7 @@
         asleep: Boolean(stored.asleep),
         coltName: customization.name,
         nameplateVisible: customization.nameplateVisible,
-        platformVisible: customization.platformVisible,
-        glassesVisible: customization.glassesVisible
+        platformVisible: customization.platformVisible
       };
     } catch {
       prefs = defaultPreferences();
@@ -435,8 +386,6 @@
     nameplateButton.setAttribute("aria-label", prefs.nameplateVisible ? "Hide Nameplate" : "Show Nameplate");
     nameplateButton.title = `${nameplateButton.getAttribute("aria-label")} for the Colt`;
     platformButton.textContent = prefs.platformVisible ? "Hide Platform" : "Place Platform";
-    glassesButton.textContent = prefs.glassesVisible ? "Glasses Off" : "Glasses On";
-    glassesButton.setAttribute("aria-pressed", String(prefs.glassesVisible));
     applyCustomization();
     applySavedPosition();
     if (prefs.hidden) closeControls();
@@ -538,8 +487,7 @@
     const customization = normalizeCustomization({
       name: customizerName.value,
       nameplateVisible: prefs.nameplateVisible,
-      platformVisible: prefs.platformVisible,
-      glassesVisible: prefs.glassesVisible
+      platformVisible: prefs.platformVisible
     });
     customizationRevision += 1;
     customizerStatus.textContent = "Saving…";
@@ -919,15 +867,6 @@
       saveCustomization("The default Colt name was restored.");
       return;
     }
-    if (action === "glasses") {
-      prefs.glassesVisible = !prefs.glassesVisible;
-      customizationDraft = { ...customizationDraft, glassesVisible: prefs.glassesVisible };
-      saveAppearancePreferences();
-      customizerStatus.textContent = prefs.glassesVisible
-        ? "Idle glasses prototype enabled."
-        : "Idle glasses prototype disabled.";
-      return;
-    }
     if (action === "save-name") saveCustomization("Your Colt's name was saved.");
   });
 
@@ -1059,6 +998,5 @@
     }
   }
 
-  globalObject.requestAnimationFrame(trackIdleGlasses);
   start();
 })(window);
