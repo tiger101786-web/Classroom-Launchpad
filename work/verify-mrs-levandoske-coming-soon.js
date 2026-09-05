@@ -21,6 +21,8 @@ assert.match(app, /colt-run-mrs-levandoske-run\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-run\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-jump\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-jump-02\.webm/);
+assert.match(app, /colt-run-mrs-levandoske-jump\.webm\?v=20260905-green-key2/);
+assert.match(app, /colt-run-mrs-levandoske-jump-02\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-death\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-death-audio\.mp3/);
@@ -29,6 +31,7 @@ assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCele
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeIdleVideo\(\);[\s\S]*?keepMrsLevandoskeIdleVideoPlaying\(\);/, "Mrs. Levandoske should use an idle animation for her temporary celebration.");
 assert.match(app, /isMrsLevandoske \? 18 : 8/, "Mrs. Levandoske should sit lower on gameplay platforms.");
+assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 1\]/, "Mrs. Levandoske's death scream should receive a significant volume boost.");
 assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mrsLevandoskeIdleVideos\.length/);
 assert.match(app, /mrsLevandoskeJumpIndex = \(mrsLevandoskeJumpIndex \+ 1\) % mrsLevandoskeJumpVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);

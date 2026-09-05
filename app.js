@@ -3398,6 +3398,7 @@ function startColtRunGame() {
   const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio1");
   const mrsLevandoskeCelebrationAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio1");
   const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, mrsLevandoskeCelebrationAudio];
+  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
@@ -3459,8 +3460,8 @@ function startColtRunGame() {
       : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
     audio.muted = musicMuted;
   });
-  mrsLevandoskeCueAudios.forEach(audio => {
-    audio.volume = musicMuted ? 0 : musicVolume;
+  mrsLevandoskeCueAudios.forEach((audio, index) => {
+    audio.volume = musicMuted ? 0 : Math.min(1, musicVolume * mrsLevandoskeCueVolumeMultipliers[index]);
     audio.muted = musicMuted;
   });
   const keys = { left: false, right: false, jump: false };
@@ -3978,8 +3979,8 @@ function startColtRunGame() {
   const getMrsLevandoskeIdleVideo = () => mrsLevandoskeIdleVideos[mrsLevandoskeIdleIndex];
   const mrsLevandoskeRunVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-run.webm?v=20260905-green-key2");
   const mrsLevandoskeJumpVideos = [
-    createDeferredVideo("assets/colt-run-mrs-levandoske-jump.webm?v=20260905-playable1"),
-    createDeferredVideo("assets/colt-run-mrs-levandoske-jump-02.webm?v=20260905-playable1")
+    createDeferredVideo("assets/colt-run-mrs-levandoske-jump.webm?v=20260905-green-key2"),
+    createDeferredVideo("assets/colt-run-mrs-levandoske-jump-02.webm?v=20260905-green-key2")
   ];
   let mrsLevandoskeJumpIndex = -1;
   const getMrsLevandoskeJumpVideo = () => mrsLevandoskeJumpVideos[Math.max(0, mrsLevandoskeJumpIndex)];
@@ -4567,8 +4568,8 @@ function startColtRunGame() {
         : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
-    mrsLevandoskeCueAudios.forEach(audio => {
-      audio.volume = musicMuted ? 0 : musicVolume;
+    mrsLevandoskeCueAudios.forEach((audio, index) => {
+      audio.volume = musicMuted ? 0 : Math.min(1, musicVolume * mrsLevandoskeCueVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
     applyAmbientBoost();
