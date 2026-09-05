@@ -41,7 +41,8 @@ assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mr
 assert.match(app, /mrsLevandoskeJumpIndex = \(mrsLevandoskeJumpIndex \+ 1\) % mrsLevandoskeJumpVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 130, 198, -6\)/, "Mrs. Levandoske should sit slightly lower on the character-select platform.");
-assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(5,/);
+assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(6,/);
+assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: span 2;/, "Character cards should retain their original three-across width.");
 assert.match(styles, /\.colt-run-coming-soon/);
 assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?bottom: 94px;/, "Coming Soon badges should sit directly above the character names.");
 assert.match(
