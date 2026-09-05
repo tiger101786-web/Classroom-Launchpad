@@ -24,6 +24,7 @@ assert.match(app, /colt-run-mrs-levandoske-jump-02\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-jump\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-jump-02\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-death\.webm/);
+assert.match(app, /colt-run-mrs-levandoske-death\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio-02\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-death-audio\.mp3/);

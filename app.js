@@ -3988,7 +3988,7 @@ function startColtRunGame() {
   ];
   let mrsLevandoskeJumpIndex = -1;
   const getMrsLevandoskeJumpVideo = () => mrsLevandoskeJumpVideos[Math.max(0, mrsLevandoskeJumpIndex)];
-  const mrsLevandoskeDeathVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-death.webm?v=20260905-playable1");
+  const mrsLevandoskeDeathVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-death.webm?v=20260905-green-key2");
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideos = [
     createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1"),
