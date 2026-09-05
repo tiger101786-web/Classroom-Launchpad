@@ -10611,7 +10611,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   aspect-ratio: 1672 / 941;
   box-sizing: border-box;
   gap: 4px 16px;
-  padding: 14.2% 20.2% 14.9% 20.7%;
+  padding: 67px 92px 70px 95px;
   border: 0;
   border-radius: 0;
   background: url("assets/launchpad-colt-controls-panel.png?v=20260904") center / 100% 100% no-repeat;
@@ -11019,7 +11019,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     top: 62px;
     right: 8px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(420px, calc(100vw - 16px));
+    width: 420px;
+    gap: 4px 15px;
+    padding: 61px 84px 64px 87px;
     max-height: none;
     overflow: visible;
   }
@@ -11032,6 +11034,18 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
     width: auto;
     max-height: calc(100vh - 24px);
     transform: none;
+  }
+}
+
+@media (max-width: 429px) {
+  .launchpad-colt-controls {
+    width: calc(100vw - 16px);
+    gap: clamp(2px, .95vw, 4px) clamp(10px, 3.6vw, 15px);
+    padding:
+      calc(14.45vw - 2.31px)
+      calc(20.2vw - 3.23px)
+      calc(15vw - 2.4px)
+      calc(20.7vw - 3.31px);
   }
 }
 

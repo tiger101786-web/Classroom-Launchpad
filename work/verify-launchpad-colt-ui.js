@@ -230,6 +230,14 @@ async function run() {
     assert.match(await controlsPanel.evaluate(element => getComputedStyle(element).backgroundImage), /launchpad-colt-controls-panel\.png/);
     assert.equal(await controlsPanel.locator("button").count(), 11, "The redesigned panel lost a Colt control.");
     assert(Math.abs((controlsBounds.width / controlsBounds.height) - (1672 / 941)) < 0.08, "The Colt controls artwork is distorted.");
+    assert(controlsBounds.x >= 7 && controlsBounds.y >= 7 && controlsBounds.x + controlsBounds.width <= 1433 && controlsBounds.y + controlsBounds.height <= 893, "The Colt controls panel is not contained in the viewport.");
+    const slotButtons = controlsPanel.locator('button:not([data-colt-control="minimize"])');
+    const firstSlotBounds = await slotButtons.first().boundingBox();
+    const lastSlotBounds = await slotButtons.last().boundingBox();
+    const firstSlotCenter = firstSlotBounds.y + firstSlotBounds.height / 2;
+    const lastSlotCenter = lastSlotBounds.y + lastSlotBounds.height / 2;
+    assert(firstSlotCenter > controlsBounds.y + controlsBounds.height * .27 && firstSlotCenter < controlsBounds.y + controlsBounds.height * .33, "The first-row words are outside their artwork slots.");
+    assert(lastSlotCenter > controlsBounds.y + controlsBounds.height * .67 && lastSlotCenter < controlsBounds.y + controlsBounds.height * .73, "The last-row words are outside their artwork slots.");
     assert.equal(await page.getByRole("button", { name: "Minimize", exact: true }).evaluate(element => getComputedStyle(element).position), "absolute", "Minimize must remain available without consuming an artwork slot.");
     await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");

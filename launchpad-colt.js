@@ -402,6 +402,30 @@
     characterButton.setAttribute("aria-expanded", "false");
   }
 
+  function positionControls() {
+    const rootBounds = root.getBoundingClientRect();
+    const coltBounds = characterButton.getBoundingClientRect();
+    const panelWidth = Math.min(globalObject.innerWidth <= 760 ? 420 : 460, globalObject.innerWidth - 16);
+    const panelHeight = panelWidth * (941 / 1672);
+    const roomOnLeft = coltBounds.left + (coltBounds.width / 2) >= globalObject.innerWidth / 2;
+    const desiredLeft = roomOnLeft
+      ? coltBounds.left - panelWidth + 40
+      : coltBounds.right - 40;
+    const desiredTop = coltBounds.top + Math.min(72, coltBounds.height / 2);
+    const viewportLeft = Math.min(
+      Math.max(8, desiredLeft),
+      Math.max(8, globalObject.innerWidth - panelWidth - 8)
+    );
+    const viewportTop = Math.min(
+      Math.max(8, desiredTop),
+      Math.max(8, globalObject.innerHeight - panelHeight - 8)
+    );
+    controls.style.right = "auto";
+    controls.style.bottom = "auto";
+    controls.style.left = `${viewportLeft - rootBounds.left}px`;
+    controls.style.top = `${viewportTop - rootBounds.top}px`;
+  }
+
   function renderCustomizationDraft() {
     const customization = normalizeCustomization(customizationDraft);
     customizerName.value = customization.name;
@@ -728,6 +752,7 @@
     }
     controlsOpen = !controlsOpen;
     controls.hidden = !controlsOpen;
+    if (controlsOpen) positionControls();
     characterButton.setAttribute("aria-expanded", String(controlsOpen));
     speech.hidden = true;
   });
@@ -876,6 +901,7 @@
   globalObject.addEventListener("resize", () => {
     root.classList.toggle("is-auto-compact", globalObject.innerWidth < 1120);
     applySavedPosition();
+    if (controlsOpen) positionControls();
   });
   globalObject.addEventListener("colt-radio-opened", syncPanelCollision);
   globalObject.addEventListener("colt-assistant-opened", syncPanelCollision);
