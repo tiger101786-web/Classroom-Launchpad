@@ -460,7 +460,7 @@
     const heading = buildElement("div", "colt-radio-heading");
     const headingMark = buildElement("span", "colt-radio-heading-mark");
     const headingHorse = document.createElement("img");
-    headingHorse.src = "assets/colt-radio-header-portrait.png?v=20260829-radio-header";
+    headingHorse.dataset.src = "assets/colt-radio-header-portrait.png?v=20260905-radio-header-optimized";
     headingHorse.alt = "";
     headingHorse.setAttribute("aria-hidden", "true");
     headingMark.append(headingHorse);
@@ -537,7 +537,7 @@
     const streamArtwork = buildElement("span", "colt-radio-stream-artwork");
     streamArtwork.setAttribute("aria-hidden", "true");
     const streamArtworkImage = document.createElement("img");
-    streamArtworkImage.src = "assets/colt-radio-horse-portrait.png?v=20260829-radio-artwork";
+    streamArtworkImage.dataset.src = "assets/colt-radio-horse-portrait.png?v=20260905-radio-artwork-optimized";
     streamArtworkImage.alt = "";
     streamArtwork.append(streamArtworkImage);
     const streamDetails = buildElement("span", "colt-radio-stream-details");
@@ -1021,6 +1021,8 @@
     }
 
     function openPanel() {
+      if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
+      if (!streamArtworkImage.src) streamArtworkImage.src = streamArtworkImage.dataset.src;
       panel.hidden = false;
       launcher.hidden = true;
       launcher.setAttribute("aria-expanded", "true");

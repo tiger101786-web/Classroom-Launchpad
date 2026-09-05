@@ -5,7 +5,7 @@
   const root = documentObject.getElementById("launchpadColtRoot");
   if (!root) return;
 
-  const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260830-launchpad-colt";
+  const ASSET_URL = "assets/launchpad-colt-companion.png?v=20260905-launchpad-colt-optimized";
   const VIDEO_ASSETS = {
     idle: "assets/launchpad-colt-idle.webm?v=20260830-colt-video-poses",
     welcome: "assets/launchpad-colt-welcome.webm?v=20260830-welcome-alpha-v1",
@@ -86,14 +86,14 @@
         <span class="launchpad-colt-platform" aria-hidden="true"></span>
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
         <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="welcome" src="${VIDEO_ASSETS.welcome}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="greetingExcited" src="${VIDEO_ASSETS.greetingExcited}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="pointing" src="${VIDEO_ASSETS.pointing}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="radioDance" src="${VIDEO_ASSETS.radioDance}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="radioDanceAlternate" src="${VIDEO_ASSETS.radioDanceAlternate}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="feeding" src="${VIDEO_ASSETS.feeding}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="petting" src="${VIDEO_ASSETS.petting}" autoplay muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-        <video class="launchpad-colt-pose" data-pose="sleeping" src="${VIDEO_ASSETS.sleeping}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="welcome" data-src="${VIDEO_ASSETS.welcome}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="greetingExcited" data-src="${VIDEO_ASSETS.greetingExcited}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="pointing" data-src="${VIDEO_ASSETS.pointing}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="radioDance" data-src="${VIDEO_ASSETS.radioDance}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="radioDanceAlternate" data-src="${VIDEO_ASSETS.radioDanceAlternate}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="feeding" data-src="${VIDEO_ASSETS.feeding}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="petting" data-src="${VIDEO_ASSETS.petting}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="sleeping" data-src="${VIDEO_ASSETS.sleeping}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
         <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
       </button>
@@ -166,6 +166,13 @@
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
   const radioDanceVideos = poseVideos.filter(video => video.dataset.pose === "radioDance" || video.dataset.pose === "radioDanceAlternate");
 
+  function ensurePoseVideoSource(video, preload = "auto") {
+    if (!video || video.getAttribute("src") || !video.dataset.src) return;
+    video.preload = preload;
+    video.src = video.dataset.src;
+    video.load();
+  }
+
   function syncPoseVideos(state = currentState, restart = false) {
     if (state !== "radio") globalObject.clearTimeout(radioDanceRecoveryTimer);
     const poseByState = {
@@ -191,6 +198,7 @@
         video.pause();
         return;
       }
+      ensurePoseVideoSource(video);
       if (restart) {
         try { video.currentTime = 0; } catch {}
       }
@@ -202,6 +210,7 @@
 
   function warmRadioDanceVideos() {
     radioDanceVideos.forEach(video => {
+      ensurePoseVideoSource(video);
       video.preload = "auto";
       if (video.networkState === globalObject.HTMLMediaElement.NETWORK_EMPTY) video.load();
     });
@@ -210,6 +219,7 @@
   function switchRadioDanceWhenReady(nextPose, fallbackPose) {
     const target = radioDanceVideos.find(video => video.dataset.pose === nextPose);
     if (!target || !radioPlaybackActive || currentState !== "radio") return;
+    ensurePoseVideoSource(target);
     const token = ++radioDanceSwitchToken;
     let settled = false;
     const activate = () => {

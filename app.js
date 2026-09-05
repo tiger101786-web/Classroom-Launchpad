@@ -162,7 +162,7 @@ function observeDeferredVideos(root = document) {
         loadDeferredVideo(entry.target);
         deferredVideoObserver.unobserve(entry.target);
       });
-    }, { rootMargin: "80px 0px", threshold: 0.01 });
+    }, { rootMargin: "0px", threshold: 0.25 });
   }
   videos.forEach(video => deferredVideoObserver.observe(video));
 }
@@ -2034,7 +2034,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
     <div class="topbar">
       <div class="title-group">
         ${back ? `<button class="back-btn" data-action="back"> Back</button>` : ""}
-        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260702" type="video/mp4"></video></span>` : ""}
+        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         <h1>${escapeHtml(title)}</h1>
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
@@ -2228,10 +2228,10 @@ function renderHome() {
     <div class="home-page-content">
     <section id="home-top" class="hero-panel home-navigation-anchor">
       <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/hero-panel-bg.mp4" type="video/mp4">
+        <source data-src="assets/hero-panel-bg.mp4?v=20260905-optimized1" type="video/mp4">
       </video>
       <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/hero-panel-bg-mobile.mp4?v=20260710-mobile-bg2" type="video/mp4">
+        <source data-src="assets/hero-panel-bg-mobile.mp4?v=20260905-optimized1" type="video/mp4">
       </video>
       ${pageHeader(
         "Classroom Launchpad",
@@ -2241,7 +2241,7 @@ function renderHome() {
       )}
       <section class="home-feature${homeProfileVideo.endsWith("home-profile-12.mp4") ? " home-feature--detail" : ""}">
         <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
-          <source data-src="${homeProfileVideo}?v=20260802-profile-rotation12-clean-detail" type="video/mp4">
+          <source data-src="${homeProfileVideo}?v=20260905-profile-optimized1" type="video/mp4">
         </video>
       </section>
     </section>
@@ -2264,7 +2264,7 @@ function renderHomeDefault() {
     <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="Launch tools">
       <section class="daily-launch-card" aria-label="Today's Launch">
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
-          <source data-src="assets/daily-launch-bg.mp4" type="video/mp4">
+          <source data-src="assets/daily-launch-bg.mp4?v=20260905-optimized1" type="video/mp4">
         </video>
         <div class="daily-launch-icon" aria-hidden="true">✓</div>
         <div class="daily-launch-copy">
@@ -2304,7 +2304,7 @@ function renderHomeDefault() {
         </div>
         <figure class="expectations-colt">
           <video autoplay muted loop playsinline aria-label="Animated Colts horse graphic">
-            <source data-src="assets/expectations-colt.mp4" type="video/mp4">
+            <source data-src="assets/expectations-colt.mp4?v=20260905-optimized1" type="video/mp4">
           </video>
         </figure>
         <section class="calendar-card" aria-label="Current date and time">
@@ -2340,7 +2340,7 @@ function renderRandomActivityCard() {
   return `
     <section id="randomActivityCard" class="random-activity-card ${locked ? "is-locked" : ""}" aria-label="Random Activity">
       <video class="random-activity-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/random-activity-bg.mp4" type="video/mp4">
+        <source data-src="assets/random-activity-bg.mp4?v=20260905-optimized1" type="video/mp4">
       </video>
       <span class="feature-kicker">Student Choice</span>
       <h2>Random Activity</h2>
@@ -2687,7 +2687,7 @@ function categoryCard(category) {
   return `
     <button class="category-card" data-action="category" data-category="${escapeHtml(category)}">
       <video class="category-card-bg" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/category-pane-bg.mp4" type="video/mp4">
+        <source data-src="assets/category-pane-bg.mp4?v=20260905-optimized1" type="video/mp4">
       </video>
       <span class="card-icon">${categoryIcons[category] || "•"}</span>
       <span class="category-copy">
@@ -2701,7 +2701,9 @@ function categoryCard(category) {
 
 function renderCategory(category) {
   const visibleLinks = links.filter(link => link.active && link.category === category);
-  const sectionColtsLogo = category === "Creative Projects" ? "assets/creative-projects-colts-logo.mp4" : "assets/section-colts-logo.mp4";
+  const sectionColtsLogo = category === "Creative Projects"
+    ? "assets/creative-projects-colts-logo.mp4"
+    : "assets/section-colts-logo.mp4?v=20260905-optimized1";
 
   return `
     ${categoryTopbar()}
@@ -3951,16 +3953,16 @@ function startColtRunGame() {
     return sprite;
   };
   const animatedBackgroundVideos = [
-    "assets/colt-run-bg-01.mp4?v=20260726-backgrounds1-5-hq2",
-    "assets/colt-run-bg-02.mp4?v=20260726-backgrounds1-5-hq2",
-    "assets/colt-run-bg-03.mp4?v=20260726-backgrounds1-5-hq2",
-    "assets/colt-run-bg-04.mp4?v=20260726-backgrounds1-5-hq2",
-    "assets/colt-run-bg-05.mp4?v=20260726-backgrounds1-5-hq2",
-    "assets/colt-run-bg-06.mp4?v=20260725-background6-hq2",
-    "assets/colt-run-bg-07.mp4?v=20260725-background7-hq2",
-    "assets/colt-run-bg-08.mp4?v=20260725-background8-hq2",
-    "assets/colt-run-bg-09.mp4?v=20260730-background9-cartoon-students-replacement2",
-    "assets/colt-run-bg-10.mp4?v=20260730-background10-hq1"
+    "assets/colt-run-bg-01.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-02.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-03.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-04.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-05.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-06.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-07.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-08.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-09.mp4?v=20260905-optimized1",
+    "assets/colt-run-bg-10.mp4?v=20260905-optimized1"
   ].map(createDeferredVideo);
   const coinSprite = new Image();
   coinSprite.decoding = "async";

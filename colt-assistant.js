@@ -554,7 +554,7 @@
     const headingMark = buildElement("span", "colt-assistant-heading-mark");
     headingMark.setAttribute("aria-hidden", "true");
     const headingHorse = document.createElement("img");
-    headingHorse.src = "assets/colt-radio-header-portrait.png?v=20260829-guided-ai";
+    headingHorse.dataset.src = "assets/colt-radio-header-portrait.png?v=20260905-guided-ai-optimized";
     headingHorse.alt = "";
     headingMark.append(headingHorse);
     const titleWrap = buildElement("div");
@@ -910,6 +910,7 @@
     }
 
     function openPanel() {
+      if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       panel.hidden = false;
       launcher.setAttribute("aria-expanded", "true");
       launcher.hidden = true;

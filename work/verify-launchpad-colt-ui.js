@@ -95,23 +95,27 @@ async function run() {
     assert.equal(await page.locator(".launchpad-colt-pose").count(), 9);
     const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
     assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await welcomeVideo.getAttribute("src"), /launchpad-colt-welcome\.webm/);
+    assert.match(await welcomeVideo.getAttribute("data-src"), /launchpad-colt-welcome\.webm/);
     assert.equal(await welcomeVideo.getAttribute("poster"), null);
     assert.equal(await welcomeVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the welcome animation.");
     const pointingVideo = page.locator('.launchpad-colt-pose[data-pose="pointing"]');
     assert.equal(await pointingVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await pointingVideo.getAttribute("src"), /launchpad-colt-pointing-transparent\.webm/);
+    assert.match(await pointingVideo.getAttribute("data-src"), /launchpad-colt-pointing-transparent\.webm/);
     assert.equal(await pointingVideo.getAttribute("poster"), null);
     assert.equal(await pointingVideo.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the pointing animation.");
     assert.equal(await page.locator('img[src*="launchpad-colt-pointing"]').count(), 0, "A static pointing image must never be rendered.");
     const radioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDance"]');
     assert.equal(await radioDanceVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await radioDanceVideo.getAttribute("src"), /launchpad-colt-radio-dance\.webm/);
+    assert.match(await radioDanceVideo.getAttribute("data-src"), /launchpad-colt-radio-dance\.webm/);
     const alternateRadioDanceVideo = page.locator('.launchpad-colt-pose[data-pose="radioDanceAlternate"]');
     assert.equal(await alternateRadioDanceVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await alternateRadioDanceVideo.getAttribute("src"), /launchpad-colt-radio-dance-alternate\.webm/);
+    assert.match(await alternateRadioDanceVideo.getAttribute("data-src"), /launchpad-colt-radio-dance-alternate\.webm/);
     assert.equal(await alternateRadioDanceVideo.getAttribute("loop"), null);
     const alternateDanceCornerAlpha = await alternateRadioDanceVideo.evaluate(async element => {
+      if (!element.src) {
+        element.src = element.dataset.src;
+        element.load();
+      }
       await new Promise(resolve => {
         if (element.readyState >= 2) resolve();
         else element.addEventListener("loadeddata", resolve, { once: true });
@@ -175,7 +179,7 @@ async function run() {
     assert(cornerAlpha < 8, `The pointing animation background is not transparent (corner alpha: ${cornerAlpha}).`);
     const greetingExcitedVideo = page.locator('.launchpad-colt-pose[data-pose="greetingExcited"]');
     assert.equal(await greetingExcitedVideo.evaluate(element => element.tagName), "VIDEO");
-    assert.match(await greetingExcitedVideo.getAttribute("src"), /launchpad-colt-greeting-excited\.webm/);
+    assert.match(await greetingExcitedVideo.getAttribute("data-src"), /launchpad-colt-greeting-excited\.webm/);
     assert.equal(await page.locator('.launchpad-colt-pose[data-pose="greeting"], .launchpad-colt-pose[data-pose="excited"]').count(), 0);
     await page.evaluate(() => {
       const target = document.createElement("button");
