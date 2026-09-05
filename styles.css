@@ -10427,6 +10427,25 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   z-index: 1;
 }
 
+.launchpad-colt-sunglasses {
+  position: absolute;
+  z-index: 4;
+  display: block;
+  width: 42%;
+  height: auto;
+  pointer-events: none;
+  transform-origin: center;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .72)) drop-shadow(0 0 3px rgba(236, 23, 68, .42));
+  will-change: left, top, transform;
+}
+
+.launchpad-colt-sunglasses[hidden],
+.launchpad-colt-root.is-minimized .launchpad-colt-sunglasses {
+  display: none;
+}
+
 .launchpad-colt-companion[data-state="idle"] .launchpad-colt-pose[data-pose="idle"],
 .launchpad-colt-companion[data-state="success"] .launchpad-colt-pose[data-pose="greetingExcited"],
 .launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose[data-pose="greetingExcited"],

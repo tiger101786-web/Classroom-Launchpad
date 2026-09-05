@@ -57,7 +57,7 @@ async function waitForServer() {
     const headers = { "Content-Type": "application/json", Origin: origin, Cookie: cookie };
 
     const initial = await request("/api/launchpad-colt/customization", { headers });
-    assert.deepEqual(initial.payload.customization, { name: "Colt", nameplateVisible: true, platformVisible: true });
+    assert.deepEqual(initial.payload.customization, { name: "Colt", nameplateVisible: true, platformVisible: true, glassesVisible: false });
 
     const saved = await request("/api/launchpad-colt/customization", {
       method: "PUT",
@@ -68,21 +68,24 @@ async function waitForServer() {
     assert.equal(saved.payload.customization.name, "Blaze");
     assert.equal(saved.payload.customization.nameplateVisible, true);
     assert.equal(saved.payload.customization.platformVisible, true);
+    assert.equal(saved.payload.customization.glassesVisible, false);
     assert.equal(Object.hasOwn(saved.payload.customization, "accessories"), false);
 
     const hidden = await request("/api/launchpad-colt/customization", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ name: "Blaze", nameplateVisible: false, platformVisible: false })
+      body: JSON.stringify({ name: "Blaze", nameplateVisible: false, platformVisible: false, glassesVisible: true })
     });
     assert.equal(hidden.response.status, 200);
     assert.equal(hidden.payload.customization.nameplateVisible, false);
     assert.equal(hidden.payload.customization.platformVisible, false);
+    assert.equal(hidden.payload.customization.glassesVisible, true);
 
     const state = await request("/api/state", { headers });
     assert.equal(state.payload.coltCustomization.name, "Blaze");
     assert.equal(state.payload.coltCustomization.nameplateVisible, false);
     assert.equal(state.payload.coltCustomization.platformVisible, false);
+    assert.equal(state.payload.coltCustomization.glassesVisible, true);
     assert.equal(Object.hasOwn(state.payload.coltCustomization, "accessories"), false);
 
     const invalid = await request("/api/launchpad-colt/customization", {
@@ -96,6 +99,7 @@ async function waitForServer() {
     assert.equal(persisted.coltCustomizations.teacher.name, "Blaze");
     assert.equal(persisted.coltCustomizations.teacher.nameplateVisible, false);
     assert.equal(persisted.coltCustomizations.teacher.platformVisible, false);
+    assert.equal(persisted.coltCustomizations.teacher.glassesVisible, true);
     assert.equal(Object.hasOwn(persisted.coltCustomizations.teacher, "accessories"), false);
     console.log("Launchpad Colt customization verification passed.");
   } finally {

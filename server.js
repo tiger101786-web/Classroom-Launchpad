@@ -318,7 +318,8 @@ function radioFavoritesAccountKey(session) {
 const defaultColtCustomization = Object.freeze({
   name: "Colt",
   nameplateVisible: true,
-  platformVisible: true
+  platformVisible: true,
+  glassesVisible: false
 });
 
 function normalizeColtCustomization(value) {
@@ -329,6 +330,7 @@ function normalizeColtCustomization(value) {
     name: name || defaultColtCustomization.name,
     nameplateVisible: source.nameplateVisible !== false,
     platformVisible: source.platformVisible !== false,
+    glassesVisible: Boolean(source.glassesVisible),
     updatedAt: Number.isFinite(Date.parse(source.updatedAt)) ? new Date(source.updatedAt).toISOString() : ""
   };
 }
@@ -2811,6 +2813,7 @@ async function handleApi(req, res, pathname) {
         name,
         nameplateVisible: body.nameplateVisible,
         platformVisible: body.platformVisible,
+        glassesVisible: body.glassesVisible,
         updatedAt: new Date().toISOString()
       });
       const db = readDb();
