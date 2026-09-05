@@ -7406,10 +7406,10 @@ function startColtRunGame() {
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
     drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, -6);
     if (mrsTrittelComingSoonImage.complete && mrsTrittelComingSoonImage.naturalWidth) {
-      drawSelectPreview(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 148, 198, 2);
+      drawSelectPreview(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 72, 198, 2);
     }
     if (mrsKochComingSoonImage.complete && mrsKochComingSoonImage.naturalWidth) {
-      drawSelectPreview(selectMrsKochCanvas, mrsKochComingSoonImage, 148, 198, 2);
+      drawSelectPreview(selectMrsKochCanvas, mrsKochComingSoonImage, 74, 198, 2);
     }
   };
 

@@ -44,7 +44,10 @@ assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandosk
 assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(6,/);
 assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: span 2;/, "Character cards should retain their original three-across width.");
 assert.match(styles, /\.colt-run-coming-soon/);
-assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?bottom: 94px;/, "Coming Soon badges should sit directly above the character names.");
+assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?position: relative !important;/, "Coming Soon badges should remain in normal layout below the character artwork.");
+assert.doesNotMatch(styles.match(/\.colt-run-coming-soon \{[\s\S]*?\n\}/)?.[0] || "", /^\s*(?:bottom|left|transform):/m, "Coming Soon badges must not float over character legs.");
+assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 72, 198, 2\)/, "Mrs. Trittel must preserve her natural proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, mrsKochComingSoonImage, 74, 198, 2\)/, "Mrs. Koch must preserve her natural proportions.");
 assert.match(
   styles,
   /button\[data-character="mrsLevandoske"\],[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
