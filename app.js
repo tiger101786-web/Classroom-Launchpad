@@ -3395,6 +3395,9 @@ function startColtRunGame() {
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")
   ];
+  const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio1");
+  const mrsLevandoskeCelebrationAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio1");
+  const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, mrsLevandoskeCelebrationAudio];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
@@ -3454,6 +3457,10 @@ function startColtRunGame() {
     audio.volume = musicMuted
       ? 0
       : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
+    audio.muted = musicMuted;
+  });
+  mrsLevandoskeCueAudios.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume;
     audio.muted = musicMuted;
   });
   const keys = { left: false, right: false, jump: false };
@@ -3969,7 +3976,7 @@ function startColtRunGame() {
   });
   let mrsLevandoskeIdleIndex = 0;
   const getMrsLevandoskeIdleVideo = () => mrsLevandoskeIdleVideos[mrsLevandoskeIdleIndex];
-  const mrsLevandoskeRunVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-run.webm?v=20260905-playable1");
+  const mrsLevandoskeRunVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-run.webm?v=20260905-green-key2");
   const mrsLevandoskeJumpVideos = [
     createDeferredVideo("assets/colt-run-mrs-levandoske-jump.webm?v=20260905-playable1"),
     createDeferredVideo("assets/colt-run-mrs-levandoske-jump-02.webm?v=20260905-playable1")
@@ -4009,6 +4016,7 @@ function startColtRunGame() {
       ensureMediaSource(mrsLevandoskeRunVideo);
       mrsLevandoskeJumpVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsLevandoskeDeathVideo);
+      mrsLevandoskeCueAudios.forEach(audio => ensureMediaSource(audio));
       return;
     }
     if (character === "mrNieves") {
@@ -4484,11 +4492,20 @@ function startColtRunGame() {
     lastMrNievesCelebrationAudioIndex = nextIndex;
     playExclusiveAudio(mrNievesCelebrationAudios, nextIndex);
   };
+  const playMrsLevandoskeDeathAudio = () => {
+    if (musicMuted || musicVolume <= 0) return;
+    playExclusiveAudio([mrsLevandoskeDeathAudio], 0);
+  };
+  const playMrsLevandoskeCelebrationAudio = () => {
+    if (musicMuted || musicVolume <= 0) return;
+    playExclusiveAudio([mrsLevandoskeCelebrationAudio], 0);
+  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
-      const activeRunningAudio = selectedCharacter === "mrNieves" ? mrNievesRunningAudio : runningAudio;
-      const inactiveRunningAudio = selectedCharacter === "mrNieves" ? runningAudio : mrNievesRunningAudio;
+      const usesHumanRunningAudio = selectedCharacter === "mrNieves" || selectedCharacter === "mrsLevandoske";
+      const activeRunningAudio = usesHumanRunningAudio ? mrNievesRunningAudio : runningAudio;
+      const inactiveRunningAudio = usesHumanRunningAudio ? runningAudio : mrNievesRunningAudio;
       ensureMediaSource(activeRunningAudio);
       if (!inactiveRunningAudio.paused) {
         inactiveRunningAudio.pause();
@@ -4550,6 +4567,10 @@ function startColtRunGame() {
         : Math.min(1, musicVolume * mrNievesCelebrationLayerVolume * mrNievesCelebrationVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
+    mrsLevandoskeCueAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume;
+      audio.muted = musicMuted;
+    });
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -4570,6 +4591,7 @@ function startColtRunGame() {
       coltCelebrationAudios.forEach(audio => audio.pause());
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
+      mrsLevandoskeCueAudios.forEach(audio => audio.pause());
     }
     else playColtRunAudio();
   };
@@ -4591,6 +4613,7 @@ function startColtRunGame() {
       coltCelebrationAudios.forEach(audio => audio.pause());
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
+      mrsLevandoskeCueAudios.forEach(audio => audio.pause());
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -6703,6 +6726,7 @@ function startColtRunGame() {
     stopRunningAudio();
     stopGameplayCues();
     if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();
+    else if (selectedCharacter === "mrsLevandoske") playMrsLevandoskeDeathAudio();
     else if (selectedCharacter === "colt") playColtDeathAudio();
     deathStartedAt = performance.now();
     deathX = player.x;
@@ -7041,6 +7065,7 @@ function startColtRunGame() {
     if (!finishPlatform) return;
     stopRunningAudio();
     if (selectedCharacter === "mrNieves") playMrNievesCelebrationAudio();
+    else if (selectedCharacter === "mrsLevandoske") playMrsLevandoskeCelebrationAudio();
     finishLandingPending = true;
     finishTouchElapsedSeconds = Math.max(0, (now - levelStart) / 1000);
     if (nextLevelButton) nextLevelButton.disabled = true;
@@ -7154,6 +7179,7 @@ function startColtRunGame() {
         audio.currentTime = 0;
       } catch {}
     });
+    mrsLevandoskeCueAudios.forEach(stopAndRewindAudio);
     lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
     lavaRockVideoFrameSource = -1;
@@ -7256,7 +7282,7 @@ function startColtRunGame() {
         ? (mrsLevandoskeIsJumping ? 174 : mrsLevandoskeIsRunning ? 170 : 168)
         : coltIsCelebrating ? 123 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : isMrsLevandoske ? 10 : 8));
+    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : isMrsLevandoske ? 18 : 8));
     ctx.save();
     if (!isHumanRunner) ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);
@@ -7990,6 +8016,7 @@ function startColtRunGame() {
         ...coltCelebrationAudios,
         ...mrNievesDeathAudios,
         ...mrNievesCelebrationAudios,
+        ...mrsLevandoskeCueAudios,
         coinVideo,
         flagVideo,
         ...coltIdleVideos,
