@@ -41,6 +41,17 @@ async function run() {
     await instantPage.close();
 
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await page.addInitScript(() => {
+      window.__coltRunMediaDraws = [];
+      const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
+      CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
+        const mediaSource = source instanceof HTMLVideoElement ? source.dataset.src || source.currentSrc || "" : "";
+        if (mediaSource.includes("colt-run-mrs-levandoske") && window.__coltRunMediaDraws.length < 2000) {
+          window.__coltRunMediaDraws.push(mediaSource);
+        }
+        return originalDrawImage.call(this, source, ...args);
+      };
+    });
     await page.goto("http://localhost:8098/", { waitUntil: "networkidle" });
     await page.evaluate(() => localStorage.removeItem("classroomLaunchpadHomeNavigationCollapsedV1"));
     await page.setViewportSize({ width: 1600, height: 1000 });
@@ -678,8 +689,44 @@ async function run() {
     }, null, { timeout: 10_000 });
     const mrsLevandoskeCard = page.locator('[data-character="mrsLevandoske"]');
     const mrsLevandoskeCardText = (await mrsLevandoskeCard.innerText()).toLowerCase();
-    if (!await mrsLevandoskeCard.isDisabled() || !(mrsLevandoskeCardText.includes("mrs. levandoske") && mrsLevandoskeCardText.includes("coming soon"))) {
-      throw new Error("Mrs. Levandoske is not presented as a disabled Coming Soon character with a rendered idle animation.");
+    if (await mrsLevandoskeCard.isDisabled() || !mrsLevandoskeCardText.includes("mrs. levandoske") || mrsLevandoskeCardText.includes("coming soon")) {
+      throw new Error("Mrs. Levandoske is not presented as a playable character with a rendered idle animation.");
+    }
+    if (await mrsLevandoskeCard.getAttribute("data-colt-run") !== "character") {
+      throw new Error("Mrs. Levandoske is not connected to the Colt Run character selector.");
+    }
+    const mrsLevandoskeAnimationAlpha = await page.evaluate(async filenames => Promise.all(filenames.map(filename => new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.muted = true;
+      video.playsInline = true;
+      video.src = `/assets/${filename}`;
+      const fail = () => reject(new Error(`Could not load ${filename}`));
+      video.addEventListener("error", fail, { once: true });
+      video.addEventListener("loadeddata", () => {
+        video.currentTime = Math.min(2, Math.max(0, video.duration - 0.1));
+      }, { once: true });
+      video.addEventListener("seeked", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0);
+        const corners = [
+          context.getImageData(0, 0, 1, 1).data[3],
+          context.getImageData(canvas.width - 1, 0, 1, 1).data[3],
+          context.getImageData(0, canvas.height - 1, 1, 1).data[3],
+          context.getImageData(canvas.width - 1, canvas.height - 1, 1, 1).data[3]
+        ];
+        resolve({ filename, maxCornerAlpha: Math.max(...corners), width: canvas.width, height: canvas.height });
+      }, { once: true });
+    }))), [
+      "colt-run-mrs-levandoske-run.webm",
+      "colt-run-mrs-levandoske-jump.webm",
+      "colt-run-mrs-levandoske-jump-02.webm",
+      "colt-run-mrs-levandoske-death.webm"
+    ]);
+    if (mrsLevandoskeAnimationAlpha.some(animation => animation.maxCornerAlpha > 8 || animation.width !== 576 || animation.height !== 876)) {
+      throw new Error(`Mrs. Levandoske animations are not transparent game-ready media: ${JSON.stringify(mrsLevandoskeAnimationAlpha)}.`);
     }
     const howToPlayCards = await page.locator(".colt-run-control-card").count();
     const howToPlayText = await page.locator(".colt-run-how-to-play").innerText();
@@ -698,6 +745,29 @@ async function run() {
     }
     await page.screenshot({ path: path.join(dataDir, "colt-run-how-to-play-mobile-ui-qa.png"), fullPage: true });
     await page.setViewportSize({ width: 1440, height: 1000 });
+    await mrsLevandoskeCard.click();
+    await page.locator("#coltRunCharacterSelect").waitFor({ state: "hidden" });
+    const mrsLevandoskeStatus = await page.locator("#coltRunStatus").innerText();
+    if (!mrsLevandoskeStatus.includes("Mrs. Levandoske selected") || await page.evaluate(() => localStorage.getItem("coltRunCharacterV1")) !== "mrsLevandoske") {
+      throw new Error("Mrs. Levandoske did not become the active playable runner.");
+    }
+    await page.keyboard.down("ArrowRight");
+    await page.waitForTimeout(450);
+    if (!await page.evaluate(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-levandoske-run.webm")))) {
+      throw new Error("Mrs. Levandoske's running animation was not drawn during movement.");
+    }
+    await page.screenshot({ path: path.join(dataDir, "colt-run-mrs-levandoske-running-ui-qa.png"), fullPage: true });
+    await page.keyboard.up("ArrowRight");
+    await page.evaluate(() => { window.__coltRunMediaDraws = []; });
+    await page.keyboard.down("Space");
+    await page.waitForFunction(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-levandoske-jump.webm")), null, { timeout: 3000 });
+    await page.screenshot({ path: path.join(dataDir, "colt-run-mrs-levandoske-jumping-ui-qa.png"), fullPage: true });
+    await page.keyboard.up("Space");
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => { window.__coltRunMediaDraws = []; });
+    await page.keyboard.down("Space");
+    await page.waitForFunction(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-levandoske-jump-02.webm")), null, { timeout: 3000 });
+    await page.keyboard.up("Space");
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="login"]').first().click();
     await page.locator(".auth-card").waitFor();

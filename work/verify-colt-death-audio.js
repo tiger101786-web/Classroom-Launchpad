@@ -13,13 +13,13 @@ function check(value, message) {
 check(audio.length === 19865, "Colt death audio size changed unexpectedly.");
 check(audio[0] === 0xff && (audio[1] & 0xe0) === 0xe0, "Colt death audio does not begin with a valid MP3 frame.");
 check(appSource.includes('createDeferredAudio("assets/colt-run-colt-death-audio.mp3?v=20260728-minecraft-death2")'), "Colt death audio is not registered.");
-check(appSource.includes("ensureMediaSource(coltDeathAudio);"), "Colt death audio is not preloaded with the Colt character media.");
+check(appSource.includes("coltDeathAudios.forEach(audio => ensureMediaSource(audio));"), "Colt death audio is not preloaded with the Colt character media.");
 
 const triggerStart = appSource.indexOf("const triggerColtDeath =");
 const triggerEnd = appSource.indexOf("const updateColtDeath =", triggerStart);
 const trigger = appSource.slice(triggerStart, triggerEnd);
 const mrAudioCall = trigger.indexOf('if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();');
-const coltAudioCall = trigger.indexOf("else playColtDeathAudio();");
+const coltAudioCall = trigger.indexOf('else if (selectedCharacter === "colt") playColtDeathAudio();');
 const deathTimestamp = trigger.indexOf("deathStartedAt = performance.now();");
 const deathAnimation = trigger.indexOf("const activeDeathVideo =");
 check(mrAudioCall >= 0 && coltAudioCall > mrAudioCall, "Character-specific death audio routing is incomplete.");

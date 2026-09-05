@@ -3612,45 +3612,9 @@ body[data-theme="night"] .colt-run-stats span {
   box-shadow: inset 0 0 0 2px rgba(255, 213, 138, 0.36);
 }
 
-.colt-run-character-grid button.is-placeholder {
-  cursor: default;
-  opacity: 0.82;
-}
-
-.colt-run-character-grid button.is-placeholder:hover,
-.colt-run-character-grid button.is-placeholder:focus-visible {
-  border-color: rgba(249, 168, 37, 0.26);
-  background: rgba(255, 255, 255, 0.08);
-}
-
 .colt-run-character-grid canvas {
   width: min(300px, 100%);
   aspect-ratio: 3 / 2;
-}
-
-.colt-run-coming-soon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  border: 1px solid rgba(255, 213, 138, 0.52);
-  border-radius: 999px;
-  background: rgba(123, 11, 49, 0.86);
-  color: #fff4df;
-  font-size: 0.7rem;
-  font-weight: 1000;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.colt-run-character-grid .colt-run-coming-soon {
-  position: absolute;
-  z-index: 2;
-  top: auto;
-  bottom: 58px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
 }
 
 .colt-run-character-empty {

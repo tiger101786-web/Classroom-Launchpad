@@ -31,11 +31,11 @@ const triggerStart = appSource.indexOf("const triggerColtDeath =");
 const triggerEnd = appSource.indexOf("const updateColtDeath =", triggerStart);
 const trigger = appSource.slice(triggerStart, triggerEnd);
 const mrAudioCall = trigger.indexOf('if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();');
-const coltDeathCall = trigger.indexOf("else playColtDeathAudio();");
+const coltDeathCall = trigger.indexOf('else if (selectedCharacter === "colt") playColtDeathAudio();');
 const deathTimestamp = trigger.indexOf("deathStartedAt = performance.now();");
 const deathAnimation = trigger.indexOf("const activeDeathVideo =");
 check(mrAudioCall >= 0, "Mr. Nieves death sound is not selected by character.");
-check(coltDeathCall > mrAudioCall, "The Colt and Mr. Nieves death sounds are not separated by character.");
+check(coltDeathCall > mrAudioCall, "The Colt, Mr. Nieves, and Mrs. Levandoske death sounds are not separated by character.");
 check(mrAudioCall < deathTimestamp && mrAudioCall < deathAnimation, "Mr. Nieves death sound does not start before the death animation.");
 check((appSource.match(/triggerColtDeath\(/g) || []).length === 3, "Not every death cause uses the shared death trigger.");
 
