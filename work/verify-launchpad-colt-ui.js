@@ -363,6 +363,8 @@ async function run() {
     assert(await page.getByRole("button", { name: "Size: Extra Large", exact: true }).isVisible());
     assert.equal(await page.locator('[data-colt-control="size"]').textContent(), "Size: XL");
     assert((await page.locator(".launchpad-colt-character").boundingBox()).width >= 200);
+    const defaultPlatformBounds = await page.locator(".launchpad-colt-platform").boundingBox();
+    assert(defaultPlatformBounds.x >= 6 && defaultPlatformBounds.x + defaultPlatformBounds.width <= 1434, "The extra-large platform is clipped at its default/reset spot.");
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
     await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
@@ -438,7 +440,17 @@ async function run() {
     const afterSecondDrag = await page.locator("#launchpadColtRoot").boundingBox();
     assert(Math.abs(afterSecondDrag.x - afterFirstDrag.x) > 30, "The Colt could not be immediately dragged a second time.");
 
+    await page.mouse.move(afterSecondDrag.x + 70, afterSecondDrag.y + 65);
+    await page.mouse.down();
+    await page.mouse.move(1438, afterSecondDrag.y + 65, { steps: 8 });
+    await page.mouse.up();
+    const draggedPlatformBounds = await page.locator(".launchpad-colt-platform").boundingBox();
+    assert(draggedPlatformBounds.x >= 6 && draggedPlatformBounds.x + draggedPlatformBounds.width <= 1434, "Dragging allowed the platform to leave the viewport.");
     await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Reset position", exact: true }).click();
+    const resetPlatformBounds = await page.locator(".launchpad-colt-platform").boundingBox();
+    assert(resetPlatformBounds.x >= 6 && resetPlatformBounds.x + resetPlatformBounds.width <= 1434, "Reset Spot leaves the platform clipped.");
+
     await page.getByRole("button", { name: "Hide Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-restore:visible");
     const hiddenBeforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
@@ -473,6 +485,14 @@ async function run() {
     await page.waitForTimeout(2200);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "radio", "The Colt radio dance stopped while playback was still active.");
     assert.equal(await radioDanceVideo.evaluate(element => element.paused), false, "The Colt radio dance video is not playing.");
+    await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Pause motion", exact: true }).click();
+    const pausedDance = page.locator('.launchpad-colt-pose[data-active="true"]');
+    assert.equal(await pausedDance.count(), 1, "Pausing removed the active Colt pose.");
+    assert.equal(await pausedDance.evaluate(element => element.paused), true, "Pause motion did not pause the active animation.");
+    assert.equal(await pausedDance.evaluate(element => getComputedStyle(element).opacity), "1", "The Colt disappeared when motion was paused.");
+    await page.getByRole("button", { name: "Resume motion", exact: true }).click();
+    assert.equal(await page.locator('.launchpad-colt-pose[data-active="true"]').evaluate(element => element.paused), false, "Resume motion did not restart the active animation.");
     await radioDanceVideo.evaluate(element => element.dispatchEvent(new Event("ended")));
     await page.waitForTimeout(120);
     assert.equal(await radioDanceVideo.evaluate(element => element.paused), true, "The first dance kept playing after it ended.");

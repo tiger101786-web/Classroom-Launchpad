@@ -10200,7 +10200,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   position: fixed;
   z-index: 17;
   top: 51%;
-  right: 14px;
+  right: 34px;
   width: 154px;
   transform: translateY(-50%);
   transition: opacity 180ms ease, transform 180ms ease;

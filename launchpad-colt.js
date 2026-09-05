@@ -185,9 +185,9 @@
     };
     const activePose = poseByState[state] || "";
     poseVideos.forEach(video => {
-      const active = prefs.motion && video.dataset.pose === activePose;
-      video.dataset.active = String(active);
-      if (!active) {
+      const selected = video.dataset.pose === activePose;
+      video.dataset.active = String(selected);
+      if (!selected || !prefs.motion) {
         video.pause();
         return;
       }
@@ -386,8 +386,22 @@
   function clampPosition(x, y) {
     const width = root.offsetWidth || (prefs.minimized || globalObject.innerWidth < 1120 ? 68 : 154);
     const height = root.offsetHeight || (prefs.minimized || globalObject.innerWidth < 1120 ? 68 : 154);
+    const platform = root.querySelector(".launchpad-colt-platform");
+    let horizontalOverflow = 0;
+    if (!prefs.hidden && prefs.platformVisible && !root.classList.contains("is-auto-compact") && platform) {
+      const rootBounds = root.getBoundingClientRect();
+      const platformBounds = platform.getBoundingClientRect();
+      if (platformBounds.width > 0) {
+        horizontalOverflow = Math.ceil(Math.max(
+          0,
+          rootBounds.left - platformBounds.left,
+          platformBounds.right - rootBounds.right
+        ));
+      }
+    }
+    const horizontalMargin = 6 + horizontalOverflow;
     return {
-      x: Math.max(6, Math.min(globalObject.innerWidth - width - 6, Number(x) || 6)),
+      x: Math.max(horizontalMargin, Math.min(globalObject.innerWidth - width - horizontalMargin, Number(x) || horizontalMargin)),
       y: Math.max(6, Math.min(globalObject.innerHeight - height - 6, Number(y) || 6))
     };
   }

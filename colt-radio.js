@@ -300,7 +300,7 @@
     },
     {
       id: "wcpe-classical",
-      label: "Classical • WCPE",
+      label: "Classical",
       type: "stream",
       source: "https://audio-mp3.ibiblio.org/wcpe.mp3",
       provider: "WCPE The Classical Station",
@@ -505,11 +505,13 @@
       button.setAttribute("aria-pressed", "false");
       const [stationFamily, stationStyle = ""] = station.label.split(" • ");
       const stationName = buildElement("span", "colt-radio-station-name");
-      stationName.append(
-        buildElement("span", "colt-radio-station-family", stationFamily),
-        document.createTextNode(" "),
-        buildElement("span", "colt-radio-station-style", stationStyle)
-      );
+      stationName.append(buildElement("span", "colt-radio-station-family", stationFamily));
+      if (stationStyle) {
+        stationName.append(
+          document.createTextNode(" "),
+          buildElement("span", "colt-radio-station-style", stationStyle)
+        );
+      }
       if (stationFamily.length > 9 || stationStyle.length > 9) item.classList.add("has-long-name");
       button.setAttribute("aria-label", station.label);
       button.append(stationIcon(station.id), stationName);

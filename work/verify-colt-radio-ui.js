@@ -301,7 +301,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -475,9 +475,9 @@ async function run() {
     await page.getByText("Test Movie Artist - Test Movie Song", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Disney classics/);
 
-    await page.getByRole("button", { name: "Classical • WCPE", exact: true }).click();
+    await page.getByRole("button", { name: "Classical", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://audio-mp3.ibiblio.org/wcpe.mp3");
-    await page.getByText("Classical • WCPE live stream", { exact: true }).waitFor();
+    await page.getByText("Classical live stream", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /noncommercial/);
 
     await page.getByRole("button", { name: "Ambient • Sleeping Pill", exact: true }).click();
@@ -592,7 +592,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical • WCPE", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,
