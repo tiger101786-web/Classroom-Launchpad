@@ -738,6 +738,29 @@ async function run() {
       throw new Error(`Colt Run live status panel did not replace the old directions sentence: ${JSON.stringify(gameStatusText)}.`);
     }
     await page.screenshot({ path: path.join(dataDir, "colt-run-how-to-play-ui-qa.png"), fullPage: true });
+    await page.setViewportSize({ width: 1366, height: 768 });
+    if (await page.evaluate(() => document.fullscreenEnabled)) {
+      await page.locator('.colt-run-footer [data-colt-run="fullscreen"]').click();
+      await page.waitForFunction(() => document.fullscreenElement?.classList.contains("colt-run-stage"));
+      const fullscreenFit = await page.evaluate(() => {
+        const stage = document.querySelector(".colt-run-stage").getBoundingClientRect();
+        const canvas = document.querySelector(".colt-run-canvas").getBoundingClientRect();
+        return {
+          fullscreenIsStage: document.fullscreenElement?.classList.contains("colt-run-stage"),
+          stageTop: stage.top,
+          stageBottom: stage.bottom,
+          canvasTop: canvas.top,
+          canvasBottom: canvas.bottom,
+          viewportHeight: window.innerHeight
+        };
+      });
+      if (!fullscreenFit.fullscreenIsStage || fullscreenFit.stageTop < -1
+        || fullscreenFit.canvasTop < -1 || fullscreenFit.canvasBottom > fullscreenFit.viewportHeight + 1) {
+        throw new Error(`Colt Run fullscreen clips the game on a lab-sized display: ${JSON.stringify(fullscreenFit)}.`);
+      }
+      await page.evaluate(() => document.exitFullscreen());
+      await page.waitForFunction(() => !document.fullscreenElement);
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     const mobileColtRunOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     if (mobileColtRunOverflow || !await page.locator(".colt-run-how-to-play").isVisible()) {

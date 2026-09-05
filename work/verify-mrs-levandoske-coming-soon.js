@@ -8,6 +8,8 @@ const root = path.resolve(__dirname, "..");
 const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const card = app.match(/<button type="button" data-colt-run="character" data-character="mrsLevandoske"[\s\S]*?<\/button>/)?.[0] || "";
+const trittelCard = app.match(/<button type="button" class="is-placeholder" data-character="mrsTrittel"[\s\S]*?<\/button>/)?.[0] || "";
+const kochCard = app.match(/<button type="button" class="is-placeholder" data-character="mrsKoch"[\s\S]*?<\/button>/)?.[0] || "";
 
 assert(card, "Mrs. Levandoske is missing from character select.");
 assert.doesNotMatch(card, /disabled|aria-disabled|is-placeholder/, "Mrs. Levandoske is still disabled.");
@@ -39,13 +41,41 @@ assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mr
 assert.match(app, /mrsLevandoskeJumpIndex = \(mrsLevandoskeJumpIndex \+ 1\) % mrsLevandoskeJumpVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 130, 198, -6\)/, "Mrs. Levandoske should sit slightly lower on the character-select platform.");
-assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(3,/);
-assert.doesNotMatch(styles, /\.colt-run-coming-soon/);
+assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(5,/);
+assert.match(styles, /\.colt-run-coming-soon/);
+assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?bottom: 94px;/, "Coming Soon badges should sit directly above the character names.");
 assert.match(
   styles,
-  /button\[data-character="mrsLevandoske"\] \{[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
+  /button\[data-character="mrsLevandoske"\],[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
   "Mrs. Levandoske must use the same fiery character-select background as the existing runners."
 );
+
+[
+  [trittelCard, "Mrs. Trittel"],
+  [kochCard, "Mrs. Koch"]
+].forEach(([comingSoonCard, name]) => {
+  assert(comingSoonCard, `${name} is missing from character select.`);
+  assert.match(comingSoonCard, /disabled/);
+  assert.doesNotMatch(comingSoonCard, /data-colt-run="character"/, `${name} must not be playable yet.`);
+  assert.match(comingSoonCard, /colt-run-coming-soon">Coming Soon<\/strong>/);
+  assert.match(comingSoonCard, new RegExp(name.replace(".", "\\.")));
+});
+
+assert.match(app, /const fullscreenTarget = stage \|\| shell;/, "Fullscreen should target only the 16:9 game stage.");
+assert.match(app, /keys\.jump && !jumpConsumed && player\.grounded/, "Jump must require a fresh press.");
+assert.match(app, /if \(name === "jump" && !value\) jumpConsumed = false;/);
+assert.match(app, /const mrsTrittelComingSoonImage = new Image\(\)/);
+assert.match(app, /const mrsKochComingSoonImage = new Image\(\)/);
+assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch"[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/);
+
+[
+  "colt-run-mrs-trittel-coming-soon.png",
+  "colt-run-mrs-koch-coming-soon.png"
+].forEach(filename => {
+  const file = path.join(root, "assets", filename);
+  assert(fs.existsSync(file), `Missing transparent character art: ${filename}`);
+  assert(fs.statSync(file).size > 100_000, `Character art is unexpectedly small: ${filename}`);
+});
 
 [
   "colt-run-mrs-levandoske-idle.webm",
@@ -70,4 +100,4 @@ assert.match(
   assert(fs.statSync(file).size > 20_000, `Mrs. Levandoske sound is unexpectedly small: ${filename}`);
 });
 
-console.log("Mrs. Levandoske playable character verification passed.");
+console.log("Colt Run roster, jump guard, and fullscreen verification passed.");

@@ -2964,6 +2964,16 @@ function renderColtRun() {
                 <canvas id="coltRunSelectMrsLevandoske" width="300" height="200" aria-hidden="true"></canvas>
                 <span>Mrs. Levandoske</span>
               </button>
+              <button type="button" class="is-placeholder" data-character="mrsTrittel" disabled aria-disabled="true" aria-label="Mrs. Trittel, coming soon">
+                <canvas id="coltRunSelectMrsTrittel" width="300" height="200" aria-hidden="true"></canvas>
+                <strong class="colt-run-coming-soon">Coming Soon</strong>
+                <span>Mrs. Trittel</span>
+              </button>
+              <button type="button" class="is-placeholder" data-character="mrsKoch" disabled aria-disabled="true" aria-label="Mrs. Koch, coming soon">
+                <canvas id="coltRunSelectMrsKoch" width="300" height="200" aria-hidden="true"></canvas>
+                <strong class="colt-run-coming-soon">Coming Soon</strong>
+                <span>Mrs. Koch</span>
+              </button>
             </div>
           </div>
         </div>
@@ -3027,7 +3037,9 @@ function startColtRunGame() {
   if (!canvas) return;
   const shell = canvas.closest(".colt-run-shell");
   const stage = canvas.closest(".colt-run-stage");
-  const fullscreenTarget = shell || stage;
+  // Fullscreen only the 16:9 game stage. Fullscreening the entire shell can
+  // clip the top of the game on shorter lab monitors when the controls wrap.
+  const fullscreenTarget = stage || shell;
   const fullscreenButtons = shell ? Array.from(shell.querySelectorAll('[data-colt-run="fullscreen"]')) : [];
   const ctx = canvas.getContext("2d");
   const gameViewportWidth = 960;
@@ -3070,6 +3082,8 @@ function startColtRunGame() {
   const selectColtCanvas = document.getElementById("coltRunSelectColt");
   const selectMrNievesCanvas = document.getElementById("coltRunSelectMrNieves");
   const selectMrsLevandoskeCanvas = document.getElementById("coltRunSelectMrsLevandoske");
+  const selectMrsTrittelCanvas = document.getElementById("coltRunSelectMrsTrittel");
+  const selectMrsKochCanvas = document.getElementById("coltRunSelectMrsKoch");
   const characterStorageKey = "coltRunCharacterV1";
   const characterNames = {
     colt: "Colt",
@@ -3469,6 +3483,9 @@ function startColtRunGame() {
     audio.muted = musicMuted;
   });
   const keys = { left: false, right: false, jump: false };
+  // Require a fresh press for each jump. This prevents a held key or a missed
+  // key-up event from immediately launching the runner again after landing.
+  let jumpConsumed = false;
   let animationId = 0;
   let lastRenderedTimeText = "";
   let lastOverlayFrameAt = 0;
@@ -4014,6 +4031,12 @@ function startColtRunGame() {
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.decoding = "async";
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
+  const mrsTrittelComingSoonImage = new Image();
+  mrsTrittelComingSoonImage.decoding = "async";
+  mrsTrittelComingSoonImage.src = "assets/colt-run-mrs-trittel-coming-soon.png?v=20260905-coming-soon1";
+  const mrsKochComingSoonImage = new Image();
+  mrsKochComingSoonImage.decoding = "async";
+  mrsKochComingSoonImage.src = "assets/colt-run-mrs-koch-coming-soon.png?v=20260905-coming-soon1";
   const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
   const ensureCharacterMedia = character => {
     if (character === "mrsLevandoske") {
@@ -7123,6 +7146,7 @@ function startColtRunGame() {
   };
 
   const resetLevel = (newSeed = false, keepRun = false, preservePendingLeaderboardEntry = false) => {
+    jumpConsumed = false;
     if (newSeed) {
       levelSeed = Date.now() + Math.floor(Math.random() * 9999);
       chooseLevelBackground();
@@ -7381,6 +7405,12 @@ function startColtRunGame() {
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
     drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, -6);
+    if (mrsTrittelComingSoonImage.complete && mrsTrittelComingSoonImage.naturalWidth) {
+      drawSelectPreview(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 104, 196, 2);
+    }
+    if (mrsKochComingSoonImage.complete && mrsKochComingSoonImage.naturalWidth) {
+      drawSelectPreview(selectMrsKochCanvas, mrsKochComingSoonImage, 104, 196, 2);
+    }
   };
 
   const coverDrawRectCache = new WeakMap();
@@ -7639,7 +7669,8 @@ function startColtRunGame() {
         player.vx = currentMoveSpeed;
         player.facing = 1;
       }
-      if (keys.jump && player.grounded) {
+      if (keys.jump && !jumpConsumed && player.grounded) {
+        jumpConsumed = true;
         if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
         if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeJumpVideo();
         player.vy = currentJumpPower;
@@ -7730,6 +7761,7 @@ function startColtRunGame() {
       stopRunningAudio();
     }
     keys[name] = value;
+    if (name === "jump" && !value) jumpConsumed = false;
   };
   const keyMap = {
     ArrowLeft: "left",
@@ -7937,6 +7969,7 @@ function startColtRunGame() {
     keys.left = false;
     keys.right = false;
     keys.jump = false;
+    jumpConsumed = false;
     document.querySelectorAll("[data-colt-joystick]").forEach(joystick => {
       joystick.style.setProperty("--stick-x", "0px");
       joystick.style.setProperty("--stick-y", "0px");
@@ -8047,6 +8080,8 @@ function startColtRunGame() {
         ...animatedBackgroundVideos
       ].forEach(releaseMediaSource);
       mrNievesJumpImage.src = "";
+      mrsTrittelComingSoonImage.src = "";
+      mrsKochComingSoonImage.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
