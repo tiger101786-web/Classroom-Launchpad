@@ -217,7 +217,7 @@ async function run() {
     assert.match(await greetingExcitedVideo.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-hop/);
 
     await page.locator(".launchpad-colt-character").click();
-    assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Minimize control panel", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Pause motion", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Reset position", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
@@ -243,7 +243,7 @@ async function run() {
     const lastSlotCenter = lastSlotBounds.y + lastSlotBounds.height / 2;
     assert(firstSlotCenter > controlsBounds.y + controlsBounds.height * .27 && firstSlotCenter < controlsBounds.y + controlsBounds.height * .33, "The first-row words are outside their artwork slots.");
     assert(lastSlotCenter > controlsBounds.y + controlsBounds.height * .67 && lastSlotCenter < controlsBounds.y + controlsBounds.height * .73, "The last-row words are outside their artwork slots.");
-    assert.equal(await page.getByRole("button", { name: "Minimize", exact: true }).evaluate(element => getComputedStyle(element).position), "absolute", "Minimize must remain available without consuming an artwork slot.");
+    assert.equal(await page.getByRole("button", { name: "Minimize control panel", exact: true }).evaluate(element => getComputedStyle(element).position), "absolute", "Panel minimize must remain available without consuming an artwork slot.");
     await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");
     await page.locator("#launchpadColtName").fill("Blaze");
@@ -401,21 +401,17 @@ async function run() {
     assert.notEqual(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep");
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
-    assert(await page.getByRole("button", { name: "Minimize", exact: true }).isVisible());
-    await page.getByRole("button", { name: "Minimize", exact: true }).click();
-    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
-    const minimizedBeforeDrag = await page.locator("#launchpadColtRoot").boundingBox();
-    await page.mouse.move(minimizedBeforeDrag.x + 32, minimizedBeforeDrag.y + 32);
-    await page.mouse.down();
-    await page.mouse.move(minimizedBeforeDrag.x - 85, minimizedBeforeDrag.y + 45, { steps: 7 });
-    await page.mouse.up();
-    const minimizedAfterDrag = await page.locator("#launchpadColtRoot").boundingBox();
-    assert(Math.abs(minimizedAfterDrag.x - minimizedBeforeDrag.x) > 30, "The minimized Colt icon could not be dragged.");
-    assert(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")));
+    assert(await page.getByRole("button", { name: "Minimize control panel", exact: true }).isVisible());
+    const coltBeforePanelMinimize = await page.locator(".launchpad-colt-character").boundingBox();
+    await page.getByRole("button", { name: "Minimize control panel", exact: true }).click();
+    assert.equal(await page.locator(".launchpad-colt-controls").isHidden(), true, "Minimizing did not close the Colt control panel.");
+    assert.equal(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized")), false, "Minimizing the panel still shrank the Colt into a circle.");
+    const coltAfterPanelMinimize = await page.locator(".launchpad-colt-character").boundingBox();
+    assert.equal(coltAfterPanelMinimize.width, coltBeforePanelMinimize.width, "Minimizing the panel changed the Colt's size.");
+    assert.equal(coltAfterPanelMinimize.height, coltBeforePanelMinimize.height, "Minimizing the panel changed the Colt's size.");
     await page.locator(".launchpad-colt-character").click();
-    assert(await page.getByRole("button", { name: "Make larger", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Minimize control panel", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
-    await page.getByRole("button", { name: "Make larger", exact: true }).click();
     assert(!(await page.locator("#launchpadColtRoot").evaluate(element => element.classList.contains("is-minimized"))));
 
     const beforeDrag = await page.locator("#launchpadColtRoot").boundingBox();

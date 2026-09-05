@@ -98,7 +98,7 @@
         <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
-        <button type="button" data-colt-control="minimize" aria-label="Minimize" title="Minimize Colt">Minimize</button>
+        <button type="button" data-colt-control="minimize" aria-label="Minimize control panel" title="Minimize control panel">Close</button>
         <button type="button" data-colt-control="motion" aria-label="Pause motion" title="Pause Colt motion">Pause</button>
         <button type="button" data-colt-control="size" aria-label="Size: Medium" title="Change Colt size">Size: Medium</button>
         <button type="button" data-colt-control="feed">Feed Me</button>
@@ -324,7 +324,7 @@
       const stored = JSON.parse(globalObject.localStorage.getItem(preferenceKey()) || "{}");
       const customization = normalizeCustomization(stored);
       prefs = {
-        minimized: Boolean(stored.minimized),
+        minimized: false,
         motion: stored.motion !== false,
         hidden: Boolean(stored.hidden),
         position: stored.position && Number.isFinite(stored.position.x) && Number.isFinite(stored.position.y)
@@ -349,14 +349,14 @@
   }
 
   function applyPreferences() {
-    root.classList.toggle("is-minimized", prefs.minimized);
+    root.classList.remove("is-minimized");
     root.classList.toggle("is-motion-paused", !prefs.motion);
     root.dataset.size = prefs.size;
     companion.hidden = prefs.hidden;
     restoreButton.hidden = !prefs.hidden;
-    minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
-    minimizeButton.setAttribute("aria-label", minimizeButton.textContent);
-    minimizeButton.title = prefs.minimized ? "Restore Colt size" : "Minimize Colt";
+    minimizeButton.textContent = "Close";
+    minimizeButton.setAttribute("aria-label", "Minimize control panel");
+    minimizeButton.title = "Minimize control panel";
     const motionLabel = prefs.motion ? "Pause motion" : "Resume motion";
     motionButton.textContent = prefs.motion ? "Pause" : "Resume";
     motionButton.setAttribute("aria-label", motionLabel);
@@ -812,7 +812,12 @@
       }
       return;
     }
-    if (action === "minimize") prefs.minimized = !prefs.minimized;
+    if (action === "minimize") {
+      prefs.minimized = false;
+      savePreferences();
+      closeControls();
+      return;
+    }
     if (action === "motion") prefs.motion = !prefs.motion;
     if (action === "size") {
       const sizes = ["small", "medium", "large", "extra-large"];
