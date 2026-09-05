@@ -34,7 +34,7 @@ async function run() {
   assert.match(coltSource, /addEventListener\("stalled", \(\) => recoverStalledRadioDance\(video\)\)/, "A stalled dance must recover instead of freezing.");
   assert.match(coltSource, /target\.addEventListener\("canplay", activate, \{ once: true \}\)/, "Dance switching must wait for the next video to be playable.");
   assert.match(coltSource, /react\("radio", showMessage \? "Now playing—enjoy the music!" : "", 0\)/, "The radio dance must not have a short reaction timer.");
-  assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt Up" : "Put Colt to Sleep"/, "The sleep control must switch to a wake control.");
+  assert.match(coltSource, /sleepButton\.textContent = prefs\.asleep \? "Wake Colt" : "Sleep Colt"/, "The compact sleep control must switch to a wake control.");
   assert.match(coltSource, /if \(prefs\.asleep \|\| radioPlaybackActive\) return;[\s\S]*?if \(currentState === "sleep"\) welcome\("I'm awake—what are we doing next\?"\);[\s\S]*?60000/, "The automatic nap must remain activity-based and stay disabled during radio playback.");
   assert.match(coltSource, /if \(prefs\.asleep \|\| radioPlaybackActive\) return;/, "Automatic sleep must stay disabled while Colt Radio is playing.");
   assert.match(coltSource, /addEventListener\("colt-radio-playback"/, "The Colt must follow Colt Radio playback state.");
@@ -225,6 +225,11 @@ async function run() {
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Name Your Colt", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Hide Platform", exact: true }).isVisible());
+    assert.equal(await page.locator('[data-colt-control="motion"]').textContent(), "Pause");
+    assert.equal(await page.locator('[data-colt-control="customize"]').textContent(), "Colt Name");
+    assert.equal(await page.locator('[data-colt-control="nameplate"]').textContent(), "Hide Name");
+    assert.equal(await page.locator('[data-colt-control="sleep"]').textContent(), "Sleep Colt");
+    assert.equal(await page.locator('[data-colt-control="reset-position"]').textContent(), "Reset Spot");
     const controlsPanel = page.locator(".launchpad-colt-controls");
     const controlsBounds = await controlsPanel.boundingBox();
     assert.match(await controlsPanel.evaluate(element => getComputedStyle(element).backgroundImage), /launchpad-colt-controls-panel\.png/);
@@ -356,6 +361,7 @@ async function run() {
     await page.getByRole("button", { name: "Size: Large", exact: true }).click();
     assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "extra-large");
     assert(await page.getByRole("button", { name: "Size: Extra Large", exact: true }).isVisible());
+    assert.equal(await page.locator('[data-colt-control="size"]').textContent(), "Size: XL");
     assert((await page.locator(".launchpad-colt-character").boundingBox()).width >= 200);
     assert(await page.getByRole("button", { name: "Hide Colt", exact: true }).isVisible());
     await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).click();

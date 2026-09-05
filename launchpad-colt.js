@@ -99,15 +99,15 @@
       </button>
       <div class="launchpad-colt-controls" aria-label="Launchpad Colt controls" hidden>
         <button type="button" data-colt-control="minimize" aria-label="Minimize" title="Minimize Colt">Minimize</button>
-        <button type="button" data-colt-control="motion">Pause motion</button>
-        <button type="button" data-colt-control="size">Size: Medium</button>
+        <button type="button" data-colt-control="motion" aria-label="Pause motion" title="Pause Colt motion">Pause</button>
+        <button type="button" data-colt-control="size" aria-label="Size: Medium" title="Change Colt size">Size: Medium</button>
         <button type="button" data-colt-control="feed">Feed Me</button>
         <button type="button" data-colt-control="pet">Pet Me</button>
-        <button type="button" data-colt-control="customize">Name Your Colt</button>
-        <button type="button" data-colt-control="nameplate">Hide Nameplate</button>
+        <button type="button" data-colt-control="customize" aria-label="Name Your Colt" title="Name Your Colt">Colt Name</button>
+        <button type="button" data-colt-control="nameplate" aria-label="Hide Nameplate" title="Hide Colt nameplate">Hide Name</button>
         <button type="button" data-colt-control="platform">Hide Platform</button>
-        <button type="button" data-colt-control="sleep">Put Colt to Sleep</button>
-        <button type="button" data-colt-control="reset-position">Reset position</button>
+        <button type="button" data-colt-control="sleep" aria-label="Put Colt to Sleep" title="Put Colt to Sleep">Sleep Colt</button>
+        <button type="button" data-colt-control="reset-position" aria-label="Reset position" title="Reset Colt position">Reset Spot</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
       </div>
     </aside>
@@ -357,14 +357,24 @@
     minimizeButton.textContent = prefs.minimized ? "Make larger" : "Minimize";
     minimizeButton.setAttribute("aria-label", minimizeButton.textContent);
     minimizeButton.title = prefs.minimized ? "Restore Colt size" : "Minimize Colt";
-    motionButton.textContent = prefs.motion ? "Pause motion" : "Resume motion";
-    sizeButton.textContent = `Size: ${SIZE_LABELS[prefs.size]}`;
+    const motionLabel = prefs.motion ? "Pause motion" : "Resume motion";
+    motionButton.textContent = prefs.motion ? "Pause" : "Resume";
+    motionButton.setAttribute("aria-label", motionLabel);
+    motionButton.title = `${motionLabel} for the Colt`;
+    const sizeLabel = SIZE_LABELS[prefs.size];
+    sizeButton.textContent = prefs.size === "extra-large" ? "Size: XL" : `Size: ${sizeLabel}`;
+    sizeButton.setAttribute("aria-label", `Size: ${sizeLabel}`);
+    sizeButton.title = `Change Colt size. Current size: ${sizeLabel}`;
     feedButton.disabled = prefs.asleep;
     feedButton.title = prefs.asleep ? "Wake the Colt before feeding him" : "Play the feeding animation";
     petButton.disabled = prefs.asleep;
     petButton.title = prefs.asleep ? "Wake the Colt before petting him" : "Play the petting animation";
-    sleepButton.textContent = prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep";
-    nameplateButton.textContent = prefs.nameplateVisible ? "Hide Nameplate" : "Show Nameplate";
+    sleepButton.textContent = prefs.asleep ? "Wake Colt" : "Sleep Colt";
+    sleepButton.setAttribute("aria-label", prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep");
+    sleepButton.title = sleepButton.getAttribute("aria-label");
+    nameplateButton.textContent = prefs.nameplateVisible ? "Hide Name" : "Show Name";
+    nameplateButton.setAttribute("aria-label", prefs.nameplateVisible ? "Hide Nameplate" : "Show Nameplate");
+    nameplateButton.title = `${nameplateButton.getAttribute("aria-label")} for the Colt`;
     platformButton.textContent = prefs.platformVisible ? "Hide Platform" : "Place Platform";
     applyCustomization();
     applySavedPosition();
