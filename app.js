@@ -3395,15 +3395,19 @@ function startColtRunGame() {
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")
   ];
-  const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio1");
-  const mrsLevandoskeCelebrationAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio1");
-  const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, mrsLevandoskeCelebrationAudio];
-  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1];
+  const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio2");
+  const mrsLevandoskeCelebrationAudios = [
+    createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio2"),
+    createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-02.mp3?v=20260905-mrs-audio2")
+  ];
+  const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, ...mrsLevandoskeCelebrationAudios];
+  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
   let lastMrNievesDeathAudioIndex = -1;
   let lastMrNievesCelebrationAudioIndex = -1;
+  let lastMrsLevandoskeCelebrationAudioIndex = -1;
   const ambientLayerVolume = 1;
   const inGameMusicLayerVolume = 0.5;
   const characterSelectMusicLayerVolume = 0.7;
@@ -4499,7 +4503,12 @@ function startColtRunGame() {
   };
   const playMrsLevandoskeCelebrationAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
-    playExclusiveAudio([mrsLevandoskeCelebrationAudio], 0);
+    const nextIndex = chooseNonRepeatingAudioIndex(
+      mrsLevandoskeCelebrationAudios.length,
+      lastMrsLevandoskeCelebrationAudioIndex
+    );
+    lastMrsLevandoskeCelebrationAudioIndex = nextIndex;
+    playExclusiveAudio(mrsLevandoskeCelebrationAudios, nextIndex);
   };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
