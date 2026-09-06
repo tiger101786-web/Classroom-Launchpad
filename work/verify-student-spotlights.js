@@ -17,6 +17,26 @@ function cookieFrom(response) {
   return String(response.headers.get("set-cookie") || "").split(";")[0];
 }
 
+function onePagePdf() {
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  const addObject = (id, contents) => {
+    offsets[id] = Buffer.byteLength(pdf);
+    pdf += `${id} 0 obj\n${contents}\nendobj\n`;
+  };
+  addObject(1, "<</Type /Catalog /Pages 2 0 R>>");
+  addObject(2, "<</Type /Pages /Kids [3 0 R] /Count 1>>");
+  addObject(3, "<</Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources <</Font <</F1 4 0 R>>>> /Contents 5 0 R>>");
+  addObject(4, "<</Type /Font /Subtype /Type1 /BaseFont /Helvetica>>");
+  const stream = "BT /F1 30 Tf 72 700 Td (Student Work Preview) Tj ET";
+  addObject(5, `<</Length ${Buffer.byteLength(stream)}>>\nstream\n${stream}\nendstream`);
+  const xrefOffset = Buffer.byteLength(pdf);
+  pdf += "xref\n0 6\n0000000000 65535 f \n";
+  for (let id = 1; id <= 5; id += 1) pdf += `${String(offsets[id]).padStart(10, "0")} 00000 n \n`;
+  pdf += `trailer\n<</Size 6 /Root 1 0 R>>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return Buffer.from(pdf);
+}
+
 async function request(pathname, options = {}) {
   const response = await fetch(`${origin}${pathname}`, options);
   const type = response.headers.get("content-type") || "";
@@ -69,7 +89,7 @@ async function waitForServer() {
     assert.equal(created.payload.spotlight.studentEmail, "avery.johnson@scscolts.org");
     const id = created.payload.spotlight.id;
 
-    const pdf = Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF");
+    const pdf = onePagePdf();
     const uploaded = await request(`/api/student-spotlights/${id}/file`, {
       method: "POST",
       headers: { Origin: origin, Cookie: teacherCookie, "Content-Type": "application/pdf", "X-File-Name": encodeURIComponent("ecosystem.pdf") },
@@ -78,6 +98,16 @@ async function waitForServer() {
     assert.equal(uploaded.response.status, 201);
     assert.equal(uploaded.payload.spotlight.hasMedia, true);
     assert.equal(uploaded.payload.spotlight.mediaKind, "pdf");
+    assert.equal(uploaded.payload.spotlight.hasThumbnail, true);
+    const storedDbPath = path.join(dataDir, "classroom-launchpad-db.json");
+    const storedDb = JSON.parse(fs.readFileSync(storedDbPath, "utf8"));
+    const storedSpotlight = storedDb.studentSpotlights.find(item => item.id === id);
+    const firstThumbnailPath = path.join(dataDir, "student-spotlights", storedSpotlight.thumbnailStoredName);
+    assert(fs.existsSync(firstThumbnailPath), "The upload did not persist its thumbnail.");
+    fs.unlinkSync(firstThumbnailPath);
+    storedSpotlight.thumbnailStoredName = "";
+    storedSpotlight.thumbnailSize = 0;
+    fs.writeFileSync(storedDbPath, `${JSON.stringify(storedDb, null, 2)}\n`);
 
     const registered = await request("/api/auth/register", {
       method: "POST",
@@ -92,6 +122,12 @@ async function waitForServer() {
 
     const studentFile = await request(`/api/student-spotlights/${id}/file`, { headers: { Cookie: studentCookie } });
     assert.equal(studentFile.response.status, 200);
+    const studentThumbnail = await request(`/api/student-spotlights/${id}/thumbnail`, { headers: { Cookie: studentCookie } });
+    assert.equal(studentThumbnail.response.status, 200);
+    assert.equal(studentThumbnail.response.headers.get("content-type"), "image/jpeg");
+    assert.deepEqual([...studentThumbnail.payload.subarray(0, 3)], [0xff, 0xd8, 0xff]);
+    const regeneratedDb = JSON.parse(fs.readFileSync(storedDbPath, "utf8"));
+    assert(regeneratedDb.studentSpotlights.find(item => item.id === id).thumbnailStoredName, "An existing PDF did not receive a thumbnail automatically.");
     const guestFile = await request(`/api/student-spotlights/${id}/file`);
     assert.equal(guestFile.response.status, 401);
 
@@ -114,7 +150,9 @@ async function waitForServer() {
     assert.match(appSource, /Creative Work, Great Ideas, Student Success/);
     assert.match(appSource, /Students Only/);
     assert.match(appSource, /Feature New Work/);
-    assert.match(appSource, /class="spotlight-pdf-preview"/);
+    assert.match(appSource, /class="spotlight-document-thumbnail"/);
+    assert.match(appSource, /student-spotlights\/.*\/thumbnail/);
+    assert(!appSource.includes("spotlight-pdf-preview"));
     assert(!appSource.includes('<b>PDF</b><small>Student Project</small>'));
     assert(!appSource.includes("sharedBackend.enabled = false"));
     assert.match(appSource, /could not reach the spotlight server/);

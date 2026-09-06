@@ -329,6 +329,8 @@ function normalizeStudentSpotlight(entry) {
     mediaExtension: allowedStudentSpotlightTypes.has(extension) ? extension : "",
     mediaMimeType: cleanText(entry && entry.mediaMimeType, 120),
     mediaSize: Math.max(0, Number(entry && entry.mediaSize) || 0),
+    thumbnailStoredName: path.basename(String(entry && entry.thumbnailStoredName || "")),
+    thumbnailSize: Math.max(0, Number(entry && entry.thumbnailSize) || 0),
     createdAt: Number.isFinite(Date.parse(entry && entry.createdAt)) ? new Date(entry.createdAt).toISOString() : new Date().toISOString(),
     updatedAt: Number.isFinite(Date.parse(entry && entry.updatedAt)) ? new Date(entry.updatedAt).toISOString() : new Date().toISOString()
   };
@@ -364,6 +366,7 @@ function publicStudentSpotlight(item, teacher = false) {
     expiresAt: item.expiresAt,
     hasMedia: Boolean(item.mediaStoredName),
     mediaKind: item.mediaExtension === ".pdf" ? "pdf" : item.mediaStoredName ? "image" : "",
+    hasThumbnail: Boolean(item.thumbnailStoredName),
     updatedAt: item.updatedAt,
     ...(teacher ? {
       studentEmail: item.studentEmail,
@@ -2002,11 +2005,98 @@ function studentSpotlightFilePath(item) {
   return resolved.startsWith(`${studentSpotlightDir}${path.sep}`) ? resolved : "";
 }
 
-function removeStudentSpotlightFile(item) {
-  const filePath = studentSpotlightFilePath(item);
+function studentSpotlightThumbnailPath(item) {
+  const filename = path.basename(String(item && item.thumbnailStoredName || ""));
+  if (!filename || filename !== item.thumbnailStoredName) return "";
+  const resolved = path.join(studentSpotlightDir, filename);
+  return resolved.startsWith(`${studentSpotlightDir}${path.sep}`) ? resolved : "";
+}
+
+function removeStudentSpotlightFiles(item) {
+  [studentSpotlightFilePath(item), studentSpotlightThumbnailPath(item)].forEach(filePath => {
+    try {
+      if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch {}
+  });
+}
+
+let spotlightPdfRendererPromise;
+const spotlightThumbnailJobs = new Map();
+
+async function spotlightPdfRenderer() {
+  if (!spotlightPdfRendererPromise) {
+    spotlightPdfRendererPromise = (async () => {
+      const canvas = require("@napi-rs/canvas");
+      if (!globalThis.DOMMatrix) globalThis.DOMMatrix = canvas.DOMMatrix;
+      if (!globalThis.ImageData) globalThis.ImageData = canvas.ImageData;
+      if (!globalThis.Path2D) globalThis.Path2D = canvas.Path2D;
+      const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      return { ...canvas, pdfjs };
+    })();
+  }
+  return spotlightPdfRendererPromise;
+}
+
+async function createStudentSpotlightThumbnail(pdfPath, storedName) {
+  const { createCanvas, pdfjs } = await spotlightPdfRenderer();
+  const document = await pdfjs.getDocument({
+    data: new Uint8Array(fs.readFileSync(pdfPath)),
+    disableWorker: true,
+    isEvalSupported: false
+  }).promise;
   try {
-    if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  } catch {}
+    const page = await document.getPage(1);
+    const naturalViewport = page.getViewport({ scale: 1 });
+    const viewport = page.getViewport({ scale: Math.min(1.75, 900 / naturalViewport.width) });
+    const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: context, viewport }).promise;
+    const thumbnail = await canvas.encode("jpeg", 80);
+    const thumbnailStoredName = `${path.basename(storedName, path.extname(storedName))}.preview.jpg`;
+    const thumbnailPath = path.join(studentSpotlightDir, thumbnailStoredName);
+    fs.writeFileSync(`${thumbnailPath}.tmp`, thumbnail, { flag: "wx" });
+    fs.renameSync(`${thumbnailPath}.tmp`, thumbnailPath);
+    return { thumbnailStoredName, thumbnailSize: thumbnail.length };
+  } finally {
+    await document.destroy();
+  }
+}
+
+async function ensureStudentSpotlightThumbnail(item) {
+  if (!item || item.mediaExtension !== ".pdf") return item;
+  const existingPath = studentSpotlightThumbnailPath(item);
+  if (existingPath && fs.existsSync(existingPath)) return item;
+  const pdfPath = studentSpotlightFilePath(item);
+  if (!pdfPath || !fs.existsSync(pdfPath)) return item;
+  if (spotlightThumbnailJobs.has(item.id)) return spotlightThumbnailJobs.get(item.id);
+  const job = (async () => {
+    try {
+      const thumbnail = await createStudentSpotlightThumbnail(pdfPath, item.mediaStoredName);
+      const updated = normalizeStudentSpotlight({ ...item, ...thumbnail });
+      const latestDb = readDb();
+      latestDb.studentSpotlights = normalizeStudentSpotlights(latestDb.studentSpotlights)
+        .map(entry => entry.id === item.id ? updated : entry);
+      writeDb(latestDb);
+      return updated;
+    } catch (error) {
+      console.warn(`Could not create spotlight thumbnail for ${item.id}: ${error.message}`);
+      return item;
+    }
+  })();
+  spotlightThumbnailJobs.set(item.id, job);
+  try {
+    return await job;
+  } finally {
+    spotlightThumbnailJobs.delete(item.id);
+  }
+}
+
+async function warmStudentSpotlightThumbnails() {
+  const spotlights = normalizeStudentSpotlights(readDb().studentSpotlights)
+    .filter(item => item.mediaExtension === ".pdf" && !studentSpotlightThumbnailPath(item));
+  for (const item of spotlights) await ensureStudentSpotlightThumbnail(item);
 }
 
 function studentSpotlightPayload(db, session) {
@@ -2044,6 +2134,30 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
 
   if (req.method === "GET" && pathname === "/api/student-spotlights") {
     sendJson(res, 200, studentSpotlightPayload(readDb(), session));
+    return true;
+  }
+
+  const thumbnailMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/thumbnail$/);
+  if (thumbnailMatch && ["GET", "HEAD"].includes(req.method)) {
+    const db = readDb();
+    const id = decodeURIComponent(thumbnailMatch[1]);
+    let item = normalizeStudentSpotlights(db.studentSpotlights).find(entry => entry.id === id);
+    const visible = item && publicState(db, session).studentSpotlights.some(entry => entry.id === id);
+    if (visible) item = await ensureStudentSpotlightThumbnail(item);
+    const thumbnailPath = visible ? studentSpotlightThumbnailPath(item) : "";
+    if (!thumbnailPath || !fs.existsSync(thumbnailPath)) {
+      sendJson(res, 404, { error: "That featured-work preview is unavailable." });
+      return true;
+    }
+    const stats = fs.statSync(thumbnailPath);
+    res.writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Content-Length": stats.size,
+      "Cache-Control": "private, max-age=31536000, immutable",
+      "X-Content-Type-Options": "nosniff"
+    });
+    if (req.method === "HEAD") res.end();
+    else fs.createReadStream(thumbnailPath).pipe(res);
     return true;
   }
 
@@ -2132,6 +2246,14 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       const finalPath = path.join(studentSpotlightDir, storedName);
       fs.writeFileSync(`${finalPath}.tmp`, buffer, { flag: "wx" });
       fs.renameSync(`${finalPath}.tmp`, finalPath);
+      let thumbnail = { thumbnailStoredName: "", thumbnailSize: 0 };
+      if (extension === ".pdf") {
+        try {
+          thumbnail = await createStudentSpotlightThumbnail(finalPath, storedName);
+        } catch (error) {
+          console.warn(`Could not create spotlight thumbnail during upload: ${error.message}`);
+        }
+      }
       const updated = normalizeStudentSpotlight({
         ...existing,
         mediaOriginalName: originalName,
@@ -2139,11 +2261,12 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
         mediaExtension: extension,
         mediaMimeType: allowedStudentSpotlightTypes.get(extension),
         mediaSize: buffer.length,
+        ...thumbnail,
         updatedAt: new Date().toISOString()
       });
       db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
       writeDb(db);
-      removeStudentSpotlightFile(existing);
+      removeStudentSpotlightFiles(existing);
       sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
@@ -2164,8 +2287,8 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Featured work not found." });
       return true;
     }
-    removeStudentSpotlightFile(existing);
-    const updated = normalizeStudentSpotlight({ ...existing, mediaOriginalName: "", mediaStoredName: "", mediaExtension: "", mediaMimeType: "", mediaSize: 0, updatedAt: new Date().toISOString() });
+    removeStudentSpotlightFiles(existing);
+    const updated = normalizeStudentSpotlight({ ...existing, mediaOriginalName: "", mediaStoredName: "", mediaExtension: "", mediaMimeType: "", mediaSize: 0, thumbnailStoredName: "", thumbnailSize: 0, updatedAt: new Date().toISOString() });
     db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
     writeDb(db);
     sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session) });
@@ -2185,7 +2308,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Featured work not found." });
       return true;
     }
-    removeStudentSpotlightFile(existing);
+    removeStudentSpotlightFiles(existing);
     db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).filter(item => item.id !== id);
     writeDb(db);
     sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session) });
@@ -3950,4 +4073,5 @@ server.listen(port, "0.0.0.0", () => {
   addresses.forEach(address => console.log(`Network URL: ${address}`));
   if (!configuredSessionSecret) console.log("Student login is waiting for SESSION_SECRET.");
   if (!initialTeacherPin && !readDb().teacherPin) console.log("Teacher login is waiting for TEACHER_PIN.");
+  warmStudentSpotlightThumbnails().catch(error => console.warn(`Could not prepare spotlight thumbnails: ${error.message}`));
 });

@@ -11297,15 +11297,13 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .student-spotlight-preview-collage figure:nth-child(3) { transform: rotate(5deg); }
 .student-spotlight-preview-collage img,
 .student-spotlight-card-art img,
-.spotlight-dashboard-card figure img,
-.spotlight-pdf-preview { width: 100%; height: 100%; display: block; }
+.spotlight-dashboard-card figure img { width: 100%; height: 100%; display: block; }
 .student-spotlight-preview-collage img,
 .student-spotlight-card-art img,
 .spotlight-dashboard-card figure img { object-fit: cover; }
-.spotlight-pdf-preview {
-  border: 0;
+.spotlight-document-thumbnail {
+  object-position: top center;
   background: #fff;
-  pointer-events: none;
 }
 
 .spotlight-file-art {

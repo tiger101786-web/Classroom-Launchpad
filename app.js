@@ -2394,12 +2394,16 @@ function spotlightMediaUrl(item) {
   return `/api/student-spotlights/${encodeURIComponent(item.id)}/file`;
 }
 
+function spotlightThumbnailUrl(item) {
+  return `/api/student-spotlights/${encodeURIComponent(item.id)}/thumbnail?v=${encodeURIComponent(item.updatedAt || "1")}`;
+}
+
 function renderSpotlightArtwork(item, compact = false) {
   if (item.hasMedia && item.mediaKind === "image") {
     return `<img src="${spotlightMediaUrl(item)}" alt="Preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
   if (item.hasMedia && item.mediaKind === "pdf") {
-    return `<iframe class="spotlight-pdf-preview" src="${spotlightMediaUrl(item)}#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0" title="Preview of ${escapeHtml(item.title)}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>`;
+    return `<img class="spotlight-document-thumbnail" src="${spotlightThumbnailUrl(item)}" alt="First-page preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
   return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
 }
