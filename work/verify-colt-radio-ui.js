@@ -247,6 +247,8 @@ async function run() {
     await page.route("https://streaming.positivity.radio/pr-app/posimeditation/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmzen/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmrain/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber-app/calmtaichi/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber-app/calmspa/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -277,7 +279,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 45, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 47, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -307,7 +309,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -535,6 +537,10 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmzen/icecast.audio");
     await page.getByRole("button", { name: "Calm • Rain", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmrain/icecast.audio");
+    await page.getByRole("button", { name: "Calm • Tai Chi", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmtaichi/icecast.audio");
+    await page.getByRole("button", { name: "Calm • Spa", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmspa/icecast.audio");
 
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
@@ -618,7 +624,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

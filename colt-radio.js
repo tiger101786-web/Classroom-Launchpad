@@ -417,6 +417,22 @@
       source: "https://drive.uber.radio/uber-app/calmrain/icecast.audio",
       provider: "YouRadio Calm Rain",
       note: "Continuous calming rain sounds for focus, relaxation, and quiet classroom work, streamed commercial-free by YouRadio."
+    },
+    {
+      id: "youradio-calm-tai-chi",
+      label: "Calm • Tai Chi",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/calmtaichi/icecast.audio",
+      provider: "YouRadio Calm Tai Chi",
+      note: "Gentle Tai Chi-inspired music for mindful movement, calm breaks, and quiet classroom focus, streamed commercial-free by YouRadio."
+    },
+    {
+      id: "youradio-calm-spa",
+      label: "Calm • Spa",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/calmspa/icecast.audio",
+      provider: "YouRadio Calm Spa",
+      note: "Soft spa music for relaxation, reading, and a peaceful classroom atmosphere, streamed commercial-free by YouRadio."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -476,7 +492,9 @@
     "youradio-calm-instrumental": '<path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>',
     "youradio-positively-meditation": '<path d="M12 4c-2 3-3 5-3 7a3 3 0 0 0 6 0c0-2-1-4-3-7Z"/><path d="M5 20c1.5-3 3.8-4.5 7-4.5S17.5 17 19 20M7 20h10"/>',
     "youradio-calm-zen": '<path d="M12 3c2.5 3 4 5.5 4 8a4 4 0 0 1-8 0c0-2.5 1.5-5 4-8Z"/><path d="M4 20c2-2 4.7-3 8-3s6 1 8 3"/>',
-    "youradio-calm-rain": '<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.7 9 3 3 0 0 1 18 15H7Z"/><path d="m8 18-1 2m5-2-1 2m5-2-1 2"/>'
+    "youradio-calm-rain": '<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.7 9 3 3 0 0 1 18 15H7Z"/><path d="m8 18-1 2m5-2-1 2m5-2-1 2"/>',
+    "youradio-calm-tai-chi": '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1"/><circle cx="12" cy="16.5" r="1"/>',
+    "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>'
   };
 
   function iconSvg(paths, className = "") {
