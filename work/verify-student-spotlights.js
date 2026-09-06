@@ -107,6 +107,11 @@ async function waitForServer() {
     const appSource = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
     assert.match(appSource, /Student Work Spotlight/);
     assert.match(appSource, /Open Student Spotlight/);
+    assert.match(appSource, /home-student-spotlight/);
+    assert.match(appSource, /Student Spotlight.*requiresAuth: true/);
+    assert.match(appSource, /Creative Work/);
+    assert.match(appSource, /Great Ideas/);
+    assert.match(appSource, /Student Success/);
     assert.match(appSource, /Students Only/);
     assert.match(appSource, /Feature New Work/);
     assert.match(appSource, /class="spotlight-pdf-preview"/);

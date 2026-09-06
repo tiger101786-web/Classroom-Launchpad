@@ -86,6 +86,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
+  { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>', requiresAuth: true },
   { id: "home-google-classroom", label: "Google Classroom", icon: '<img src="assets/google-classroom.svg?v=20260905-crimson1" alt="">' },
   { id: "home-classroom-pass", label: "Classroom Pass", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4V7Z"></path><path d="M9 7v2M9 11v2M9 15v2"></path></svg>' },
   { id: "home-colt-corner", label: "Colt Corner", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="message-bubble" d="M3 4.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3.5 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2Z"></path><path class="message-bubble" d="M10 13.5h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v2l-2.5-2H10a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"></path><circle class="message-dot" cx="5" cy="8.5" r="1"></circle><circle class="message-dot" cx="9" cy="8.5" r="1"></circle><circle class="message-dot" cx="13" cy="8.5" r="1"></circle><circle class="message-dot" cx="12" cy="16.5" r=".85"></circle><circle class="message-dot" cx="15" cy="16.5" r=".85"></circle><circle class="message-dot" cx="18" cy="16.5" r=".85"></circle></svg>' },
@@ -2260,7 +2261,7 @@ function renderHomeNavigation() {
         <button class="home-nav-close" type="button" data-action="closeHomeNavigation" aria-label="Close quick navigation">&#10005;</button>
       </header>
       <nav class="home-navigation-list">
-        ${HOME_NAVIGATION_ITEMS.map(item => `
+        ${HOME_NAVIGATION_ITEMS.filter(item => !item.requiresAuth || isSignedIn()).map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
             <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
@@ -2404,7 +2405,6 @@ function renderSpotlightArtwork(item, compact = false) {
 }
 
 function renderStudentSpotlightPreview() {
-  const published = studentSpotlights.filter(item => item.status !== "hidden").slice(0, 3);
   return `
     <section class="student-spotlight-preview">
       <div class="student-spotlight-preview-copy">
@@ -2413,12 +2413,10 @@ function renderStudentSpotlightPreview() {
         <p>Explore creative projects and outstanding work from students across Classroom Launchpad.</p>
         <button class="primary-btn" type="button" data-action="openStudentSpotlights">Open Student Spotlight</button>
       </div>
-      <div class="student-spotlight-preview-collage" aria-label="Featured student projects">
-        ${published.length ? published.map(item => `<figure>${renderSpotlightArtwork(item, true)}</figure>`).join("") : `
-          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
-          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
-          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
-        `}
+      <div class="student-spotlight-preview-collage is-generic" aria-label="Student creativity artwork">
+        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#9733;</b><small>Creative Work</small></span></figure>
+        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#10024;</b><small>Great Ideas</small></span></figure>
+        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#9733;</b><small>Student Success</small></span></figure>
       </div>
     </section>
   `;
