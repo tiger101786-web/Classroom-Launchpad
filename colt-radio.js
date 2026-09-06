@@ -433,6 +433,46 @@
       source: "https://drive.uber.radio/uber-app/calmspa/icecast.audio",
       provider: "YouRadio Calm Spa",
       note: "Soft spa music for relaxation, reading, and a peaceful classroom atmosphere, streamed commercial-free by YouRadio."
+    },
+    {
+      id: "youradio-greatest-hits-1980s",
+      label: "Decades • 1980s",
+      type: "stream",
+      source: "https://nl4.mystreaming.net/uber-app/boomerang1980s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1980s",
+      note: "Commercial-free greatest hits from the 1980s, streamed by YouRadio. This station plays original mainstream releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1990s",
+      label: "Decades • 1990s",
+      type: "stream",
+      source: "https://2.mystreaming.net/uber-app/boomerang1990s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1990s",
+      note: "Commercial-free greatest hits from the 1990s, streamed by YouRadio. This station plays original mainstream releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-2000s",
+      label: "Decades • 2000s",
+      type: "stream",
+      source: "https://2.mystreaming.net/uber-app/boomerang2000s/icecast.audio",
+      provider: "YouRadio Greatest Hits 2000s",
+      note: "Commercial-free greatest hits from the 2000s, streamed by YouRadio. This station plays original mainstream releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-2010s",
+      label: "Decades • 2010s",
+      type: "stream",
+      source: "https://nl4.mystreaming.net/uber-app/boomerang2010s/icecast.audio",
+      provider: "YouRadio Greatest Hits 2010s",
+      note: "Commercial-free greatest hits from the 2010s, streamed by YouRadio. This station plays original mainstream releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-2020s",
+      label: "Decades • 2020s",
+      type: "stream",
+      source: "https://nl4.mystreaming.net/uber-app/boomerang2020s/icecast.audio",
+      provider: "YouRadio Greatest Hits 2020s",
+      note: "Commercial-free greatest hits from the 2020s, streamed by YouRadio. This station may include original mainstream releases with explicit content, so preview it before classroom use."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -494,7 +534,12 @@
     "youradio-calm-zen": '<path d="M12 3c2.5 3 4 5.5 4 8a4 4 0 0 1-8 0c0-2.5 1.5-5 4-8Z"/><path d="M4 20c2-2 4.7-3 8-3s6 1 8 3"/>',
     "youradio-calm-rain": '<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.7 9 3 3 0 0 1 18 15H7Z"/><path d="m8 18-1 2m5-2-1 2m5-2-1 2"/>',
     "youradio-calm-tai-chi": '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1"/><circle cx="12" cy="16.5" r="1"/>',
-    "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>'
+    "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>',
+    "youradio-greatest-hits-1980s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1990s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-2000s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-2010s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-2020s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>'
   };
 
   function iconSvg(paths, className = "") {
