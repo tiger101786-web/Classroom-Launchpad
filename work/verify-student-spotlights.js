@@ -69,14 +69,15 @@ async function waitForServer() {
     assert.equal(created.payload.spotlight.studentEmail, "avery.johnson@scscolts.org");
     const id = created.payload.spotlight.id;
 
-    const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.alloc(32)]);
+    const pdf = Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF");
     const uploaded = await request(`/api/student-spotlights/${id}/file`, {
       method: "POST",
-      headers: { Origin: origin, Cookie: teacherCookie, "Content-Type": "image/png", "X-File-Name": encodeURIComponent("ecosystem.png") },
-      body: png
+      headers: { Origin: origin, Cookie: teacherCookie, "Content-Type": "application/pdf", "X-File-Name": encodeURIComponent("ecosystem.pdf") },
+      body: pdf
     });
     assert.equal(uploaded.response.status, 201);
     assert.equal(uploaded.payload.spotlight.hasMedia, true);
+    assert.equal(uploaded.payload.spotlight.mediaKind, "pdf");
 
     const registered = await request("/api/auth/register", {
       method: "POST",
@@ -108,6 +109,10 @@ async function waitForServer() {
     assert.match(appSource, /Open Student Spotlight/);
     assert.match(appSource, /Students Only/);
     assert.match(appSource, /Feature New Work/);
+    assert.match(appSource, /class="spotlight-pdf-preview"/);
+    assert(!appSource.includes('<b>PDF</b><small>Student Project</small>'));
+    assert(!appSource.includes("sharedBackend.enabled = false"));
+    assert.match(appSource, /could not reach the spotlight server/);
     console.log("Student spotlight verification passed.");
   } finally {
     server.kill("SIGTERM");

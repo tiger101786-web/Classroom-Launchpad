@@ -1760,9 +1760,7 @@ async function loadSharedState(shouldRender = true) {
     store.saveClassTimer(classTimer);
     store.saveRandomActivitySettings(randomActivitySettings);
     if (shouldRender && before !== sharedSnapshot() && !isEditingForm()) render();
-  } catch (error) {
-    if (!error || error.status >= 500) sharedBackend.enabled = false;
-  }
+  } catch {}
 }
 
 function startSharedSync() {
@@ -2400,7 +2398,7 @@ function renderSpotlightArtwork(item, compact = false) {
     return `<img src="${spotlightMediaUrl(item)}" alt="Preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
   if (item.hasMedia && item.mediaKind === "pdf") {
-    return `<span class="spotlight-file-art" aria-hidden="true"><b>PDF</b><small>Student Project</small></span>`;
+    return `<iframe class="spotlight-pdf-preview" src="${spotlightMediaUrl(item)}#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0" title="Preview of ${escapeHtml(item.title)}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>`;
   }
   return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
 }
@@ -11317,6 +11315,9 @@ function attachStudentSpotlightForm() {
       let result = editing
         ? await sharedBackend.updateStudentSpotlight(editing, payload)
         : await sharedBackend.createStudentSpotlight(file ? { ...payload, status: "hidden" } : payload);
+      if (!result || (!editing && !result.spotlight)) {
+        throw new Error("Classroom Launchpad could not reach the spotlight server. Please try Publish Spotlight again.");
+      }
       const id = editing || (result.spotlight && result.spotlight.id);
       createdId = editing ? "" : id;
       if (file && id) result = await sharedBackend.uploadStudentSpotlightFile(id, file);
