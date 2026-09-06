@@ -279,7 +279,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 52, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 58, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -309,7 +309,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");

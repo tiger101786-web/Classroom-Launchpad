@@ -435,6 +435,54 @@
       note: "Soft spa music for relaxation, reading, and a peaceful classroom atmosphere, streamed commercial-free by YouRadio."
     },
     {
+      id: "youradio-greatest-hits-1920s",
+      label: "Decades • 1920s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1920s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1920s",
+      note: "Commercial-free greatest hits from the 1920s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1930s",
+      label: "Decades • 1930s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1930s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1930s",
+      note: "Commercial-free greatest hits from the 1930s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1940s",
+      label: "Decades • 1940s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1940s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1940s",
+      note: "Commercial-free greatest hits from the 1940s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1950s",
+      label: "Decades • 1950s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1950s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1950s",
+      note: "Commercial-free greatest hits from the 1950s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1960s",
+      label: "Decades • 1960s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1960s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1960s",
+      note: "Commercial-free greatest hits from the 1960s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
+      id: "youradio-greatest-hits-1970s",
+      label: "Decades • 1970s",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/boomerang1970s/icecast.audio",
+      provider: "YouRadio Greatest Hits 1970s",
+      note: "Commercial-free greatest hits from the 1970s, streamed by YouRadio. This station plays original releases, so preview it before classroom use."
+    },
+    {
       id: "youradio-greatest-hits-1980s",
       label: "Decades • 1980s",
       type: "stream",
@@ -535,6 +583,12 @@
     "youradio-calm-rain": '<path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.7 9 3 3 0 0 1 18 15H7Z"/><path d="m8 18-1 2m5-2-1 2m5-2-1 2"/>',
     "youradio-calm-tai-chi": '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1"/><circle cx="12" cy="16.5" r="1"/>',
     "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>',
+    "youradio-greatest-hits-1920s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1930s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1940s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1950s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1960s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
+    "youradio-greatest-hits-1970s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-1980s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-1990s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-2000s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
