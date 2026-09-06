@@ -42,9 +42,9 @@ async function oneSlidePowerPoint() {
   const zip = new JSZip();
   zip.file("ppt/slides/slide1.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
-      <p:cSld><p:spTree><p:sp><p:txBody><a:p><a:r><a:t>Our Ecosystem Presentation</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
+      <p:cSld><p:spTree><p:sp><p:spPr><a:xfrm><a:off x="900000" y="900000"/><a:ext cx="7300000" cy="1200000"/></a:xfrm></p:spPr><p:txBody><a:p><a:r><a:rPr sz="3200"><a:solidFill><a:srgbClr val="65001F"/></a:solidFill></a:rPr><a:t>Our Ecosystem Presentation</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
     </p:sld>`);
-  zip.file("docProps/thumbnail.png", Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z2S8AAAAASUVORK5CYII=", "base64"));
+  zip.file("ppt/presentation.xml", `<?xml version="1.0" encoding="UTF-8"?><p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldSz cx="9144000" cy="5143500"/></p:presentation>`);
   return zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
 }
 

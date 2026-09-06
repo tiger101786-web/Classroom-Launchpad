@@ -32,7 +32,7 @@ const teacherLoginAttempts = new Map();
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
-const maxStudentSpotlightBytes = 12 * 1024 * 1024;
+const maxStudentSpotlightBytes = 50 * 1024 * 1024;
 const coltAiEnabled = String(process.env.COLT_AI_ENABLED || "true").toLowerCase() !== "false";
 const coltAiAccountId = cleanEnvironmentValue(process.env.CLOUDFLARE_ACCOUNT_ID, 120);
 const coltAiApiToken = cleanEnvironmentValue(process.env.CLOUDFLARE_AI_API_TOKEN, 500);
@@ -2106,6 +2106,98 @@ function drawWrappedSlideText(context, text, x, y, maxWidth, lineHeight, maxLine
   lines.forEach((value, index) => context.fillText(value, x, y + index * lineHeight));
 }
 
+function officeRelationshipMap(buffer, entries, relationshipName) {
+  const relationshipEntry = entries.find(entry => entry.name === relationshipName);
+  if (!relationshipEntry) return new Map();
+  const xml = unzipEntry(buffer, relationshipEntry).toString("utf8");
+  return new Map([...xml.matchAll(/<Relationship\b[^>]*\bId="([^"]+)"[^>]*\bTarget="([^"]+)"[^>]*\/?\s*>/gi)]
+    .map(match => [match[1], `ppt/${match[2].replace(/^\.\.\//, "")}`.replace(/\/\.\//g, "/")]));
+}
+
+function powerPointTransform(block) {
+  const offset = block.match(/<a:off\b[^>]*\bx="(\d+)"[^>]*\by="(\d+)"/i);
+  const extent = block.match(/<a:ext\b[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/i);
+  if (!offset || !extent) return null;
+  return { x: Number(offset[1]), y: Number(offset[2]), width: Number(extent[1]), height: Number(extent[2]) };
+}
+
+function powerPointSlideSize(buffer, entries) {
+  const entry = entries.find(item => item.name === "ppt/presentation.xml");
+  if (!entry) return { width: 9_144_000, height: 5_143_500 };
+  const xml = unzipEntry(buffer, entry).toString("utf8");
+  const size = xml.match(/<p:sldSz\b[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/i);
+  return size ? { width: Number(size[1]), height: Number(size[2]) } : { width: 9_144_000, height: 5_143_500 };
+}
+
+async function drawPowerPointImage(context, loadImage, buffer, entries, relationshipMap, relationshipId, transform, slideSize, canvasSize) {
+  const entryName = relationshipMap.get(relationshipId);
+  const entry = entries.find(item => item.name === entryName);
+  if (!entry) return false;
+  try {
+    const image = await loadImage(unzipEntry(buffer, entry));
+    const x = transform.x / slideSize.width * canvasSize.width;
+    const y = transform.y / slideSize.height * canvasSize.height;
+    const width = transform.width / slideSize.width * canvasSize.width;
+    const height = transform.height / slideSize.height * canvasSize.height;
+    context.drawImage(image, x, y, width, height);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function drawPowerPointTextBlock(context, block, transform, slideSize, canvasSize) {
+  const text = decodeXmlText([...block.matchAll(/<a:t>([\s\S]*?)<\/a:t>/gi)].map(match => match[1]).join(" "))
+    .replace(/\s+/g, " ").trim();
+  if (!text) return;
+  const x = transform.x / slideSize.width * canvasSize.width;
+  const y = transform.y / slideSize.height * canvasSize.height;
+  const width = transform.width / slideSize.width * canvasSize.width;
+  const requestedSize = Number((block.match(/<a:rPr\b[^>]*\bsz="(\d+)"/i) || [])[1]) / 100;
+  const fontSize = Math.max(12, Math.min(52, Number.isFinite(requestedSize) ? requestedSize * 1.15 : 20));
+  const color = (block.match(/<a:srgbClr\b[^>]*\bval="([0-9a-f]{6})"/i) || [])[1] || "222222";
+  const alignment = (block.match(/<a:pPr\b[^>]*\balgn="(ctr|r)"/i) || [])[1];
+  context.fillStyle = `#${color}`;
+  context.font = `${/\bb="1"/i.test(block) ? "700" : "400"} ${fontSize}px Arial`;
+  context.textAlign = alignment === "ctr" ? "center" : alignment === "r" ? "right" : "left";
+  const textX = alignment === "ctr" ? x + width / 2 : alignment === "r" ? x + width : x;
+  drawWrappedSlideText(context, text, textX, y + fontSize, width, fontSize * 1.25, Math.max(1, Math.floor((transform.height / slideSize.height * canvasSize.height) / (fontSize * 1.25))));
+  context.textAlign = "left";
+}
+
+async function renderPowerPointFirstSlide(context, loadImage, buffer, width, height) {
+  const entries = zipEntries(buffer);
+  const slideEntry = entries.find(entry => entry.name === "ppt/slides/slide1.xml");
+  if (!slideEntry) return false;
+  const slideXml = unzipEntry(buffer, slideEntry).toString("utf8");
+  const relationships = officeRelationshipMap(buffer, entries, "ppt/slides/_rels/slide1.xml.rels");
+  const slideSize = powerPointSlideSize(buffer, entries);
+  const canvasSize = { width, height };
+  const backgroundBlock = (slideXml.match(/<p:bg\b[\s\S]*?<\/p:bg>/i) || [])[0] || "";
+  const backgroundId = (backgroundBlock.match(/r:embed="([^"]+)"/i) || [])[1];
+  if (backgroundId) {
+    await drawPowerPointImage(context, loadImage, buffer, entries, relationships, backgroundId,
+      { x: 0, y: 0, width: slideSize.width, height: slideSize.height }, slideSize, canvasSize);
+  }
+  const blocks = [
+    ...[...slideXml.matchAll(/<p:pic\b[\s\S]*?<\/p:pic>/gi)].map(match => ({ type: "image", index: match.index, xml: match[0] })),
+    ...[...slideXml.matchAll(/<p:sp\b[\s\S]*?<\/p:sp>/gi)].map(match => ({ type: "text", index: match.index, xml: match[0] }))
+  ].sort((a, b) => a.index - b.index);
+  let rendered = Boolean(backgroundId);
+  for (const block of blocks) {
+    const transform = powerPointTransform(block.xml);
+    if (!transform) continue;
+    if (block.type === "image") {
+      const relationshipId = (block.xml.match(/r:embed="([^"]+)"/i) || [])[1];
+      if (relationshipId) rendered = await drawPowerPointImage(context, loadImage, buffer, entries, relationships, relationshipId, transform, slideSize, canvasSize) || rendered;
+    } else {
+      drawPowerPointTextBlock(context, block.xml, transform, slideSize, canvasSize);
+      rendered = true;
+    }
+  }
+  return rendered;
+}
+
 async function createStudentSpotlightPowerPointThumbnail(filePath, storedName, extension, originalName) {
   const { createCanvas, loadImage } = await spotlightPdfRenderer();
   const width = 960;
@@ -2123,21 +2215,8 @@ async function createStudentSpotlightPowerPointThumbnail(filePath, storedName, e
       drawContainedImage(context, image, width, height);
       return writeStudentSpotlightCanvasThumbnail(canvas, storedName);
     }
-    const preview = officePreviewPayload(buffer, extension, originalName);
-    const firstImage = preview.images && preview.images[0];
-    if (firstImage) {
-      const image = await loadImage(firstImage.src);
-      context.save();
-      context.globalAlpha = 0.28;
-      drawContainedImage(context, image, width, height);
-      context.restore();
-    }
-    const firstSlideText = preview.slides && preview.slides[0] && preview.slides[0].text;
-    context.fillStyle = "rgba(255,255,255,.88)";
-    context.fillRect(58, 58, width - 116, height - 116);
-    context.fillStyle = "#65001f";
-    context.font = "700 38px Arial";
-    drawWrappedSlideText(context, firstSlideText || originalName, 92, 128, width - 184, 48, 7);
+    const rendered = await renderPowerPointFirstSlide(context, loadImage, buffer, width, height);
+    if (!rendered) throw new Error("The first slide could not be rendered.");
   } else {
     context.fillStyle = "#65001f";
     context.fillRect(0, 0, width, height);
@@ -2332,7 +2411,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
       const extension = path.extname(originalName).toLowerCase();
       if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, PDF, or PowerPoint file.");
-      const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 12 MB or smaller.");
+      const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 50 MB or smaller.");
       if (!buffer.length || !fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
       const storedName = `${crypto.randomUUID()}${extension}`;
       const finalPath = path.join(studentSpotlightDir, storedName);

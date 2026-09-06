@@ -10007,7 +10007,7 @@ function renderDashboardStudentSpotlights() {
             <div class="field">
               <label for="spotlightFile">Image, PDF, or PowerPoint</label>
               <input id="spotlightFile" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.ppt,.pptx,image/jpeg,image/png,image/webp,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation">
-              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}` : "Maximum file size: 12 MB."}</small>
+              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}` : "Maximum file size: 50 MB."}</small>
             </div>
             <div class="field">
               <label for="spotlightUrl">Approved project link (optional)</label>
@@ -11346,6 +11346,11 @@ function attachStudentSpotlightForm() {
     const projectUrl = form.elements.projectUrl.value.trim();
     const existing = editing ? studentSpotlights.find(item => item.id === editing) : null;
     status.classList.remove("error");
+    if (file && file.size > 50 * 1024 * 1024) {
+      status.textContent = "That file is larger than the 50 MB Spotlight limit.";
+      status.classList.add("error");
+      return;
+    }
     if (!file && !projectUrl && !(existing && existing.hasMedia)) {
       status.textContent = "Upload an image, PDF, or PowerPoint, or add an approved project link.";
       status.classList.add("error");
@@ -11364,17 +11369,25 @@ function attachStudentSpotlightForm() {
     };
     const submit = form.querySelector("button[type='submit']");
     const desiredStatus = payload.status;
+    const recoverableDraft = !editing && file
+      ? studentSpotlights.find(item => item.status === "hidden"
+        && !item.hasMedia
+        && String(item.studentEmail || "").toLowerCase() === payload.studentEmail.toLowerCase()
+        && String(item.title || "").trim().toLowerCase() === payload.title.toLowerCase())
+      : null;
     let createdId = "";
     submit.disabled = true;
     status.textContent = file ? "Saving and uploading the featured work…" : "Saving the featured work…";
     try {
       let result = editing
         ? await sharedBackend.updateStudentSpotlight(editing, payload)
-        : await sharedBackend.createStudentSpotlight(file ? { ...payload, status: "hidden" } : payload);
+        : recoverableDraft
+          ? await sharedBackend.updateStudentSpotlight(recoverableDraft.id, { ...payload, status: "hidden" })
+          : await sharedBackend.createStudentSpotlight(file ? { ...payload, status: "hidden" } : payload);
       if (!result || (!editing && !result.spotlight)) {
         throw new Error("Classroom Launchpad could not reach the spotlight server. Please try Publish Spotlight again.");
       }
-      const id = editing || (result.spotlight && result.spotlight.id);
+      const id = editing || (recoverableDraft && recoverableDraft.id) || (result.spotlight && result.spotlight.id);
       createdId = editing ? "" : id;
       if (file && id) result = await sharedBackend.uploadStudentSpotlightFile(id, file);
       if (!editing && file && desiredStatus === "published") {
@@ -11386,7 +11399,10 @@ function attachStudentSpotlightForm() {
       render();
     } catch (error) {
       if (createdId) {
-        try { await sharedBackend.deleteStudentSpotlight(createdId); } catch {}
+        try {
+          const cleanup = await sharedBackend.deleteStudentSpotlight(createdId);
+          if (cleanup && cleanup.studentSpotlights) studentSpotlights = normalizeStudentSpotlights(cleanup.studentSpotlights);
+        } catch {}
       }
       status.textContent = error.message;
       status.classList.add("error");
