@@ -55,6 +55,8 @@ const allowedSubmissionTypes = new Map([
 const allowedAssignmentFileTypes = new Map(allowedSubmissionTypes);
 const allowedStudentSpotlightTypes = new Map([
   [".pdf", "application/pdf"],
+  [".ppt", "application/vnd.ms-powerpoint"],
+  [".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
   [".png", "image/png"],
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
@@ -311,12 +313,14 @@ function normalizeStudentSpotlight(entry) {
     ? new Date(entry.expiresAt).toISOString()
     : "";
   const extension = cleanText(entry && entry.mediaExtension, 10).toLowerCase();
+  const title = cleanText(entry && entry.title, 120);
   return {
     id: cleanText(entry && entry.id, 100) || crypto.randomUUID(),
     studentEmail: normalizeEmail(entry && entry.studentEmail),
     studentName: cleanText(entry && entry.studentName, 80),
     grade: cleanGrade(entry && entry.grade),
-    title: cleanText(entry && entry.title, 120),
+    title,
+    collectionName: cleanText(entry && entry.collectionName, 120) || title,
     description: cleanMultilineText(entry && entry.description, 600),
     displayNameStyle: ["first-last-initial", "first-only", "anonymous"].includes(entry && entry.displayNameStyle)
       ? entry.displayNameStyle
@@ -358,6 +362,7 @@ function publicStudentSpotlight(item, teacher = false) {
   return {
     id: item.id,
     title: item.title,
+    collectionName: item.collectionName,
     description: item.description,
     grade: item.grade,
     displayName: spotlightDisplayName(item),
@@ -365,7 +370,11 @@ function publicStudentSpotlight(item, teacher = false) {
     status: item.status,
     expiresAt: item.expiresAt,
     hasMedia: Boolean(item.mediaStoredName),
-    mediaKind: item.mediaExtension === ".pdf" ? "pdf" : item.mediaStoredName ? "image" : "",
+    mediaKind: item.mediaExtension === ".pdf"
+      ? "pdf"
+      : [".ppt", ".pptx"].includes(item.mediaExtension)
+        ? "powerpoint"
+        : item.mediaStoredName ? "image" : "",
     hasThumbnail: Boolean(item.thumbnailStoredName),
     updatedAt: item.updatedAt,
     ...(teacher ? {
@@ -2064,16 +2073,99 @@ async function createStudentSpotlightThumbnail(pdfPath, storedName) {
   }
 }
 
+async function writeStudentSpotlightCanvasThumbnail(canvas, storedName) {
+  const thumbnail = await canvas.encode("jpeg", 82);
+  const thumbnailStoredName = `${path.basename(storedName, path.extname(storedName))}.preview.jpg`;
+  const thumbnailPath = path.join(studentSpotlightDir, thumbnailStoredName);
+  fs.writeFileSync(`${thumbnailPath}.tmp`, thumbnail, { flag: "wx" });
+  fs.renameSync(`${thumbnailPath}.tmp`, thumbnailPath);
+  return { thumbnailStoredName, thumbnailSize: thumbnail.length };
+}
+
+function drawContainedImage(context, image, width, height) {
+  const scale = Math.min(width / image.width, height / image.height);
+  const drawWidth = image.width * scale;
+  const drawHeight = image.height * scale;
+  context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+}
+
+function drawWrappedSlideText(context, text, x, y, maxWidth, lineHeight, maxLines) {
+  const words = String(text || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (context.measureText(candidate).width <= maxWidth) line = candidate;
+    else {
+      if (line) lines.push(line);
+      line = word;
+      if (lines.length >= maxLines) break;
+    }
+  }
+  if (line && lines.length < maxLines) lines.push(line);
+  lines.forEach((value, index) => context.fillText(value, x, y + index * lineHeight));
+}
+
+async function createStudentSpotlightPowerPointThumbnail(filePath, storedName, extension, originalName) {
+  const { createCanvas, loadImage } = await spotlightPdfRenderer();
+  const width = 960;
+  const height = 540;
+  const canvas = createCanvas(width, height);
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  const buffer = fs.readFileSync(filePath);
+  if (extension === ".pptx") {
+    const entries = zipEntries(buffer);
+    const embeddedThumbnail = entries.find(entry => /^docProps\/thumbnail\.(?:jpe?g|png)$/i.test(entry.name));
+    if (embeddedThumbnail) {
+      const image = await loadImage(unzipEntry(buffer, embeddedThumbnail));
+      drawContainedImage(context, image, width, height);
+      return writeStudentSpotlightCanvasThumbnail(canvas, storedName);
+    }
+    const preview = officePreviewPayload(buffer, extension, originalName);
+    const firstImage = preview.images && preview.images[0];
+    if (firstImage) {
+      const image = await loadImage(firstImage.src);
+      context.save();
+      context.globalAlpha = 0.28;
+      drawContainedImage(context, image, width, height);
+      context.restore();
+    }
+    const firstSlideText = preview.slides && preview.slides[0] && preview.slides[0].text;
+    context.fillStyle = "rgba(255,255,255,.88)";
+    context.fillRect(58, 58, width - 116, height - 116);
+    context.fillStyle = "#65001f";
+    context.font = "700 38px Arial";
+    drawWrappedSlideText(context, firstSlideText || originalName, 92, 128, width - 184, 48, 7);
+  } else {
+    context.fillStyle = "#65001f";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#ffffff";
+    context.font = "700 44px Arial";
+    drawWrappedSlideText(context, path.basename(originalName, extension), 86, 220, width - 172, 54, 4);
+    context.font = "700 22px Arial";
+    context.fillStyle = "#ffbfd2";
+    context.fillText("PowerPoint presentation", 86, 390);
+  }
+  return writeStudentSpotlightCanvasThumbnail(canvas, storedName);
+}
+
+async function createStudentSpotlightMediaThumbnail(filePath, storedName, extension, originalName) {
+  if (extension === ".pdf") return createStudentSpotlightThumbnail(filePath, storedName);
+  return createStudentSpotlightPowerPointThumbnail(filePath, storedName, extension, originalName);
+}
+
 async function ensureStudentSpotlightThumbnail(item) {
-  if (!item || item.mediaExtension !== ".pdf") return item;
+  if (!item || ![".pdf", ".ppt", ".pptx"].includes(item.mediaExtension)) return item;
   const existingPath = studentSpotlightThumbnailPath(item);
   if (existingPath && fs.existsSync(existingPath)) return item;
-  const pdfPath = studentSpotlightFilePath(item);
-  if (!pdfPath || !fs.existsSync(pdfPath)) return item;
+  const mediaPath = studentSpotlightFilePath(item);
+  if (!mediaPath || !fs.existsSync(mediaPath)) return item;
   if (spotlightThumbnailJobs.has(item.id)) return spotlightThumbnailJobs.get(item.id);
   const job = (async () => {
     try {
-      const thumbnail = await createStudentSpotlightThumbnail(pdfPath, item.mediaStoredName);
+      const thumbnail = await createStudentSpotlightMediaThumbnail(mediaPath, item.mediaStoredName, item.mediaExtension, item.mediaOriginalName);
       const updated = normalizeStudentSpotlight({ ...item, ...thumbnail });
       const latestDb = readDb();
       latestDb.studentSpotlights = normalizeStudentSpotlights(latestDb.studentSpotlights)
@@ -2095,7 +2187,7 @@ async function ensureStudentSpotlightThumbnail(item) {
 
 async function warmStudentSpotlightThumbnails() {
   const spotlights = normalizeStudentSpotlights(readDb().studentSpotlights)
-    .filter(item => item.mediaExtension === ".pdf" && !studentSpotlightThumbnailPath(item));
+    .filter(item => [".pdf", ".ppt", ".pptx"].includes(item.mediaExtension) && !studentSpotlightThumbnailPath(item));
   for (const item of spotlights) await ensureStudentSpotlightThumbnail(item);
 }
 
@@ -2110,7 +2202,7 @@ function spotlightFromTeacherInput(db, body, existing = {}) {
   if (!student) throw new Error("Choose a student from the approved student list.");
   const projectInput = body.projectUrl !== undefined ? cleanText(body.projectUrl, 1000) : existing.projectUrl;
   const projectUrl = projectInput ? approvedProjectUrl(db, projectInput) : "";
-  if (projectInput && !projectUrl) throw new Error("Use an approved secure project link, or upload an image or PDF.");
+  if (projectInput && !projectUrl) throw new Error("Use an approved secure project link, or upload an image, PDF, or PowerPoint.");
   const now = new Date().toISOString();
   const next = normalizeStudentSpotlight({
     ...existing,
@@ -2239,7 +2331,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       if (!existing) throw new Error("Featured work not found.");
       const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
       const extension = path.extname(originalName).toLowerCase();
-      if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, or PDF file.");
+      if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, PDF, or PowerPoint file.");
       const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 12 MB or smaller.");
       if (!buffer.length || !fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
       const storedName = `${crypto.randomUUID()}${extension}`;
@@ -2247,9 +2339,9 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       fs.writeFileSync(`${finalPath}.tmp`, buffer, { flag: "wx" });
       fs.renameSync(`${finalPath}.tmp`, finalPath);
       let thumbnail = { thumbnailStoredName: "", thumbnailSize: 0 };
-      if (extension === ".pdf") {
+      if ([".pdf", ".ppt", ".pptx"].includes(extension)) {
         try {
-          thumbnail = await createStudentSpotlightThumbnail(finalPath, storedName);
+          thumbnail = await createStudentSpotlightMediaThumbnail(finalPath, storedName, extension, originalName);
         } catch (error) {
           console.warn(`Could not create spotlight thumbnail during upload: ${error.message}`);
         }

@@ -3,6 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const JSZip = require("jszip");
 
 const port = 8146;
 const origin = `http://127.0.0.1:${port}`;
@@ -35,6 +36,16 @@ function onePagePdf() {
   for (let id = 1; id <= 5; id += 1) pdf += `${String(offsets[id]).padStart(10, "0")} 00000 n \n`;
   pdf += `trailer\n<</Size 6 /Root 1 0 R>>\nstartxref\n${xrefOffset}\n%%EOF\n`;
   return Buffer.from(pdf);
+}
+
+async function oneSlidePowerPoint() {
+  const zip = new JSZip();
+  zip.file("ppt/slides/slide1.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+      <p:cSld><p:spTree><p:sp><p:txBody><a:p><a:r><a:t>Our Ecosystem Presentation</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
+    </p:sld>`);
+  zip.file("docProps/thumbnail.png", Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z2S8AAAAASUVORK5CYII=", "base64"));
+  return zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
 }
 
 async function request(pathname, options = {}) {
@@ -87,6 +98,7 @@ async function waitForServer() {
     assert.equal(created.response.status, 201);
     assert.equal(created.payload.spotlight.displayName, "Avery J.");
     assert.equal(created.payload.spotlight.studentEmail, "avery.johnson@scscolts.org");
+    assert.equal(created.payload.spotlight.collectionName, "Ecosystem Research Project");
     const id = created.payload.spotlight.id;
 
     const pdf = onePagePdf();
@@ -131,6 +143,25 @@ async function waitForServer() {
     const guestFile = await request(`/api/student-spotlights/${id}/file`);
     assert.equal(guestFile.response.status, 401);
 
+    const pptx = await oneSlidePowerPoint();
+    const powerpointUpload = await request(`/api/student-spotlights/${id}/file`, {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Cookie: teacherCookie,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "X-File-Name": encodeURIComponent("ecosystem-presentation.pptx")
+      },
+      body: pptx
+    });
+    assert.equal(powerpointUpload.response.status, 201);
+    assert.equal(powerpointUpload.payload.spotlight.mediaKind, "powerpoint");
+    assert.equal(powerpointUpload.payload.spotlight.hasThumbnail, true);
+    const powerpointThumbnail = await request(`/api/student-spotlights/${id}/thumbnail`, { headers: { Cookie: studentCookie } });
+    assert.equal(powerpointThumbnail.response.status, 200);
+    assert.equal(powerpointThumbnail.response.headers.get("content-type"), "image/jpeg");
+    assert.deepEqual([...powerpointThumbnail.payload.subarray(0, 3)], [0xff, 0xd8, 0xff]);
+
     const hidden = await request(`/api/student-spotlights/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
@@ -151,6 +182,10 @@ async function waitForServer() {
     assert.match(appSource, /Students Only/);
     assert.match(appSource, /Feature New Work/);
     assert.match(appSource, /class="spotlight-document-thumbnail"/);
+    assert.match(appSource, /Assignment Folders/);
+    assert.match(appSource, /Assignment folder/);
+    assert.match(appSource, /spotlightCollection/);
+    assert.match(appSource, /Image, PDF, or PowerPoint/);
     assert.match(appSource, /student-spotlights\/.*\/thumbnail/);
     assert(!appSource.includes("spotlight-pdf-preview"));
     assert(!appSource.includes('<b>PDF</b><small>Student Project</small>'));

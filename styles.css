@@ -11341,6 +11341,83 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   cursor: pointer;
 }
 .student-spotlight-filters button.is-active { color: #fff; border-color: var(--blue); background: var(--blue); }
+.spotlight-folder-back {
+  display: block;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  color: var(--blue);
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+.student-spotlight-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+}
+.student-spotlight-folder {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 40px;
+  gap: 18px;
+  align-items: center;
+  min-height: 122px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--blue);
+  border-radius: 14px;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--gold-soft), var(--white));
+  box-shadow: 0 9px 20px rgba(45, 0, 15, .1);
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.student-spotlight-folder:hover,
+.student-spotlight-folder:focus-visible {
+  border-color: var(--blue);
+  box-shadow: 0 13px 26px rgba(101, 0, 31, .18);
+  transform: translateY(-2px);
+}
+.student-spotlight-folder-icon {
+  position: relative;
+  display: grid;
+  width: 72px;
+  height: 56px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #c4134d, #65001f);
+  box-shadow: 0 8px 14px rgba(101, 0, 31, .25);
+}
+.student-spotlight-folder-icon::before {
+  position: absolute;
+  top: -10px;
+  left: 7px;
+  width: 30px;
+  height: 14px;
+  border-radius: 7px 7px 0 0;
+  background: #c4134d;
+  content: "";
+}
+.student-spotlight-folder-icon span::before { content: "\2605"; font-size: 1.65rem; }
+.student-spotlight-folder-copy { display: grid; gap: 4px; min-width: 0; }
+.student-spotlight-folder-copy strong { font-size: 1.15rem; line-height: 1.18; }
+.student-spotlight-folder-copy small { color: var(--muted); font-weight: 800; }
+.student-spotlight-folder-copy > span { color: var(--blue); font-size: .82rem; font-weight: 900; }
+.student-spotlight-folder-arrow {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--blue);
+  font-size: 1.25rem;
+  font-weight: 900;
+}
 .student-spotlight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
 .student-spotlight-card { overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: var(--gold-soft); }
 .student-spotlight-card-art { height: 220px; margin: 0; background: #18070d; }
@@ -11382,6 +11459,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-page-heading,
   .spotlight-dashboard-heading { align-items: flex-start; flex-direction: column; }
   .student-spotlight-grid,
+  .student-spotlight-folder-grid,
   .spotlight-editor-grid { grid-template-columns: 1fr; }
   .spotlight-wide-field { grid-column: auto; }
   .student-spotlight-card-art { height: 200px; }
