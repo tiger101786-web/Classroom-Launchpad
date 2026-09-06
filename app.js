@@ -2133,6 +2133,12 @@ function renderHomeHeaderControls() {
           <button class="portal-btn" data-action="open" data-url="https://www.plusportals.com/StCletus">PlusPortal</button>
           ${renderGoogleHeaderControls()}
         </div>
+        <span class="home-header-energy" aria-hidden="true">
+          <svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">
+            <path class="home-header-energy-base" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
+            <path class="home-header-energy-pulse" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
+          </svg>
+        </span>
         <div class="home-header-user">${renderAuthButton()}</div>
       </nav>
     </div>
