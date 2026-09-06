@@ -559,6 +559,28 @@ const sharedBackend = {
   deleteAssignment(id) {
     return this.request(`/api/assignments/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
   },
+  createStudentSpotlight(spotlight) {
+    return this.request("/api/student-spotlights", { method: "POST", body: JSON.stringify(spotlight) });
+  },
+  updateStudentSpotlight(id, spotlight) {
+    return this.request(`/api/student-spotlights/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(spotlight) });
+  },
+  async uploadStudentSpotlightFile(id, file) {
+    const response = await fetch(`/api/student-spotlights/${encodeURIComponent(id)}/file`, {
+      method: "POST",
+      headers: { "Content-Type": file.type || "application/octet-stream", "X-File-Name": encodeURIComponent(file.name) },
+      body: file
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload && payload.error ? payload.error : `Upload failed: ${response.status}`);
+    return payload;
+  },
+  removeStudentSpotlightFile(id) {
+    return this.request(`/api/student-spotlights/${encodeURIComponent(id)}/file`, { method: "DELETE", body: "{}" });
+  },
+  deleteStudentSpotlight(id) {
+    return this.request(`/api/student-spotlights/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" });
+  },
   async submitAssignment(id, file, note) {
     if (!this.enabled) return null;
     const response = await fetch(`/api/assignments/${encodeURIComponent(id)}/submissions`, {
@@ -1289,6 +1311,26 @@ function normalizeAssignments(items) {
   })).filter(item => item.id && item.title);
 }
 
+function normalizeStudentSpotlights(items) {
+  return (Array.isArray(items) ? items : []).map(item => ({
+    id: String(item && item.id || ""),
+    studentEmail: String(item && item.studentEmail || "").toLowerCase(),
+    studentName: String(item && item.studentName || ""),
+    displayName: String(item && item.displayName || "Student"),
+    grade: String(item && item.grade || ""),
+    title: String(item && item.title || ""),
+    description: String(item && item.description || ""),
+    displayNameStyle: String(item && item.displayNameStyle || "first-last-initial"),
+    projectUrl: String(item && item.projectUrl || ""),
+    status: item && item.status === "hidden" ? "hidden" : "published",
+    expiresAt: String(item && item.expiresAt || ""),
+    hasMedia: Boolean(item && item.hasMedia),
+    mediaKind: String(item && item.mediaKind || ""),
+    mediaOriginalName: String(item && item.mediaOriginalName || ""),
+    updatedAt: String(item && item.updatedAt || "")
+  })).filter(item => item.id && item.title);
+}
+
 function normalizeSubmissions(items) {
   return (Array.isArray(items) ? items : []).map(item => ({
     id: String(item && item.id || ""),
@@ -1385,6 +1427,10 @@ let teacherMessageHistoryFilter = "all";
 let activationCodeResults = [];
 let assignments = [];
 let submissions = [];
+let studentSpotlights = [];
+let spotlightGradeFilter = "all";
+let spotlightEditorId = "";
+let spotlightStatusMessage = "";
 let selectedAssignmentId = "";
 let selectedSubmissionId = "";
 let assignmentView = "todo";
@@ -1430,6 +1476,7 @@ const dashboardSections = [
   { id: "websites", label: "Manage Websites", icon: "▦" },
   { id: "settings", label: "Settings", icon: "⚙" }
 ];
+dashboardSections.splice(6, 0, { id: "spotlights", label: "Student Spotlights", icon: "&#9733;" });
 dashboardSections.splice(4, 0, { id: "registered", label: "Registered Students", icon: "&#10003;" });
 const savedDashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
 let dashboardSection = dashboardSections.some(section => section.id === savedDashboardSection) ? savedDashboardSection : "overview";
@@ -1648,6 +1695,7 @@ function sharedSnapshot() {
     websiteRequests,
     assignments,
     submissions,
+    studentSpotlights,
     dailyLaunch,
     classTimer,
     randomActivitySettings,
@@ -1673,6 +1721,7 @@ async function loadSharedState(shouldRender = true) {
     const incomingRequests = normalizeRequests(state && state.websiteRequests);
     const incomingAssignments = normalizeAssignments(state && state.assignments);
     const incomingSubmissions = normalizeSubmissions(state && state.submissions);
+    const incomingStudentSpotlights = normalizeStudentSpotlights(state && state.studentSpotlights);
     const incomingLaunch = normalizeDailyLaunch((state && state.dailyLaunch) || extractDailyLaunchFromRequests(state && state.websiteRequests));
     const incomingTimer = chooseSharedClassTimer(state && state.classTimer, extractClassTimerFromRequests(state && state.websiteRequests));
     const incomingRandomActivity = chooseSharedRandomActivitySettings(state && state.randomActivity, extractRandomActivitySettingsFromRequests(state && state.websiteRequests));
@@ -1699,6 +1748,7 @@ async function loadSharedState(shouldRender = true) {
     websiteRequests = incomingRequests;
     assignments = incomingAssignments;
     submissions = incomingSubmissions;
+    studentSpotlights = incomingStudentSpotlights;
     dailyLaunch = incomingLaunch;
     classTimer = incomingTimer;
     randomActivitySettings = incomingRandomActivity;
@@ -2333,10 +2383,84 @@ function renderHomeDefault() {
         ${categories.map(category => categoryCard(category)).join("")}
       </section>
     </div>
+    ${isSignedIn() ? `<div id="home-student-spotlight" class="home-navigation-anchor">${renderStudentSpotlightPreview()}</div>` : ""}
     <div id="home-google-classroom" class="home-navigation-anchor">${renderGoogleClassroomPreview()}</div>
     <div id="home-classroom-pass" class="home-navigation-anchor">${renderClassroomPassPreview()}</div>
     <div id="home-colt-corner" class="home-navigation-anchor">${renderColtCornerPreview()}</div>
     <div id="home-feedback" class="home-navigation-anchor">${renderStudentWebsiteRequest()}</div>
+  `;
+}
+
+function spotlightMediaUrl(item) {
+  return `/api/student-spotlights/${encodeURIComponent(item.id)}/file`;
+}
+
+function renderSpotlightArtwork(item, compact = false) {
+  if (item.hasMedia && item.mediaKind === "image") {
+    return `<img src="${spotlightMediaUrl(item)}" alt="Preview of ${escapeHtml(item.title)}" loading="lazy">`;
+  }
+  if (item.hasMedia && item.mediaKind === "pdf") {
+    return `<span class="spotlight-file-art" aria-hidden="true"><b>PDF</b><small>Student Project</small></span>`;
+  }
+  return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
+}
+
+function renderStudentSpotlightPreview() {
+  const published = studentSpotlights.filter(item => item.status !== "hidden").slice(0, 3);
+  return `
+    <section class="student-spotlight-preview">
+      <div class="student-spotlight-preview-copy">
+        <span class="feature-kicker">Student Showcase</span>
+        <h2>Student Work Spotlight</h2>
+        <p>Explore creative projects and outstanding work from students across Classroom Launchpad.</p>
+        <button class="primary-btn" type="button" data-action="openStudentSpotlights">Open Student Spotlight</button>
+      </div>
+      <div class="student-spotlight-preview-collage" aria-label="Featured student projects">
+        ${published.length ? published.map(item => `<figure>${renderSpotlightArtwork(item, true)}</figure>`).join("") : `
+          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
+          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
+          <figure>${renderSpotlightArtwork({ title: "Featured work" }, true)}</figure>
+        `}
+      </div>
+    </section>
+  `;
+}
+
+function renderStudentSpotlightCard(item) {
+  const openUrl = item.projectUrl || (item.hasMedia ? spotlightMediaUrl(item) : "");
+  return `
+    <article class="student-spotlight-card">
+      <figure class="student-spotlight-card-art">${renderSpotlightArtwork(item)}</figure>
+      <div class="student-spotlight-card-copy">
+        <span class="feature-kicker">Grade ${escapeHtml(item.grade)}</span>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p class="student-spotlight-byline">By ${escapeHtml(item.displayName)}</p>
+        ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
+        ${openUrl ? `<button class="primary-btn" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project</button>` : ""}
+      </div>
+    </article>
+  `;
+}
+
+function renderStudentSpotlightPage() {
+  if (!isSignedIn()) {
+    return `${pageHeader("Student Work Spotlight", "Sign in to view featured student projects.", true)}<section class="auth-card"><button class="primary-btn" data-action="login">Launchpad Login</button></section>`;
+  }
+  const published = studentSpotlights.filter(item => item.status !== "hidden");
+  const visible = spotlightGradeFilter === "all" ? published : published.filter(item => item.grade === spotlightGradeFilter);
+  return `
+    ${pageHeader("Student Work Spotlight", "Celebrate creative projects and outstanding classroom work.", true)}
+    <section class="student-spotlight-page">
+      <header class="student-spotlight-page-heading">
+        <div><span class="feature-kicker">Students Only</span><h2>Featured Work Gallery</h2></div>
+        <div class="student-spotlight-filters" role="group" aria-label="Filter featured work by grade">
+          ${["all", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
+        </div>
+      </header>
+      <div class="student-spotlight-grid">
+        ${visible.length ? visible.map(renderStudentSpotlightCard).join("") : emptyCard(spotlightGradeFilter === "all" ? "No student work has been featured yet." : `No Grade ${spotlightGradeFilter} work is featured yet.`)}
+      </div>
+    </section>
   `;
 }
 
@@ -9774,6 +9898,93 @@ function renderDashboardClassroomPasses() {
   `;
 }
 
+function renderDashboardStudentSpotlights() {
+  const editing = spotlightEditorId === "new"
+    ? null
+    : studentSpotlights.find(item => item.id === spotlightEditorId);
+  const showEditor = spotlightEditorId === "new" || Boolean(editing);
+  const students = [...approvedStudents]
+    .filter(student => student && student.email && ["4", "5", "6", "7"].includes(String(student.grade)))
+    .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+  return `
+    <section class="spotlight-dashboard">
+      <div class="spotlight-dashboard-heading">
+        <div>
+          <span class="feature-kicker">Student Showcase</span>
+          <h2>Featured Student Work</h2>
+          <p class="instruction">Publish selected work to the private student gallery. Guests cannot view this content.</p>
+        </div>
+        <button class="primary-btn" type="button" data-action="newStudentSpotlight">Feature New Work</button>
+      </div>
+      ${spotlightStatusMessage ? `<p class="request-message ${spotlightStatusMessage.startsWith("Error:") ? "error" : ""}" role="status">${escapeHtml(spotlightStatusMessage)}</p>` : ""}
+      ${showEditor ? `
+        <form id="studentSpotlightForm" class="form-card spotlight-editor" data-id="${escapeHtml(editing && editing.id || "")}">
+          <div class="assignment-manager-heading">
+            <div><span class="feature-kicker">${editing ? "Edit Spotlight" : "New Spotlight"}</span><h3>${editing ? escapeHtml(editing.title) : "Add Featured Work"}</h3></div>
+            <button class="outline-btn" type="button" data-action="closeStudentSpotlightEditor">Close</button>
+          </div>
+          <div class="form-grid spotlight-editor-grid">
+            <div class="field">
+              <label for="spotlightStudent">Student</label>
+              <select id="spotlightStudent" name="studentEmail" required>
+                <option value="">Choose a student</option>
+                ${students.map(student => `<option value="${escapeHtml(student.email)}" ${editing && editing.studentEmail === student.email ? "selected" : ""}>${escapeHtml(student.name || student.email)} — Grade ${escapeHtml(student.grade)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label for="spotlightTitle">Project title</label>
+              <input id="spotlightTitle" name="title" maxlength="120" value="${escapeHtml(editing && editing.title || "")}" required placeholder="Example: Ecosystem Research Project">
+            </div>
+            <div class="field spotlight-wide-field">
+              <label for="spotlightDescription">Teacher description</label>
+              <textarea id="spotlightDescription" name="description" maxlength="600" rows="4" placeholder="Briefly explain what makes this work special.">${escapeHtml(editing && editing.description || "")}</textarea>
+            </div>
+            <div class="field">
+              <label for="spotlightDisplayName">Student name display</label>
+              <select id="spotlightDisplayName" name="displayNameStyle">
+                <option value="first-last-initial" ${!editing || editing.displayNameStyle === "first-last-initial" ? "selected" : ""}>First name + last initial</option>
+                <option value="first-only" ${editing && editing.displayNameStyle === "first-only" ? "selected" : ""}>First name only</option>
+                <option value="anonymous" ${editing && editing.displayNameStyle === "anonymous" ? "selected" : ""}>Anonymous Student</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="spotlightStatus">Visibility</label>
+              <select id="spotlightStatus" name="status"><option value="published" ${!editing || editing.status === "published" ? "selected" : ""}>Published</option><option value="hidden" ${editing && editing.status === "hidden" ? "selected" : ""}>Hidden</option></select>
+            </div>
+            <div class="field">
+              <label for="spotlightFile">Image or PDF</label>
+              <input id="spotlightFile" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}` : "Maximum file size: 12 MB."}</small>
+            </div>
+            <div class="field">
+              <label for="spotlightUrl">Approved project link (optional)</label>
+              <input id="spotlightUrl" name="projectUrl" type="url" value="${escapeHtml(editing && editing.projectUrl || "")}" placeholder="https://…">
+            </div>
+            <div class="field">
+              <label for="spotlightExpires">Hide automatically (optional)</label>
+              <input id="spotlightExpires" name="expiresAt" type="datetime-local" value="${editing && editing.expiresAt ? escapeHtml(editing.expiresAt.slice(0, 16)) : ""}">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="primary-btn" type="submit">${editing ? "Save Changes" : "Publish Spotlight"}</button>
+            ${editing && editing.hasMedia ? `<button class="outline-btn" type="button" data-action="removeStudentSpotlightFile" data-id="${editing.id}">Remove File</button>` : ""}
+          </div>
+          <p id="studentSpotlightFormStatus" class="request-message" aria-live="polite"></p>
+        </form>
+      ` : ""}
+      <div class="spotlight-dashboard-list">
+        ${studentSpotlights.length ? studentSpotlights.map(item => `
+          <article class="teacher-card spotlight-dashboard-card ${item.status === "hidden" ? "is-hidden" : ""}">
+            <figure>${renderSpotlightArtwork(item, true)}</figure>
+            <div><span class="feature-kicker">Grade ${escapeHtml(item.grade)} · ${item.status === "hidden" ? "Hidden" : "Published"}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.displayName)}${item.description ? ` — ${escapeHtml(item.description)}` : ""}</p></div>
+            <div class="actions"><button class="outline-btn" type="button" data-action="editStudentSpotlight" data-id="${item.id}">Edit</button><button class="danger-btn" type="button" data-action="deleteStudentSpotlight" data-id="${item.id}">Delete</button></div>
+          </article>
+        `).join("") : emptyCard("No student work has been featured yet.")}
+      </div>
+    </section>
+  `;
+}
+
 function renderDashboardSection() {
 
   if (dashboardSection === "messages") return renderDashboardMessages();
@@ -9782,6 +9993,7 @@ function renderDashboardSection() {
   if (dashboardSection === "registered") return renderRegisteredStudents();
   if (dashboardSection === "tools") return renderDashboardClassroomTools();
   if (dashboardSection === "corner") return renderDashboardColtCorner();
+  if (dashboardSection === "spotlights") return renderDashboardStudentSpotlights();
   if (dashboardSection === "requests") return renderDashboardRequests();
   if (dashboardSection === "websites") return renderDashboardWebsites();
   if (dashboardSection === "settings") return renderDashboardSettings();
@@ -9994,6 +10206,7 @@ function render() {
   if (screen.name === "category") html = renderCategory(screen.category);
   if (screen.name === "coltRun") html = renderColtRun();
   if (screen.name === "coltCorner") html = renderColtCornerPage();
+  if (screen.name === "studentSpotlights") html = renderStudentSpotlightPage();
   if (screen.name === "thread") html = renderThreadDetail(screen.id);
   if (screen.name === "pin") html = renderPin();
   if (screen.name === "login") html = renderLogin();
@@ -10407,6 +10620,7 @@ function attachScreenHandlers() {
     });
   }
   attachStudentRequestForm();
+  attachStudentSpotlightForm();
   attachThreadForm();
   attachReplyForm();
   attachForumProfileEditor();
@@ -11067,6 +11281,63 @@ function attachThreadForm() {
   });
 }
 
+function attachStudentSpotlightForm() {
+  const form = document.getElementById("studentSpotlightForm");
+  if (!form || form.dataset.ready === "true") return;
+  form.dataset.ready = "true";
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const status = document.getElementById("studentSpotlightFormStatus");
+    const file = form.elements.file.files && form.elements.file.files[0];
+    const editing = form.dataset.id;
+    const projectUrl = form.elements.projectUrl.value.trim();
+    const existing = editing ? studentSpotlights.find(item => item.id === editing) : null;
+    status.classList.remove("error");
+    if (!file && !projectUrl && !(existing && existing.hasMedia)) {
+      status.textContent = "Upload an image or PDF, or add an approved project link.";
+      status.classList.add("error");
+      return;
+    }
+    const expiresValue = form.elements.expiresAt.value;
+    const payload = {
+      studentEmail: form.elements.studentEmail.value,
+      title: form.elements.title.value.trim(),
+      description: form.elements.description.value.trim(),
+      displayNameStyle: form.elements.displayNameStyle.value,
+      projectUrl,
+      status: form.elements.status.value,
+      expiresAt: expiresValue ? new Date(expiresValue).toISOString() : ""
+    };
+    const submit = form.querySelector("button[type='submit']");
+    const desiredStatus = payload.status;
+    let createdId = "";
+    submit.disabled = true;
+    status.textContent = file ? "Saving and uploading the featured work…" : "Saving the featured work…";
+    try {
+      let result = editing
+        ? await sharedBackend.updateStudentSpotlight(editing, payload)
+        : await sharedBackend.createStudentSpotlight(file ? { ...payload, status: "hidden" } : payload);
+      const id = editing || (result.spotlight && result.spotlight.id);
+      createdId = editing ? "" : id;
+      if (file && id) result = await sharedBackend.uploadStudentSpotlightFile(id, file);
+      if (!editing && file && desiredStatus === "published") {
+        result = await sharedBackend.updateStudentSpotlight(id, { status: "published" });
+      }
+      studentSpotlights = normalizeStudentSpotlights(result.studentSpotlights);
+      spotlightEditorId = "";
+      spotlightStatusMessage = editing ? "The spotlight was updated." : "The student work is now featured.";
+      render();
+    } catch (error) {
+      if (createdId) {
+        try { await sharedBackend.deleteStudentSpotlight(createdId); } catch {}
+      }
+      status.textContent = error.message;
+      status.classList.add("error");
+      submit.disabled = false;
+    }
+  });
+}
+
 function attachReplyForm() {
   const replyForm = document.getElementById("replyForm");
   if (!replyForm || replyForm.dataset.ready === "true") return;
@@ -11305,7 +11576,7 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
-    else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "studentSpotlights", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
   if (action === "teacher") {
@@ -11477,6 +11748,7 @@ app.addEventListener("click", async event => {
     approvedStudents = [];
     assignments = [];
     submissions = [];
+    studentSpotlights = [];
     classroomPassData = normalizeClassroomPassPayload(null);
     classroomPassDestination = "";
     classroomPassMessage = "";
@@ -11630,6 +11902,53 @@ app.addEventListener("click", async event => {
     observeDeferredVideos(app);
   }
   if (action === "openColtCorner") setScreen({ name: isSignedIn() ? "coltCorner" : "login" });
+  if (action === "openStudentSpotlights") setScreen({ name: isSignedIn() ? "studentSpotlights" : "login" });
+  if (action === "spotlightGrade") {
+    spotlightGradeFilter = ["all", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";
+    render();
+  }
+  if (action === "newStudentSpotlight") {
+    spotlightEditorId = "new";
+    spotlightStatusMessage = "";
+    render();
+  }
+  if (action === "editStudentSpotlight") {
+    spotlightEditorId = target.dataset.id || "";
+    spotlightStatusMessage = "";
+    render();
+  }
+  if (action === "closeStudentSpotlightEditor") {
+    spotlightEditorId = "";
+    spotlightStatusMessage = "";
+    render();
+  }
+  if (action === "removeStudentSpotlightFile") {
+    try {
+      const result = await sharedBackend.removeStudentSpotlightFile(target.dataset.id);
+      studentSpotlights = normalizeStudentSpotlights(result.studentSpotlights);
+      spotlightStatusMessage = "The uploaded file was removed.";
+      render();
+    } catch (error) {
+      spotlightStatusMessage = `Error: ${error.message}`;
+      render();
+    }
+  }
+  if (action === "deleteStudentSpotlight") {
+    const item = studentSpotlights.find(entry => entry.id === target.dataset.id);
+    modal = {
+      title: "Delete featured work?",
+      message: `This permanently removes ${item ? item.title : "this spotlight"} from the gallery.`,
+      confirmText: "Delete Spotlight",
+      onConfirm: async () => {
+        const result = await sharedBackend.deleteStudentSpotlight(target.dataset.id);
+        studentSpotlights = normalizeStudentSpotlights(result.studentSpotlights);
+        spotlightEditorId = "";
+        spotlightStatusMessage = "The spotlight was deleted.";
+        render();
+      }
+    };
+    render();
+  }
   if (action === "openColtRun") {
     window.dispatchEvent(new CustomEvent("colt-run-opening"));
     setScreen({ name: "coltRun" });

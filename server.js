@@ -19,6 +19,7 @@ const dbPath = path.join(dataDir, "classroom-launchpad-db.json");
 const submissionDir = path.join(dataDir, "student-submissions");
 const assignmentFileDir = path.join(dataDir, "assignment-files");
 const profileAvatarDir = path.join(dataDir, "profile-avatars");
+const studentSpotlightDir = path.join(dataDir, "student-spotlights");
 const port = Number(process.env.PORT || 8080);
 const allowedStudentDomain = String(process.env.STUDENT_EMAIL_DOMAIN || "scscolts.org").trim().toLowerCase();
 const teacherTestStudentEmail = "tiger101786@gmail.com";
@@ -31,6 +32,7 @@ const teacherLoginAttempts = new Map();
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
+const maxStudentSpotlightBytes = 12 * 1024 * 1024;
 const coltAiEnabled = String(process.env.COLT_AI_ENABLED || "true").toLowerCase() !== "false";
 const coltAiAccountId = cleanEnvironmentValue(process.env.CLOUDFLARE_ACCOUNT_ID, 120);
 const coltAiApiToken = cleanEnvironmentValue(process.env.CLOUDFLARE_AI_API_TOKEN, 500);
@@ -51,6 +53,13 @@ const allowedSubmissionTypes = new Map([
   [".txt", "text/plain"]
 ]);
 const allowedAssignmentFileTypes = new Map(allowedSubmissionTypes);
+const allowedStudentSpotlightTypes = new Map([
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"]
+]);
 const commonProjectHosts = new Set([
   "canva.com", "www.canva.com", "prezi.com", "www.prezi.com", "scratch.mit.edu",
   "docs.google.com", "drive.google.com", "sites.google.com", "padlet.com", "www.padlet.com"
@@ -81,6 +90,7 @@ const defaultDb = {
   websiteRequests: [],
   assignments: [],
   submissions: [],
+  studentSpotlights: [],
   classroomPasses: [],
   classroomPassConfig: {
     enabled: true,
@@ -294,6 +304,74 @@ function cleanGrade(value) {
   const cleaned = cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
   const classroomGrade = cleaned.match(/\b([4-7])(?:th)?\b/i);
   return classroomGrade ? classroomGrade[1] : cleaned;
+}
+
+function normalizeStudentSpotlight(entry) {
+  const expiresAt = Number.isFinite(Date.parse(entry && entry.expiresAt))
+    ? new Date(entry.expiresAt).toISOString()
+    : "";
+  const extension = cleanText(entry && entry.mediaExtension, 10).toLowerCase();
+  return {
+    id: cleanText(entry && entry.id, 100) || crypto.randomUUID(),
+    studentEmail: normalizeEmail(entry && entry.studentEmail),
+    studentName: cleanText(entry && entry.studentName, 80),
+    grade: cleanGrade(entry && entry.grade),
+    title: cleanText(entry && entry.title, 120),
+    description: cleanMultilineText(entry && entry.description, 600),
+    displayNameStyle: ["first-last-initial", "first-only", "anonymous"].includes(entry && entry.displayNameStyle)
+      ? entry.displayNameStyle
+      : "first-last-initial",
+    projectUrl: cleanText(entry && entry.projectUrl, 1000),
+    status: entry && entry.status === "hidden" ? "hidden" : "published",
+    expiresAt,
+    mediaOriginalName: entry && entry.mediaOriginalName ? safeDownloadName(entry.mediaOriginalName) : "",
+    mediaStoredName: path.basename(String(entry && entry.mediaStoredName || "")),
+    mediaExtension: allowedStudentSpotlightTypes.has(extension) ? extension : "",
+    mediaMimeType: cleanText(entry && entry.mediaMimeType, 120),
+    mediaSize: Math.max(0, Number(entry && entry.mediaSize) || 0),
+    createdAt: Number.isFinite(Date.parse(entry && entry.createdAt)) ? new Date(entry.createdAt).toISOString() : new Date().toISOString(),
+    updatedAt: Number.isFinite(Date.parse(entry && entry.updatedAt)) ? new Date(entry.updatedAt).toISOString() : new Date().toISOString()
+  };
+}
+
+function normalizeStudentSpotlights(entries) {
+  return (Array.isArray(entries) ? entries : [])
+    .map(normalizeStudentSpotlight)
+    .filter(item => item.title && item.studentName && ["4", "5", "6", "7"].includes(item.grade))
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+}
+
+function spotlightDisplayName(item) {
+  if (item.displayNameStyle === "anonymous") return "Anonymous Student";
+  const raw = cleanText(item.studentName, 80);
+  const parts = raw.includes(",")
+    ? raw.split(",").map(part => part.trim()).filter(Boolean).reverse()
+    : raw.split(/\s+/).filter(Boolean);
+  const first = parts[0] || "Student";
+  if (item.displayNameStyle === "first-only" || parts.length < 2) return first;
+  return `${first} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
+}
+
+function publicStudentSpotlight(item, teacher = false) {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    grade: item.grade,
+    displayName: spotlightDisplayName(item),
+    projectUrl: item.projectUrl,
+    status: item.status,
+    expiresAt: item.expiresAt,
+    hasMedia: Boolean(item.mediaStoredName),
+    mediaKind: item.mediaExtension === ".pdf" ? "pdf" : item.mediaStoredName ? "image" : "",
+    updatedAt: item.updatedAt,
+    ...(teacher ? {
+      studentEmail: item.studentEmail,
+      studentName: item.studentName,
+      displayNameStyle: item.displayNameStyle,
+      mediaOriginalName: item.mediaOriginalName
+    } : {})
+  };
 }
 
 function normalizeRadioFavorites(value) {
@@ -969,6 +1047,7 @@ function ensureDb() {
   fs.mkdirSync(submissionDir, { recursive: true });
   fs.mkdirSync(assignmentFileDir, { recursive: true });
   fs.mkdirSync(profileAvatarDir, { recursive: true });
+  fs.mkdirSync(studentSpotlightDir, { recursive: true });
   if (!fs.existsSync(dbPath)) writeDb(defaultDb);
 }
 
@@ -1015,6 +1094,7 @@ function writeDb(db) {
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
     submissions: normalizeSubmissions(db.submissions),
+    studentSpotlights: normalizeStudentSpotlights(db.studentSpotlights),
     classroomPasses: normalizeClassroomPasses(db.classroomPasses),
     classroomPassConfig: normalizeClassroomPassConfig(db.classroomPassConfig),
     launchpadColt: db.launchpadColt && typeof db.launchpadColt === "object"
@@ -1233,6 +1313,13 @@ function publicState(db, session) {
     : (session && session.role === "student"
         ? submissions.filter(submission => submission.studentEmail === normalizeEmail(session.email))
         : []);
+  const now = Date.now();
+  const studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights);
+  const visibleSpotlights = teacher
+    ? studentSpotlights
+    : signedIn
+      ? studentSpotlights.filter(item => item.status === "published" && (!item.expiresAt || Date.parse(item.expiresAt) > now))
+      : [];
   return {
     links: Array.isArray(db.links) ? normalizeLinks(db.links) : null,
     threads: signedIn ? visibleApprovedThreads(db.threads, session) : [],
@@ -1243,6 +1330,7 @@ function publicState(db, session) {
     websiteRequests: teacher ? db.websiteRequests : [],
     assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
+    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher)),
     leaderboards: db.leaderboards,
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
@@ -1905,6 +1993,207 @@ function publicAssignmentRecord(assignment) {
 function assignmentApiPayload(db, session) {
   const state = publicState(db, session);
   return { assignments: state.assignments || [], submissions: state.submissions || [] };
+}
+
+function studentSpotlightFilePath(item) {
+  const filename = path.basename(String(item && item.mediaStoredName || ""));
+  if (!filename || filename !== item.mediaStoredName) return "";
+  const resolved = path.join(studentSpotlightDir, filename);
+  return resolved.startsWith(`${studentSpotlightDir}${path.sep}`) ? resolved : "";
+}
+
+function removeStudentSpotlightFile(item) {
+  const filePath = studentSpotlightFilePath(item);
+  try {
+    if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch {}
+}
+
+function studentSpotlightPayload(db, session) {
+  return { studentSpotlights: publicState(db, session).studentSpotlights || [] };
+}
+
+function spotlightFromTeacherInput(db, body, existing = {}) {
+  const students = normalizeApprovedStudents(db.approvedStudents);
+  const studentEmail = normalizeEmail(body.studentEmail !== undefined ? body.studentEmail : existing.studentEmail);
+  const student = students.find(item => item.email === studentEmail);
+  if (!student) throw new Error("Choose a student from the approved student list.");
+  const projectInput = body.projectUrl !== undefined ? cleanText(body.projectUrl, 1000) : existing.projectUrl;
+  const projectUrl = projectInput ? approvedProjectUrl(db, projectInput) : "";
+  if (projectInput && !projectUrl) throw new Error("Use an approved secure project link, or upload an image or PDF.");
+  const now = new Date().toISOString();
+  const next = normalizeStudentSpotlight({
+    ...existing,
+    ...body,
+    id: existing.id || body.id || crypto.randomUUID(),
+    studentEmail: student.email,
+    studentName: student.name || student.email.split("@")[0],
+    grade: student.grade,
+    projectUrl,
+    createdAt: existing.createdAt || now,
+    updatedAt: now
+  });
+  if (!next.title) throw new Error("Add a title for the featured work.");
+  return next;
+}
+
+async function handleStudentSpotlightsApi(req, res, pathname) {
+  if (!pathname.startsWith("/api/student-spotlights")) return false;
+  const session = requireRole(req, res, ["student", "teacher"]);
+  if (!session) return true;
+
+  if (req.method === "GET" && pathname === "/api/student-spotlights") {
+    sendJson(res, 200, studentSpotlightPayload(readDb(), session));
+    return true;
+  }
+
+  const fileMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/file$/);
+  if (fileMatch && ["GET", "HEAD"].includes(req.method)) {
+    const db = readDb();
+    const id = decodeURIComponent(fileMatch[1]);
+    const item = normalizeStudentSpotlights(db.studentSpotlights).find(entry => entry.id === id);
+    const visible = item && publicState(db, session).studentSpotlights.some(entry => entry.id === id);
+    const filePath = visible ? studentSpotlightFilePath(item) : "";
+    if (!filePath || !fs.existsSync(filePath)) {
+      sendJson(res, 404, { error: "That featured-work file is unavailable." });
+      return true;
+    }
+    const stats = fs.statSync(filePath);
+    res.writeHead(200, {
+      "Content-Type": item.mediaMimeType || "application/octet-stream",
+      "Content-Length": stats.size,
+      "Content-Disposition": `inline; filename="${safeDownloadName(item.mediaOriginalName)}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'"
+    });
+    if (req.method === "HEAD") res.end();
+    else fs.createReadStream(filePath).pipe(res);
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/student-spotlights") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can feature student work." });
+      return true;
+    }
+    try {
+      const db = readDb();
+      const item = spotlightFromTeacherInput(db, { ...(await readBody(req)), id: crypto.randomUUID() });
+      db.studentSpotlights = [item, ...normalizeStudentSpotlights(db.studentSpotlights)];
+      writeDb(db);
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  const itemMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)$/);
+  if (itemMatch && req.method === "PATCH") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can update featured work." });
+      return true;
+    }
+    try {
+      const db = readDb();
+      const id = decodeURIComponent(itemMatch[1]);
+      const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
+      if (!existing) throw new Error("Featured work not found.");
+      const item = spotlightFromTeacherInput(db, await readBody(req), existing);
+      db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(entry => entry.id === id ? item : entry);
+      writeDb(db);
+      sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (fileMatch && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can upload featured work." });
+      return true;
+    }
+    try {
+      const db = readDb();
+      const id = decodeURIComponent(fileMatch[1]);
+      const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
+      if (!existing) throw new Error("Featured work not found.");
+      const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
+      const extension = path.extname(originalName).toLowerCase();
+      if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, or PDF file.");
+      const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 12 MB or smaller.");
+      if (!buffer.length || !fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
+      const storedName = `${crypto.randomUUID()}${extension}`;
+      const finalPath = path.join(studentSpotlightDir, storedName);
+      fs.writeFileSync(`${finalPath}.tmp`, buffer, { flag: "wx" });
+      fs.renameSync(`${finalPath}.tmp`, finalPath);
+      const updated = normalizeStudentSpotlight({
+        ...existing,
+        mediaOriginalName: originalName,
+        mediaStoredName: storedName,
+        mediaExtension: extension,
+        mediaMimeType: allowedStudentSpotlightTypes.get(extension),
+        mediaSize: buffer.length,
+        updatedAt: new Date().toISOString()
+      });
+      db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
+      writeDb(db);
+      removeStudentSpotlightFile(existing);
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (fileMatch && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can remove featured-work files." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(fileMatch[1]);
+    const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
+    if (!existing) {
+      sendJson(res, 404, { error: "Featured work not found." });
+      return true;
+    }
+    removeStudentSpotlightFile(existing);
+    const updated = normalizeStudentSpotlight({ ...existing, mediaOriginalName: "", mediaStoredName: "", mediaExtension: "", mediaMimeType: "", mediaSize: 0, updatedAt: new Date().toISOString() });
+    db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session) });
+    return true;
+  }
+
+  if (itemMatch && req.method === "DELETE") {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "teacher") {
+      sendJson(res, 403, { error: "Only the teacher can delete featured work." });
+      return true;
+    }
+    const db = readDb();
+    const id = decodeURIComponent(itemMatch[1]);
+    const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
+    if (!existing) {
+      sendJson(res, 404, { error: "Featured work not found." });
+      return true;
+    }
+    removeStudentSpotlightFile(existing);
+    db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).filter(item => item.id !== id);
+    writeDb(db);
+    sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session) });
+    return true;
+  }
+
+  sendJson(res, 404, { error: "Not found." });
+  return true;
 }
 
 async function handleAssignmentsApi(req, res, pathname) {
@@ -2645,6 +2934,7 @@ async function handleApi(req, res, pathname) {
 
   if (await handleAuthApi(req, res, pathname)) return true;
   if (await handleApprovedStudentsApi(req, res, pathname)) return true;
+  if (await handleStudentSpotlightsApi(req, res, pathname)) return true;
   if (await handleAssignmentsApi(req, res, pathname)) return true;
   if (await handleClassroomPassApi(req, res, pathname)) return true;
   if (await handleColtAssistantAiApi(req, res, pathname)) return true;
