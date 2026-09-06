@@ -11305,6 +11305,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   object-position: top center;
   background: #fff;
 }
+.spotlight-google-slides-thumbnail { object-fit: contain !important; }
 
 .spotlight-file-art {
   display: grid;

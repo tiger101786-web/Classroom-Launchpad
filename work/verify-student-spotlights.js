@@ -186,6 +186,8 @@ async function waitForServer() {
     assert.match(appSource, /Assignment folder/);
     assert.match(appSource, /spotlightCollection/);
     assert.match(appSource, /Image, PDF, or PowerPoint/);
+    assert.match(appSource, /drive\.google\.com\/thumbnail/);
+    assert.match(appSource, /spotlight-google-slides-thumbnail/);
     assert.match(appSource, /student-spotlights\/.*\/thumbnail/);
     assert(!appSource.includes("spotlight-pdf-preview"));
     assert(!appSource.includes('<b>PDF</b><small>Student Project</small>'));

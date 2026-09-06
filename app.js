@@ -2400,6 +2400,23 @@ function spotlightThumbnailUrl(item) {
   return `/api/student-spotlights/${encodeURIComponent(item.id)}/thumbnail?v=${encodeURIComponent(item.updatedAt || "1")}`;
 }
 
+function googleSlidesThumbnailUrl(projectUrl) {
+  try {
+    const url = new URL(projectUrl);
+    if (url.hostname !== "docs.google.com") return "";
+    const match = url.pathname.match(/^\/presentation\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)/);
+    if (!match) return "";
+    const thumbnail = new URL("https://drive.google.com/thumbnail");
+    thumbnail.searchParams.set("id", match[1]);
+    thumbnail.searchParams.set("sz", "w1200");
+    const resourceKey = url.searchParams.get("resourcekey");
+    if (resourceKey) thumbnail.searchParams.set("resourcekey", resourceKey);
+    return thumbnail.toString();
+  } catch {
+    return "";
+  }
+}
+
 function renderSpotlightArtwork(item, compact = false) {
   if (item.hasMedia && item.mediaKind === "image") {
     return `<img src="${spotlightMediaUrl(item)}" alt="Preview of ${escapeHtml(item.title)}" loading="lazy">`;
@@ -2407,6 +2424,10 @@ function renderSpotlightArtwork(item, compact = false) {
   if (item.hasMedia && ["pdf", "powerpoint"].includes(item.mediaKind)) {
     const previewLabel = item.mediaKind === "powerpoint" ? "First-slide" : "First-page";
     return `<img class="spotlight-document-thumbnail" src="${spotlightThumbnailUrl(item)}" alt="${previewLabel} preview of ${escapeHtml(item.title)}" loading="lazy">`;
+  }
+  const googleSlidesThumbnail = googleSlidesThumbnailUrl(item.projectUrl);
+  if (googleSlidesThumbnail) {
+    return `<img class="spotlight-document-thumbnail spotlight-google-slides-thumbnail" src="${escapeHtml(googleSlidesThumbnail)}" alt="First-slide preview of ${escapeHtml(item.title)}" loading="lazy" referrerpolicy="no-referrer">`;
   }
   return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
 }
@@ -11605,6 +11626,14 @@ function validateWebsite(link) {
   }
   return "";
 }
+
+app.addEventListener("error", event => {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || !image.classList.contains("spotlight-google-slides-thumbnail")) return;
+  const artwork = image.parentElement;
+  if (!artwork) return;
+  artwork.innerHTML = '<span class="spotlight-file-art" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>';
+}, true);
 
 app.addEventListener("keydown", event => {
   if (event.key !== "Escape") return;
