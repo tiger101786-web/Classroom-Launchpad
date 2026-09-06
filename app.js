@@ -2263,7 +2263,7 @@ function renderHomeNavigation() {
       <nav class="home-navigation-list">
         ${HOME_NAVIGATION_ITEMS.filter(item => !item.requiresAuth || isSignedIn()).map(item => `
           <button class="home-navigation-button ${homeNavigationActive === item.id ? "is-active" : ""}" type="button" data-action="homeNavigate" data-target="${item.id}" title="${escapeHtml(item.label)}" ${homeNavigationActive === item.id ? 'aria-current="location"' : ""}>
-            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
+            <span class="home-navigation-icon ${item.id === "home-top" ? "is-home-icon" : item.id === "home-expectations" ? "is-expectations-icon" : item.id === "home-categories" ? "is-categories-icon" : item.id === "home-student-spotlight" ? "is-spotlight-icon" : item.id === "home-google-classroom" ? "is-google-classroom-icon" : item.id === "home-classroom-pass" ? "is-pass-icon" : item.id === "home-colt-corner" ? "is-corner-icon" : ""}" aria-hidden="true">${item.icon}</span>
             <span class="home-navigation-label">${escapeHtml(item.label)}</span>
           </button>
         `).join("")}
@@ -2413,10 +2413,8 @@ function renderStudentSpotlightPreview() {
         <p>Explore creative projects and outstanding work from students across Classroom Launchpad.</p>
         <button class="primary-btn" type="button" data-action="openStudentSpotlights">Open Student Spotlight</button>
       </div>
-      <div class="student-spotlight-preview-collage is-generic" aria-label="Student creativity artwork">
-        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#9733;</b><small>Creative Work</small></span></figure>
-        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#10024;</b><small>Great Ideas</small></span></figure>
-        <figure><span class="spotlight-file-art is-compact" aria-hidden="true"><b>&#9733;</b><small>Student Success</small></span></figure>
+      <div class="student-spotlight-preview-artwork">
+        <img src="assets/student-spotlight-home-art.png?v=20260906-1" alt="Creative Work, Great Ideas, Student Success">
       </div>
     </section>
   `;

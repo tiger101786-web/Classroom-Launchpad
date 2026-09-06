@@ -284,7 +284,8 @@ body.home-navigation-open {
   stroke-linejoin: round;
 }
 
-.home-navigation-icon.is-expectations-icon svg {
+.home-navigation-icon.is-expectations-icon svg,
+.home-navigation-icon.is-spotlight-icon svg {
   width: 22px;
   height: 22px;
   fill: currentColor;
@@ -11260,6 +11261,21 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .spotlight-dashboard h2 { margin: 6px 0 8px; }
 .student-spotlight-preview-copy p { max-width: 620px; margin: 0 0 20px; color: var(--muted); }
 
+.student-spotlight-preview-artwork {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+}
+
+.student-spotlight-preview-artwork img {
+  display: block;
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 18px rgba(45, 0, 15, .22));
+}
+
 .student-spotlight-preview-collage {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -11349,6 +11365,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 @media (max-width: 900px) {
   .student-spotlight-preview { grid-template-columns: 1fr; }
+  .student-spotlight-preview-artwork { max-width: 620px; }
   .student-spotlight-preview-collage { max-width: 580px; }
   .student-spotlight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .spotlight-dashboard-card { grid-template-columns: 90px minmax(0, 1fr); }
@@ -11360,6 +11377,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-preview,
   .student-spotlight-page,
   .spotlight-dashboard { padding: 18px; }
+  .student-spotlight-preview-artwork img { max-height: 190px; }
   .student-spotlight-preview-collage { min-height: 140px; }
   .student-spotlight-preview-collage figure { height: 125px; }
   .student-spotlight-preview-collage figure:nth-child(2) { height: 145px; }
