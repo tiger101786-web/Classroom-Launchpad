@@ -1434,6 +1434,7 @@ dashboardSections.splice(4, 0, { id: "registered", label: "Registered Students",
 const savedDashboardSection = sessionStorage.getItem("teacherDashboardSection") || "overview";
 let dashboardSection = dashboardSections.some(section => section.id === savedDashboardSection) ? savedDashboardSection : "overview";
 let dashboardStudentSearch = "";
+let registeredStudentSearch = "";
 let teacherPasswordStudentEmail = "";
 let teacherPasswordMessage = "";
 let dashboardLinkSearch = "";
@@ -8876,10 +8877,17 @@ function renderApprovedStudentManager() {
 }
 
 function renderRegisteredStudents() {
-  const registeredStudents = approvedStudents
+  const allRegisteredStudents = approvedStudents
     .filter(student => student.registered)
     .map(student => ({ ...student, rosterDisplayName: formatStudentFirstLast(student.name || student.email) }))
     .sort((a, b) => a.rosterDisplayName.localeCompare(b.rosterDisplayName, undefined, { sensitivity: "base" }));
+  const registeredQuery = registeredStudentSearch.trim().toLowerCase();
+  const registeredStudents = allRegisteredStudents.filter(student => !registeredQuery || [
+    student.rosterDisplayName,
+    student.name,
+    student.email,
+    student.grade ? `grade ${student.grade}` : ""
+  ].some(value => String(value || "").toLowerCase().includes(registeredQuery)));
   const gradeGroups = CLASSROOM_GRADES.map(grade => ({
     grade,
     students: registeredStudents.filter(student => String(student.grade || "") === grade)
@@ -8894,9 +8902,18 @@ function renderRegisteredStudents() {
           <h2>Students Who Have Registered</h2>
           <p class="instruction">Only students who completed account activation appear here.</p>
         </div>
-        <strong class="registered-student-total">${registeredStudents.length}</strong>
+        <strong class="registered-student-total" aria-label="${allRegisteredStudents.length} registered students">${allRegisteredStudents.length}</strong>
       </header>
-      ${registeredStudents.length ? `
+      ${allRegisteredStudents.length ? `
+        <div class="registered-student-search-row">
+          <label class="registered-student-search" for="registeredStudentSearch">
+            <span aria-hidden="true">&#128269;</span>
+            <span class="sr-only">Search registered students</span>
+            <input id="registeredStudentSearch" type="search" value="${escapeHtml(registeredStudentSearch)}" placeholder="Search registered students…" autocomplete="off">
+          </label>
+          <small aria-live="polite">${registeredQuery ? `${registeredStudents.length} of ${allRegisteredStudents.length} students shown` : `${allRegisteredStudents.length} activated accounts`}</small>
+        </div>
+        ${registeredStudents.length ? `
         <div class="registered-student-grade-grid">
           ${gradeGroups.filter(group => group.students.length).map(group => `
             <section class="registered-student-grade-card">
@@ -8913,6 +8930,7 @@ function renderRegisteredStudents() {
             </section>
           `).join("")}
         </div>
+        ` : emptyCard(`No registered students match “${escapeHtml(registeredStudentSearch.trim())}”.`)}
       ` : emptyCard("No students have activated their accounts yet.")}
     </section>
   `;
@@ -10309,6 +10327,18 @@ function attachScreenHandlers() {
       if (nextSearch) {
         nextSearch.focus();
         nextSearch.setSelectionRange(dashboardStudentSearch.length, dashboardStudentSearch.length);
+      }
+    });
+  }
+  const registeredSearch = document.getElementById("registeredStudentSearch");
+  if (registeredSearch) {
+    registeredSearch.addEventListener("input", event => {
+      registeredStudentSearch = event.target.value;
+      render();
+      const nextSearch = document.getElementById("registeredStudentSearch");
+      if (nextSearch) {
+        nextSearch.focus();
+        nextSearch.setSelectionRange(registeredStudentSearch.length, registeredStudentSearch.length);
       }
     });
   }

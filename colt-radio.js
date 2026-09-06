@@ -369,6 +369,14 @@
       source: "https://drive.uber.radio/uber/calmkids/icecast.audio",
       provider: "YouRadio Calm Kids",
       note: "Ad-free calm, gentle music for quiet classroom work, reading, and relaxation, streamed by YouRadio."
+    },
+    {
+      id: "hitbound-radio",
+      label: "Pop • New Hits",
+      type: "stream",
+      source: "https://streaming.live365.com/a08639",
+      provider: "HitBound Radio",
+      note: "Current pop, rhythmic, and crossover discoveries streamed by HitBound Radio. The station describes its programming as family-friendly, always commercial-free, and free of ad breaks."
     }
   ];
   const preferredStationKey = "classroomLaunchpadColtRadioStationV1";
@@ -422,7 +430,8 @@
     "iheartcountry-family": '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/><path d="M8 4h8M9 4l1-2m5 2-1-2"/>',
     "youradio-kids-movie-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
     "youradio-kidz-bop": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
-    "youradio-calm-kids": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>'
+    "youradio-calm-kids": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
+    "hitbound-radio": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>'
   };
 
   function iconSvg(paths, className = "") {

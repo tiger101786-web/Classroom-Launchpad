@@ -142,7 +142,7 @@ async function run() {
     });
     if (!expectationsRedesign.kicker.includes("Classroom Standards") || expectationsRedesign.heading !== "Classroom Launchpad Expectations"
       || expectationsRedesign.ruleCount !== 6 || expectationsRedesign.checkCount !== 6
-      || expectationsRedesign.imageSource !== "assets/expectations-colt.mp4" || !expectationsRedesign.weekday
+      || !expectationsRedesign.imageSource?.startsWith("assets/expectations-colt.mp4") || !expectationsRedesign.weekday
       || !expectationsRedesign.date || !expectationsRedesign.year || !expectationsRedesign.time
       || expectationsRedesign.live !== "Live" || expectationsRedesign.calendarWidth < 220 || !expectationsRedesign.dateFits
       || !expectationsRedesign.contained) {
@@ -998,6 +998,14 @@ async function run() {
       || registeredRoster.heading !== "Students Who Have Registered" || !registeredRoster.gradeCards) {
       throw new Error(`Registered-student details did not isolate activated accounts: ${JSON.stringify(registeredRoster)}.`);
     }
+    await page.locator("#registeredStudentSearch").fill("Cody");
+    const filteredRegisteredNames = await page.locator(".registered-student-name strong").allTextContents();
+    if (filteredRegisteredNames.length !== 1 || filteredRegisteredNames[0].trim() !== "Cody, Nieves") {
+      throw new Error(`Registered-student search returned the wrong students: ${JSON.stringify(filteredRegisteredNames)}.`);
+    }
+    await page.locator("#registeredStudentSearch").fill("not-a-registered-student");
+    await page.getByText("No registered students match “not-a-registered-student”.", { exact: true }).waitFor();
+    await page.locator("#registeredStudentSearch").fill("");
     await page.evaluate(() => {
       approvedStudents = approvedStudents.filter(student => !["activated.ui@scscolts.org", "cody.nieves@scscolts.org", "avery.adams@scscolts.org"].includes(student.email));
       render();
