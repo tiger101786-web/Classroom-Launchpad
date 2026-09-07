@@ -232,7 +232,7 @@ async function run() {
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ artist: "Test Movie Artist", song: "Test Movie Song" })
     }));
-    await page.route("https://audio-mp3.ibiblio.org/wcpe.mp3", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber-app/easyclassical/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://radio.stereoscenic.com/asp-h", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://streamssl.chilltrax.com/", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber/forkidzpophits/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
@@ -494,9 +494,9 @@ async function run() {
     assert.match(await page.locator(".colt-radio-note").innerText(), /Disney classics/);
 
     await page.getByRole("button", { name: "Classical", exact: true }).click();
-    assert.equal(await audio.getAttribute("src"), "https://audio-mp3.ibiblio.org/wcpe.mp3");
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/easyclassical/icecast.audio");
     await page.getByText("Classical live stream", { exact: true }).waitFor();
-    assert.match(await page.locator(".colt-radio-note").innerText(), /noncommercial/);
+    assert.match(await page.locator(".colt-radio-note").innerText(), /commercial-free by YouRadio/);
 
     await page.getByRole("button", { name: "Ambient • Sleeping Pill", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://radio.stereoscenic.com/asp-h");

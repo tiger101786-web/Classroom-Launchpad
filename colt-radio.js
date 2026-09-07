@@ -310,9 +310,9 @@
       id: "wcpe-classical",
       label: "Classical",
       type: "stream",
-      source: "https://audio-mp3.ibiblio.org/wcpe.mp3",
-      provider: "WCPE The Classical Station",
-      note: "Classical music streamed by the independent, listener-supported, noncommercial WCPE The Classical Station. No account required."
+      source: "https://drive.uber.radio/uber-app/easyclassical/icecast.audio",
+      provider: "YouRadio Easy Classical",
+      note: "Gentle, accessible classical music streamed commercial-free by YouRadio. No account or subscription required."
     },
     {
       id: "ambient-sleeping-pill",
