@@ -212,6 +212,12 @@ async function waitForServer() {
     assert.match(appSource, /No featured work matches that search/);
     assert.match(appSource, /class="spotlight-document-thumbnail"/);
     assert.match(appSource, /Assignment Folders/);
+    assert.match(appSource, /student-spotlight-folder-hero/);
+    assert.match(appSource, /student-spotlight-stage-art/);
+    assert.match(appSource, /renderStudentSpotlightFolderCollage/);
+    assert.match(appSource, /Search assignment folders/);
+    assert.match(appSource, /data-spotlight-folder-search/);
+    assert.match(appSource, /Open Gallery/);
     assert.match(appSource, /Assignment folder/);
     assert.match(appSource, /spotlightCollection/);
     assert.match(appSource, /screen\.name === "studentSpotlights" && spotlightCollectionFilter/);

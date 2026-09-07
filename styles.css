@@ -11381,7 +11381,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .spotlight-file-art b { font-size: 2rem; color: #ff315f; }
 .spotlight-file-art small { font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
 
-.student-spotlight-page { margin-top: 18px; padding: 24px; }
+.student-spotlight-page { margin-top: 18px; padding: 24px; overflow: hidden; }
 .student-spotlight-page-heading,
 .spotlight-dashboard-heading,
 .spotlight-dashboard-card,
@@ -11440,27 +11440,114 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   font-weight: 900;
   cursor: pointer;
 }
+.student-spotlight-folder-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+  align-items: center;
+  min-height: 168px;
+  margin: -24px -24px 0;
+  padding: 28px 34px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at 78% 60%, rgba(205, 18, 78, .28), transparent 34%),
+    linear-gradient(110deg, #17171b 0%, #1f151a 45%, #260711 100%);
+  color: #fff;
+}
+.student-spotlight-folder-hero::after {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(135deg, rgba(255,255,255,.025) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.025) 50%, rgba(255,255,255,.025) 75%, transparent 75%);
+  background-size: 24px 24px;
+  pointer-events: none;
+  content: "";
+}
+.student-spotlight-folder-hero-copy { position: relative; z-index: 2; }
+.student-spotlight-folder-hero-copy h2 { color: #f8e8ef; font-size: clamp(2rem, 3vw, 2.7rem); }
+.student-spotlight-folder-hero-copy p { margin: 0; color: #f1dfe6; }
+.student-spotlight-stage-art {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  height: 145px;
+  place-items: end center;
+}
+.student-spotlight-stage-art::after {
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  left: 8%;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,31,98,.78), rgba(101,0,31,.3) 48%, transparent 72%);
+  filter: blur(2px);
+  content: "";
+}
+.student-spotlight-stage-art svg { position: relative; z-index: 2; width: min(300px, 100%); height: 145px; filter: drop-shadow(0 0 16px rgba(238,24,88,.55)); }
+.student-spotlight-stage-art .stage-board-top,
+.student-spotlight-stage-art .stage-board,
+.student-spotlight-stage-art .stage-board-legs { fill: #17070d; stroke: #f02563; stroke-width: 3; }
+.student-spotlight-stage-art .stage-board-star { fill: #f02563; filter: drop-shadow(0 0 7px #f02563); }
+.student-spotlight-stage-beam {
+  position: absolute;
+  top: -12px;
+  width: 72px;
+  height: 138px;
+  background: linear-gradient(to bottom, rgba(255,74,126,.5), rgba(255,24,91,.08) 72%, transparent);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+  filter: blur(4px);
+  opacity: .75;
+}
+.student-spotlight-stage-beam.is-left { left: 10%; transform: rotate(-13deg); }
+.student-spotlight-stage-beam.is-center { left: calc(50% - 36px); }
+.student-spotlight-stage-beam.is-right { right: 10%; transform: rotate(13deg); }
+.student-spotlight-folder-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(280px, 1fr);
+  align-items: center;
+  gap: 8px 24px;
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--gold-soft);
+}
+.student-spotlight-folder-summary { display: flex; align-items: center; gap: 9px; color: var(--blue-dark); text-transform: uppercase; }
+.student-spotlight-folder-summary > span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; color: #fff; background: var(--blue); }
+.student-spotlight-folder-summary strong { font-size: .84rem; white-space: nowrap; }
+.student-spotlight-folder-summary b { color: var(--blue); }
+.student-spotlight-folder-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--blue);
+  background: var(--white);
+}
+.student-spotlight-folder-search:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(123,11,49,.16); }
+.student-spotlight-folder-search svg { flex: 0 0 auto; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.student-spotlight-folder-search input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; }
+.student-spotlight-folder-search-status { grid-column: 1 / -1; color: var(--muted); text-align: right; font-weight: 800; }
 .student-spotlight-folder-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-  margin-top: 22px;
+  margin-top: 20px;
 }
 .student-spotlight-folder {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) 40px;
-  gap: 18px;
-  align-items: center;
-  min-height: 122px;
-  padding: 20px;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
   border: 1px solid var(--border);
-  border-left: 5px solid var(--blue);
   border-radius: 14px;
   color: var(--text);
-  background: linear-gradient(135deg, var(--gold-soft), var(--white));
+  background: var(--gold-soft);
   box-shadow: 0 9px 20px rgba(45, 0, 15, .1);
   text-align: left;
-  cursor: pointer;
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 .student-spotlight-folder:hover,
@@ -11468,6 +11555,41 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   border-color: var(--blue);
   box-shadow: 0 13px 26px rgba(101, 0, 31, .18);
   transform: translateY(-2px);
+}
+.student-spotlight-folder-collage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  height: 230px;
+  padding: 22px 20px 12px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 100%, rgba(196,19,77,.32), transparent 58%), linear-gradient(145deg, #210810, #480919 55%, #17070d);
+}
+.student-spotlight-folder-preview {
+  height: 178px;
+  margin: 0 -8px;
+  overflow: hidden;
+  border: 3px solid #f8e8ef;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 22px rgba(0,0,0,.32);
+  transform: rotate(-5deg);
+}
+.student-spotlight-folder-preview:nth-child(2) { z-index: 2; height: 194px; transform: rotate(0); }
+.student-spotlight-folder-preview:nth-child(3) { transform: rotate(5deg); }
+.student-spotlight-folder-preview img,
+.student-spotlight-folder-preview .spotlight-file-art { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.student-spotlight-folder-preview.is-placeholder { display: grid; place-items: center; color: #65001f; background: #fff7fa; }
+.student-spotlight-folder-preview.is-placeholder > span { display: grid; gap: 8px; text-align: center; }
+.student-spotlight-folder-preview.is-placeholder b { font-size: 2rem; }
+.student-spotlight-folder-preview.is-placeholder small { font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.student-spotlight-folder-details {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+  border-top: 1px solid var(--border);
 }
 .student-spotlight-folder-icon {
   position: relative;
@@ -11494,18 +11616,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .student-spotlight-folder-copy { display: grid; gap: 4px; min-width: 0; }
 .student-spotlight-folder-copy strong { font-size: 1.15rem; line-height: 1.18; }
 .student-spotlight-folder-copy small { color: var(--muted); font-weight: 800; }
-.student-spotlight-folder-copy > span { color: var(--blue); font-size: .82rem; font-weight: 900; }
-.student-spotlight-folder-arrow {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 50%;
-  color: #fff;
-  background: var(--blue);
-  font-size: 1.25rem;
-  font-weight: 900;
-}
+.student-spotlight-folder-grades { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.student-spotlight-folder-grades > span { padding: 4px 8px; border: 1px solid var(--blue); border-radius: 999px; color: var(--blue); font-size: .75rem; font-weight: 900; }
+.student-spotlight-folder-open { white-space: nowrap; }
+.student-spotlight-folder[hidden],
+.student-spotlight-folder-search-empty[hidden] { display: none !important; }
+.student-spotlight-folder-search-empty { grid-column: 1 / -1; }
 .student-spotlight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
 .student-spotlight-card { overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: var(--gold-soft); }
 .student-spotlight-card-art { height: 220px; margin: 0; background: #18070d; }
@@ -11534,6 +11650,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-preview-artwork { max-width: 620px; margin-top: 0; }
   .student-spotlight-preview-collage { max-width: 580px; }
   .student-spotlight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .student-spotlight-folder-hero { grid-template-columns: 1fr; }
+  .student-spotlight-stage-art { height: 130px; }
+  .student-spotlight-folder-toolbar { grid-template-columns: 1fr; }
+  .student-spotlight-folder-search-status { text-align: left; }
+  .student-spotlight-folder-grid { grid-template-columns: 1fr; }
   .spotlight-dashboard-card { grid-template-columns: 90px minmax(0, 1fr); }
   .spotlight-dashboard-card figure { width: 90px; }
   .spotlight-dashboard-card .actions { grid-column: 1 / -1; justify-content: flex-end; }
@@ -11549,6 +11670,18 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-preview-collage figure:nth-child(2) { height: 145px; }
   .student-spotlight-page-heading,
   .spotlight-dashboard-heading { align-items: flex-start; flex-direction: column; }
+  .student-spotlight-folder-hero { margin: -18px -18px 0; padding: 24px 20px; }
+  .student-spotlight-folder-hero-copy h2 { font-size: 2rem; }
+  .student-spotlight-stage-art { height: 112px; }
+  .student-spotlight-stage-art svg { height: 112px; }
+  .student-spotlight-folder-summary { flex-wrap: wrap; }
+  .student-spotlight-folder-summary strong { white-space: normal; }
+  .student-spotlight-folder-collage { height: 190px; padding-inline: 14px; }
+  .student-spotlight-folder-preview { height: 142px; }
+  .student-spotlight-folder-preview:nth-child(2) { height: 158px; }
+  .student-spotlight-folder-details { grid-template-columns: 58px minmax(0, 1fr); padding: 16px; }
+  .student-spotlight-folder-icon { width: 56px; height: 48px; }
+  .student-spotlight-folder-open { grid-column: 1 / -1; width: 100%; }
   .student-spotlight-grid,
   .student-spotlight-folder-grid,
   .spotlight-editor-grid { grid-template-columns: 1fr; }

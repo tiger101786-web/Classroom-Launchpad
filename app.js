@@ -1433,6 +1433,7 @@ let studentSpotlights = [];
 let spotlightGradeFilter = "all";
 let spotlightCollectionFilter = "";
 let spotlightSearchQuery = "";
+let spotlightFolderSearchQuery = "";
 let categorySearchQuery = "";
 let spotlightEditorId = "";
 let spotlightStatusMessage = "";
@@ -2490,6 +2491,20 @@ function studentSpotlightCollections(items) {
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
+function renderStudentSpotlightFolderCollage(collection) {
+  const previews = collection.items.slice(0, 3);
+  while (previews.length < 3) previews.push(null);
+  return `
+    <div class="student-spotlight-folder-collage" aria-hidden="true">
+      ${previews.map((item, index) => `
+        <figure class="student-spotlight-folder-preview ${item ? "" : "is-placeholder"}">
+          ${item ? renderSpotlightArtwork(item, true) : `<span><b>${index + 1}</b><small>Student Work</small></span>`}
+        </figure>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderStudentSpotlightPage() {
   if (!isSignedIn()) {
     return `${pageHeader("Student Work Spotlight", "Sign in to view featured student projects.", true)}<section class="auth-card"><button class="primary-btn" data-action="login">Launchpad Login</button></section>`;
@@ -2523,24 +2538,57 @@ function renderStudentSpotlightPage() {
           <div id="studentSpotlightSearchEmpty" class="empty-card student-spotlight-search-empty" hidden>No featured work matches that search.</div>
         </div>
       ` : `
-        <header class="student-spotlight-page-heading">
-          <div><span class="feature-kicker">Students Only</span><h2>Assignment Folders</h2><p>Choose an assignment to view its featured student work.</p></div>
+        <header class="student-spotlight-folder-hero">
+          <div class="student-spotlight-folder-hero-copy">
+            <span class="feature-kicker">Students Only</span>
+            <h2>Assignment Folders</h2>
+            <p>Choose an assignment to view its featured student work.</p>
+          </div>
+          <div class="student-spotlight-stage-art" aria-hidden="true">
+            <span class="student-spotlight-stage-beam is-left"></span>
+            <span class="student-spotlight-stage-beam is-center"></span>
+            <span class="student-spotlight-stage-beam is-right"></span>
+            <svg viewBox="0 0 240 150" focusable="false">
+              <path class="stage-board-top" d="M47 28h146v8H47z"></path>
+              <rect class="stage-board" x="55" y="36" width="130" height="82" rx="4"></rect>
+              <path class="stage-board-star" d="m120 54 9 18 20 3-14.5 14 3.5 20-18-9.5-18 9.5 3.5-20L91 75l20-3 9-18Z"></path>
+              <path class="stage-board-legs" d="M103 118h8l-17 28h-10l19-28Zm26 0h8l19 28h-10l-17-28Z"></path>
+            </svg>
+          </div>
         </header>
+        <div class="student-spotlight-folder-toolbar">
+          <div class="student-spotlight-folder-summary">
+            <span aria-hidden="true">&#9733;</span>
+            <strong>${collections.length} ${collections.length === 1 ? "assignment" : "assignments"}</strong>
+            <b aria-hidden="true">&middot;</b>
+            <strong>${published.length} featured ${published.length === 1 ? "project" : "projects"}</strong>
+          </div>
+          <label class="student-spotlight-folder-search" for="studentSpotlightFolderSearch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5"></path></svg>
+            <input id="studentSpotlightFolderSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightFolderSearchQuery)}" placeholder="Search assignment folders">
+          </label>
+          <small id="studentSpotlightFolderSearchStatus" class="student-spotlight-folder-search-status" aria-live="polite">${collections.length} ${collections.length === 1 ? "folder" : "folders"}.</small>
+        </div>
         <div class="student-spotlight-folder-grid">
           ${collections.length ? collections.map(collection => {
             const grades = [...new Set(collection.items.map(item => item.grade))].sort();
+            const folderSearchText = `${collection.name} ${grades.map(grade => `grade ${grade}`).join(" ")}`.toLowerCase();
             return `
-              <button class="student-spotlight-folder" type="button" data-action="spotlightCollection" data-collection="${escapeHtml(collection.key)}">
-                <span class="student-spotlight-folder-icon" aria-hidden="true"><span></span></span>
-                <span class="student-spotlight-folder-copy">
-                  <strong>${escapeHtml(collection.name)}</strong>
-                  <small>${collection.items.length} featured ${collection.items.length === 1 ? "project" : "projects"}</small>
-                  <span>${grades.map(grade => `Grade ${escapeHtml(grade)}`).join(" · ")}</span>
-                </span>
-                <span class="student-spotlight-folder-arrow" aria-hidden="true">&#8594;</span>
-              </button>
+              <article class="student-spotlight-folder" data-spotlight-folder-search="${escapeHtml(folderSearchText)}">
+                ${renderStudentSpotlightFolderCollage(collection)}
+                <div class="student-spotlight-folder-details">
+                  <span class="student-spotlight-folder-icon" aria-hidden="true"><span></span></span>
+                  <div class="student-spotlight-folder-copy">
+                    <strong>${escapeHtml(collection.name)}</strong>
+                    <small>${collection.items.length} featured ${collection.items.length === 1 ? "project" : "projects"}</small>
+                    <span class="student-spotlight-folder-grades">${grades.map(grade => `<span>Grade ${escapeHtml(grade)}</span>`).join("")}</span>
+                  </div>
+                  <button class="primary-btn student-spotlight-folder-open" type="button" data-action="spotlightCollection" data-collection="${escapeHtml(collection.key)}">Open Gallery</button>
+                </div>
+              </article>
             `;
           }).join("") : emptyCard("No student work has been featured yet.")}
+          <div id="studentSpotlightFolderSearchEmpty" class="empty-card student-spotlight-folder-search-empty" hidden>No assignment folders match that search.</div>
         </div>
       `}
     </section>
@@ -10733,6 +10781,7 @@ function attachScreenHandlers() {
   attachStudentRequestForm();
   attachStudentSpotlightForm();
   attachStudentSpotlightSearch();
+  attachStudentSpotlightFolderSearch();
   attachCategoryLinkSearch();
   attachThreadForm();
   attachReplyForm();
@@ -11424,6 +11473,36 @@ function attachStudentSpotlightSearch() {
   applyStudentSpotlightSearch();
 }
 
+function applyStudentSpotlightFolderSearch() {
+  const input = document.getElementById("studentSpotlightFolderSearch");
+  if (!input) return;
+  const query = String(spotlightFolderSearchQuery || "").trim().toLowerCase();
+  const folders = [...document.querySelectorAll(".student-spotlight-folder[data-spotlight-folder-search]")];
+  let matchCount = 0;
+  folders.forEach(folder => {
+    const matches = !query || String(folder.dataset.spotlightFolderSearch || "").includes(query);
+    folder.hidden = !matches;
+    if (matches) matchCount += 1;
+  });
+  const status = document.getElementById("studentSpotlightFolderSearchStatus");
+  if (status) status.textContent = query
+    ? `${matchCount} matching ${matchCount === 1 ? "folder" : "folders"}.`
+    : `${folders.length} ${folders.length === 1 ? "folder" : "folders"}.`;
+  const empty = document.getElementById("studentSpotlightFolderSearchEmpty");
+  if (empty) empty.hidden = !query || matchCount > 0;
+}
+
+function attachStudentSpotlightFolderSearch() {
+  const input = document.getElementById("studentSpotlightFolderSearch");
+  if (!input || input.dataset.ready === "true") return;
+  input.dataset.ready = "true";
+  input.addEventListener("input", event => {
+    spotlightFolderSearchQuery = event.target.value;
+    applyStudentSpotlightFolderSearch();
+  });
+  applyStudentSpotlightFolderSearch();
+}
+
 function applyCategoryLinkSearch() {
   const input = document.getElementById("categoryLinkSearch");
   if (!input) return;
@@ -11808,6 +11887,7 @@ app.addEventListener("click", async event => {
     else if (screen.name === "studentSpotlights" && spotlightCollectionFilter) {
       spotlightCollectionFilter = "";
       spotlightGradeFilter = "all";
+      spotlightFolderSearchQuery = "";
       render();
     }
     else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "studentSpotlights", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
@@ -12143,6 +12223,7 @@ app.addEventListener("click", async event => {
     spotlightCollectionFilter = "";
     spotlightGradeFilter = "all";
     spotlightSearchQuery = "";
+    spotlightFolderSearchQuery = "";
     setScreen({ name: isSignedIn() ? "studentSpotlights" : "login" });
   }
   if (action === "spotlightCollection") {
@@ -12155,6 +12236,7 @@ app.addEventListener("click", async event => {
     spotlightCollectionFilter = "";
     spotlightGradeFilter = "all";
     spotlightSearchQuery = "";
+    spotlightFolderSearchQuery = "";
     render();
   }
   if (action === "spotlightGrade") {
