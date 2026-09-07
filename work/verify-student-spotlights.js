@@ -162,6 +162,24 @@ async function waitForServer() {
     assert.equal(powerpointThumbnail.response.headers.get("content-type"), "image/jpeg");
     assert.deepEqual([...powerpointThumbnail.payload.subarray(0, 3)], [0xff, 0xd8, 0xff]);
 
+    const jpegNamedAsPng = Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2Q==", "base64");
+    const normalizedPreviewUpload = await request(`/api/student-spotlights/${id}/file`, {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        Cookie: teacherCookie,
+        "Content-Type": "image/png",
+        "X-File-Name": encodeURIComponent("slide-preview.png")
+      },
+      body: jpegNamedAsPng
+    });
+    assert.equal(normalizedPreviewUpload.response.status, 201);
+    assert.equal(normalizedPreviewUpload.payload.spotlight.mediaKind, "image");
+    const normalizedPreview = await request(`/api/student-spotlights/${id}/file`, { headers: { Cookie: studentCookie } });
+    assert.equal(normalizedPreview.response.status, 200);
+    assert.equal(normalizedPreview.response.headers.get("content-type"), "image/jpeg");
+    assert.match(normalizedPreview.response.headers.get("content-disposition"), /slide-preview\.jpg/);
+
     const hidden = await request(`/api/student-spotlights/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },

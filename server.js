@@ -2408,11 +2408,18 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       const id = decodeURIComponent(fileMatch[1]);
       const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
       if (!existing) throw new Error("Featured work not found.");
-      const originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
-      const extension = path.extname(originalName).toLowerCase();
+      let originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
+      let extension = path.extname(originalName).toLowerCase();
       if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, PDF, or PowerPoint file.");
       const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 50 MB or smaller.");
-      if (!buffer.length || !fileMatchesExtension(buffer, extension)) throw new Error("The file contents do not match the filename.");
+      if (!buffer.length) throw new Error("The uploaded file is empty.");
+      if (!fileMatchesExtension(buffer, extension)) {
+        const detectedExtension = detectedImageExtension(buffer);
+        const declaredAsImage = [".jpg", ".jpeg", ".png", ".webp"].includes(extension);
+        if (!declaredAsImage || !detectedExtension) throw new Error("The file contents do not match the filename.");
+        extension = detectedExtension;
+        originalName = `${path.basename(originalName, path.extname(originalName))}${extension}`;
+      }
       const storedName = `${crypto.randomUUID()}${extension}`;
       const finalPath = path.join(studentSpotlightDir, storedName);
       fs.writeFileSync(`${finalPath}.tmp`, buffer, { flag: "wx" });
@@ -4063,6 +4070,14 @@ function fileMatchesExtension(buffer, extension) {
   if ([".doc", ".ppt"].includes(extension)) return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]));
   if (extension === ".txt") return !buffer.subarray(0, Math.min(buffer.length, 4096)).includes(0);
   return false;
+}
+
+function detectedImageExtension(buffer) {
+  if (!Buffer.isBuffer(buffer) || !buffer.length) return "";
+  if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return ".png";
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return ".jpg";
+  if (buffer.length >= 12 && buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP") return ".webp";
+  return "";
 }
 
 function decodeXmlText(value) {
