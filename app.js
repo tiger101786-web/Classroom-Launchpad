@@ -2442,7 +2442,7 @@ function renderStudentSpotlightPreview() {
         <button class="primary-btn" type="button" data-action="openStudentSpotlights">Open Student Spotlight</button>
       </div>
       <div class="student-spotlight-preview-artwork">
-        <img src="assets/student-spotlight-home-art.png?v=20260906-1" alt="Creative Work, Great Ideas, Student Success">
+        <img src="assets/student-spotlight-home-art.png?v=20260906-spotlight-stage-v2" alt="Creative Work, Great Ideas, Student Success">
       </div>
     </section>
   `;
@@ -11678,6 +11678,11 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
+    else if (screen.name === "studentSpotlights" && spotlightCollectionFilter) {
+      spotlightCollectionFilter = "";
+      spotlightGradeFilter = "all";
+      render();
+    }
     else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "studentSpotlights", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
