@@ -9971,7 +9971,11 @@ function renderDashboardStudentSpotlights() {
   const showEditor = spotlightEditorId === "new" || Boolean(editing);
   const students = [...approvedStudents]
     .filter(student => student && student.email && ["4", "5", "6", "7"].includes(String(student.grade)))
-    .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+    .map(student => ({
+      ...student,
+      spotlightDisplayName: formatStudentFirstLast(student.name || student.email)
+    }))
+    .sort((a, b) => a.spotlightDisplayName.localeCompare(b.spotlightDisplayName, undefined, { sensitivity: "base" }));
   const folderNames = [...new Set(studentSpotlights.map(item => String(item.collectionName || item.title || "").trim()).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   return `
@@ -9992,12 +9996,15 @@ function renderDashboardStudentSpotlights() {
             <button class="outline-btn" type="button" data-action="closeStudentSpotlightEditor">Close</button>
           </div>
           <div class="form-grid spotlight-editor-grid">
-            <div class="field">
-              <label for="spotlightStudent">Student</label>
+            <div class="field spotlight-student-picker">
+              <label for="spotlightStudentSearch">Find a student</label>
+              <input id="spotlightStudentSearch" type="search" autocomplete="off" placeholder="Search by first name, last name, email, or grade">
+              <label class="spotlight-student-results-label" for="spotlightStudent">Student results</label>
               <select id="spotlightStudent" name="studentEmail" required>
                 <option value="">Choose a student</option>
-                ${students.map(student => `<option value="${escapeHtml(student.email)}" ${editing && editing.studentEmail === student.email ? "selected" : ""}>${escapeHtml(student.name || student.email)} — Grade ${escapeHtml(student.grade)}</option>`).join("")}
+                ${students.map(student => `<option value="${escapeHtml(student.email)}" data-student-search="${escapeHtml(`${student.spotlightDisplayName} ${student.email} grade ${student.grade}`.toLowerCase())}" ${editing && editing.studentEmail === student.email ? "selected" : ""}>${escapeHtml(student.spotlightDisplayName)} — Grade ${escapeHtml(student.grade)}</option>`).join("")}
               </select>
+              <small id="spotlightStudentSearchStatus" aria-live="polite">${students.length} students available.</small>
             </div>
             <div class="field">
               <label for="spotlightTitle">Project title</label>
@@ -11359,6 +11366,34 @@ function attachStudentSpotlightForm() {
   const form = document.getElementById("studentSpotlightForm");
   if (!form || form.dataset.ready === "true") return;
   form.dataset.ready = "true";
+  const studentSearch = document.getElementById("spotlightStudentSearch");
+  const studentSelect = document.getElementById("spotlightStudent");
+  const studentSearchStatus = document.getElementById("spotlightStudentSearchStatus");
+  if (studentSearch && studentSelect) {
+    const studentOptions = [...studentSelect.options].filter(option => option.value);
+    studentSearch.addEventListener("input", () => {
+      const query = studentSearch.value.trim().toLowerCase();
+      let firstMatch = null;
+      let matchCount = 0;
+      studentOptions.forEach(option => {
+        const matches = !query || String(option.dataset.studentSearch || option.textContent).includes(query);
+        option.hidden = !matches;
+        if (matches) {
+          matchCount += 1;
+          if (!firstMatch) firstMatch = option;
+        }
+      });
+      const selectedOption = studentSelect.selectedOptions[0];
+      if (query && (!selectedOption || !selectedOption.value || selectedOption.hidden)) {
+        studentSelect.value = firstMatch ? firstMatch.value : "";
+      }
+      if (studentSearchStatus) {
+        studentSearchStatus.textContent = query
+          ? `${matchCount} matching student${matchCount === 1 ? "" : "s"}.`
+          : `${studentOptions.length} students available.`;
+      }
+    });
+  }
   form.addEventListener("submit", async event => {
     event.preventDefault();
     const status = document.getElementById("studentSpotlightFormStatus");

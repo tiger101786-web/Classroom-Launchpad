@@ -11433,6 +11433,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .spotlight-dashboard { padding: 22px; }
 .spotlight-editor { margin: 20px 0; }
 .spotlight-editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.spotlight-student-picker { align-content: start; }
+.spotlight-student-picker .spotlight-student-results-label { margin-top: 11px; }
+.spotlight-student-picker small { margin-top: 7px; color: var(--muted); }
 .spotlight-wide-field { grid-column: 1 / -1; }
 .spotlight-dashboard-list { display: grid; gap: 12px; margin-top: 20px; }
 .spotlight-dashboard-card { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; }

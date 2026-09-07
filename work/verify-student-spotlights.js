@@ -199,6 +199,10 @@ async function waitForServer() {
     assert.match(appSource, /Creative Work, Great Ideas, Student Success/);
     assert.match(appSource, /Students Only/);
     assert.match(appSource, /Feature New Work/);
+    assert.match(appSource, /spotlightStudentSearch/);
+    assert.match(appSource, /Search by first name, last name, email, or grade/);
+    assert.match(appSource, /spotlightDisplayName: formatStudentFirstLast/);
+    assert.match(appSource, /matching student/);
     assert.match(appSource, /class="spotlight-document-thumbnail"/);
     assert.match(appSource, /Assignment Folders/);
     assert.match(appSource, /Assignment folder/);
