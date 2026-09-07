@@ -2411,10 +2411,7 @@ function googleSlidesPreviewInfo(projectUrl) {
     const thumbnail = new URL(`https://docs.google.com/presentation/d/${match[1]}/export/png`);
     thumbnail.searchParams.set("id", match[1]);
     thumbnail.searchParams.set("pageid", pageId);
-    const preview = new URL(`https://docs.google.com/presentation/d/${match[1]}/preview`);
-    preview.searchParams.set("rm", "minimal");
-    preview.hash = `slide=id.${pageId}`;
-    return { thumbnailUrl: thumbnail.toString(), previewUrl: preview.toString() };
+    return { thumbnailUrl: thumbnail.toString() };
   } catch {
     return null;
   }
@@ -2430,7 +2427,7 @@ function renderSpotlightArtwork(item, compact = false) {
   }
   const googleSlidesPreview = googleSlidesPreviewInfo(item.projectUrl);
   if (googleSlidesPreview) {
-    return `<img class="spotlight-document-thumbnail spotlight-google-slides-thumbnail" src="${escapeHtml(googleSlidesPreview.thumbnailUrl)}" data-google-slides-preview="${escapeHtml(googleSlidesPreview.previewUrl)}" alt="First-slide preview of ${escapeHtml(item.title)}" loading="lazy">`;
+    return `<img class="spotlight-document-thumbnail spotlight-google-slides-thumbnail" src="${escapeHtml(googleSlidesPreview.thumbnailUrl)}" alt="First-slide preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
   return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
 }
@@ -10029,9 +10026,9 @@ function renderDashboardStudentSpotlights() {
               <select id="spotlightStatus" name="status"><option value="published" ${!editing || editing.status === "published" ? "selected" : ""}>Published</option><option value="hidden" ${editing && editing.status === "hidden" ? "selected" : ""}>Hidden</option></select>
             </div>
             <div class="field">
-              <label for="spotlightFile">Image, PDF, or PowerPoint</label>
+              <label for="spotlightFile">Project file or preview image</label>
               <input id="spotlightFile" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.ppt,.pptx,image/jpeg,image/png,image/webp,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation">
-              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}` : "Maximum file size: 50 MB."}</small>
+              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}. ` : ""}For a restricted Google Slides link, upload a PNG or JPG of slide 1 here for a guaranteed thumbnail. Maximum file size: 50 MB.</small>
             </div>
             <div class="field">
               <label for="spotlightUrl">Approved project link (optional)</label>
@@ -11635,19 +11632,7 @@ app.addEventListener("error", event => {
   if (!(image instanceof HTMLImageElement) || !image.classList.contains("spotlight-google-slides-thumbnail")) return;
   const artwork = image.parentElement;
   if (!artwork) return;
-  const previewUrl = image.dataset.googleSlidesPreview;
-  if (!previewUrl) {
-    artwork.innerHTML = '<span class="spotlight-file-art" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>';
-    return;
-  }
-  const frame = document.createElement("iframe");
-  frame.className = "spotlight-google-slides-frame";
-  frame.src = previewUrl;
-  frame.title = image.alt;
-  frame.loading = "lazy";
-  frame.tabIndex = -1;
-  frame.setAttribute("aria-hidden", "true");
-  artwork.replaceChildren(frame);
+  artwork.innerHTML = '<span class="spotlight-file-art" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>';
 }, true);
 
 app.addEventListener("keydown", event => {
