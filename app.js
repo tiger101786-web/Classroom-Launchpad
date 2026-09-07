@@ -2400,20 +2400,23 @@ function spotlightThumbnailUrl(item) {
   return `/api/student-spotlights/${encodeURIComponent(item.id)}/thumbnail?v=${encodeURIComponent(item.updatedAt || "1")}`;
 }
 
-function googleSlidesThumbnailUrl(projectUrl) {
+function googleSlidesPreviewInfo(projectUrl) {
   try {
     const url = new URL(projectUrl);
-    if (url.hostname !== "docs.google.com") return "";
+    if (url.hostname !== "docs.google.com") return null;
     const match = url.pathname.match(/^\/presentation\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)/);
-    if (!match) return "";
-    const thumbnail = new URL("https://drive.google.com/thumbnail");
+    if (!match) return null;
+    const slideMatch = `${url.search}${url.hash}`.match(/(?:slide=id\.|pageid=)([a-zA-Z0-9_-]+)/i);
+    const pageId = slideMatch ? slideMatch[1] : "p";
+    const thumbnail = new URL(`https://docs.google.com/presentation/d/${match[1]}/export/png`);
     thumbnail.searchParams.set("id", match[1]);
-    thumbnail.searchParams.set("sz", "w1200");
-    const resourceKey = url.searchParams.get("resourcekey");
-    if (resourceKey) thumbnail.searchParams.set("resourcekey", resourceKey);
-    return thumbnail.toString();
+    thumbnail.searchParams.set("pageid", pageId);
+    const preview = new URL(`https://docs.google.com/presentation/d/${match[1]}/preview`);
+    preview.searchParams.set("rm", "minimal");
+    preview.hash = `slide=id.${pageId}`;
+    return { thumbnailUrl: thumbnail.toString(), previewUrl: preview.toString() };
   } catch {
-    return "";
+    return null;
   }
 }
 
@@ -2425,9 +2428,9 @@ function renderSpotlightArtwork(item, compact = false) {
     const previewLabel = item.mediaKind === "powerpoint" ? "First-slide" : "First-page";
     return `<img class="spotlight-document-thumbnail" src="${spotlightThumbnailUrl(item)}" alt="${previewLabel} preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
-  const googleSlidesThumbnail = googleSlidesThumbnailUrl(item.projectUrl);
-  if (googleSlidesThumbnail) {
-    return `<img class="spotlight-document-thumbnail spotlight-google-slides-thumbnail" src="${escapeHtml(googleSlidesThumbnail)}" alt="First-slide preview of ${escapeHtml(item.title)}" loading="lazy" referrerpolicy="no-referrer">`;
+  const googleSlidesPreview = googleSlidesPreviewInfo(item.projectUrl);
+  if (googleSlidesPreview) {
+    return `<img class="spotlight-document-thumbnail spotlight-google-slides-thumbnail" src="${escapeHtml(googleSlidesPreview.thumbnailUrl)}" data-google-slides-preview="${escapeHtml(googleSlidesPreview.previewUrl)}" alt="First-slide preview of ${escapeHtml(item.title)}" loading="lazy">`;
   }
   return `<span class="spotlight-file-art ${compact ? "is-compact" : ""}" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>`;
 }
@@ -11632,7 +11635,19 @@ app.addEventListener("error", event => {
   if (!(image instanceof HTMLImageElement) || !image.classList.contains("spotlight-google-slides-thumbnail")) return;
   const artwork = image.parentElement;
   if (!artwork) return;
-  artwork.innerHTML = '<span class="spotlight-file-art" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>';
+  const previewUrl = image.dataset.googleSlidesPreview;
+  if (!previewUrl) {
+    artwork.innerHTML = '<span class="spotlight-file-art" aria-hidden="true"><b>&#9733;</b><small>Featured Work</small></span>';
+    return;
+  }
+  const frame = document.createElement("iframe");
+  frame.className = "spotlight-google-slides-frame";
+  frame.src = previewUrl;
+  frame.title = image.alt;
+  frame.loading = "lazy";
+  frame.tabIndex = -1;
+  frame.setAttribute("aria-hidden", "true");
+  artwork.replaceChildren(frame);
 }, true);
 
 app.addEventListener("keydown", event => {

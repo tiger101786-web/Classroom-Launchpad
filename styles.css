@@ -11306,6 +11306,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   background: #fff;
 }
 .spotlight-google-slides-thumbnail { object-fit: contain !important; }
+.spotlight-google-slides-frame {
+  display: block;
+  width: 100%;
+  height: calc(100% + 42px);
+  border: 0;
+  background: #fff;
+  pointer-events: none;
+}
 
 .spotlight-file-art {
   display: grid;
