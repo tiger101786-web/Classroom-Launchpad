@@ -297,23 +297,12 @@ body.home-navigation-open {
   fill: currentColor;
 }
 
-.home-navigation-icon.is-spotlight-icon .spotlight-lens {
+.home-navigation-icon.is-spotlight-icon .spotlight-board-accent {
   fill: var(--white);
 }
 
-.home-navigation-icon.is-spotlight-icon .spotlight-vents {
-  fill: none;
-  stroke: var(--white);
-  stroke-width: 1.05;
-  stroke-linecap: round;
-}
-
-.home-navigation-button.is-active .home-navigation-icon.is-spotlight-icon .spotlight-lens {
+.home-navigation-button.is-active .home-navigation-icon.is-spotlight-icon .spotlight-board-accent {
   fill: var(--blue);
-}
-
-.home-navigation-button.is-active .home-navigation-icon.is-spotlight-icon .spotlight-vents {
-  stroke: var(--blue);
 }
 
 .home-navigation-icon.is-corner-icon svg {
