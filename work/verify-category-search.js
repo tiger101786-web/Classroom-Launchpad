@@ -13,5 +13,7 @@ assert.match(appSource, /data-category-link-search/);
 assert.match(appSource, /No websites match that search/);
 assert.match(appSource, /attachCategoryLinkSearch\(\)/);
 assert.match(stylesSource, /\.category-link-search/);
+assert.match(stylesSource, /\.link-card\[hidden\]/);
+assert.match(stylesSource, /display: none !important/);
 
 console.log("Website category sorting and search verification passed.");

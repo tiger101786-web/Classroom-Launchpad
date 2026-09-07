@@ -2732,6 +2732,12 @@ body:not([data-theme="night"]) .colt-corner-graphic video {
 
 .category-link-search small { color: var(--muted); font-weight: 800; }
 .category-link-search-empty { width: 100%; }
+.link-card[hidden],
+.category-link-search-empty[hidden],
+.student-spotlight-card[hidden],
+.student-spotlight-search-empty[hidden] {
+  display: none !important;
+}
 
 .category-content {
   display: grid;
