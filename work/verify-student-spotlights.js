@@ -195,6 +195,8 @@ async function waitForServer() {
     assert.match(appSource, /home-student-spotlight/);
     assert.match(appSource, /Student Spotlight.*requiresAuth: true/);
     assert.match(appSource, /is-spotlight-icon/);
+    assert.match(appSource, /spotlight-lamp/);
+    assert.match(appSource, /spotlight-rays/);
     assert.match(appSource, /student-spotlight-home-art\.png\?v=20260906-spotlight-stage-v2/);
     assert.match(appSource, /Creative Work, Great Ideas, Student Success/);
     assert.match(appSource, /Students Only/);
@@ -203,6 +205,10 @@ async function waitForServer() {
     assert.match(appSource, /Search by first name, last name, email, or grade/);
     assert.match(appSource, /spotlightDisplayName: formatStudentFirstLast/);
     assert.match(appSource, /matching student/);
+    assert.match(appSource, /studentSpotlightSearch/);
+    assert.match(appSource, /Search by student name, project, description, or grade/);
+    assert.match(appSource, /data-spotlight-search/);
+    assert.match(appSource, /No featured work matches that search/);
     assert.match(appSource, /class="spotlight-document-thumbnail"/);
     assert.match(appSource, /Assignment Folders/);
     assert.match(appSource, /Assignment folder/);

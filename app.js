@@ -86,7 +86,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
-  { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>', requiresAuth: true },
+  { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="spotlight-mount" d="M2.5 3.8h11M8 3.8v3"></path><circle class="spotlight-pivot" cx="8" cy="7.7" r="1.15"></circle><path class="spotlight-lamp" d="m5.8 7.2 7.8 3.2-2.8 6.7-7.8-3.2 2-4.8Z"></path><path class="spotlight-rays" d="m14.1 12.1 4.6-1.6m-5.5 4.1 5 .8m-6.3 1.4 3.4 3.5"></path></svg>', requiresAuth: true },
   { id: "home-google-classroom", label: "Google Classroom", icon: '<img src="assets/google-classroom.svg?v=20260905-crimson1" alt="">' },
   { id: "home-classroom-pass", label: "Classroom Pass", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4V7Z"></path><path d="M9 7v2M9 11v2M9 15v2"></path></svg>' },
   { id: "home-colt-corner", label: "Colt Corner", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="message-bubble" d="M3 4.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3.5 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2Z"></path><path class="message-bubble" d="M10 13.5h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v2l-2.5-2H10a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"></path><circle class="message-dot" cx="5" cy="8.5" r="1"></circle><circle class="message-dot" cx="9" cy="8.5" r="1"></circle><circle class="message-dot" cx="13" cy="8.5" r="1"></circle><circle class="message-dot" cx="12" cy="16.5" r=".85"></circle><circle class="message-dot" cx="15" cy="16.5" r=".85"></circle><circle class="message-dot" cx="18" cy="16.5" r=".85"></circle></svg>' },
@@ -1432,6 +1432,7 @@ let submissions = [];
 let studentSpotlights = [];
 let spotlightGradeFilter = "all";
 let spotlightCollectionFilter = "";
+let spotlightSearchQuery = "";
 let spotlightEditorId = "";
 let spotlightStatusMessage = "";
 let selectedAssignmentId = "";
@@ -2450,8 +2451,9 @@ function renderStudentSpotlightPreview() {
 
 function renderStudentSpotlightCard(item) {
   const openUrl = item.projectUrl || (item.hasMedia ? spotlightMediaUrl(item) : "");
+  const searchText = `${item.displayName || ""} ${item.title || ""} ${item.description || ""} grade ${item.grade || ""}`.toLowerCase();
   return `
-    <article class="student-spotlight-card">
+    <article class="student-spotlight-card" data-spotlight-search="${escapeHtml(searchText)}">
       <figure class="student-spotlight-card-art">${renderSpotlightArtwork(item)}</figure>
       <div class="student-spotlight-card-copy">
         <span class="feature-kicker">Grade ${escapeHtml(item.grade)}</span>
@@ -2476,7 +2478,15 @@ function studentSpotlightCollections(items) {
     if (!collections.has(key)) collections.set(key, { key, name, items: [] });
     collections.get(key).items.push(item);
   });
-  return [...collections.values()].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  return [...collections.values()]
+    .map(collection => ({
+      ...collection,
+      items: [...collection.items].sort((a, b) => {
+        const nameComparison = String(a.displayName || "").localeCompare(String(b.displayName || ""), undefined, { sensitivity: "base" });
+        return nameComparison || String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" });
+      })
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 function renderStudentSpotlightPage() {
@@ -2502,8 +2512,14 @@ function renderStudentSpotlightPage() {
             ${["all", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
           </div>
         </header>
+        <div class="student-spotlight-search">
+          <label for="studentSpotlightSearch">Search featured work</label>
+          <input id="studentSpotlightSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightSearchQuery)}" placeholder="Search by student name, project, description, or grade">
+          <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
+        </div>
         <div class="student-spotlight-grid">
           ${visible.length ? visible.map(renderStudentSpotlightCard).join("") : emptyCard(spotlightGradeFilter === "all" ? "No student work is featured in this assignment yet." : `No Grade ${spotlightGradeFilter} work is featured in this assignment yet.`)}
+          <div id="studentSpotlightSearchEmpty" class="empty-card student-spotlight-search-empty" hidden>No featured work matches that search.</div>
         </div>
       ` : `
         <header class="student-spotlight-page-heading">
@@ -9978,6 +9994,10 @@ function renderDashboardStudentSpotlights() {
     .sort((a, b) => a.spotlightDisplayName.localeCompare(b.spotlightDisplayName, undefined, { sensitivity: "base" }));
   const folderNames = [...new Set(studentSpotlights.map(item => String(item.collectionName || item.title || "").trim()).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  const sortedSpotlights = [...studentSpotlights].sort((a, b) => {
+    const nameComparison = String(a.displayName || "").localeCompare(String(b.displayName || ""), undefined, { sensitivity: "base" });
+    return nameComparison || String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" });
+  });
   return `
     <section class="spotlight-dashboard">
       <div class="spotlight-dashboard-heading">
@@ -10054,7 +10074,7 @@ function renderDashboardStudentSpotlights() {
         </form>
       ` : ""}
       <div class="spotlight-dashboard-list">
-        ${studentSpotlights.length ? studentSpotlights.map(item => `
+        ${sortedSpotlights.length ? sortedSpotlights.map(item => `
           <article class="teacher-card spotlight-dashboard-card ${item.status === "hidden" ? "is-hidden" : ""}">
             <figure>${renderSpotlightArtwork(item, true)}</figure>
             <div><span class="feature-kicker">${escapeHtml(item.collectionName || item.title)} · Grade ${escapeHtml(item.grade)} · ${item.status === "hidden" ? "Hidden" : "Published"}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.displayName)}${item.description ? ` — ${escapeHtml(item.description)}` : ""}</p></div>
@@ -10702,6 +10722,7 @@ function attachScreenHandlers() {
   }
   attachStudentRequestForm();
   attachStudentSpotlightForm();
+  attachStudentSpotlightSearch();
   attachThreadForm();
   attachReplyForm();
   attachForumProfileEditor();
@@ -11360,6 +11381,36 @@ function attachThreadForm() {
       button.textContent = "Start Topic";
     }
   });
+}
+
+function applyStudentSpotlightSearch() {
+  const input = document.getElementById("studentSpotlightSearch");
+  if (!input) return;
+  const query = String(spotlightSearchQuery || "").trim().toLowerCase();
+  const cards = [...document.querySelectorAll(".student-spotlight-card[data-spotlight-search]")];
+  let matchCount = 0;
+  cards.forEach(card => {
+    const matches = !query || String(card.dataset.spotlightSearch || "").includes(query);
+    card.hidden = !matches;
+    if (matches) matchCount += 1;
+  });
+  const status = document.getElementById("studentSpotlightSearchStatus");
+  if (status) status.textContent = query
+    ? `${matchCount} matching ${matchCount === 1 ? "project" : "projects"}.`
+    : `${cards.length} featured ${cards.length === 1 ? "project" : "projects"}.`;
+  const empty = document.getElementById("studentSpotlightSearchEmpty");
+  if (empty) empty.hidden = !query || matchCount > 0;
+}
+
+function attachStudentSpotlightSearch() {
+  const input = document.getElementById("studentSpotlightSearch");
+  if (!input || input.dataset.ready === "true") return;
+  input.dataset.ready = "true";
+  input.addEventListener("input", event => {
+    spotlightSearchQuery = event.target.value;
+    applyStudentSpotlightSearch();
+  });
+  applyStudentSpotlightSearch();
 }
 
 function attachStudentSpotlightForm() {
@@ -12047,16 +12098,19 @@ app.addEventListener("click", async event => {
   if (action === "openStudentSpotlights") {
     spotlightCollectionFilter = "";
     spotlightGradeFilter = "all";
+    spotlightSearchQuery = "";
     setScreen({ name: isSignedIn() ? "studentSpotlights" : "login" });
   }
   if (action === "spotlightCollection") {
     spotlightCollectionFilter = spotlightCollectionKey(target.dataset.collection);
     spotlightGradeFilter = "all";
+    spotlightSearchQuery = "";
     render();
   }
   if (action === "spotlightCollections") {
     spotlightCollectionFilter = "";
     spotlightGradeFilter = "all";
+    spotlightSearchQuery = "";
     render();
   }
   if (action === "spotlightGrade") {

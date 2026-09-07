@@ -284,11 +284,27 @@ body.home-navigation-open {
   stroke-linejoin: round;
 }
 
-.home-navigation-icon.is-expectations-icon svg,
-.home-navigation-icon.is-spotlight-icon svg {
+.home-navigation-icon.is-expectations-icon svg {
   width: 22px;
   height: 22px;
   fill: currentColor;
+}
+
+.home-navigation-icon.is-spotlight-icon svg {
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-navigation-icon.is-spotlight-icon .spotlight-lamp,
+.home-navigation-icon.is-spotlight-icon .spotlight-pivot {
+  fill: currentColor;
+  stroke: currentColor;
 }
 
 .home-navigation-icon.is-corner-icon svg {
@@ -11344,6 +11360,32 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   cursor: pointer;
 }
 .student-spotlight-filters button.is-active { color: #fff; border-color: var(--blue); background: var(--blue); }
+.student-spotlight-search {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(280px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--gold-soft);
+}
+.student-spotlight-search label { color: var(--blue-dark); font-weight: 900; }
+.student-spotlight-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--white);
+  font: inherit;
+  outline: none;
+}
+.student-spotlight-search input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(123, 11, 49, .16); }
+.student-spotlight-search small { color: var(--muted); font-weight: 800; white-space: nowrap; }
+.student-spotlight-search-empty { grid-column: 1 / -1; }
 .spotlight-folder-back {
   display: block;
   margin: 0 0 12px;
@@ -11468,6 +11510,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-folder-grid,
   .spotlight-editor-grid { grid-template-columns: 1fr; }
   .spotlight-wide-field { grid-column: auto; }
+  .student-spotlight-search { grid-template-columns: 1fr; }
+  .student-spotlight-search small { white-space: normal; }
   .student-spotlight-card-art { height: 200px; }
   .spotlight-dashboard-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: start; }
   .spotlight-dashboard-card figure { width: 76px; height: 76px; }
