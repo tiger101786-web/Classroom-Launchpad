@@ -195,8 +195,9 @@ async function waitForServer() {
     assert.match(appSource, /home-student-spotlight/);
     assert.match(appSource, /Student Spotlight.*requiresAuth: true/);
     assert.match(appSource, /is-spotlight-icon/);
-    assert.match(appSource, /spotlight-lamp/);
-    assert.match(appSource, /spotlight-rays/);
+    assert.match(appSource, /spotlight-housing/);
+    assert.match(appSource, /spotlight-lens/);
+    assert.match(appSource, /spotlight-stand/);
     assert.match(appSource, /student-spotlight-home-art\.png\?v=20260906-spotlight-stage-v2/);
     assert.match(appSource, /Creative Work, Great Ideas, Student Success/);
     assert.match(appSource, /Students Only/);

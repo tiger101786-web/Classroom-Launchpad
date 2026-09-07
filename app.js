@@ -86,7 +86,7 @@ const HOME_NAVIGATION_ITEMS = [
   { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
   { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
-  { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="spotlight-mount" d="M2.5 3.8h11M8 3.8v3"></path><circle class="spotlight-pivot" cx="8" cy="7.7" r="1.15"></circle><path class="spotlight-lamp" d="m5.8 7.2 7.8 3.2-2.8 6.7-7.8-3.2 2-4.8Z"></path><path class="spotlight-rays" d="m14.1 12.1 4.6-1.6m-5.5 4.1 5 .8m-6.3 1.4 3.4 3.5"></path></svg>', requiresAuth: true },
+  { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="spotlight-stand" d="m12.4 14.2-2 7.2h3.4l1.1-4 2.2 4h3.5l-3.7-7.2Z"></path><path class="spotlight-housing" d="M8.1 4.1h7.3c3.8 0 6.1 2.5 6.1 6.3s-2.3 6.3-6.1 6.3H8.1Z"></path><path class="spotlight-vents" d="m14.1 6.4 3.6.8m-4 1.6 4.8 1m-5.2 1.6 4.9 1m-5.4 1.6 3.9.8"></path><ellipse class="spotlight-rim" cx="8" cy="10.4" rx="5.6" ry="7" transform="rotate(14 8 10.4)"></ellipse><ellipse class="spotlight-lens" cx="8" cy="10.4" rx="3.9" ry="5.2" transform="rotate(14 8 10.4)"></ellipse><circle class="spotlight-pivot" cx="15.2" cy="15.3" r="1.25"></circle></svg>', requiresAuth: true },
   { id: "home-google-classroom", label: "Google Classroom", icon: '<img src="assets/google-classroom.svg?v=20260905-crimson1" alt="">' },
   { id: "home-classroom-pass", label: "Classroom Pass", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4V7Z"></path><path d="M9 7v2M9 11v2M9 15v2"></path></svg>' },
   { id: "home-colt-corner", label: "Colt Corner", icon: '<svg viewBox="0 0 24 24" focusable="false"><path class="message-bubble" d="M3 4.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3.5 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2Z"></path><path class="message-bubble" d="M10 13.5h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v2l-2.5-2H10a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"></path><circle class="message-dot" cx="5" cy="8.5" r="1"></circle><circle class="message-dot" cx="9" cy="8.5" r="1"></circle><circle class="message-dot" cx="13" cy="8.5" r="1"></circle><circle class="message-dot" cx="12" cy="16.5" r=".85"></circle><circle class="message-dot" cx="15" cy="16.5" r=".85"></circle><circle class="message-dot" cx="18" cy="16.5" r=".85"></circle></svg>' },
@@ -1433,6 +1433,7 @@ let studentSpotlights = [];
 let spotlightGradeFilter = "all";
 let spotlightCollectionFilter = "";
 let spotlightSearchQuery = "";
+let categorySearchQuery = "";
 let spotlightEditorId = "";
 let spotlightStatusMessage = "";
 let selectedAssignmentId = "";
@@ -2913,7 +2914,9 @@ function categoryCard(category) {
 }
 
 function renderCategory(category) {
-  const visibleLinks = links.filter(link => link.active && link.category === category);
+  const visibleLinks = links
+    .filter(link => link.active && link.category === category)
+    .sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" }));
   const sectionColtsLogo = category === "Creative Projects"
     ? "assets/creative-projects-colts-logo.mp4"
     : "assets/section-colts-logo.mp4?v=20260905-optimized1";
@@ -2929,7 +2932,13 @@ function renderCategory(category) {
     ${category === "Class Videos" ? renderClassVideosFeature() : ""}
     <section class="category-content">
       <section class="link-list">
+        <div class="category-link-search">
+          <label for="categoryLinkSearch">Search ${escapeHtml(category)}</label>
+          <input id="categoryLinkSearch" type="search" autocomplete="off" value="${escapeHtml(categorySearchQuery)}" placeholder="Search websites in this category">
+          <small id="categoryLinkSearchStatus" aria-live="polite">${visibleLinks.length} ${visibleLinks.length === 1 ? "website" : "websites"}.</small>
+        </div>
         ${visibleLinks.length ? visibleLinks.map(renderStudentLink).join("") : emptyCard("No active links are available in this category.")}
+        <div id="categoryLinkSearchEmpty" class="empty-card category-link-search-empty" hidden>No websites match that search.</div>
       </section>
       <aside class="section-colts-art ${category === "Creative Projects" ? "creative-projects-colts-art" : ""}" aria-label="St. Cletus Colts graphic">
         <video autoplay muted loop playsinline aria-label="Animated St. Cletus Colts logo">
@@ -3070,8 +3079,9 @@ function renderClassVideosFeature() {
 
 function renderStudentLink(link) {
   const isColtRun = link.url === COLT_RUN_URL;
+  const searchText = `${link.title || ""} ${link.instruction || ""} ${link.category || ""}`.toLowerCase();
   return `
-    <article class="link-card">
+    <article class="link-card" data-category-link-search="${escapeHtml(searchText)}">
       <h3>${escapeHtml(link.title)}</h3>
       <p class="instruction">${escapeHtml(link.instruction)}</p>
       <p class="meta">${escapeHtml(link.category)}</p>
@@ -10723,6 +10733,7 @@ function attachScreenHandlers() {
   attachStudentRequestForm();
   attachStudentSpotlightForm();
   attachStudentSpotlightSearch();
+  attachCategoryLinkSearch();
   attachThreadForm();
   attachReplyForm();
   attachForumProfileEditor();
@@ -11413,6 +11424,36 @@ function attachStudentSpotlightSearch() {
   applyStudentSpotlightSearch();
 }
 
+function applyCategoryLinkSearch() {
+  const input = document.getElementById("categoryLinkSearch");
+  if (!input) return;
+  const query = String(categorySearchQuery || "").trim().toLowerCase();
+  const cards = [...document.querySelectorAll(".link-card[data-category-link-search]")];
+  let matchCount = 0;
+  cards.forEach(card => {
+    const matches = !query || String(card.dataset.categoryLinkSearch || "").includes(query);
+    card.hidden = !matches;
+    if (matches) matchCount += 1;
+  });
+  const status = document.getElementById("categoryLinkSearchStatus");
+  if (status) status.textContent = query
+    ? `${matchCount} matching ${matchCount === 1 ? "website" : "websites"}.`
+    : `${cards.length} ${cards.length === 1 ? "website" : "websites"}.`;
+  const empty = document.getElementById("categoryLinkSearchEmpty");
+  if (empty) empty.hidden = !query || matchCount > 0;
+}
+
+function attachCategoryLinkSearch() {
+  const input = document.getElementById("categoryLinkSearch");
+  if (!input || input.dataset.ready === "true") return;
+  input.dataset.ready = "true";
+  input.addEventListener("input", event => {
+    categorySearchQuery = event.target.value;
+    applyCategoryLinkSearch();
+  });
+  applyCategoryLinkSearch();
+}
+
 function attachStudentSpotlightForm() {
   const form = document.getElementById("studentSpotlightForm");
   if (!form || form.dataset.ready === "true") return;
@@ -11949,7 +11990,10 @@ app.addEventListener("click", async event => {
     setScreen({ name: "home" });
   }
   if (action === "toggleTheme") toggleTheme();
-  if (action === "category") setScreen({ name: "category", category: target.dataset.category });
+  if (action === "category") {
+    categorySearchQuery = "";
+    setScreen({ name: "category", category: target.dataset.category });
+  }
 
   if (action === "openClassroomPass") {
     if (!isSignedIn()) setScreen({ name: "login" });
