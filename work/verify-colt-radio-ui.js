@@ -245,8 +245,13 @@ async function run() {
     await page.route("https://streaming.positivity.radio/pr-app/posisuccessful/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calminstrumental/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://streaming.positivity.radio/pr-app/posimeditation/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://streaming.positivity.radio/pr-app/chants/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmzen/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmrain/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://drive.uber.radio/uber-app/calmbirdsong/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://streaming.positivity.radio/pr-app/posiocean/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://streaming.positivity.radio/pr-app/sleeptones/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://streaming.positivity.radio/pr-app/happy/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmtaichi/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmspa/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
@@ -279,7 +284,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 58, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 63, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -309,7 +314,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -533,10 +538,20 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calminstrumental/icecast.audio");
     await page.getByRole("button", { name: "Meditation • Positive", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/posimeditation/icecast.audio");
+    await page.getByRole("button", { name: "Meditation • Chants", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/chants/icecast.audio");
     await page.getByRole("button", { name: "Calm • Zen", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmzen/icecast.audio");
     await page.getByRole("button", { name: "Calm • Rain", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmrain/icecast.audio");
+    await page.getByRole("button", { name: "Calm • Birdsong", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmbirdsong/icecast.audio");
+    await page.getByRole("button", { name: "Calm • Ocean", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/posiocean/icecast.audio");
+    await page.getByRole("button", { name: "Sleep • Tones", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/sleeptones/icecast.audio");
+    await page.getByRole("button", { name: "Feel-Good • Happy", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/happy/icecast.audio");
     await page.getByRole("button", { name: "Calm • Tai Chi", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmtaichi/icecast.audio");
     await page.getByRole("button", { name: "Calm • Spa", exact: true }).click();
