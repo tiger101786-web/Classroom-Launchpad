@@ -4285,10 +4285,9 @@ function startColtRunGame() {
     createDeferredVideo("assets/colt-run-mrs-levandoske-celebration-02.webm?v=20260908-green-key1")
   ];
   mrsLevandoskeCelebrationVideos.forEach(video => {
-    video.loop = false;
+    video.loop = true;
   });
   let mrsLevandoskeCelebrationIndex = -1;
-  const finishedMrsLevandoskeCelebrationVideos = new WeakSet();
   const getMrsLevandoskeCelebrationVideo = () => mrsLevandoskeCelebrationVideos[Math.max(0, mrsLevandoskeCelebrationIndex)];
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideos = [
@@ -5058,18 +5057,6 @@ function startColtRunGame() {
   const keepMrsLevandoskeCelebrationVideoPlaying = () => {
     const video = getMrsLevandoskeCelebrationVideo();
     ensureMediaSource(video);
-    if (finishedMrsLevandoskeCelebrationVideos.has(video)) return;
-    const duration = Number.isFinite(video.duration) ? video.duration : 0;
-    if (video.ended || (duration > 0 && video.currentTime >= duration - 0.08)) {
-      video.pause();
-      finishedMrsLevandoskeCelebrationVideos.add(video);
-      if (duration > 0) {
-        try {
-          video.currentTime = Math.max(0, duration - 0.04);
-        } catch {}
-      }
-      return;
-    }
     if (video.paused) video.play().catch(() => {});
   };
 
@@ -5077,7 +5064,6 @@ function startColtRunGame() {
     mrsLevandoskeCelebrationIndex = (mrsLevandoskeCelebrationIndex + 1) % mrsLevandoskeCelebrationVideos.length;
     const video = getMrsLevandoskeCelebrationVideo();
     ensureMediaSource(video);
-    finishedMrsLevandoskeCelebrationVideos.delete(video);
     try {
       video.currentTime = 0;
     } catch {}
@@ -5252,11 +5238,7 @@ function startColtRunGame() {
     characterAnimationVideos.forEach(video => {
       if (activeVideoSet.has(video)) {
         ensureMediaSource(video);
-        const shouldHoldFinishedMrsLevandoskeCelebration =
-          selectedCharacter === "mrsLevandoske"
-          && player.state === "celebrate"
-          && finishedMrsLevandoskeCelebrationVideos.has(video);
-        if (video.paused && !shouldHoldFinishedMrsLevandoskeCelebration) video.play().catch(() => {});
+        if (video.paused) video.play().catch(() => {});
       } else if (!video.paused) {
         video.pause();
       }
@@ -5289,13 +5271,6 @@ function startColtRunGame() {
       syncCharacterVideoPlayback(true);
     });
   });
-  mrsLevandoskeCelebrationVideos.forEach(video => {
-    video.addEventListener("ended", () => {
-      if (video !== getMrsLevandoskeCelebrationVideo() || selectedCharacter !== "mrsLevandoske" || player.state !== "celebrate") return;
-      finishedMrsLevandoskeCelebrationVideos.add(video);
-    });
-  });
-
   const getLavaRockVideoSpecial = index => lavaRockVideoSpecials[index] || lavaRockVideoSpecials[0];
 
   const keepLavaRockVideoSpecialPlaying = (index = 0) => {
