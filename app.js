@@ -3685,10 +3685,11 @@ function startColtRunGame() {
   const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio2");
   const mrsLevandoskeCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio2"),
-    createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-02.mp3?v=20260905-mrs-audio2")
+    createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-02.mp3?v=20260905-mrs-audio2"),
+    createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-03.mp3?v=20260908-mrs-celebration1")
   ];
   const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, ...mrsLevandoskeCelebrationAudios];
-  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1, 1];
+  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1, 1, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
@@ -4279,6 +4280,15 @@ function startColtRunGame() {
   let mrsLevandoskeJumpIndex = -1;
   const getMrsLevandoskeJumpVideo = () => mrsLevandoskeJumpVideos[Math.max(0, mrsLevandoskeJumpIndex)];
   const mrsLevandoskeDeathVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-death.webm?v=20260905-green-key2");
+  const mrsLevandoskeCelebrationVideos = [
+    createDeferredVideo("assets/colt-run-mrs-levandoske-celebration.webm?v=20260908-green-key1"),
+    createDeferredVideo("assets/colt-run-mrs-levandoske-celebration-02.webm?v=20260908-green-key1")
+  ];
+  mrsLevandoskeCelebrationVideos.forEach(video => {
+    video.loop = false;
+  });
+  let mrsLevandoskeCelebrationIndex = -1;
+  const getMrsLevandoskeCelebrationVideo = () => mrsLevandoskeCelebrationVideos[Math.max(0, mrsLevandoskeCelebrationIndex)];
   const mrNievesRunVideo = createDeferredVideo(mrNievesRunMediaSource);
   const mrNievesInAirVideos = [
     createDeferredVideo("assets/colt-run-mr-nieves-inair.mp4?v=20260717-inair1"),
@@ -4317,6 +4327,7 @@ function startColtRunGame() {
       ensureMediaSource(mrsLevandoskeRunVideo);
       mrsLevandoskeJumpVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsLevandoskeDeathVideo);
+      mrsLevandoskeCelebrationVideos.forEach(video => ensureMediaSource(video));
       mrsLevandoskeCueAudios.forEach(audio => ensureMediaSource(audio));
       return;
     }
@@ -5043,6 +5054,22 @@ function startColtRunGame() {
     if (mrsLevandoskeDeathVideo.paused) mrsLevandoskeDeathVideo.play().catch(() => {});
   };
 
+  const keepMrsLevandoskeCelebrationVideoPlaying = () => {
+    const video = getMrsLevandoskeCelebrationVideo();
+    ensureMediaSource(video);
+    if (video.paused) video.play().catch(() => {});
+  };
+
+  const chooseMrsLevandoskeCelebrationVideo = () => {
+    mrsLevandoskeCelebrationIndex = (mrsLevandoskeCelebrationIndex + 1) % mrsLevandoskeCelebrationVideos.length;
+    const video = getMrsLevandoskeCelebrationVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
+  };
+
   const keepMrNievesRunVideoPlaying = () => {
     ensureMediaSource(mrNievesRunVideo);
     if (!mrNievesRunVideo.paused) return;
@@ -5135,6 +5162,7 @@ function startColtRunGame() {
     mrsLevandoskeRunVideo,
     ...mrsLevandoskeJumpVideos,
     mrsLevandoskeDeathVideo,
+    ...mrsLevandoskeCelebrationVideos,
     mrNievesRunVideo,
     ...mrNievesInAirVideos,
     ...mrNievesCelebrationVideos,
@@ -5166,6 +5194,9 @@ function startColtRunGame() {
         else if (player.state === "jumpPrep" || player.state === "leap") {
           nextKey = `mrsLevandoske:jump:${mrsLevandoskeJumpIndex}`;
           activeVideos = [getMrsLevandoskeJumpVideo()];
+        } else if (player.state === "celebrate") {
+          nextKey = `mrsLevandoske:celebrate:${mrsLevandoskeCelebrationIndex}`;
+          activeVideos = [getMrsLevandoskeCelebrationVideo()];
         } else {
           nextKey = `mrsLevandoske:idle:${mrsLevandoskeIdleIndex}`;
           activeVideos = [getMrsLevandoskeIdleVideo()];
@@ -5236,6 +5267,14 @@ function startColtRunGame() {
     video.addEventListener("ended", () => {
       if (video !== getMrsLevandoskeIdleVideo()) return;
       chooseMrsLevandoskeIdleVideo();
+      characterPlaybackKey = "";
+      syncCharacterVideoPlayback(true);
+    });
+  });
+  mrsLevandoskeCelebrationVideos.forEach(video => {
+    video.addEventListener("ended", () => {
+      if (video !== getMrsLevandoskeCelebrationVideo() || selectedCharacter !== "mrsLevandoske" || player.state !== "celebrate") return;
+      chooseMrsLevandoskeCelebrationVideo();
       characterPlaybackKey = "";
       syncCharacterVideoPlayback(true);
     });
@@ -7350,8 +7389,8 @@ function startColtRunGame() {
       chooseMrNievesCelebrationVideo();
       keepMrNievesCelebrationVideoPlaying();
     } else if (selectedCharacter === "mrsLevandoske") {
-      chooseMrsLevandoskeIdleVideo();
-      keepMrsLevandoskeIdleVideoPlaying();
+      chooseMrsLevandoskeCelebrationVideo();
+      keepMrsLevandoskeCelebrationVideoPlaying();
     } else {
       coltCelebrationAudioPending = true;
       coltCelebrationLastVideoTime = 0;
@@ -7577,6 +7616,7 @@ function startColtRunGame() {
     const mrNievesIsCelebrating = isMrNieves && player.state === "celebrate";
     const mrsLevandoskeIsJumping = isMrsLevandoske && (player.state === "jumpPrep" || player.state === "leap");
     const mrsLevandoskeIsRunning = isMrsLevandoske && player.state === "run";
+    const mrsLevandoskeIsCelebrating = isMrsLevandoske && player.state === "celebrate";
     const coltIsCelebrating = !isHumanRunner && player.state === "celebrate";
     const drawW = isMrNieves
       ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 150 : mrNievesIsCelebrating ? 132 : 128)
@@ -7605,6 +7645,8 @@ function startColtRunGame() {
           ? (getMrsLevandoskeJumpVideo().readyState >= 2 ? getMrsLevandoskeJumpVideo() : getMrsLevandoskeIdleVideo())
           : mrsLevandoskeIsRunning
             ? (mrsLevandoskeRunVideo.readyState >= 2 ? mrsLevandoskeRunVideo : getMrsLevandoskeIdleVideo())
+            : mrsLevandoskeIsCelebrating
+              ? (getMrsLevandoskeCelebrationVideo().readyState >= 2 ? getMrsLevandoskeCelebrationVideo() : getMrsLevandoskeIdleVideo())
             : getMrsLevandoskeIdleVideo())
       : null;
     const idleFrame = !isHumanRunner && player.state === "idle" ? getTransparentIdleFrame() : null;
@@ -7614,6 +7656,7 @@ function startColtRunGame() {
     if (mrsLevandoskeFrame) {
       if (mrsLevandoskeIsJumping && getMrsLevandoskeJumpVideo().readyState >= 2) keepMrsLevandoskeJumpVideoPlaying();
       else if (mrsLevandoskeIsRunning && mrsLevandoskeRunVideo.readyState >= 2) keepMrsLevandoskeRunVideoPlaying();
+      else if (mrsLevandoskeIsCelebrating && getMrsLevandoskeCelebrationVideo().readyState >= 2) keepMrsLevandoskeCelebrationVideoPlaying();
       else keepMrsLevandoskeIdleVideoPlaying();
       ctx.drawImage(mrsLevandoskeFrame, -drawW / 2, 0, drawW, drawH);
     } else if (mrNievesFrame) {
@@ -8344,6 +8387,7 @@ function startColtRunGame() {
         mrsLevandoskeRunVideo,
         ...mrsLevandoskeJumpVideos,
         mrsLevandoskeDeathVideo,
+        ...mrsLevandoskeCelebrationVideos,
         mrNievesRunVideo,
         ...mrNievesInAirVideos,
         ...mrNievesCelebrationVideos,

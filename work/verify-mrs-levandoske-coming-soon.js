@@ -27,16 +27,22 @@ assert.match(app, /colt-run-mrs-levandoske-jump\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-jump-02\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-death\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-death\.webm\?v=20260905-green-key2/);
+assert.match(app, /colt-run-mrs-levandoske-celebration\.webm\?v=20260908-green-key1/);
+assert.match(app, /colt-run-mrs-levandoske-celebration-02\.webm\?v=20260908-green-key1/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio-02\.mp3/);
+assert.match(app, /colt-run-mrs-levandoske-celebration-audio-03\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-death-audio\.mp3/);
 assert.match(app, /selectedCharacter === "mrNieves" \|\| selectedCharacter === "mrsLevandoske"/, "Mrs. Levandoske should reuse Mr. Nieves's running sound.");
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCelebrationAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
-assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeIdleVideo\(\);[\s\S]*?keepMrsLevandoskeIdleVideoPlaying\(\);/, "Mrs. Levandoske should use an idle animation for her temporary celebration.");
+assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\);[\s\S]*?keepMrsLevandoskeCelebrationVideoPlaying\(\);/, "Mrs. Levandoske should use her dedicated end-flag celebration animations.");
 assert.match(app, /isMrsLevandoske \? 18 : 8/, "Mrs. Levandoske should sit lower on gameplay platforms.");
-assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 1, 1\]/, "Mrs. Levandoske's death scream should receive a significant volume boost.");
+assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 1, 1, 1\]/, "Mrs. Levandoske's death scream should receive a significant volume boost.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeCelebrationAudios\.length,[\s\S]*?lastMrsLevandoskeCelebrationAudioIndex/, "Mrs. Levandoske's celebration sounds should rotate without immediate repeats.");
+assert.match(app, /mrsLevandoskeCelebrationIndex = \(mrsLevandoskeCelebrationIndex \+ 1\) % mrsLevandoskeCelebrationVideos\.length/, "Mrs. Levandoske's celebration videos should alternate.");
+assert.match(app, /video !== getMrsLevandoskeCelebrationVideo\(\)[\s\S]*?player\.state !== "celebrate"[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\)/, "Mrs. Levandoske's celebration rotation should continue only during the end-flag state.");
+assert.match(app, /mrsLevandoskeIsCelebrating[\s\S]*?getMrsLevandoskeCelebrationVideo\(\)\.readyState >= 2/, "Mrs. Levandoske's dedicated celebration frame should be rendered at the finish flag.");
 assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mrsLevandoskeIdleVideos\.length/);
 assert.match(app, /mrsLevandoskeJumpIndex = \(mrsLevandoskeJumpIndex \+ 1\) % mrsLevandoskeJumpVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
@@ -87,7 +93,9 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-levandoske-run.webm",
   "colt-run-mrs-levandoske-jump.webm",
   "colt-run-mrs-levandoske-jump-02.webm",
-  "colt-run-mrs-levandoske-death.webm"
+  "colt-run-mrs-levandoske-death.webm",
+  "colt-run-mrs-levandoske-celebration.webm",
+  "colt-run-mrs-levandoske-celebration-02.webm"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing transparent animation: ${filename}`);
@@ -97,6 +105,7 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
 [
   "colt-run-mrs-levandoske-celebration-audio.mp3",
   "colt-run-mrs-levandoske-celebration-audio-02.mp3",
+  "colt-run-mrs-levandoske-celebration-audio-03.mp3",
   "colt-run-mrs-levandoske-death-audio.mp3"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
