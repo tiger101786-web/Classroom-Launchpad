@@ -29,6 +29,11 @@ const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_EN
 const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 const teacherLoginAttempts = new Map();
+const approvedStudentGradeMigrations = [{
+  id: "2026-09-08-kelly-vien-grade-7",
+  email: "kelly.vien@scscolts.org",
+  grade: "7"
+}];
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
@@ -105,6 +110,7 @@ const defaultDb = {
   },
   leaderboards: [],
   approvedStudents: [],
+  appliedDataMigrations: [],
   teacherPin: null,
   teacherAvatarUpdatedAt: "",
   dailyLaunch: {
@@ -1082,10 +1088,36 @@ function withTeacherTestStudent(db) {
   return { ...db, approvedStudents: normalizeApprovedStudents(approvedStudents) };
 }
 
+function applyApprovedStudentGradeMigrations(db) {
+  const applied = new Set((Array.isArray(db && db.appliedDataMigrations) ? db.appliedDataMigrations : [])
+    .map(value => cleanText(value, 120))
+    .filter(Boolean));
+  let approvedStudents = normalizeApprovedStudents(db && db.approvedStudents);
+  let changed = false;
+
+  approvedStudentGradeMigrations.forEach(migration => {
+    if (applied.has(migration.id)) return;
+    const studentIndex = approvedStudents.findIndex(student => student.email === migration.email);
+    if (studentIndex < 0) return;
+    if (approvedStudents[studentIndex].grade !== migration.grade) {
+      approvedStudents[studentIndex] = { ...approvedStudents[studentIndex], grade: migration.grade };
+    }
+    applied.add(migration.id);
+    changed = true;
+  });
+
+  return {
+    db: { ...db, approvedStudents, appliedDataMigrations: [...applied] },
+    changed
+  };
+}
+
 function readDb() {
   ensureDb();
   try {
-    const db = withTeacherTestStudent({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
+    const migrated = applyApprovedStudentGradeMigrations({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
+    if (migrated.changed) writeDb(migrated.db);
+    const db = withTeacherTestStudent(migrated.db);
     return { ...db, threads: migrateGradeScopedThreads(db.threads), dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch) };
   } catch {
     writeDb(defaultDb);
@@ -1117,6 +1149,9 @@ function writeDb(db) {
       : { ...defaultDb.launchpadColt },
     leaderboards: normalizeLeaderboards(db.leaderboards),
     approvedStudents: normalizeApprovedStudents(db.approvedStudents),
+    appliedDataMigrations: [...new Set((Array.isArray(db.appliedDataMigrations) ? db.appliedDataMigrations : [])
+      .map(value => cleanText(value, 120))
+      .filter(Boolean))],
     teacherPin: db.teacherPin && typeof db.teacherPin === "object"
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,

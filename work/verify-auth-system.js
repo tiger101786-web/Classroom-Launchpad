@@ -5,6 +5,16 @@ const fs = require("fs");
 const root = path.resolve(__dirname, "..");
 const dataDir = path.join(__dirname, `auth-api-test-data-${process.pid}-${Date.now()}`);
 fs.mkdirSync(dataDir, { recursive: true });
+fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringify({
+  approvedStudents: [{
+    email: "kelly.vien@scscolts.org",
+    name: "Vien, Kellie",
+    grade: "5",
+    passwordSalt: "preserved-password-salt",
+    passwordHash: "preserved-password-hash",
+    createdAt: "2026-09-01T00:00:00.000Z"
+  }]
+}, null, 2));
 
 const child = spawn(process.execPath, ["server.js"], {
   cwd: root,
@@ -163,6 +173,22 @@ async function run() {
   check(privateResult.students.some(student => student.email === "test.student@scscolts.org")
     && privateResult.students.some(student => student.email === "o'example.student@scscolts.org"), "Teacher could not read the private allowlist.");
   check(!("activationHash" in privateResult.students[0]) && !("passwordHash" in privateResult.students[0]), "Secret hashes leaked through the teacher API.");
+  check(
+    privateResult.students.some(student => student.email === "kelly.vien@scscolts.org" && student.grade === "7"),
+    "The one-time Kellie Vien grade correction was not applied."
+  );
+  const migratedDatabase = JSON.parse(fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8"));
+  const migratedKellie = migratedDatabase.approvedStudents.find(student => student.email === "kelly.vien@scscolts.org");
+  check(
+    migratedKellie && migratedKellie.grade === "7"
+      && migratedKellie.passwordSalt === "preserved-password-salt"
+      && migratedKellie.passwordHash === "preserved-password-hash",
+    "The Kellie Vien grade correction did not preserve the existing account credentials."
+  );
+  check(
+    migratedDatabase.appliedDataMigrations.includes("2026-09-08-kelly-vien-grade-7"),
+    "The Kellie Vien grade correction was not recorded as complete."
+  );
 
   const outsiderList = await fetch(`${base}/api/approved-students`);
   check(outsiderList.status === 401, `Outsider allowlist read returned ${outsiderList.status}.`);
