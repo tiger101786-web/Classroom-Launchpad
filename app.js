@@ -3682,19 +3682,23 @@ function startColtRunGame() {
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-04.mp3?v=20260728-victory1"),
     createDeferredAudio("assets/colt-run-mr-nieves-celebration-audio-05.mp3?v=20260728-yayboy-ohyeah-boost1")
   ];
-  const mrsLevandoskeDeathAudio = createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio2");
+  const mrsLevandoskeDeathAudios = [
+    createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio2"),
+    createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio-02.mp3?v=20260908-mrs-death2")
+  ];
   const mrsLevandoskeCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio2"),
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-02.mp3?v=20260905-mrs-audio2"),
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-03.mp3?v=20260908-mrs-celebration1")
   ];
-  const mrsLevandoskeCueAudios = [mrsLevandoskeDeathAudio, ...mrsLevandoskeCelebrationAudios];
-  const mrsLevandoskeCueVolumeMultipliers = [2.4, 1, 1, 1];
+  const mrsLevandoskeCueAudios = [...mrsLevandoskeDeathAudios, ...mrsLevandoskeCelebrationAudios];
+  const mrsLevandoskeCueVolumeMultipliers = [2.4, 2.4, 1, 1, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
   let lastColtCelebrationAudioIndex = -1;
   let lastMrNievesDeathAudioIndex = -1;
   let lastMrNievesCelebrationAudioIndex = -1;
+  let lastMrsLevandoskeDeathAudioIndex = -1;
   let lastMrsLevandoskeCelebrationAudioIndex = -1;
   const ambientLayerVolume = 1;
   const inGameMusicLayerVolume = 0.5;
@@ -4806,7 +4810,12 @@ function startColtRunGame() {
   };
   const playMrsLevandoskeDeathAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
-    playExclusiveAudio([mrsLevandoskeDeathAudio], 0);
+    const nextIndex = chooseNonRepeatingAudioIndex(
+      mrsLevandoskeDeathAudios.length,
+      lastMrsLevandoskeDeathAudioIndex
+    );
+    lastMrsLevandoskeDeathAudioIndex = nextIndex;
+    playExclusiveAudio(mrsLevandoskeDeathAudios, nextIndex);
   };
   const playMrsLevandoskeCelebrationAudio = () => {
     if (musicMuted || musicVolume <= 0) return;
