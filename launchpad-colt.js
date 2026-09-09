@@ -450,7 +450,7 @@
     const rootBounds = root.getBoundingClientRect();
     const coltBounds = characterButton.getBoundingClientRect();
     const panelWidth = Math.min(globalObject.innerWidth <= 760 ? 420 : 460, globalObject.innerWidth - 16);
-    const panelHeight = panelWidth * (941 / 1672);
+    const panelHeight = panelWidth * (1032 / 1672);
     const roomOnLeft = coltBounds.left + (coltBounds.width / 2) >= globalObject.innerWidth / 2;
     const desiredLeft = roomOnLeft
       ? coltBounds.left - panelWidth + 40
