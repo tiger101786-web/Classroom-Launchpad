@@ -29,6 +29,7 @@ async function run() {
   assert.match(coltSource, /GREETING_EXCITED_REACTION_DURATION_MS\s*=\s*6_100/, "The complete greeting and excited animation must remain visible.");
   assert.match(coltSource, /FEEDING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete feeding animation must remain visible.");
   assert.match(coltSource, /PETTING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete petting animation must remain visible.");
+  assert.match(coltSource, /BATHING_REACTION_DURATION_MS\s*=\s*6_200/, "The complete bathing animation must remain visible.");
   assert.match(coltSource, /RADIO_MESSAGE_DURATION_MS\s*=\s*4_200/, "The radio announcement must have a short display time.");
   assert.match(coltSource, /RADIO_DANCE_READY_TIMEOUT_MS\s*=\s*2_500/, "The alternate dance must have a buffering fallback.");
   assert.match(coltSource, /addEventListener\("stalled", \(\) => recoverStalledRadioDance\(video\)\)/, "A stalled dance must recover instead of freezing.");
@@ -42,7 +43,7 @@ async function run() {
     const filename = pose === "companion" ? "launchpad-colt-companion.png" : `launchpad-colt-${pose}.png`;
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${pose} pose artwork.`);
   });
-  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm"].forEach(filename => {
+  ["launchpad-colt-idle.webm", "launchpad-colt-welcome.webm", "launchpad-colt-sleeping.webm", "launchpad-colt-pointing-transparent.webm", "launchpad-colt-radio-dance.webm", "launchpad-colt-radio-dance-alternate.webm", "launchpad-colt-greeting-excited.webm", "launchpad-colt-feeding.webm", "launchpad-colt-petting.webm", "launchpad-colt-bathing.webm"].forEach(filename => {
     assert(fs.existsSync(path.resolve(__dirname, "..", "assets", filename)), `Missing ${filename}.`);
   });
   assert(fs.existsSync(path.resolve(__dirname, "..", "assets", "launchpad-colt-nameplate.png")), "Missing the custom Colt nameplate artwork.");
@@ -92,7 +93,7 @@ async function run() {
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
     assert.equal(await image.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the idle animation.");
-    assert.equal(await page.locator(".launchpad-colt-pose").count(), 9);
+    assert.equal(await page.locator(".launchpad-colt-pose").count(), 10);
     const welcomeVideo = page.locator('.launchpad-colt-pose[data-pose="welcome"]');
     assert.equal(await welcomeVideo.evaluate(element => element.tagName), "VIDEO");
     assert.match(await welcomeVideo.getAttribute("data-src"), /launchpad-colt-welcome\.webm/);
@@ -227,6 +228,7 @@ async function run() {
     assert(await page.getByRole("button", { name: "Size: Medium", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Put Colt to Sleep", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Feed Me", exact: true }).isVisible());
+    assert(await page.getByRole("button", { name: "Give Colt a Bath", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Name Your Colt", exact: true }).isVisible());
     assert(await page.getByRole("button", { name: "Hide Platform", exact: true }).isVisible());
     assert.equal(await page.locator('[data-colt-control="motion"]').textContent(), "Pause");
@@ -237,16 +239,19 @@ async function run() {
     const controlsPanel = page.locator(".launchpad-colt-controls");
     const controlsBounds = await controlsPanel.boundingBox();
     assert.match(await controlsPanel.evaluate(element => getComputedStyle(element).backgroundImage), /launchpad-colt-controls-panel\.png/);
-    assert.equal(await controlsPanel.locator("button").count(), 11, "The redesigned panel lost a Colt control.");
+    assert.equal(await controlsPanel.locator("button").count(), 12, "The redesigned panel lost a Colt control.");
     assert(Math.abs((controlsBounds.width / controlsBounds.height) - (1672 / 941)) < 0.08, "The Colt controls artwork is distorted.");
     assert(controlsBounds.x >= 7 && controlsBounds.y >= 7 && controlsBounds.x + controlsBounds.width <= 1433 && controlsBounds.y + controlsBounds.height <= 893, "The Colt controls panel is not contained in the viewport.");
-    const slotButtons = controlsPanel.locator('button:not([data-colt-control="minimize"])');
+    const slotButtons = controlsPanel.locator('button:not([data-colt-control="minimize"]):not([data-colt-control="bath"])');
     const firstSlotBounds = await slotButtons.first().boundingBox();
     const lastSlotBounds = await slotButtons.last().boundingBox();
     const firstSlotCenter = firstSlotBounds.y + firstSlotBounds.height / 2;
     const lastSlotCenter = lastSlotBounds.y + lastSlotBounds.height / 2;
     assert(firstSlotCenter > controlsBounds.y + controlsBounds.height * .27 && firstSlotCenter < controlsBounds.y + controlsBounds.height * .33, "The first-row words are outside their artwork slots.");
     assert(lastSlotCenter > controlsBounds.y + controlsBounds.height * .67 && lastSlotCenter < controlsBounds.y + controlsBounds.height * .73, "The last-row words are outside their artwork slots.");
+    const bathControlBounds = await controlsPanel.locator('[data-colt-control="bath"]').boundingBox();
+    assert(bathControlBounds.x >= controlsBounds.x && bathControlBounds.x + bathControlBounds.width <= controlsBounds.x + controlsBounds.width, "The Give Bath control extends outside the Colt panel.");
+    assert(bathControlBounds.y >= controlsBounds.y && bathControlBounds.y + bathControlBounds.height <= controlsBounds.y + controlsBounds.height, "The Give Bath control extends outside the Colt panel.");
     assert.equal(await page.getByRole("button", { name: "Minimize control panel", exact: true }).evaluate(element => getComputedStyle(element).position), "absolute", "Panel minimize must remain available without consuming an artwork slot.");
     await page.getByRole("button", { name: "Name Your Colt", exact: true }).click();
     await page.waitForSelector(".launchpad-colt-customizer:visible");
@@ -273,7 +278,7 @@ async function run() {
     assert(platformBounds.y + platformBounds.height <= nameplateBounds.y + 2, "The platform overlaps the Colt nameplate.");
     assert(parseFloat(await image.evaluate(element => getComputedStyle(element).top)) < 0, "The Colt is not moved back onto the platform surface.");
     const idlePlatformTop = parseFloat(await image.evaluate(element => getComputedStyle(element).top));
-    for (const pose of ["feeding", "petting", "radioDance", "radioDanceAlternate", "sleeping"]) {
+    for (const pose of ["feeding", "petting", "bathing", "radioDance", "radioDanceAlternate", "sleeping"]) {
       const poseTop = parseFloat(await page.locator(`.launchpad-colt-pose[data-pose="${pose}"]`).evaluate(element => getComputedStyle(element).top));
       assert(poseTop < idlePlatformTop, `${pose} needs its own higher platform alignment.`);
     }
@@ -359,6 +364,31 @@ async function run() {
     assert(pettingCornerAlpha < 8, `The petting animation background is not transparent (corner alpha: ${pettingCornerAlpha}).`);
     await pettingVideo.dispatchEvent("ended");
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after petting.");
+    await page.locator(".launchpad-colt-character").click();
+    await page.getByRole("button", { name: "Give Colt a Bath", exact: true }).click();
+    const bathingVideo = page.locator('.launchpad-colt-pose[data-pose="bathing"]');
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "bathing");
+    assert.match(await bathingVideo.getAttribute("src"), /launchpad-colt-bathing\.webm/);
+    assert.equal(await bathingVideo.getAttribute("muted"), "");
+    assert.equal(await bathingVideo.getAttribute("loop"), null, "The bathing animation must play once rather than loop.");
+    await bathingVideo.evaluate(element => new Promise(resolve => {
+      if (element.readyState >= 3) resolve();
+      else element.addEventListener("canplay", resolve, { once: true });
+    }));
+    assert.equal(await bathingVideo.evaluate(element => getComputedStyle(element).opacity), "1");
+    const bathingCornerAlpha = await bathingVideo.evaluate(async element => {
+      element.currentTime = 2;
+      await new Promise(resolve => element.addEventListener("seeked", resolve, { once: true }));
+      const canvas = document.createElement("canvas");
+      canvas.width = element.videoWidth;
+      canvas.height = element.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(element, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+    assert(bathingCornerAlpha < 8, `The bathing animation background is not transparent (corner alpha: ${bathingCornerAlpha}).`);
+    await bathingVideo.dispatchEvent("ended");
+    assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "idle", "The Colt did not return to idle after bathing.");
     await page.locator(".launchpad-colt-character").click();
     await page.getByRole("button", { name: "Size: Medium", exact: true }).click();
     assert.equal(await page.locator("#launchpadColtRoot").getAttribute("data-size"), "large");

@@ -15,13 +15,15 @@
     radioDanceAlternate: "assets/launchpad-colt-radio-dance-alternate.webm?v=20260903-radio-dance-optimized-v2",
     greetingExcited: "assets/launchpad-colt-greeting-excited.webm?v=20260831-greeting-excited-alpha-v1",
     feeding: "assets/launchpad-colt-feeding.webm?v=20260901-feeding-alpha-v1",
-    petting: "assets/launchpad-colt-petting.webm?v=20260901-petting-alpha-v1"
+    petting: "assets/launchpad-colt-petting.webm?v=20260901-petting-alpha-v1",
+    bathing: "assets/launchpad-colt-bathing.webm?v=20260908-bathing-alpha-v1"
   };
   const HIDDEN_SCREENS = new Set(["pin", "login", "coltRun", "dashboard", "edit", "changePin"]);
   const WELCOME_REACTION_DURATION_MS = 10_100;
   const GREETING_EXCITED_REACTION_DURATION_MS = 6_100;
   const FEEDING_REACTION_DURATION_MS = 6_200;
   const PETTING_REACTION_DURATION_MS = 6_200;
+  const BATHING_REACTION_DURATION_MS = 6_200;
   const RADIO_MESSAGE_DURATION_MS = 4_200;
   const RADIO_DANCE_READY_TIMEOUT_MS = 2_500;
   const RADIO_DANCE_STALL_TIMEOUT_MS = 1_400;
@@ -37,6 +39,7 @@
     success: { icon: "✓", text: "Nice work!" },
     feeding: { icon: "", text: "Snack time!" },
     petting: { icon: "", text: "That feels nice!" },
+    bathing: { icon: "", text: "Bath time!" },
     sleep: { icon: "", text: "" }
   };
   const SIZE_LABELS = {
@@ -93,6 +96,7 @@
         <video class="launchpad-colt-pose" data-pose="radioDanceAlternate" data-src="${VIDEO_ASSETS.radioDanceAlternate}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="feeding" data-src="${VIDEO_ASSETS.feeding}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="petting" data-src="${VIDEO_ASSETS.petting}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="bathing" data-src="${VIDEO_ASSETS.bathing}" muted playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="sleeping" data-src="${VIDEO_ASSETS.sleeping}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <span class="launchpad-colt-spark" aria-hidden="true">✦</span>
         <span class="launchpad-colt-nameplate" aria-hidden="true"><strong>Colt</strong></span>
@@ -109,6 +113,7 @@
         <button type="button" data-colt-control="sleep" aria-label="Put Colt to Sleep" title="Put Colt to Sleep">Sleep Colt</button>
         <button type="button" data-colt-control="reset-position" aria-label="Reset position" title="Reset Colt position">Reset Spot</button>
         <button type="button" data-colt-control="hide">Hide Colt</button>
+        <button type="button" data-colt-control="bath" aria-label="Give Colt a Bath" title="Play the bathing animation">Give Bath</button>
       </div>
     </aside>
     <button class="launchpad-colt-restore" type="button" aria-label="Show Launchpad Colt" title="Show Launchpad Colt" hidden>
@@ -153,6 +158,7 @@
   const sizeButton = controls.querySelector('[data-colt-control="size"]');
   const feedButton = controls.querySelector('[data-colt-control="feed"]');
   const petButton = controls.querySelector('[data-colt-control="pet"]');
+  const bathButton = controls.querySelector('[data-colt-control="bath"]');
   const sleepButton = controls.querySelector('[data-colt-control="sleep"]');
   const customizeButton = controls.querySelector('[data-colt-control="customize"]');
   const nameplateButton = controls.querySelector('[data-colt-control="nameplate"]');
@@ -163,6 +169,7 @@
   const customizerStatus = customizer.querySelector(".launchpad-colt-customizer-status");
   const feedingVideo = root.querySelector('video[data-pose="feeding"]');
   const pettingVideo = root.querySelector('video[data-pose="petting"]');
+  const bathingVideo = root.querySelector('video[data-pose="bathing"]');
   const poseVideos = Array.from(root.querySelectorAll("video.launchpad-colt-pose"));
   const radioDanceVideos = poseVideos.filter(video => video.dataset.pose === "radioDance" || video.dataset.pose === "radioDanceAlternate");
 
@@ -188,6 +195,7 @@
       radio: activeRadioDancePose,
       feeding: "feeding",
       petting: "petting",
+      bathing: "bathing",
       sleep: "sleeping"
     };
     const activePose = poseByState[state] || "";
@@ -379,6 +387,8 @@
     feedButton.title = prefs.asleep ? "Wake the Colt before feeding him" : "Play the feeding animation";
     petButton.disabled = prefs.asleep;
     petButton.title = prefs.asleep ? "Wake the Colt before petting him" : "Play the petting animation";
+    bathButton.disabled = prefs.asleep;
+    bathButton.title = prefs.asleep ? "Wake the Colt before bathing him" : "Play the bathing animation";
     sleepButton.textContent = prefs.asleep ? "Wake Colt" : "Sleep Colt";
     sleepButton.setAttribute("aria-label", prefs.asleep ? "Wake Colt Up" : "Put Colt to Sleep");
     sleepButton.title = sleepButton.getAttribute("aria-label");
@@ -568,7 +578,7 @@
         : duration;
     if (reactionDuration > 0) {
       reactionTimer = globalObject.setTimeout(() => {
-        if (radioPlaybackActive && name !== "radio" && name !== "feeding" && name !== "petting") {
+        if (radioPlaybackActive && name !== "radio" && name !== "feeding" && name !== "petting" && name !== "bathing") {
           react("radio", "", 0);
           return;
         }
@@ -623,8 +633,21 @@
     resetSleepTimer();
   }
 
+  function finishBathing() {
+    if (currentState !== "bathing") return;
+    globalObject.clearTimeout(reactionTimer);
+    currentState = "idle";
+    root.classList.remove("is-radio-dancing");
+    companion.dataset.state = "idle";
+    prop.textContent = "";
+    speech.hidden = true;
+    syncPoseVideos("idle", true);
+    resetSleepTimer();
+  }
+
   feedingVideo.addEventListener("ended", finishFeeding);
   pettingVideo.addEventListener("ended", finishPetting);
+  bathingVideo.addEventListener("ended", finishBathing);
   radioDanceVideos.forEach(video => {
       video.addEventListener("ended", () => {
         if (!radioPlaybackActive || currentState !== "radio" || prefs.asleep || !prefs.motion) return;
@@ -819,6 +842,12 @@
       if (prefs.asleep) return;
       closeControls();
       react("petting", undefined, PETTING_REACTION_DURATION_MS);
+      return;
+    }
+    if (action === "bath") {
+      if (prefs.asleep) return;
+      closeControls();
+      react("bathing", undefined, BATHING_REACTION_DURATION_MS);
       return;
     }
     if (action === "sleep") {

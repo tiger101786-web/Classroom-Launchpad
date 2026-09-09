@@ -3684,7 +3684,7 @@ function startColtRunGame() {
   ];
   const mrsLevandoskeDeathAudios = [
     createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio.mp3?v=20260905-mrs-audio2"),
-    createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio-02.mp3?v=20260908-mrs-death2")
+    createDeferredAudio("assets/colt-run-mrs-levandoske-death-audio-02.mp3?v=20260908-mrs-death2-trim1")
   ];
   const mrsLevandoskeCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio.mp3?v=20260905-mrs-audio2"),

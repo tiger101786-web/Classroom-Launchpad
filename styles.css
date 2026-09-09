@@ -10515,6 +10515,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   top: -14%;
 }
 
+.launchpad-colt-root:not(.is-platform-hidden):not(.is-minimized):not(.is-auto-compact) .launchpad-colt-pose[data-pose="bathing"] {
+  top: -17%;
+}
+
 .launchpad-colt-root:not(.is-platform-hidden):not(.is-minimized):not(.is-auto-compact) .launchpad-colt-pose[data-pose="radioDance"],
 .launchpad-colt-root:not(.is-platform-hidden):not(.is-minimized):not(.is-auto-compact) .launchpad-colt-pose[data-pose="radioDanceAlternate"] {
   top: -18%;
@@ -10608,6 +10612,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose[data-pose="radioDanceAlternate"][data-active="true"],
 .launchpad-colt-companion[data-state="feeding"] .launchpad-colt-pose[data-pose="feeding"],
 .launchpad-colt-companion[data-state="petting"] .launchpad-colt-pose[data-pose="petting"],
+.launchpad-colt-companion[data-state="bathing"] .launchpad-colt-pose[data-pose="bathing"],
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose[data-pose="sleeping"] {
   opacity: 1 !important;
 }
@@ -10850,6 +10855,21 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   content: "−";
   font-size: 1rem;
   line-height: 1;
+}
+
+.launchpad-colt-controls button[data-colt-control="bath"] {
+  position: absolute;
+  bottom: 7.5%;
+  left: 50%;
+  width: 92px;
+  height: 23px;
+  padding: 0 10px;
+  border: 1px solid rgba(244, 39, 87, .88);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(100, 12, 37, .96), rgba(24, 7, 14, .97));
+  box-shadow: inset 0 0 9px rgba(255, 47, 91, .35), 0 0 8px rgba(240, 25, 72, .42);
+  font-size: .61rem;
+  transform: translateX(-50%);
 }
 
 .launchpad-colt-controls button:disabled {
