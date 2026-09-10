@@ -3226,24 +3226,24 @@ function renderColtRun() {
             </section>
             <div class="colt-run-character-grid">
               <button type="button" data-colt-run="character" data-character="colt">
-                <canvas id="coltRunSelectColt" width="300" height="200" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectColt" width="600" height="400" aria-hidden="true"></canvas>
                 <span>Colt</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrNieves">
-                <canvas id="coltRunSelectMrNieves" width="300" height="200" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectMrNieves" width="600" height="400" aria-hidden="true"></canvas>
                 <span>Mr. Nieves</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsLevandoske">
-                <canvas id="coltRunSelectMrsLevandoske" width="300" height="200" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectMrsLevandoske" width="600" height="400" aria-hidden="true"></canvas>
                 <span>Mrs. Levandoske</span>
               </button>
               <button type="button" class="is-placeholder" data-character="mrsTrittel" disabled aria-disabled="true" aria-label="Mrs. Trittel, coming soon">
-                <canvas id="coltRunSelectMrsTrittel" width="300" height="200" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectMrsTrittel" width="600" height="400" aria-hidden="true"></canvas>
                 <strong class="colt-run-coming-soon">Coming Soon</strong>
                 <span>Mrs. Trittel</span>
               </button>
               <button type="button" class="is-placeholder" data-character="mrsKoch" disabled aria-disabled="true" aria-label="Mrs. Koch, coming soon">
-                <canvas id="coltRunSelectMrsKoch" width="300" height="200" aria-hidden="true"></canvas>
+                <canvas id="coltRunSelectMrsKoch" width="600" height="400" aria-hidden="true"></canvas>
                 <strong class="colt-run-coming-soon">Coming Soon</strong>
                 <span>Mrs. Koch</span>
               </button>
@@ -7759,13 +7759,19 @@ function startColtRunGame() {
     if (!previewCanvas || !frame) return;
     const previewContext = previewCanvas.getContext("2d");
     if (!previewContext) return;
+    const renderScale = previewCanvas.width / 300;
+    const renderWidth = width * renderScale;
+    const renderHeight = height * renderScale;
+    const renderBottomPadding = bottomPadding * renderScale;
     previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewContext.save();
-    previewContext.translate(previewCanvas.width / 2, previewCanvas.height - bottomPadding);
+    previewContext.translate(previewCanvas.width / 2, previewCanvas.height - renderBottomPadding);
     previewContext.shadowColor = "rgba(0, 0, 0, 0.34)";
-    previewContext.shadowBlur = 10;
-    previewContext.shadowOffsetY = 6;
-    previewContext.drawImage(frame, -width / 2, -height, width, height);
+    previewContext.shadowBlur = 10 * renderScale;
+    previewContext.shadowOffsetY = 6 * renderScale;
+    previewContext.imageSmoothingEnabled = true;
+    previewContext.imageSmoothingQuality = "high";
+    previewContext.drawImage(frame, -renderWidth / 2, -renderHeight, renderWidth, renderHeight);
     previewContext.restore();
   };
 

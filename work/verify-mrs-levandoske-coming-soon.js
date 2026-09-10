@@ -52,6 +52,9 @@ assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.a
 assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 130, 198, -6\)/, "Mrs. Levandoske should sit slightly lower on the character-select platform.");
 assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(6,/);
 assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: span 2;/, "Character cards should retain their original three-across width.");
+assert.equal((app.match(/<canvas id="coltRunSelect[^\"]+" width="600" height="400"/g) || []).length, 5, "All character-select previews should use high-resolution canvases.");
+assert.match(app, /const renderScale = previewCanvas\.width \/ 300;/, "Character artwork should retain its visible size on the sharper canvas.");
+assert.match(app, /imageSmoothingQuality = "high";/, "Character previews should use high-quality image smoothing.");
 assert.match(styles, /\.colt-run-coming-soon/);
 assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?position: relative !important;/, "Coming Soon badges should remain in normal layout below the character artwork.");
 assert.doesNotMatch(styles.match(/\.colt-run-coming-soon \{[\s\S]*?\n\}/)?.[0] || "", /^\s*(?:bottom|left|transform):/m, "Coming Soon badges must not float over character legs.");
