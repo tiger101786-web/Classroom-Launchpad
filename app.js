@@ -7781,7 +7781,7 @@ function startColtRunGame() {
       drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 130, 198, 2);
     }
     if (getMrsKochIdleVideo().readyState >= 2) {
-      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 130, 198, 2);
+      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 130, 198, -3);
     }
   };
 
