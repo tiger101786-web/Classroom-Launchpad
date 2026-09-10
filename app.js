@@ -7780,14 +7780,14 @@ function startColtRunGame() {
     keepIdleVideoPlaying();
     keepMrNievesIdleVideoPlaying();
     keepMrsLevandoskeIdleVideoPlaying();
-    drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
-    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
-    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, -6);
+    drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 242, 176, 12);
+    drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 192, 218, 0);
+    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 143, 218, -7);
     if (getMrsTrittelIdleVideo().readyState >= 2) {
-      drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 130, 198, 2);
+      drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 143, 218, 0);
     }
     if (getMrsKochIdleVideo().readyState >= 2) {
-      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 130, 198, -3);
+      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 143, 218, -5);
     }
   };
 
