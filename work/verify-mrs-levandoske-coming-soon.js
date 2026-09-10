@@ -55,8 +55,8 @@ assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: sp
 assert.match(styles, /\.colt-run-coming-soon/);
 assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?position: relative !important;/, "Coming Soon badges should remain in normal layout below the character artwork.");
 assert.doesNotMatch(styles.match(/\.colt-run-coming-soon \{[\s\S]*?\n\}/)?.[0] || "", /^\s*(?:bottom|left|transform):/m, "Coming Soon badges must not float over character legs.");
-assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 72, 198, 2\)/, "Mrs. Trittel must preserve her natural proportions.");
-assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, mrsKochComingSoonImage, 74, 198, 2\)/, "Mrs. Koch must preserve her natural proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, getMrsTrittelIdleVideo\(\), 72, 198, 2\)/, "Mrs. Trittel must preserve her natural proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, getMrsKochIdleVideo\(\), 74, 198, 2\)/, "Mrs. Koch must preserve her natural proportions.");
 assert.match(
   styles,
   /button\[data-character="mrsLevandoske"\],[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
@@ -77,17 +77,23 @@ assert.match(
 assert.match(app, /const fullscreenTarget = stage \|\| shell;/, "Fullscreen should target only the 16:9 game stage.");
 assert.match(app, /keys\.jump && !jumpConsumed && player\.grounded/, "Jump must require a fresh press.");
 assert.match(app, /if \(name === "jump" && !value\) jumpConsumed = false;/);
-assert.match(app, /const mrsTrittelComingSoonImage = new Image\(\)/);
-assert.match(app, /const mrsKochComingSoonImage = new Image\(\)/);
+assert.match(app, /const mrsTrittelIdleVideos = \[/);
+assert.match(app, /const mrsKochIdleVideos = \[/);
+assert.match(app, /mrsTrittelIdleIndex = \(mrsTrittelIdleIndex \+ 1\) % mrsTrittelIdleVideos\.length/);
+assert.match(app, /mrsKochIdleIndex = \(mrsKochIdleIndex \+ 1\) % mrsKochIdleVideos\.length/);
+assert.match(app, /mrsTrittelIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
+assert.match(app, /mrsKochIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch"[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/);
 
 [
-  "colt-run-mrs-trittel-coming-soon.png",
-  "colt-run-mrs-koch-coming-soon.png"
+  "colt-run-mrs-trittel-idle.webm",
+  "colt-run-mrs-trittel-idle-02.webm",
+  "colt-run-mrs-koch-idle.webm",
+  "colt-run-mrs-koch-idle-02.webm"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
-  assert(fs.existsSync(file), `Missing transparent character art: ${filename}`);
-  assert(fs.statSync(file).size > 100_000, `Character art is unexpectedly small: ${filename}`);
+  assert(fs.existsSync(file), `Missing transparent coming-soon animation: ${filename}`);
+  assert(fs.statSync(file).size > 100_000, `Coming-soon animation is unexpectedly small: ${filename}`);
 });
 
 [

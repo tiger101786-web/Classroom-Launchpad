@@ -4276,6 +4276,24 @@ function startColtRunGame() {
   });
   let mrsLevandoskeIdleIndex = 0;
   const getMrsLevandoskeIdleVideo = () => mrsLevandoskeIdleVideos[mrsLevandoskeIdleIndex];
+  const mrsTrittelIdleVideos = [
+    createDeferredVideo("assets/colt-run-mrs-trittel-idle.webm?v=20260909-idle1"),
+    createDeferredVideo("assets/colt-run-mrs-trittel-idle-02.webm?v=20260909-idle1")
+  ];
+  mrsTrittelIdleVideos.forEach(video => {
+    video.loop = false;
+  });
+  let mrsTrittelIdleIndex = 0;
+  const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
+  const mrsKochIdleVideos = [
+    createDeferredVideo("assets/colt-run-mrs-koch-idle.webm?v=20260909-idle1"),
+    createDeferredVideo("assets/colt-run-mrs-koch-idle-02.webm?v=20260909-idle1")
+  ];
+  mrsKochIdleVideos.forEach(video => {
+    video.loop = false;
+  });
+  let mrsKochIdleIndex = 0;
+  const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
   const mrsLevandoskeRunVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-run.webm?v=20260905-green-key2");
   const mrsLevandoskeJumpVideos = [
     createDeferredVideo("assets/colt-run-mrs-levandoske-jump.webm?v=20260905-green-key2"),
@@ -4318,12 +4336,6 @@ function startColtRunGame() {
   const mrNievesJumpImage = new Image();
   mrNievesJumpImage.decoding = "async";
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
-  const mrsTrittelComingSoonImage = new Image();
-  mrsTrittelComingSoonImage.decoding = "async";
-  mrsTrittelComingSoonImage.src = "assets/colt-run-mrs-trittel-coming-soon.png?v=20260905-coming-soon1";
-  const mrsKochComingSoonImage = new Image();
-  mrsKochComingSoonImage.decoding = "async";
-  mrsKochComingSoonImage.src = "assets/colt-run-mrs-koch-coming-soon.png?v=20260905-coming-soon1";
   const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
   const ensureCharacterMedia = character => {
     if (character === "mrsLevandoske") {
@@ -5037,6 +5049,26 @@ function startColtRunGame() {
     return video;
   };
 
+  const chooseMrsTrittelIdleVideo = () => {
+    mrsTrittelIdleIndex = (mrsTrittelIdleIndex + 1) % mrsTrittelIdleVideos.length;
+    const video = getMrsTrittelIdleVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
+  };
+
+  const chooseMrsKochIdleVideo = () => {
+    mrsKochIdleIndex = (mrsKochIdleIndex + 1) % mrsKochIdleVideos.length;
+    const video = getMrsKochIdleVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
+  };
+
   const keepMrsLevandoskeRunVideoPlaying = () => {
     ensureMediaSource(mrsLevandoskeRunVideo);
     if (mrsLevandoskeRunVideo.paused) mrsLevandoskeRunVideo.play().catch(() => {});
@@ -5168,6 +5200,8 @@ function startColtRunGame() {
     coltCelebrationVideo,
     ...mrNievesIdleVideos,
     ...mrsLevandoskeIdleVideos,
+    ...mrsTrittelIdleVideos,
+    ...mrsKochIdleVideos,
     mrsLevandoskeRunVideo,
     ...mrsLevandoskeJumpVideos,
     mrsLevandoskeDeathVideo,
@@ -5184,8 +5218,14 @@ function startColtRunGame() {
     let nextKey = "hidden";
     if (!document.hidden) {
       if (characterSelectOpen) {
-        nextKey = `character-select:${coltIdleIndex}:${mrNievesIdleIndex}:${mrsLevandoskeIdleIndex}`;
-        activeVideos = [getColtIdleVideo(), getMrNievesIdleVideo(), getMrsLevandoskeIdleVideo()];
+        nextKey = `character-select:${coltIdleIndex}:${mrNievesIdleIndex}:${mrsLevandoskeIdleIndex}:${mrsTrittelIdleIndex}:${mrsKochIdleIndex}`;
+        activeVideos = [
+          getColtIdleVideo(),
+          getMrNievesIdleVideo(),
+          getMrsLevandoskeIdleVideo(),
+          getMrsTrittelIdleVideo(),
+          getMrsKochIdleVideo()
+        ];
       } else if (lost) {
         if (selectedCharacter === "mrNieves") {
           nextKey = `death:mrNieves:${mrNievesDeathIndex}`;
@@ -5276,6 +5316,22 @@ function startColtRunGame() {
     video.addEventListener("ended", () => {
       if (video !== getMrsLevandoskeIdleVideo()) return;
       chooseMrsLevandoskeIdleVideo();
+      characterPlaybackKey = "";
+      syncCharacterVideoPlayback(true);
+    });
+  });
+  mrsTrittelIdleVideos.forEach(video => {
+    video.addEventListener("ended", () => {
+      if (!characterSelectOpen || video !== getMrsTrittelIdleVideo()) return;
+      chooseMrsTrittelIdleVideo();
+      characterPlaybackKey = "";
+      syncCharacterVideoPlayback(true);
+    });
+  });
+  mrsKochIdleVideos.forEach(video => {
+    video.addEventListener("ended", () => {
+      if (!characterSelectOpen || video !== getMrsKochIdleVideo()) return;
+      chooseMrsKochIdleVideo();
       characterPlaybackKey = "";
       syncCharacterVideoPlayback(true);
     });
@@ -7721,11 +7777,11 @@ function startColtRunGame() {
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 220, 160, 14);
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
     drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, -6);
-    if (mrsTrittelComingSoonImage.complete && mrsTrittelComingSoonImage.naturalWidth) {
-      drawSelectPreview(selectMrsTrittelCanvas, mrsTrittelComingSoonImage, 72, 198, 2);
+    if (getMrsTrittelIdleVideo().readyState >= 2) {
+      drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 72, 198, 2);
     }
-    if (mrsKochComingSoonImage.complete && mrsKochComingSoonImage.naturalWidth) {
-      drawSelectPreview(selectMrsKochCanvas, mrsKochComingSoonImage, 74, 198, 2);
+    if (getMrsKochIdleVideo().readyState >= 2) {
+      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 74, 198, 2);
     }
   };
 
@@ -8384,6 +8440,8 @@ function startColtRunGame() {
         coltCelebrationVideo,
         ...mrNievesIdleVideos,
         ...mrsLevandoskeIdleVideos,
+        ...mrsTrittelIdleVideos,
+        ...mrsKochIdleVideos,
         mrsLevandoskeRunVideo,
         ...mrsLevandoskeJumpVideos,
         mrsLevandoskeDeathVideo,
@@ -8397,8 +8455,6 @@ function startColtRunGame() {
         ...animatedBackgroundVideos
       ].forEach(releaseMediaSource);
       mrNievesJumpImage.src = "";
-      mrsTrittelComingSoonImage.src = "";
-      mrsKochComingSoonImage.src = "";
       if (ambientAudioContext) ambientAudioContext.close().catch(() => {});
       if (isFullscreen()) document.exitFullscreen?.();
     }
