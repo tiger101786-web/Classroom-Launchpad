@@ -55,8 +55,8 @@ assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: sp
 assert.match(styles, /\.colt-run-coming-soon/);
 assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?position: relative !important;/, "Coming Soon badges should remain in normal layout below the character artwork.");
 assert.doesNotMatch(styles.match(/\.colt-run-coming-soon \{[\s\S]*?\n\}/)?.[0] || "", /^\s*(?:bottom|left|transform):/m, "Coming Soon badges must not float over character legs.");
-assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, getMrsTrittelIdleVideo\(\), 72, 198, 2\)/, "Mrs. Trittel must preserve her natural proportions.");
-assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, getMrsKochIdleVideo\(\), 74, 198, 2\)/, "Mrs. Koch must preserve her natural proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, getMrsTrittelIdleVideo\(\), 130, 198, 2\)/, "Mrs. Trittel must preserve her natural video proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, getMrsKochIdleVideo\(\), 130, 198, 2\)/, "Mrs. Koch must preserve her natural video proportions.");
 assert.match(
   styles,
   /button\[data-character="mrsLevandoske"\],[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
