@@ -49,7 +49,7 @@ assert.match(app, /mrsLevandoskeIsCelebrating[\s\S]*?getMrsLevandoskeCelebration
 assert.match(app, /mrsLevandoskeIdleIndex = \(mrsLevandoskeIdleIndex \+ 1\) % mrsLevandoskeIdleVideos\.length/);
 assert.match(app, /mrsLevandoskeJumpIndex = \(mrsLevandoskeJumpIndex \+ 1\) % mrsLevandoskeJumpVideos\.length/);
 assert.match(app, /mrsLevandoskeIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
-assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 143, 218, -20\)/, "Mrs. Levandoske should be enlarged proportionally without clipping her head.");
+assert.match(app, /drawSelectPreview\(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo\(\), 130, 198, 2\)/, "Mrs. Levandoske should remain fully visible within the high-resolution preview.");
 assert.match(styles, /\.colt-run-character-grid \{[\s\S]*?grid-template-columns: repeat\(6,/);
 assert.match(styles, /\.colt-run-character-grid button \{[\s\S]*?grid-column: span 2;/, "Character cards should retain their original three-across width.");
 assert.equal((app.match(/<canvas id="coltRunSelect[^\"]+" width="600" height="400"/g) || []).length, 5, "All character-select previews should use high-resolution canvases.");
@@ -58,8 +58,8 @@ assert.match(app, /imageSmoothingQuality = "high";/, "Character previews should 
 assert.match(styles, /\.colt-run-coming-soon/);
 assert.match(styles, /\.colt-run-coming-soon \{[\s\S]*?position: relative !important;/, "Coming Soon badges should remain in normal layout below the character artwork.");
 assert.doesNotMatch(styles.match(/\.colt-run-coming-soon \{[\s\S]*?\n\}/)?.[0] || "", /^\s*(?:bottom|left|transform):/m, "Coming Soon badges must not float over character legs.");
-assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, getMrsTrittelIdleVideo\(\), 143, 218, -20\)/, "Mrs. Trittel must be enlarged without clipping her head.");
-assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, getMrsKochIdleVideo\(\), 143, 218, -22\)/, "Mrs. Koch must be enlarged without clipping her head while retaining her slightly lower platform position.");
+assert.match(app, /drawSelectPreview\(selectMrsTrittelCanvas, getMrsTrittelIdleVideo\(\), 130, 198, 2\)/, "Mrs. Trittel must remain fully visible while preserving her natural video proportions.");
+assert.match(app, /drawSelectPreview\(selectMrsKochCanvas, getMrsKochIdleVideo\(\), 130, 198, 0\)/, "Mrs. Koch must remain fully visible while retaining her slightly lower platform position.");
 assert.match(
   styles,
   /button\[data-character="mrsLevandoske"\],[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/,
