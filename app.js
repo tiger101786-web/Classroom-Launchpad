@@ -4268,8 +4268,8 @@ function startColtRunGame() {
   let lastMrNievesIdleIndex = -1;
   const getMrNievesIdleVideo = () => mrNievesIdleVideos[mrNievesIdleIndex];
   const mrsLevandoskeIdleVideos = [
-    createDeferredVideo("assets/colt-run-mrs-levandoske-idle.webm?v=20260831-idle-alpha1"),
-    createDeferredVideo("assets/colt-run-mrs-levandoske-idle-02.webm?v=20260831-idle-alpha1")
+    createDeferredVideo("assets/colt-run-mrs-levandoske-idle.webm?v=20260910-tight-hq1"),
+    createDeferredVideo("assets/colt-run-mrs-levandoske-idle-02.webm?v=20260910-tight-hq1")
   ];
   mrsLevandoskeIdleVideos.forEach(video => {
     video.loop = false;
@@ -4277,8 +4277,8 @@ function startColtRunGame() {
   let mrsLevandoskeIdleIndex = 0;
   const getMrsLevandoskeIdleVideo = () => mrsLevandoskeIdleVideos[mrsLevandoskeIdleIndex];
   const mrsTrittelIdleVideos = [
-    createDeferredVideo("assets/colt-run-mrs-trittel-idle.webm?v=20260909-idle1"),
-    createDeferredVideo("assets/colt-run-mrs-trittel-idle-02.webm?v=20260909-idle1")
+    createDeferredVideo("assets/colt-run-mrs-trittel-idle.webm?v=20260910-tight-hq1"),
+    createDeferredVideo("assets/colt-run-mrs-trittel-idle-02.webm?v=20260910-tight-hq1")
   ];
   mrsTrittelIdleVideos.forEach(video => {
     video.loop = false;
@@ -4286,8 +4286,8 @@ function startColtRunGame() {
   let mrsTrittelIdleIndex = 0;
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsKochIdleVideos = [
-    createDeferredVideo("assets/colt-run-mrs-koch-idle.webm?v=20260909-idle1"),
-    createDeferredVideo("assets/colt-run-mrs-koch-idle-02.webm?v=20260909-idle1")
+    createDeferredVideo("assets/colt-run-mrs-koch-idle.webm?v=20260910-tight-hq1"),
+    createDeferredVideo("assets/colt-run-mrs-koch-idle-02.webm?v=20260910-tight-hq1")
   ];
   mrsKochIdleVideos.forEach(video => {
     video.loop = false;
@@ -7782,12 +7782,12 @@ function startColtRunGame() {
     keepMrsLevandoskeIdleVideoPlaying();
     drawSelectPreview(selectColtCanvas, getTransparentIdleFrame(), 242, 176, 12);
     drawSelectPreview(selectMrNievesCanvas, getTransparentMrNievesIdleFrame(), 174, 198, 2);
-    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 130, 198, 2);
+    drawSelectPreview(selectMrsLevandoskeCanvas, getMrsLevandoskeIdleVideo(), 140, 198, 2);
     if (getMrsTrittelIdleVideo().readyState >= 2) {
-      drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 130, 198, 2);
+      drawSelectPreview(selectMrsTrittelCanvas, getMrsTrittelIdleVideo(), 135, 198, 2);
     }
     if (getMrsKochIdleVideo().readyState >= 2) {
-      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 130, 198, 0);
+      drawSelectPreview(selectMrsKochCanvas, getMrsKochIdleVideo(), 136, 198, 0);
     }
   };
 
