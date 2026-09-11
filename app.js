@@ -3237,9 +3237,8 @@ function renderColtRun() {
                 <canvas id="coltRunSelectMrsLevandoske" width="600" height="400" aria-hidden="true"></canvas>
                 <span>Mrs. Levandoske</span>
               </button>
-              <button type="button" class="is-placeholder" data-character="mrsTrittel" disabled aria-disabled="true" aria-label="Mrs. Trittel, coming soon">
+              <button type="button" data-colt-run="character" data-character="mrsTrittel">
                 <canvas id="coltRunSelectMrsTrittel" width="600" height="400" aria-hidden="true"></canvas>
-                <strong class="colt-run-coming-soon">Coming Soon</strong>
                 <span>Mrs. Trittel</span>
               </button>
               <button type="button" class="is-placeholder" data-character="mrsKoch" disabled aria-disabled="true" aria-label="Mrs. Koch, coming soon">
@@ -3361,7 +3360,8 @@ function startColtRunGame() {
   const characterNames = {
     colt: "Colt",
     mrNieves: "Mr. Nieves",
-    mrsLevandoske: "Mrs. Levandoske"
+    mrsLevandoske: "Mrs. Levandoske",
+    mrsTrittel: "Mrs. Trittel"
   };
   let selectedCharacter = localStorage.getItem(characterStorageKey);
   if (!characterNames[selectedCharacter]) selectedCharacter = "colt";
@@ -3869,6 +3869,7 @@ function startColtRunGame() {
     updateCharacterButtons();
     if (selectedCharacter === "mrNieves") chooseMrNievesIdleVideo();
     if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeIdleVideo();
+    if (selectedCharacter === "mrsTrittel") chooseMrsTrittelIdleVideo();
     ensureCharacterMedia(selectedCharacter);
     resetLevel(true);
     closeCharacterSelect();
@@ -4285,6 +4286,8 @@ function startColtRunGame() {
   });
   let mrsTrittelIdleIndex = 0;
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
+  const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
+  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260910-playable1");
   const mrsKochIdleVideos = [
     createDeferredVideo("assets/colt-run-mrs-koch-idle.webm?v=20260910-tight-hq1"),
     createDeferredVideo("assets/colt-run-mrs-koch-idle-02.webm?v=20260910-tight-hq1")
@@ -4338,6 +4341,12 @@ function startColtRunGame() {
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
   const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
   const ensureCharacterMedia = character => {
+    if (character === "mrsTrittel") {
+      mrsTrittelIdleVideos.forEach(video => ensureMediaSource(video));
+      ensureMediaSource(mrsTrittelRunVideo);
+      ensureMediaSource(mrsTrittelJumpVideo);
+      return;
+    }
     if (character === "mrsLevandoske") {
       mrsLevandoskeIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsLevandoskeRunVideo);
@@ -4841,7 +4850,9 @@ function startColtRunGame() {
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
-      const usesHumanRunningAudio = selectedCharacter === "mrNieves" || selectedCharacter === "mrsLevandoske";
+      const usesHumanRunningAudio = selectedCharacter === "mrNieves"
+        || selectedCharacter === "mrsLevandoske"
+        || selectedCharacter === "mrsTrittel";
       const activeRunningAudio = usesHumanRunningAudio ? mrNievesRunningAudio : runningAudio;
       const inactiveRunningAudio = usesHumanRunningAudio ? runningAudio : mrNievesRunningAudio;
       ensureMediaSource(activeRunningAudio);
@@ -5059,6 +5070,30 @@ function startColtRunGame() {
     return video;
   };
 
+  const keepMrsTrittelIdleVideoPlaying = () => {
+    const video = getMrsTrittelIdleVideo();
+    ensureMediaSource(video);
+    if (video.paused) video.play().catch(() => {});
+  };
+
+  const keepMrsTrittelRunVideoPlaying = () => {
+    ensureMediaSource(mrsTrittelRunVideo);
+    if (mrsTrittelRunVideo.paused) mrsTrittelRunVideo.play().catch(() => {});
+  };
+
+  const restartMrsTrittelJumpVideo = () => {
+    ensureMediaSource(mrsTrittelJumpVideo);
+    try {
+      mrsTrittelJumpVideo.currentTime = 0;
+    } catch {}
+    mrsTrittelJumpVideo.play().catch(() => {});
+  };
+
+  const keepMrsTrittelJumpVideoPlaying = () => {
+    ensureMediaSource(mrsTrittelJumpVideo);
+    if (mrsTrittelJumpVideo.paused) mrsTrittelJumpVideo.play().catch(() => {});
+  };
+
   const chooseMrsKochIdleVideo = () => {
     mrsKochIdleIndex = (mrsKochIdleIndex + 1) % mrsKochIdleVideos.length;
     const video = getMrsKochIdleVideo();
@@ -5201,6 +5236,8 @@ function startColtRunGame() {
     ...mrNievesIdleVideos,
     ...mrsLevandoskeIdleVideos,
     ...mrsTrittelIdleVideos,
+    mrsTrittelRunVideo,
+    mrsTrittelJumpVideo,
     ...mrsKochIdleVideos,
     mrsLevandoskeRunVideo,
     ...mrsLevandoskeJumpVideos,
@@ -5233,9 +5270,21 @@ function startColtRunGame() {
         } else if (selectedCharacter === "mrsLevandoske") {
           nextKey = "death:mrsLevandoske";
           activeVideos = [mrsLevandoskeDeathVideo];
+        } else if (selectedCharacter === "mrsTrittel") {
+          nextKey = `death:mrsTrittel:${mrsTrittelIdleIndex}`;
+          activeVideos = [getMrsTrittelIdleVideo()];
         } else {
           nextKey = "death:colt";
           activeVideos = [deathVideo];
+        }
+      } else if (selectedCharacter === "mrsTrittel") {
+        nextKey = `mrsTrittel:${player.state}`;
+        if (player.state === "run") activeVideos = [mrsTrittelRunVideo];
+        else if (player.state === "jumpPrep" || player.state === "leap") {
+          activeVideos = [mrsTrittelJumpVideo];
+        } else {
+          nextKey = `mrsTrittel:${player.state}:${mrsTrittelIdleIndex}`;
+          activeVideos = [getMrsTrittelIdleVideo()];
         }
       } else if (selectedCharacter === "mrsLevandoske") {
         nextKey = `mrsLevandoske:${player.state}`;
@@ -5322,7 +5371,15 @@ function startColtRunGame() {
   });
   mrsTrittelIdleVideos.forEach(video => {
     video.addEventListener("ended", () => {
-      if (!characterSelectOpen || video !== getMrsTrittelIdleVideo()) return;
+      if (video !== getMrsTrittelIdleVideo()) return;
+      if (!characterSelectOpen && selectedCharacter === "mrsTrittel" && player.state === "celebrate") {
+        try {
+          video.currentTime = 0;
+        } catch {}
+        video.play().catch(() => {});
+        return;
+      }
+      if (!characterSelectOpen && selectedCharacter !== "mrsTrittel") return;
       chooseMrsTrittelIdleVideo();
       characterPlaybackKey = "";
       syncCharacterVideoPlayback(true);
@@ -7138,6 +7195,8 @@ function startColtRunGame() {
       ? chooseMrNievesDeathVideo()
       : selectedCharacter === "mrsLevandoske"
         ? mrsLevandoskeDeathVideo
+        : selectedCharacter === "mrsTrittel"
+          ? getMrsTrittelIdleVideo()
         : deathVideo;
     ensureMediaSource(activeDeathVideo);
     try {
@@ -7145,6 +7204,7 @@ function startColtRunGame() {
     } catch {}
     if (selectedCharacter === "mrNieves") keepMrNievesDeathVideoPlaying();
     else if (selectedCharacter === "mrsLevandoske") keepMrsLevandoskeDeathVideoPlaying();
+    else if (selectedCharacter === "mrsTrittel") keepMrsTrittelIdleVideoPlaying();
     else keepDeathVideoPlaying();
     syncGameStatus();
   };
@@ -7447,6 +7507,9 @@ function startColtRunGame() {
     } else if (selectedCharacter === "mrsLevandoske") {
       chooseMrsLevandoskeCelebrationVideo();
       keepMrsLevandoskeCelebrationVideoPlaying();
+    } else if (selectedCharacter === "mrsTrittel") {
+      chooseMrsTrittelIdleVideo();
+      keepMrsTrittelIdleVideoPlaying();
     } else {
       coltCelebrationAudioPending = true;
       coltCelebrationLastVideoTime = 0;
@@ -7489,6 +7552,7 @@ function startColtRunGame() {
     player.state = "leap";
     if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
     if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeJumpVideo();
+    if (selectedCharacter === "mrsTrittel") restartMrsTrittelJumpVideo();
     stopRunningAudio();
     syncGameStatus();
   };
@@ -7605,15 +7669,18 @@ function startColtRunGame() {
   const drawDeathColt = () => {
     const isMrNieves = selectedCharacter === "mrNieves";
     const isMrsLevandoske = selectedCharacter === "mrsLevandoske";
-    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : 178) * deathColtDrawScale;
-    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : 132) * deathColtDrawScale;
+    const isMrsTrittel = selectedCharacter === "mrsTrittel";
+    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : isMrsTrittel ? 112 : 178) * deathColtDrawScale;
+    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : isMrsTrittel ? 170 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
-    const y = Math.round(deathY + player.h - drawH + (isMrNieves ? 22 : isMrsLevandoske ? 14 : 8));
+    const y = Math.round(deathY + player.h - drawH + (isMrNieves ? 22 : isMrsLevandoske ? 14 : isMrsTrittel ? 16 : 8));
     const mrNievesDeathReady = isMrNieves && getMrNievesDeathVideo().readyState >= 2;
     const deathFrame = isMrNieves
       ? getTransparentMrNievesDeathFrame() || getTransparentMrNievesIdleFrame()
       : isMrsLevandoske
         ? (mrsLevandoskeDeathVideo.readyState >= 2 ? mrsLevandoskeDeathVideo : getMrsLevandoskeIdleVideo())
+        : isMrsTrittel
+          ? getMrsTrittelIdleVideo()
         : getTransparentDeathFrame();
     ctx.save();
     ctx.translate(x, y);
@@ -7626,9 +7693,10 @@ function startColtRunGame() {
       else if (isMrNieves) keepMrNievesIdleVideoPlaying();
       else if (isMrsLevandoske && mrsLevandoskeDeathVideo.readyState >= 2) keepMrsLevandoskeDeathVideoPlaying();
       else if (isMrsLevandoske) keepMrsLevandoskeIdleVideoPlaying();
+      else if (isMrsTrittel) keepMrsTrittelIdleVideoPlaying();
       else keepDeathVideoPlaying();
       ctx.drawImage(deathFrame, -drawW / 2, 0, drawW, drawH);
-    } else if (!isMrNieves && !isMrsLevandoske && coltSprites.deathLoading.complete && coltSprites.deathLoading.naturalWidth) {
+    } else if (!isMrNieves && !isMrsLevandoske && !isMrsTrittel && coltSprites.deathLoading.complete && coltSprites.deathLoading.naturalWidth) {
       ctx.drawImage(coltSprites.deathLoading, -drawW / 2, 0, drawW, drawH);
     } else {
       ctx.fillStyle = "#7b0b31";
@@ -7665,7 +7733,8 @@ function startColtRunGame() {
       : coltSprites[player.state] || coltSprites.idle;
     const isMrNieves = selectedCharacter === "mrNieves";
     const isMrsLevandoske = selectedCharacter === "mrsLevandoske";
-    const isHumanRunner = isMrNieves || isMrsLevandoske;
+    const isMrsTrittel = selectedCharacter === "mrsTrittel";
+    const isHumanRunner = isMrNieves || isMrsLevandoske || isMrsTrittel;
     const mrNievesIsJumping = isMrNieves && player.state === "jumpPrep";
     const mrNievesIsInAir = isMrNieves && player.state === "leap";
     const mrNievesIsRunning = isMrNieves && player.state === "run";
@@ -7673,19 +7742,25 @@ function startColtRunGame() {
     const mrsLevandoskeIsJumping = isMrsLevandoske && (player.state === "jumpPrep" || player.state === "leap");
     const mrsLevandoskeIsRunning = isMrsLevandoske && player.state === "run";
     const mrsLevandoskeIsCelebrating = isMrsLevandoske && player.state === "celebrate";
+    const mrsTrittelIsJumping = isMrsTrittel && (player.state === "jumpPrep" || player.state === "leap");
+    const mrsTrittelIsRunning = isMrsTrittel && player.state === "run";
     const coltIsCelebrating = !isHumanRunner && player.state === "celebrate";
     const drawW = isMrNieves
       ? (mrNievesIsJumping ? 154 : mrNievesIsInAir ? 150 : mrNievesIsCelebrating ? 132 : 128)
       : isMrsLevandoske
         ? (mrsLevandoskeIsJumping ? 122 : mrsLevandoskeIsRunning ? 112 : 108)
+        : isMrsTrittel
+          ? (mrsTrittelIsJumping ? 116 : mrsTrittelIsRunning ? 112 : 110)
         : coltIsCelebrating ? 180 : player.state === "idle" ? 154 : player.state === "run" ? 170 : player.state === "leap" ? 164 : player.state === "jumpPrep" ? 132 : 124;
     const drawH = isMrNieves
       ? (mrNievesIsJumping ? 142 : mrNievesIsInAir ? 140 : mrNievesIsCelebrating ? 154 : 154)
       : isMrsLevandoske
         ? (mrsLevandoskeIsJumping ? 174 : mrsLevandoskeIsRunning ? 170 : 168)
+        : isMrsTrittel
+          ? (mrsTrittelIsJumping ? 176 : mrsTrittelIsRunning ? 170 : 162)
         : coltIsCelebrating ? 123 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : isMrsLevandoske ? 18 : 8));
+    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : isMrsLevandoske ? 18 : isMrsTrittel ? 16 : 8));
     ctx.save();
     if (!isHumanRunner) ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);
@@ -7705,11 +7780,23 @@ function startColtRunGame() {
               ? (getMrsLevandoskeCelebrationVideo().readyState >= 2 ? getMrsLevandoskeCelebrationVideo() : getMrsLevandoskeIdleVideo())
             : getMrsLevandoskeIdleVideo())
       : null;
+    const mrsTrittelFrame = isMrsTrittel
+      ? (mrsTrittelIsJumping
+          ? (mrsTrittelJumpVideo.readyState >= 2 ? mrsTrittelJumpVideo : getMrsTrittelIdleVideo())
+          : mrsTrittelIsRunning
+            ? (mrsTrittelRunVideo.readyState >= 2 ? mrsTrittelRunVideo : getMrsTrittelIdleVideo())
+            : getMrsTrittelIdleVideo())
+      : null;
     const idleFrame = !isHumanRunner && player.state === "idle" ? getTransparentIdleFrame() : null;
     const runningFrame = !isHumanRunner && player.state === "run" ? getTransparentRunFrame() : null;
     const leapFrame = !isHumanRunner && player.state === "leap" ? getTransparentLeapFrame() : null;
     const coltCelebrationFrame = coltIsCelebrating ? getTransparentColtCelebrationFrame() : null;
-    if (mrsLevandoskeFrame) {
+    if (mrsTrittelFrame) {
+      if (mrsTrittelIsJumping && mrsTrittelJumpVideo.readyState >= 2) keepMrsTrittelJumpVideoPlaying();
+      else if (mrsTrittelIsRunning && mrsTrittelRunVideo.readyState >= 2) keepMrsTrittelRunVideoPlaying();
+      else keepMrsTrittelIdleVideoPlaying();
+      ctx.drawImage(mrsTrittelFrame, -drawW / 2, 0, drawW, drawH);
+    } else if (mrsLevandoskeFrame) {
       if (mrsLevandoskeIsJumping && getMrsLevandoskeJumpVideo().readyState >= 2) keepMrsLevandoskeJumpVideoPlaying();
       else if (mrsLevandoskeIsRunning && mrsLevandoskeRunVideo.readyState >= 2) keepMrsLevandoskeRunVideoPlaying();
       else if (mrsLevandoskeIsCelebrating && getMrsLevandoskeCelebrationVideo().readyState >= 2) keepMrsLevandoskeCelebrationVideoPlaying();
@@ -7747,6 +7834,8 @@ function startColtRunGame() {
     } else if (!isHumanRunner) {
       ctx.fillStyle = "#7b0b31";
       ctx.fillRect(-player.w / 2, drawH - player.h, player.w, player.h);
+    } else if (isMrsTrittel) {
+      keepMrsTrittelIdleVideoPlaying();
     } else if (isMrsLevandoske) {
       keepMrsLevandoskeIdleVideoPlaying();
     } else {
@@ -8051,6 +8140,7 @@ function startColtRunGame() {
         jumpConsumed = true;
         if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
         if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeJumpVideo();
+        if (selectedCharacter === "mrsTrittel") restartMrsTrittelJumpVideo();
         player.vy = currentJumpPower;
         player.grounded = false;
         player.state = "jumpPrep";
@@ -8447,6 +8537,8 @@ function startColtRunGame() {
         ...mrNievesIdleVideos,
         ...mrsLevandoskeIdleVideos,
         ...mrsTrittelIdleVideos,
+        mrsTrittelRunVideo,
+        mrsTrittelJumpVideo,
         ...mrsKochIdleVideos,
         mrsLevandoskeRunVideo,
         ...mrsLevandoskeJumpVideos,

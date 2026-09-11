@@ -46,7 +46,7 @@ async function run() {
       const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
       CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
         const mediaSource = source instanceof HTMLVideoElement ? source.dataset.src || source.currentSrc || "" : "";
-        if (mediaSource.includes("colt-run-mrs-levandoske") && window.__coltRunMediaDraws.length < 2000) {
+        if ((mediaSource.includes("colt-run-mrs-levandoske") || mediaSource.includes("colt-run-mrs-trittel")) && window.__coltRunMediaDraws.length < 2000) {
           window.__coltRunMediaDraws.push(mediaSource);
         }
         return originalDrawImage.call(this, source, ...args);
@@ -723,7 +723,9 @@ async function run() {
       "colt-run-mrs-levandoske-run.webm",
       "colt-run-mrs-levandoske-jump.webm",
       "colt-run-mrs-levandoske-jump-02.webm",
-      "colt-run-mrs-levandoske-death.webm"
+      "colt-run-mrs-levandoske-death.webm",
+      "colt-run-mrs-trittel-run.webm",
+      "colt-run-mrs-trittel-jump.webm"
     ]);
     if (mrsLevandoskeAnimationAlpha.some(animation => animation.maxCornerAlpha > 8 || animation.width !== 576 || animation.height !== 876)) {
       throw new Error(`Mrs. Levandoske animations are not transparent game-ready media: ${JSON.stringify(mrsLevandoskeAnimationAlpha)}.`);
@@ -790,6 +792,24 @@ async function run() {
     await page.evaluate(() => { window.__coltRunMediaDraws = []; });
     await page.keyboard.down("Space");
     await page.waitForFunction(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-levandoske-jump-02.webm")), null, { timeout: 3000 });
+    await page.keyboard.up("Space");
+    await page.locator('[data-colt-run="characterSelect"]').click();
+    const mrsTrittelCard = page.locator('[data-character="mrsTrittel"]');
+    const mrsTrittelCardText = (await mrsTrittelCard.innerText()).toLowerCase();
+    if (await mrsTrittelCard.isDisabled() || !mrsTrittelCardText.includes("mrs. trittel") || mrsTrittelCardText.includes("coming soon")) {
+      throw new Error("Mrs. Trittel is not presented as a playable character.");
+    }
+    await mrsTrittelCard.click();
+    if (!(await page.locator("#coltRunStatus").innerText()).includes("Mrs. Trittel selected")) {
+      throw new Error("Mrs. Trittel did not become the active playable runner.");
+    }
+    await page.evaluate(() => { window.__coltRunMediaDraws = []; });
+    await page.keyboard.down("ArrowRight");
+    await page.waitForFunction(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-trittel-run.webm")), null, { timeout: 3000 });
+    await page.keyboard.up("ArrowRight");
+    await page.evaluate(() => { window.__coltRunMediaDraws = []; });
+    await page.keyboard.down("Space");
+    await page.waitForFunction(() => window.__coltRunMediaDraws.some(source => source.includes("mrs-trittel-jump.webm")), null, { timeout: 3000 });
     await page.keyboard.up("Space");
     await page.locator('[data-action="back"]').first().click();
     await page.locator('[data-action="login"]').first().click();

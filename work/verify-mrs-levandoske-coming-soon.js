@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, "..");
 const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const card = app.match(/<button type="button" data-colt-run="character" data-character="mrsLevandoske"[\s\S]*?<\/button>/)?.[0] || "";
-const trittelCard = app.match(/<button type="button" class="is-placeholder" data-character="mrsTrittel"[\s\S]*?<\/button>/)?.[0] || "";
+const trittelCard = app.match(/<button type="button" data-colt-run="character" data-character="mrsTrittel"[\s\S]*?<\/button>/)?.[0] || "";
 const kochCard = app.match(/<button type="button" class="is-placeholder" data-character="mrsKoch"[\s\S]*?<\/button>/)?.[0] || "";
 
 assert(card, "Mrs. Levandoske is missing from character select.");
@@ -37,11 +37,11 @@ assert.match(app, /colt-run-mrs-levandoske-celebration-audio-02\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-celebration-audio-03\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-death-audio\.mp3/);
 assert.match(app, /colt-run-mrs-levandoske-death-audio-02\.mp3/);
-assert.match(app, /selectedCharacter === "mrNieves" \|\| selectedCharacter === "mrsLevandoske"/, "Mrs. Levandoske should reuse Mr. Nieves's running sound.");
+assert.match(app, /usesHumanRunningAudio[\s\S]*?selectedCharacter === "mrsLevandoske"[\s\S]*?selectedCharacter === "mrsTrittel"/, "The playable teacher characters should reuse the human running sound.");
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCelebrationAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\);[\s\S]*?keepMrsLevandoskeCelebrationVideoPlaying\(\);/, "Mrs. Levandoske should use her dedicated end-flag celebration animations.");
-assert.match(app, /isMrsLevandoske \? 18 : 8/, "Mrs. Levandoske should sit lower on gameplay platforms.");
+assert.match(app, /isMrsLevandoske \? 18 : isMrsTrittel \? 16 : 8/, "The playable teacher characters should sit correctly on gameplay platforms.");
 assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 2\.4, 1, 1, 1\]/, "Both Mrs. Levandoske death screams should receive a significant volume boost.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeDeathAudios\.length,[\s\S]*?lastMrsLevandoskeDeathAudioIndex/, "Mrs. Levandoske's death sounds should alternate without immediate repeats.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeCelebrationAudios\.length,[\s\S]*?lastMrsLevandoskeCelebrationAudioIndex/, "Mrs. Levandoske's celebration sounds should rotate without immediate repeats.");
@@ -69,8 +69,19 @@ assert.match(
   "Mrs. Levandoske must use the same fiery character-select background as the existing runners."
 );
 
+assert(trittelCard, "Mrs. Trittel is missing from character select.");
+assert.doesNotMatch(trittelCard, /disabled|aria-disabled|is-placeholder/, "Mrs. Trittel is still disabled.");
+assert.match(trittelCard, /data-colt-run="character"/, "Mrs. Trittel cannot start gameplay.");
+assert.match(trittelCard, /Mrs\. Trittel/);
+assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
+assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
+assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
+assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260910-playable1/);
+assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelRunVideo/);
+assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelJumpVideo/);
+assert.match(app, /selectedCharacter === "mrsTrittel"\) \{[\s\S]*?chooseMrsTrittelIdleVideo\(\);[\s\S]*?keepMrsTrittelIdleVideoPlaying\(\);/, "Mrs. Trittel should alternate her idle animations as temporary finish celebrations.");
+
 [
-  [trittelCard, "Mrs. Trittel"],
   [kochCard, "Mrs. Koch"]
 ].forEach(([comingSoonCard, name]) => {
   assert(comingSoonCard, `${name} is missing from character select.`);
@@ -94,6 +105,8 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
 [
   "colt-run-mrs-trittel-idle.webm",
   "colt-run-mrs-trittel-idle-02.webm",
+  "colt-run-mrs-trittel-run.webm",
+  "colt-run-mrs-trittel-jump.webm",
   "colt-run-mrs-koch-idle.webm",
   "colt-run-mrs-koch-idle-02.webm"
 ].forEach(filename => {

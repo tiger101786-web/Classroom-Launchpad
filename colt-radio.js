@@ -475,14 +475,6 @@
       note: "Soft spa music for relaxation, reading, and a peaceful classroom atmosphere, streamed commercial-free by YouRadio."
     },
     {
-      id: "my-christmas-radio",
-      label: "Christmas • Classics",
-      type: "stream",
-      source: "https://stream.radio.co/sd9a4a0471/low",
-      provider: "My Christmas Radio",
-      note: "Commercial-free classic Christmas music with occasional listener holiday reflections. Available year-round with no Colt Radio account required."
-    },
-    {
       id: "evergreen-christmas",
       label: "Christmas • Evergreen",
       type: "stream",
@@ -657,7 +649,6 @@
     "youradio-positively-happy": '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01m6 0h.01M8.5 14.5c2 2 5 2 7 0M12 2v2m0 16v2M2 12h2m16 0h2"/>',
     "youradio-calm-tai-chi": '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1"/><circle cx="12" cy="16.5" r="1"/>',
     "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>',
-    "my-christmas-radio": '<path d="M12 3v18M5 7l14 10M19 7 5 17M4 12h16"/><path d="m12 3 1.5 2.5L12 7l-1.5-1.5L12 3Zm0 14 1.5 1.5L12 21l-1.5-2.5L12 17Z"/>',
     "evergreen-christmas": '<path d="m12 3-5 7h3l-4 6h4v5h4v-5h4l-4-6h3l-5-7Z"/><path d="M8 21h8"/>',
     "youradio-greatest-hits-1920s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-1930s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
