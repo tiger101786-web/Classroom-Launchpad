@@ -77,6 +77,7 @@ assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260910-playable1/);
+assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
 assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelRunVideo/);
 assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelJumpVideo/);
 assert.match(app, /selectedCharacter === "mrsTrittel"\) \{[\s\S]*?chooseMrsTrittelIdleVideo\(\);[\s\S]*?keepMrsTrittelIdleVideoPlaying\(\);/, "Mrs. Trittel should alternate her idle animations as temporary finish celebrations.");
@@ -107,6 +108,7 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-trittel-idle-02.webm",
   "colt-run-mrs-trittel-run.webm",
   "colt-run-mrs-trittel-jump.webm",
+  "colt-run-mrs-trittel-death.webm",
   "colt-run-mrs-koch-idle.webm",
   "colt-run-mrs-koch-idle-02.webm"
 ].forEach(filename => {

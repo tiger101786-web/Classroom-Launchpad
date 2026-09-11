@@ -327,6 +327,9 @@ function normalizeStudentSpotlight(entry) {
     grade: cleanGrade(entry && entry.grade),
     title,
     collectionName: cleanText(entry && entry.collectionName, 120) || title,
+    folderPreviewPosition: [1, 2, 3].includes(Number(entry && entry.folderPreviewPosition))
+      ? Number(entry.folderPreviewPosition)
+      : 0,
     description: cleanMultilineText(entry && entry.description, 600),
     displayNameStyle: ["first-last-initial", "first-only", "anonymous"].includes(entry && entry.displayNameStyle)
       ? entry.displayNameStyle
@@ -369,6 +372,7 @@ function publicStudentSpotlight(item, teacher = false) {
     id: item.id,
     title: item.title,
     collectionName: item.collectionName,
+    folderPreviewPosition: item.folderPreviewPosition,
     description: item.description,
     grade: item.grade,
     displayName: spotlightDisplayName(item),
@@ -2333,6 +2337,19 @@ function spotlightFromTeacherInput(db, body, existing = {}) {
   return next;
 }
 
+function applyStudentSpotlightPreviewSelection(entries, selected) {
+  const normalized = normalizeStudentSpotlights(entries);
+  if (!selected || selected.status === "hidden" || !selected.folderPreviewPosition) return normalized;
+  const selectedCollection = cleanText(selected.collectionName, 120).toLocaleLowerCase();
+  return normalizeStudentSpotlights(normalized.map(item => (
+    item.id !== selected.id
+      && item.folderPreviewPosition === selected.folderPreviewPosition
+      && cleanText(item.collectionName, 120).toLocaleLowerCase() === selectedCollection
+      ? { ...item, folderPreviewPosition: 0 }
+      : item
+  )));
+}
+
 async function handleStudentSpotlightsApi(req, res, pathname) {
   if (!pathname.startsWith("/api/student-spotlights")) return false;
   const session = requireRole(req, res, ["student", "teacher"]);
@@ -2401,7 +2418,10 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
     try {
       const db = readDb();
       const item = spotlightFromTeacherInput(db, { ...(await readBody(req)), id: crypto.randomUUID() });
-      db.studentSpotlights = [item, ...normalizeStudentSpotlights(db.studentSpotlights)];
+      db.studentSpotlights = applyStudentSpotlightPreviewSelection(
+        [item, ...normalizeStudentSpotlights(db.studentSpotlights)],
+        item
+      );
       writeDb(db);
       sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
     } catch (error) {
@@ -2423,7 +2443,10 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       const existing = normalizeStudentSpotlights(db.studentSpotlights).find(item => item.id === id);
       if (!existing) throw new Error("Featured work not found.");
       const item = spotlightFromTeacherInput(db, await readBody(req), existing);
-      db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(entry => entry.id === id ? item : entry);
+      db.studentSpotlights = applyStudentSpotlightPreviewSelection(
+        normalizeStudentSpotlights(db.studentSpotlights).map(entry => entry.id === id ? item : entry),
+        item
+      );
       writeDb(db);
       sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
     } catch (error) {

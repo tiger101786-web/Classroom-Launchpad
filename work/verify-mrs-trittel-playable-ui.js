@@ -103,7 +103,7 @@ async function run() {
     assert.equal(await card.getAttribute("data-colt-run"), "character");
     assert.doesNotMatch((await card.innerText()).toLowerCase(), /coming soon/);
 
-    for (const filename of ["colt-run-mrs-trittel-run.webm", "colt-run-mrs-trittel-jump.webm"]) {
+    for (const filename of ["colt-run-mrs-trittel-run.webm", "colt-run-mrs-trittel-jump.webm", "colt-run-mrs-trittel-death.webm"]) {
       const media = await verifyTransparentVideo(page, filename);
       assert.deepEqual({ width: media.width, height: media.height }, { width: 576, height: 876 });
       assert(media.maxCornerAlpha <= 8, `${filename} still has an opaque green-screen corner.`);

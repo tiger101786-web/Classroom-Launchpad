@@ -1321,6 +1321,9 @@ function normalizeStudentSpotlights(items) {
     grade: String(item && item.grade || ""),
     title: String(item && item.title || ""),
     collectionName: String(item && item.collectionName || item && item.title || ""),
+    folderPreviewPosition: [1, 2, 3].includes(Number(item && item.folderPreviewPosition))
+      ? Number(item.folderPreviewPosition)
+      : 0,
     description: String(item && item.description || ""),
     displayNameStyle: String(item && item.displayNameStyle || "first-last-initial"),
     projectUrl: String(item && item.projectUrl || ""),
@@ -2492,8 +2495,16 @@ function studentSpotlightCollections(items) {
 }
 
 function renderStudentSpotlightFolderCollage(collection) {
-  const previews = collection.items.slice(0, 3);
-  while (previews.length < 3) previews.push(null);
+  const previews = [null, null, null];
+  const remaining = [];
+  collection.items.forEach(item => {
+    const position = Number(item.folderPreviewPosition);
+    if (position >= 1 && position <= 3 && !previews[position - 1]) previews[position - 1] = item;
+    else remaining.push(item);
+  });
+  previews.forEach((item, index) => {
+    if (!item) previews[index] = remaining.shift() || null;
+  });
   return `
     <div class="student-spotlight-folder-collage" aria-hidden="true">
       ${previews.map((item, index) => `
@@ -4288,6 +4299,7 @@ function startColtRunGame() {
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
   const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260910-playable1");
+  const mrsTrittelDeathVideo = createDeferredVideo("assets/colt-run-mrs-trittel-death.webm?v=20260911-death1");
   const mrsKochIdleVideos = [
     createDeferredVideo("assets/colt-run-mrs-koch-idle.webm?v=20260910-tight-hq1"),
     createDeferredVideo("assets/colt-run-mrs-koch-idle-02.webm?v=20260910-tight-hq1")
@@ -4345,6 +4357,7 @@ function startColtRunGame() {
       mrsTrittelIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsTrittelRunVideo);
       ensureMediaSource(mrsTrittelJumpVideo);
+      ensureMediaSource(mrsTrittelDeathVideo);
       return;
     }
     if (character === "mrsLevandoske") {
@@ -5094,6 +5107,11 @@ function startColtRunGame() {
     if (mrsTrittelJumpVideo.paused) mrsTrittelJumpVideo.play().catch(() => {});
   };
 
+  const keepMrsTrittelDeathVideoPlaying = () => {
+    ensureMediaSource(mrsTrittelDeathVideo);
+    if (mrsTrittelDeathVideo.paused && !mrsTrittelDeathVideo.ended) mrsTrittelDeathVideo.play().catch(() => {});
+  };
+
   const chooseMrsKochIdleVideo = () => {
     mrsKochIdleIndex = (mrsKochIdleIndex + 1) % mrsKochIdleVideos.length;
     const video = getMrsKochIdleVideo();
@@ -5238,6 +5256,7 @@ function startColtRunGame() {
     ...mrsTrittelIdleVideos,
     mrsTrittelRunVideo,
     mrsTrittelJumpVideo,
+    mrsTrittelDeathVideo,
     ...mrsKochIdleVideos,
     mrsLevandoskeRunVideo,
     ...mrsLevandoskeJumpVideos,
@@ -5271,8 +5290,8 @@ function startColtRunGame() {
           nextKey = "death:mrsLevandoske";
           activeVideos = [mrsLevandoskeDeathVideo];
         } else if (selectedCharacter === "mrsTrittel") {
-          nextKey = `death:mrsTrittel:${mrsTrittelIdleIndex}`;
-          activeVideos = [getMrsTrittelIdleVideo()];
+          nextKey = "death:mrsTrittel";
+          activeVideos = [mrsTrittelDeathVideo];
         } else {
           nextKey = "death:colt";
           activeVideos = [deathVideo];
@@ -7196,7 +7215,7 @@ function startColtRunGame() {
       : selectedCharacter === "mrsLevandoske"
         ? mrsLevandoskeDeathVideo
         : selectedCharacter === "mrsTrittel"
-          ? getMrsTrittelIdleVideo()
+          ? mrsTrittelDeathVideo
         : deathVideo;
     ensureMediaSource(activeDeathVideo);
     try {
@@ -7204,7 +7223,7 @@ function startColtRunGame() {
     } catch {}
     if (selectedCharacter === "mrNieves") keepMrNievesDeathVideoPlaying();
     else if (selectedCharacter === "mrsLevandoske") keepMrsLevandoskeDeathVideoPlaying();
-    else if (selectedCharacter === "mrsTrittel") keepMrsTrittelIdleVideoPlaying();
+    else if (selectedCharacter === "mrsTrittel") keepMrsTrittelDeathVideoPlaying();
     else keepDeathVideoPlaying();
     syncGameStatus();
   };
@@ -7670,8 +7689,8 @@ function startColtRunGame() {
     const isMrNieves = selectedCharacter === "mrNieves";
     const isMrsLevandoske = selectedCharacter === "mrsLevandoske";
     const isMrsTrittel = selectedCharacter === "mrsTrittel";
-    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : isMrsTrittel ? 112 : 178) * deathColtDrawScale;
-    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : isMrsTrittel ? 170 : 132) * deathColtDrawScale;
+    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : isMrsTrittel ? 148 : 178) * deathColtDrawScale;
+    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : isMrsTrittel ? 225 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
     const y = Math.round(deathY + player.h - drawH + (isMrNieves ? 22 : isMrsLevandoske ? 14 : isMrsTrittel ? 16 : 8));
     const mrNievesDeathReady = isMrNieves && getMrNievesDeathVideo().readyState >= 2;
@@ -7680,7 +7699,7 @@ function startColtRunGame() {
       : isMrsLevandoske
         ? (mrsLevandoskeDeathVideo.readyState >= 2 ? mrsLevandoskeDeathVideo : getMrsLevandoskeIdleVideo())
         : isMrsTrittel
-          ? getMrsTrittelIdleVideo()
+          ? (mrsTrittelDeathVideo.readyState >= 2 ? mrsTrittelDeathVideo : getMrsTrittelIdleVideo())
         : getTransparentDeathFrame();
     ctx.save();
     ctx.translate(x, y);
@@ -7693,6 +7712,7 @@ function startColtRunGame() {
       else if (isMrNieves) keepMrNievesIdleVideoPlaying();
       else if (isMrsLevandoske && mrsLevandoskeDeathVideo.readyState >= 2) keepMrsLevandoskeDeathVideoPlaying();
       else if (isMrsLevandoske) keepMrsLevandoskeIdleVideoPlaying();
+      else if (isMrsTrittel && mrsTrittelDeathVideo.readyState >= 2) keepMrsTrittelDeathVideoPlaying();
       else if (isMrsTrittel) keepMrsTrittelIdleVideoPlaying();
       else keepDeathVideoPlaying();
       ctx.drawImage(deathFrame, -drawW / 2, 0, drawW, drawH);
@@ -8539,6 +8559,7 @@ function startColtRunGame() {
         ...mrsTrittelIdleVideos,
         mrsTrittelRunVideo,
         mrsTrittelJumpVideo,
+        mrsTrittelDeathVideo,
         ...mrsKochIdleVideos,
         mrsLevandoskeRunVideo,
         ...mrsLevandoskeJumpVideos,
@@ -10293,6 +10314,16 @@ function renderDashboardStudentSpotlights() {
               <small>Use the same folder name for every project from this assignment.</small>
             </div>
             <div class="field spotlight-wide-field">
+              <label for="spotlightFolderPreviewPosition">Assignment folder preview</label>
+              <select id="spotlightFolderPreviewPosition" name="folderPreviewPosition">
+                <option value="0" ${!editing || !editing.folderPreviewPosition ? "selected" : ""}>Not selected for the three-image preview</option>
+                <option value="1" ${editing && editing.folderPreviewPosition === 1 ? "selected" : ""}>Left preview</option>
+                <option value="2" ${editing && editing.folderPreviewPosition === 2 ? "selected" : ""}>Center preview</option>
+                <option value="3" ${editing && editing.folderPreviewPosition === 3 ? "selected" : ""}>Right preview</option>
+              </select>
+              <small>Choose up to three standout projects for this assignment card. Selecting an occupied position replaces the previous choice.</small>
+            </div>
+            <div class="field spotlight-wide-field">
               <label for="spotlightDescription">Teacher description</label>
               <textarea id="spotlightDescription" name="description" maxlength="600" rows="4" placeholder="Briefly explain what makes this work special.">${escapeHtml(editing && editing.description || "")}</textarea>
             </div>
@@ -10333,7 +10364,7 @@ function renderDashboardStudentSpotlights() {
         ${sortedSpotlights.length ? sortedSpotlights.map(item => `
           <article class="teacher-card spotlight-dashboard-card ${item.status === "hidden" ? "is-hidden" : ""}">
             <figure>${renderSpotlightArtwork(item, true)}</figure>
-            <div><span class="feature-kicker">${escapeHtml(item.collectionName || item.title)} · Grade ${escapeHtml(item.grade)} · ${item.status === "hidden" ? "Hidden" : "Published"}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.displayName)}${item.description ? ` — ${escapeHtml(item.description)}` : ""}</p></div>
+            <div><span class="feature-kicker">${escapeHtml(item.collectionName || item.title)} · Grade ${escapeHtml(item.grade)} · ${item.status === "hidden" ? "Hidden" : "Published"}${item.folderPreviewPosition ? ` · Preview ${item.folderPreviewPosition}` : ""}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.displayName)}${item.description ? ` — ${escapeHtml(item.description)}` : ""}</p></div>
             <div class="actions"><button class="outline-btn" type="button" data-action="editStudentSpotlight" data-id="${item.id}">Edit</button><button class="danger-btn" type="button" data-action="deleteStudentSpotlight" data-id="${item.id}">Delete</button></div>
           </article>
         `).join("") : emptyCard("No student work has been featured yet.")}
@@ -11786,6 +11817,7 @@ function attachStudentSpotlightForm() {
       studentEmail: form.elements.studentEmail.value,
       title: form.elements.title.value.trim(),
       collectionName: form.elements.collectionName.value.trim(),
+      folderPreviewPosition: Number(form.elements.folderPreviewPosition.value) || 0,
       description: form.elements.description.value.trim(),
       displayNameStyle: form.elements.displayNameStyle.value,
       projectUrl,

@@ -561,14 +561,6 @@
       source: "https://nl4.mystreaming.net/uber-app/boomerang2010s/icecast.audio",
       provider: "YouRadio Greatest Hits 2010s",
       note: "Commercial-free greatest hits from the 2010s, streamed by YouRadio. This station plays original mainstream releases, so preview it before classroom use."
-    },
-    {
-      id: "youradio-greatest-hits-2020s",
-      label: "Decades • 2020s",
-      type: "stream",
-      source: "https://nl4.mystreaming.net/uber-app/boomerang2020s/icecast.audio",
-      provider: "YouRadio Greatest Hits 2020s",
-      note: "Commercial-free greatest hits from the 2020s, streamed by YouRadio. This station may include original mainstream releases with explicit content, so preview it before classroom use."
     }
   ];
   const stationFamilyOrder = [
@@ -659,8 +651,7 @@
     "youradio-greatest-hits-1980s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-1990s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-2000s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
-    "youradio-greatest-hits-2010s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
-    "youradio-greatest-hits-2020s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>'
+    "youradio-greatest-hits-2010s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>'
   };
 
   function iconSvg(paths, className = "") {
