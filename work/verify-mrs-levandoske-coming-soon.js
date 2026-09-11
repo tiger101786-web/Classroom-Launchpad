@@ -78,6 +78,10 @@ assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
+assert.match(app, /colt-run-mrs-trittel-death-audio\.mp3\?v=20260911-trim1/);
+assert.match(app, /colt-run-mrs-trittel-death-audio-02\.mp3\?v=20260911-death2/);
+assert.match(app, /selectedCharacter === "mrsTrittel"\) playMrsTrittelDeathAudio\(\)/, "Mrs. Trittel must play her dedicated death screams.");
+assert.match(app, /const nextIndex = \(lastMrsTrittelDeathAudioIndex \+ 1\) % mrsTrittelDeathAudios\.length;/, "Mrs. Trittel's death screams must follow a strict alternating cycle.");
 assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelRunVideo/);
 assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelJumpVideo/);
 assert.match(app, /selectedCharacter === "mrsTrittel"\) \{[\s\S]*?chooseMrsTrittelIdleVideo\(\);[\s\S]*?keepMrsTrittelIdleVideoPlaying\(\);/, "Mrs. Trittel should alternate her idle animations as temporary finish celebrations.");
@@ -141,6 +145,15 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing Mrs. Levandoske sound: ${filename}`);
   assert(fs.statSync(file).size > 20_000, `Mrs. Levandoske sound is unexpectedly small: ${filename}`);
+});
+
+[
+  "colt-run-mrs-trittel-death-audio.mp3",
+  "colt-run-mrs-trittel-death-audio-02.mp3"
+].forEach(filename => {
+  const file = path.join(root, "assets", filename);
+  assert(fs.existsSync(file), `Missing Mrs. Trittel death sound: ${filename}`);
+  assert(fs.statSync(file).size > 3_000, `Mrs. Trittel death sound is unexpectedly small: ${filename}`);
 });
 
 console.log("Colt Run roster, jump guard, and fullscreen verification passed.");

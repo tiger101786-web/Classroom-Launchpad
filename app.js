@@ -3703,6 +3703,10 @@ function startColtRunGame() {
     createDeferredAudio("assets/colt-run-mrs-levandoske-celebration-audio-03.mp3?v=20260908-mrs-celebration1")
   ];
   const mrsLevandoskeCueAudios = [...mrsLevandoskeDeathAudios, ...mrsLevandoskeCelebrationAudios];
+  const mrsTrittelDeathAudios = [
+    createDeferredAudio("assets/colt-run-mrs-trittel-death-audio.mp3?v=20260911-trim1"),
+    createDeferredAudio("assets/colt-run-mrs-trittel-death-audio-02.mp3?v=20260911-death2")
+  ];
   const mrsLevandoskeCueVolumeMultipliers = [2.4, 2.4, 1, 1, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];
   let lastColtDeathAudioIndex = -1;
@@ -3711,6 +3715,7 @@ function startColtRunGame() {
   let lastMrNievesCelebrationAudioIndex = -1;
   let lastMrsLevandoskeDeathAudioIndex = -1;
   let lastMrsLevandoskeCelebrationAudioIndex = -1;
+  let lastMrsTrittelDeathAudioIndex = -1;
   const ambientLayerVolume = 1;
   const inGameMusicLayerVolume = 0.5;
   const characterSelectMusicLayerVolume = 0.7;
@@ -3769,6 +3774,10 @@ function startColtRunGame() {
   });
   mrsLevandoskeCueAudios.forEach((audio, index) => {
     audio.volume = musicMuted ? 0 : Math.min(1, musicVolume * mrsLevandoskeCueVolumeMultipliers[index]);
+    audio.muted = musicMuted;
+  });
+  mrsTrittelDeathAudios.forEach(audio => {
+    audio.volume = musicMuted ? 0 : musicVolume;
     audio.muted = musicMuted;
   });
   const keys = { left: false, right: false, jump: false };
@@ -4358,6 +4367,7 @@ function startColtRunGame() {
       ensureMediaSource(mrsTrittelRunVideo);
       ensureMediaSource(mrsTrittelJumpVideo);
       ensureMediaSource(mrsTrittelDeathVideo);
+      mrsTrittelDeathAudios.forEach(audio => ensureMediaSource(audio));
       return;
     }
     if (character === "mrsLevandoske") {
@@ -4860,6 +4870,12 @@ function startColtRunGame() {
     lastMrsLevandoskeCelebrationAudioIndex = nextIndex;
     playExclusiveAudio(mrsLevandoskeCelebrationAudios, nextIndex);
   };
+  const playMrsTrittelDeathAudio = () => {
+    if (musicMuted || musicVolume <= 0) return;
+    const nextIndex = (lastMrsTrittelDeathAudioIndex + 1) % mrsTrittelDeathAudios.length;
+    lastMrsTrittelDeathAudioIndex = nextIndex;
+    playExclusiveAudio(mrsTrittelDeathAudios, nextIndex);
+  };
   const syncRunningAudio = () => {
     const shouldRunAudio = !musicMuted && musicVolume > 0 && !won && !lost && player.state === "run";
     if (shouldRunAudio) {
@@ -4933,6 +4949,10 @@ function startColtRunGame() {
       audio.volume = musicMuted ? 0 : Math.min(1, musicVolume * mrsLevandoskeCueVolumeMultipliers[index]);
       audio.muted = musicMuted;
     });
+    mrsTrittelDeathAudios.forEach(audio => {
+      audio.volume = musicMuted ? 0 : musicVolume;
+      audio.muted = musicMuted;
+    });
     applyAmbientBoost();
     if (persist) localStorage.setItem(musicVolumeStorageKey, String(musicMuted ? 0 : musicVolume));
     updateMusicVolumeUi();
@@ -4954,6 +4974,7 @@ function startColtRunGame() {
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
       mrsLevandoskeCueAudios.forEach(audio => audio.pause());
+      mrsTrittelDeathAudios.forEach(audio => audio.pause());
     }
     else playColtRunAudio();
   };
@@ -4976,6 +4997,7 @@ function startColtRunGame() {
       mrNievesDeathAudios.forEach(audio => audio.pause());
       mrNievesCelebrationAudios.forEach(audio => audio.pause());
       mrsLevandoskeCueAudios.forEach(audio => audio.pause());
+      mrsTrittelDeathAudios.forEach(audio => audio.pause());
     }
   };
   const onMusicVolumeInput = event => setMusicVolumeFromSlider(event.target.value);
@@ -7204,6 +7226,7 @@ function startColtRunGame() {
     stopGameplayCues();
     if (selectedCharacter === "mrNieves") playMrNievesDeathAudio();
     else if (selectedCharacter === "mrsLevandoske") playMrsLevandoskeDeathAudio();
+    else if (selectedCharacter === "mrsTrittel") playMrsTrittelDeathAudio();
     else if (selectedCharacter === "colt") playColtDeathAudio();
     deathStartedAt = performance.now();
     deathX = player.x;
@@ -7665,6 +7688,7 @@ function startColtRunGame() {
       } catch {}
     });
     mrsLevandoskeCueAudios.forEach(stopAndRewindAudio);
+    mrsTrittelDeathAudios.forEach(stopAndRewindAudio);
     lavaRockVideoSpecials.forEach(video => video.pause());
     lavaRockVideoFrameStamp = -1;
     lavaRockVideoFrameSource = -1;
@@ -8548,6 +8572,7 @@ function startColtRunGame() {
         ...mrNievesDeathAudios,
         ...mrNievesCelebrationAudios,
         ...mrsLevandoskeCueAudios,
+        ...mrsTrittelDeathAudios,
         coinVideo,
         flagVideo,
         ...coltIdleVideos,
