@@ -254,6 +254,8 @@ async function run() {
     await page.route("https://streaming.positivity.radio/pr-app/happy/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmtaichi/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://drive.uber.radio/uber-app/calmspa/icecast.audio", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://stream.radio.co/sd9a4a0471/low", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("https://emg.streamguys1.com/evergreen-website", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const indexResponse = await page.request.get(baseUrl);
     assert.match(indexResponse.headers()["permissions-policy"], /autoplay=.*loficafe\.net/);
@@ -284,7 +286,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 63, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 65, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -314,7 +316,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Classics", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s", "Decades • 2020s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -556,6 +558,13 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmtaichi/icecast.audio");
     await page.getByRole("button", { name: "Calm • Spa", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/calmspa/icecast.audio");
+
+    await page.getByRole("button", { name: "Christmas • Classics", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.radio.co/sd9a4a0471/low");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Commercial-free classic Christmas music/);
+    await page.getByRole("button", { name: "Christmas • Evergreen", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://emg.streamguys1.com/evergreen-website");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /24\/7\/365/);
 
     await page.getByRole("button", { name: "Add Games • Soundtracks to favorites" }).click();
     assert(await page.getByRole("button", { name: "Favorites (1)", exact: true }).isVisible());
