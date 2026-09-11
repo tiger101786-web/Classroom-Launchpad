@@ -246,6 +246,9 @@ async function waitForServer() {
     assert.match(appSource, /Center preview/);
     assert.match(appSource, /Right preview/);
     assert.match(appSource, /folderPreviewPosition/);
+    assert.match(appSource, /function revealStudentSpotlightEditor/);
+    assert.match(appSource, /editor\.scrollIntoView\(\{ behavior: "auto", block: "start" \}\)/);
+    assert.match(appSource, /That featured project could not be found/);
     assert.match(appSource, /Search assignment folders/);
     assert.match(appSource, /data-spotlight-folder-search/);
     assert.match(appSource, /Open Gallery/);

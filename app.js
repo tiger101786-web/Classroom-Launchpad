@@ -7689,8 +7689,8 @@ function startColtRunGame() {
     const isMrNieves = selectedCharacter === "mrNieves";
     const isMrsLevandoske = selectedCharacter === "mrsLevandoske";
     const isMrsTrittel = selectedCharacter === "mrsTrittel";
-    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : isMrsTrittel ? 148 : 178) * deathColtDrawScale;
-    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : isMrsTrittel ? 225 : 132) * deathColtDrawScale;
+    const drawW = (isMrNieves ? 144 : isMrsLevandoske ? 126 : isMrsTrittel ? 128 : 178) * deathColtDrawScale;
+    const drawH = (isMrNieves ? 178 : isMrsLevandoske ? 176 : isMrsTrittel ? 194 : 132) * deathColtDrawScale;
     const x = Math.round(deathX - cameraX + player.w / 2);
     const y = Math.round(deathY + player.h - drawH + (isMrNieves ? 22 : isMrsLevandoske ? 14 : isMrsTrittel ? 16 : 8));
     const mrNievesDeathReady = isMrNieves && getMrNievesDeathVideo().readyState >= 2;
@@ -11868,6 +11868,16 @@ function attachStudentSpotlightForm() {
   });
 }
 
+function revealStudentSpotlightEditor() {
+  requestAnimationFrame(() => {
+    const editor = document.getElementById("studentSpotlightForm");
+    if (!editor) return;
+    editor.scrollIntoView({ behavior: "auto", block: "start" });
+    const firstField = editor.querySelector("input, select, textarea");
+    if (firstField) firstField.focus({ preventScroll: true });
+  });
+}
+
 function attachReplyForm() {
   const replyForm = document.getElementById("replyForm");
   if (!replyForm || replyForm.dataset.ready === "true") return;
@@ -12477,11 +12487,19 @@ app.addEventListener("click", async event => {
     spotlightEditorId = "new";
     spotlightStatusMessage = "";
     render();
+    revealStudentSpotlightEditor();
   }
   if (action === "editStudentSpotlight") {
-    spotlightEditorId = target.dataset.id || "";
+    const spotlightId = target.dataset.id || "";
+    if (!studentSpotlights.some(item => item.id === spotlightId)) {
+      spotlightStatusMessage = "Error: That featured project could not be found. Refresh the page and try again.";
+      render();
+      return;
+    }
+    spotlightEditorId = spotlightId;
     spotlightStatusMessage = "";
     render();
+    revealStudentSpotlightEditor();
   }
   if (action === "closeStudentSpotlightEditor") {
     spotlightEditorId = "";
