@@ -77,7 +77,7 @@ assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260911-best-leap1/);
-assert.match(app, /mrsTrittelJumpVideo\.playbackRate = 2\.25;/, "Mrs. Trittel's leap clip should move quickly enough to read during the short in-game jump.");
+assert.match(app, /mrsTrittelJumpVideo\.playbackRate = 5;/, "Mrs. Trittel's leap clip should move quickly enough to read during the short in-game jump.");
 assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio\.mp3\?v=20260911-trim1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio-02\.mp3\?v=20260911-death2-lower1/);
@@ -87,6 +87,7 @@ assert.match(app, /colt-run-mrs-trittel-celebration\.webm\?v=20260911-green-key1
 assert.match(app, /colt-run-mrs-trittel-celebration-02\.webm\?v=20260911-green-key1/);
 assert.match(app, /colt-run-mrs-trittel-celebration-audio\.mp3\?v=20260911-celebration1/);
 assert.match(app, /colt-run-mrs-trittel-celebration-audio-02\.mp3\?v=20260911-celebration2/);
+assert.match(app, /colt-run-mrs-trittel-celebration-audio-03\.mp3\?v=20260911-celebration3/);
 assert.match(app, /mrsTrittelCelebrationIndex = \(mrsTrittelCelebrationIndex \+ 1\) % mrsTrittelCelebrationVideos\.length/, "Mrs. Trittel's finish animations must alternate between levels.");
 assert.match(app, /const nextIndex = \(lastMrsTrittelCelebrationAudioIndex \+ 1\) % mrsTrittelCelebrationAudios\.length;/, "Mrs. Trittel's finish sounds must follow a strict alternating cycle.");
 assert.match(app, /mrsTrittelCelebrationVideos\.forEach\(video => \{\s*video\.loop = true;/, "Mrs. Trittel's selected finish animation must loop.");
@@ -163,7 +164,8 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-trittel-death-audio.mp3",
   "colt-run-mrs-trittel-death-audio-02.mp3",
   "colt-run-mrs-trittel-celebration-audio.mp3",
-  "colt-run-mrs-trittel-celebration-audio-02.mp3"
+  "colt-run-mrs-trittel-celebration-audio-02.mp3",
+  "colt-run-mrs-trittel-celebration-audio-03.mp3"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing Mrs. Trittel death sound: ${filename}`);
