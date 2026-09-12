@@ -23,6 +23,7 @@ assert.match(app, /colt-run-mrs-levandoske-idle\.webm\?v=20260910-tight-hq1/);
 assert.match(app, /colt-run-mrs-trittel-idle\.webm\?v=20260910-tight-hq1/);
 assert.match(app, /colt-run-mrs-koch-idle\.webm\?v=20260910-tight-hq1/);
 assert.match(app, /colt-run-mrs-koch-run\.webm\?v=20260912-green-key1/);
+assert.match(app, /colt-run-mrs-koch-jump\.webm\?v=20260912-green-key1/);
 assert.match(app, /colt-run-mrs-koch-death\.webm\?v=20260912-green-key1/);
 assert.match(app, /colt-run-mrs-koch-celebration\.webm\?v=20260912-green-key1/);
 assert.match(app, /colt-run-mrs-koch-celebration-02\.webm\?v=20260912-green-key1/);
@@ -137,6 +138,7 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-koch-idle.webm",
   "colt-run-mrs-koch-idle-02.webm",
   "colt-run-mrs-koch-run.webm",
+  "colt-run-mrs-koch-jump.webm",
   "colt-run-mrs-koch-death.webm",
   "colt-run-mrs-koch-celebration.webm",
   "colt-run-mrs-koch-celebration-02.webm"

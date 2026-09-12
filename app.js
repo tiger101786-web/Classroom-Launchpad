@@ -4355,6 +4355,7 @@ function startColtRunGame() {
   let mrsKochIdleIndex = 0;
   const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
   const mrsKochRunVideo = createDeferredVideo("assets/colt-run-mrs-koch-run.webm?v=20260912-green-key1");
+  const mrsKochJumpVideo = createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-green-key1");
   const mrsKochDeathVideo = createDeferredVideo("assets/colt-run-mrs-koch-death.webm?v=20260912-green-key1");
   mrsKochDeathVideo.loop = false;
   const mrsKochCelebrationVideos = [
@@ -4413,6 +4414,7 @@ function startColtRunGame() {
     if (character === "mrsKoch") {
       mrsKochIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsKochRunVideo);
+      ensureMediaSource(mrsKochJumpVideo);
       ensureMediaSource(mrsKochDeathVideo);
       mrsKochCelebrationVideos.forEach(video => ensureMediaSource(video));
       return;
@@ -5383,6 +5385,7 @@ function startColtRunGame() {
     ...mrsTrittelCelebrationVideos,
     ...mrsKochIdleVideos,
     mrsKochRunVideo,
+    mrsKochJumpVideo,
     mrsKochDeathVideo,
     ...mrsKochCelebrationVideos,
     mrsLevandoskeRunVideo,
@@ -8703,6 +8706,7 @@ function startColtRunGame() {
         ...mrsTrittelCelebrationVideos,
         ...mrsKochIdleVideos,
         mrsKochRunVideo,
+        mrsKochJumpVideo,
         mrsKochDeathVideo,
         ...mrsKochCelebrationVideos,
         mrsLevandoskeRunVideo,
