@@ -4334,8 +4334,7 @@ function startColtRunGame() {
   let mrsTrittelIdleIndex = 0;
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
-  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260911-best-leap1");
-  mrsTrittelJumpVideo.playbackRate = 10;
+  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260912-fast-leap1");
   const mrsTrittelDeathVideo = createDeferredVideo("assets/colt-run-mrs-trittel-death.webm?v=20260911-death1");
   const mrsTrittelCelebrationVideos = [
     createDeferredVideo("assets/colt-run-mrs-trittel-celebration.webm?v=20260911-green-key1"),
@@ -5157,8 +5156,14 @@ function startColtRunGame() {
   };
 
   const keepMrsTrittelIdleVideoPlaying = () => {
-    const video = getMrsTrittelIdleVideo();
+    let video = getMrsTrittelIdleVideo();
     ensureMediaSource(video);
+    const reachedEnd = video.ended
+      || (Number.isFinite(video.duration) && video.duration > 0 && video.currentTime >= video.duration - 0.05);
+    if (reachedEnd) {
+      video = chooseMrsTrittelIdleVideo();
+      characterPlaybackKey = "";
+    }
     if (video.paused) video.play().catch(() => {});
   };
 

@@ -76,8 +76,8 @@ assert.match(trittelCard, /Mrs\. Trittel/);
 assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
-assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260911-best-leap1/);
-assert.match(app, /mrsTrittelJumpVideo\.playbackRate = 10;/, "Mrs. Trittel's six-second leap clip should complete during the short in-game jump.");
+assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260912-fast-leap1/);
+assert.doesNotMatch(app, /mrsTrittelJumpVideo\.playbackRate\s*=/, "Mrs. Trittel's leap speed should be baked into the video instead of relying on browser playback-rate behavior.");
 assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio\.mp3\?v=20260911-trim1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio-02\.mp3\?v=20260911-death2-lower1/);
@@ -115,6 +115,7 @@ assert.match(app, /const mrsKochIdleVideos = \[/);
 assert.match(app, /mrsTrittelIdleIndex = \(mrsTrittelIdleIndex \+ 1\) % mrsTrittelIdleVideos\.length/);
 assert.match(app, /mrsKochIdleIndex = \(mrsKochIdleIndex \+ 1\) % mrsKochIdleVideos\.length/);
 assert.match(app, /mrsTrittelIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
+assert.match(app, /keepMrsTrittelIdleVideoPlaying[\s\S]*?const reachedEnd = video\.ended[\s\S]*?video = chooseMrsTrittelIdleVideo\(\);/, "Mrs. Trittel's in-game idle must recover if an ended video misses its event or resumes at the final frame.");
 assert.match(app, /mrsKochIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch"[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/);
 

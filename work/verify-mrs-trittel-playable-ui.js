@@ -53,7 +53,7 @@ async function verifyTransparentVideo(page, filename) {
         context.getImageData(0, canvas.height - 1, 1, 1).data[3],
         context.getImageData(canvas.width - 1, canvas.height - 1, 1, 1).data[3]
       ];
-      resolve({ width: canvas.width, height: canvas.height, maxCornerAlpha: Math.max(...corners) });
+      resolve({ width: canvas.width, height: canvas.height, duration: video.duration, maxCornerAlpha: Math.max(...corners) });
     }, { once: true });
   }), filename);
 }
@@ -85,6 +85,7 @@ async function run() {
     await page.addInitScript(() => {
       window.__mrsTrittelDraws = [];
       window.__mrsTrittelPreviewTimes = [];
+      window.__lastMrsTrittelIdleVideo = null;
       const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
       CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
         const mediaSource = source?.currentSrc || source?.src || source?.dataset?.src || "";
@@ -93,6 +94,7 @@ async function run() {
         }
         if (mediaSource.includes("colt-run-mrs-trittel-idle") && window.__mrsTrittelPreviewTimes.length < 2000) {
           window.__mrsTrittelPreviewTimes.push(Number(source.currentTime) || 0);
+          window.__lastMrsTrittelIdleVideo = source;
         }
         return originalDrawImage.call(this, source, ...args);
       };
@@ -117,10 +119,21 @@ async function run() {
       const media = await verifyTransparentVideo(page, filename);
       assert.deepEqual({ width: media.width, height: media.height }, { width: 576, height: 876 });
       assert(media.maxCornerAlpha <= 8, `${filename} still has an opaque green-screen corner.`);
+      if (filename === "colt-run-mrs-trittel-jump.webm") {
+        assert(media.duration >= 0.45 && media.duration <= 0.65, `Mrs. Trittel's baked fast leap is ${media.duration.toFixed(2)} seconds instead of roughly 0.57 seconds.`);
+      }
     }
 
     await card.click();
     assert.match(await page.locator("#coltRunStatus").innerText(), /Mrs\. Trittel selected/);
+    await page.waitForFunction(() => Number.isFinite(window.__lastMrsTrittelIdleVideo?.duration));
+    await page.evaluate(() => {
+      window.__lastMrsTrittelIdleVideo.currentTime = window.__lastMrsTrittelIdleVideo.duration;
+    });
+    await page.waitForFunction(() => {
+      const video = window.__lastMrsTrittelIdleVideo;
+      return video && !video.ended && video.currentTime < video.duration - 0.1;
+    }, null, { timeout: 3000 });
     await page.evaluate(() => { window.__mrsTrittelDraws = []; });
     await page.keyboard.down("ArrowRight");
     await page.waitForFunction(() => window.__mrsTrittelDraws.some(source => source.includes("mrs-trittel-run.webm")), null, { timeout: 5000 });
