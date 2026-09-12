@@ -4335,7 +4335,7 @@ function startColtRunGame() {
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
   const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260911-best-leap1");
-  mrsTrittelJumpVideo.playbackRate = 5;
+  mrsTrittelJumpVideo.playbackRate = 10;
   const mrsTrittelDeathVideo = createDeferredVideo("assets/colt-run-mrs-trittel-death.webm?v=20260911-death1");
   const mrsTrittelCelebrationVideos = [
     createDeferredVideo("assets/colt-run-mrs-trittel-celebration.webm?v=20260911-green-key1"),

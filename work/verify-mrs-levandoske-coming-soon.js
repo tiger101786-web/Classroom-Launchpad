@@ -77,7 +77,7 @@ assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260911-best-leap1/);
-assert.match(app, /mrsTrittelJumpVideo\.playbackRate = 5;/, "Mrs. Trittel's leap clip should move quickly enough to read during the short in-game jump.");
+assert.match(app, /mrsTrittelJumpVideo\.playbackRate = 10;/, "Mrs. Trittel's six-second leap clip should complete during the short in-game jump.");
 assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio\.mp3\?v=20260911-trim1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio-02\.mp3\?v=20260911-death2-lower1/);
