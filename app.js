@@ -4354,6 +4354,18 @@ function startColtRunGame() {
   });
   let mrsKochIdleIndex = 0;
   const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
+  const mrsKochRunVideo = createDeferredVideo("assets/colt-run-mrs-koch-run.webm?v=20260912-green-key1");
+  const mrsKochDeathVideo = createDeferredVideo("assets/colt-run-mrs-koch-death.webm?v=20260912-green-key1");
+  mrsKochDeathVideo.loop = false;
+  const mrsKochCelebrationVideos = [
+    createDeferredVideo("assets/colt-run-mrs-koch-celebration.webm?v=20260912-green-key1"),
+    createDeferredVideo("assets/colt-run-mrs-koch-celebration-02.webm?v=20260912-green-key1")
+  ];
+  mrsKochCelebrationVideos.forEach(video => {
+    video.loop = true;
+  });
+  let mrsKochCelebrationIndex = -1;
+  const getMrsKochCelebrationVideo = () => mrsKochCelebrationVideos[Math.max(0, mrsKochCelebrationIndex)];
   const mrsLevandoskeRunVideo = createDeferredVideo("assets/colt-run-mrs-levandoske-run.webm?v=20260905-green-key2");
   const mrsLevandoskeJumpVideos = [
     createDeferredVideo("assets/colt-run-mrs-levandoske-jump.webm?v=20260905-green-key2"),
@@ -4398,6 +4410,13 @@ function startColtRunGame() {
   mrNievesJumpImage.src = "assets/colt-run-mr-nieves-jump.jpg?v=20260717-jump1";
   const deathVideo = createDeferredVideo("assets/colt-run-death.mp4?v=20260706-death");
   const ensureCharacterMedia = character => {
+    if (character === "mrsKoch") {
+      mrsKochIdleVideos.forEach(video => ensureMediaSource(video));
+      ensureMediaSource(mrsKochRunVideo);
+      ensureMediaSource(mrsKochDeathVideo);
+      mrsKochCelebrationVideos.forEach(video => ensureMediaSource(video));
+      return;
+    }
     if (character === "mrsTrittel") {
       mrsTrittelIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsTrittelRunVideo);
@@ -5216,6 +5235,16 @@ function startColtRunGame() {
     return video;
   };
 
+  const chooseMrsKochCelebrationVideo = () => {
+    mrsKochCelebrationIndex = (mrsKochCelebrationIndex + 1) % mrsKochCelebrationVideos.length;
+    const video = getMrsKochCelebrationVideo();
+    ensureMediaSource(video);
+    try {
+      video.currentTime = 0;
+    } catch {}
+    return video;
+  };
+
   const keepMrsLevandoskeRunVideoPlaying = () => {
     ensureMediaSource(mrsLevandoskeRunVideo);
     if (mrsLevandoskeRunVideo.paused) mrsLevandoskeRunVideo.play().catch(() => {});
@@ -5353,6 +5382,9 @@ function startColtRunGame() {
     mrsTrittelDeathVideo,
     ...mrsTrittelCelebrationVideos,
     ...mrsKochIdleVideos,
+    mrsKochRunVideo,
+    mrsKochDeathVideo,
+    ...mrsKochCelebrationVideos,
     mrsLevandoskeRunVideo,
     ...mrsLevandoskeJumpVideos,
     mrsLevandoskeDeathVideo,
@@ -8670,6 +8702,9 @@ function startColtRunGame() {
         mrsTrittelDeathVideo,
         ...mrsTrittelCelebrationVideos,
         ...mrsKochIdleVideos,
+        mrsKochRunVideo,
+        mrsKochDeathVideo,
+        ...mrsKochCelebrationVideos,
         mrsLevandoskeRunVideo,
         ...mrsLevandoskeJumpVideos,
         mrsLevandoskeDeathVideo,

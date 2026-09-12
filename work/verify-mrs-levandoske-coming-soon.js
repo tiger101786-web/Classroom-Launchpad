@@ -22,6 +22,13 @@ assert.match(app, /colt-run-mrs-levandoske-idle-02\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-idle\.webm\?v=20260910-tight-hq1/);
 assert.match(app, /colt-run-mrs-trittel-idle\.webm\?v=20260910-tight-hq1/);
 assert.match(app, /colt-run-mrs-koch-idle\.webm\?v=20260910-tight-hq1/);
+assert.match(app, /colt-run-mrs-koch-run\.webm\?v=20260912-green-key1/);
+assert.match(app, /colt-run-mrs-koch-death\.webm\?v=20260912-green-key1/);
+assert.match(app, /colt-run-mrs-koch-celebration\.webm\?v=20260912-green-key1/);
+assert.match(app, /colt-run-mrs-koch-celebration-02\.webm\?v=20260912-green-key1/);
+assert.match(app, /mrsKochDeathVideo\.loop = false;/, "Mrs. Koch's death animation should stop on its final frame when she becomes playable.");
+assert.match(app, /mrsKochCelebrationIndex = \(mrsKochCelebrationIndex \+ 1\) % mrsKochCelebrationVideos\.length/, "Mrs. Koch's future finish animations should alternate between levels.");
+assert.match(app, /mrsKochCelebrationVideos\.forEach\(video => \{\s*video\.loop = true;/, "Mrs. Koch's selected finish animation should loop.");
 assert.match(app, /colt-run-mrs-levandoske-run\.webm/);
 assert.match(app, /colt-run-mrs-levandoske-run\.webm\?v=20260905-green-key2/);
 assert.match(app, /colt-run-mrs-levandoske-jump\.webm/);
@@ -128,7 +135,11 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-trittel-celebration.webm",
   "colt-run-mrs-trittel-celebration-02.webm",
   "colt-run-mrs-koch-idle.webm",
-  "colt-run-mrs-koch-idle-02.webm"
+  "colt-run-mrs-koch-idle-02.webm",
+  "colt-run-mrs-koch-run.webm",
+  "colt-run-mrs-koch-death.webm",
+  "colt-run-mrs-koch-celebration.webm",
+  "colt-run-mrs-koch-celebration-02.webm"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing transparent coming-soon animation: ${filename}`);
