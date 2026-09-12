@@ -9,7 +9,7 @@ const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const card = app.match(/<button type="button" data-colt-run="character" data-character="mrsLevandoske"[\s\S]*?<\/button>/)?.[0] || "";
 const trittelCard = app.match(/<button type="button" data-colt-run="character" data-character="mrsTrittel"[\s\S]*?<\/button>/)?.[0] || "";
-const kochCard = app.match(/<button type="button" class="is-placeholder" data-character="mrsKoch"[\s\S]*?<\/button>/)?.[0] || "";
+const kochCard = app.match(/<button type="button" data-colt-run="character" data-character="mrsKoch"[\s\S]*?<\/button>/)?.[0] || "";
 
 assert(card, "Mrs. Levandoske is missing from character select.");
 assert.doesNotMatch(card, /disabled|aria-disabled|is-placeholder/, "Mrs. Levandoske is still disabled.");
@@ -49,7 +49,7 @@ assert.match(app, /usesHumanRunningAudio[\s\S]*?selectedCharacter === "mrsLevand
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCelebrationAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\);[\s\S]*?keepMrsLevandoskeCelebrationVideoPlaying\(\);/, "Mrs. Levandoske should use her dedicated end-flag celebration animations.");
-assert.match(app, /isMrsLevandoske \? 18 : isMrsTrittel \? 16 : 8/, "The playable teacher characters should sit correctly on gameplay platforms.");
+assert.match(app, /isMrsLevandoske \? 18 : isMrsTrittel \? 16 : isMrsKoch \? 16 : 8/, "The playable teacher characters should sit correctly on gameplay platforms.");
 assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 2\.4, 1, 1, 1\]/, "Both Mrs. Levandoske death screams should receive a significant volume boost.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeDeathAudios\.length,[\s\S]*?lastMrsLevandoskeDeathAudioIndex/, "Mrs. Levandoske's death sounds should alternate without immediate repeats.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeCelebrationAudios\.length,[\s\S]*?lastMrsLevandoskeCelebrationAudioIndex/, "Mrs. Levandoske's celebration sounds should rotate without immediate repeats.");
@@ -105,15 +105,20 @@ assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelRunVideo/
 assert.match(app, /selectedCharacter === "mrsTrittel"[\s\S]*?mrsTrittelJumpVideo/);
 assert.match(app, /mrsTrittelIsCelebrating[\s\S]*?getMrsTrittelCelebrationVideo\(\)\.readyState >= 2/, "Mrs. Trittel's dedicated celebration frame should render at the finish flag.");
 
-[
-  [kochCard, "Mrs. Koch"]
-].forEach(([comingSoonCard, name]) => {
-  assert(comingSoonCard, `${name} is missing from character select.`);
-  assert.match(comingSoonCard, /disabled/);
-  assert.doesNotMatch(comingSoonCard, /data-colt-run="character"/, `${name} must not be playable yet.`);
-  assert.match(comingSoonCard, /colt-run-coming-soon">Coming Soon<\/strong>/);
-  assert.match(comingSoonCard, new RegExp(name.replace(".", "\\.")));
-});
+assert(kochCard, "Mrs. Koch is missing from character select.");
+assert.doesNotMatch(kochCard, /disabled|aria-disabled|is-placeholder/, "Mrs. Koch is still disabled.");
+assert.match(kochCard, /data-colt-run="character"/, "Mrs. Koch cannot start gameplay.");
+assert.match(kochCard, /Mrs\. Koch/);
+assert.doesNotMatch(kochCard, /Coming Soon|colt-run-coming-soon/);
+assert.match(app, /mrsKoch: "Mrs\. Koch"/);
+assert.match(app, /selectedCharacter === "mrsKoch"\) playMrsKochDeathAudio\(\)/);
+assert.match(app, /selectedCharacter === "mrsKoch"\) playMrsKochCelebrationAudio\(\)/);
+assert.match(app, /const nextIndex = \(lastMrsKochDeathAudioIndex \+ 1\) % mrsKochDeathAudios\.length;/);
+assert.match(app, /const nextIndex = \(lastMrsKochCelebrationAudioIndex \+ 1\) % mrsKochCelebrationAudios\.length;/);
+assert.match(app, /selectedCharacter === "mrsKoch"\) \{[\s\S]*?chooseMrsKochCelebrationVideo\(\);[\s\S]*?keepMrsKochCelebrationVideoPlaying\(\);/);
+assert.match(app, /selectedCharacter === "mrsKoch"[\s\S]*?mrsKochRunVideo/);
+assert.match(app, /selectedCharacter === "mrsKoch"[\s\S]*?mrsKochJumpVideo/);
+assert.match(app, /mrsKochIsCelebrating[\s\S]*?getMrsKochCelebrationVideo\(\)\.readyState >= 2/);
 
 assert.match(app, /const fullscreenTarget = stage \|\| shell;/, "Fullscreen should target only the 16:9 game stage.");
 assert.match(app, /keys\.jump && !jumpConsumed && player\.grounded/, "Jump must require a fresh press.");
@@ -124,6 +129,7 @@ assert.match(app, /mrsTrittelIdleIndex = \(mrsTrittelIdleIndex \+ 1\) % mrsTritt
 assert.match(app, /mrsKochIdleIndex = \(mrsKochIdleIndex \+ 1\) % mrsKochIdleVideos\.length/);
 assert.match(app, /mrsTrittelIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(app, /keepMrsTrittelIdleVideoPlaying[\s\S]*?const reachedEnd = video\.ended[\s\S]*?video = chooseMrsTrittelIdleVideo\(\);/, "Mrs. Trittel's in-game idle must recover if an ended video misses its event or resumes at the final frame.");
+assert.match(app, /keepMrsKochIdleVideoPlaying[\s\S]*?const reachedEnd = video\.ended[\s\S]*?video = chooseMrsKochIdleVideo\(\);/, "Mrs. Koch's in-game idle must recover from a frozen final frame.");
 assert.match(app, /mrsKochIdleVideos\.forEach\(video => \{[\s\S]*?video\.addEventListener\("ended"/);
 assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch"[\s\S]*?colt-run-character-select-mr-nieves-bg\.png/);
 
@@ -146,6 +152,18 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing transparent coming-soon animation: ${filename}`);
   assert(fs.statSync(file).size > 100_000, `Coming-soon animation is unexpectedly small: ${filename}`);
+});
+
+[
+  "colt-run-mrs-koch-death-audio.mp3",
+  "colt-run-mrs-koch-death-audio-02.mp3",
+  "colt-run-mrs-koch-celebration-audio.mp3",
+  "colt-run-mrs-koch-celebration-audio-02.mp3",
+  "colt-run-mrs-koch-celebration-audio-03.mp3"
+].forEach(filename => {
+  const file = path.join(root, "assets", filename);
+  assert(fs.existsSync(file), `Missing Mrs. Koch sound: ${filename}`);
+  assert(fs.statSync(file).size > 3_000, `Mrs. Koch sound is unexpectedly small: ${filename}`);
 });
 
 [
