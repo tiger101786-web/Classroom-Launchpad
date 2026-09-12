@@ -4375,7 +4375,15 @@ function startColtRunGame() {
   let mrsKochIdleIndex = 0;
   const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
   const mrsKochRunVideo = createDeferredVideo("assets/colt-run-mrs-koch-run.webm?v=20260912-green-key1");
-  const mrsKochJumpVideo = createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-green-key1");
+  const mrsKochJumpVideos = [
+    createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-green-key1"),
+    createDeferredVideo("assets/colt-run-mrs-koch-jump-02.webm?v=20260912-green-key1")
+  ];
+  mrsKochJumpVideos.forEach(video => {
+    video.loop = true;
+  });
+  let mrsKochJumpIndex = -1;
+  const getMrsKochJumpVideo = () => mrsKochJumpVideos[Math.max(0, mrsKochJumpIndex)];
   const mrsKochDeathVideo = createDeferredVideo("assets/colt-run-mrs-koch-death.webm?v=20260912-green-key1");
   mrsKochDeathVideo.loop = false;
   const mrsKochCelebrationVideos = [
@@ -4434,7 +4442,7 @@ function startColtRunGame() {
     if (character === "mrsKoch") {
       mrsKochIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsKochRunVideo);
-      ensureMediaSource(mrsKochJumpVideo);
+      mrsKochJumpVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsKochDeathVideo);
       mrsKochCelebrationVideos.forEach(video => ensureMediaSource(video));
       mrsKochDeathAudios.forEach(audio => ensureMediaSource(audio));
@@ -5302,16 +5310,20 @@ function startColtRunGame() {
   };
 
   const restartMrsKochJumpVideo = () => {
-    ensureMediaSource(mrsKochJumpVideo);
+    mrsKochJumpIndex = (mrsKochJumpIndex + 1) % mrsKochJumpVideos.length;
+    const video = getMrsKochJumpVideo();
+    ensureMediaSource(video);
     try {
-      mrsKochJumpVideo.currentTime = 0;
+      video.currentTime = 0;
     } catch {}
-    mrsKochJumpVideo.play().catch(() => {});
+    characterPlaybackKey = "";
+    video.play().catch(() => {});
   };
 
   const keepMrsKochJumpVideoPlaying = () => {
-    ensureMediaSource(mrsKochJumpVideo);
-    if (mrsKochJumpVideo.paused) mrsKochJumpVideo.play().catch(() => {});
+    const video = getMrsKochJumpVideo();
+    ensureMediaSource(video);
+    if (video.paused) video.play().catch(() => {});
   };
 
   const keepMrsKochDeathVideoPlaying = () => {
@@ -5473,7 +5485,7 @@ function startColtRunGame() {
     ...mrsTrittelCelebrationVideos,
     ...mrsKochIdleVideos,
     mrsKochRunVideo,
-    mrsKochJumpVideo,
+    ...mrsKochJumpVideos,
     mrsKochDeathVideo,
     ...mrsKochCelebrationVideos,
     mrsLevandoskeRunVideo,
@@ -5521,7 +5533,8 @@ function startColtRunGame() {
         nextKey = `mrsKoch:${player.state}`;
         if (player.state === "run") activeVideos = [mrsKochRunVideo];
         else if (player.state === "jumpPrep" || player.state === "leap") {
-          activeVideos = [mrsKochJumpVideo];
+          nextKey = `mrsKoch:jump:${mrsKochJumpIndex}`;
+          activeVideos = [getMrsKochJumpVideo()];
         } else if (player.state === "celebrate") {
           nextKey = `mrsKoch:celebrate:${mrsKochCelebrationIndex}`;
           activeVideos = [getMrsKochCelebrationVideo()];
@@ -7819,7 +7832,7 @@ function startColtRunGame() {
     if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
     if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeJumpVideo();
     if (selectedCharacter === "mrsTrittel") restartMrsTrittelJumpVideo();
-    if (selectedCharacter === "mrsKoch") restartMrsKochJumpVideo();
+    if (selectedCharacter === "mrsKoch") keepMrsKochJumpVideoPlaying();
     stopRunningAudio();
     syncGameStatus();
   };
@@ -8079,7 +8092,7 @@ function startColtRunGame() {
       : null;
     const mrsKochFrame = isMrsKoch
       ? (mrsKochIsJumping
-          ? (mrsKochJumpVideo.readyState >= 2 ? mrsKochJumpVideo : getMrsKochIdleVideo())
+          ? (getMrsKochJumpVideo().readyState >= 2 ? getMrsKochJumpVideo() : getMrsKochIdleVideo())
           : mrsKochIsRunning
             ? (mrsKochRunVideo.readyState >= 2 ? mrsKochRunVideo : getMrsKochIdleVideo())
             : mrsKochIsCelebrating
@@ -8091,7 +8104,7 @@ function startColtRunGame() {
     const leapFrame = !isHumanRunner && player.state === "leap" ? getTransparentLeapFrame() : null;
     const coltCelebrationFrame = coltIsCelebrating ? getTransparentColtCelebrationFrame() : null;
     if (mrsKochFrame) {
-      if (mrsKochIsJumping && mrsKochJumpVideo.readyState >= 2) keepMrsKochJumpVideoPlaying();
+      if (mrsKochIsJumping && getMrsKochJumpVideo().readyState >= 2) keepMrsKochJumpVideoPlaying();
       else if (mrsKochIsRunning && mrsKochRunVideo.readyState >= 2) keepMrsKochRunVideoPlaying();
       else if (mrsKochIsCelebrating && getMrsKochCelebrationVideo().readyState >= 2) keepMrsKochCelebrationVideoPlaying();
       else keepMrsKochIdleVideoPlaying();
@@ -8856,7 +8869,7 @@ function startColtRunGame() {
         ...mrsTrittelCelebrationVideos,
         ...mrsKochIdleVideos,
         mrsKochRunVideo,
-        mrsKochJumpVideo,
+        ...mrsKochJumpVideos,
         mrsKochDeathVideo,
         ...mrsKochCelebrationVideos,
         mrsLevandoskeRunVideo,
