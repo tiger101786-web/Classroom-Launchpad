@@ -3714,12 +3714,14 @@ function startColtRunGame() {
   ];
   const mrsKochDeathAudios = [
     createDeferredAudio("assets/colt-run-mrs-koch-death-audio.mp3?v=20260912-trim1"),
-    createDeferredAudio("assets/colt-run-mrs-koch-death-audio-02.mp3?v=20260912-trim1")
+    createDeferredAudio("assets/colt-run-mrs-koch-death-audio-02.mp3?v=20260912-trim1"),
+    createDeferredAudio("assets/colt-run-mrs-koch-death-audio-03.mp3?v=20260912-new3")
   ];
   const mrsKochCelebrationAudios = [
     createDeferredAudio("assets/colt-run-mrs-koch-celebration-audio.mp3?v=20260912-trim1"),
     createDeferredAudio("assets/colt-run-mrs-koch-celebration-audio-02.mp3?v=20260912-trim1"),
-    createDeferredAudio("assets/colt-run-mrs-koch-celebration-audio-03.mp3?v=20260912-trim1")
+    createDeferredAudio("assets/colt-run-mrs-koch-celebration-audio-03.mp3?v=20260912-trim1"),
+    createDeferredAudio("assets/colt-run-mrs-koch-celebration-audio-04.mp3?v=20260912-new4")
   ];
   const mrsLevandoskeCueVolumeMultipliers = [2.4, 2.4, 1, 1, 1];
   const mrNievesCelebrationVolumeMultipliers = [1, 1, 1.4, 1, 1.4];

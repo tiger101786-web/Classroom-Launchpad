@@ -167,9 +167,11 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
 [
   "colt-run-mrs-koch-death-audio.mp3",
   "colt-run-mrs-koch-death-audio-02.mp3",
+  "colt-run-mrs-koch-death-audio-03.mp3",
   "colt-run-mrs-koch-celebration-audio.mp3",
   "colt-run-mrs-koch-celebration-audio-02.mp3",
-  "colt-run-mrs-koch-celebration-audio-03.mp3"
+  "colt-run-mrs-koch-celebration-audio-03.mp3",
+  "colt-run-mrs-koch-celebration-audio-04.mp3"
 ].forEach(filename => {
   const file = path.join(root, "assets", filename);
   assert(fs.existsSync(file), `Missing Mrs. Koch sound: ${filename}`);
