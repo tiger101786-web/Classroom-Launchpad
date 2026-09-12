@@ -4384,8 +4384,8 @@ function startColtRunGame() {
   const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
   const mrsKochRunVideo = createDeferredVideo("assets/colt-run-mrs-koch-run.webm?v=20260912-green-key1");
   const mrsKochJumpVideos = [
-    createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-fast-leap1"),
-    createDeferredVideo("assets/colt-run-mrs-koch-jump-02.webm?v=20260912-fast-leap1")
+    createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-green-key1"),
+    createDeferredVideo("assets/colt-run-mrs-koch-jump-02.webm?v=20260912-green-key1")
   ];
   mrsKochJumpVideos.forEach(video => {
     video.loop = true;
