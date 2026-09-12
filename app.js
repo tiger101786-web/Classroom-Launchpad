@@ -4354,7 +4354,15 @@ function startColtRunGame() {
   let mrsTrittelIdleIndex = 0;
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
-  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260912-fast-leap1");
+  const mrsTrittelJumpVideos = [
+    createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260912-fast-leap1"),
+    createDeferredVideo("assets/colt-run-mrs-trittel-jump-02.webm?v=20260912-fast-leap1")
+  ];
+  mrsTrittelJumpVideos.forEach(video => {
+    video.loop = true;
+  });
+  let mrsTrittelJumpIndex = -1;
+  const getMrsTrittelJumpVideo = () => mrsTrittelJumpVideos[Math.max(0, mrsTrittelJumpIndex)];
   const mrsTrittelDeathVideo = createDeferredVideo("assets/colt-run-mrs-trittel-death.webm?v=20260911-death1");
   const mrsTrittelCelebrationVideos = [
     createDeferredVideo("assets/colt-run-mrs-trittel-celebration.webm?v=20260911-green-key1"),
@@ -4452,7 +4460,7 @@ function startColtRunGame() {
     if (character === "mrsTrittel") {
       mrsTrittelIdleVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsTrittelRunVideo);
-      ensureMediaSource(mrsTrittelJumpVideo);
+      mrsTrittelJumpVideos.forEach(video => ensureMediaSource(video));
       ensureMediaSource(mrsTrittelDeathVideo);
       mrsTrittelDeathAudios.forEach(audio => ensureMediaSource(audio));
       mrsTrittelCelebrationVideos.forEach(video => ensureMediaSource(video));
@@ -5249,16 +5257,20 @@ function startColtRunGame() {
   };
 
   const restartMrsTrittelJumpVideo = () => {
-    ensureMediaSource(mrsTrittelJumpVideo);
+    mrsTrittelJumpIndex = (mrsTrittelJumpIndex + 1) % mrsTrittelJumpVideos.length;
+    const video = getMrsTrittelJumpVideo();
+    ensureMediaSource(video);
     try {
-      mrsTrittelJumpVideo.currentTime = 0;
+      video.currentTime = 0;
     } catch {}
-    mrsTrittelJumpVideo.play().catch(() => {});
+    characterPlaybackKey = "";
+    video.play().catch(() => {});
   };
 
   const keepMrsTrittelJumpVideoPlaying = () => {
-    ensureMediaSource(mrsTrittelJumpVideo);
-    if (mrsTrittelJumpVideo.paused) mrsTrittelJumpVideo.play().catch(() => {});
+    const video = getMrsTrittelJumpVideo();
+    ensureMediaSource(video);
+    if (video.paused) video.play().catch(() => {});
   };
 
   const keepMrsTrittelDeathVideoPlaying = () => {
@@ -5480,7 +5492,7 @@ function startColtRunGame() {
     ...mrsLevandoskeIdleVideos,
     ...mrsTrittelIdleVideos,
     mrsTrittelRunVideo,
-    mrsTrittelJumpVideo,
+    ...mrsTrittelJumpVideos,
     mrsTrittelDeathVideo,
     ...mrsTrittelCelebrationVideos,
     ...mrsKochIdleVideos,
@@ -5546,7 +5558,8 @@ function startColtRunGame() {
         nextKey = `mrsTrittel:${player.state}`;
         if (player.state === "run") activeVideos = [mrsTrittelRunVideo];
         else if (player.state === "jumpPrep" || player.state === "leap") {
-          activeVideos = [mrsTrittelJumpVideo];
+          nextKey = `mrsTrittel:jump:${mrsTrittelJumpIndex}`;
+          activeVideos = [getMrsTrittelJumpVideo()];
         } else if (player.state === "celebrate") {
           nextKey = `mrsTrittel:celebrate:${mrsTrittelCelebrationIndex}`;
           activeVideos = [getMrsTrittelCelebrationVideo()];
@@ -7831,7 +7844,7 @@ function startColtRunGame() {
     player.state = "leap";
     if (selectedCharacter === "mrNieves") chooseMrNievesInAirVideo();
     if (selectedCharacter === "mrsLevandoske") chooseMrsLevandoskeJumpVideo();
-    if (selectedCharacter === "mrsTrittel") restartMrsTrittelJumpVideo();
+    if (selectedCharacter === "mrsTrittel") keepMrsTrittelJumpVideoPlaying();
     if (selectedCharacter === "mrsKoch") keepMrsKochJumpVideoPlaying();
     stopRunningAudio();
     syncGameStatus();
@@ -8083,7 +8096,7 @@ function startColtRunGame() {
       : null;
     const mrsTrittelFrame = isMrsTrittel
       ? (mrsTrittelIsJumping
-          ? (mrsTrittelJumpVideo.readyState >= 2 ? mrsTrittelJumpVideo : getMrsTrittelIdleVideo())
+          ? (getMrsTrittelJumpVideo().readyState >= 2 ? getMrsTrittelJumpVideo() : getMrsTrittelIdleVideo())
           : mrsTrittelIsRunning
             ? (mrsTrittelRunVideo.readyState >= 2 ? mrsTrittelRunVideo : getMrsTrittelIdleVideo())
             : mrsTrittelIsCelebrating
@@ -8110,7 +8123,7 @@ function startColtRunGame() {
       else keepMrsKochIdleVideoPlaying();
       ctx.drawImage(mrsKochFrame, -drawW / 2, 0, drawW, drawH);
     } else if (mrsTrittelFrame) {
-      if (mrsTrittelIsJumping && mrsTrittelJumpVideo.readyState >= 2) keepMrsTrittelJumpVideoPlaying();
+      if (mrsTrittelIsJumping && getMrsTrittelJumpVideo().readyState >= 2) keepMrsTrittelJumpVideoPlaying();
       else if (mrsTrittelIsRunning && mrsTrittelRunVideo.readyState >= 2) keepMrsTrittelRunVideoPlaying();
       else if (mrsTrittelIsCelebrating && getMrsTrittelCelebrationVideo().readyState >= 2) keepMrsTrittelCelebrationVideoPlaying();
       else keepMrsTrittelIdleVideoPlaying();
@@ -8864,7 +8877,7 @@ function startColtRunGame() {
         ...mrsLevandoskeIdleVideos,
         ...mrsTrittelIdleVideos,
         mrsTrittelRunVideo,
-        mrsTrittelJumpVideo,
+        ...mrsTrittelJumpVideos,
         mrsTrittelDeathVideo,
         ...mrsTrittelCelebrationVideos,
         ...mrsKochIdleVideos,

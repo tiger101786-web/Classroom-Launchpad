@@ -87,6 +87,8 @@ assert.doesNotMatch(trittelCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsTrittel: "Mrs\. Trittel"/);
 assert.match(app, /colt-run-mrs-trittel-run\.webm\?v=20260910-playable1/);
 assert.match(app, /colt-run-mrs-trittel-jump\.webm\?v=20260912-fast-leap1/);
+assert.match(app, /colt-run-mrs-trittel-jump-02\.webm\?v=20260912-fast-leap1/);
+assert.match(app, /mrsTrittelJumpIndex = \(mrsTrittelJumpIndex \+ 1\) % mrsTrittelJumpVideos\.length/, "Mrs. Trittel's jump animations should alternate on each new jump.");
 assert.doesNotMatch(app, /mrsTrittelJumpVideo\.playbackRate\s*=/, "Mrs. Trittel's leap speed should be baked into the video instead of relying on browser playback-rate behavior.");
 assert.match(app, /colt-run-mrs-trittel-death\.webm\?v=20260911-death1/);
 assert.match(app, /colt-run-mrs-trittel-death-audio\.mp3\?v=20260911-trim1/);
@@ -140,6 +142,7 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-trittel-idle-02.webm",
   "colt-run-mrs-trittel-run.webm",
   "colt-run-mrs-trittel-jump.webm",
+  "colt-run-mrs-trittel-jump-02.webm",
   "colt-run-mrs-trittel-death.webm",
   "colt-run-mrs-trittel-celebration.webm",
   "colt-run-mrs-trittel-celebration-02.webm",
