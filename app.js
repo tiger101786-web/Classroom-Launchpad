@@ -3874,6 +3874,23 @@ function startColtRunGame() {
     if (characterSelectPanel) characterSelectPanel.hidden = false;
     updateCharacterButtons();
     stopRunningAudio();
+    [
+      getColtIdleVideo(),
+      getMrNievesIdleVideo(),
+      getMrsLevandoskeIdleVideo(),
+      getMrsTrittelIdleVideo(),
+      getMrsKochIdleVideo()
+    ].forEach(video => {
+      ensureMediaSource(video);
+      const hasFinished = video.ended
+        || (Number.isFinite(video.duration) && video.duration > 0 && video.currentTime >= video.duration - 0.08);
+      if (!hasFinished) return;
+      try {
+        video.currentTime = 0;
+      } catch {}
+    });
+    characterPlaybackKey = "";
+    syncCharacterVideoPlayback(true);
     if (initialCharacterSelectionPending) playColtRunAudio();
     syncGameStatus();
   };
@@ -4316,7 +4333,7 @@ function startColtRunGame() {
   let mrsTrittelIdleIndex = 0;
   const getMrsTrittelIdleVideo = () => mrsTrittelIdleVideos[mrsTrittelIdleIndex];
   const mrsTrittelRunVideo = createDeferredVideo("assets/colt-run-mrs-trittel-run.webm?v=20260910-playable1");
-  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260910-playable1");
+  const mrsTrittelJumpVideo = createDeferredVideo("assets/colt-run-mrs-trittel-jump.webm?v=20260911-clean-leap1");
   const mrsTrittelDeathVideo = createDeferredVideo("assets/colt-run-mrs-trittel-death.webm?v=20260911-death1");
   const mrsTrittelCelebrationVideos = [
     createDeferredVideo("assets/colt-run-mrs-trittel-celebration.webm?v=20260911-green-key1"),

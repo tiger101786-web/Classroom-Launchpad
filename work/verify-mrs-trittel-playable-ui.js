@@ -84,11 +84,15 @@ async function run() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await page.addInitScript(() => {
       window.__mrsTrittelDraws = [];
+      window.__mrsTrittelPreviewTimes = [];
       const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
       CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
         const mediaSource = source?.currentSrc || source?.src || source?.dataset?.src || "";
         if (mediaSource.includes("colt-run-mrs-trittel") && window.__mrsTrittelDraws.length < 2000) {
           window.__mrsTrittelDraws.push(mediaSource);
+        }
+        if (mediaSource.includes("colt-run-mrs-trittel-idle") && window.__mrsTrittelPreviewTimes.length < 2000) {
+          window.__mrsTrittelPreviewTimes.push(Number(source.currentTime) || 0);
         }
         return originalDrawImage.call(this, source, ...args);
       };
@@ -103,7 +107,13 @@ async function run() {
     assert.equal(await card.getAttribute("data-colt-run"), "character");
     assert.doesNotMatch((await card.innerText()).toLowerCase(), /coming soon/);
 
-    for (const filename of ["colt-run-mrs-trittel-run.webm", "colt-run-mrs-trittel-jump.webm", "colt-run-mrs-trittel-death.webm"]) {
+    for (const filename of [
+      "colt-run-mrs-trittel-run.webm",
+      "colt-run-mrs-trittel-jump.webm",
+      "colt-run-mrs-trittel-death.webm",
+      "colt-run-mrs-trittel-celebration.webm",
+      "colt-run-mrs-trittel-celebration-02.webm"
+    ]) {
       const media = await verifyTransparentVideo(page, filename);
       assert.deepEqual({ width: media.width, height: media.height }, { width: 576, height: 876 });
       assert(media.maxCornerAlpha <= 8, `${filename} still has an opaque green-screen corner.`);
@@ -119,6 +129,12 @@ async function run() {
     await page.keyboard.down("Space");
     await page.waitForFunction(() => window.__mrsTrittelDraws.some(source => source.includes("mrs-trittel-jump.webm")), null, { timeout: 5000 });
     await page.keyboard.up("Space");
+    await page.evaluate(() => { window.__mrsTrittelPreviewTimes = []; });
+    await page.locator('[data-colt-run="characterSelect"]').click();
+    await page.waitForTimeout(700);
+    const previewTimes = await page.evaluate(() => window.__mrsTrittelPreviewTimes);
+    assert(previewTimes.length > 3, "Mrs. Trittel's character-select preview was not redrawn.");
+    assert(Math.max(...previewTimes) - Math.min(...previewTimes) > 0.15, "Mrs. Trittel's character-select preview remained frozen after returning from gameplay.");
     await page.screenshot({ path: path.join(dataDir, "mrs-trittel-playable-ui.png"), fullPage: true });
     console.log("Mrs. Trittel playable UI verification passed.");
   } finally {
