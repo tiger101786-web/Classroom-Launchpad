@@ -27,9 +27,11 @@ assert.match(app, /colt-run-mrs-koch-jump\.webm\?v=20260912-green-key1/);
 assert.match(app, /colt-run-mrs-koch-jump-02\.webm\?v=20260912-green-key1/);
 assert.match(app, /mrsKochJumpIndex = \(mrsKochJumpIndex \+ 1\) % mrsKochJumpVideos\.length/, "Mrs. Koch's jump animations should alternate on each new jump.");
 assert.match(app, /colt-run-mrs-koch-death\.webm\?v=20260912-green-key1/);
+assert.match(app, /colt-run-mrs-koch-death-02\.webm\?v=20260912-green-key1/);
+assert.match(app, /mrsKochDeathIndex = \(mrsKochDeathIndex \+ 1\) % mrsKochDeathVideos\.length/, "Mrs. Koch's death animations should alternate on each loss.");
 assert.match(app, /colt-run-mrs-koch-celebration\.webm\?v=20260912-green-key1/);
 assert.match(app, /colt-run-mrs-koch-celebration-02\.webm\?v=20260912-green-key1/);
-assert.match(app, /mrsKochDeathVideo\.loop = false;/, "Mrs. Koch's death animation should stop on its final frame when she becomes playable.");
+assert.match(app, /mrsKochDeathVideos\.forEach\(video => \{\s*video\.loop = false;/, "Mrs. Koch's death animations should stop on their final frame.");
 assert.match(app, /mrsKochCelebrationIndex = \(mrsKochCelebrationIndex \+ 1\) % mrsKochCelebrationVideos\.length/, "Mrs. Koch's future finish animations should alternate between levels.");
 assert.match(app, /mrsKochCelebrationVideos\.forEach\(video => \{\s*video\.loop = true;/, "Mrs. Koch's selected finish animation should loop.");
 assert.match(app, /colt-run-mrs-levandoske-run\.webm/);
@@ -116,6 +118,7 @@ assert.match(kochCard, /Mrs\. Koch/);
 assert.doesNotMatch(kochCard, /Coming Soon|colt-run-coming-soon/);
 assert.match(app, /mrsKoch: "Mrs\. Koch"/);
 assert.match(app, /selectedCharacter === "mrsKoch"\) playMrsKochDeathAudio\(\)/);
+assert.match(app, /selectedCharacter === "mrsKoch"[\s\S]*?chooseMrsKochDeathVideo\(\)/, "Mrs. Koch should choose the next death animation when a loss begins.");
 assert.match(app, /selectedCharacter === "mrsKoch"\) playMrsKochCelebrationAudio\(\)/);
 assert.match(app, /const nextIndex = \(lastMrsKochDeathAudioIndex \+ 1\) % mrsKochDeathAudios\.length;/);
 assert.match(app, /const nextIndex = \(lastMrsKochCelebrationAudioIndex \+ 1\) % mrsKochCelebrationAudios\.length;/);
@@ -152,6 +155,7 @@ assert.match(styles, /data-character="mrsTrittel"[\s\S]*?data-character="mrsKoch
   "colt-run-mrs-koch-jump.webm",
   "colt-run-mrs-koch-jump-02.webm",
   "colt-run-mrs-koch-death.webm",
+  "colt-run-mrs-koch-death-02.webm",
   "colt-run-mrs-koch-celebration.webm",
   "colt-run-mrs-koch-celebration-02.webm"
 ].forEach(filename => {
