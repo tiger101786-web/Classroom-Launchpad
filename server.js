@@ -34,6 +34,10 @@ const approvedStudentGradeMigrations = [{
   email: "kelly.vien@scscolts.org",
   grade: "7"
 }];
+const approvedStudentRemovalMigrations = [{
+  id: "2026-09-13-remove-blakeleigh-freeman",
+  email: "blakeleigh.freeman@scscolts.org"
+}];
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
@@ -1106,6 +1110,13 @@ function applyApprovedStudentGradeMigrations(db) {
     if (approvedStudents[studentIndex].grade !== migration.grade) {
       approvedStudents[studentIndex] = { ...approvedStudents[studentIndex], grade: migration.grade };
     }
+    applied.add(migration.id);
+    changed = true;
+  });
+
+  approvedStudentRemovalMigrations.forEach(migration => {
+    if (applied.has(migration.id)) return;
+    approvedStudents = approvedStudents.filter(student => student.email !== migration.email);
     applied.add(migration.id);
     changed = true;
   });

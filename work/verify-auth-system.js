@@ -13,6 +13,13 @@ fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringi
     passwordSalt: "preserved-password-salt",
     passwordHash: "preserved-password-hash",
     createdAt: "2026-09-01T00:00:00.000Z"
+  }, {
+    email: "blakeleigh.freeman@scscolts.org",
+    name: "Blakeleigh Freeman",
+    grade: "4",
+    activationSalt: "unused-activation-salt",
+    activationHash: "unused-activation-hash",
+    createdAt: "2026-09-01T00:00:00.000Z"
   }]
 }, null, 2));
 
@@ -188,6 +195,14 @@ async function run() {
   check(
     migratedDatabase.appliedDataMigrations.includes("2026-09-08-kelly-vien-grade-7"),
     "The Kellie Vien grade correction was not recorded as complete."
+  );
+  check(
+    !migratedDatabase.approvedStudents.some(student => student.email === "blakeleigh.freeman@scscolts.org"),
+    "Blakeleigh Freeman was not removed from the approved student roster."
+  );
+  check(
+    migratedDatabase.appliedDataMigrations.includes("2026-09-13-remove-blakeleigh-freeman"),
+    "The Blakeleigh Freeman removal was not recorded as complete."
   );
 
   const outsiderList = await fetch(`${base}/api/approved-students`);
