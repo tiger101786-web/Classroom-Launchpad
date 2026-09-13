@@ -1101,6 +1101,44 @@ body[data-theme="night"] .auth-notice {
   pointer-events: none;
 }
 
+.bulk-password-reset-panel {
+  border-color: rgba(176, 22, 68, 0.4);
+  background: rgba(176, 22, 68, 0.07);
+}
+
+.bulk-password-reset-panel .request-message {
+  margin: 0;
+}
+
+.bulk-password-reset-results {
+  display: grid;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.bulk-password-reset-results span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.bulk-password-reset-results strong {
+  color: var(--ink);
+}
+
+@media (max-width: 680px) {
+  .bulk-password-reset-results span {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
 .activation-code-results {
   grid-column: 1 / -1;
   display: grid;

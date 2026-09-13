@@ -1856,6 +1856,73 @@ async function handleApprovedStudentsApi(req, res, pathname) {
     return true;
   }
 
+  if (req.method === "PUT" && pathname === "/api/approved-students/passwords/bulk") {
+    try {
+      const body = await readBody(req);
+      const requested = Array.isArray(body.students) ? body.students : [];
+      if (!requested.length) throw new Error("The password list does not contain any students.");
+      if (requested.length > 250) throw new Error("A password list can contain up to 250 students.");
+
+      const entries = requested.map(item => ({
+        email: normalizeEmail(item && item.email),
+        newPassword: String(item && item.newPassword != null ? item.newPassword : "")
+      }));
+      const seen = new Set();
+      for (const entry of entries) {
+        if (!entry.email || !isAllowedStudentEmail(entry.email)) {
+          throw new Error("Every row must contain an approved school email address.");
+        }
+        if (!entry.newPassword.length || entry.newPassword.length > 128) {
+          throw new Error(`Enter a password between 1 and 128 characters for ${entry.email}.`);
+        }
+        if (seen.has(entry.email)) throw new Error(`The password list contains ${entry.email} more than once.`);
+        seen.add(entry.email);
+      }
+
+      const students = normalizeApprovedStudents(db.approvedStudents);
+      const byEmail = new Map(students.map(student => [student.email, student]));
+      const results = [];
+      let updated = 0;
+      for (const entry of entries) {
+        const student = byEmail.get(entry.email);
+        if (!student) {
+          results.push({ email: entry.email, status: "not-found" });
+          continue;
+        }
+        if (!student.passwordHash) {
+          results.push({ email: entry.email, status: "not-activated" });
+          continue;
+        }
+        const passwordRecord = hashStudentSecret(entry.newPassword);
+        byEmail.set(entry.email, {
+          ...student,
+          passwordSalt: passwordRecord.salt,
+          passwordHash: passwordRecord.hash,
+          activationSalt: "",
+          activationHash: "",
+          activationIssuedAt: ""
+        });
+        results.push({ email: entry.email, status: "updated" });
+        updated += 1;
+      }
+
+      if (updated) {
+        db.approvedStudents = normalizeApprovedStudents([...byEmail.values()]);
+        writeDb(db);
+      }
+      sendJson(res, 200, {
+        ok: true,
+        updated,
+        requested: entries.length,
+        results,
+        students: publicApprovedStudents(updated ? db.approvedStudents : students)
+      });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
   if (req.method === "PUT" && pathname === "/api/approved-students/import") {
     try {
       const body = await readBody(req);

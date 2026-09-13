@@ -271,6 +271,22 @@ function parseStudentRosterCsv(text) {
   })).filter(student => student.email && student.name);
 }
 
+function parseStudentPasswordResetCsv(text) {
+  const rows = parseCsvRows(text);
+  if (rows.length < 2) throw new Error("The password list does not contain any student rows.");
+  const headers = rows[0].map(header => header.toLowerCase().replace(/[^a-z]/g, ""));
+  const emailIndex = headers.findIndex(header => ["email", "schoolemail", "studentemail", "googleaccountemail"].includes(header));
+  const passwordIndex = headers.findIndex(header => ["password", "newpassword", "launchpadpassword"].includes(header));
+  if (emailIndex < 0 || passwordIndex < 0) throw new Error("The list must include School Email and Password columns.");
+  const students = rows.slice(1).map(row => ({
+    email: row[emailIndex] || "",
+    newPassword: row[passwordIndex] || ""
+  })).filter(student => student.email || student.newPassword);
+  if (!students.length) throw new Error("The password list does not contain any student rows.");
+  if (students.some(student => !student.email || !student.newPassword)) throw new Error("Every student row must include both an email and a password.");
+  return students;
+}
+
 function normalizeRequests(items) {
   return (Array.isArray(items) ? items : []).filter(item => item && item.id !== DAILY_LAUNCH_REQUEST_ID && item.id !== CLASS_TIMER_REQUEST_ID && item.id !== RANDOM_ACTIVITY_REQUEST_ID).map(item => ({
     id: item.id || makeId(),
@@ -751,6 +767,12 @@ const sharedBackend = {
     return this.request(`/api/approved-students/${encodeURIComponent(email)}/password`, {
       method: "PUT",
       body: JSON.stringify({ newPassword })
+    });
+  },
+  setStudentPasswordsBulk(students) {
+    return this.request("/api/approved-students/passwords/bulk", {
+      method: "PUT",
+      body: JSON.stringify({ students })
     });
   },
   regenerateStudentCodes() {
@@ -1493,6 +1515,7 @@ let dashboardStudentSearch = "";
 let registeredStudentSearch = "";
 let teacherPasswordStudentEmail = "";
 let teacherPasswordMessage = "";
+let bulkPasswordResetResult = null;
 let dashboardLinkSearch = "";
 let dashboardLinkCategory = "all";
 let dashboardLinkStatus = "all";
@@ -9667,6 +9690,26 @@ function renderApprovedStudentManager() {
             <input id="approvedStudentRosterFile" type="file" accept=".csv,text/csv">
           </label>
         </div>
+        <div class="roster-import-panel bulk-password-reset-panel">
+          <div>
+            <strong>Reset a class password list</strong>
+            <small>Choose a prepared CSV or text file containing School Email and Password columns. Each row can use a different password. Launchpad updates only the exact activated accounts listed in the file, so separate class sections do not need to be stored in Launchpad.</small>
+          </div>
+          <label class="primary-btn roster-file-button">
+            Choose Class List and Reset Passwords
+            <input id="bulkStudentPasswordFile" type="file" accept=".csv,.txt,text/csv,text/plain">
+          </label>
+          <p class="request-message${bulkPasswordResetResult && bulkPasswordResetResult.error ? " error" : ""}" aria-live="polite">
+            ${bulkPasswordResetResult ? escapeHtml(bulkPasswordResetResult.message || "") : "Passwords are processed securely and are not saved in the page or source code."}
+          </p>
+          ${bulkPasswordResetResult && Array.isArray(bulkPasswordResetResult.results) && bulkPasswordResetResult.results.some(item => item.status !== "updated") ? `
+            <div class="bulk-password-reset-results">
+              ${bulkPasswordResetResult.results.filter(item => item.status !== "updated").map(item => `
+                <span><strong>${escapeHtml(item.email)}</strong>${item.status === "not-activated" ? "Account has not been activated" : "Student was not found"}</span>
+              `).join("")}
+            </div>
+          ` : ""}
+        </div>
         <button class="outline-btn" type="button" data-action="regenerateStudentCodes">Generate New Codes for Unregistered Students</button>
         <p id="approvedStudentStatus" class="request-message" aria-live="polite"></p>
       </form>
@@ -11513,6 +11556,35 @@ function attachScreenHandlers() {
       } catch (error) {
         status.textContent = error.message;
         status.classList.add("error");
+      } finally {
+        event.target.value = "";
+      }
+    });
+  }
+
+  const bulkStudentPasswordFile = document.getElementById("bulkStudentPasswordFile");
+  if (bulkStudentPasswordFile) {
+    bulkStudentPasswordFile.addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const students = parseStudentPasswordResetCsv(await file.text());
+        const activatedMatches = students.filter(entry => approvedStudents.some(student => student.registered && student.email.toLowerCase() === entry.email.trim().toLowerCase())).length;
+        const confirmed = window.confirm(`Reset passwords for ${activatedMatches} activated students from this list? Only exact email matches will be changed.`);
+        if (!confirmed) return;
+        bulkPasswordResetResult = { message: "Securely updating the listed student passwords..." };
+        render();
+        const result = await sharedBackend.setStudentPasswordsBulk(students);
+        approvedStudents = result.students || approvedStudents;
+        const skipped = result.results.filter(item => item.status !== "updated").length;
+        bulkPasswordResetResult = {
+          message: `${result.updated} student ${result.updated === 1 ? "password was" : "passwords were"} reset.${skipped ? ` ${skipped} ${skipped === 1 ? "entry was" : "entries were"} not changed.` : ""}`,
+          results: result.results || []
+        };
+        render();
+      } catch (error) {
+        bulkPasswordResetResult = { error: true, message: error.message };
+        render();
       } finally {
         event.target.value = "";
       }

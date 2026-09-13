@@ -29,5 +29,12 @@ check(server.includes('pathname.endsWith("/password")'), "Teacher student-passwo
 check(server.includes('const newPassword = String(body.newPassword ?? "")'), "Teacher-set passwords are being transformed or constrained.");
 check(!server.includes("Teacher passwords must contain"), "Teacher-set student passwords still have a complexity restriction.");
 check(styles.includes(".teacher-student-password-form"), "Teacher student-password styling is missing.");
+check(app.includes('id="bulkStudentPasswordFile"'), "Teacher bulk password-list control is missing.");
+check(app.includes("parseStudentPasswordResetCsv"), "Teacher bulk password-list parser is missing.");
+check(app.includes("sharedBackend.setStudentPasswordsBulk(students)"), "Teacher bulk password reset is not connected to the backend.");
+check(server.includes('pathname === "/api/approved-students/passwords/bulk"'), "Teacher bulk password endpoint is missing.");
+check(server.includes('status: "not-activated"'), "Bulk password reset should leave unactivated accounts unchanged.");
+check(server.includes('status: "not-found"'), "Bulk password reset should report unknown students.");
+check(styles.includes(".bulk-password-reset-panel"), "Teacher bulk password reset styling is missing.");
 
 console.log("Student password change verification passed.");
