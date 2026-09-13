@@ -290,7 +290,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 64, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 65, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -320,7 +320,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -537,6 +537,10 @@ async function run() {
     await page.getByRole("button", { name: "Pop • New Hits", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.live365.com/a08639");
     assert.match(await page.locator(".colt-radio-note").innerText(), /family-friendly, always commercial-free/);
+
+    await page.getByRole("button", { name: "Pop • Current Hits", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://stream.revma.ihrhls.com/zc7013");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /family-friendly Top 20, streamed commercial-free/);
 
     await page.getByRole("button", { name: "Focus • Positive", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.positivity.radio/pr-app/posisuccessful/icecast.audio");
