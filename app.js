@@ -3212,7 +3212,7 @@ function renderColtRun() {
     ${coltRunTopbar()}
     <section class="colt-run-shell" aria-label="Colt Run game">
       <div class="colt-run-topline">
-        <div>
+        <div class="colt-run-title-block">
           <span class="feature-kicker">Logic Games</span>
           <h2>Colt Run</h2>
           <p>Reach the finish flag before time runs out.</p>
@@ -3224,10 +3224,14 @@ function renderColtRun() {
             <button type="button" data-colt-run="difficulty" data-difficulty="impossible">Impossible</button>
           </div>
         </div>
+        <div class="colt-run-hanging-banner" aria-hidden="true">
+          <span></span>
+          <img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt="">
+        </div>
         <div class="colt-run-stats" aria-label="Game stats">
-          <span>Level <strong id="coltRunLevel">1</strong></span>
-          <span>Time Left <strong id="coltRunTime">0.0</strong></span>
-          <span>Coins <strong id="coltRunScore">0</strong></span>
+          <span><i aria-hidden="true">&#9873;</i> Level <strong id="coltRunLevel">1</strong></span>
+          <span><i aria-hidden="true">&#9203;</i> Time <strong id="coltRunTime">0.0</strong></span>
+          <span><i aria-hidden="true">&#9673;</i> Coins <strong id="coltRunScore">0</strong></span>
         </div>
       </div>
       <div class="colt-run-stage">
@@ -3289,24 +3293,29 @@ function renderColtRun() {
             </section>
             <div class="colt-run-character-grid">
               <button type="button" data-colt-run="character" data-character="colt">
+                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectColt" width="600" height="400" aria-hidden="true"></canvas>
-                <span>Colt</span>
+                <span class="colt-run-character-name">Colt</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrNieves">
+                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrNieves" width="600" height="400" aria-hidden="true"></canvas>
-                <span>Mr. Nieves</span>
+                <span class="colt-run-character-name">Mr. Nieves</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsLevandoske">
+                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsLevandoske" width="600" height="400" aria-hidden="true"></canvas>
-                <span>Mrs. Levandoske</span>
+                <span class="colt-run-character-name">Mrs. Levandoske</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsTrittel">
+                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsTrittel" width="600" height="400" aria-hidden="true"></canvas>
-                <span>Mrs. Trittel</span>
+                <span class="colt-run-character-name">Mrs. Trittel</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsKoch">
+                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsKoch" width="600" height="400" aria-hidden="true"></canvas>
-                <span>Mrs. Koch</span>
+                <span class="colt-run-character-name">Mrs. Koch</span>
               </button>
             </div>
           </div>
@@ -3324,8 +3333,11 @@ function renderColtRun() {
       </div>
       <div class="colt-run-footer">
         <div class="colt-run-status-panel" role="status" aria-live="polite">
-          <span>Game Status</span>
-          <p id="coltRunStatus">Choose a runner to begin.</p>
+          <img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt="" aria-hidden="true">
+          <div>
+            <span>Game Status</span>
+            <p id="coltRunStatus">Choose a runner to begin.</p>
+          </div>
         </div>
         <div class="colt-run-actions">
           <div class="colt-run-volume" aria-label="Game audio volume">
