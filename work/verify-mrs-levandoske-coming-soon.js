@@ -53,7 +53,9 @@ assert.match(app, /usesHumanRunningAudio[\s\S]*?selectedCharacter === "mrsLevand
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCelebrationAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\);[\s\S]*?keepMrsLevandoskeCelebrationVideoPlaying\(\);/, "Mrs. Levandoske should use her dedicated end-flag celebration animations.");
-assert.match(app, /isMrsLevandoske \? 18 : isMrsTrittel \? 16 : isMrsKoch \? 16 : 8/, "The playable teacher characters should sit correctly on gameplay platforms.");
+assert.match(app, /mrsLevandoskeIsJumping \? 18 : mrsLevandoskeIsRunning \? 19 : mrsLevandoskeIsCelebrating \? 14 : 4/, "Mrs. Levandoske should use animation-specific platform alignment.");
+assert.match(app, /mrsTrittelIsJumping \? 16 : mrsTrittelIsRunning \? 17 : mrsTrittelIsCelebrating \? 7 : 3/, "Mrs. Trittel should use animation-specific platform alignment.");
+assert.match(app, /mrsKochIsJumping \? 16 : mrsKochIsRunning \? 19 : mrsKochIsCelebrating \? 14 : 7/, "Mrs. Koch should use animation-specific platform alignment.");
 assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 2\.4, 1, 1, 1\]/, "Both Mrs. Levandoske death screams should receive a significant volume boost.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeDeathAudios\.length,[\s\S]*?lastMrsLevandoskeDeathAudioIndex/, "Mrs. Levandoske's death sounds should alternate without immediate repeats.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeCelebrationAudios\.length,[\s\S]*?lastMrsLevandoskeCelebrationAudioIndex/, "Mrs. Levandoske's celebration sounds should rotate without immediate repeats.");

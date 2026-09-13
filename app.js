@@ -8094,7 +8094,16 @@ function startColtRunGame() {
           ? (mrsKochIsJumping ? 176 : mrsKochIsRunning ? 170 : 168)
         : coltIsCelebrating ? 123 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
-    const y = Math.round(player.y + player.h - drawH + (isMrNieves ? 10 + getMrNievesPlatformVisualOffset() : isMrsLevandoske ? 18 : isMrsTrittel ? 16 : isMrsKoch ? 16 : 8));
+    const platformVisualOffset = isMrNieves
+      ? 10 + getMrNievesPlatformVisualOffset()
+      : isMrsLevandoske
+        ? (mrsLevandoskeIsJumping ? 18 : mrsLevandoskeIsRunning ? 19 : mrsLevandoskeIsCelebrating ? 14 : 4)
+        : isMrsTrittel
+          ? (mrsTrittelIsJumping ? 16 : mrsTrittelIsRunning ? 17 : mrsTrittelIsCelebrating ? 7 : 3)
+          : isMrsKoch
+            ? (mrsKochIsJumping ? 16 : mrsKochIsRunning ? 19 : mrsKochIsCelebrating ? 14 : 7)
+            : 8;
+    const y = Math.round(player.y + player.h - drawH + platformVisualOffset);
     ctx.save();
     if (!isHumanRunner) ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);

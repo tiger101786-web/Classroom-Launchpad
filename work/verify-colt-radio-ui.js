@@ -43,6 +43,10 @@ function overlaps(first, second) {
 async function run() {
   const root = path.resolve(__dirname, "..");
   const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const radioSource = fs.readFileSync(path.join(root, "colt-radio.js"), "utf8");
+  assert(radioSource.includes('id: "youradio-positively-binaural"'), "Positively Binaural is missing from Colt Radio.");
+  assert(radioSource.includes('source: "https://streaming.positivity.radio/pr/posivibe/icecast.audio"'), "Positively Binaural is not using the verified YouRadio stream.");
+  assert(radioSource.includes('"youradio-positively-binaural":'), "Positively Binaural is missing its station icon.");
   assert(
     appSource.includes('window.dispatchEvent(new CustomEvent("colt-run-opening"));\n    setScreen({ name: "coltRun" });'),
     "Colt Run does not send the immediate radio stop event before opening."
@@ -286,7 +290,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 63, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 64, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -316,7 +320,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");

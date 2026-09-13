@@ -387,6 +387,14 @@
       note: "Positive background music for concentration, studying, and focused classroom work, streamed commercial-free by YouRadio."
     },
     {
+      id: "youradio-positively-binaural",
+      label: "Focus • Binaural",
+      type: "stream",
+      source: "https://streaming.positivity.radio/pr/posivibe/icecast.audio",
+      provider: "YouRadio Positively Binaural",
+      note: "Binaural tones for calm focus and mindful classroom work, streamed commercial-free by YouRadio. Best experienced with headphones at a comfortable volume."
+    },
+    {
       id: "youradio-calm-instrumental",
       label: "Calm • Instrumental",
       type: "stream",
@@ -630,6 +638,7 @@
     "youradio-calm-kids": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
     "hitbound-radio": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',
     "youradio-positively-focus": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
+    "youradio-positively-binaural": '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="7" rx="2"/><rect x="17" y="13" width="4" height="7" rx="2"/><path d="M10 10c1-1 3-1 4 0m-3 3c.6-.5 1.4-.5 2 0"/>',
     "youradio-calm-instrumental": '<path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>',
     "youradio-positively-meditation": '<path d="M12 4c-2 3-3 5-3 7a3 3 0 0 0 6 0c0-2-1-4-3-7Z"/><path d="M5 20c1.5-3 3.8-4.5 7-4.5S17.5 17 19 20M7 20h10"/>',
     "youradio-positively-chants": '<path d="M12 4c-2 3-3 5-3 7a3 3 0 0 0 6 0c0-2-1-4-3-7Z"/><path d="M5 20c1.5-3 3.8-4.5 7-4.5S17.5 17 19 20M7 20h10"/>',
