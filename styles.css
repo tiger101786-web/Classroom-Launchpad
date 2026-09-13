@@ -11855,8 +11855,8 @@ body[data-theme="night"] .colt-run-shell {
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 126px;
-  height: 151px;
+  width: 164px;
+  height: 195px;
   transform: translateX(-50%);
   filter: drop-shadow(0 9px 8px rgba(0, 0, 0, 0.58));
 }
@@ -12099,7 +12099,25 @@ body[data-theme="night"] .colt-run-volume {
 .colt-run-actions .primary-btn { background: linear-gradient(#b9164c, #680827); color: #fff0e6; }
 .colt-run-actions .primary-btn:disabled { background: linear-gradient(#521326, #290a14); color: rgba(255, 225, 220, 0.48); opacity: 1; }
 .colt-run-volume { width: auto; }
-.colt-run-volume-btn { color: #ff536e; }
+.colt-run-volume-btn,
+.colt-run-volume-btn.is-muted { color: #ff6842; }
+.colt-run-volume-btn svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  margin: auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(255, 85, 52, 0.42));
+}
+.colt-run-volume-btn .colt-run-speaker-body {
+  fill: currentColor;
+  stroke: currentColor;
+}
 .colt-run-volume-btn:hover,
 .colt-run-volume-btn:focus-visible { background: rgba(190, 23, 71, 0.2); }
 .colt-run-volume-slider::-webkit-slider-runnable-track { background: linear-gradient(to right, #ff593d 0 var(--volume), #3c3437 var(--volume) 100%); }

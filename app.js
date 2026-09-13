@@ -5106,7 +5106,12 @@ function startColtRunGame() {
       musicVolumeSlider.style.setProperty("--volume", `${percent}%`);
     }
     if (musicToggleButton) {
-      musicToggleButton.textContent = percent <= 0 ? "🔇" : percent < 45 ? "🔉" : "🔊";
+      const speakerBody = '<path class="colt-run-speaker-body" d="M3.5 9h4l5-4v14l-5-4h-4Z"></path>';
+      const lowWave = '<path d="M15.5 9.5c1.4 1.35 1.4 3.65 0 5"></path>';
+      const highWave = '<path d="M18.5 7c3 2.7 3 7.3 0 10"></path>';
+      const muteSlash = '<path d="m16 9 5 6m0-6-5 6"></path>';
+      const soundMarks = percent <= 0 ? muteSlash : percent < 45 ? lowWave : `${lowWave}${highWave}`;
+      musicToggleButton.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${speakerBody}${soundMarks}</svg>`;
       musicToggleButton.setAttribute("aria-label", percent <= 0 ? "Turn game audio on" : "Turn game audio off");
       musicToggleButton.classList.toggle("is-muted", percent <= 0);
     }
