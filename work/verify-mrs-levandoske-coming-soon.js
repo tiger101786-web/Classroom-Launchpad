@@ -54,8 +54,12 @@ assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeCele
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) playMrsLevandoskeDeathAudio\(\)/);
 assert.match(app, /selectedCharacter === "mrsLevandoske"\) \{[\s\S]*?chooseMrsLevandoskeCelebrationVideo\(\);[\s\S]*?keepMrsLevandoskeCelebrationVideoPlaying\(\);/, "Mrs. Levandoske should use her dedicated end-flag celebration animations.");
 assert.match(app, /mrsLevandoskeIsJumping \? 18 : mrsLevandoskeIsRunning \? 19 : mrsLevandoskeIsCelebrating \? 14 : 4/, "Mrs. Levandoske should use animation-specific platform alignment.");
-assert.match(app, /mrsTrittelIsJumping \? 16 : mrsTrittelIsRunning \? 17 : mrsTrittelIsCelebrating \? 7 : 3/, "Mrs. Trittel should use animation-specific platform alignment.");
-assert.match(app, /mrsKochIsJumping \? 16 : mrsKochIsRunning \? 19 : mrsKochIsCelebrating \? 14 : 7/, "Mrs. Koch should use animation-specific platform alignment.");
+assert.match(app, /mrsTrittelIdleBottomPaddingSamples = \[[\s\S]*?mrsKochIdleBottomPaddingSamples/, "Mrs. Trittel's alternating idle videos should include frame-timed platform alignment data.");
+assert.match(app, /mrsKochIdleBottomPaddingSamples = \[[\s\S]*?mrsTrittelIdleBottomPaddingSamples/, "Mrs. Koch's alternating idle videos should include frame-timed platform alignment data.");
+assert.match(app, /getSampledPlatformOffset[\s\S]*?samplePosition[\s\S]*?sourcePadding/, "Idle platform alignment should interpolate smoothly throughout each animation.");
+assert.equal((app.match(/IdleBottomPaddingSamples\[[^\]]+\],[\s\S]*?10\s*\)/g) || []).length, 2, "Mrs. Trittel and Mrs. Koch should both include the platform artwork's surface offset.");
+assert.match(app, /mrsTrittelIsJumping \? 16 : mrsTrittelIsRunning \? 17 : mrsTrittelIsCelebrating \? 7 : mrsTrittelIdlePlatformOffset/, "Mrs. Trittel should use frame-timed idle platform alignment.");
+assert.match(app, /mrsKochIsJumping \? 16 : mrsKochIsRunning \? 19 : mrsKochIsCelebrating \? 14 : mrsKochIdlePlatformOffset/, "Mrs. Koch should use frame-timed idle platform alignment.");
 assert.match(app, /mrsLevandoskeCueVolumeMultipliers = \[2\.4, 2\.4, 1, 1, 1\]/, "Both Mrs. Levandoske death screams should receive a significant volume boost.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeDeathAudios\.length,[\s\S]*?lastMrsLevandoskeDeathAudioIndex/, "Mrs. Levandoske's death sounds should alternate without immediate repeats.");
 assert.match(app, /chooseNonRepeatingAudioIndex\([\s\S]*?mrsLevandoskeCelebrationAudios\.length,[\s\S]*?lastMrsLevandoskeCelebrationAudioIndex/, "Mrs. Levandoske's celebration sounds should rotate without immediate repeats.");

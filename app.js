@@ -4384,6 +4384,25 @@ function startColtRunGame() {
   });
   let mrsKochIdleIndex = 0;
   const getMrsKochIdleVideo = () => mrsKochIdleVideos[mrsKochIdleIndex];
+  const mrsKochIdleBottomPaddingSamples = [
+    [36, 35, 35, 37, 47, 43, 38, 36, 26, 16, 11, 12, 13, 12, 12, 14, 15, 11, 10, 8, 8],
+    [36, 35, 34, 35, 34, 17, 13, 13, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11]
+  ];
+  const mrsTrittelIdleBottomPaddingSamples = [
+    [13, 13, 13, 13, 13, 13, 13, 13, 20, 32, 32, 32, 22, 16, 16, 19, 20, 20, 20, 20, 20],
+    [13, 13, 13, 13, 13, 17, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 20, 8, 8, 8]
+  ];
+  const getSampledPlatformOffset = (video, sourceHeight, drawHeight, samples, platformSurfaceOffset = 0) => {
+    if (!video || !samples?.length) return platformSurfaceOffset;
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 6.042;
+    const progress = Math.max(0, Math.min(1, video.currentTime / duration));
+    const samplePosition = progress * (samples.length - 1);
+    const lowerIndex = Math.floor(samplePosition);
+    const upperIndex = Math.min(samples.length - 1, lowerIndex + 1);
+    const blend = samplePosition - lowerIndex;
+    const sourcePadding = samples[lowerIndex] + (samples[upperIndex] - samples[lowerIndex]) * blend;
+    return Math.max(0, platformSurfaceOffset + Math.round(sourcePadding * drawHeight / sourceHeight));
+  };
   const mrsKochRunVideo = createDeferredVideo("assets/colt-run-mrs-koch-run.webm?v=20260912-green-key1");
   const mrsKochJumpVideos = [
     createDeferredVideo("assets/colt-run-mrs-koch-jump.webm?v=20260912-green-key1"),
@@ -8094,14 +8113,28 @@ function startColtRunGame() {
           ? (mrsKochIsJumping ? 176 : mrsKochIsRunning ? 170 : 168)
         : coltIsCelebrating ? 123 : player.state === "idle" ? 104 : player.state === "run" ? 100 : player.state === "leap" ? 112 : player.state === "jumpPrep" ? 100 : 84;
     const x = Math.round(player.x - cameraX + player.w / 2);
+    const mrsTrittelIdlePlatformOffset = getSampledPlatformOffset(
+      getMrsTrittelIdleVideo(),
+      846,
+      drawH,
+      mrsTrittelIdleBottomPaddingSamples[mrsTrittelIdleIndex],
+      10
+    );
+    const mrsKochIdlePlatformOffset = getSampledPlatformOffset(
+      getMrsKochIdleVideo(),
+      840,
+      drawH,
+      mrsKochIdleBottomPaddingSamples[mrsKochIdleIndex],
+      10
+    );
     const platformVisualOffset = isMrNieves
       ? 10 + getMrNievesPlatformVisualOffset()
       : isMrsLevandoske
         ? (mrsLevandoskeIsJumping ? 18 : mrsLevandoskeIsRunning ? 19 : mrsLevandoskeIsCelebrating ? 14 : 4)
         : isMrsTrittel
-          ? (mrsTrittelIsJumping ? 16 : mrsTrittelIsRunning ? 17 : mrsTrittelIsCelebrating ? 7 : 3)
+          ? (mrsTrittelIsJumping ? 16 : mrsTrittelIsRunning ? 17 : mrsTrittelIsCelebrating ? 7 : mrsTrittelIdlePlatformOffset)
           : isMrsKoch
-            ? (mrsKochIsJumping ? 16 : mrsKochIsRunning ? 19 : mrsKochIsCelebrating ? 14 : 7)
+            ? (mrsKochIsJumping ? 16 : mrsKochIsRunning ? 19 : mrsKochIsCelebrating ? 14 : mrsKochIdlePlatformOffset)
             : 8;
     const y = Math.round(player.y + player.h - drawH + platformVisualOffset);
     ctx.save();
