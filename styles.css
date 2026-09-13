@@ -11850,33 +11850,24 @@ body[data-theme="night"] .colt-run-shell {
 
 .colt-run-hanging-banner {
   position: absolute;
-  top: -5px;
+  top: -7px;
   left: 50%;
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 112px;
-  height: 136px;
+  width: 126px;
+  height: 151px;
   transform: translateX(-50%);
-  clip-path: polygon(8% 0, 92% 0, 92% 79%, 50% 100%, 8% 79%);
-  background: linear-gradient(90deg, #390914, #8e0d34 48%, #390914);
-  border-top: 5px solid #17171b;
   filter: drop-shadow(0 9px 8px rgba(0, 0, 0, 0.58));
 }
 
-.colt-run-hanging-banner::before,
-.colt-run-hanging-banner::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 18px;
-  width: 3px;
-  background: rgba(255, 157, 91, 0.7);
+.colt-run-hanging-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
 }
-
-.colt-run-hanging-banner::before { left: 10px; }
-.colt-run-hanging-banner::after { right: 10px; }
-.colt-run-hanging-banner img { width: 68px; height: auto; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.58)); }
 
 .colt-run-difficulty {
   gap: 0;
@@ -12015,22 +12006,6 @@ body[data-theme="night"] .colt-run-stats span {
   box-shadow: inset 0 0 0 2px rgba(255, 176, 85, 0.7), 0 0 18px rgba(255, 72, 41, 0.58);
 }
 
-.colt-run-character-crest {
-  position: absolute !important;
-  top: 11px;
-  right: 11px;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 52px;
-  padding: 6px 5px 9px;
-  clip-path: polygon(5% 0, 95% 0, 95% 78%, 50% 100%, 5% 78%);
-  background: linear-gradient(#831030, #360913);
-  opacity: 0.84;
-  pointer-events: none;
-}
-
-.colt-run-character-crest img { width: 30px; height: auto; }
 .colt-run-character-name { position: relative; color: #fff0df; font-size: 1.08rem; text-shadow: 0 2px 4px #000; }
 .colt-run-character-grid button.is-active .colt-run-character-name::after {
   content: "Selected";
@@ -12119,8 +12094,6 @@ body[data-theme="night"] .colt-run-volume {
   .colt-run-stats { width: 100%; }
   .colt-run-stats span,
   body[data-theme="night"] .colt-run-stats span { flex: 1 1 86px; min-width: 0; }
-  .colt-run-character-crest { width: 34px; height: 42px; }
-  .colt-run-character-crest img { width: 24px; }
   .colt-run-footer { flex-direction: column; }
   .colt-run-status-panel,
   body[data-theme="night"] .colt-run-status-panel,

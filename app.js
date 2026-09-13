@@ -3225,8 +3225,7 @@ function renderColtRun() {
           </div>
         </div>
         <div class="colt-run-hanging-banner" aria-hidden="true">
-          <span></span>
-          <img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt="">
+          <img src="assets/colt-run-header-banner.png?v=20260913-fabric-banner1" alt="">
         </div>
         <div class="colt-run-stats" aria-label="Game stats">
           <span><i aria-hidden="true">&#9873;</i> Level <strong id="coltRunLevel">1</strong></span>
@@ -3293,27 +3292,22 @@ function renderColtRun() {
             </section>
             <div class="colt-run-character-grid">
               <button type="button" data-colt-run="character" data-character="colt">
-                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectColt" width="600" height="400" aria-hidden="true"></canvas>
                 <span class="colt-run-character-name">Colt</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrNieves">
-                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrNieves" width="600" height="400" aria-hidden="true"></canvas>
                 <span class="colt-run-character-name">Mr. Nieves</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsLevandoske">
-                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsLevandoske" width="600" height="400" aria-hidden="true"></canvas>
                 <span class="colt-run-character-name">Mrs. Levandoske</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsTrittel">
-                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsTrittel" width="600" height="400" aria-hidden="true"></canvas>
                 <span class="colt-run-character-name">Mrs. Trittel</span>
               </button>
               <button type="button" data-colt-run="character" data-character="mrsKoch">
-                <span class="colt-run-character-crest" aria-hidden="true"><img src="assets/st-cletus-crest.png?v=20260913-colt-run-redesign1" alt=""></span>
                 <canvas id="coltRunSelectMrsKoch" width="600" height="400" aria-hidden="true"></canvas>
                 <span class="colt-run-character-name">Mrs. Koch</span>
               </button>
