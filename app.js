@@ -2511,13 +2511,15 @@ function renderStudentSpotlightCard(item) {
   const searchText = `${item.displayName || ""} ${item.title || ""} ${item.description || ""} grade ${item.grade || ""}`.toLowerCase();
   return `
     <article class="student-spotlight-card" data-spotlight-search="${escapeHtml(searchText)}">
-      <figure class="student-spotlight-card-art">${renderSpotlightArtwork(item)}</figure>
+      <figure class="student-spotlight-card-art">
+        ${renderSpotlightArtwork(item)}
+        <span class="student-spotlight-grade-ribbon">Grade ${escapeHtml(item.grade)}</span>
+      </figure>
       <div class="student-spotlight-card-copy">
-        <span class="feature-kicker">Grade ${escapeHtml(item.grade)}</span>
         <h3>${escapeHtml(item.title)}</h3>
         <p class="student-spotlight-byline">By ${escapeHtml(item.displayName)}</p>
         ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
-        ${openUrl ? `<button class="primary-btn" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project</button>` : ""}
+        ${openUrl ? `<button class="primary-btn student-spotlight-view-project" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project <span aria-hidden="true">&#8594;</span></button>` : ""}
       </div>
     </article>
   `;
@@ -2579,21 +2581,36 @@ function renderStudentSpotlightPage() {
   const visible = spotlightGradeFilter === "all" ? collectionItems : collectionItems.filter(item => item.grade === spotlightGradeFilter);
   return `
     ${pageHeader("Student Work Spotlight", "Celebrate creative projects and outstanding classroom work.", true)}
-    <section class="student-spotlight-page">
+    <section class="student-spotlight-page ${selectedCollection ? "is-gallery" : "is-folders"}">
       ${selectedCollection ? `
-        <header class="student-spotlight-page-heading">
-          <div>
-            <button class="spotlight-folder-back" type="button" data-action="spotlightCollections">&#8592; Assignment Folders</button>
+        <header class="student-spotlight-page-heading student-spotlight-gallery-hero">
+          <span class="student-spotlight-gallery-emblem" aria-hidden="true">
+            <svg viewBox="0 0 64 64" focusable="false">
+              <path d="M13 45 26 13h12l13 32H13Z"></path>
+              <ellipse cx="32" cy="45" rx="22" ry="7"></ellipse>
+              <circle cx="32" cy="25" r="8"></circle>
+              <path d="M32 7v6M13 17l6 4M51 17l-6 4"></path>
+            </svg>
+          </span>
+          <div class="student-spotlight-gallery-title">
             <span class="feature-kicker">Featured Assignment</span>
             <h2>${escapeHtml(selectedCollection.name)}</h2>
+            <p>Celebrating standout ideas, creativity, and classroom success.</p>
           </div>
+          <div class="student-spotlight-gallery-count">
+            <strong>${collectionItems.length}</strong>
+            <span>Featured ${collectionItems.length === 1 ? "Project" : "Projects"}</span>
+          </div>
+        </header>
+        <div class="student-spotlight-search student-spotlight-gallery-toolbar">
+          <label class="student-spotlight-gallery-search" for="studentSpotlightSearch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5"></path></svg>
+            <span>Search featured work</span>
+            <input id="studentSpotlightSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightSearchQuery)}" placeholder="Search by student name, project, description, or grade">
+          </label>
           <div class="student-spotlight-filters" role="group" aria-label="Filter featured work by grade">
             ${["all", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
           </div>
-        </header>
-        <div class="student-spotlight-search">
-          <label for="studentSpotlightSearch">Search featured work</label>
-          <input id="studentSpotlightSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightSearchQuery)}" placeholder="Search by student name, project, description, or grade">
           <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
         </div>
         <div class="student-spotlight-grid">

@@ -11674,6 +11674,272 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .student-spotlight-card .student-spotlight-byline { margin: 0 0 10px; color: var(--blue); font-weight: 850; }
 .student-spotlight-card .primary-btn { margin-top: 8px; }
 
+/* Featured assignment gallery: a polished stage for student work. */
+.student-spotlight-page.is-gallery {
+  position: relative;
+  padding: 28px;
+  overflow: hidden;
+  border-color: #5f1930;
+  border-left-color: #e91d59;
+  color: #fff1f5;
+  background-color: #09080b;
+  background-image:
+    linear-gradient(180deg, rgba(7, 5, 8, .08) 0, rgba(7, 5, 8, .44) 440px, #09080b 760px),
+    url("assets/student-spotlight-gallery-stage.webp?v=20260913-stage1");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% auto;
+  box-shadow: 0 18px 48px rgba(32, 0, 11, .42), inset 0 0 45px rgba(185, 17, 64, .08);
+}
+
+.student-spotlight-page.is-gallery::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 220px, rgba(210, 27, 84, .12), transparent 34%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0 2px, transparent 2px 12px);
+  pointer-events: none;
+  content: "";
+}
+
+.student-spotlight-page.is-gallery > * {
+  position: relative;
+  z-index: 1;
+}
+
+.student-spotlight-gallery-hero {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  min-height: 132px;
+  padding: 22px 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 73, 127, .72);
+  border-radius: 16px;
+  background:
+    linear-gradient(110deg, rgba(19, 8, 13, .95), rgba(77, 5, 28, .86) 55%, rgba(16, 7, 11, .94)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 10px, transparent 10px 22px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.42), inset 0 0 24px rgba(229, 25, 84, .12);
+}
+
+.student-spotlight-gallery-hero::after {
+  position: absolute;
+  right: 18%;
+  bottom: -38px;
+  width: 280px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(245, 34, 98, .36), transparent 70%);
+  filter: blur(8px);
+  content: "";
+}
+
+.student-spotlight-gallery-emblem {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 66px;
+  height: 74px;
+  place-items: center;
+  border: 1px solid rgba(255, 164, 78, .54);
+  border-radius: 14px;
+  color: #ffb15c;
+  background: radial-gradient(circle at 50% 35%, #6e102d, #17080e 70%);
+  box-shadow: 0 0 20px rgba(233, 29, 89, .38), inset 0 0 12px rgba(255, 183, 92, .12);
+}
+
+.student-spotlight-gallery-emblem svg {
+  width: 48px;
+  height: 48px;
+  overflow: visible;
+  fill: rgba(234, 29, 88, .2);
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(255, 111, 63, .55));
+}
+
+.student-spotlight-gallery-title { position: relative; z-index: 1; min-width: 0; }
+.student-spotlight-gallery-title .feature-kicker {
+  color: #ffd099;
+  background: rgba(67, 7, 26, .86);
+  box-shadow: inset 0 0 0 1px rgba(255, 173, 92, .2);
+}
+.student-spotlight-page.is-gallery .student-spotlight-gallery-title h2 {
+  margin: 8px 0 3px;
+  color: #fff4f7;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.02;
+  text-shadow: 0 2px 0 #5b001d, 0 0 18px rgba(240, 34, 94, .22);
+}
+.student-spotlight-gallery-title p { margin: 0; color: #e7cfd7; font-weight: 650; }
+
+.student-spotlight-gallery-count {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 17px;
+  border-left: 2px solid #ff6a3d;
+  color: #fff2f5;
+  background: rgba(8, 6, 9, .5);
+}
+.student-spotlight-gallery-count strong { color: #ffb065; font-size: 1.7rem; line-height: 1; }
+.student-spotlight-gallery-count span { max-width: 100px; font-size: .8rem; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+
+.student-spotlight-gallery-toolbar {
+  grid-template-columns: minmax(340px, 1fr) auto;
+  gap: 10px 18px;
+  margin-top: 14px;
+  padding: 12px;
+  border-color: rgba(255, 88, 135, .42);
+  background: rgba(11, 10, 13, .9);
+  box-shadow: 0 10px 24px rgba(0,0,0,.32);
+}
+
+.student-spotlight-search .student-spotlight-gallery-search {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding-left: 13px;
+  border: 1px solid #56313e;
+  border-radius: 10px;
+  color: #ff6a87;
+  background: rgba(20, 18, 22, .95);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.student-spotlight-search .student-spotlight-gallery-search:focus-within { border-color: #f12661; box-shadow: 0 0 0 3px rgba(241,38,97,.16), 0 0 18px rgba(241,38,97,.12); }
+.student-spotlight-search .student-spotlight-gallery-search svg { flex: 0 0 auto; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.student-spotlight-search .student-spotlight-gallery-search > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.student-spotlight-search .student-spotlight-gallery-search input,
+.student-spotlight-search .student-spotlight-gallery-search input:focus {
+  min-width: 0;
+  padding: 12px 12px 12px 0;
+  border: 0;
+  color: #fff3f6;
+  background: transparent;
+  box-shadow: none;
+}
+.student-spotlight-search .student-spotlight-gallery-search input::placeholder { color: #a88e97; }
+
+.student-spotlight-page.is-gallery .student-spotlight-filters { justify-content: flex-end; }
+.student-spotlight-page.is-gallery .student-spotlight-filters button {
+  min-height: 42px;
+  padding: 9px 16px;
+  border-color: #4e3b42;
+  color: #f5e9ed;
+  background: linear-gradient(#201d21, #121114);
+  box-shadow: inset 0 1px rgba(255,255,255,.04);
+}
+.student-spotlight-page.is-gallery .student-spotlight-filters button:hover,
+.student-spotlight-page.is-gallery .student-spotlight-filters button:focus-visible { border-color: #ed285f; color: #fff; }
+.student-spotlight-page.is-gallery .student-spotlight-filters button.is-active {
+  border-color: #ff3a70;
+  color: #fff;
+  background: linear-gradient(145deg, #e91d59, #8a082f);
+  box-shadow: 0 0 16px rgba(233,29,89,.38), inset 0 1px rgba(255,255,255,.2);
+}
+.student-spotlight-gallery-toolbar > small { grid-column: 1 / -1; color: #cdb8bf; text-align: right; }
+
+@media (max-width: 1180px) {
+  .student-spotlight-gallery-toolbar { grid-template-columns: 1fr; }
+  .student-spotlight-page.is-gallery .student-spotlight-filters { justify-content: flex-start; }
+}
+
+.student-spotlight-page.is-gallery .student-spotlight-grid { gap: 22px; margin-top: 22px; }
+.student-spotlight-page.is-gallery .student-spotlight-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border-color: #5f3543;
+  border-radius: 15px;
+  color: #fff2f6;
+  background: linear-gradient(155deg, rgba(30,27,31,.98), rgba(13,12,15,.99));
+  box-shadow: 0 14px 28px rgba(0,0,0,.36), inset 0 0 0 1px rgba(255,255,255,.025);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.student-spotlight-page.is-gallery .student-spotlight-card::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 3px 0 #d61750;
+  pointer-events: none;
+  content: "";
+}
+.student-spotlight-page.is-gallery .student-spotlight-card:hover,
+.student-spotlight-page.is-gallery .student-spotlight-card:focus-within {
+  border-color: #f02562;
+  box-shadow: 0 18px 34px rgba(0,0,0,.48), 0 0 20px rgba(230, 23, 78, .2);
+  transform: translateY(-3px);
+}
+.student-spotlight-page.is-gallery .student-spotlight-card-art {
+  position: relative;
+  height: 238px;
+  overflow: hidden;
+  border-bottom: 1px solid #7c2943;
+  background: #fff;
+}
+.student-spotlight-page.is-gallery .student-spotlight-card-art::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 38px;
+  background: linear-gradient(transparent, rgba(14, 7, 10, .2));
+  pointer-events: none;
+  content: "";
+}
+.student-spotlight-grade-ribbon {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  z-index: 2;
+  padding: 7px 16px 7px 14px;
+  border: 1px solid #ff4a78;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  color: #fff;
+  background: linear-gradient(90deg, #8d092f, #d91a51);
+  box-shadow: 0 5px 14px rgba(53,0,17,.42), 2px 0 12px rgba(226,25,82,.2);
+  font-size: .75rem;
+  font-weight: 950;
+  letter-spacing: .05em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.student-spotlight-page.is-gallery .student-spotlight-card-copy {
+  display: flex;
+  min-height: 205px;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px 19px 20px;
+}
+.student-spotlight-page.is-gallery .student-spotlight-card h3 { margin: 0 0 4px; color: #fff5f7; line-height: 1.14; }
+.student-spotlight-page.is-gallery .student-spotlight-card .student-spotlight-byline { margin-bottom: 8px; color: #ff3f73; }
+.student-spotlight-page.is-gallery .student-spotlight-card-copy > p:not(.student-spotlight-byline) { margin: 0 0 12px; color: #cfbec4; line-height: 1.35; }
+.student-spotlight-page.is-gallery .student-spotlight-view-project {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 150px;
+  margin-top: auto;
+  border: 1px solid #ff3e72;
+  color: #fff;
+  background: linear-gradient(145deg, #d91650, #86072e);
+  box-shadow: 0 8px 18px rgba(87,0,27,.42), inset 0 1px rgba(255,255,255,.15);
+}
+.student-spotlight-page.is-gallery .student-spotlight-view-project:hover,
+.student-spotlight-page.is-gallery .student-spotlight-view-project:focus-visible { box-shadow: 0 10px 22px rgba(87,0,27,.5), 0 0 16px rgba(234,29,87,.36); }
+
 .spotlight-dashboard { padding: 22px; }
 .spotlight-editor { margin: 20px 0; }
 .spotlight-editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -11701,6 +11967,10 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .spotlight-dashboard-card { grid-template-columns: 90px minmax(0, 1fr); }
   .spotlight-dashboard-card figure { width: 90px; }
   .spotlight-dashboard-card .actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .student-spotlight-gallery-hero { grid-template-columns: 66px minmax(0, 1fr); }
+  .student-spotlight-gallery-count { grid-column: 1 / -1; justify-self: start; }
+  .student-spotlight-gallery-toolbar { grid-template-columns: 1fr; }
+  .student-spotlight-page.is-gallery .student-spotlight-filters { justify-content: flex-start; }
 }
 
 @media (max-width: 620px) {
@@ -11734,6 +12004,16 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-card-art { height: 200px; }
   .spotlight-dashboard-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: start; }
   .spotlight-dashboard-card figure { width: 76px; height: 76px; }
+  .student-spotlight-page.is-gallery { padding: 14px; background-size: auto 540px; }
+  .student-spotlight-gallery-hero { grid-template-columns: 1fr; min-height: 0; padding: 20px; }
+  .student-spotlight-gallery-emblem { width: 56px; height: 60px; }
+  .student-spotlight-gallery-title p { font-size: .9rem; }
+  .student-spotlight-gallery-count { grid-column: auto; }
+  .student-spotlight-gallery-toolbar { padding: 10px; }
+  .student-spotlight-gallery-search { width: 100%; }
+  .student-spotlight-page.is-gallery .student-spotlight-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .student-spotlight-page.is-gallery .student-spotlight-filters button:first-child { grid-column: 1 / -1; }
+  .student-spotlight-page.is-gallery .student-spotlight-card-art { height: 215px; }
 }
 
 /* Colt Run premium arcade shell. Gameplay remains isolated in the existing canvas. */
