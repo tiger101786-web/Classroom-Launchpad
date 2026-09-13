@@ -61,7 +61,16 @@ const DEFAULT_RANDOM_ACTIVITY_SETTINGS = {
 };
 const RANDOM_ACTIVITY_REQUEST_ID = "__random_activity__";
 const COLT_RUN_URL = "internal:colt-run";
+const COLT_RUN_SHARE_PATH = "/colt-run";
 const GOOGLE_CLASSROOM_URL = "https://classroom.google.com/";
+
+function isDirectColtRunPath() {
+  return window.location.pathname.replace(/\/+$/, "") === COLT_RUN_SHARE_PATH;
+}
+
+function coltRunShareUrl() {
+  return new URL(COLT_RUN_SHARE_PATH, window.location.origin).href;
+}
 
 const HOME_PROFILE_VIDEOS = [
   "assets/mr-nieves-colts.mp4",
@@ -1421,7 +1430,7 @@ let recentlyModerated = [];
 let dailyLaunch = store.loadDailyLaunch();
 let classTimer = store.loadClassTimer();
 let randomActivitySettings = store.loadRandomActivitySettings();
-let screen = { name: "home" };
+let screen = { name: isDirectColtRunPath() ? "coltRun" : "home" };
 let modal = null;
 let theme = store.getTheme();
 let homeNavigationCollapsed = (() => {
@@ -1805,6 +1814,14 @@ function setScreen(next) {
   screen = next;
   render();
   requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
+}
+
+function leaveColtRun() {
+  if (isDirectColtRunPath()) {
+    window.location.assign("/");
+    return;
+  }
+  setScreen({ name: "home" });
 }
 
 async function openTeacherDashboard() {
@@ -2305,6 +2322,18 @@ function renderHomeNavigation() {
       </button>
     </aside>
     <button class="home-navigation-backdrop" type="button" data-action="closeHomeNavigation" aria-label="Close quick navigation"></button>
+  `;
+}
+
+function coltRunTopbar() {
+  return `
+    <div class="topbar category-topbar">
+      <button class="back-btn" data-action="back">Back</button>
+      <div class="header-actions">
+        <button class="outline-btn" type="button" data-colt-run="copyLink">Copy Game Link</button>
+        <button class="mode-btn" title="Switch color mode" data-action="toggleTheme">${theme === "night" ? "Light" : "Night"}</button>
+      </div>
+    </div>
   `;
 }
 
@@ -3180,7 +3209,7 @@ function emptyCard(message) {
 
 function renderColtRun() {
   return `
-    ${categoryTopbar()}
+    ${coltRunTopbar()}
     <section class="colt-run-shell" aria-label="Colt Run game">
       <div class="colt-run-topline">
         <div>
@@ -8725,7 +8754,22 @@ function startColtRunGame() {
       return;
     }
     if (button.dataset.coltRun === "back") {
-      setScreen({ name: "home" });
+      leaveColtRun();
+      return;
+    }
+    if (button.dataset.coltRun === "copyLink") {
+      const shareUrl = coltRunShareUrl();
+      const showCopied = () => {
+        button.textContent = "Link Copied!";
+        window.setTimeout(() => {
+          if (button.isConnected) button.textContent = "Copy Game Link";
+        }, 1800);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(shareUrl).then(showCopied).catch(() => window.prompt("Copy this Colt Run link:", shareUrl));
+      } else {
+        window.prompt("Copy this Colt Run link:", shareUrl);
+      }
       return;
     }
     playColtRunAudio();
@@ -11018,6 +11062,7 @@ function render() {
   }
   document.body.dataset.theme = theme;
   document.body.dataset.screen = screen.name;
+  document.title = screen.name === "coltRun" ? "Colt Run | Classroom Launchpad" : "Classroom Launchpad";
   let html = "";
   if (screen.name === "home") html = renderHome();
   if (screen.name === "category") html = renderCategory(screen.category);
@@ -12582,13 +12627,14 @@ app.addEventListener("click", async event => {
 
   if (action === "back") {
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
+    else if (screen.name === "coltRun") leaveColtRun();
     else if (screen.name === "studentSpotlights" && spotlightCollectionFilter) {
       spotlightCollectionFilter = "";
       spotlightGradeFilter = "all";
       spotlightFolderSearchQuery = "";
       render();
     }
-    else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "studentSpotlights", "coltRun"].includes(screen.name)) setScreen({ name: "home" });
+    else if (["dashboard", "category", "pin", "login", "account", "messages", "assignments", "classroomPass", "coltCorner", "studentSpotlights"].includes(screen.name)) setScreen({ name: "home" });
     else setScreen({ name: "dashboard" });
   }
   if (action === "teacher") {
@@ -13197,7 +13243,7 @@ app.addEventListener("change", event => {
   }
 });
 
-window.addEventListener("popstate", () => setScreen({ name: "home" }));
+window.addEventListener("popstate", () => setScreen({ name: isDirectColtRunPath() ? "coltRun" : "home" }));
 
 window.ClassroomLaunchpadAssistantData = Object.freeze({
   getApprovedLinks() {

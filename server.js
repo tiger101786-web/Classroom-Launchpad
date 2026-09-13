@@ -4071,12 +4071,19 @@ function serveStatic(req, res, url) {
     res.end("Method not allowed");
     return;
   }
+  if (pathname === "/colt-run/") {
+    res.writeHead(308, { Location: "/colt-run" });
+    res.end();
+    return;
+  }
 
   const vendorFiles = new Map([
     ["/vendor/jszip.min.js", path.join(root, "node_modules", "jszip", "dist", "jszip.min.js")],
     ["/vendor/docx-preview.min.js", path.join(root, "node_modules", "docx-preview", "dist", "docx-preview.min.js")]
   ]);
-  const requested = pathname === "/" ? "/index.html" : pathname;
+  const requested = pathname === "/" || pathname === "/colt-run"
+    ? "/index.html"
+    : pathname;
   let decoded;
   try {
     decoded = decodeURIComponent(requested);
