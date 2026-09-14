@@ -3226,7 +3226,9 @@ function renderColtRun() {
       <div class="colt-run-topline">
         <div class="colt-run-title-block">
           <span class="feature-kicker">Logic Games</span>
-          <h2>Colt Run</h2>
+          <h2 class="colt-run-art-title">
+            <img src="assets/colt-run-title-art.webp?v=20260913" alt="Colt Run">
+          </h2>
           <p>Reach the finish flag before time runs out.</p>
           <div class="colt-run-difficulty" role="group" aria-label="Difficulty">
             <button type="button" data-colt-run="difficulty" data-difficulty="easy">Easy</button>
