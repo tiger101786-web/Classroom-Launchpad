@@ -2585,12 +2585,7 @@ function renderStudentSpotlightPage() {
       ${selectedCollection ? `
         <header class="student-spotlight-page-heading student-spotlight-gallery-hero">
           <span class="student-spotlight-gallery-emblem" aria-hidden="true">
-            <svg viewBox="0 0 64 64" focusable="false">
-              <path d="M13 45 26 13h12l13 32H13Z"></path>
-              <ellipse cx="32" cy="45" rx="22" ry="7"></ellipse>
-              <circle cx="32" cy="25" r="8"></circle>
-              <path d="M32 7v6M13 17l6 4M51 17l-6 4"></path>
-            </svg>
+            <img src="assets/student-spotlight-gallery-icon.webp?v=20260913" alt="">
           </span>
           <div class="student-spotlight-gallery-title">
             <span class="feature-kicker">Featured Assignment</span>
