@@ -266,11 +266,10 @@
       id: "kpop-hits",
       label: "K-Pop • Hits",
       type: "stream",
-      source: "https://cdn.onlyhitsradio.net/kpop",
-      provider: "OnlyHit K-Pop",
-      metadataEndpoint: "https://cdn.onlyhitsradio.net/currentsong/kpop",
-      metadataFormat: "plainText",
-      note: "K-pop hits, Korean R&B, and K-hip-hop streamed by OnlyHit K-Pop. No account required."
+      source: "https://listen.moe/kpop/stream",
+      provider: "LISTEN.moe",
+      metadataSocket: "wss://listen.moe/kpop/gateway_v2",
+      note: "Ad-free K-pop streamed by the community-supported LISTEN.moe. No account required."
     },
     {
       id: "urban-heat",
@@ -854,6 +853,10 @@
     let activeStation = "";
     let playlistTrackIndex = -1;
     let metadataTimer = 0;
+    let metadataSocket = null;
+    let metadataHeartbeatTimer = 0;
+    let metadataReconnectTimer = 0;
+    let metadataConnectionVersion = 0;
     let favoriteStationIds = new Set();
     let favoritesOnly = false;
     let favoritesAccountKey = "";
@@ -1100,6 +1103,7 @@
       playbackAttempt = 0;
       playbackRequestVersion += 1;
       clearConnectionTimer();
+      clearMetadataUpdates();
       audio.pause();
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
       audio.removeAttribute("src");
@@ -1108,8 +1112,6 @@
       nowPlaying.hidden = true;
       setPlaybackState("idle");
       nowPlayingTitle.textContent = "Loading track information...";
-      if (metadataTimer) globalObject.clearInterval(metadataTimer);
-      metadataTimer = 0;
     }
 
     function clearEmbeddedPlayer() {
@@ -1203,7 +1205,91 @@
       }
     }
 
+    function clearMetadataUpdates() {
+      metadataConnectionVersion += 1;
+      if (metadataTimer) globalObject.clearInterval(metadataTimer);
+      if (metadataHeartbeatTimer) globalObject.clearInterval(metadataHeartbeatTimer);
+      if (metadataReconnectTimer) globalObject.clearTimeout(metadataReconnectTimer);
+      metadataTimer = 0;
+      metadataHeartbeatTimer = 0;
+      metadataReconnectTimer = 0;
+      if (metadataSocket) {
+        const socket = metadataSocket;
+        metadataSocket = null;
+        try {
+          socket.close();
+        } catch (error) {
+          // A station can be changed before its metadata socket finishes opening.
+        }
+      }
+    }
+
+    function listenMoeTrackTitle(payload) {
+      const song = payload?.song || payload?.track || payload?.currentSong || payload;
+      const artists = Array.isArray(song?.artists)
+        ? song.artists.map(artist => typeof artist === "string" ? artist : artist?.name).filter(Boolean)
+        : [];
+      const artist = artists.join(", ") || song?.artist?.name || song?.artist || "";
+      const title = song?.title || song?.name || "";
+      return [artist, title].filter(Boolean).join(" - ");
+    }
+
+    function startSocketNowPlayingUpdates(station) {
+      if (!globalObject.WebSocket) {
+        nowPlayingTitle.textContent = `${station.label} live stream`;
+        return;
+      }
+      const connectionVersion = metadataConnectionVersion;
+      const connect = () => {
+        if (activeStation !== station.id || connectionVersion !== metadataConnectionVersion) return;
+        const socket = new globalObject.WebSocket(station.metadataSocket);
+        metadataSocket = socket;
+        socket.addEventListener("message", event => {
+          if (activeStation !== station.id || connectionVersion !== metadataConnectionVersion) return;
+          try {
+            const response = JSON.parse(event.data);
+            if (response.op === 0) {
+              const heartbeat = Number(response.d?.heartbeat);
+              const sendHeartbeat = () => {
+                if (socket.readyState === globalObject.WebSocket.OPEN) socket.send(JSON.stringify({ op: 9 }));
+              };
+              sendHeartbeat();
+              if (metadataHeartbeatTimer) globalObject.clearInterval(metadataHeartbeatTimer);
+              if (heartbeat > 0) metadataHeartbeatTimer = globalObject.setInterval(sendHeartbeat, heartbeat);
+              return;
+            }
+            if (response.op !== 1 || !["TRACK_UPDATE", "TRACK_UPDATE_REQUEST", "QUEUE_UPDATE", "NOTIFICATION"].includes(response.t)) return;
+            const title = listenMoeTrackTitle(response.d);
+            if (title) nowPlayingTitle.textContent = title;
+          } catch (error) {
+            // Ignore malformed metadata messages; audio playback remains unaffected.
+          }
+        });
+        socket.addEventListener("close", () => {
+          if (metadataSocket === socket) metadataSocket = null;
+          if (metadataHeartbeatTimer) globalObject.clearInterval(metadataHeartbeatTimer);
+          metadataHeartbeatTimer = 0;
+          if (activeStation === station.id && connectionVersion === metadataConnectionVersion) {
+            metadataReconnectTimer = globalObject.setTimeout(connect, 5000);
+          }
+        });
+        socket.addEventListener("error", () => {
+          try {
+            socket.close();
+          } catch (error) {
+            // The reconnect timer will handle a metadata connection failure.
+          }
+        });
+      };
+      nowPlayingTitle.textContent = `${station.label} live stream`;
+      connect();
+    }
+
     function startNowPlayingUpdates(station) {
+      if (station.metadataSocket) {
+        startSocketNowPlayingUpdates(station);
+        return;
+      }
       refreshNowPlaying(station);
       metadataTimer = globalObject.setInterval(() => refreshNowPlaying(station), 20000);
     }
