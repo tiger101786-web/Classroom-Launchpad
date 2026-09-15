@@ -223,6 +223,14 @@
       note: "Smooth jazz, funk, soul, Latin, and lounge music streamed by the independent, ad-free NUCROOZE station."
     },
     {
+      id: "acid-jazz-groove",
+      label: "Jazz • Acid Groove",
+      type: "stream",
+      source: "https://mpc1.mediacp.eu:8356/stream",
+      provider: "100% Acid Jazz",
+      note: "Acid jazz and jazz-fusion grooves streamed around the clock by 100% Acid Jazz. No Colt Radio account required."
+    },
+    {
       id: "fantasy-adventure",
       label: "Fantasy • Adventure",
       type: "stream",
@@ -626,6 +634,7 @@
     "game-soundtracks": '<path d="M8 8h8a5 5 0 0 1 4.7 6.8l-1 2.7a2 2 0 0 1-3.2.8L14.8 17H9.2l-1.7 1.3a2 2 0 0 1-3.2-.8l-1-2.7A5 5 0 0 1 8 8Z"/><path d="M8 11v4m-2-2h4m6-1h.01m2 2h.01"/>',
     "laid-back-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
     "jazz-funk-soul": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M19 5v8m-2-6h4"/>',
+    "acid-jazz-groove": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M18 5v5m-2-3h4"/>',
     "fantasy-adventure": '<path d="M5 21V9l3 2V6l4 3 4-3v5l3-2v12M9 21v-5h6v5"/><path d="M4 21h16"/>',
     "oldies-jukebox": '<path d="M7 21h10V10a5 5 0 0 0-10 0v11Z"/><path d="M9 11h6v5H9zm0 8h6M9 8h6"/>',
     "smooth-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
