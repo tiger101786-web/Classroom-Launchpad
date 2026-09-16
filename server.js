@@ -336,7 +336,7 @@ function normalizeStudentSpotlight(entry) {
     grade: cleanGrade(entry && entry.grade),
     title,
     collectionName: cleanText(entry && entry.collectionName, 120) || title,
-    folderPreviewPosition: [1, 2, 3].includes(Number(entry && entry.folderPreviewPosition))
+    folderPreviewPosition: [1, 2, 3, 4, 5].includes(Number(entry && entry.folderPreviewPosition))
       ? Number(entry.folderPreviewPosition)
       : 0,
     description: cleanMultilineText(entry && entry.description, 600),

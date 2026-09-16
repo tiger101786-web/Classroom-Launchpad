@@ -11603,7 +11603,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 .student-spotlight-folder-collage {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   height: 230px;
   padding: 22px 20px 12px;
@@ -11612,16 +11612,18 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 }
 .student-spotlight-folder-preview {
   height: 178px;
-  margin: 0 -8px;
+  margin: 0 -10px;
   overflow: hidden;
   border: 3px solid #f8e8ef;
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 12px 22px rgba(0,0,0,.32);
-  transform: rotate(-5deg);
+  transform: rotate(-8deg);
 }
-.student-spotlight-folder-preview:nth-child(2) { z-index: 2; height: 194px; transform: rotate(0); }
-.student-spotlight-folder-preview:nth-child(3) { transform: rotate(5deg); }
+.student-spotlight-folder-preview:nth-child(2) { z-index: 2; height: 184px; transform: rotate(-4deg); }
+.student-spotlight-folder-preview:nth-child(3) { z-index: 3; height: 194px; transform: rotate(0); }
+.student-spotlight-folder-preview:nth-child(4) { z-index: 2; height: 184px; transform: rotate(4deg); }
+.student-spotlight-folder-preview:nth-child(5) { transform: rotate(8deg); }
 .student-spotlight-folder-preview img,
 .student-spotlight-folder-preview .spotlight-file-art { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .student-spotlight-folder-preview.is-placeholder { display: grid; place-items: center; color: #65001f; background: #fff7fa; }
@@ -12016,7 +12018,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .student-spotlight-folder-summary strong { white-space: normal; }
   .student-spotlight-folder-collage { height: 190px; padding-inline: 14px; }
   .student-spotlight-folder-preview { height: 142px; }
-  .student-spotlight-folder-preview:nth-child(2) { height: 158px; }
+  .student-spotlight-folder-preview:nth-child(2),
+  .student-spotlight-folder-preview:nth-child(4) { height: 148px; }
+  .student-spotlight-folder-preview:nth-child(3) { height: 158px; }
   .student-spotlight-folder-details { grid-template-columns: 58px minmax(0, 1fr); padding: 16px; }
   .student-spotlight-folder-icon { width: 56px; height: 48px; }
   .student-spotlight-folder-open { grid-column: 1 / -1; width: 100%; }

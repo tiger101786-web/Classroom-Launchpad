@@ -1352,7 +1352,7 @@ function normalizeStudentSpotlights(items) {
     grade: String(item && item.grade || ""),
     title: String(item && item.title || ""),
     collectionName: String(item && item.collectionName || item && item.title || ""),
-    folderPreviewPosition: [1, 2, 3].includes(Number(item && item.folderPreviewPosition))
+    folderPreviewPosition: [1, 2, 3, 4, 5].includes(Number(item && item.folderPreviewPosition))
       ? Number(item.folderPreviewPosition)
       : 0,
     description: String(item && item.description || ""),
@@ -2550,11 +2550,11 @@ function studentSpotlightCollections(items) {
 }
 
 function renderStudentSpotlightFolderCollage(collection) {
-  const previews = [null, null, null];
+  const previews = [null, null, null, null, null];
   const remaining = [];
   collection.items.forEach(item => {
     const position = Number(item.folderPreviewPosition);
-    if (position >= 1 && position <= 3 && !previews[position - 1]) previews[position - 1] = item;
+    if (position >= 1 && position <= 5 && !previews[position - 1]) previews[position - 1] = item;
     else remaining.push(item);
   });
   previews.forEach((item, index) => {
@@ -10829,12 +10829,14 @@ function renderDashboardStudentSpotlights() {
             <div class="field spotlight-wide-field">
               <label for="spotlightFolderPreviewPosition">Assignment folder preview</label>
               <select id="spotlightFolderPreviewPosition" name="folderPreviewPosition">
-                <option value="0" ${!editing || !editing.folderPreviewPosition ? "selected" : ""}>Not selected for the three-image preview</option>
-                <option value="1" ${editing && editing.folderPreviewPosition === 1 ? "selected" : ""}>Left preview</option>
-                <option value="2" ${editing && editing.folderPreviewPosition === 2 ? "selected" : ""}>Center preview</option>
-                <option value="3" ${editing && editing.folderPreviewPosition === 3 ? "selected" : ""}>Right preview</option>
+                <option value="0" ${!editing || !editing.folderPreviewPosition ? "selected" : ""}>Not selected for the five-image preview</option>
+                <option value="1" ${editing && editing.folderPreviewPosition === 1 ? "selected" : ""}>Far-left preview</option>
+                <option value="2" ${editing && editing.folderPreviewPosition === 2 ? "selected" : ""}>Left preview</option>
+                <option value="3" ${editing && editing.folderPreviewPosition === 3 ? "selected" : ""}>Center preview</option>
+                <option value="4" ${editing && editing.folderPreviewPosition === 4 ? "selected" : ""}>Right preview</option>
+                <option value="5" ${editing && editing.folderPreviewPosition === 5 ? "selected" : ""}>Far-right preview</option>
               </select>
-              <small>Choose up to three standout projects for this assignment card. Selecting an occupied position replaces the previous choice.</small>
+              <small>Choose up to five standout projects for this assignment card. Selecting an occupied position replaces the previous choice.</small>
             </div>
             <div class="field spotlight-wide-field">
               <label for="spotlightDescription">Teacher description</label>

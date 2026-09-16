@@ -91,7 +91,7 @@ async function waitForServer() {
       body: JSON.stringify({
         studentEmail: "avery.johnson@scscolts.org",
         title: "Ecosystem Research Project",
-        folderPreviewPosition: 2,
+        folderPreviewPosition: 4,
         description: "A clear and creative explanation of a local ecosystem.",
         displayNameStyle: "first-last-initial",
         projectUrl: "https://docs.google.com/presentation/d/example",
@@ -102,7 +102,7 @@ async function waitForServer() {
     assert.equal(created.payload.spotlight.displayName, "Avery J.");
     assert.equal(created.payload.spotlight.studentEmail, "avery.johnson@scscolts.org");
     assert.equal(created.payload.spotlight.collectionName, "Ecosystem Research Project");
-    assert.equal(created.payload.spotlight.folderPreviewPosition, 2);
+    assert.equal(created.payload.spotlight.folderPreviewPosition, 4);
     const id = created.payload.spotlight.id;
 
     const pdf = onePagePdf();
@@ -134,7 +134,7 @@ async function waitForServer() {
     const studentState = await request("/api/state", { headers: { Cookie: studentCookie } });
     assert.equal(studentState.payload.studentSpotlights.length, 1);
     assert.equal(studentState.payload.studentSpotlights[0].displayName, "Avery J.");
-    assert.equal(studentState.payload.studentSpotlights[0].folderPreviewPosition, 2);
+    assert.equal(studentState.payload.studentSpotlights[0].folderPreviewPosition, 4);
     assert.equal(studentState.payload.studentSpotlights[0].studentEmail, undefined);
 
     const replacementPreview = await request("/api/student-spotlights", {
@@ -144,7 +144,7 @@ async function waitForServer() {
         studentEmail: "avery.johnson@scscolts.org",
         title: "Ecosystem Diagram",
         collectionName: "Ecosystem Research Project",
-        folderPreviewPosition: 2,
+        folderPreviewPosition: 4,
         projectUrl: "https://docs.google.com/presentation/d/replacement",
         status: "published"
       })
@@ -152,7 +152,7 @@ async function waitForServer() {
     assert.equal(replacementPreview.response.status, 201);
     const originalAfterReplacement = replacementPreview.payload.studentSpotlights.find(item => item.id === id);
     assert.equal(originalAfterReplacement.folderPreviewPosition, 0, "Choosing an occupied preview position should replace its previous project.");
-    assert.equal(replacementPreview.payload.spotlight.folderPreviewPosition, 2);
+    assert.equal(replacementPreview.payload.spotlight.folderPreviewPosition, 4);
     const removedReplacement = await request(`/api/student-spotlights/${replacementPreview.payload.spotlight.id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
@@ -272,6 +272,9 @@ async function waitForServer() {
     assert.match(appSource, /Left preview/);
     assert.match(appSource, /Center preview/);
     assert.match(appSource, /Right preview/);
+    assert.match(appSource, /Far-left preview/);
+    assert.match(appSource, /Far-right preview/);
+    assert.match(appSource, /Choose up to five standout projects/);
     assert.match(appSource, /folderPreviewPosition/);
     assert.match(appSource, /function revealStudentSpotlightEditor/);
     assert.match(appSource, /editor\.scrollIntoView\(\{ behavior: "auto", block: "start" \}\)/);
