@@ -11941,6 +11941,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .spotlight-student-picker { align-content: start; }
 .spotlight-student-picker .spotlight-student-results-label { margin-top: 11px; }
 .spotlight-student-picker small { margin-top: 7px; color: var(--muted); }
+.spotlight-manual-student[hidden] { display: none !important; }
 .spotlight-wide-field { grid-column: 1 / -1; }
 .spotlight-dashboard-search-toolbar {
   display: grid;

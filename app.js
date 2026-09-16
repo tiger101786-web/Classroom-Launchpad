@@ -10806,9 +10806,15 @@ function renderDashboardStudentSpotlights() {
               <label class="spotlight-student-results-label" for="spotlightStudent">Student results</label>
               <select id="spotlightStudent" name="studentEmail" required>
                 <option value="">Choose a student</option>
+                <option value="manual-grade-3" ${editing && !editing.studentEmail && editing.grade === "3" ? "selected" : ""}>Type a Grade 3 student name</option>
                 ${students.map(student => `<option value="${escapeHtml(student.email)}" data-student-search="${escapeHtml(`${student.spotlightDisplayName} ${student.email} grade ${student.grade}`.toLowerCase())}" ${editing && editing.studentEmail === student.email ? "selected" : ""}>${escapeHtml(student.spotlightDisplayName)} — Grade ${escapeHtml(student.grade)}</option>`).join("")}
               </select>
               <small id="spotlightStudentSearchStatus" aria-live="polite">${students.length} students available.</small>
+            </div>
+            <div id="spotlightManualStudentField" class="field spotlight-manual-student" ${editing && !editing.studentEmail && editing.grade === "3" ? "" : "hidden"}>
+              <label for="spotlightManualStudentName">Grade 3 student name</label>
+              <input id="spotlightManualStudentName" name="manualStudentName" maxlength="80" value="${escapeHtml(editing && !editing.studentEmail && editing.grade === "3" ? editing.studentName : "")}" placeholder="Enter the student's first and last name">
+              <small>No Launchpad account or email is required.</small>
             </div>
             <div class="field">
               <label for="spotlightTitle">Project title</label>
@@ -12338,8 +12344,17 @@ function attachStudentSpotlightForm() {
   const studentSearch = document.getElementById("spotlightStudentSearch");
   const studentSelect = document.getElementById("spotlightStudent");
   const studentSearchStatus = document.getElementById("spotlightStudentSearchStatus");
+  const manualStudentField = document.getElementById("spotlightManualStudentField");
+  const manualStudentName = document.getElementById("spotlightManualStudentName");
   if (studentSearch && studentSelect) {
-    const studentOptions = [...studentSelect.options].filter(option => option.value);
+    const studentOptions = [...studentSelect.options].filter(option => option.value && option.value !== "manual-grade-3");
+    const syncManualStudentField = () => {
+      const manual = studentSelect.value === "manual-grade-3";
+      if (manualStudentField) manualStudentField.hidden = !manual;
+      if (manualStudentName) manualStudentName.required = manual;
+    };
+    studentSelect.addEventListener("change", syncManualStudentField);
+    syncManualStudentField();
     studentSearch.addEventListener("input", () => {
       const query = studentSearch.value.trim().toLowerCase();
       let firstMatch = null;
@@ -12382,8 +12397,11 @@ function attachStudentSpotlightForm() {
       return;
     }
     const expiresValue = form.elements.expiresAt.value;
+    const manualThirdGradeStudent = form.elements.studentEmail.value === "manual-grade-3";
     const payload = {
-      studentEmail: form.elements.studentEmail.value,
+      studentEmail: manualThirdGradeStudent ? "" : form.elements.studentEmail.value,
+      studentName: manualThirdGradeStudent ? form.elements.manualStudentName.value.trim() : "",
+      grade: manualThirdGradeStudent ? "3" : "",
       title: form.elements.title.value.trim(),
       collectionName: form.elements.collectionName.value.trim(),
       folderPreviewPosition: Number(form.elements.folderPreviewPosition.value) || 0,

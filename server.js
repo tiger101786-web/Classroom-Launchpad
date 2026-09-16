@@ -2396,7 +2396,10 @@ function spotlightFromTeacherInput(db, body, existing = {}) {
   const students = normalizeApprovedStudents(db.approvedStudents);
   const studentEmail = normalizeEmail(body.studentEmail !== undefined ? body.studentEmail : existing.studentEmail);
   const student = students.find(item => item.email === studentEmail);
-  if (!student) throw new Error("Choose a student from the approved student list.");
+  const manualStudentName = cleanText(body.studentName !== undefined ? body.studentName : existing.studentName, 80);
+  const requestedGrade = cleanGrade(body.grade !== undefined ? body.grade : existing.grade);
+  const manualThirdGradeStudent = !studentEmail && requestedGrade === "3" && Boolean(manualStudentName);
+  if (!student && !manualThirdGradeStudent) throw new Error("Choose an approved student, or enter a Grade 3 student name.");
   const projectInput = body.projectUrl !== undefined ? cleanText(body.projectUrl, 1000) : existing.projectUrl;
   const projectUrl = projectInput ? approvedProjectUrl(db, projectInput) : "";
   if (projectInput && !projectUrl) throw new Error("Use an approved secure project link, or upload an image, PDF, or PowerPoint.");
@@ -2405,9 +2408,9 @@ function spotlightFromTeacherInput(db, body, existing = {}) {
     ...existing,
     ...body,
     id: existing.id || body.id || crypto.randomUUID(),
-    studentEmail: student.email,
-    studentName: student.name || student.email.split("@")[0],
-    grade: student.grade,
+    studentEmail: student ? student.email : "",
+    studentName: student ? (student.name || student.email.split("@")[0]) : manualStudentName,
+    grade: student ? student.grade : "3",
     projectUrl,
     createdAt: existing.createdAt || now,
     updatedAt: now
