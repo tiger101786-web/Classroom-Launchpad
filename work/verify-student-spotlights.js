@@ -79,7 +79,10 @@ async function waitForServer() {
     const imported = await request("/api/approved-students/import", {
       method: "PUT",
       headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
-      body: JSON.stringify({ students: [{ email: "avery.johnson@scscolts.org", name: "Avery Johnson", grade: "6" }] })
+      body: JSON.stringify({ students: [
+        { email: "avery.johnson@scscolts.org", name: "Avery Johnson", grade: "6" },
+        { email: "jordan.third@scscolts.org", name: "Jordan Third", grade: "Grade 3" }
+      ] })
     });
     const activationCode = imported.payload.activationCodes[0].activationCode;
 
@@ -215,6 +218,20 @@ async function waitForServer() {
     const hiddenStudentState = await request("/api/state", { headers: { Cookie: studentCookie } });
     assert.equal(hiddenStudentState.payload.studentSpotlights.length, 0);
 
+    const thirdGradeSpotlight = await request("/api/student-spotlights", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: origin, Cookie: teacherCookie },
+      body: JSON.stringify({
+        studentEmail: "jordan.third@scscolts.org",
+        title: "Third Grade Showcase",
+        description: "Grade 3 spotlight support.",
+        displayNameStyle: "first-last-initial",
+        status: "hidden"
+      })
+    });
+    assert.equal(thirdGradeSpotlight.response.status, 201);
+    assert.equal(thirdGradeSpotlight.payload.spotlight.grade, "3");
+
     const appSource = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
     assert.match(appSource, /Student Work Spotlight/);
     assert.match(appSource, /Open Student Spotlight/);
@@ -230,6 +247,9 @@ async function waitForServer() {
     assert.match(appSource, /Feature New Work/);
     assert.match(appSource, /spotlightStudentSearch/);
     assert.match(appSource, /Search by first name, last name, email, or grade/);
+    assert.match(appSource, /spotlightDashboardSearch/);
+    assert.match(appSource, /data-dashboard-spotlight-search/);
+    assert.match(appSource, /\["all", "3", "4", "5", "6", "7"\]/);
     assert.match(appSource, /spotlightDisplayName: formatStudentFirstLast/);
     assert.match(appSource, /matching student/);
     assert.match(appSource, /studentSpotlightSearch/);

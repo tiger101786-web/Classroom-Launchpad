@@ -11942,6 +11942,33 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .spotlight-student-picker .spotlight-student-results-label { margin-top: 11px; }
 .spotlight-student-picker small { margin-top: 7px; color: var(--muted); }
 .spotlight-wide-field { grid-column: 1 / -1; }
+.spotlight-dashboard-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--gold-soft);
+}
+.spotlight-dashboard-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+}
+.spotlight-dashboard-search:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(123,11,49,.16); }
+.spotlight-dashboard-search svg { flex: 0 0 auto; width: 20px; height: 20px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; }
+.spotlight-dashboard-search input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; }
+.spotlight-dashboard-search-toolbar > small { color: var(--muted); font-weight: 800; white-space: nowrap; }
+.spotlight-dashboard-card[hidden],
+.spotlight-dashboard-search-empty[hidden] { display: none !important; }
 .spotlight-dashboard-list { display: grid; gap: 12px; margin-top: 20px; }
 .spotlight-dashboard-card { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; }
 .spotlight-dashboard-card.is-hidden { opacity: .7; }
@@ -11962,6 +11989,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .spotlight-dashboard-card { grid-template-columns: 90px minmax(0, 1fr); }
   .spotlight-dashboard-card figure { width: 90px; }
   .spotlight-dashboard-card .actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .spotlight-dashboard-search-toolbar { grid-template-columns: 1fr; }
+  .spotlight-dashboard-search-toolbar > small { white-space: normal; }
   .student-spotlight-gallery-hero { grid-template-columns: 74px minmax(0, 1fr); }
   .student-spotlight-gallery-count { grid-column: 1 / -1; justify-self: start; }
   .student-spotlight-gallery-toolbar { grid-template-columns: 1fr; }

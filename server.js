@@ -314,7 +314,7 @@ function normalizeDirectMessages(entries) {
 
 function cleanGrade(value) {
   const cleaned = cleanText(value, 12).replace(/[^a-z0-9 -]/gi, "");
-  const classroomGrade = cleaned.match(/\b([4-7])(?:th)?\b/i);
+  const classroomGrade = cleaned.match(/\b([3-7])(?:th)?\b/i);
   return classroomGrade ? classroomGrade[1] : cleaned;
 }
 
@@ -356,7 +356,7 @@ function normalizeStudentSpotlight(entry) {
 function normalizeStudentSpotlights(entries) {
   return (Array.isArray(entries) ? entries : [])
     .map(normalizeStudentSpotlight)
-    .filter(item => item.title && item.studentName && ["4", "5", "6", "7"].includes(item.grade))
+    .filter(item => item.title && item.studentName && ["3", "4", "5", "6", "7"].includes(item.grade))
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
 }
 

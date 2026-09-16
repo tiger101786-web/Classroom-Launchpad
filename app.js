@@ -1468,6 +1468,7 @@ let spotlightGradeFilter = "all";
 let spotlightCollectionFilter = "";
 let spotlightSearchQuery = "";
 let spotlightFolderSearchQuery = "";
+let spotlightDashboardSearchQuery = "";
 let categorySearchQuery = "";
 let spotlightEditorId = "";
 let spotlightStatusMessage = "";
@@ -2604,7 +2605,7 @@ function renderStudentSpotlightPage() {
             <input id="studentSpotlightSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightSearchQuery)}" placeholder="Search by student name, project, description, or grade">
           </label>
           <div class="student-spotlight-filters" role="group" aria-label="Filter featured work by grade">
-            ${["all", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
+            ${["all", "3", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
           </div>
           <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
         </div>
@@ -10761,7 +10762,7 @@ function renderDashboardStudentSpotlights() {
     : studentSpotlights.find(item => item.id === spotlightEditorId);
   const showEditor = spotlightEditorId === "new" || Boolean(editing);
   const students = [...approvedStudents]
-    .filter(student => student && student.email && ["4", "5", "6", "7"].includes(String(student.grade)))
+    .filter(student => student && student.email && ["3", "4", "5", "6", "7"].includes(String(student.grade)))
     .map(student => ({
       ...student,
       spotlightDisplayName: formatStudentFirstLast(student.name || student.email)
@@ -10784,6 +10785,14 @@ function renderDashboardStudentSpotlights() {
         <button class="primary-btn" type="button" data-action="newStudentSpotlight">Feature New Work</button>
       </div>
       ${spotlightStatusMessage ? `<p class="request-message ${spotlightStatusMessage.startsWith("Error:") ? "error" : ""}" role="status">${escapeHtml(spotlightStatusMessage)}</p>` : ""}
+      <div class="spotlight-dashboard-search-toolbar">
+        <label class="spotlight-dashboard-search" for="spotlightDashboardSearch">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5"></path></svg>
+          <span class="sr-only">Search featured student work</span>
+          <input id="spotlightDashboardSearch" type="search" autocomplete="off" value="${escapeHtml(spotlightDashboardSearchQuery)}" placeholder="Search by student name, project, assignment, email, or grade">
+        </label>
+        <small id="spotlightDashboardSearchStatus" aria-live="polite">${sortedSpotlights.length} featured ${sortedSpotlights.length === 1 ? "project" : "projects"}.</small>
+      </div>
       ${showEditor ? `
         <form id="studentSpotlightForm" class="form-card spotlight-editor" data-id="${escapeHtml(editing && editing.id || "")}">
           <div class="assignment-manager-heading">
@@ -10860,12 +10869,13 @@ function renderDashboardStudentSpotlights() {
       ` : ""}
       <div class="spotlight-dashboard-list">
         ${sortedSpotlights.length ? sortedSpotlights.map(item => `
-          <article class="teacher-card spotlight-dashboard-card ${item.status === "hidden" ? "is-hidden" : ""}">
+          <article class="teacher-card spotlight-dashboard-card ${item.status === "hidden" ? "is-hidden" : ""}" data-dashboard-spotlight-search="${escapeHtml(`${item.displayName} ${item.studentName || ""} ${item.studentEmail || ""} ${item.title} ${item.collectionName || ""} ${item.description || ""} grade ${item.grade} ${item.status}`.toLowerCase())}">
             <figure>${renderSpotlightArtwork(item, true)}</figure>
             <div><span class="feature-kicker">${escapeHtml(item.collectionName || item.title)} · Grade ${escapeHtml(item.grade)} · ${item.status === "hidden" ? "Hidden" : "Published"}${item.folderPreviewPosition ? ` · Preview ${item.folderPreviewPosition}` : ""}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.displayName)}${item.description ? ` — ${escapeHtml(item.description)}` : ""}</p></div>
             <div class="actions"><button class="outline-btn" type="button" data-action="editStudentSpotlight" data-id="${item.id}">Edit</button><button class="danger-btn" type="button" data-action="deleteStudentSpotlight" data-id="${item.id}">Delete</button></div>
           </article>
         `).join("") : emptyCard("No student work has been featured yet.")}
+        <div id="spotlightDashboardSearchEmpty" class="empty-card spotlight-dashboard-search-empty" hidden>No featured student work matches that search.</div>
       </div>
     </section>
   `;
@@ -11509,6 +11519,7 @@ function attachScreenHandlers() {
   attachStudentRequestForm();
   attachStudentSpotlightForm();
   attachStudentSpotlightSearch();
+  attachSpotlightDashboardSearch();
   attachStudentSpotlightFolderSearch();
   attachCategoryLinkSearch();
   attachThreadForm();
@@ -12228,6 +12239,36 @@ function attachStudentSpotlightSearch() {
     applyStudentSpotlightSearch();
   });
   applyStudentSpotlightSearch();
+}
+
+function applySpotlightDashboardSearch() {
+  const input = document.getElementById("spotlightDashboardSearch");
+  if (!input) return;
+  const query = String(spotlightDashboardSearchQuery || "").trim().toLowerCase();
+  const cards = [...document.querySelectorAll(".spotlight-dashboard-card[data-dashboard-spotlight-search]")];
+  let matchCount = 0;
+  cards.forEach(card => {
+    const matches = !query || String(card.dataset.dashboardSpotlightSearch || "").includes(query);
+    card.hidden = !matches;
+    if (matches) matchCount += 1;
+  });
+  const status = document.getElementById("spotlightDashboardSearchStatus");
+  if (status) status.textContent = query
+    ? `${matchCount} matching ${matchCount === 1 ? "project" : "projects"}.`
+    : `${cards.length} featured ${cards.length === 1 ? "project" : "projects"}.`;
+  const empty = document.getElementById("spotlightDashboardSearchEmpty");
+  if (empty) empty.hidden = !query || matchCount > 0;
+}
+
+function attachSpotlightDashboardSearch() {
+  const input = document.getElementById("spotlightDashboardSearch");
+  if (!input || input.dataset.ready === "true") return;
+  input.dataset.ready = "true";
+  input.addEventListener("input", event => {
+    spotlightDashboardSearchQuery = event.target.value;
+    applySpotlightDashboardSearch();
+  });
+  applySpotlightDashboardSearch();
 }
 
 function applyStudentSpotlightFolderSearch() {
@@ -13009,7 +13050,7 @@ app.addEventListener("click", async event => {
     render();
   }
   if (action === "spotlightGrade") {
-    spotlightGradeFilter = ["all", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";
+    spotlightGradeFilter = ["all", "3", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";
     render();
   }
   if (action === "newStudentSpotlight") {
