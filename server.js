@@ -33,6 +33,11 @@ const approvedStudentGradeMigrations = [{
   id: "2026-09-08-kelly-vien-grade-7",
   email: "kelly.vien@scscolts.org",
   grade: "7"
+}, {
+  id: "2026-09-16-kelly-vien-spotlight-grade-7",
+  email: "kelly.vien@scscolts.org",
+  grade: "7",
+  updateSpotlights: true
 }];
 const approvedStudentRemovalMigrations = [{
   id: "2026-09-13-remove-blakeleigh-freeman",
@@ -1102,6 +1107,7 @@ function applyApprovedStudentGradeMigrations(db) {
     .map(value => cleanText(value, 120))
     .filter(Boolean));
   let approvedStudents = normalizeApprovedStudents(db && db.approvedStudents);
+  let studentSpotlights = normalizeStudentSpotlights(db && db.studentSpotlights);
   let changed = false;
 
   approvedStudentGradeMigrations.forEach(migration => {
@@ -1110,6 +1116,11 @@ function applyApprovedStudentGradeMigrations(db) {
     if (studentIndex < 0) return;
     if (approvedStudents[studentIndex].grade !== migration.grade) {
       approvedStudents[studentIndex] = { ...approvedStudents[studentIndex], grade: migration.grade };
+    }
+    if (migration.updateSpotlights) {
+      studentSpotlights = studentSpotlights.map(spotlight => spotlight.studentEmail === migration.email
+        ? { ...spotlight, grade: migration.grade }
+        : spotlight);
     }
     applied.add(migration.id);
     changed = true;
@@ -1123,7 +1134,7 @@ function applyApprovedStudentGradeMigrations(db) {
   });
 
   return {
-    db: { ...db, approvedStudents, appliedDataMigrations: [...applied] },
+    db: { ...db, approvedStudents, studentSpotlights, appliedDataMigrations: [...applied] },
     changed
   };
 }

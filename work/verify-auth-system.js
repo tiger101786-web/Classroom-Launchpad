@@ -20,7 +20,19 @@ fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringi
     activationSalt: "unused-activation-salt",
     activationHash: "unused-activation-hash",
     createdAt: "2026-09-01T00:00:00.000Z"
-  }]
+  }],
+  studentSpotlights: [{
+    id: "kellie-existing-spotlight",
+    studentEmail: "kelly.vien@scscolts.org",
+    studentName: "Vien, Kellie",
+    grade: "5",
+    title: "All About Me",
+    collectionName: "All About Me",
+    status: "published",
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z"
+  }],
+  appliedDataMigrations: ["2026-09-08-kelly-vien-grade-7"]
 }, null, 2));
 
 const child = spawn(process.execPath, ["server.js"], {
@@ -195,6 +207,14 @@ async function run() {
   check(
     migratedDatabase.appliedDataMigrations.includes("2026-09-08-kelly-vien-grade-7"),
     "The Kellie Vien grade correction was not recorded as complete."
+  );
+  check(
+    migratedDatabase.studentSpotlights.some(spotlight => spotlight.studentEmail === "kelly.vien@scscolts.org" && spotlight.grade === "7"),
+    "Kellie Vien's existing spotlight was not corrected to Grade 7."
+  );
+  check(
+    migratedDatabase.appliedDataMigrations.includes("2026-09-16-kelly-vien-spotlight-grade-7"),
+    "The Kellie Vien spotlight correction was not recorded as complete."
   );
   check(
     !migratedDatabase.approvedStudents.some(student => student.email === "blakeleigh.freeman@scscolts.org"),
