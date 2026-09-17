@@ -7235,6 +7235,87 @@ body[data-theme="night"] .colt-radio-heading .feature-kicker {
   filter: drop-shadow(0 0 4px rgba(255, 26, 49, 0.8));
 }
 
+.colt-radio-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 3px 14px 7px;
+  background: #050505;
+}
+
+.colt-radio-search-icon {
+  position: absolute;
+  left: 26px;
+  width: 17px;
+  height: 17px;
+  color: #d12a3e;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(239, 44, 64, 0.28));
+}
+
+.colt-radio-search-input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 42px 8px 38px;
+  border: 1px solid #42131a;
+  border-radius: 6px;
+  outline: none;
+  background:
+    radial-gradient(circle at 8% 50%, rgba(126, 8, 25, 0.13), transparent 28%),
+    linear-gradient(180deg, #111012, #09090a);
+  color: #f8f3f4;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.colt-radio-search-input::placeholder {
+  color: #918b8d;
+  opacity: 1;
+}
+
+.colt-radio-search-input:focus {
+  border-color: #d62b40;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.55),
+    0 0 0 2px rgba(214, 43, 64, 0.2),
+    0 0 10px rgba(214, 43, 64, 0.2);
+}
+
+.colt-radio-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.colt-radio-search-clear {
+  position: absolute;
+  right: 21px;
+  display: grid;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #5d1821;
+  border-radius: 5px;
+  background: #17090b;
+  color: #e63a4d;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.colt-radio-search-clear:hover {
+  border-color: #ef3449;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(239, 52, 73, 0.3);
+}
+
+.colt-radio-search-clear[hidden] {
+  display: none;
+}
+
 .colt-radio-stations {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -7313,7 +7394,7 @@ body[data-theme="night"] .colt-radio-station {
 }
 
 .colt-radio-station-item.has-long-name .colt-radio-station-name {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   letter-spacing: -0.025em;
 }
 
@@ -7365,6 +7446,23 @@ body[data-theme="night"] .colt-radio-station.is-active {
   border-color: #56121a;
   background: #0b0809;
   color: #a9a4a5;
+}
+
+.colt-radio-search-empty {
+  grid-column: 1 / -1;
+  margin: 5px 0;
+  padding: 18px 14px;
+  border: 1px solid #56121a;
+  border-radius: 6px;
+  background: #0b0809;
+  color: #bbb4b6;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.colt-radio-search-empty[hidden] {
+  display: none;
 }
 
 .colt-radio-player {

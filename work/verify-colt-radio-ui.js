@@ -192,17 +192,11 @@ async function run() {
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ artist: "Test Fantasy Artist", title: "Test Adventure Song" })
     }));
-    await page.route("https://manager11.streamradio.fr:2485/**", route => {
-      if (new URL(route.request().url()).pathname === "/status-json.xsl") {
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          headers: { "Access-Control-Allow-Origin": "*" },
-          body: JSON.stringify({ icestats: { source: { listenurl: "https://manager11.streamradio.fr:2485/stream", title: "Test Oldies Artist - Test Jukebox Song" } } })
-        });
-      }
-      return route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) });
-    });
+    await page.route("https://radio1.streamserver.link/radio/8060/gyr-aac", route => route.fulfill({
+      status: 200,
+      contentType: "audio/aac",
+      body: Buffer.from([])
+    }));
     await page.route("https://443-1.autopo.st/171/stream/1/", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("https://relaxingjazz.com/nowplaying.php?type=current", route => route.fulfill({
       status: 200,
@@ -320,8 +314,19 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Golden Years", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
+    const stationSearch = page.getByRole("searchbox", { name: "Search Colt Radio stations or music styles" });
+    await stationSearch.fill("motown");
+    assert.deepEqual(
+      await page.locator(".colt-radio-station-item:not([hidden]) .colt-radio-station").allTextContents(),
+      ["Oldies Golden Years"],
+      "Station search did not filter by descriptive music keywords."
+    );
+    await stationSearch.fill("does-not-exist");
+    assert(await page.locator(".colt-radio-search-empty").isVisible(), "The empty search message is not visible.");
+    await page.getByRole("button", { name: "Clear station search" }).click();
+    assert.equal(await stationSearch.inputValue(), "", "The station search did not clear.");
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
     assert.equal(await iframe.getAttribute("src"), null);
@@ -465,9 +470,9 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://play.radiorivendell.com/radio/8000/radio.mp3");
     await page.getByText("Test Fantasy Artist - Test Adventure Song", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Oldies • Jukebox", exact: true }).click();
-    assert.equal(await audio.getAttribute("src"), "https://manager11.streamradio.fr:2485/stream");
-    await page.getByText("Test Oldies Artist - Test Jukebox Song", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "Oldies • Golden Years", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "https://radio1.streamserver.link/radio/8060/gyr-aac");
+    await page.getByText("Oldies • Golden Years live stream", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Jazz • Smooth", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://443-1.autopo.st/171/stream/1/");
@@ -661,7 +666,7 @@ async function run() {
     console.log(JSON.stringify({
       embeddedInsideLaunchpad: true,
       noExternalNavigationLink: true,
-      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Jukebox", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa"],
+      stations: ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "House • Chill", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Games • Soundtracks", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Fantasy • Adventure", "Oldies • Golden Years", "Jazz • Smooth", "Celtic • Traditional", "K-Pop • Hits", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "Instrumental • Brazil", "Movies • Soundtracks", "Classical", "Ambient • Sleeping Pill", "Electronic • Chilltrax", "Kids • Pop", "Country • Family", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Pop • New Hits", "Focus • Positive", "Calm • Instrumental", "Meditation • Positive", "Calm • Zen", "Calm • Rain", "Calm • Tai Chi", "Calm • Spa"],
       directLofiCafeStreams: true,
       freeInstrumentalStreams: true,
       lofiFmAutomaticPlaylist: true,

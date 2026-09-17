@@ -267,13 +267,12 @@
     },
     {
       id: "oldies-jukebox",
-      label: "Oldies • Jukebox",
+      label: "Oldies • Golden Years",
       type: "stream",
-      source: "https://manager11.streamradio.fr:2485/stream",
-      provider: "Majestic Jukebox Radio",
-      metadataEndpoint: "https://manager11.streamradio.fr:2485/status-json.xsl",
-      metadataMount: "/stream",
-      note: "Clean-version oldies, blues, jazz, swing, rock and roll, country, doo-wop, and big-band music from Majestic Jukebox Radio. Commercial-free."
+      source: "https://radio1.streamserver.link/radio/8060/gyr-aac",
+      provider: "Golden Years Radio",
+      searchTerms: "1950s 1960s 1970s 50s 60s 70s classic hits golden era rock and roll doo-wop motown soul british invasion country crossover",
+      note: "Ad-free classic oldies from 1955 to 1975, including rock and roll, doo-wop, Motown, soul, British Invasion, and country crossover hits from Golden Years Radio."
     },
     {
       id: "smooth-jazz",
@@ -793,6 +792,21 @@
     favoritesFilter.innerHTML = `${iconSvg('<path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0L12 6.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z"/>', "colt-radio-filter-icon")}<span data-favorites-label>Favorites (0)</span>`;
     stationFilters.append(allStationsFilter, favoritesFilter);
 
+    const stationSearch = buildElement("div", "colt-radio-search");
+    stationSearch.innerHTML = iconSvg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>', "colt-radio-search-icon");
+    const stationSearchInput = document.createElement("input");
+    stationSearchInput.type = "search";
+    stationSearchInput.className = "colt-radio-search-input";
+    stationSearchInput.placeholder = "Search stations or music styles";
+    stationSearchInput.setAttribute("aria-label", "Search Colt Radio stations or music styles");
+    stationSearchInput.autocomplete = "off";
+    stationSearchInput.spellcheck = false;
+    const clearStationSearch = buildElement("button", "colt-radio-search-clear", "×");
+    clearStationSearch.type = "button";
+    clearStationSearch.setAttribute("aria-label", "Clear station search");
+    clearStationSearch.hidden = true;
+    stationSearch.append(stationSearchInput, clearStationSearch);
+
     const stationNav = buildElement("nav", "colt-radio-stations");
     stationNav.setAttribute("aria-label", "Choose a Colt Radio station");
     const stationButtons = stations.map(station => {
@@ -826,7 +840,9 @@
     });
     const favoritesEmpty = buildElement("p", "colt-radio-favorites-empty", "No favorites yet. Select All Stations, then use a star to pin one here.");
     favoritesEmpty.hidden = true;
-    stationNav.append(favoritesEmpty);
+    const searchEmpty = buildElement("p", "colt-radio-search-empty", "No stations match your search. Try a genre such as jazz, oldies, calm, or hip-hop.");
+    searchEmpty.hidden = true;
+    stationNav.append(favoritesEmpty, searchEmpty);
 
     const playerWrap = buildElement("div", "colt-radio-player");
     const placeholder = buildElement("p", "colt-radio-placeholder", "Choose a station, then press Play in the radio player.");
@@ -891,7 +907,7 @@
     playerWrap.append(placeholder, iframe, nowPlaying, audio);
 
     const note = buildElement("p", "colt-radio-note", "Free, ad-free music streamed by Lofi Cafe. No account required.");
-    panel.append(header, stationFilters, stationNav, playerWrap, note);
+    panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
     let activeStation = "";
@@ -903,6 +919,7 @@
     let metadataConnectionVersion = 0;
     let favoriteStationIds = new Set();
     let favoritesOnly = false;
+    let stationSearchQuery = "";
     let favoritesAccountKey = "";
     let favoritesRequestVersion = 0;
     let connectionTimer = 0;
@@ -961,7 +978,14 @@
       return [...new Set((Array.isArray(values) ? values : []).filter(id => knownIds.has(id)))];
     }
 
-    function renderFavorites() {
+    function searchableStationText(station) {
+      return [station.label, station.provider, station.note, station.searchTerms]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase();
+    }
+
+    function renderStationList() {
       const favoriteButtons = stationNav.querySelectorAll("[data-favorite-station]");
       favoriteButtons.forEach(button => {
         const selected = favoriteStationIds.has(button.dataset.favoriteStation);
@@ -980,16 +1004,26 @@
         return favoriteDifference || stationOrder.get(left.dataset.stationItem) - stationOrder.get(right.dataset.stationItem);
       });
       stationItems.forEach(item => stationNav.insertBefore(item, favoritesEmpty));
+      let visibleCount = 0;
       stationItems.forEach(item => {
-        item.hidden = favoritesOnly && !favoriteStationIds.has(item.dataset.stationItem);
+        const station = stations.find(candidate => candidate.id === item.dataset.stationItem);
+        const matchesFavorites = !favoritesOnly || favoriteStationIds.has(item.dataset.stationItem);
+        const matchesSearch = !stationSearchQuery || searchableStationText(station).includes(stationSearchQuery);
+        item.hidden = !(matchesFavorites && matchesSearch);
+        if (!item.hidden) visibleCount += 1;
       });
-      favoritesEmpty.hidden = !(favoritesOnly && favoriteStationIds.size === 0);
+      favoritesEmpty.hidden = !(favoritesOnly && favoriteStationIds.size === 0 && !stationSearchQuery);
+      searchEmpty.hidden = !(visibleCount === 0 && (Boolean(stationSearchQuery) || (favoritesOnly && favoriteStationIds.size > 0)));
       const favoritesLabel = favoritesFilter.querySelector("[data-favorites-label]");
       if (favoritesLabel) favoritesLabel.textContent = `Favorites (${favoriteStationIds.size})`;
       allStationsFilter.classList.toggle("is-active", !favoritesOnly);
       favoritesFilter.classList.toggle("is-active", favoritesOnly);
       allStationsFilter.setAttribute("aria-pressed", String(!favoritesOnly));
       favoritesFilter.setAttribute("aria-pressed", String(favoritesOnly));
+    }
+
+    function renderFavorites() {
+      renderStationList();
     }
 
     function guestFavorites() {
@@ -1440,6 +1474,23 @@
       renderFavorites();
       const firstVisibleStation = stationNav.querySelector("[data-station-item]:not([hidden]) .colt-radio-station");
       firstVisibleStation?.focus();
+    });
+    stationSearchInput.addEventListener("input", () => {
+      stationSearchQuery = stationSearchInput.value.trim().toLocaleLowerCase();
+      clearStationSearch.hidden = !stationSearchQuery;
+      renderStationList();
+    });
+    stationSearchInput.addEventListener("search", () => {
+      stationSearchQuery = stationSearchInput.value.trim().toLocaleLowerCase();
+      clearStationSearch.hidden = !stationSearchQuery;
+      renderStationList();
+    });
+    clearStationSearch.addEventListener("click", () => {
+      stationSearchInput.value = "";
+      stationSearchQuery = "";
+      clearStationSearch.hidden = true;
+      renderStationList();
+      stationSearchInput.focus();
     });
     stationNav.addEventListener("click", event => {
       const favoriteButton = event.target.closest("[data-favorite-station]");
