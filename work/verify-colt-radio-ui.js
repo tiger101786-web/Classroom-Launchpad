@@ -290,7 +290,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 65, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 68, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -320,7 +320,7 @@ async function run() {
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
       visibleStationNames.map(name => name.replace(" ", " • ")),
-      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
+      ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Celtic • Traditional", "Country • Family", "Oldies • Jukebox", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const iframe = radioPanel.locator("iframe");
     const audio = radioPanel.locator("audio.colt-radio-audio");
@@ -478,8 +478,8 @@ async function run() {
     await page.getByText("Test Celtic Artist - Test Celtic Tune", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "K-Pop • Hits", exact: true }).click();
-    assert.equal(await audio.getAttribute("src"), "https://cdn.onlyhitsradio.net/kpop");
-    await page.getByText("Test K-Pop Artist - Test K-Pop Song", { exact: true }).waitFor();
+    assert.equal(await audio.getAttribute("src"), "https://listen.moe/kpop/stream");
+    assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /K-Pop .* Hits live stream|.+ - .+/);
 
     await page.getByRole("button", { name: "Hip-Hop • Urban Heat", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.zeno.fm/hs2dndb7ydnuv");
@@ -498,6 +498,14 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "https://stream.rcs.revma.com/x8wbda03tm0uv");
     await page.getByText("Test Movie Artist - Test Movie Song", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /Disney classics/);
+
+    await page.locator('[data-station="drdio-night-drive"]').click();
+    assert.match(await audio.getAttribute("src"), /^https:\/\/drdio\.studio\/s\/audio\//);
+    assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /^Dr\.DIO Night Drive - /);
+
+    await page.locator('[data-station="walts-radio"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.live365.com/a10182");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Disney movie music/);
 
     await page.getByRole("button", { name: "Classical", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/easyclassical/icecast.audio");
