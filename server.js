@@ -36,6 +36,8 @@ const approvedStudentGradeMigrations = [{
 }, {
   id: "2026-09-16-kelly-vien-spotlight-grade-7",
   email: "kelly.vien@scscolts.org",
+  emailAliases: ["kellie.vien@scscolts.org"],
+  studentNames: ["Vien, Kellie", "Kellie Vien"],
   grade: "7",
   updateSpotlights: true,
   enforce: true
@@ -1110,19 +1112,33 @@ function applyApprovedStudentGradeMigrations(db) {
   let approvedStudents = normalizeApprovedStudents(db && db.approvedStudents);
   let studentSpotlights = normalizeStudentSpotlights(db && db.studentSpotlights);
   let changed = false;
+  const matchesMigrationStudent = (student, migration) => {
+    const acceptedEmails = [migration.email, ...(Array.isArray(migration.emailAliases) ? migration.emailAliases : [])]
+      .map(normalizeEmail)
+      .filter(Boolean);
+    if (acceptedEmails.includes(normalizeEmail(student && student.email))) return true;
+    const acceptedNames = (Array.isArray(migration.studentNames) ? migration.studentNames : [])
+      .map(name => cleanText(name, 80).toLowerCase())
+      .filter(Boolean);
+    return acceptedNames.includes(cleanText(student && student.studentName !== undefined ? student.studentName : student && student.name, 80).toLowerCase());
+  };
 
   approvedStudentGradeMigrations.forEach(migration => {
     const alreadyApplied = applied.has(migration.id);
     if (alreadyApplied && !migration.enforce) return;
-    const studentIndex = approvedStudents.findIndex(student => student.email === migration.email);
-    if (studentIndex < 0) return;
-    if (approvedStudents[studentIndex].grade !== migration.grade) {
-      approvedStudents[studentIndex] = { ...approvedStudents[studentIndex], grade: migration.grade };
+    const matchingStudents = approvedStudents.filter(student => matchesMigrationStudent(student, migration));
+    const matchingSpotlights = migration.updateSpotlights
+      ? studentSpotlights.filter(spotlight => matchesMigrationStudent(spotlight, migration))
+      : [];
+    if (!matchingStudents.length && !matchingSpotlights.length) return;
+    approvedStudents = approvedStudents.map(student => {
+      if (!matchesMigrationStudent(student, migration) || student.grade === migration.grade) return student;
       changed = true;
-    }
+      return { ...student, grade: migration.grade };
+    });
     if (migration.updateSpotlights) {
       studentSpotlights = studentSpotlights.map(spotlight => {
-        if (spotlight.studentEmail !== migration.email || spotlight.grade === migration.grade) return spotlight;
+        if (!matchesMigrationStudent(spotlight, migration) || spotlight.grade === migration.grade) return spotlight;
         changed = true;
         return { ...spotlight, grade: migration.grade };
       });

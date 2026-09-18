@@ -7,7 +7,7 @@ const dataDir = path.join(__dirname, `auth-api-test-data-${process.pid}-${Date.n
 fs.mkdirSync(dataDir, { recursive: true });
 fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringify({
   approvedStudents: [{
-    email: "kelly.vien@scscolts.org",
+    email: "kellie.vien@scscolts.org",
     name: "Vien, Kellie",
     grade: "5",
     passwordSalt: "preserved-password-salt",
@@ -23,7 +23,7 @@ fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringi
   }],
   studentSpotlights: [{
     id: "kellie-existing-spotlight",
-    studentEmail: "kelly.vien@scscolts.org",
+    studentEmail: "kellie.vien@scscolts.org",
     studentName: "Vien, Kellie",
     grade: "5",
     title: "All About Me",
@@ -196,11 +196,11 @@ async function run() {
     && privateResult.students.some(student => student.email === "o'example.student@scscolts.org"), "Teacher could not read the private allowlist.");
   check(!("activationHash" in privateResult.students[0]) && !("passwordHash" in privateResult.students[0]), "Secret hashes leaked through the teacher API.");
   check(
-    privateResult.students.some(student => student.email === "kelly.vien@scscolts.org" && student.grade === "7"),
+    privateResult.students.some(student => student.email === "kellie.vien@scscolts.org" && student.grade === "7"),
     "The one-time Kellie Vien grade correction was not applied."
   );
   const migratedDatabase = JSON.parse(fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8"));
-  const migratedKellie = migratedDatabase.approvedStudents.find(student => student.email === "kelly.vien@scscolts.org");
+  const migratedKellie = migratedDatabase.approvedStudents.find(student => student.email === "kellie.vien@scscolts.org");
   check(
     migratedKellie && migratedKellie.grade === "7"
       && migratedKellie.passwordSalt === "preserved-password-salt"
@@ -212,7 +212,7 @@ async function run() {
     "The Kellie Vien grade correction was not recorded as complete."
   );
   check(
-    migratedDatabase.studentSpotlights.some(spotlight => spotlight.studentEmail === "kelly.vien@scscolts.org" && spotlight.grade === "7"),
+    migratedDatabase.studentSpotlights.some(spotlight => spotlight.studentEmail === "kellie.vien@scscolts.org" && spotlight.grade === "7"),
     "Kellie Vien's existing spotlight was not corrected to Grade 7."
   );
   check(
