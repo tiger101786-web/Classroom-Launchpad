@@ -4,7 +4,6 @@ const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
 const zlib = require("zlib");
-const { Readable } = require("stream");
 const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
 const {
@@ -29,23 +28,6 @@ const sessionSecret = configuredSessionSecret || crypto.randomBytes(48).toString
 const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_ENV === "production" ? "" : "1017"));
 const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
-const drDioTrackUrls = [
-  "https://drdio.studio/s/audio/20260622_375a38/Glacier%20Pickaxe.mp3",
-  "https://drdio.studio/s/audio/20260827_be5787/Glass%20Kiln.mp3",
-  "https://drdio.studio/s/audio/20260818_c15fac/Wet%20Ferry%20Lights%20v2.mp3",
-  "https://drdio.studio/s/audio/20260818_616e73/Harbour%20Noir%20v2.mp3",
-  "https://drdio.studio/s/audio/20260818_d9c139/Cold%20Case%20File%20v2.mp3",
-  "https://drdio.studio/s/audio/20260818_2adc12/Neon%20Underpass.mp3",
-  "https://drdio.studio/s/audio/20260818_84e7f5/Sodium%20Straight%20v2.mp3",
-  "https://drdio.studio/s/audio/20260818_49cb28/Empty%20Concourse.mp3",
-  "https://drdio.studio/s/audio/20260818_5eccd4/Ramp%20Lights%20Ahead%20v2.mp3",
-  "https://drdio.studio/s/audio/20260813_261471/Filing%20Room%20Pulse.mp3",
-  "https://drdio.studio/s/audio/20260813_eb1ccb/Chrome%20Straightaway.mp3",
-  "https://drdio.studio/s/audio/20260812_847df4/Trench%20Headlights.mp3",
-  "https://drdio.studio/s/audio/20260812_d8a6d1/Faded%20Cinema.mp3",
-  "https://drdio.studio/s/audio/20260812_337572/Neon%20Arcade.mp3",
-  "https://drdio.studio/s/audio/20260812_8cc3f9/Distant%20Junction.mp3"
-];
 const teacherLoginAttempts = new Map();
 const approvedStudentGradeMigrations = [{
   id: "2026-09-08-kelly-vien-grade-7",
@@ -3623,53 +3605,6 @@ async function handleApi(req, res, pathname) {
       });
     } catch {
       sendJson(res, 502, { error: "Radio Rivendell metadata is temporarily unavailable." });
-    }
-    return true;
-  }
-
-  if (req.method === "GET" && pathname.startsWith("/api/radio-audio/drdio/")) {
-    const trackIndex = Number(pathname.slice("/api/radio-audio/drdio/".length));
-    const trackUrl = Number.isInteger(trackIndex) ? drDioTrackUrls[trackIndex] : "";
-    if (!trackUrl) {
-      sendJson(res, 404, { error: "Dr.DIO track not found." });
-      return true;
-    }
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
-    res.once("close", () => controller.abort());
-    try {
-      const headers = {
-        Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.5",
-        "User-Agent": "Classroom Launchpad Colt Radio/1.0"
-      };
-      if (req.headers.range) headers.Range = req.headers.range;
-      const response = await fetch(trackUrl, {
-        headers,
-        redirect: "follow",
-        signal: controller.signal
-      });
-      if (!response.ok || !response.body) throw new Error(`Dr.DIO returned ${response.status}.`);
-
-      const responseHeaders = {
-        "Content-Type": response.headers.get("content-type") || "audio/mpeg",
-        "Cache-Control": "public, max-age=3600",
-        "Accept-Ranges": response.headers.get("accept-ranges") || "bytes"
-      };
-      ["content-length", "content-range", "etag", "last-modified"].forEach(header => {
-        const value = response.headers.get(header);
-        if (value) responseHeaders[header] = value;
-      });
-      res.writeHead(response.status, responseHeaders);
-      Readable.fromWeb(response.body).pipe(res);
-    } catch {
-      if (!res.headersSent) {
-        sendJson(res, 502, { error: "Dr.DIO is temporarily unavailable from this network." });
-      } else {
-        res.destroy();
-      }
-    } finally {
-      clearTimeout(timeout);
     }
     return true;
   }
