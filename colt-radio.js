@@ -220,6 +220,17 @@
       note: "Contemporary Christian music and encouraging programs from The JOY FM's family-friendly main channel. Listener-supported and free to hear without a Colt Radio account."
     },
     {
+      id: "abiding-patriotic",
+      label: "Patriotic • Abiding",
+      type: "stream",
+      source: "https://streams.abidingradio.com:7830/seasonal",
+      provider: "Abiding Radio Patriotic",
+      metadataEndpoint: "https://streams.abidingradio.com/api/nowplaying/abiding_radio_-_seasonal",
+      metadataFormat: "azuraNowPlaying",
+      searchTerms: "usa united states america american patriotic military marches armed forces national anthem star spangled banner god bless america",
+      note: "American patriotic songs, hymns, military-band selections, and national favorites from Abiding Radio's dedicated Patriotic playlist. Music plays without advertisements or interruptions."
+    },
+    {
       id: "game-soundtracks",
       label: "Games • Soundtracks",
       type: "stream",
@@ -620,7 +631,7 @@
   ];
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
-    "Movies", "Disney", "Games", "Worship", "Christian", "Jazz", "Classical", "Celtic",
+    "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Celtic",
     "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Christmas", "Decades"
   ];
@@ -664,6 +675,7 @@
     "god-radio": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/>',
     "hpr4-bluegrass-gospel": '<circle cx="8" cy="15" r="4"/><circle cx="8" cy="15" r="1.5"/><path d="m11 12 7-8 2 2-8 7M16 6l2 2M5 19l-2 2"/>',
     "joy-fm-main": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/><path d="m18 3 .5 1.5L20 5l-1.5.5L18 7l-.5-1.5L16 5l1.5-.5Z"/>',
+    "abiding-patriotic": '<path d="M5 4v17M6 5h11l-2 3 2 3H6"/><path d="M9 15h10M14 12v6"/>',
     "game-soundtracks": '<path d="M8 8h8a5 5 0 0 1 4.7 6.8l-1 2.7a2 2 0 0 1-3.2.8L14.8 17H9.2l-1.7 1.3a2 2 0 0 1-3.2-.8l-1-2.7A5 5 0 0 1 8 8Z"/><path d="M8 11v4m-2-2h4m6-1h.01m2 2h.01"/>',
     "laid-back-jazz": '<path d="M15 4v11.5a3.5 3.5 0 1 1-2-3.2V6l7-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/>',
     "jazz-funk-soul": '<path d="M5 16V6l10-2v10M5 9l10-2"/><circle cx="3.5" cy="17.5" r="2.5"/><circle cx="13.5" cy="15.5" r="2.5"/><path d="M19 5v8m-2-6h4"/>',
