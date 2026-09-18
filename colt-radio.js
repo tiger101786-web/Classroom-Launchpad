@@ -365,6 +365,28 @@
       note: "Gentle, accessible classical music streamed commercial-free by YouRadio. No account or subscription required."
     },
     {
+      id: "ancient-fm",
+      label: "Medieval • Ancient FM",
+      type: "stream",
+      source: "https://mediaserv73.live-streams.nl:18058/stream",
+      provider: "Ancient FM",
+      metadataEndpoint: "https://mediaserv73.live-streams.nl:18058/status-json.xsl",
+      metadataMount: "/autodj",
+      searchTerms: "medieval mediaeval renaissance early music historical ancient lute court castle",
+      note: "Commercial-free music from the Medieval and Renaissance eras, streamed by the listener-supported Ancient FM."
+    },
+    {
+      id: "organlive-pipe-organ",
+      label: "Pipe Organ • Organlive",
+      type: "stream",
+      source: "https://play.organlive.com:7010/320",
+      provider: "Organlive",
+      metadataEndpoint: "https://api.organlive.com/1/playing",
+      metadataFormat: "organLiveNowPlaying",
+      searchTerms: "pipe organ cathedral church concert hall symphonic historical classical instrument",
+      note: "Pipe-organ performances from cathedrals, churches, and concert halls around the world, streamed free without commercial interruption by the nonprofit Organ Media Foundation."
+    },
+    {
       id: "ambient-sleeping-pill",
       label: "Ambient • Sleeping Pill",
       type: "stream",
@@ -631,7 +653,7 @@
   ];
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
-    "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Celtic",
+    "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
     "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Christmas", "Decades"
   ];
@@ -691,6 +713,8 @@
     "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
     "walts-radio": '<path d="M5 21V10l3 2V7l4 3 4-3v5l3-2v11M9 21v-5h6v5"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',
     "wcpe-classical": '<path d="M4 20h16M6 17h12M8 17V9m4 8V9m4 8V9M5 8h14L12 3 5 8Z"/>',
+    "ancient-fm": '<path d="M5 21V8l7-5 7 5v13M3 21h18M8 21v-6h8v6M8 10h.01m8 0h.01"/><path d="M10 6h4"/>',
+    "organlive-pipe-organ": '<path d="M4 21h16M6 18h12M7 18V8h10v10M9 18V6h6v12M11 18V4h2v14"/><path d="M6 8h12"/>',
     "ambient-sleeping-pill": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="m16 4 .5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5Z"/>',
     chilltrax: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/><path d="M8 20h8"/>',
     "youradio-pop-kids": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',
@@ -1278,6 +1302,13 @@
         }
         if (station.metadataFormat === "simpleTrack") {
           const title = [payload?.artist, payload?.title || payload?.song].filter(Boolean).join(" - ");
+          if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
+          return;
+        }
+        if (station.metadataFormat === "organLiveNowPlaying") {
+          const work = String(payload?.work?.title || "").trim();
+          const artist = String(payload?.artist?.name || "").trim();
+          const title = [work, artist].filter(Boolean).join(" — ");
           if (activeStation === station.id) nowPlayingTitle.textContent = title || `${station.label} live stream`;
           return;
         }
