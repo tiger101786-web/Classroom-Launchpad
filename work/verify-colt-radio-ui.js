@@ -517,6 +517,15 @@ async function run() {
     await page.getByText("Classical live stream", { exact: true }).waitFor();
     assert.match(await page.locator(".colt-radio-note").innerText(), /commercial-free by YouRadio/);
 
+    await page.locator('[data-station="abiding-patriotic"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://streams.abidingradio.com/seasonal");
+
+    await page.locator('[data-station="ancient-fm"]').click();
+    assert.equal(await audio.getAttribute("src"), "/api/radio-audio/ancient-fm");
+
+    await page.locator('[data-station="organlive-pipe-organ"]').click();
+    assert.equal(await audio.getAttribute("src"), "/api/radio-audio/organlive-pipe-organ");
+
     await page.getByRole("button", { name: "Ambient • Sleeping Pill", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://radio.stereoscenic.com/asp-h");
     await page.getByText("Ambient • Sleeping Pill live stream", { exact: true }).waitFor();

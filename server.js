@@ -4,6 +4,7 @@ const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
 const zlib = require("zlib");
+const { Readable } = require("stream");
 const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
 const {
@@ -28,6 +29,10 @@ const sessionSecret = configuredSessionSecret || crypto.randomBytes(48).toString
 const initialTeacherPin = String(process.env.TEACHER_PIN || (process.env.NODE_ENV === "production" ? "" : "1017"));
 const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
+const schoolNetworkRadioRelays = Object.freeze({
+  "ancient-fm": "https://mediaserv73.live-streams.nl:18058/stream",
+  "organlive-pipe-organ": "https://play.organlive.com:7010/320"
+});
 const teacherLoginAttempts = new Map();
 const approvedStudentGradeMigrations = [{
   id: "2026-09-08-kelly-vien-grade-7",
@@ -3605,6 +3610,62 @@ async function handleApi(req, res, pathname) {
       });
     } catch {
       sendJson(res, 502, { error: "Radio Rivendell metadata is temporarily unavailable." });
+    }
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/radio-metadata/ancient-fm") {
+    try {
+      const response = await fetch("https://mediaserv73.live-streams.nl:18058/status-json.xsl", {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!response.ok) throw new Error("Ancient FM metadata is unavailable.");
+      sendJson(res, 200, await response.json());
+    } catch {
+      sendJson(res, 502, { error: "Ancient FM metadata is temporarily unavailable." });
+    }
+    return true;
+  }
+
+  const radioRelayMatch = pathname.match(/^\/api\/radio-audio\/([a-z0-9-]+)$/);
+  if (req.method === "GET" && radioRelayMatch) {
+    const stationUrl = schoolNetworkRadioRelays[radioRelayMatch[1]];
+    if (!stationUrl) {
+      sendJson(res, 404, { error: "Radio station not found." });
+      return true;
+    }
+
+    const controller = new AbortController();
+    const connectionTimer = setTimeout(() => controller.abort(), 12000);
+    res.once("close", () => controller.abort());
+    try {
+      const response = await fetch(stationUrl, {
+        headers: {
+          Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.5",
+          "Icy-MetaData": "0",
+          "User-Agent": "Classroom Launchpad Colt Radio/1.0"
+        },
+        redirect: "follow",
+        signal: controller.signal
+      });
+      clearTimeout(connectionTimer);
+      if (!response.ok || !response.body) throw new Error(`Radio host returned ${response.status}.`);
+      res.writeHead(200, {
+        "Content-Type": response.headers.get("content-type") || "audio/mpeg",
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff"
+      });
+      const audioStream = Readable.fromWeb(response.body);
+      audioStream.on("error", () => res.destroy());
+      audioStream.pipe(res);
+    } catch {
+      clearTimeout(connectionTimer);
+      if (!res.headersSent) {
+        sendJson(res, 502, { error: "This radio station is temporarily unavailable." });
+      } else {
+        res.destroy();
+      }
     }
     return true;
   }
