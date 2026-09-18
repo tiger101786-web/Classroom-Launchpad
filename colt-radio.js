@@ -150,6 +150,7 @@
       label: "Electronic • Dr.DIO",
       type: "playlist",
       provider: "Dr.DIO Night Drive",
+      relayPath: "/api/radio-audio/drdio/",
       sources: [
         "https://drdio.studio/s/audio/20260622_375a38/Glacier%20Pickaxe.mp3",
         "https://drdio.studio/s/audio/20260827_be5787/Glass%20Kiln.mp3",
@@ -948,6 +949,7 @@
 
     let activeStation = "";
     let playlistTrackIndex = -1;
+    let playlistUsingFallback = false;
     let metadataTimer = 0;
     let metadataSocket = null;
     let metadataHeartbeatTimer = 0;
@@ -1173,6 +1175,7 @@
       const attemptNumber = playbackAttempt;
       connectionTimer = globalObject.setTimeout(() => {
         if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+        if (tryPlaylistDirectFallback(requestVersion)) return;
         if (playbackAttempt === 0) {
           playbackAttempt = 1;
           audio.load();
@@ -1185,6 +1188,7 @@
       if (playPromise?.catch) {
         playPromise.catch(() => {
           if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+          if (tryPlaylistDirectFallback(requestVersion)) return;
           if (playbackAttempt === 0) {
             playbackAttempt = 1;
             audio.load();
@@ -1249,10 +1253,24 @@
       }
       playlistTrackIndex = nextIndex;
       const source = station.sources[nextIndex];
-      audio.src = source;
+      playlistUsingFallback = false;
+      audio.src = station.relayPath ? `${station.relayPath}${nextIndex}` : source;
       nowPlayingTitle.textContent = `${station.provider || station.label} - ${trackNameFromSource(source)}`;
       audio.load();
       if (autoplay) requestPlayback();
+    }
+
+    function tryPlaylistDirectFallback(requestVersion) {
+      const station = stations.find(item => item.id === activeStation);
+      if (station?.type !== "playlist" || !station.relayPath || playlistUsingFallback) return false;
+      const directSource = station.sources?.[playlistTrackIndex];
+      if (!directSource) return false;
+      playlistUsingFallback = true;
+      playbackAttempt = 0;
+      audio.src = directSource;
+      audio.load();
+      startPlaybackAttempt(requestVersion);
+      return true;
     }
 
     function metadataSources(payload) {
@@ -1577,24 +1595,28 @@
       const attemptNumber = playbackAttempt;
       connectionTimer = globalObject.setTimeout(() => {
         if (requestVersion !== playbackRequestVersion || attemptNumber !== playbackAttempt || !wantsPlayback) return;
+        if (tryPlaylistDirectFallback(requestVersion)) return;
         if (playbackAttempt === 0) {
           playbackAttempt = 1;
           audio.load();
           startPlaybackAttempt(requestVersion);
           return;
         }
+        if (tryPlaylistDirectFallback(requestVersion)) return;
         markPlaybackUnavailable(requestVersion);
       }, connectionTimeoutMs);
     }));
     audio.addEventListener("error", () => {
       if (!wantsPlayback) return;
       const requestVersion = playbackRequestVersion;
+      if (tryPlaylistDirectFallback(requestVersion)) return;
       if (playbackAttempt === 0) {
         playbackAttempt = 1;
         audio.load();
         startPlaybackAttempt(requestVersion);
         return;
       }
+      if (tryPlaylistDirectFallback(requestVersion)) return;
       markPlaybackUnavailable(requestVersion);
     });
     toggleStream.addEventListener("click", () => {

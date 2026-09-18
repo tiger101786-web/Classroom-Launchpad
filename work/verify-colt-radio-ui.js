@@ -505,7 +505,7 @@ async function run() {
     assert.match(await page.locator(".colt-radio-note").innerText(), /Disney classics/);
 
     await page.locator('[data-station="drdio-night-drive"]').click();
-    assert.match(await audio.getAttribute("src"), /^https:\/\/drdio\.studio\/s\/audio\//);
+    assert.match(await audio.getAttribute("src"), /^\/api\/radio-audio\/drdio\/\d+$/);
     assert.match(await page.locator(".colt-radio-now-playing strong").innerText(), /^Dr\.DIO Night Drive - /);
 
     await page.locator('[data-station="walts-radio"]').click();
