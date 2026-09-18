@@ -37,7 +37,8 @@ const approvedStudentGradeMigrations = [{
   id: "2026-09-16-kelly-vien-spotlight-grade-7",
   email: "kelly.vien@scscolts.org",
   grade: "7",
-  updateSpotlights: true
+  updateSpotlights: true,
+  enforce: true
 }];
 const approvedStudentRemovalMigrations = [{
   id: "2026-09-13-remove-blakeleigh-freeman",
@@ -1111,19 +1112,25 @@ function applyApprovedStudentGradeMigrations(db) {
   let changed = false;
 
   approvedStudentGradeMigrations.forEach(migration => {
-    if (applied.has(migration.id)) return;
+    const alreadyApplied = applied.has(migration.id);
+    if (alreadyApplied && !migration.enforce) return;
     const studentIndex = approvedStudents.findIndex(student => student.email === migration.email);
     if (studentIndex < 0) return;
     if (approvedStudents[studentIndex].grade !== migration.grade) {
       approvedStudents[studentIndex] = { ...approvedStudents[studentIndex], grade: migration.grade };
+      changed = true;
     }
     if (migration.updateSpotlights) {
-      studentSpotlights = studentSpotlights.map(spotlight => spotlight.studentEmail === migration.email
-        ? { ...spotlight, grade: migration.grade }
-        : spotlight);
+      studentSpotlights = studentSpotlights.map(spotlight => {
+        if (spotlight.studentEmail !== migration.email || spotlight.grade === migration.grade) return spotlight;
+        changed = true;
+        return { ...spotlight, grade: migration.grade };
+      });
     }
-    applied.add(migration.id);
-    changed = true;
+    if (!alreadyApplied) {
+      applied.add(migration.id);
+      changed = true;
+    }
   });
 
   approvedStudentRemovalMigrations.forEach(migration => {

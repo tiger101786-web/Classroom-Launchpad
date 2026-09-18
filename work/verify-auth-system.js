@@ -32,7 +32,10 @@ fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringi
     createdAt: "2026-09-01T00:00:00.000Z",
     updatedAt: "2026-09-01T00:00:00.000Z"
   }],
-  appliedDataMigrations: ["2026-09-08-kelly-vien-grade-7"]
+  appliedDataMigrations: [
+    "2026-09-08-kelly-vien-grade-7",
+    "2026-09-16-kelly-vien-spotlight-grade-7"
+  ]
 }, null, 2));
 
 const child = spawn(process.execPath, ["server.js"], {
