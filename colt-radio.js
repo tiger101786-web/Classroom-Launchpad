@@ -315,13 +315,13 @@
       note: "Spanish flamenco from Radio Caprice. The provider describes its broadcasts as commercial-free; ad-free playback and classroom suitability have not been independently verified."
     },
     {
-      id: "cumbias-mezcladas",
-      label: "Cumbia • Mix",
+      id: "tejano-express",
+      label: "Tejano • Express",
       type: "stream",
-      source: "https://stream.zeno.fm/xpe0b2f42mzuv",
-      provider: "Cumbias Mezcladas · DJ Corsan",
-      searchTerms: "cumbia cumbias mezcladas mexico mexican latin dj corsan",
-      note: "Cumbia mixes selected by DJ Corsan. A radio directory describes this station as commercial-free; ad-free playback and classroom suitability have not been independently verified."
+      source: "/api/radio-audio/tejano-express",
+      provider: "Tejano Express Radio",
+      searchTerms: "tejano express cumbia cumbias conjunto texas mexican latin laredo",
+      note: "Tejano, cumbia, and conjunto from Tejano Express Radio. The station describes its broadcasts as commercial-free; ad-free playback and classroom suitability have not been independently verified."
     },
     {
       id: "iheart-mardi-gras",
@@ -718,7 +718,7 @@
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
-    "Asian", "Hawaiian", "Persian", "Spanish", "Cumbia", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
+    "Asian", "Hawaiian", "Persian", "Spanish", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
@@ -741,7 +741,7 @@
   }
 
   const stationIconPaths = {
-    "cumbias-mezcladas": '<ellipse cx="9" cy="7" rx="5" ry="2"/><path d="m4 7 1 13c2 2 6 2 8 0l1-13M7 10v8m4-8v8M17 5l4-2v9"/><ellipse cx="19" cy="13" rx="2" ry="1.5"/>',
+    "tejano-express": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M10 7v10m3-10v10m3-10v10M19 8v1m0 3v1m0 3v1"/>',
     "caprice-flamenco": '<path d="m14 10 6-7 2 2-7 6M14 10c-3-4-7-2-6 1-5-1-7 4-4 7s8 1 7-4c3 1 5-1 3-4Z"/><circle cx="9" cy="14" r="1.5"/>',
     "iheart-mardi-gras": '<path d="M3 8c3-2 6 2 9 2s6-4 9-2l-1 6c-2 5-6 3-8 0-2 3-6 5-8 0L3 8Z"/><path d="m6 11 3 1m6 0 3-1M8 5 7 2m9 3 1-3M12 6V2"/>',
     "halloweenradio-kids": '<path d="M12 7V3l3-1M12 7C5 3 2 9 3 15s5 7 9 5c4 2 8 1 9-5s-2-12-9-8Z"/><path d="m7 12 2-2 1 2m4 0 1-2 2 2M8 15c2 3 6 3 8 0"/>',

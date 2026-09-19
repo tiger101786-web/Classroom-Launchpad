@@ -49,6 +49,7 @@ const schoolNetworkRadioRelays = Object.freeze({
   "koko-hawaiian": "https://s2.yesstreaming.net:17031/stream",
   "caprice-far-east": "http://79.111.119.111:8002/fareast",
   "caprice-flamenco": "http://79.111.14.76:8002/flamenco",
+  "tejano-express": "http://54.39.247.236:6560/stream",
   "halloweenradio-kids": "https://radio1.streamserver.link:8030/hrk-aac"
 });
 const teacherLoginAttempts = new Map();

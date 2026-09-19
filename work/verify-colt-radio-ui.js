@@ -257,7 +257,7 @@ async function run() {
     await page.route("**/api/radio-audio/caprice-far-east", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("**/api/radio-audio/caprice-flamenco", route => route.fulfill({ status: 200, contentType: "audio/aacp", body: Buffer.from([]) }));
     await page.route("https://stream.revma.ihrhls.com/zc10638", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
-    await page.route("https://stream.zeno.fm/xpe0b2f42mzuv", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
+    await page.route("**/api/radio-audio/tejano-express", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("**/api/radio-audio/koko-hawaiian", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
     await page.route("**/api/radio-audio/halloweenradio-kids", route => route.fulfill({ status: 200, contentType: "audio/aac", body: Buffer.from([]) }));
     await page.route("https://stream.zeno.fm/3q0k3nxazjkvv", route => route.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.from([]) }));
@@ -320,15 +320,17 @@ async function run() {
     }));
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
-      visibleStationNames.filter(name => !['Spanish Flamenco', 'Cumbia Mix', 'Mardi Gras NOLA'].includes(name)).map(name => name.replace(" ", " • ")),
+      visibleStationNames.filter(name => !['Spanish Flamenco', 'Tejano Express', 'Mardi Gras NOLA'].includes(name)).map(name => name.replace(" ", " • ")),
       ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Patriotic • Abiding", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Medieval • Ancient FM", "Pipe • Organ Organlive", "Celtic • Traditional", "Asian • Caprice", "Hawaiian • KOKO", "Persian • Farsi", "Country • Family", "Oldies • Golden Years", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Halloween • Kids", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const stationSearch = page.getByRole("searchbox", { name: "Search Colt Radio stations or music styles" });
     for (const [query, expected] of [
       ["flamenco", ["Spanish Flamenco"]],
-      ["cumbia", ["Cumbia Mix"]],
-      ["cumbias mezcladas", ["Cumbia Mix"]],
-      ["corsan", ["Cumbia Mix"]],
+      ["cumbia", ["Tejano Express"]],
+      ["tejano", ["Tejano Express"]],
+      ["conjunto", ["Tejano Express"]],
+      ["cumbias mezcladas", []],
+      ["corsan", []],
       ["andalusia", ["Spanish Flamenco"]],
       ["mardi gras", ["Mardi Gras NOLA"]],
       ["new orleans", ["Mardi Gras NOLA"]],
@@ -563,8 +565,8 @@ async function run() {
     assert.equal(await audio.getAttribute("src"), "/api/radio-audio/caprice-flamenco");
     await page.getByRole("button", { name: "Mardi Gras • NOLA", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.revma.ihrhls.com/zc10638");
-    await page.getByRole("button", { name: "Cumbia • Mix", exact: true }).click();
-    assert.equal(await audio.getAttribute("src"), "https://stream.zeno.fm/xpe0b2f42mzuv");
+    await page.getByRole("button", { name: "Tejano • Express", exact: true }).click();
+    assert.equal(await audio.getAttribute("src"), "/api/radio-audio/tejano-express");
     assert.match(await page.locator(".colt-radio-note").innerText(), /not been independently verified/);
     await page.getByRole("button", { name: "Halloween • Kids", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "/api/radio-audio/halloweenradio-kids");
