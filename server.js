@@ -15,6 +15,14 @@ const {
 } = require("./colt-corner-moderation");
 
 const root = __dirname;
+const homeSceneIds = new Set(["original", "reef", "forest"]);
+function cleanHomeScene(value) {
+  return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false };
+}
+function homeSceneForSession(session, db) {
+  return cleanHomeScene(session.role === "teacher" ? db.teacherHomeScene
+    : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeScene);
+}
 const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin"]);
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
@@ -832,6 +840,7 @@ function normalizeApprovedStudents(entries) {
       activationIssuedAt: Number.isFinite(Date.parse(source.activationIssuedAt)) ? new Date(source.activationIssuedAt).toISOString() : "",
       avatarUpdatedAt: Number.isFinite(Date.parse(source.avatarUpdatedAt)) ? new Date(source.avatarUpdatedAt).toISOString() : "",
       profileFrame: cleanProfileFrame(source.profileFrame),
+      homeScene: cleanHomeScene(source.homeScene),
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
   }).sort((a, b) => a.email.localeCompare(b.email));
@@ -1223,6 +1232,7 @@ function writeDb(db) {
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,
     teacherProfileFrame: cleanProfileFrame(db.teacherProfileFrame),
+    teacherHomeScene: cleanHomeScene(db.teacherHomeScene),
     teacherAvatarUpdatedAt: Number.isFinite(Date.parse(db.teacherAvatarUpdatedAt))
       ? new Date(db.teacherAvatarUpdatedAt).toISOString()
       : "",
@@ -1347,7 +1357,8 @@ function publicSession(session, db = null) {
     email: session.role === "student" ? session.email : "",
     grade: session.role === "student" ? session.grade || "" : "Teacher",
     avatarUrl: profileAvatarUrlForSession(session, sourceDb),
-    profileFrame: profileFrameForSession(session, sourceDb)
+    profileFrame: profileFrameForSession(session, sourceDb),
+    homeScene: homeSceneForSession(session, sourceDb)
   };
 }
 function requireRole(req, res, roles) {
@@ -3457,6 +3468,29 @@ async function handleApi(req, res, pathname) {
       "X-Content-Type-Options": "nosniff"
     });
     fs.createReadStream(avatarPath).pipe(res);
+    return true;
+  }
+
+  if (pathname === "/api/home-scene" && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      if (!homeSceneIds.has(body.id) || typeof body.motion !== "boolean") throw new Error("Choose an available scene and motion setting.");
+      const db = readDb();
+      const scene = cleanHomeScene(body);
+      if (allowed.role === "teacher") db.teacherHomeScene = scene;
+      else {
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(item => item.email === normalizeEmail(allowed.email));
+        if (!student) throw new Error("Your approved student account could not be found.");
+        student.homeScene = scene;
+        db.approvedStudents = students;
+      }
+      writeDb(db);
+      sendJson(res, 200, { ok: true, session: publicSession(allowed, db) });
+    } catch (error) { sendJson(res, 400, { error: error.message }); }
     return true;
   }
 

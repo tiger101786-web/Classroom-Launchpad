@@ -2402,11 +2402,7 @@ function renderHome() {
         false,
         renderHomeHeaderControls()
       )}
-      <section class="home-feature${homeProfileVideo.endsWith("home-profile-12.mp4") ? " home-feature--detail" : ""}">
-        <video class="school-photo" autoplay muted loop playsinline aria-label="Rotating St. Cletus Colts profile animation">
-          <source data-src="${homeProfileVideo}?v=20260905-profile-optimized1" type="video/mp4">
-        </video>
-      </section>
+      ${window.LaunchpadScenes.render(authSession, homeProfileVideo)}
     </section>
     <section id="homeBody">
       ${renderHomeDefault()}
@@ -11618,6 +11614,11 @@ function attachScreenHandlers() {
   attachThreadForm();
   attachReplyForm();
   attachForumProfileEditor();
+  window.LaunchpadScenes.attach(authSession, homeProfileVideo, session => {
+    if (!isSignedIn() || authSession.role !== session.role || authSession.email !== session.email) return;
+    authSession = session;
+    render();
+  });
   hydrateOfficeSubmissionPreviews();
   startCalendarClock();
   startClassTimerClock();

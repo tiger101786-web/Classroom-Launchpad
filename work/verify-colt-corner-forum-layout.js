@@ -120,6 +120,53 @@ async function run() {
     await context.addCookies([{ name: cookieName, value: cookieValue, url: baseUrl }]);
     const page = await context.newPage();
     await page.goto(baseUrl, { waitUntil: "networkidle" });
+    // Homepage scene choices are personal, persistent, and previewed before saving.
+    assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'original');
+    await page.locator('#chooseLaunchScene').click();
+    await page.locator('[data-scene-choice="reef"]').click();
+    assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, 'original');
+    await page.locator('#saveLaunchScene').click();
+    await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
+    assert.equal(await page.locator('.launch-scene-image').evaluate(image => image.complete && image.naturalWidth > 0), true);
+    await page.locator('#toggleLaunchScene').click();
+    await page.getByRole('button', { name: 'Resume scene', exact: true }).waitFor();
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.motion, false);
+    await page.reload({ waitUntil: 'networkidle' });
+    assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
+    assert(await page.locator('.home-scene-feature .launch-scene').evaluate(element => element.classList.contains('is-paused')));
+    assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.homeScene.id, 'original');
+    assert.equal((await request('/api/home-scene', { method: 'POST', body: { id: 'reef', motion: true } })).status, 401);
+    assert.equal((await request('/api/home-scene', { method: 'POST', cookie: studentCookie, body: { id: '../bad', motion: true } })).status, 400);
+    await page.locator('#chooseLaunchScene').click();
+    await page.locator('[data-scene-choice="forest"]').click();
+    await page.locator('#launchSceneMotion').check();
+    await page.locator('#saveLaunchScene').click();
+    await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
+    assert(await page.locator('#toggleLaunchScene').isDisabled());
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'scene-drift');
+    await page.locator('#home-top').screenshot({ path: path.join(dataDir, 'scene-home-desktop.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('#chooseLaunchScene').click();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.locator('.launch-scene-dialog').screenshot({ path: path.join(dataDir, 'scene-chooser-mobile.png') });
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.launch-scene-dialog').count(), 0);
+    await page.locator('#chooseLaunchScene').click();
+    await page.locator('[data-scene-choice="original"]').click();
+    await page.locator('#launchSceneMotion').uncheck();
+    assert(await page.locator('#launchScenePreview video').evaluate(video => video.muted && !video.autoplay));
+    await page.route('**/api/home-scene', route => route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Test save failure' }) }));
+    await page.locator('#saveLaunchScene').click();
+    await page.locator('#launchSceneSaveStatus').getByText('Test save failure').waitFor();
+    assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'forest');
+    await page.unroute('**/api/home-scene');
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.locator('[data-action="openColtCorner"]').first().click();
     await page.locator('[data-action="openThread"]').first().click();
     await page.locator(".forum-thread-view").waitFor();
@@ -244,6 +291,9 @@ async function run() {
 
     console.log(JSON.stringify({
       forumDesktopTwoColumnLayout: true,
+      homepageScenesPersistPerAccount: true,
+      sceneMotionPauseAndReducedMotion: true,
+      scenePreviewCancelAndSaveFailure: true,
       accountSavedFramePreviews: true,
       frameScreenshot: path.join(dataDir, 'profile-frames-desktop.png'),
       frameMobileScreenshot: path.join(dataDir, 'profile-frames-mobile.png'),

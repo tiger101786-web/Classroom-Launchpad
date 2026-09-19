@@ -1,0 +1,35 @@
+.home-scene-feature { flex-direction: column; gap: 10px; }
+.launch-scene { position: relative; overflow: hidden; isolation: isolate; flex: 0 0 auto; }
+.launch-scene-image, .launch-scene-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.launch-scene-image { transform: scale(1.04); animation: scene-drift 20s ease-in-out infinite alternate; }
+.launch-scene-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 50%; }
+.launch-scene-particles i { position: absolute; left: var(--x); top: var(--y); width: 4px; height: 4px; border-radius: 50%; background: #ffe394; box-shadow: 0 0 8px 2px #ffdf8080; animation: scene-firefly 9s ease-in-out infinite alternate; animation-delay: calc(var(--n) * -1.3s); }
+.scene-reef .launch-scene-particles i { top: 110%; width: 9px; height: 9px; background: #dbffff12; border: 1px solid #dcffff8c; box-shadow: inset 1px 1px 2px #fff9; animation: scene-bubble 14s linear infinite; animation-delay: calc(var(--n) * -1.7s); }
+.launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
+.launch-scene-controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; max-width: 310px; }
+.launch-scene-controls button { border: 1px solid #a6526a; border-radius: 18px; background: #190c13e8; color: #fff0f5; padding: 7px 12px; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.launch-scene-controls button:focus-visible, .launch-scene-options button:focus-visible { outline: 3px solid #f197b5; outline-offset: 3px; }
+.launch-scene-controls button:disabled { opacity: .65; cursor: default; }
+.launch-scene-status { max-width: 300px; font-size: .75rem; color: #ffcada; }
+.launch-scene-status:empty { display: none; }
+.launch-scene-dialog { width: min(680px, calc(100vw - 28px)); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box; border: 1px solid var(--border); border-radius: 22px; padding: 24px; background: var(--paper); color: var(--ink); box-shadow: 0 24px 100px #0009; }
+.launch-scene-dialog::backdrop { background: #08060dcc; backdrop-filter: blur(5px); }
+.launch-scene-dialog-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.launch-scene-dialog h2 { margin: 8px 0 0; font-size: 1.45rem; }
+.launch-scene-dialog > p { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+#launchScenePreview { display: flex; justify-content: center; margin: 18px 0; }
+#launchScenePreview .school-photo { width: 210px; height: 210px; border-width: 5px; }
+.launch-scene-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.launch-scene-options button { display: grid; justify-items: center; align-content: start; gap: 7px; border: 2px solid var(--border); border-radius: 14px; padding: 12px 8px; color: var(--ink); background: var(--paper); cursor: pointer; }
+.launch-scene-options button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 12%, var(--paper)); }
+.launch-scene-options img, .scene-original-thumb { display: grid; place-items: center; width: 74px; height: 74px; object-fit: cover; border-radius: 50%; background: #56122c; color: white; font-size: 1.5rem; }
+.launch-scene-options strong { font-size: .85rem; text-align: center; }
+.launch-scene-options small { color: var(--muted); font-size: .72rem; text-align: center; }
+.launch-scene-motion { display: flex; align-items: center; gap: 10px; margin-top: 20px; font-weight: 800; }
+.launch-scene-motion input { width: 19px; height: 19px; accent-color: var(--blue); }
+.launch-scene-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+@keyframes scene-drift { from { transform: scale(1.04) translate(-.4%, 0); } to { transform: scale(1.08) translate(.4%, -.6%); } }
+@keyframes scene-bubble { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: .65; } 85% { opacity: .5; } 100% { transform: translate(12px, -350px); opacity: 0; } }
+@keyframes scene-firefly { 0% { transform: translate(-5px, 4px); opacity: .2; } 50% { opacity: .8; } 100% { transform: translate(9px, -10px); opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .launch-scene *, .launch-scene { animation: none !important; } }
+@media (max-width: 480px) { .launch-scene-dialog { padding: 16px; } .launch-scene-options { gap: 6px; } .launch-scene-options img, .scene-original-thumb { width: 58px; height: 58px; } .launch-scene-options strong { font-size: .75rem; } .launch-scene-options small { font-size: .66rem; } }
