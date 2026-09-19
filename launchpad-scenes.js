@@ -16,7 +16,9 @@
     { id: "volcano", name: "Volcano Island", description: "Tropical sunset & drifting embers", image: "assets/launchpad-scene-volcano.png" },
     { id: "football", name: "Friday Night Football", description: "Stadium lights & falling confetti", image: "assets/launchpad-scene-football.png" },
     { id: "basketball", name: "Basketball After Dark", description: "Gently glowing court lights & reflections", image: "assets/launchpad-scene-basketball.png" },
-    { id: "championship", name: "Colts Championship Arena", description: "Golden trophy & celebration confetti", image: "assets/launchpad-scene-championship.png" }
+    { id: "championship", name: "Colts Championship Arena", description: "Golden trophy & celebration confetti", image: "assets/launchpad-scene-championship.png" },
+    { id: "soccer", name: "Soccer Stadium", description: "Twilight pitch & glowing floodlights", image: "assets/launchpad-scene-soccer.png" },
+    { id: "baseball", name: "Baseball Under the Lights", description: "Sunset diamond & warm stadium lights", image: "assets/launchpad-scene-baseball.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   let guestMotion = true;

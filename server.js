@@ -15,7 +15,7 @@ const {
 } = require("./colt-corner-moderation");
 
 const root = __dirname;
-const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observatory", "dragon", "cabin", "neon", "castle", "koi", "crystal", "pumpkin", "volcano", "football", "basketball", "championship"]);
+const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observatory", "dragon", "cabin", "neon", "castle", "koi", "crystal", "pumpkin", "volcano", "football", "basketball", "championship", "soccer", "baseball"]);
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false };
 }

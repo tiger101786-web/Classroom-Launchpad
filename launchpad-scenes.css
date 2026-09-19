@@ -35,6 +35,9 @@
 .scene-basketball .launch-scene-particles i:nth-child(n+2) { display: none; }
 .scene-football .launch-scene-particles::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 15% 28%, #fff2c1b3, transparent 15%), radial-gradient(ellipse at 85% 28%, #fff2c1b3, transparent 15%); animation: scene-stadium-glow 5s ease-in-out infinite; }
 @keyframes scene-court-lights { 0%, 100% { opacity: .2; } 50% { opacity: .8; } }
+.scene-soccer .launch-scene-particles i, .scene-baseball .launch-scene-particles i { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; background: radial-gradient(ellipse 13% 12% at 12% 18%, #edf5ffe6, #b6d9ff66 38%, transparent 100%), radial-gradient(ellipse 13% 12% at 88% 18%, #edf5ffe6, #b6d9ff66 38%, transparent 100%); box-shadow: none; opacity: .5; animation: scene-court-lights 5s ease-in-out infinite; animation-delay: 0s; }
+.scene-baseball .launch-scene-particles i { background: radial-gradient(ellipse 13% 12% at 13% 15%, #fff3cce6, #ffc77566 38%, transparent 100%), radial-gradient(ellipse 13% 12% at 87% 15%, #fff3cce6, #ffc77566 38%, transparent 100%); animation-duration: 6s; }
+.scene-soccer .launch-scene-particles i:nth-child(n+2), .scene-baseball .launch-scene-particles i:nth-child(n+2) { display: none; }
 .scene-championship .launch-scene-particles::before, .scene-championship .launch-scene-particles::after { content: ""; position: absolute; left: 34%; top: 33%; width: 15px; height: 15px; background: #fff4ce; clip-path: polygon(50% 0, 59% 40%, 100% 50%, 59% 60%, 50% 100%, 41% 60%, 0 50%, 41% 40%); animation: scene-trophy-sparkle 3.5s ease-in-out infinite; }
 .scene-championship .launch-scene-particles::after { left: 65%; top: 52%; animation-delay: -1.75s; }
 @keyframes scene-confetti { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 10%, 85% { opacity: .85; } 100% { transform: translate(25px, 350px) rotate(540deg); opacity: 0; } }
