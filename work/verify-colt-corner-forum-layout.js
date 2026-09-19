@@ -223,8 +223,17 @@ async function run() {
           animation.play();
           return { dim, bright, transform };
         });
-        assert(light.bright - light.dim > .5);
+        assert(light.bright - light.dim > .8);
         assert.equal(light.transform, 'none');
+        for (const [phase, fraction] of [['dim', 0], ['bright', .5]]) {
+          await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate((element, fraction) => {
+            const animation = element.getAnimations()[0];
+            animation.pause();
+            animation.currentTime = animation.effect.getTiming().duration * fraction;
+          }, fraction);
+          await page.locator('#launchScenePreview .launch-scene').screenshot({ path: path.join(dataDir, `${id}-lights-${phase}.png`) });
+        }
+        await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(element => element.getAnimations()[0].play());
       }
       if (['forest', 'observatory', 'dragon'].includes(id)) {
         const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
