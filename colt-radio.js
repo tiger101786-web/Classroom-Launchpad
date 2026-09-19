@@ -306,6 +306,24 @@
       note: "Irish traditional and folk music streamed by the listener-supported Ceol FM. No account required."
     },
     {
+      id: "caprice-flamenco",
+      label: "Spanish • Flamenco",
+      type: "stream",
+      source: "/api/radio-audio/caprice-flamenco",
+      provider: "Radio Caprice",
+      searchTerms: "spain spanish flamenco andalusia guitar traditional",
+      note: "Spanish flamenco from Radio Caprice. The provider describes its broadcasts as commercial-free; ad-free playback and classroom suitability have not been independently verified."
+    },
+    {
+      id: "iheart-mardi-gras",
+      label: "Mardi Gras • NOLA",
+      type: "stream",
+      source: "https://stream.revma.ihrhls.com/zc10638",
+      provider: "iHeart Mardi Gras Radio",
+      searchTerms: "mardi gras new orleans louisiana nola carnival brass party",
+      note: "New Orleans party music, described by iHeart as commercial-free. Introductory ads and classroom suitability have not been independently verified."
+    },
+    {
       id: "caprice-far-east",
       label: "Asian • Caprice",
       type: "stream",
@@ -691,7 +709,7 @@
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
-    "Asian", "Hawaiian", "Persian", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
+    "Asian", "Hawaiian", "Persian", "Spanish", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
@@ -714,6 +732,8 @@
   }
 
   const stationIconPaths = {
+    "caprice-flamenco": '<path d="m14 10 6-7 2 2-7 6M14 10c-3-4-7-2-6 1-5-1-7 4-4 7s8 1 7-4c3 1 5-1 3-4Z"/><circle cx="9" cy="14" r="1.5"/>',
+    "iheart-mardi-gras": '<path d="M3 8c3-2 6 2 9 2s6-4 9-2l-1 6c-2 5-6 3-8 0-2 3-6 5-8 0L3 8Z"/><path d="m6 11 3 1m6 0 3-1M8 5 7 2m9 3 1-3M12 6V2"/>',
     "halloweenradio-kids": '<path d="M12 7V3l3-1M12 7C5 3 2 9 3 15s5 7 9 5c4 2 8 1 9-5s-2-12-9-8Z"/><path d="m7 12 2-2 1 2m4 0 1-2 2 2M8 15c2 3 6 3 8 0"/>',
     "caprice-far-east": '<path d="m4 9 8-5 8 5H4Zm-2 6 10-5 10 5H2Zm4 0v6h12v-6M3 21h18M10 21v-4h4v4M12 2v2"/>',
     "koko-hawaiian": '<path d="M12 21c2-5 3-10 1-15M13 6C9 2 5 3 3 6c4-1 7 0 10 0Zm0 0c3-4 6-3 8 0-3-1-5 0-8 0ZM3 21c3-2 6-2 9 0s6 2 9 0"/>',

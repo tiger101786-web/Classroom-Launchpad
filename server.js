@@ -48,6 +48,7 @@ const schoolNetworkRadioRelays = Object.freeze({
   "organlive-pipe-organ": "https://play.organlive.com:7010/320",
   "koko-hawaiian": "https://s2.yesstreaming.net:17031/stream",
   "caprice-far-east": "http://79.111.119.111:8002/fareast",
+  "caprice-flamenco": "http://79.111.14.76:8002/flamenco",
   "halloweenradio-kids": "https://radio1.streamserver.link:8030/hrk-aac"
 });
 const teacherLoginAttempts = new Map();
