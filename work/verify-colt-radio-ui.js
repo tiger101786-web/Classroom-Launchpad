@@ -545,6 +545,62 @@ async function run() {
 
     await page.getByRole("button", { name: "Hawaiian • KOKO", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "/api/radio-audio/koko-hawaiian");
+    const recovery = await page.evaluate(() => {
+      const audio = document.querySelector("audio.colt-radio-audio");
+      const button = document.querySelector(".colt-radio-play");
+      const state = () => document.querySelector(".colt-radio-now-playing").dataset.playbackState;
+      const originalSetTimeout = window.setTimeout;
+      const originalClearTimeout = window.clearTimeout;
+      const timers = new Map();
+      let nextId = 900000, loads = 0, paused = true, ready = 3, time = 0;
+      const properties = ["play", "pause", "load", "paused", "readyState", "currentTime"];
+      const originals = properties.map(key => Object.getOwnPropertyDescriptor(audio, key));
+      try {
+        window.setTimeout = (callback, delay, ...args) => {
+          if (delay !== 7000) return originalSetTimeout(callback, delay, ...args);
+          const id = nextId++;
+          timers.set(id, callback);
+          return id;
+        };
+        window.clearTimeout = id => { if (!timers.delete(id)) originalClearTimeout(id); };
+        Object.defineProperties(audio, {
+          play: { configurable: true, value: () => { paused = false; return Promise.resolve(); } },
+          pause: { configurable: true, value: () => { paused = true; } },
+          load: { configurable: true, value: () => { loads++; } },
+          paused: { configurable: true, get: () => paused },
+          readyState: { configurable: true, get: () => ready },
+          currentTime: { configurable: true, get: () => time }
+        });
+        button.click();
+        audio.dispatchEvent(new Event("playing"));
+        audio.dispatchEvent(new Event("stalled"));
+        const bufferedStallIgnored = state() === "playing" && timers.size === 0;
+        ready = 2;
+        audio.dispatchEvent(new Event("waiting"));
+        const deadline = [...timers.keys()][0];
+        for (let i = 0; i < 5; i++) audio.dispatchEvent(new Event("stalled"));
+        const deadlinePreserved = timers.size === 1 && timers.has(deadline);
+        ready = 3; time = 1;
+        audio.dispatchEvent(new Event("timeupdate"));
+        const progressRecovered = state() === "playing" && timers.size === 0;
+        ready = 2;
+        audio.dispatchEvent(new Event("waiting"));
+        const retry = [...timers.values()][0];
+        timers.clear(); retry();
+        const reconnected = loads === 1 && state() === "retrying";
+        const finalTimeout = [...timers.values()][0];
+        timers.clear(); finalTimeout();
+        return { bufferedStallIgnored, deadlinePreserved, progressRecovered, reconnected, boundedFailure: state() === "error" && paused };
+      } finally {
+        window.setTimeout = originalSetTimeout;
+        window.clearTimeout = originalClearTimeout;
+        properties.forEach((key, index) => {
+          if (originals[index]) Object.defineProperty(audio, key, originals[index]);
+          else delete audio[key];
+        });
+      }
+    });
+    assert(Object.values(recovery).every(Boolean), JSON.stringify(recovery));
     await page.getByRole("button", { name: "Persian • Farsi", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://stream.zeno.fm/3q0k3nxazjkvv");
 

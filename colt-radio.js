@@ -1578,7 +1578,7 @@
     audio.addEventListener("play", () => {
       if (wantsPlayback) setPlaybackState(playbackAttempt ? "retrying" : "connecting");
     });
-    audio.addEventListener("playing", () => {
+    function markAudioPlaying() {
       if (!wantsPlayback) return;
       clearConnectionTimer();
       playbackAttempt = 0;
@@ -1586,6 +1586,13 @@
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", {
         detail: { playing: true, station: activeStation }
       }));
+    }
+    audio.addEventListener("playing", markAudioPlaying);
+    let lastPlaybackTime = 0;
+    audio.addEventListener("timeupdate", () => {
+      if (audio.currentTime > lastPlaybackTime && !audio.paused && audio.readyState >= 3
+        && nowPlaying.dataset.playbackState === "buffering") markAudioPlaying();
+      lastPlaybackTime = audio.currentTime;
     });
     audio.addEventListener("pause", () => {
       globalObject.dispatchEvent(new CustomEvent("colt-radio-playback", { detail: { playing: false } }));
@@ -1598,8 +1605,11 @@
     });
     ["waiting", "stalled"].forEach(eventName => audio.addEventListener(eventName, () => {
       if (!wantsPlayback) return;
+      // A stalled download can still have enough buffered audio to keep playing.
+      if (eventName === "stalled" && !audio.paused && audio.readyState >= 3) return;
       setPlaybackState("buffering");
-      clearConnectionTimer();
+      // Keep the original deadline: repeated events must not postpone recovery.
+      if (connectionTimer) return;
       const requestVersion = playbackRequestVersion;
       const attemptNumber = playbackAttempt;
       connectionTimer = globalObject.setTimeout(() => {
