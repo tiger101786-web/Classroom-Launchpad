@@ -591,6 +591,15 @@
       note: "Soft spa music for relaxation, reading, and a peaceful classroom atmosphere, streamed commercial-free by YouRadio."
     },
     {
+      id: "halloweenradio-kids",
+      label: "Halloween • Kids",
+      type: "stream",
+      source: "/api/radio-audio/halloweenradio-kids",
+      provider: "Halloweenradio.net Kids",
+      searchTerms: "halloween spooky pumpkin monster autumn fall",
+      note: "Playful Halloween songs, silly sounds, and stories curated for children by Halloweenradio.net Kids. The listener-supported network advertises ad-free streaming."
+    },
+    {
       id: "evergreen-christmas",
       label: "Christmas • Evergreen",
       type: "stream",
@@ -683,7 +692,7 @@
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
     "Asian", "Hawaiian", "Persian", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
-    "Ambient", "Sleep", "Feel-Good", "Christmas", "Decades"
+    "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
   stations.sort((left, right) => {
@@ -705,6 +714,7 @@
   }
 
   const stationIconPaths = {
+    "halloweenradio-kids": '<path d="M12 7V3l3-1M12 7C5 3 2 9 3 15s5 7 9 5c4 2 8 1 9-5s-2-12-9-8Z"/><path d="m7 12 2-2 1 2m4 0 1-2 2 2M8 15c2 3 6 3 8 0"/>',
     "caprice-far-east": '<path d="m4 9 8-5 8 5H4Zm-2 6 10-5 10 5H2Zm4 0v6h12v-6M3 21h18M10 21v-4h4v4M12 2v2"/>',
     "koko-hawaiian": '<path d="M12 21c2-5 3-10 1-15M13 6C9 2 5 3 3 6c4-1 7 0 10 0Zm0 0c3-4 6-3 8 0-3-1-5 0-8 0ZM3 21c3-2 6-2 9 0s6 2 9 0"/>',
     "farsi-frequency": '<path d="m3 15 5-7h8l5 7H3Zm0 0v4h18v-4M9 9l-3 6m6-6v6m3-6 3 6M6 4l4 3m8-3-4 3"/>',
@@ -892,7 +902,7 @@
           buildElement("span", "colt-radio-station-style", stationStyle)
         );
       }
-      if (stationFamily.length > 9 || stationStyle.length > 9) item.classList.add("has-long-name");
+      if (stationFamily.length >= 9 || stationStyle.length > 9) item.classList.add("has-long-name");
       button.setAttribute("aria-label", station.label);
       button.append(stationIcon(station.id), stationName);
       const favorite = buildElement("button", "colt-radio-favorite", "☆");

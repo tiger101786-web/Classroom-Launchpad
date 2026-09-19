@@ -33,7 +33,8 @@ const schoolNetworkRadioRelays = Object.freeze({
   "ancient-fm": "https://mediaserv73.live-streams.nl:18058/stream",
   "organlive-pipe-organ": "https://play.organlive.com:7010/320",
   "koko-hawaiian": "https://s2.yesstreaming.net:17031/stream",
-  "caprice-far-east": "http://79.111.119.111:8002/fareast"
+  "caprice-far-east": "http://79.111.119.111:8002/fareast",
+  "halloweenradio-kids": "https://radio1.streamserver.link:8030/hrk-aac"
 });
 const teacherLoginAttempts = new Map();
 const approvedStudentGradeMigrations = [{
