@@ -81,3 +81,46 @@ assert.match(popup(), /1 new student response/);
 context.directMessages[2].readByTeacher = true;
 assert.equal(popup(), "");
 console.log("Private message security, password visibility, and popup timeout checks passed.");
+
+async function verifyMessageBell() {
+  const read = [];
+  const revealed = [];
+  const bell = vm.createContext({
+    authSession: { role: 'teacher', email: '' },
+    approvedStudents: [{ email: 'a@school.org' }, { email: 'b@school.org' }],
+    directMessages: [
+      { id: 'older', studentEmail: 'a@school.org', senderRole: 'student', createdAt: '2026-09-19T10:00:00Z' },
+      { id: 'newest', studentEmail: 'b@school.org', senderRole: 'student', createdAt: '2026-09-19T12:00:00Z' },
+      { id: 'outgoing', studentEmail: 'a@school.org', senderRole: 'teacher', createdAt: '2026-09-19T13:00:00Z' }
+    ],
+    selectedMessageStudentEmail: 'a@school.org', teacherMessageSearch: 'old search', teacherMessageGrade: '4', teacherMessageHistoryFilter: 'messaged',
+    directMessageStatus: '', dashboardSection: '', action: 'openMessages',
+    sessionStorage: { setItem() {} },
+    loadApprovedStudents: async () => {},
+    markCurrentDirectMessagesRead: async email => read.push(email),
+    render() {}, setScreen: value => { bell.currentScreen = value; },
+    revealDirectMessage: id => revealed.push(id)
+  });
+  vm.runInContext(`
+    function isTeacher() { return authSession.role === 'teacher'; }
+    function isApprovedStudent() { return authSession.role === 'student'; }
+    ${app.slice(app.indexOf('function newestUnreadDirectMessage()'), app.indexOf('function revealDirectMessage('))}
+    async function openBell() {
+      ${app.slice(app.indexOf('  if (action === "openMessages") {'), app.indexOf('  if (action === "messageGrade") {'))}
+    }
+  `, bell);
+  await vm.runInContext('openBell()', bell);
+  assert.equal(bell.selectedMessageStudentEmail, 'b@school.org');
+  assert.equal(bell.teacherMessageGrade, 'all');
+  assert.equal(bell.teacherMessageSearch, '');
+  assert.deepEqual(read, ['b@school.org'], 'Only the opened conversation should be marked read.');
+  assert.deepEqual(revealed, ['newest']);
+  bell.authSession = { role: 'student', email: 'a@school.org' };
+  await vm.runInContext('openBell()', bell);
+  assert.equal(bell.currentScreen.name, 'messages');
+  assert.equal(revealed.at(-1), 'outgoing');
+  bell.directMessages.forEach(message => { message.readByStudent = true; message.readByTeacher = true; });
+  assert.equal(vm.runInContext('newestUnreadDirectMessage()', bell), undefined);
+  console.log('Personal-message bell opens the newest unread conversation and targets its message.');
+}
+verifyMessageBell().catch(error => { console.error(error); process.exitCode = 1; });

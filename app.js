@@ -9642,6 +9642,21 @@ function directMessageConversation(studentEmail) {
   return directMessages.filter(message => message.studentEmail === email);
 }
 
+function newestUnreadDirectMessage() {
+  return directMessages.filter(message => isTeacher()
+    ? message.senderRole === "student" && !message.readByTeacher && approvedStudents.some(student => student.email === message.studentEmail)
+    : message.senderRole === "teacher" && !message.readByStudent && message.studentEmail === String(authSession.email || "").toLowerCase()
+  ).sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0))[0];
+}
+
+function revealDirectMessage(messageId) {
+  if (!messageId) return;
+  const message = [...document.querySelectorAll("[data-direct-message-id]")].find(item => item.dataset.directMessageId === messageId);
+  if (!message) return;
+  message.scrollIntoView({ block: "center", behavior: "instant" });
+  message.focus({ preventScroll: true });
+}
+
 function renderDirectMessageThread(studentEmail, studentName = "Student") {
   const conversation = directMessageConversation(studentEmail);
   return `
@@ -9654,7 +9669,7 @@ function renderDirectMessageThread(studentEmail, studentName = "Student") {
         ${conversation.length ? conversation.map(message => {
           const own = (isTeacher() && message.senderRole === "teacher") || (!isTeacher() && message.senderRole === "student");
           return `
-            <article class="direct-message-bubble ${own ? "is-own" : "is-other"}">
+            <article class="direct-message-bubble ${own ? "is-own" : "is-other"}" data-direct-message-id="${escapeHtml(message.id)}" tabindex="-1">
               <strong>${escapeHtml(message.senderRole === "teacher" ? "Mr. Nieves" : formatStudentFirstLast(message.studentName))}</strong>
               <p>${escapeHtml(message.message)}</p>
               <time datetime="${escapeHtml(message.createdAt)}">${escapeHtml(formatDirectMessageTime(message.createdAt))}</time>
@@ -12861,16 +12876,26 @@ app.addEventListener("click", async event => {
     if (isTeacher()) {
       await loadApprovedStudents();
       dashboardSection = "messages";
+      const newest = newestUnreadDirectMessage();
+      if (newest) {
+        selectedMessageStudentEmail = newest.studentEmail;
+        teacherMessageSearch = "";
+        teacherMessageGrade = "all";
+        teacherMessageHistoryFilter = "all";
+      }
       sessionStorage.setItem("teacherDashboardSection", dashboardSection);
       setScreen({ name: "dashboard" });
       if (selectedMessageStudentEmail) {
         await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
         render();
       }
+      revealDirectMessage(newest?.id);
     } else if (isApprovedStudent()) {
+      const newest = newestUnreadDirectMessage();
       setScreen({ name: "messages" });
       await markCurrentDirectMessagesRead(authSession.email);
       render();
+      revealDirectMessage(newest?.id);
     } else {
       setScreen({ name: "login" });
     }
