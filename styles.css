@@ -10678,7 +10678,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.42);
   filter: blur(5px);
-  animation: launchpad-colt-shadow 2.4s ease-in-out infinite;
+  opacity: 0.52;
 }
 
 .launchpad-colt-nameplate {
@@ -10785,7 +10785,6 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .launchpad-colt-root.is-dragging .launchpad-colt-pose {
   animation: none;
-  transform: rotate(-5deg) translateY(-5px) scale(1.04);
 }
 
 .launchpad-colt-character .launchpad-colt-pose {
@@ -10798,7 +10797,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   object-position: center bottom;
   filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 5px rgba(236, 23, 68, 0.32));
   transform-origin: 60% 84%;
-  animation: launchpad-colt-breathe 2.4s ease-in-out infinite;
+  /* The video supplies Colt's movement; keep its frame planted on the platform. */
+  animation: none;
   opacity: 0;
   pointer-events: none;
   user-select: none;
@@ -10969,25 +10969,25 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .launchpad-colt-companion[data-state="directions"] .launchpad-colt-pose,
 .launchpad-colt-companion[data-state="explore"] .launchpad-colt-pose {
-  animation: launchpad-colt-point 650ms ease-in-out 2;
+  animation: none;
 }
 
 .launchpad-colt-companion[data-state="message"] .launchpad-colt-pose,
 .launchpad-colt-companion[data-state="corner"] .launchpad-colt-pose {
-  animation: launchpad-colt-hop 620ms ease-in-out 2;
+  animation: none;
 }
 
 .launchpad-colt-companion[data-state="success"] .launchpad-colt-pose,
 .launchpad-colt-companion[data-state="classroom"] .launchpad-colt-pose {
-  animation: launchpad-colt-greeting 760ms cubic-bezier(0.2, 0.8, 0.3, 1.15) 2;
+  animation: none;
 }
 
 .launchpad-colt-companion[data-state="radio"] .launchpad-colt-pose {
-  animation: launchpad-colt-groove 720ms ease-in-out infinite;
+  animation: none;
 }
 
 .launchpad-colt-companion[data-state="sleep"] .launchpad-colt-pose {
-  animation: launchpad-colt-sleep-breathe 2.8s ease-in-out infinite;
+  animation: none;
   transform: translateY(5px) scale(1.04);
   filter: saturate(0.72) brightness(0.72) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.65));
 }

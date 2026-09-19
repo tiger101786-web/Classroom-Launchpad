@@ -90,6 +90,17 @@ async function run() {
     await page.waitForSelector(".launchpad-colt-character:visible");
 
     const image = page.locator('.launchpad-colt-character video[data-pose="idle"]');
+    const groundedStates = await page.locator('.launchpad-colt-companion').evaluate(companion => {
+      const original = companion.dataset.state;
+      const result = [];
+      for (const state of ['idle', 'welcome', 'directions', 'explore', 'move', 'message', 'corner', 'success', 'classroom', 'radio', 'feeding', 'petting', 'bathing', 'sleep']) {
+        companion.dataset.state = state;
+        result.push(...Array.from(companion.querySelectorAll('video'), video => ({ state, animation: getComputedStyle(video).animationName })));
+      }
+      companion.dataset.state = original;
+      return result;
+    });
+    assert(groundedStates.every(pose => pose.animation === 'none'), JSON.stringify(groundedStates));
     assert.match(await image.getAttribute("src"), /launchpad-colt-idle\.webm/);
     assert.match(await image.getAttribute("poster"), /launchpad-colt-companion\.png/);
     assert.equal(await image.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), "none", "The sleep fade leaked onto the idle animation.");
@@ -219,7 +230,7 @@ async function run() {
     });
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "message");
     assert.equal(await greetingExcitedVideo.evaluate(element => getComputedStyle(element).opacity), "1");
-    assert.match(await greetingExcitedVideo.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-hop/);
+    assert.equal(await greetingExcitedVideo.evaluate(element => getComputedStyle(element).animationName), "none");
 
     await page.locator(".launchpad-colt-character").click();
     assert(await page.getByRole("button", { name: "Minimize control panel", exact: true }).isVisible());
@@ -427,7 +438,7 @@ async function run() {
     assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).opacity), "1");
     assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).webkitMaskImage || getComputedStyle(element).maskImage), /linear-gradient/);
     assert.equal(await page.locator(".launchpad-colt-prop").evaluate(element => getComputedStyle(element).display), "none", "The empty red reaction bubble is still visible during sleep.");
-    assert.match(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), /launchpad-colt-sleep-breathe/);
+    assert.equal(await sleepingImage.evaluate(element => getComputedStyle(element).animationName), "none");
     await page.keyboard.press("A");
     await page.waitForTimeout(120);
     assert.equal(await page.locator(".launchpad-colt-companion").getAttribute("data-state"), "sleep", "Keyboard activity woke a manually sleeping Colt.");
