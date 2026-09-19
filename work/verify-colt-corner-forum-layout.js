@@ -168,7 +168,7 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['cafe', 'scene-window-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves']]) {
       await page.locator('#chooseLaunchScene').click();
       assert.equal(await page.locator('[data-scene-choice]').count(), 22);
       await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -189,6 +189,13 @@ async function run() {
           return { face, edge };
         });
         assert(spin.face > .9 && spin.edge < .2, JSON.stringify(spin));
+      }
+      if (id === 'cafe') {
+        const rain = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(element => {
+          const style = getComputedStyle(element);
+          return { width: style.width, height: style.height, duration: style.animationDuration, trail: getComputedStyle(element, '::before').content };
+        });
+        assert.deepEqual(rain, { width: '1px', height: '19px', duration: '2.8s', trail: 'none' });
       }
       if (id === 'castle') {
         const rays = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
