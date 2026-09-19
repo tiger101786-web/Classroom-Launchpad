@@ -4,8 +4,11 @@
 .launch-scene-image { transform: none; animation: none; }
 .scene-loading { display: grid; place-items: center; background: #21131d; color: #f3dae3; font-size: .85rem; }
 .scene-cafe .launch-scene-particles { clip-path: polygon(9% 0, 96% 0, 96% 69%, 9% 67%); }
-.scene-cafe .launch-scene-particles i { top: -12%; width: 3px; height: 19px; border-radius: 60% 60% 45% 45%; background: linear-gradient(transparent, #d4eeff66 65%, #f2fbffcf); box-shadow: 1px 0 1px #17284280; animation: scene-window-rain 4s linear infinite; animation-delay: calc(var(--n) * -.44s); }
-@keyframes scene-window-rain { 0% { transform: translate(0, 0); opacity: 0; } 10%, 85% { opacity: .8; } 100% { transform: translate(3px, 340px); opacity: 0; } }
+.scene-cafe .launch-scene-particles i { top: -8%; width: 4px; height: 6px; border-radius: 48% 52% 46% 54%; background: radial-gradient(ellipse at 30% 25%, #ffffff8c, transparent 42%), #a7c4d012; box-shadow: inset 0 -1px 1px #16283580, inset 1px 0 1px #e5f4ff66, 0 1px 1px #14263855; animation: scene-window-rain 6s linear infinite; animation-delay: calc(var(--n) * -.73s); }
+.scene-cafe .launch-scene-particles i::before { content: ""; position: absolute; bottom: 75%; left: 45%; width: 1px; height: 13px; background: linear-gradient(transparent, #cfe0e526); border-radius: 50%; }
+.scene-cafe .launch-scene-particles i:nth-child(3n) { width: 3px; height: 4px; animation-duration: 8s; }
+.scene-cafe .launch-scene-particles i:nth-child(3n+1) { width: 4px; height: 7px; animation-duration: 5s; }
+@keyframes scene-window-rain { 0% { transform: translate(0, 0); opacity: 0; } 8% { opacity: .7; } 35% { transform: translate(1px, 75px); } 55% { transform: translate(0, 145px); } 85% { opacity: .7; } 100% { transform: translate(2px, 300px); opacity: 0; } }
 .scene-aurora .launch-scene-particles { clip-path: polygon(0 0, 100% 0, 100% 38%, 85% 45%, 67% 35%, 57% 30%, 42% 39%, 0 44%); }
 .scene-aurora .launch-scene-particles i { left: -20%; top: -20%; width: 140%; height: 80%; border-radius: 0; background: repeating-linear-gradient(105deg, transparent 0 12%, #66ffd499 17%, #9d7aff88 22%, transparent 30%); mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 70%); filter: blur(5px); box-shadow: none; animation: scene-aurora-flow 6s ease-in-out infinite; animation-delay: 0s; }
 .scene-aurora .launch-scene-particles i:nth-child(n+2) { display: none; }
