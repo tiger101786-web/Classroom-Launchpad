@@ -10574,6 +10574,16 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   .forum-post-author .profile-frame > .forum-avatar { width: 78%; height: 78%; grid-area: 1 / 1; }
   .forum-post-author .frame-none > .forum-avatar { width: 100%; height: 100%; }
 }
+/* Header frames reserve the original avatar footprint, including decorative tips. */
+.header-frame-slot { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; overflow: hidden; }
+.header-frame-slot > .profile-frame { width: 36px; height: 36px; font-size: .8rem; box-shadow: none; pointer-events: none; }
+.header-frame-slot .profile-frame > .forum-avatar { border-width: 1px; }
+.header-account-identity > .header-frame-slot { min-width: 42px; gap: 0; }
+@media (max-width: 720px) {
+  .header-frame-slot { width: 36px; height: 36px; flex-basis: 36px; }
+  .header-frame-slot > .profile-frame { width: 30px; height: 30px; font-size: .7rem; }
+  .header-account-identity > .header-frame-slot { min-width: 36px; }
+}
 /* Launchpad Colt companion */
 .launchpad-colt-root {
   --colt-crimson: #c4134d;

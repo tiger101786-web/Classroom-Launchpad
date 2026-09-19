@@ -2226,9 +2226,11 @@ function renderAuthButton() {
     const roleLabel = isTeacher() ? "Teacher" : `Grade ${authSession.grade || "Student"}`;
     const messageCount = unreadDirectMessageCount();
     const safeAvatar = normalizeProfileAvatarUrl(authSession.avatarUrl);
-    const avatar = safeAvatar
+    const plainAvatar = safeAvatar
       ? `<img class="header-account-avatar" src="${escapeHtml(safeAvatar)}" alt="">`
       : `<span class="header-account-avatar header-account-initials" aria-hidden="true">${escapeHtml(forumInitials(fullName))}</span>`;
+    const avatar = normalizeProfileFrame(authSession.profileFrame) === "none" ? plainAvatar
+      : `<span class="header-frame-slot" aria-hidden="true">${renderForumAvatar(fullName, safeAvatar, "", authSession.profileFrame)}</span>`;
     const bellIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>`;
     const chevron = `<svg class="header-account-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5"></path></svg>`;
     return `

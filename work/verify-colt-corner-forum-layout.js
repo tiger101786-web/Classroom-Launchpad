@@ -163,6 +163,26 @@ async function run() {
     await page.locator('#saveProfileFrame').click();
     await page.getByText('Profile frame saved!', { exact: true }).waitFor();
     assert(await page.locator('.forum-post-author .frame-colt').isVisible());
+    async function checkHeaderFrame(page, frame) {
+      const previousScreen = await page.evaluate(() => ({ ...screen }));
+      await page.evaluate(() => setScreen({ name: 'home' }));
+      const summary = page.locator('.header-account-summary:visible').first();
+      assert(await summary.locator(`.header-frame-slot .frame-${frame}`).isVisible());
+      const geometry = await summary.evaluate(element => {
+        const slot = element.querySelector('.header-frame-slot').getBoundingClientRect();
+        const art = element.querySelector('.profile-frame-art').getBoundingClientRect();
+        const copy = element.querySelector('.header-account-copy').getBoundingClientRect();
+        return { contained: art.left >= slot.left && art.right <= slot.right && art.top >= slot.top && art.bottom <= slot.bottom, noOverlap: slot.right <= copy.left, width: slot.width };
+      });
+      assert(geometry.contained && geometry.noOverlap, JSON.stringify(geometry));
+      assert(geometry.width <= 42);
+      await summary.click();
+      assert(await page.locator('.header-account-panel').first().isVisible());
+      assert(await page.locator(`.header-account-identity .frame-${frame}`).first().isVisible());
+      await summary.click();
+      await page.evaluate(value => setScreen(value), previousScreen);
+    }
+    await checkHeaderFrame(page, 'colt');
     const freshSession = await request('/api/auth/session', { cookie: studentCookie });
     assert.equal(freshSession.status, 200);
     assert.equal(freshSession.payload.session.profileFrame, 'colt');
@@ -173,6 +193,7 @@ async function run() {
     await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-frames-desktop.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
 
     await page.setViewportSize({ width: 390, height: 844 });
+    await checkHeaderFrame(page, 'colt');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     assert(await page.locator(".forum-post-author").isVisible());
     assert(await page.locator(".forum-post-content").isVisible());
@@ -200,6 +221,7 @@ async function run() {
     await teacherPage.locator('#saveProfileFrame').click();
     await teacherPage.getByText('Profile frame saved!', { exact: true }).waitFor();
     assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.profileFrame, 'stars');
+    await checkHeaderFrame(teacherPage, 'stars');
     const newTopic = await request('/api/threads', { method: 'POST', cookie: teacherCookie, body: { title: 'Frame inheritance check', message: 'Let us share our favorite classroom activities.', grades: ['4'] } });
     assert.equal(newTopic.status, 200);
     const framedTopic = newTopic.payload.threads.find(thread => thread.title === 'Frame inheritance check');
