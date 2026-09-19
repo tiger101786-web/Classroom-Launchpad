@@ -168,9 +168,9 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain']]) {
       await page.locator('#chooseLaunchScene').click();
-      assert.equal(await page.locator('[data-scene-choice]').count(), 22);
+      assert.equal(await page.locator('[data-scene-choice]').count(), 24);
       await page.locator(`[data-scene-choice="${id}"]`).click();
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
@@ -285,7 +285,7 @@ async function run() {
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
       if (['football', 'basketball', 'championship', 'soccer', 'baseball', 'softball'].includes(id)) await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `sports-${id}.png`) });
-      if (['cafe', 'aurora', 'train'].includes(id)) {
+      if (['cafe', 'aurora', 'train', 'lantern', 'bookshop'].includes(id)) {
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `cozy-${id}.png`) });
         const effectLayer = page.locator('.home-scene-feature .launch-scene-particles i').first();
         const before = await effectLayer.evaluate(element => getComputedStyle(element).transform);

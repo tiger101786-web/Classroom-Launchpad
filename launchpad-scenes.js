@@ -22,7 +22,9 @@
     { id: "softball", name: "Softball Sunset", description: "Golden diamond & glowing stadium lights", image: "assets/launchpad-scene-softball.png" },
     { id: "cafe", name: "French Quarter Café", description: "Beignets, New Orleans & rain on glass", image: "assets/launchpad-scene-cafe-v2.png" },
     { id: "aurora", name: "Northern Lights Lake", description: "Alpine lake & flowing aurora light", image: "assets/launchpad-scene-aurora.png" },
-    { id: "train", name: "Autumn Train Station", description: "Golden leaves & drifting steam", image: "assets/launchpad-scene-train.png" }
+    { id: "train", name: "Autumn Train Station", description: "Golden leaves & drifting steam", image: "assets/launchpad-scene-train.png" },
+    { id: "lantern", name: "Japanese Lantern Street", description: "Warm lanterns & drifting cherry petals", image: "assets/launchpad-scene-lantern.png" },
+    { id: "bookshop", name: "Cozy Bookshop", description: "Book displays, shop cat & rainy window", image: "assets/launchpad-scene-bookshop-v2.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   let guestMotion = true;

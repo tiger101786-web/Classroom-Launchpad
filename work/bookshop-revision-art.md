@@ -1,0 +1,6 @@
+# Cozy Bookshop revision
+
+Built-in image-generation edit replacing domestic seating with bookstore displays, checkout counter, shelving and shop cat. Original asset retained; active asset: assets/launchpad-scene-bookshop-v2.png. Rain clipped to visible glass below hanging sign and above foreground displays.
+
+Final edit prompt: Edit this image into an unmistakable cozy independent BOOKSHOP, not a home library or living room. Replace the large armchair, ottoman and domestic side table with a central wooden bookstore display table stacked with books and several face-out books on small stands. Add clear narrow aisles between tall bookcases, a small checkout counter with a cash register and paper book bags on the right. A small ginger shop cat sleeps on a low shelf near the central display, not a sofa. A tasteful central hanging sign reads BOOKSHOP clearly. Preserve warm amber lighting, rich dark wood, inviting cinematic realistic illustration and square full-bleed composition for a circular 300px crop. Preserve a large rainy blue garden window in back around x33-77%, y5-51%, straight rectangular glass with no mullions so animated rain can stay inside it. No people, no armchairs, no couches, no bed, no ottoman, no fireplace, no watermark, no border. Main book displays and checkout must be legible within central 75% of composition.
+
