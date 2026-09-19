@@ -3,7 +3,11 @@
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
     { id: "reef", name: "Coral Cove", description: "Sunlit reef & rising bubbles", image: "assets/launchpad-scene-reef.png" },
-    { id: "forest", name: "Firefly Forest", description: "Twilight stream & drifting lights", image: "assets/launchpad-scene-forest.png" }
+    { id: "forest", name: "Firefly Forest", description: "Twilight stream & drifting lights", image: "assets/launchpad-scene-forest.png" },
+    { id: "pixel", name: "Pixel Arcade", description: "Floating clouds & glowing pixels", image: "assets/launchpad-scene-pixel.png" },
+    { id: "observatory", name: "Cosmic Observatory", description: "Ringed planet & drifting stars", image: "assets/launchpad-scene-observatory.png" },
+    { id: "dragon", name: "Dragon’s Library", description: "Cozy books & golden dust", image: "assets/launchpad-scene-dragon.png" },
+    { id: "cabin", name: "Snowy Cabin", description: "Warm windows & falling snow", image: "assets/launchpad-scene-cabin.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   let guestMotion = true;
@@ -67,8 +71,8 @@
         <p>Only your homepage changes. Your profile picture and classmates’ pages stay the same.</p>
         <div id="launchScenePreview">${artwork(draft.id, draft.motion, video, true)}</div>
         <div class="launch-scene-options">${scenes.map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
-        <label class="launch-scene-motion"><input type="checkbox" id="launchSceneMotion" ${draft.motion ? "checked" : ""}> Gentle motion</label>
-        <p class="launch-scene-hint">Silent effects stay inside the circle. Reduced-motion preferences are always respected.</p>
+        <label class="launch-scene-motion"><input type="checkbox" id="launchSceneMotion" ${draft.motion ? "checked" : ""}> Gentle effects (or original video playback)</label>
+        <p class="launch-scene-hint">Scene artwork stays still; only the silent effects move inside the circle. Reduced-motion preferences are always respected.</p>
         <p id="launchSceneSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-scene-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchScene">Save Scene</button></div>`;
       document.body.append(dialog);
       const close = () => { dialog.close(); dialog.remove(); document.getElementById("chooseLaunchScene")?.focus(); };

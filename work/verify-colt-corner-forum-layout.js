@@ -148,7 +148,32 @@ async function run() {
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert(await page.locator('#toggleLaunchScene').isDisabled());
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'scene-drift');
+    assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
+    assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
+    for (const [id, effect] of [['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow']]) {
+      await page.locator('#chooseLaunchScene').click();
+      assert.equal(await page.locator('[data-scene-choice]').count(), 7);
+      await page.locator(`[data-scene-choice="${id}"]`).click();
+      await page.locator('#launchScenePreview img').evaluate(image => image.decode());
+      const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
+      assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
+      assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), effect);
+      await page.locator('#launchSceneMotion').uncheck();
+      assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationPlayState), 'paused');
+      if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationPlayState), 'paused');
+      await page.locator('#launchSceneMotion').check();
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), 'none');
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.locator('#saveLaunchScene').click();
+      await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
+      assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, id);
+      assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), id);
+    }
+    await page.locator('#chooseLaunchScene').click();
+    await page.locator('[data-scene-choice="forest"]').click();
+    await page.locator('#saveLaunchScene').click();
+    await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
     await page.locator('#home-top').screenshot({ path: path.join(dataDir, 'scene-home-desktop.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#chooseLaunchScene').click();
