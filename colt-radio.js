@@ -306,6 +306,15 @@
       note: "Irish traditional and folk music streamed by the listener-supported Ceol FM. No account required."
     },
     {
+      id: "caprice-far-east",
+      label: "Asian • Caprice",
+      type: "stream",
+      source: "/api/radio-audio/caprice-far-east",
+      provider: "Radio Caprice · Far Eastern Traditional Music",
+      searchTerms: "far east eastern asia asian chinese china traditional folk instrumental guzheng guqin erhu pipa",
+      note: "Far Eastern traditional music from Radio Caprice. This regional mix is broader than Chinese music alone; ad-free playback is not confirmed."
+    },
+    {
       id: "koko-hawaiian",
       label: "Hawaiian • KOKO",
       type: "stream",
@@ -673,7 +682,7 @@
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
-    "Hawaiian", "Persian", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
+    "Asian", "Hawaiian", "Persian", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
@@ -696,6 +705,7 @@
   }
 
   const stationIconPaths = {
+    "caprice-far-east": '<path d="m4 9 8-5 8 5H4Zm-2 6 10-5 10 5H2Zm4 0v6h12v-6M3 21h18M10 21v-4h4v4M12 2v2"/>',
     "koko-hawaiian": '<path d="M12 21c2-5 3-10 1-15M13 6C9 2 5 3 3 6c4-1 7 0 10 0Zm0 0c3-4 6-3 8 0-3-1-5 0-8 0ZM3 21c3-2 6-2 9 0s6 2 9 0"/>',
     "farsi-frequency": '<path d="m3 15 5-7h8l5 7H3Zm0 0v4h18v-4M9 9l-3 6m6-6v6m3-6 3 6M6 4l4 3m8-3-4 3"/>',
     studying: '<path d="M6 4h9a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2Z"/><path d="M8 4v5h8V4M8 14h6"/>',
