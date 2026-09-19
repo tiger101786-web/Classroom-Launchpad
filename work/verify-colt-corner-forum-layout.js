@@ -150,9 +150,9 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-dust'], ['championship', 'scene-confetti']]) {
       await page.locator('#chooseLaunchScene').click();
-      assert.equal(await page.locator('[data-scene-choice]').count(), 13);
+      assert.equal(await page.locator('[data-scene-choice]').count(), 16);
       await page.locator(`[data-scene-choice="${id}"]`).click();
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
@@ -209,11 +209,13 @@ async function run() {
         assert.equal(Number(flow.endOpacity), 0);
       }
       await page.locator('#launchSceneMotion').uncheck();
+      if (['football', 'basketball', 'championship'].includes(id)) assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationPlayState), 'paused');
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationPlayState), 'paused');
       if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationPlayState), 'paused');
       if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin svg').first().evaluate(coin => getComputedStyle(coin).animationPlayState), 'paused');
       await page.locator('#launchSceneMotion').check();
       await page.emulateMedia({ reducedMotion: 'reduce' });
+      if (['football', 'basketball', 'championship'].includes(id)) assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationName), 'none');
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), 'none');
       if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin svg').first().evaluate(coin => getComputedStyle(coin).animationName), 'none');
       await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -226,6 +228,7 @@ async function run() {
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-sun-rays.png') });
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
+      if (['football', 'basketball', 'championship'].includes(id)) await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `sports-${id}.png`) });
     }
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="forest"]').click();
