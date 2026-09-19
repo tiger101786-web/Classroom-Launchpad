@@ -196,7 +196,7 @@ async function run() {
           animation.pause();
           animation.currentTime = 0;
           const first = { transform: getComputedStyle(particle).transform, opacity: Number(getComputedStyle(particle).opacity) };
-          animation.currentTime = 3500;
+          animation.currentTime = 2400;
           const peak = { transform: getComputedStyle(particle).transform, opacity: Number(getComputedStyle(particle).opacity) };
           const background = getComputedStyle(particle).backgroundImage;
           animation.play();
@@ -205,6 +205,10 @@ async function run() {
         assert(rays.background.includes('conic-gradient'));
         assert.notEqual(rays.first.transform, rays.peak.transform);
         assert(rays.peak.opacity - rays.first.opacity >= .39);
+        const liveRay = page.locator('#launchScenePreview .launch-scene-particles i').first();
+        const before = await liveRay.evaluate(element => getComputedStyle(element).transform);
+        await page.waitForTimeout(350);
+        assert.notEqual(await liveRay.evaluate(element => getComputedStyle(element).transform), before, 'Sun rays must move with real elapsed time');
       }
       if (id === 'basketball') {
         assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i:visible').count(), 1);
@@ -258,7 +262,7 @@ async function run() {
       assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, id);
       assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), id);
       if (id === 'castle') {
-        await page.locator('.home-scene-feature .scene-castle i').first().evaluate(particle => { const animation = particle.getAnimations()[0]; animation.pause(); animation.currentTime = 3500; });
+        await page.locator('.home-scene-feature .scene-castle i').first().evaluate(particle => { const animation = particle.getAnimations()[0]; animation.pause(); animation.currentTime = 2400; });
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-sun-rays.png') });
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });

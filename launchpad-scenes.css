@@ -20,7 +20,7 @@
 .scene-cabin .launch-scene-particles i:nth-child(2n) { width: 3px; height: 3px; animation-duration: 20s; }
 .scene-neon .launch-scene-particles i { top: -12%; width: 1px; height: 19px; border-radius: 1px; background: #b9eaff99; box-shadow: none; animation: scene-rain 2.8s linear infinite; animation-delay: calc(var(--n) * -.31s); }
 /* Anchor the light to the painted sun (8%, 37%), not the center of the castle. */
-.scene-castle .launch-scene-particles i { left: -92%; top: -63%; width: 200%; height: 200%; border-radius: 0; background: conic-gradient(transparent 82deg, #fff2b8b3 88deg, transparent 94deg, transparent 103deg, #ffe6a6a6 110deg, transparent 118deg, transparent 128deg, #fff1b8b3 135deg, transparent 142deg, transparent 153deg, #ffe6a680 160deg, transparent 167deg); mask-image: radial-gradient(circle, transparent 1%, #000 7%, #000 24%, transparent 49%); box-shadow: none; filter: blur(2px); opacity: .6; transform-origin: center; animation: scene-sun-rays 7s ease-in-out infinite; animation-delay: 0s; }
+.scene-castle .launch-scene-particles i { left: -92%; top: -63%; width: 200%; height: 200%; border-radius: 0; background: conic-gradient(transparent 78deg, #fff4cad9 84deg, transparent 90deg, transparent 98deg, #ffe8b3e6 105deg, transparent 112deg, transparent 122deg, #fff4cad9 129deg, transparent 136deg, transparent 146deg, #ffe8b3b3 153deg, transparent 160deg); mask-image: radial-gradient(circle, transparent 1%, #000 5%, #000 30%, transparent 53%); box-shadow: none; filter: blur(1px); opacity: .65; transform-origin: center; animation: scene-sun-rays 4.8s ease-in-out infinite; animation-delay: 0s; }
 .scene-castle .launch-scene-particles i:nth-child(n+2) { display: none; }
 .scene-koi .launch-scene-particles i { top: -10%; width: 7px; height: 4px; border-radius: 80% 10% 80% 10%; background: #ffc0d6c9; box-shadow: none; animation: scene-petals 13s linear infinite; animation-delay: calc(var(--n) * -1.44s); }
 .scene-crystal .launch-scene-particles i { top: 110%; width: 3px; height: 5px; border-radius: 0; background: #e5e1ff; box-shadow: 0 0 7px #ab85ffb0; animation: scene-crystal-flow 14s linear infinite; animation-delay: calc(var(--n) * -1.55s); }
@@ -69,7 +69,7 @@
 @keyframes scene-stars { 0% { transform: translate(0, -8px); opacity: 0; } 10%, 90% { opacity: .75; } 100% { transform: translate(-350px, 16px); opacity: 0; } }
 @keyframes scene-firefly-flow { 0% { transform: translate(0, 0); opacity: 0; } 10%, 90% { opacity: .7; } 100% { transform: translate(22px, -350px); opacity: 0; } }
 @keyframes scene-rain { 0% { transform: translate(0, 0) rotate(12deg); opacity: 0; } 10%, 85% { opacity: .6; } 100% { transform: translate(-50px, 370px) rotate(12deg); opacity: 0; } }
-@keyframes scene-sun-rays { 0%, 100% { transform: rotate(-4deg); opacity: .4; } 50% { transform: rotate(4deg); opacity: .8; } }
+@keyframes scene-sun-rays { 0%, 100% { transform: rotate(-9deg); opacity: .4; } 50% { transform: rotate(9deg); opacity: .9; } }
 @keyframes scene-petals { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 10%, 85% { opacity: .75; } 100% { transform: translate(32px, 350px) rotate(200deg); opacity: 0; } }
 @keyframes scene-crystal-flow { 0% { transform: translate(0, 0) rotate(25deg); opacity: 0; } 15%, 80% { opacity: .65; } 100% { transform: translate(-15px, -350px) rotate(110deg); opacity: 0; } }
 @keyframes scene-leaves { 0% { transform: translate(0, 0) rotate(-30deg); opacity: 0; } 10%, 85% { opacity: .75; } 100% { transform: translate(45px, 350px) rotate(260deg); opacity: 0; } }
