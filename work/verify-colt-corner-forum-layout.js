@@ -133,7 +133,25 @@ async function run() {
     await page.locator('#toggleLaunchScene').click();
     await page.getByRole('button', { name: 'Resume scene', exact: true }).waitFor();
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.motion, false);
-    await page.reload({ waitUntil: 'networkidle' });
+    let releaseSession;
+    const sessionGate = new Promise(resolve => { releaseSession = resolve; });
+    await page.route('**/api/auth/session', async route => { await sessionGate; await route.continue(); });
+    await page.addInitScript(() => {
+      window.sawOriginalSceneDuringLoad = false;
+      new MutationObserver(records => {
+        for (const record of records) for (const node of record.addedNodes) {
+          if (node.nodeType === 1 && (node.matches('[data-scene="original"]') || node.querySelector('[data-scene="original"]'))) window.sawOriginalSceneDuringLoad = true;
+        }
+      }).observe(document, { childList: true, subtree: true });
+    });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('.scene-loading').waitFor();
+    assert.equal(await page.locator('.home-scene-feature video').count(), 0);
+    assert.equal(await page.locator('.home-scene-feature [data-scene="original"]').count(), 0);
+    releaseSession();
+    await page.locator('.home-scene-feature [data-scene="reef"]').waitFor();
+    await page.unroute('**/api/auth/session');
+    assert.equal(await page.evaluate(() => window.sawOriginalSceneDuringLoad), false);
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
     assert(await page.locator('.home-scene-feature .launch-scene').evaluate(element => element.classList.contains('is-paused')));
     assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.homeScene.id, 'original');

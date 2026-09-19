@@ -1451,6 +1451,7 @@ let randomActivity = null;
 let coltRunGame = null;
 let authConfig = { studentEmailDomain: "scscolts.org", studentLoginConfigured: false, teacherConfigured: false };
 let authSession = { authenticated: false, role: "guest", name: "", email: "", grade: "", avatarUrl: "" };
+let homeSceneSessionReady = !sharedBackend.enabled;
 let approvedStudents = [];
 let postingBlocked = false;
 let authMessage = "";
@@ -2402,7 +2403,7 @@ function renderHome() {
         false,
         renderHomeHeaderControls()
       )}
-      ${window.LaunchpadScenes.render(authSession, homeProfileVideo)}
+      ${window.LaunchpadScenes.render(authSession, homeProfileVideo, homeSceneSessionReady)}
     </section>
     <section id="homeBody">
       ${renderHomeDefault()}
@@ -13515,6 +13516,7 @@ async function initializeApp() {
       if (isTeacher()) await loadApprovedStudents();
     } catch {}
   }
+  homeSceneSessionReady = true;
   render();
   startSharedSync();
 }

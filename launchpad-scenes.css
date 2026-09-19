@@ -2,6 +2,7 @@
 .launch-scene { position: relative; overflow: hidden; isolation: isolate; flex: 0 0 auto; }
 .launch-scene-image, .launch-scene-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .launch-scene-image { transform: none; animation: none; }
+.scene-loading { display: grid; place-items: center; background: #21131d; color: #f3dae3; font-size: .85rem; }
 .scene-coin-layer { position: absolute; inset: 0; pointer-events: none; }
 .scene-pixel-coin { position: absolute; aspect-ratio: 3 / 4; transform: translate(-50%, -50%); }
 .scene-pixel-coin svg { display: block; width: 100%; height: 100%; overflow: visible; animation: scene-coin-spin 2.4s linear infinite; animation-delay: var(--coin-delay); filter: drop-shadow(0 1px 0 #66390088); }
