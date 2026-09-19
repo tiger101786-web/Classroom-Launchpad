@@ -156,38 +156,75 @@ async function run() {
     assert.equal((await fetch(`${baseUrl}${avatarSrc}`, { headers: { Cookie: studentCookie } })).status, 200);
     await page.screenshot({ path: path.join(dataDir, "forum-thread-desktop.png"), fullPage: true });
 
+    assert.equal(await page.locator('[data-profile-frame]').count(), 7);
+    await page.locator('[data-profile-frame="colt"]').click();
+    assert(await page.locator('#profileFramePreview .frame-colt').isVisible());
+    assert.equal(await page.locator('.forum-post-author .frame-colt').count(), 0, "Preview must not save immediately.");
+    await page.locator('#saveProfileFrame').click();
+    await page.getByText('Profile frame saved!', { exact: true }).waitFor();
+    assert(await page.locator('.forum-post-author .frame-colt').isVisible());
+    const freshSession = await request('/api/auth/session', { cookie: studentCookie });
+    assert.equal(freshSession.status, 200);
+    assert.equal(freshSession.payload.session.profileFrame, 'colt');
+    const invalidFrame = await request('/api/profile-frame', { method: 'POST', cookie: studentCookie, body: { profileFrame: '<script>' } });
+    assert.equal(invalidFrame.status, 400);
+    const guestFrame = await request('/api/profile-frame', { method: 'POST', body: { profileFrame: 'colt' } });
+    assert.equal(guestFrame.status, 401);
+    await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-frames-desktop.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
+
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     assert(await page.locator(".forum-post-author").isVisible());
     assert(await page.locator(".forum-post-content").isVisible());
     await page.screenshot({ path: path.join(dataDir, "forum-thread-mobile.png"), fullPage: true });
+    await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-frames-mobile.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
 
     await page.locator("#removeForumProfileImage").click();
     await page.locator("#forumProfileStatus").getByText("Profile picture removed.").waitFor();
     assert(await page.locator(".forum-profile-preview.forum-avatar-initials").isVisible());
+    assert(await page.locator('#profileFramePreview .frame-colt').isVisible(), "Removing a picture must preserve its frame.");
+    await page.locator('[data-profile-frame="none"]').click();
+    await page.locator('#saveProfileFrame').click();
+    await page.getByText('Profile frame saved!', { exact: true }).waitFor();
+    assert(await page.locator('.forum-post-author .frame-none').isVisible());
 
     const teacherContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const [teacherCookieName, teacherCookieValue] = teacherCookie.split("=");
     await teacherContext.addCookies([{ name: teacherCookieName, value: teacherCookieValue, url: baseUrl }]);
     const teacherPage = await teacherContext.newPage();
     await teacherPage.goto(baseUrl, { waitUntil: "networkidle" });
-    await teacherPage.locator('[data-action="openColtCorner"]').first().click();
+    await teacherPage.locator('.colt-corner-open[data-action="openColtCorner"]').click();
     await teacherPage.locator('.colt-corner-grade-tab[data-grade="4"]').click();
     assert(await teacherPage.locator(".colt-corner-card > .forum-profile-editor").isVisible());
+    await teacherPage.locator('[data-profile-frame="stars"]').click();
+    await teacherPage.locator('#saveProfileFrame').click();
+    await teacherPage.getByText('Profile frame saved!', { exact: true }).waitFor();
+    assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.profileFrame, 'stars');
+    const newTopic = await request('/api/threads', { method: 'POST', cookie: teacherCookie, body: { title: 'Frame inheritance check', message: 'Let us share our favorite classroom activities.', grades: ['4'] } });
+    assert.equal(newTopic.status, 200);
+    const framedTopic = newTopic.payload.threads.find(thread => thread.title === 'Frame inheritance check');
+    assert.equal(framedTopic.profileFrame, 'stars');
+    const newReply = await request(`/api/threads/${framedTopic.id}/replies`, { method: 'POST', cookie: teacherCookie, body: { message: 'I enjoy reading together in class.' } });
+    assert.equal(newReply.status, 200);
+    assert.equal(newReply.payload.threads.find(thread => thread.id === framedTopic.id).replies[0].profileFrame, 'stars');
     await teacherPage.locator("#forumProfileImage").setInputFiles(avatarFixture);
     await teacherPage.locator("#forumProfileStatus").getByText("Profile picture saved.").waitFor();
     const teacherAvatarSrc = await teacherPage.locator("img.forum-profile-preview").getAttribute("src");
     assert.match(teacherAvatarSrc, /^\/api\/profile-avatar\/[a-f0-9]{64}\?v=\d+$/);
     assert.equal((await fetch(`${baseUrl}${teacherAvatarSrc}`, { headers: { Cookie: teacherCookie } })).status, 200);
     await teacherPage.locator('[data-action="openThread"]').first().click();
-    assert(await teacherPage.locator(".forum-post-author img.forum-avatar").isVisible());
+    assert(await teacherPage.locator(".forum-post-author img.forum-avatar").first().isVisible());
+    assert.equal(await teacherPage.locator('.forum-post-author .frame-stars').count(), 2);
     await teacherPage.locator("#removeForumProfileImage").click();
     await teacherPage.locator("#forumProfileStatus").getByText("Profile picture removed.").waitFor();
-    assert(await teacherPage.locator(".forum-post-author .forum-avatar-initials").isVisible());
+    assert(await teacherPage.locator(".forum-post-author .forum-avatar-initials").first().isVisible());
     await teacherContext.close();
 
     console.log(JSON.stringify({
       forumDesktopTwoColumnLayout: true,
+      accountSavedFramePreviews: true,
+      frameScreenshot: path.join(dataDir, 'profile-frames-desktop.png'),
+      frameMobileScreenshot: path.join(dataDir, 'profile-frames-mobile.png'),
       forumMobileLayoutResponsive: true,
       studentProfilePictureUpload: true,
       studentProfilePictureRemoval: true,

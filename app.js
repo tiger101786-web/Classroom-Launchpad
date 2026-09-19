@@ -320,6 +320,7 @@ function normalizeThreads(items) {
       grade: reply.grade || "",
       message: reply.message || "",
       avatarUrl: normalizeProfileAvatarUrl(reply.avatarUrl),
+      profileFrame: normalizeProfileFrame(reply.profileFrame),
       createdAt: reply.createdAt || new Date().toISOString()
     })) : [];
     return {
@@ -330,6 +331,7 @@ function normalizeThreads(items) {
       audienceGrade: String(item.audienceGrade || ""),
       body: item.body || item.message || "",
       avatarUrl: normalizeProfileAvatarUrl(item.avatarUrl),
+      profileFrame: normalizeProfileFrame(item.profileFrame),
       replies,
       createdAt: item.createdAt || new Date().toISOString()
     };
@@ -1691,17 +1693,37 @@ function formatStudentFirstLast(name) {
   return `${parts.join(" ")}, ${lastName}`;
 }
 
-function renderForumAvatar(name, avatarUrl, extraClass = "") {
+const PROFILE_FRAMES = [
+  ["none", "No Frame", "Keep it classic"], ["colt", "Colt Pride", "Crimson & silver"],
+  ["neon", "Neon Circuit", "Electric teal"], ["stars", "Star Voyager", "A little cosmic magic"],
+  ["flame", "Phoenix Flame", "Bring the spark"], ["pixel", "Pixel Quest", "Level up your look"],
+  ["pumpkin", "Pumpkin Patch", "Friendly fall spirit"]
+];
+function normalizeProfileFrame(value) { return ["colt", "neon", "stars", "flame", "pixel", "pumpkin"].includes(value) ? value : "none"; }
+function profileFrameArt(frame) {
+  const art = {
+    colt: '<path d="M42 83v8a8 8 0 0 0 16 0v-8h-5v8a3 3 0 0 1-6 0v-8Z" fill="#eef3fa" stroke="#687888"/><path d="m8 43 2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1Zm84 0 2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1Z" fill="#eef3fa"/>',
+    neon: '<g fill="none" stroke="#7ffff1" stroke-width="3"><path d="M4 37V22l17-17h15M64 5h15l17 17v15M96 64v14L80 95H64M36 95H20L4 79V64"/><path d="M8 29h8m68 42h8"/></g><g fill="#c6fff8"><circle cx="36" cy="5" r="3"/><circle cx="64" cy="95" r="3"/></g>',
+    stars: '<g fill="#ffe7a3" stroke="#b88c46" stroke-width=".6"><path d="m20 7 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Zm66 57 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1ZM61 1l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></g><path d="M9 69c-5 11 5 20 14 15-9 0-12-8-9-14Z" fill="#ffe7a3"/>',
+    flame: '<path d="M14 74C-1 61 3 47 10 39c-1 11 8 12 7 22 7-10 0-18 4-22 6 16 8 26-7 35ZM86 74c15-13 11-27 4-35 1 11-8 12-7 22-7-10 0-18-4-22-6 16-8 26 7 35Z" fill="#ff9b28" stroke="#ffd980"/><path d="M39 91c0-8 9-9 9-20 12 11 16 22 2 27-5 1-9-2-11-7Z" fill="#ffbc45"/><path d="M47 91l4-8c7 8 2 13-1 13Z" fill="#fff2b3"/>',
+    pixel: '<path d="M4 32V16h12V4h16M68 4h16v12h12v16M96 68v16H84v12H68M32 96H16V84H4V68" fill="none" stroke="#a8ff75" stroke-width="6"/><path d="M38 85h24v12H38Z" fill="#243455" stroke="#a8ff75" stroke-width="2"/><path d="M43 88v6m-3-3h6m9-2h3m-3 4h3" stroke="#a8ff75" stroke-width="2"/>',
+    pumpkin: '<path d="M50 83v-7l5-3" fill="none" stroke="#9be36c" stroke-width="3"/><ellipse cx="50" cy="90" rx="15" ry="10" fill="#ff9d32" stroke="#bc4e15"/><path d="M46 81c-5 7-5 12 0 18m8-18c5 7 5 12 0 18" fill="none" stroke="#dc691b"/><path d="m43 88 3-3 2 3m5 0 2-3 3 3m-12 5q5 4 10-1" fill="none" stroke="#5b2c19" stroke-width="2"/><path d="M7 32q-5-13 8-17-2 12-8 17M89 27q14-9 5-17-9 5-5 17" fill="#a8ca63"/>'
+  };
+  return art[frame] ? `<svg class="profile-frame-art" viewBox="0 0 100 100" aria-hidden="true">${art[frame]}</svg>` : "";
+}
+function renderForumAvatar(name, avatarUrl, extraClass = "", profileFrame = "none") {
   const safeUrl = normalizeProfileAvatarUrl(avatarUrl);
-  return safeUrl
+  const avatar = safeUrl
     ? `<img class="forum-avatar ${extraClass}" src="${escapeHtml(safeUrl)}" alt="${escapeHtml(`${name || "Student"}'s profile picture`)}">`
     : `<span class="forum-avatar forum-avatar-initials ${extraClass}" aria-label="${escapeHtml(`${name || "Student"}'s profile picture`)}">${escapeHtml(forumInitials(name))}</span>`;
+  const frame = normalizeProfileFrame(profileFrame);
+  return `<span class="profile-frame frame-${frame} ${extraClass}">${avatar}${profileFrameArt(frame)}</span>`;
 }
 
 function renderForumAuthor(post, label = "Member") {
   return `
     <aside class="forum-post-author">
-      ${renderForumAvatar(post.studentName, post.avatarUrl)}
+      ${renderForumAvatar(post.studentName, post.avatarUrl, "", post.profileFrame)}
       <strong>${escapeHtml(post.studentName || "Student")}</strong>
       <span>${escapeHtml(forumRoleLabel(post.grade))}</span>
       <small>${escapeHtml(label)}</small>
@@ -1713,10 +1735,10 @@ function renderForumProfileEditor(compact = false) {
   if (!isSignedIn()) return "";
   return `
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
-      ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview")}
+      <div id="profileFramePreview">${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame)}</div>
       <div class="forum-profile-copy">
         <span class="feature-kicker">Colt Corner Profile</span>
-        <h3 id="forumProfileHeading">Your profile picture</h3>
+        <h3 id="forumProfileHeading">Make it yours</h3>
         <p>Choose a school-appropriate JPG, PNG, or WebP image. It will be cropped to a square for the forum.</p>
       </div>
       <div class="forum-profile-actions">
@@ -1724,6 +1746,11 @@ function renderForumProfileEditor(compact = false) {
         <input id="forumProfileImage" type="file" accept="image/jpeg,image/png,image/webp" hidden>
         ${authSession.avatarUrl ? '<button type="button" class="outline-btn" id="removeForumProfileImage">Remove</button>' : ""}
       </div>
+      <fieldset class="profile-frame-picker"><legend>Choose your frame</legend>
+        <p>Your picture. Your style. Preview a frame, then save it to your account.</p>
+        <div class="profile-frame-options">${PROFILE_FRAMES.map(([id, label, description]) => `<button type="button" class="profile-frame-option" data-profile-frame="${id}" aria-pressed="${normalizeProfileFrame(authSession.profileFrame) === id}">${renderForumAvatar(authSession.name, authSession.avatarUrl, "frame-choice-avatar", id)}<strong>${label}</strong><small>${description}</small></button>`).join("")}</div>
+        <div class="profile-frame-save"><span id="profileFrameSelection" aria-live="polite">${PROFILE_FRAMES.find(([id]) => id === normalizeProfileFrame(authSession.profileFrame))[1]} selected</span><button type="button" class="primary-btn" id="saveProfileFrame" disabled>Save Profile</button></div>
+      </fieldset>
       <p id="forumProfileStatus" class="request-message ${profileAvatarMessage ? "success" : ""}" aria-live="polite">${escapeHtml(profileAvatarMessage)}</p>
     </section>
   `;
@@ -2999,7 +3026,7 @@ function renderThreadDetail(threadId) {
       ${renderForumProfileEditor(true)}
       <form id="replyForm" class="reply-form forum-reply-composer" data-thread-id="${thread.id}">
         <div class="forum-reply-identity">
-          ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-reply-avatar")}
+          ${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-reply-avatar", authSession.profileFrame)}
           <div>
             <span class="feature-kicker">Replying As</span>
             <strong>${escapeHtml(authSession.name)}</strong>
@@ -12613,6 +12640,35 @@ function attachForumProfileEditor() {
   const input = document.getElementById("forumProfileImage");
   if (!input || input.dataset.ready === "true") return;
   input.dataset.ready = "true";
+  let selectedFrame = normalizeProfileFrame(authSession.profileFrame);
+  const saveFrame = document.getElementById("saveProfileFrame");
+  const frameButtons = [...document.querySelectorAll("[data-profile-frame]")];
+  frameButtons.forEach(button => button.addEventListener("click", () => {
+    selectedFrame = button.dataset.profileFrame;
+    frameButtons.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+    document.getElementById("profileFramePreview").innerHTML = renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", selectedFrame);
+    document.getElementById("profileFrameSelection").textContent = `${PROFILE_FRAMES.find(([id]) => id === selectedFrame)[1]} selected`;
+    saveFrame.disabled = selectedFrame === normalizeProfileFrame(authSession.profileFrame);
+  }));
+  saveFrame.addEventListener("click", async () => {
+    const status = document.getElementById("forumProfileStatus");
+    saveFrame.disabled = true;
+    frameButtons.forEach(button => { button.disabled = true; });
+    status.textContent = "Saving your frame...";
+    status.classList.remove("error", "success");
+    try {
+      const result = await sharedBackend.request("/api/profile-frame", { method: "POST", body: JSON.stringify({ profileFrame: selectedFrame }) });
+      authSession = result.session;
+      classThreads = normalizeThreads(result.threads);
+      profileAvatarMessage = "Profile frame saved!";
+      render();
+    } catch (error) {
+      status.textContent = error.message;
+      status.classList.add("error");
+      saveFrame.disabled = false;
+      frameButtons.forEach(button => { button.disabled = false; });
+    }
+  });
   input.addEventListener("change", async () => {
     const status = document.getElementById("forumProfileStatus");
     const file = input.files && input.files[0];
