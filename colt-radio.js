@@ -1035,11 +1035,16 @@
       return [...new Set((Array.isArray(values) ? values : []).filter(id => knownIds.has(id)))];
     }
 
-    function searchableStationText(station) {
-      return [station.label, station.provider, station.note, station.searchTerms]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase();
+    function searchWords(value) {
+      return String(value).normalize("NFD").replace(/\p{M}/gu, "")
+        .toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
+    }
+
+    function stationMatchesSearch(station, queryWords) {
+      // Descriptions contain unrelated words such as "performed" and "subscription".
+      const words = searchWords([station.label, station.provider, station.searchTerms]
+        .filter(Boolean).join(" "));
+      return queryWords.every(query => words.some(word => word.startsWith(query)));
     }
 
     function renderStationList() {
@@ -1062,10 +1067,11 @@
       });
       stationItems.forEach(item => stationNav.insertBefore(item, favoritesEmpty));
       let visibleCount = 0;
+      const queryWords = searchWords(stationSearchQuery);
       stationItems.forEach(item => {
         const station = stations.find(candidate => candidate.id === item.dataset.stationItem);
         const matchesFavorites = !favoritesOnly || favoriteStationIds.has(item.dataset.stationItem);
-        const matchesSearch = !stationSearchQuery || searchableStationText(station).includes(stationSearchQuery);
+        const matchesSearch = !stationSearchQuery || (queryWords.length > 0 && stationMatchesSearch(station, queryWords));
         item.hidden = !(matchesFavorites && matchesSearch);
         if (!item.hidden) visibleCount += 1;
       });

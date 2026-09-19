@@ -319,6 +319,21 @@ async function run() {
       ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Patriotic • Abiding", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Medieval • Ancient FM", "Pipe • Organ Organlive", "Celtic • Traditional", "Hawaiian • KOKO", "Persian • Farsi", "Country • Family", "Oldies • Golden Years", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const stationSearch = page.getByRole("searchbox", { name: "Search Colt Radio stations or music styles" });
+    for (const [query, expected] of [
+      ["per", ["Persian Farsi"]],
+      ["  FARSI pers  ", ["Persian Farsi"]],
+      ["hawai", ["Hawaiian KOKO"]],
+      ["lo-fi study", ["Lo-Fi Study"]],
+      ["performed", []],
+      ["rsi", []]
+    ]) {
+      await stationSearch.fill(query);
+      assert.deepEqual(
+        await page.locator(".colt-radio-station-item:not([hidden]) .colt-radio-station").allTextContents(),
+        expected,
+        `Unexpected stations for search: ${query}`
+      );
+    }
     await stationSearch.fill("motown");
     assert.deepEqual(
       await page.locator(".colt-radio-station-item:not([hidden]) .colt-radio-station").allTextContents(),
