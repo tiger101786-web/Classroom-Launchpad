@@ -15,7 +15,7 @@
     { id: "pumpkin", name: "Pumpkin Patch", description: "Friendly pumpkins & autumn leaves", image: "assets/launchpad-scene-pumpkin.png" },
     { id: "volcano", name: "Volcano Island", description: "Tropical sunset & drifting embers", image: "assets/launchpad-scene-volcano.png" },
     { id: "football", name: "Friday Night Football", description: "Stadium lights & falling confetti", image: "assets/launchpad-scene-football.png" },
-    { id: "basketball", name: "Basketball After Dark", description: "Warm court lights & drifting dust", image: "assets/launchpad-scene-basketball.png" },
+    { id: "basketball", name: "Basketball After Dark", description: "Gently glowing court lights & reflections", image: "assets/launchpad-scene-basketball.png" },
     { id: "championship", name: "Colts Championship Arena", description: "Golden trophy & celebration confetti", image: "assets/launchpad-scene-championship.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");

@@ -168,7 +168,7 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-dust'], ['championship', 'scene-confetti']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti']]) {
       await page.locator('#chooseLaunchScene').click();
       assert.equal(await page.locator('[data-scene-choice]').count(), 16);
       await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -205,6 +205,22 @@ async function run() {
         assert(rays.background.includes('conic-gradient'));
         assert.notEqual(rays.first.transform, rays.peak.transform);
         assert(rays.peak.opacity - rays.first.opacity >= .39);
+      }
+      if (id === 'basketball') {
+        assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i:visible').count(), 1);
+        const light = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(element => {
+          const animation = element.getAnimations()[0];
+          animation.pause();
+          animation.currentTime = 0;
+          const dim = Number(getComputedStyle(element).opacity);
+          animation.currentTime = 3000;
+          const bright = Number(getComputedStyle(element).opacity);
+          const transform = getComputedStyle(element).transform;
+          animation.play();
+          return { dim, bright, transform };
+        });
+        assert(light.bright - light.dim > .5);
+        assert.equal(light.transform, 'none');
       }
       if (['forest', 'observatory', 'dragon'].includes(id)) {
         const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
