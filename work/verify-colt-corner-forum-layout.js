@@ -150,7 +150,7 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-cloud-flow'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-mist'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
       await page.locator('#chooseLaunchScene').click();
       assert.equal(await page.locator('[data-scene-choice]').count(), 13);
       await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -158,7 +158,31 @@ async function run() {
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
       assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), effect);
-      if (['forest', 'observatory', 'dragon', 'castle'].includes(id)) {
+      if (id === 'pixel') {
+        assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin').count(), 4);
+        const spin = await page.locator('#launchScenePreview .scene-pixel-coin svg').first().evaluate(coin => {
+          const animation = coin.getAnimations()[0];
+          animation.pause();
+          animation.currentTime = 0;
+          const face = new DOMMatrix(getComputedStyle(coin).transform).m11;
+          animation.currentTime = 600;
+          const edge = new DOMMatrix(getComputedStyle(coin).transform).m11;
+          animation.play();
+          return { face, edge };
+        });
+        assert(spin.face > .9 && spin.edge < .2, JSON.stringify(spin));
+      }
+      if (id === 'castle') {
+        const mist = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => ({
+          top: particle.offsetTop / particle.parentElement.clientHeight,
+          puff: getComputedStyle(particle, '::before').content,
+          background: getComputedStyle(particle).backgroundImage
+        }));
+        assert(mist.top >= .7);
+        assert.equal(mist.puff, 'none');
+        assert(mist.background.includes('radial-gradient'));
+      }
+      if (['forest', 'observatory', 'dragon'].includes(id)) {
         const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
           const style = getComputedStyle(particle);
           const animation = particle.getAnimations()[0];
@@ -181,9 +205,11 @@ async function run() {
       await page.locator('#launchSceneMotion').uncheck();
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationPlayState), 'paused');
       if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationPlayState), 'paused');
+      if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin svg').first().evaluate(coin => getComputedStyle(coin).animationPlayState), 'paused');
       await page.locator('#launchSceneMotion').check();
       await page.emulateMedia({ reducedMotion: 'reduce' });
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), 'none');
+      if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin svg').first().evaluate(coin => getComputedStyle(coin).animationName), 'none');
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.locator('#saveLaunchScene').click();
       await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
@@ -192,6 +218,7 @@ async function run() {
       if (id === 'castle') {
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-cloud-effects.png') });
       }
+      if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
     }
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="forest"]').click();

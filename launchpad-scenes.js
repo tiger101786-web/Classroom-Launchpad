@@ -4,12 +4,12 @@
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
     { id: "reef", name: "Coral Cove", description: "Sunlit reef & rising bubbles", image: "assets/launchpad-scene-reef.png" },
     { id: "forest", name: "Firefly Forest", description: "Twilight stream & drifting lights", image: "assets/launchpad-scene-forest.png" },
-    { id: "pixel", name: "Pixel Arcade", description: "Floating clouds & glowing pixels", image: "assets/launchpad-scene-pixel.png" },
+    { id: "pixel", name: "Pixel Arcade", description: "Spinning coins & glowing pixels", image: "assets/launchpad-scene-pixel-coinfree.png" },
     { id: "observatory", name: "Cosmic Observatory", description: "Ringed planet & drifting stars", image: "assets/launchpad-scene-observatory.png" },
     { id: "dragon", name: "Dragon’s Library", description: "Cozy books & golden dust", image: "assets/launchpad-scene-dragon.png" },
     { id: "cabin", name: "Snowy Cabin", description: "Warm windows & falling snow", image: "assets/launchpad-scene-cabin.png" },
     { id: "neon", name: "Rainy Neon City", description: "Colorful skyline & flowing rain", image: "assets/launchpad-scene-neon.png" },
-    { id: "castle", name: "Cloud Castle", description: "Floating towers & passing clouds", image: "assets/launchpad-scene-castle.png" },
+    { id: "castle", name: "Cloud Castle", description: "Floating towers & soft drifting mist", image: "assets/launchpad-scene-castle.png" },
     { id: "koi", name: "Moonlit Koi Pond", description: "Quiet garden & falling petals", image: "assets/launchpad-scene-koi.png" },
     { id: "crystal", name: "Crystal Cavern", description: "Glowing gems & rising sparkles", image: "assets/launchpad-scene-crystal.png" },
     { id: "pumpkin", name: "Pumpkin Patch", description: "Friendly pumpkins & autumn leaves", image: "assets/launchpad-scene-pumpkin.png" },
@@ -27,7 +27,8 @@
     const content = scene.image
       ? `<img class="launch-scene-image" src="${scene.image}" alt="${scene.name}" decoding="async"><span class="launch-scene-particles" aria-hidden="true">${Array.from({ length: 9 }, (_, index) => `<i style="--n:${index};--x:${9 + (index * 19) % 84}%;--y:${12 + (index * 23) % 72}%"></i>`).join("")}</span>`
       : `<video class="launch-scene-video" ${paused ? "" : "autoplay"} muted loop playsinline preload="metadata" aria-label="Mr. Nieves and Colt classroom video"><source ${preview ? "src" : "data-src"}="${video}?v=20260905-profile-optimized1" type="video/mp4"></video>`;
-    return `<div class="school-photo launch-scene scene-${scene.id}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}</div>`;
+    const coins = scene.id === "pixel" ? `<span class="scene-coin-layer" aria-hidden="true">${[[56.6, 46.9, 2.3], [50.5, 53.1, 2.5], [53.3, 64.1, 3.1], [58.4, 71.9, 3.8]].map(([x, y, size], index) => `<span class="scene-pixel-coin" style="left:${x}%;top:${y}%;width:${size}%;--coin-delay:${index * -.45}s"><svg viewBox="0 0 12 16" shape-rendering="crispEdges"><path fill="#8d4000" d="M4 0h4v1h2v2h1v2h1v6h-1v2h-1v2H8v1H4v-1H2v-2H1v-2H0V5h1V3h1V1h2Z"/><path fill="#ffd12f" d="M4 1h4v1h2v3h1v6h-1v3H8v1H4v-1H2v-3H1V5h1V2h2Z"/><path fill="#ffef85" d="M4 2h3v1H4v10H3V4h1Z"/><path fill="#ed8b06" d="M8 3h1v10H7v1H5v-1h2V4h1Z"/><path fill="#ffef85" d="M5 4h1v7H5Z"/></svg></span>`).join("")}</span>` : "";
+    return `<div class="school-photo launch-scene scene-${scene.id}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}</div>`;
   }
   function render(session, video) {
     const scene = settings(session);

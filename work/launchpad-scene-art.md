@@ -102,6 +102,16 @@ Square full-bleed premium cinematic stylized 3D environment artwork for a classr
 
 Forest fireflies and observatory stars now use linear one-way motion, staggered negative delays, and invisible loop endpoints instead of slow reversing motion.
 
+## Pixel Arcade coin-free revision
+
+Active asset: `assets/launchpad-scene-pixel-coinfree.png`. Original artwork is preserved at `assets/launchpad-scene-pixel.png`. Edited with built-in image generation; separate code-native pixel coin overlays spin in the browser and obey pause/reduced-motion settings.
+
+Final edit prompt:
+
+Precise image edit. Remove ONLY the four golden collectible coins from this pixel-art landscape: one near x57% y47%, one x50% y53%, one x53% y64%, and one x58% y72%. Reconstruct the dirt path and tiny patches of grass naturally behind each removed coin. Remove any tiny coin cast shadows too. Keep everything else exactly unchanged: path, bridge, floating islands, waterfalls, castle, trees, sunset, clouds, framing, pixel-art texture, colors and composition. Do not add anything. Return the complete square scene WITHOUT ANY COINS, without UI or text. It is a background for independently animated coin overlays.
+
+Cloud Castle: the added solid cloud silhouettes have been removed. Soft translucent mist now drifts only across the lower cloud bank; the castle image stays stationary.
+
 ## Pending
 
 The standalone Astronaut Colt image-generation request failed. It is not included in the selector. The earlier mockup is not a production asset.
