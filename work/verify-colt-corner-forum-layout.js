@@ -121,7 +121,33 @@ async function run() {
     const page = await context.newPage();
     await page.goto(baseUrl, { waitUntil: "networkidle" });
     // Homepage scene choices are personal, persistent, and previewed before saving.
+    assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
+    await page.locator('.launch-scene-stage').hover();
+    await page.getByRole('button', { name: 'Scene settings', exact: true }).click();
+    assert.equal(await page.locator('#chooseLaunchScene').isVisible(), true);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
+    await page.getByRole('button', { name: 'Scene settings', exact: true }).click();
+    await page.locator('h1').click();
+    assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
+    async function openSceneSettings() {
+      await page.locator('#launchSceneSettings').focus();
+      await page.keyboard.press('Enter');
+    }
+    const touchContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await touchContext.addCookies([{ name: cookieName, value: cookieValue, url: baseUrl }]);
+    const touchPage = await touchContext.newPage();
+    await touchPage.goto(baseUrl, { waitUntil: 'networkidle' });
+    await touchPage.locator('#launchSceneSettings').waitFor();
+    assert.equal(await touchPage.locator('#launchSceneSettings').evaluate(button => getComputedStyle(button).opacity), '1');
+    await touchPage.locator('#launchSceneSettings').tap();
+    assert.equal(await touchPage.locator('#chooseLaunchScene').isVisible(), true);
+    const menuBounds = await touchPage.locator('#launchSceneMenu').boundingBox();
+    assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
+    await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
+    await touchContext.close();
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'original');
+    await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="reef"]').click();
     assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
@@ -130,8 +156,9 @@ async function run() {
     await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => image.complete && image.naturalWidth > 0), true);
+    await openSceneSettings();
     await page.locator('#toggleLaunchScene').click();
-    await page.getByRole('button', { name: 'Resume scene', exact: true }).waitFor();
+    await page.waitForFunction(() => document.querySelector('#toggleLaunchScene')?.textContent === 'Resume scene');
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.motion, false);
     let releaseSession;
     const sessionGate = new Promise(resolve => { releaseSession = resolve; });
@@ -157,6 +184,7 @@ async function run() {
     assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.homeScene.id, 'original');
     assert.equal((await request('/api/home-scene', { method: 'POST', body: { id: 'reef', motion: true } })).status, 401);
     assert.equal((await request('/api/home-scene', { method: 'POST', cookie: studentCookie, body: { id: '../bad', motion: true } })).status, 400);
+    await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="forest"]').click();
     await page.locator('#launchSceneMotion').check();
@@ -169,6 +197,7 @@ async function run() {
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
     for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain']]) {
+      await openSceneSettings();
       await page.locator('#chooseLaunchScene').click();
       assert.equal(await page.locator('[data-scene-choice]').count(), 24);
       await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -293,17 +322,20 @@ async function run() {
         assert.notEqual(await effectLayer.evaluate(element => getComputedStyle(element).transform), before);
       }
     }
+    await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="forest"]').click();
     await page.locator('#saveLaunchScene').click();
     await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
     await page.locator('#home-top').screenshot({ path: path.join(dataDir, 'scene-home-desktop.png'), style: '#launchpadColtRoot, #coltAssistantRoot, #coltRadioRoot { visibility: hidden !important; }' });
     await page.setViewportSize({ width: 390, height: 844 });
+    await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.locator('.launch-scene-dialog').screenshot({ path: path.join(dataDir, 'scene-chooser-mobile.png') });
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.launch-scene-dialog').count(), 0);
+    await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="original"]').click();
     await page.locator('#launchSceneMotion').uncheck();

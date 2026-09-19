@@ -46,8 +46,9 @@
     if (!sessionReady) return `<section class="home-feature home-scene-feature" aria-busy="true"><div class="school-photo launch-scene scene-loading" role="status">Loading your scene…</div></section>`;
     const scene = settings(session);
     return `<section class="home-feature home-scene-feature">
-      ${artwork(scene.id, scene.motion, video)}
-      <div class="launch-scene-controls">
+      <div class="launch-scene-stage">${artwork(scene.id, scene.motion, video)}
+      <button type="button" id="launchSceneSettings" class="launch-scene-settings" aria-label="Scene settings" title="Scene settings" aria-expanded="false" aria-controls="launchSceneMenu" popovertarget="launchSceneMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button>
+      </div><div id="launchSceneMenu" class="launch-scene-controls" popover="auto" aria-label="Scene settings">
         ${session.authenticated ? '<button type="button" id="chooseLaunchScene">✦ Choose scene</button>' : ""}
         <button type="button" id="toggleLaunchScene" aria-pressed="${!scene.motion}">${reduced.matches ? "Motion reduced" : scene.motion ? "Pause scene" : "Resume scene"}</button>
       </div><span id="launchSceneStatus" class="launch-scene-status" role="status"></span>
@@ -64,8 +65,20 @@
     document.querySelector(".launch-scene-dialog")?.remove();
     const toggle = document.getElementById("toggleLaunchScene");
     if (!toggle) return;
+    const gear = document.getElementById("launchSceneSettings");
+    const menu = document.getElementById("launchSceneMenu");
+    menu.addEventListener("beforetoggle", event => {
+      if (event.newState === "open") {
+        const rect = gear.getBoundingClientRect();
+        menu.style.left = `${Math.max(8, Math.min(rect.right - 190, window.innerWidth - 198))}px`;
+        menu.style.top = `${Math.max(8, Math.min(rect.top - 112, window.innerHeight - 120))}px`;
+      }
+      gear.setAttribute("aria-expanded", String(event.newState === "open"));
+    });
     toggle.disabled = reduced.matches;
     toggle.addEventListener("click", async () => {
+      menu.hidePopover();
+      gear.focus();
       const next = settings(session);
       next.motion = !next.motion;
       toggle.disabled = true;
@@ -80,9 +93,11 @@
           const player = document.querySelector('.home-scene-feature video');
           if (player) { player.querySelector('source').src = `${video}?v=20260905-profile-optimized1`; player.load(); }
         }
-      } catch (error) { status.textContent = error.message; toggle.disabled = false; }
+        document.getElementById("launchSceneSettings")?.focus();
+      } catch (error) { status.textContent = error.message; toggle.disabled = reduced.matches; }
     });
     document.getElementById("chooseLaunchScene")?.addEventListener("click", () => {
+      menu.hidePopover();
       const draft = settings(session);
       const dialog = document.createElement("dialog");
       dialog.className = "launch-scene-dialog";
@@ -95,7 +110,7 @@
         <p class="launch-scene-hint">Scene artwork stays still; only the silent effects move inside the circle. Reduced-motion preferences are always respected.</p>
         <p id="launchSceneSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-scene-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchScene">Save Scene</button></div>`;
       document.body.append(dialog);
-      const close = () => { dialog.close(); dialog.remove(); document.getElementById("chooseLaunchScene")?.focus(); };
+      const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };
       dialog.querySelectorAll("[data-scene-close]").forEach(button => button.addEventListener("click", close));
       dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
       const refreshPreview = () => { dialog.querySelector("#launchScenePreview").innerHTML = artwork(draft.id, draft.motion, video, true); };
@@ -109,7 +124,7 @@
         const button = dialog.querySelector("#saveLaunchScene");
         button.disabled = true;
         dialog.querySelector("#launchSceneSaveStatus").textContent = "Saving your scene…";
-        try { const updated = await save(draft); close(); onSave(updated); document.getElementById("chooseLaunchScene")?.focus(); }
+        try { const updated = await save(draft); close(); onSave(updated); document.getElementById("launchSceneSettings")?.focus(); }
         catch (error) { dialog.querySelector("#launchSceneSaveStatus").textContent = error.message; button.disabled = false; }
       });
       dialog.showModal();

@@ -61,7 +61,16 @@
 @keyframes scene-trophy-sparkle { 0%, 100% { transform: scale(.3) rotate(0); opacity: .1; } 50% { transform: scale(1) rotate(90deg); opacity: .9; } }
 .launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
 .launch-scene.is-paused *::before, .launch-scene.is-paused *::after { animation-play-state: paused !important; }
-.launch-scene-controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; max-width: 310px; }
+.launch-scene-stage { position: relative; flex: 0 0 auto; }
+.launch-scene-settings { position: absolute; right: 8%; bottom: 8%; display: grid; place-items: center; width: 44px; height: 44px; padding: 10px; border: 1px solid #a6526a; border-radius: 50%; background: #190c13ed; color: #fff0f5; cursor: pointer; box-shadow: 0 3px 12px #0006; }
+.launch-scene-settings svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.launch-scene-settings:focus-visible { outline: 3px solid #f197b5; outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .launch-scene-settings { opacity: 0; pointer-events: none; }
+  .launch-scene-stage:hover .launch-scene-settings, .launch-scene-stage:focus-within .launch-scene-settings, .launch-scene-settings[aria-expanded="true"] { opacity: 1; pointer-events: auto; }
+}
+.launch-scene-controls { position: fixed; inset: auto; margin: 0; width: 190px; box-sizing: border-box; padding: 8px; border: 1px solid #a6526a; border-radius: 14px; background: #190c13; color: #fff0f5; box-shadow: 0 8px 28px #0008; }
+.launch-scene-controls:popover-open { display: grid; gap: 6px; }
 .launch-scene-controls button { border: 1px solid #a6526a; border-radius: 18px; background: #190c13e8; color: #fff0f5; padding: 7px 12px; font-size: .75rem; font-weight: 800; cursor: pointer; }
 .launch-scene-controls button:focus-visible, .launch-scene-options button:focus-visible { outline: 3px solid #f197b5; outline-offset: 3px; }
 .launch-scene-controls button:disabled { opacity: .65; cursor: default; }
