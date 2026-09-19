@@ -1455,6 +1455,10 @@ let authMessage = "";
 let accountPasswordMessage = "";
 let profileAvatarMessage = "";
 let directMessages = [];
+const directMessagePopupSeen = new Map();
+let directMessagePopupAccount = "";
+let directMessagePopupUntil = 0;
+let directMessagePopupTimer = null;
 let selectedMessageStudentEmail = "";
 let directMessageStatus = "";
 let teacherMessageSearch = "";
@@ -1626,6 +1630,16 @@ function unreadColtCornerTopics() {
   ));
 }
 
+function openNewColtCornerTopic() {
+  if (!isSignedIn()) return setScreen({ name: "login" });
+  const newest = unreadColtCornerTopics().sort((a, b) => (
+    (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0)
+  ))[0];
+  if (!newest) return setScreen({ name: "coltCorner" });
+  if (isTeacher()) teacherColtCornerGrade = coltCornerAudienceGrade(newest);
+  setScreen({ name: "thread", id: newest.id });
+}
+
 function markVisibleColtCornerTopicsSeen() {
   if (!isSignedIn()) return;
   const key = coltCornerSeenTopicsStorageKey();
@@ -1633,7 +1647,10 @@ function markVisibleColtCornerTopicsSeen() {
   const seen = loadSeenColtCornerTopicIds();
   const grade = String(authSession.grade || "");
   classThreads.forEach(thread => {
-    if (thread.id && (isTeacher() || coltCornerAudienceGrade(thread) === grade)) seen.add(String(thread.id));
+    const visible = screen.name === "thread"
+      ? thread.id === screen.id && (isTeacher() || coltCornerAudienceGrade(thread) === grade)
+      : coltCornerAudienceGrade(thread) === (isTeacher() ? teacherColtCornerGrade : grade);
+    if (thread.id && visible) seen.add(String(thread.id));
   });
   try {
     localStorage.setItem(key, JSON.stringify([...seen].slice(-500)));
@@ -2735,7 +2752,7 @@ function renderColtCornerPreview() {
         <div class="colt-corner-stats">
           <span>${escapeHtml(`${topicCount} ${topicCount === 1 ? "Topic" : "Topics"}`)}</span>
           <span>${escapeHtml(`${replyCount} ${replyCount === 1 ? "Reply" : "Replies"}`)}</span>
-          <button class="colt-corner-topic-bell" type="button" data-action="openColtCorner" aria-label="${newTopicCount ? `${newTopicCount} new Colt Corner ${newTopicCount === 1 ? "topic" : "topics"}` : "No new Colt Corner topics"}" title="${newTopicCount ? `${newTopicCount} new ${newTopicCount === 1 ? "topic" : "topics"}` : "No new topics"}">
+          <button class="colt-corner-topic-bell" type="button" data-action="openNewColtCornerTopic" aria-label="${newTopicCount ? `Open newest of ${newTopicCount} new Colt Corner ${newTopicCount === 1 ? "topic" : "topics"}` : "No new Colt Corner topics"}" title="${newTopicCount ? "Open newest unread topic" : "No new topics"}">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
             ${newTopicCount ? `<b>${newTopicCount > 99 ? "99+" : newTopicCount}</b>` : ""}
           </button>
@@ -11064,9 +11081,33 @@ function renderChangePin() {
 }
 
 function renderDirectMessageNotification() {
-  if (!isSignedIn()) return "";
-  const count = unreadDirectMessageCount(isTeacher() ? "teacher" : "student", isTeacher() ? "" : authSession.email);
+  const account = isSignedIn() ? `${authSession.role}:${String(authSession.email || "").toLowerCase()}` : "";
+  const unread = account ? directMessages.filter(message => isTeacher()
+    ? message.senderRole === "student" && !message.readByTeacher
+    : message.studentEmail === String(authSession.email || "").toLowerCase() && message.senderRole === "teacher" && !message.readByStudent
+  ) : [];
+  const count = unread.length;
+  if (account !== directMessagePopupAccount || !count) {
+    clearTimeout(directMessagePopupTimer);
+    directMessagePopupTimer = null;
+    directMessagePopupUntil = 0;
+    directMessagePopupAccount = account;
+  }
   if (!count) return "";
+  const seen = directMessagePopupSeen.get(account) || new Set();
+  if (unread.some(message => !seen.has(message.id))) {
+    unread.forEach(message => seen.add(message.id));
+    directMessagePopupSeen.set(account, seen);
+    directMessagePopupUntil = Date.now() + 8000;
+    clearTimeout(directMessagePopupTimer);
+    directMessagePopupTimer = setTimeout(() => {
+      directMessagePopupUntil = 0;
+      directMessagePopupTimer = null;
+      // Remove only the popup: do not rerender forms or mark messages as read.
+      document.querySelector(".direct-message-notification")?.remove();
+    }, 8000);
+  }
+  if (Date.now() >= directMessagePopupUntil) return "";
   const message = isTeacher()
     ? `${count} new student ${count === 1 ? "response" : "responses"}`
     : `${count} new ${count === 1 ? "message" : "messages"} from Mr. Nieves`;
@@ -13049,6 +13090,7 @@ app.addEventListener("click", async event => {
     observeDeferredVideos(app);
   }
   if (action === "openColtCorner") setScreen({ name: isSignedIn() ? "coltCorner" : "login" });
+  if (action === "openNewColtCornerTopic") openNewColtCornerTopic();
   if (action === "openStudentSpotlights") {
     spotlightCollectionFilter = "";
     spotlightGradeFilter = "all";
