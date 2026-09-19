@@ -306,6 +306,25 @@
       note: "Irish traditional and folk music streamed by the listener-supported Ceol FM. No account required."
     },
     {
+      id: "koko-hawaiian",
+      label: "Hawaiian • KOKO",
+      type: "stream",
+      source: "/api/radio-audio/koko-hawaiian",
+      provider: "KOKO-LP · Hana, Maui",
+      searchTerms: "hawaii hawaiian koko hana maui island ukulele slack key",
+      note: "Commercial-free Hawaiian music and local cultural programming from KOKO-LP 96.3 FM in Hana, Maui."
+    },
+    {
+      id: "farsi-frequency",
+      label: "Persian • Farsi",
+      type: "stream",
+      // Resolves to the requested Surfernetwork stream with a fresh short-lived token.
+      source: "https://stream.zeno.fm/3q0k3nxazjkvv",
+      provider: "Farsi Frequency",
+      searchTerms: "persian farsi iran iranian traditional ambient santur setar tar piano",
+      note: "Farsi Frequency's live Persian music mix, including traditional, instrumental, ambient, and vocal selections. Ad-free playback is not confirmed."
+    },
+    {
       id: "kpop-hits",
       label: "K-Pop • Hits",
       type: "stream",
@@ -654,7 +673,7 @@
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
-    "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
+    "Hawaiian", "Persian", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
     "Ambient", "Sleep", "Feel-Good", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
@@ -677,6 +696,8 @@
   }
 
   const stationIconPaths = {
+    "koko-hawaiian": '<path d="M12 21c2-5 3-10 1-15M13 6C9 2 5 3 3 6c4-1 7 0 10 0Zm0 0c3-4 6-3 8 0-3-1-5 0-8 0ZM3 21c3-2 6-2 9 0s6 2 9 0"/>',
+    "farsi-frequency": '<path d="m3 15 5-7h8l5 7H3Zm0 0v4h18v-4M9 9l-3 6m6-6v6m3-6 3 6M6 4l4 3m8-3-4 3"/>',
     studying: '<path d="M6 4h9a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2Z"/><path d="M8 4v5h8V4M8 14h6"/>',
     working: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',
     chilling: '<path d="M6 17h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2 2A3 3 0 0 0 6 17Z"/>',

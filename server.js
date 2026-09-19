@@ -31,7 +31,8 @@ const sessionCookieName = "classroom_launchpad_session";
 const leaderboardDifficulties = new Set(["easy", "medium", "hard", "veryHard", "impossible"]);
 const schoolNetworkRadioRelays = Object.freeze({
   "ancient-fm": "https://mediaserv73.live-streams.nl:18058/stream",
-  "organlive-pipe-organ": "https://play.organlive.com:7010/320"
+  "organlive-pipe-organ": "https://play.organlive.com:7010/320",
+  "koko-hawaiian": "https://s2.yesstreaming.net:17031/stream"
 });
 const teacherLoginAttempts = new Map();
 const approvedStudentGradeMigrations = [{
