@@ -158,7 +158,7 @@ async function run() {
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
       assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), effect);
-      if (['forest', 'observatory'].includes(id)) {
+      if (['forest', 'observatory', 'dragon', 'castle'].includes(id)) {
         const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
           const style = getComputedStyle(particle);
           const animation = particle.getAnimations()[0];
@@ -189,6 +189,9 @@ async function run() {
       await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
       assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, id);
       assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), id);
+      if (id === 'castle') {
+        await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-cloud-effects.png') });
+      }
     }
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="forest"]').click();

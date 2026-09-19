@@ -10,11 +10,18 @@
 .scene-pixel .launch-scene-particles::before, .scene-pixel .launch-scene-particles::after { content: ""; position: absolute; top: 17%; left: 15%; width: 27px; height: 7px; background: #fff6; box-shadow: 6px -6px #fff6, 13px 0 #fff6; animation: scene-cloud 32s linear infinite; }
 .scene-pixel .launch-scene-particles::after { top: 28%; left: 52%; animation-delay: -16s; }
 .scene-observatory .launch-scene-particles i { left: 110%; width: 2px; height: 2px; background: #e0eaff; box-shadow: 0 0 5px #adbfff; animation: scene-stars 12s linear infinite; animation-delay: calc(var(--n) * -1.33s); }
-.scene-dragon .launch-scene-particles i { width: 3px; height: 3px; background: #ffdf9c; box-shadow: 0 0 5px #ffcf7860; animation: scene-dust 18s ease-in-out infinite; animation-delay: calc(var(--n) * -2s); }
+.scene-dragon .launch-scene-particles i { top: 110%; width: 3px; height: 3px; background: #ffdf9c; box-shadow: 0 0 5px #ffcf7860; animation: scene-dust 10s linear infinite; animation-delay: calc(var(--n) * -1.11s); }
 .scene-cabin .launch-scene-particles i { top: -10%; width: 4px; height: 4px; background: #fff; box-shadow: none; animation: scene-snow 16s linear infinite; animation-delay: calc(var(--n) * -1.8s); }
 .scene-cabin .launch-scene-particles i:nth-child(2n) { width: 3px; height: 3px; animation-duration: 20s; }
 .scene-neon .launch-scene-particles i { top: -12%; width: 1px; height: 19px; border-radius: 1px; background: #b9eaff99; box-shadow: none; animation: scene-rain 2.8s linear infinite; animation-delay: calc(var(--n) * -.31s); }
-.scene-castle .launch-scene-particles i { left: -35%; width: 76px; height: 19px; border-radius: 50%; background: #ffffff35; box-shadow: 8px -6px 8px #ffffff25; filter: blur(5px); animation: scene-cloud-flow 25s linear infinite; animation-delay: calc(var(--n) * -2.78s); }
+.scene-castle .launch-scene-particles i { left: -100px; top: 18%; width: 76px; height: 20px; border-radius: 30px; background: linear-gradient(#fff, #e4dcf6); box-shadow: 0 3px 7px #62548155; filter: blur(.5px); animation: scene-cloud-flow 14s linear infinite; animation-delay: calc(var(--n) * -3.5s); }
+.scene-castle .launch-scene-particles i::before, .scene-castle .launch-scene-particles i::after { content: ""; position: absolute; background: #fff; border-radius: 50% 50% 35% 35%; }
+.scene-castle .launch-scene-particles i::before { width: 34px; height: 25px; left: 13px; top: -14px; }
+.scene-castle .launch-scene-particles i::after { width: 27px; height: 20px; left: 40px; top: -9px; }
+.scene-castle .launch-scene-particles i:nth-child(2) { top: 79%; }
+.scene-castle .launch-scene-particles i:nth-child(3) { top: 29%; }
+.scene-castle .launch-scene-particles i:nth-child(4) { top: 89%; }
+.scene-castle .launch-scene-particles i:nth-child(n+5) { display: none; }
 .scene-koi .launch-scene-particles i { top: -10%; width: 7px; height: 4px; border-radius: 80% 10% 80% 10%; background: #ffc0d6c9; box-shadow: none; animation: scene-petals 13s linear infinite; animation-delay: calc(var(--n) * -1.44s); }
 .scene-crystal .launch-scene-particles i { top: 110%; width: 3px; height: 5px; border-radius: 0; background: #e5e1ff; box-shadow: 0 0 7px #ab85ffb0; animation: scene-crystal-flow 14s linear infinite; animation-delay: calc(var(--n) * -1.55s); }
 .scene-pumpkin .launch-scene-particles i { top: -10%; width: 8px; height: 5px; border-radius: 0 75% 0 75%; background: #ef9a36d9; box-shadow: none; animation: scene-leaves 11s linear infinite; animation-delay: calc(var(--n) * -1.22s); }
@@ -49,12 +56,12 @@
 @keyframes scene-stars { 0% { transform: translate(0, -8px); opacity: 0; } 10%, 90% { opacity: .75; } 100% { transform: translate(-350px, 16px); opacity: 0; } }
 @keyframes scene-firefly-flow { 0% { transform: translate(0, 0); opacity: 0; } 10%, 90% { opacity: .7; } 100% { transform: translate(22px, -350px); opacity: 0; } }
 @keyframes scene-rain { 0% { transform: translate(0, 0) rotate(12deg); opacity: 0; } 10%, 85% { opacity: .6; } 100% { transform: translate(-50px, 370px) rotate(12deg); opacity: 0; } }
-@keyframes scene-cloud-flow { 0% { transform: translateX(0); opacity: 0; } 20%, 80% { opacity: .55; } 100% { transform: translateX(460px); opacity: 0; } }
+@keyframes scene-cloud-flow { 0% { transform: translateX(0); opacity: 0; } 15%, 85% { opacity: .8; } 100% { transform: translateX(460px); opacity: 0; } }
 @keyframes scene-petals { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 10%, 85% { opacity: .75; } 100% { transform: translate(32px, 350px) rotate(200deg); opacity: 0; } }
 @keyframes scene-crystal-flow { 0% { transform: translate(0, 0) rotate(25deg); opacity: 0; } 15%, 80% { opacity: .65; } 100% { transform: translate(-15px, -350px) rotate(110deg); opacity: 0; } }
 @keyframes scene-leaves { 0% { transform: translate(0, 0) rotate(-30deg); opacity: 0; } 10%, 85% { opacity: .75; } 100% { transform: translate(45px, 350px) rotate(260deg); opacity: 0; } }
 @keyframes scene-embers { 0% { transform: translate(0, 0); opacity: 0; } 15%, 80% { opacity: .65; } 100% { transform: translate(28px, -350px); opacity: 0; } }
-@keyframes scene-dust { 0% { transform: translate(0, 12px); opacity: .1; } 50% { opacity: .6; } 100% { transform: translate(8px, -16px); opacity: .1; } }
+@keyframes scene-dust { 0% { transform: translate(0, 0); opacity: 0; } 10%, 90% { opacity: .6; } 100% { transform: translate(22px, -350px); opacity: 0; } }
 @keyframes scene-snow { 0% { transform: translate(-6px, 0); opacity: 0; } 10%, 90% { opacity: .65; } 100% { transform: translate(18px, 350px); opacity: 0; } }
 @keyframes scene-bubble { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: .65; } 85% { opacity: .5; } 100% { transform: translate(12px, -350px); opacity: 0; } }
 @keyframes scene-firefly { 0% { transform: translate(-5px, 4px); opacity: .2; } 50% { opacity: .8; } 100% { transform: translate(9px, -10px); opacity: .35; } }
