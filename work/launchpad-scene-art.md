@@ -52,6 +52,56 @@ Square full-bleed cinematic stylized 3D illustration for a circular classroom ho
 
 All scene artwork is stationary. Only separate CSS effects animate; whole-image drift was removed at the user's request.
 
+## Rainy Neon City
+
+Asset: `assets/launchpad-scene-neon.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Rainy Neon City: peaceful futuristic street at night, elegant towering skyline and elevated walkways, luminous cyan and pink abstract neon panels without letters, wet pavement reflecting violet lights, no people, moody but welcoming. View down a beautiful street into central glowing city towers. Leave open air for rainfall.
+
+## Cloud Castle
+
+Asset: `assets/launchpad-scene-castle.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Cloud Castle: luminous ivory fairytale castle with slender blue-and-gold towers on a floating grassy island high above billowing clouds at sunrise. Peach and lavender sky, tiny waterfalls dropping into clouds, magical peaceful atmosphere, no characters. Broad cloud-filled open sky around the centered castle.
+
+## Moonlit Koi Pond
+
+Asset: `assets/launchpad-scene-koi.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Moonlit Koi Pond: tranquil Japanese-inspired garden, luminous silver moon reflection on a deep teal pond, orange-white koi clearly visible in foreground water, arching cherry blossom branch above, small stone lantern and red wooden bridge in middle distance. Soft pink petals, midnight blues and emerald moss, serene and beautiful.
+
+## Crystal Cavern
+
+Asset: `assets/launchpad-scene-crystal.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Crystal Cavern: spectacular peaceful underground grotto with large luminous amethyst and cyan crystals growing around a clear turquoise pool, winding stepping stones into a central glowing chamber, rich deep blue shadows and soft violet illumination. No characters, no danger. Leave dark air around the crystals for subtle sparkling particles.
+
+## Pumpkin Patch
+
+Asset: `assets/launchpad-scene-pumpkin.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Autumn Pumpkin Patch: cheerful pumpkins with friendly smiling carved faces softly lit from within, rustic wooden fence, winding path, golden maple trees, warm amber and russet leaves, cozy farmhouse in distance beneath lavender twilight sky. Welcoming harvest scene, not scary, no characters. Large friendly pumpkin near center foreground.
+
+## Volcano Island
+
+Asset: `assets/launchpad-scene-volcano.png`
+
+Final prompt (built-in image generation):
+
+Square full-bleed premium cinematic stylized 3D environment artwork for a classroom website's 300px circular scene. Compose the main subject within central 70% for a circular crop, fill all corners, clear readable composition. No text, logos, UI or border. Artwork will remain stationary; separate gentle particles will be animated on the website. Volcano Island: dramatic beautiful tropical volcanic island viewed across a sheltered lagoon at sunset, dark cone mountain centered with thin glowing orange lava streams down black rock, green palms at edges, deep turquoise water reflecting warm sky. Small soft plume at summit, peaceful uninhabited landscape, no explosions or danger. Atmospheric cinematic lighting.
+
+Forest fireflies and observatory stars now use linear one-way motion, staggered negative delays, and invisible loop endpoints instead of slow reversing motion.
+
 ## Pending
 
 The standalone Astronaut Colt image-generation request failed. It is not included in the selector. The earlier mockup is not a production asset.

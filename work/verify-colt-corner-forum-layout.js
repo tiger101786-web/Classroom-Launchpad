@@ -150,14 +150,34 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-cloud-flow'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
       await page.locator('#chooseLaunchScene').click();
-      assert.equal(await page.locator('[data-scene-choice]').count(), 7);
+      assert.equal(await page.locator('[data-scene-choice]').count(), 13);
       await page.locator(`[data-scene-choice="${id}"]`).click();
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
       assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), effect);
+      if (['forest', 'observatory'].includes(id)) {
+        const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
+          const style = getComputedStyle(particle);
+          const animation = particle.getAnimations()[0];
+          animation.pause();
+          animation.currentTime = 2000;
+          const first = new DOMMatrix(getComputedStyle(particle).transform);
+          animation.currentTime = 3000;
+          const second = new DOMMatrix(getComputedStyle(particle).transform);
+          const frames = animation.effect.getKeyframes();
+          const result = { direction: style.animationDirection, easing: style.animationTimingFunction, distance: Math.hypot(second.m41 - first.m41, second.m42 - first.m42), startOpacity: frames[0].opacity, endOpacity: frames.at(-1).opacity };
+          animation.play();
+          return result;
+        });
+        assert.equal(flow.direction, 'normal');
+        assert.equal(flow.easing, 'linear');
+        assert(flow.distance > 25, JSON.stringify(flow));
+        assert.equal(Number(flow.startOpacity), 0);
+        assert.equal(Number(flow.endOpacity), 0);
+      }
       await page.locator('#launchSceneMotion').uncheck();
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationPlayState), 'paused');
       if (id === 'pixel') assert.equal(await page.locator('#launchScenePreview .launch-scene-particles').evaluate(particles => getComputedStyle(particles, '::before').animationPlayState), 'paused');
