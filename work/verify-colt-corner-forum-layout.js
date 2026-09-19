@@ -150,7 +150,7 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-mist'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers']]) {
       await page.locator('#chooseLaunchScene').click();
       assert.equal(await page.locator('[data-scene-choice]').count(), 13);
       await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -173,14 +173,20 @@ async function run() {
         assert(spin.face > .9 && spin.edge < .2, JSON.stringify(spin));
       }
       if (id === 'castle') {
-        const mist = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => ({
-          top: particle.offsetTop / particle.parentElement.clientHeight,
-          puff: getComputedStyle(particle, '::before').content,
-          background: getComputedStyle(particle).backgroundImage
-        }));
-        assert(mist.top >= .7);
-        assert.equal(mist.puff, 'none');
-        assert(mist.background.includes('radial-gradient'));
+        const rays = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
+          const animation = particle.getAnimations()[0];
+          animation.pause();
+          animation.currentTime = 0;
+          const first = { transform: getComputedStyle(particle).transform, opacity: Number(getComputedStyle(particle).opacity) };
+          animation.currentTime = 3500;
+          const peak = { transform: getComputedStyle(particle).transform, opacity: Number(getComputedStyle(particle).opacity) };
+          const background = getComputedStyle(particle).backgroundImage;
+          animation.play();
+          return { first, peak, background };
+        });
+        assert(rays.background.includes('conic-gradient'));
+        assert.notEqual(rays.first.transform, rays.peak.transform);
+        assert(rays.peak.opacity - rays.first.opacity >= .39);
       }
       if (['forest', 'observatory', 'dragon'].includes(id)) {
         const flow = await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => {
@@ -216,7 +222,8 @@ async function run() {
       assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, id);
       assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), id);
       if (id === 'castle') {
-        await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-cloud-effects.png') });
+        await page.locator('.home-scene-feature .scene-castle i').first().evaluate(particle => { const animation = particle.getAnimations()[0]; animation.pause(); animation.currentTime = 3500; });
+        await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'castle-sun-rays.png') });
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
     }

@@ -110,7 +110,7 @@ Final edit prompt:
 
 Precise image edit. Remove ONLY the four golden collectible coins from this pixel-art landscape: one near x57% y47%, one x50% y53%, one x53% y64%, and one x58% y72%. Reconstruct the dirt path and tiny patches of grass naturally behind each removed coin. Remove any tiny coin cast shadows too. Keep everything else exactly unchanged: path, bridge, floating islands, waterfalls, castle, trees, sunset, clouds, framing, pixel-art texture, colors and composition. Do not add anything. Return the complete square scene WITHOUT ANY COINS, without UI or text. It is a background for independently animated coin overlays.
 
-Cloud Castle: the added solid cloud silhouettes have been removed. Soft translucent mist now drifts only across the lower cloud bank; the castle image stays stationary.
+Cloud Castle: both the added cloud silhouettes and the mist have been removed. Warm sun rays originate at the painted sun and gently sweep and brighten on a seamless seven-second loop. The castle image stays stationary; pause and reduced-motion settings apply to the rays.
 
 ## Pending
 
