@@ -73,6 +73,11 @@
 @keyframes scene-burner-glow { 0%, 100% { opacity: .2; } 35% { opacity: .95; } 55% { opacity: .55; } 72% { opacity: .85; } }
 @keyframes scene-robot-lights { 0%, 100% { opacity: .15; } 50% { opacity: .95; } }
 @keyframes scene-arcade-lights { 0%, 100% { opacity: .15; } 50% { opacity: .95; } }
+.scene-chapel .launch-scene-particles i { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; background: radial-gradient(ellipse 12% 17% at 50% 14%, #ffe6a566, transparent 100%), radial-gradient(ellipse 7% 24% at 13% 47%, #77b5ff55, transparent 100%), radial-gradient(ellipse 7% 24% at 87% 47%, #ffc87566, transparent 100%); mix-blend-mode: screen; animation: scene-chapel-light 5s ease-in-out infinite; animation-delay: 0s; }
+.scene-chapel .launch-scene-particles i:nth-child(2) { background: radial-gradient(ellipse 1.3% 2.6% at 28.9% 70.7%, #fff6cf, #ffc46c88 45%, transparent 100%), radial-gradient(ellipse 1.3% 2.6% at 71.1% 70.7%, #fff6cf, #ffc46c88 45%, transparent 100%); animation: scene-candle-glow 2.4s ease-in-out infinite; }
+.scene-chapel .launch-scene-particles i:nth-child(n+3) { display: none; }
+@keyframes scene-chapel-light { 0%, 100% { opacity: .15; } 50% { opacity: .85; } }
+@keyframes scene-candle-glow { 0%, 100% { opacity: .25; } 30% { opacity: .85; } 55% { opacity: .45; } 75% { opacity: .95; } }
 .launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
 .launch-scene.is-paused *::before, .launch-scene.is-paused *::after { animation-play-state: paused !important; }
 .launch-scene-stage { position: relative; flex: 0 0 auto; }

@@ -29,7 +29,8 @@
     { id: "crawfish", name: "Louisiana Crawfish Boil", description: "Bayou picnic & curling pot steam", image: "assets/launchpad-scene-crawfish.png" },
     { id: "balloons", name: "Hot Air Balloon Meadow", description: "Sunrise wildflowers & flickering burner glow", image: "assets/launchpad-scene-balloons.png" },
     { id: "robotics", name: "Robotics Workshop", description: "Friendly robot & glowing indicator lights", image: "assets/launchpad-scene-robotics.png" },
-    { id: "retro-arcade", name: "Retro Arcade", description: "Vintage cabinets & pulsing neon screens", image: "assets/launchpad-scene-retro-arcade.png" }
+    { id: "retro-arcade", name: "Retro Arcade", description: "Vintage cabinets & pulsing neon screens", image: "assets/launchpad-scene-retro-arcade.png" },
+    { id: "chapel", name: "Stained Glass Chapel", description: "Jesus, a golden cross & gentle candlelight", image: "assets/launchpad-scene-chapel.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const frames = [
