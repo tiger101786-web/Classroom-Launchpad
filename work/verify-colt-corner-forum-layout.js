@@ -446,9 +446,12 @@ async function run() {
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.profileBanner, 'colt');
     assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.profileBanner, 'none');
     assert(await page.locator('.forum-post-author [data-banner="colt"]').isVisible());
+    assert.equal(await page.locator('.forum-post-author [data-banner="colt"] img').evaluate(image => getComputedStyle(image).objectPosition), '100% 50%');
+    await page.locator('.forum-post-author').screenshot({ path: path.join(dataDir, 'colt-banner-author-desktop.png') });
     await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-banner-desktop.png') });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#changeProfileBanner').click();
+    assert.equal(await page.locator('#profileBannerPreview [data-banner="colt"] img').evaluate(image => getComputedStyle(image).objectPosition), '100% 50%');
     assert(await page.locator('.profile-banner-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
     await page.locator('.profile-banner-dialog').screenshot({ path: path.join(dataDir, 'banner-chooser-mobile.png') });
     await page.locator('[data-banner-choice="none"]').click();
