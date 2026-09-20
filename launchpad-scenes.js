@@ -20,6 +20,7 @@
     { id: "soccer", name: "Soccer Stadium", description: "Twilight pitch & glowing floodlights", image: "assets/launchpad-scene-soccer.png" },
     { id: "baseball", name: "Baseball Under the Lights", description: "Sunset diamond & warm stadium lights", image: "assets/launchpad-scene-baseball.png" },
     { id: "softball", name: "Softball Sunset", description: "Golden diamond & glowing stadium lights", image: "assets/launchpad-scene-softball.png" },
+    { id: "gymnastics", name: "Gymnastics Arena", description: "Balance beam, uneven bars & glowing lights", image: "assets/launchpad-scene-gymnastics.png" },
     { id: "cafe", name: "French Quarter Café", description: "Beignets, New Orleans & rain on glass", image: "assets/launchpad-scene-cafe-v2.png" },
     { id: "aurora", name: "Northern Lights Lake", description: "Alpine lake & flowing aurora light", image: "assets/launchpad-scene-aurora.png" },
     { id: "train", name: "Autumn Train Station", description: "Golden leaves & drifting steam", image: "assets/launchpad-scene-train.png" },
