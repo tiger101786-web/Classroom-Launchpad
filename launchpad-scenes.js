@@ -30,7 +30,10 @@
     { id: "balloons", name: "Hot Air Balloon Meadow", description: "Sunrise wildflowers & flickering burner glow", image: "assets/launchpad-scene-balloons.png" },
     { id: "robotics", name: "Robotics Workshop", description: "Friendly robot & glowing indicator lights", image: "assets/launchpad-scene-robotics.png" },
     { id: "retro-arcade", name: "Retro Arcade", description: "Vintage cabinets & pulsing neon screens", image: "assets/launchpad-scene-retro-arcade.png" },
-    { id: "chapel", name: "Stained Glass Chapel", description: "Jesus, a golden cross & gentle candlelight", image: "assets/launchpad-scene-chapel.png" }
+    { id: "chapel", name: "Stained Glass Chapel", description: "Jesus, a golden cross & gentle candlelight", image: "assets/launchpad-scene-chapel.png" },
+    { id: "bonfire", name: "Beach Bonfire", description: "Sunset waves, warm firelight & rising embers", image: "assets/launchpad-scene-bonfire.png" },
+    { id: "oasis", name: "Desert Oasis", description: "Golden cliffs, palms & shimmering turquoise water", image: "assets/launchpad-scene-oasis.png" },
+    { id: "christmas-chapel", name: "Christmas Chapel", description: "Nativity display, candlelight & a glowing star", image: "assets/launchpad-scene-christmas-chapel.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const frames = [

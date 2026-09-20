@@ -83,6 +83,17 @@
 .scene-chapel .launch-scene-particles i:nth-child(n+3) { display: none; }
 @keyframes scene-chapel-light { 0%, 100% { opacity: .04; } 50% { opacity: 1; } }
 @keyframes scene-candle-glow { 0%, 100% { opacity: .25; } 30% { opacity: .85; } 55% { opacity: .45; } 75% { opacity: .95; } }
+.scene-bonfire .launch-scene-particles i:first-child { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; background: radial-gradient(ellipse 9% 15% at 50% 58%, #ffe599cc, #ff8c3977 50%, transparent 100%), radial-gradient(ellipse 24% 10% at 50% 70%, #ffac5a77, transparent 100%); mix-blend-mode: screen; animation: scene-bonfire-glow 2.4s ease-in-out infinite; animation-delay: 0s; }
+.scene-bonfire .launch-scene-particles i:nth-child(n+2) { left: calc(44% + var(--n) * 1.4%); top: 61%; width: 2px; height: 3px; border-radius: 50%; background: #ffdc83; box-shadow: 0 0 3px #ffa742; animation: scene-bonfire-ember 2.8s linear infinite; animation-delay: calc(var(--n) * -.35s); }
+@keyframes scene-bonfire-glow { 0%, 100% { opacity: .12; } 30% { opacity: 1; } 60% { opacity: .35; } 80% { opacity: .85; } }
+@keyframes scene-bonfire-ember { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .9; } 70% { opacity: .6; } 100% { transform: translate(10px, -65px); opacity: 0; } }
+.scene-oasis .launch-scene-particles i { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; clip-path: polygon(34% 54%, 64% 54%, 83% 61%, 82% 69%, 73% 76%, 70% 86%, 58% 90%, 36% 88%, 26% 81%, 22% 69%, 16% 61%); background: radial-gradient(ellipse 18px 1.3px at 22px 9px, #c3fff5cc, transparent 100%) 0 0 / 67px 21px, radial-gradient(ellipse 11px 1px at 16px 14px, #fff5ba99, transparent 100%) 0 0 / 49px 31px; mask-image: radial-gradient(ellipse 40% 25% at 50% 73%, #000 20%, transparent 100%); mix-blend-mode: screen; animation: scene-oasis-shimmer 3.2s ease-in-out infinite; animation-delay: 0s; }
+.scene-oasis .launch-scene-particles i:nth-child(n+2) { display: none; }
+@keyframes scene-oasis-shimmer { 0%, 100% { opacity: .15; background-position: 0 0, 0 0; } 50% { opacity: .9; background-position: 10px 4px, -8px 2px; } }
+.scene-christmas-chapel .launch-scene-particles i { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; background: radial-gradient(ellipse 12% 14% at 50% 24%, #ffe5aacc, #ffc36d55 50%, transparent 100%), radial-gradient(ellipse 9% 22% at 11% 46%, #ffc55d66, transparent 100%), radial-gradient(ellipse 9% 22% at 89% 46%, #ffc55d66, transparent 100%); mix-blend-mode: screen; animation: scene-christmas-glow 3.6s ease-in-out infinite; animation-delay: 0s; }
+.scene-christmas-chapel .launch-scene-particles i:nth-child(2) { background: radial-gradient(ellipse 2% 3% at 19.4% 59.3%, #fff9dfee, #ffbe7288 45%, transparent 100%), radial-gradient(ellipse 2% 3% at 80.5% 59.3%, #fff9dfee, #ffbe7288 45%, transparent 100%); animation: scene-candle-glow 2.4s ease-in-out infinite; }
+.scene-christmas-chapel .launch-scene-particles i:nth-child(n+3) { display: none; }
+@keyframes scene-christmas-glow { 0%, 100% { opacity: .08; } 50% { opacity: 1; } }
 .launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
 .launch-scene.is-paused *::before, .launch-scene.is-paused *::after { animation-play-state: paused !important; }
 .launch-scene-stage { position: relative; flex: 0 0 auto; }
