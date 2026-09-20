@@ -167,6 +167,12 @@ async function run() {
           return { center: ctx.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data[3], corner: ctx.getImageData(0, 0, 1, 1).data[3], clicks: getComputedStyle(image).pointerEvents };
         });
         assert.deepEqual(alpha, { center: 0, corner: 0, clicks: 'none' });
+        const fit = await page.locator('#launchScenePreview .launch-scene').evaluate(scene => {
+          const style = getComputedStyle(scene);
+          return { clipped: style.clipPath.startsWith('polygon('), border: style.borderTopWidth };
+        });
+        assert.deepEqual(fit, { clipped: true, border: '0px' });
+        assert(await page.locator(`[data-frame-choice="${frame}"] .frame-swatch > img, [data-frame-choice="${frame}"] .frame-swatch > .scene-original-thumb`).evaluate(scene => getComputedStyle(scene).clipPath.startsWith('polygon(')));
       }
       if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion'].includes(frame)) {
         await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
