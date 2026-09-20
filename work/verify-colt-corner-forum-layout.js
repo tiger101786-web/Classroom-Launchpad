@@ -146,16 +146,29 @@ async function run() {
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 15);
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 19);
+    assert.equal(await touchPage.locator('.launch-frame-options').evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
+    await touchPage.locator('[data-frame-choice="blossom"]').tap();
+    await touchPage.locator('#launchScenePreview .scene-frame-artwork').evaluate(image => image.decode());
     assert(await touchPage.locator('.launch-frame-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
     await touchPage.locator('.launch-frame-dialog').screenshot({ path: path.join(dataDir, 'scene-frames-touch.png') });
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
-    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost']) {
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit']) {
       await page.locator(`[data-frame-choice="${frame}"]`).click();
       assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
-      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost'].includes(frame)) {
+      if (['blossom', 'guardian', 'woodland', 'orbit'].includes(frame)) {
+        const alpha = await page.locator('#launchScenePreview .scene-frame-artwork').evaluate(async image => {
+          await image.decode();
+          const canvas = document.createElement('canvas');
+          canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+          const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0);
+          return { center: ctx.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data[3], corner: ctx.getImageData(0, 0, 1, 1).data[3], clicks: getComputedStyle(image).pointerEvents };
+        });
+        assert.deepEqual(alpha, { center: 0, corner: 0, clicks: 'none' });
+      }
+      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit'].includes(frame)) {
         await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
         const saved = await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'reef', motion: false, frame } });
         assert.equal(saved.status, 200);

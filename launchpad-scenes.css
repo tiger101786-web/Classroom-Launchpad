@@ -113,9 +113,12 @@
 .scene-frame-frost .frame-track { stroke: #fff; stroke-width: 1.5; stroke-dasharray: 1 12; }
 .frame-swatch { position: relative; display: block; margin: 6px; }
 .launch-frame-options .frame-swatch img, .launch-frame-options .scene-original-thumb { width: 84px; height: 84px; }
-@media (max-width: 480px) { .launch-frame-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .launch-scene-options.launch-frame-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .frame-swatch .scene-frame::before { padding: 5px; }
 .frame-swatch .scene-frame-neon::after { inset: 5px; border-width: 1px; }
+.scene-frame-decorative { inset: -4%; }
+.scene-frame-decorative::before, .scene-frame-decorative::after { display: none; }
+.scene-frame-decorative > img.scene-frame-artwork { display: block; position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; border-radius: 0; background: transparent; object-fit: contain; pointer-events: none; }
 .launch-scene-settings { z-index: 2; }
 .launch-scene-settings { position: absolute; right: 8%; bottom: 8%; display: grid; place-items: center; width: 44px; height: 44px; padding: 10px; border: 1px solid #a6526a; border-radius: 50%; background: #190c13ed; color: #fff0f5; cursor: pointer; box-shadow: 0 3px 12px #0006; }
 .launch-scene-settings svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }

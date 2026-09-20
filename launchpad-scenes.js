@@ -43,7 +43,11 @@
     { id: "mosaic", name: "Mosaic Pop", description: "Colorful tiles & dark grout" },
     { id: "carbon", name: "Carbon Weave", description: "Woven graphite & silver edging" },
     { id: "deco", name: "Deco Orbit", description: "Golden dashes & midnight enamel" },
-    { id: "frost", name: "Frosted Crystal", description: "Icy facets & a cool blue halo" }
+    { id: "frost", name: "Frosted Crystal", description: "Icy facets & a cool blue halo" },
+    { id: "blossom", name: "Cherry Blossom", description: "Rose-gold branches & pink flowers", decorative: true },
+    { id: "guardian", name: "Dragon Guardian", description: "Emerald scales & amber jewels", decorative: true },
+    { id: "woodland", name: "Enchanted Forest", description: "Twisting vines & tiny mushrooms", decorative: true },
+    { id: "orbit", name: "Cosmic Explorer", description: "Golden stars, moon & ringed planet", decorative: true }
   ];
   let guestMotion = true;
   const settings = session => ({
@@ -53,6 +57,7 @@
   });
   function frameArt(id) {
     const frame = frames.find(item => item.id === id) || frames[0];
+    if (frame.decorative) return `<span class="scene-frame scene-frame-decorative" data-scene-frame="${frame.id}" aria-hidden="true"><img class="scene-frame-artwork" src="assets/scene-frame-${frame.id}.png" alt="" decoding="async"></span>`;
     return `<span class="scene-frame scene-frame-${frame.id}" data-scene-frame="${frame.id}" aria-hidden="true"><svg viewBox="0 0 320 320"><circle class="frame-track" cx="160" cy="160" r="153"/>${Array.from({ length: frame.id === "pearl" ? 48 : 12 }, (_, i) => {
       const angle = i * Math.PI * 2 / (frame.id === "pearl" ? 48 : 12);
       return `<circle class="frame-gem" cx="${160 + 153 * Math.cos(angle)}" cy="${160 + 153 * Math.sin(angle)}" r="${frame.id === "pearl" ? 5 : 2.5}"/>`;
