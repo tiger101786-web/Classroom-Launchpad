@@ -64,8 +64,27 @@
     { id: "halloween", name: "Halloween Magic", description: "Smiling pumpkins, bats & a friendly ghost", decorative: true },
     { id: "new-orleans", name: "New Orleans", description: "French Quarter lanterns & Mardi Gras jewels", decorative: true }
   ];
-  const alphabetically = items => [...items].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+  // Keep the reset choice first without mutating the catalog or saved IDs.
+  const alphabetically = items => [...items].sort((a, b) => {
+    const pinned = item => item.id === "none" || item.id === "original";
+    return Number(pinned(b)) - Number(pinned(a)) || a.name.localeCompare(b.name, "en", { sensitivity: "base" });
+  });
   let guestMotion = true;
+  let gearHideTimer;
+  function settleGear(keyboard) {
+    const gear = document.getElementById("launchSceneSettings");
+    if (!gear) return;
+    gear.focus({ preventScroll: true });
+    if (keyboard) return; // Do not hide the control from a keyboard user.
+    gear.classList.add("is-recent");
+    clearTimeout(gearHideTimer);
+    gearHideTimer = setTimeout(() => {
+      if (!gear.isConnected || gear.getAttribute("aria-expanded") === "true") return;
+      gear.classList.remove("is-recent");
+      gear.classList.add("is-idle");
+      if (document.activeElement === gear) gear.blur();
+    }, 2500);
+  }
   const settings = session => ({
     id: session.authenticated && scenes.some(scene => scene.id === session.homeScene?.id) ? session.homeScene.id : "original",
     motion: session.authenticated ? session.homeScene?.motion !== false : guestMotion,
@@ -118,8 +137,15 @@
     if (!toggle) return;
     const gear = document.getElementById("launchSceneSettings");
     const menu = document.getElementById("launchSceneMenu");
+    clearTimeout(gearHideTimer);
+    const revealGear = () => gear.classList.remove("is-idle");
+    gear.closest(".launch-scene-stage").addEventListener("pointermove", revealGear);
+    gear.closest(".launch-scene-stage").addEventListener("pointerdown", revealGear);
+    gear.addEventListener("focus", revealGear);
     menu.addEventListener("beforetoggle", event => {
       if (event.newState === "open") {
+        clearTimeout(gearHideTimer);
+        gear.classList.remove("is-idle", "is-recent");
         const rect = gear.getBoundingClientRect();
         menu.style.left = `${Math.max(8, Math.min(rect.right - 190, window.innerWidth - 198))}px`;
         menu.style.top = `${Math.max(8, Math.min(rect.top - 154, window.innerHeight - 162))}px`;
@@ -171,11 +197,12 @@
         refreshPreview();
       }));
       dialog.querySelector("#launchSceneMotion").addEventListener("change", event => { draft.motion = event.target.checked; refreshPreview(); });
-      dialog.querySelector("#saveLaunchScene").addEventListener("click", async () => {
+      dialog.querySelector("#saveLaunchScene").addEventListener("click", async event => {
+        const keyboard = event.detail === 0;
         const button = dialog.querySelector("#saveLaunchScene");
         button.disabled = true;
         dialog.querySelector("#launchSceneSaveStatus").textContent = "Saving your scene…";
-        try { const updated = await save(draft); close(); onSave(updated); document.getElementById("launchSceneSettings")?.focus(); }
+        try { const updated = await save(draft); close(); onSave(updated); settleGear(keyboard); }
         catch (error) { dialog.querySelector("#launchSceneSaveStatus").textContent = error.message; button.disabled = false; }
       });
       dialog.showModal();
@@ -202,9 +229,10 @@
         dialog.querySelector("#launchScenePreview").innerHTML = framedArtwork(draft, video);
       }));
       dialog.querySelector("#saveLaunchFrame").addEventListener("click", async event => {
+        const keyboard = event.detail === 0;
         event.currentTarget.disabled = true;
         dialog.querySelector("#launchFrameSaveStatus").textContent = "Saving your frame…";
-        try { const updated = await save(draft); close(); onSave(updated); document.getElementById("launchSceneSettings")?.focus(); }
+        try { const updated = await save(draft); close(); onSave(updated); settleGear(keyboard); }
         catch (error) { dialog.querySelector("#launchFrameSaveStatus").textContent = error.message; dialog.querySelector("#saveLaunchFrame").disabled = false; }
       });
       dialog.showModal();

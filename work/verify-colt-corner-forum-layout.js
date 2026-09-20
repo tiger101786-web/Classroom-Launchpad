@@ -150,12 +150,23 @@ async function run() {
     await touchPage.locator('#chooseLaunchFrame').tap();
     assert.equal(await touchPage.locator('[data-frame-choice]').count(), 29);
     const frameNames = await touchPage.locator('[data-frame-choice] strong').allTextContents();
-    assert.deepEqual(frameNames, [...frameNames].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
+    assert.equal(frameNames[0], 'No frame');
+    assert.deepEqual(frameNames.slice(1), frameNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
     assert.equal(await touchPage.locator('.launch-frame-options').evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
     await touchPage.locator('[data-frame-choice="blossom"]').tap();
     await touchPage.locator('#launchScenePreview .scene-frame-artwork').evaluate(image => image.decode());
     assert(await touchPage.locator('.launch-frame-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
     await touchPage.locator('.launch-frame-dialog').screenshot({ path: path.join(dataDir, 'scene-frames-touch.png') });
+    await touchPage.locator('[data-frame-choice="none"]').tap();
+    await touchPage.locator('#saveLaunchFrame').tap();
+    await touchPage.waitForFunction(() => {
+      const gear = document.querySelector('#launchSceneSettings');
+      return gear?.classList.contains('is-idle') && getComputedStyle(gear).opacity === '0';
+    });
+    await touchPage.locator('.home-scene-feature .launch-scene').tap();
+    await touchPage.waitForFunction(() => getComputedStyle(document.querySelector('#launchSceneSettings')).opacity === '1');
+    await touchPage.locator('#launchSceneSettings').tap();
+    assert.equal(await touchPage.locator('#chooseLaunchScene').isVisible(), true);
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
@@ -208,7 +219,8 @@ async function run() {
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="reef"]').click();
     const sceneNames = await page.locator('[data-scene-choice] strong').allTextContents();
-    assert.deepEqual(sceneNames, [...sceneNames].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
+    assert.equal(sceneNames[0], 'Classroom Original');
+    assert.deepEqual(sceneNames.slice(1), sceneNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
     assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, 'original');
     await page.locator('#saveLaunchScene').click();
@@ -216,6 +228,15 @@ async function run() {
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
     assert.equal(await page.locator('.home-scene-feature [data-scene-frame]').getAttribute('data-scene-frame'), 'gold');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => image.complete && image.naturalWidth > 0), true);
+    await page.locator('.home-scene-feature .launch-scene').hover();
+    await page.waitForFunction(() => {
+      const gear = document.querySelector('#launchSceneSettings');
+      return gear?.classList.contains('is-idle') && getComputedStyle(gear).opacity === '0';
+    });
+    // A stationary pointer must not hold the gear open after saving.
+    await page.mouse.move(1, 1);
+    await page.locator('.home-scene-feature .launch-scene').hover();
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#launchSceneSettings')).opacity === '1');
     await openSceneSettings();
     await page.locator('#toggleLaunchScene').click();
     await page.waitForFunction(() => document.querySelector('#toggleLaunchScene')?.textContent === 'Resume scene');
@@ -268,6 +289,35 @@ async function run() {
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
       assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
+      if (['balloons', 'retro-arcade'].includes(id)) {
+        const glow = page.locator('#launchScenePreview .launch-scene-particles i').first();
+        const contrast = await glow.evaluate(element => {
+          const animation = element.getAnimations()[0];
+          animation.pause();
+          animation.currentTime = 0;
+          const dim = Number(getComputedStyle(element).opacity);
+          animation.currentTime = Number(animation.effect.getTiming().duration) * (element.closest('.scene-balloons') ? .35 : .5);
+          return { dim, bright: Number(getComputedStyle(element).opacity), transform: getComputedStyle(element).transform };
+        });
+        assert(contrast.bright - contrast.dim > .9);
+        assert.equal(contrast.transform, 'none');
+        await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `${id}-bright-effect.png`) });
+        await glow.evaluate(element => element.getAnimations()[0].play());
+        if (id === 'retro-arcade') {
+          const scan = await page.locator('#launchScenePreview .launch-scene-particles i').nth(1).evaluate(element => {
+            const animation = element.getAnimations()[0];
+            animation.pause();
+            animation.currentTime = 0;
+            const start = getComputedStyle(element).backgroundPosition;
+            animation.currentTime = 1500;
+            const end = getComputedStyle(element).backgroundPosition;
+            animation.play();
+            return { start, end, display: getComputedStyle(element).display };
+          });
+          assert.notEqual(scan.start, scan.end);
+          assert.equal(scan.display, 'block');
+        }
+      }
       assert.equal(await page.locator('#launchScenePreview .launch-scene-particles i').first().evaluate(particle => getComputedStyle(particle).animationName), effect);
       if (id === 'pixel') {
         assert.equal(await page.locator('#launchScenePreview .scene-pixel-coin').count(), 4);
