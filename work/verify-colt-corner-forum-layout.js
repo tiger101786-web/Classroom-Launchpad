@@ -149,6 +149,13 @@ async function run() {
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
     assert.equal(await touchPage.locator('[data-frame-choice]').count(), 29);
+    await touchPage.getByRole('searchbox', { name: 'Search frames' }).fill('DRAGON');
+    assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 2);
+    await touchPage.getByRole('searchbox', { name: 'Search frames' }).fill('no-such-frame');
+    assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 0);
+    assert.match(await touchPage.locator('[data-search-status]').textContent(), /No matching frames/);
+    await touchPage.locator('[data-clear-search]').tap();
+    assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 29);
     const frameNames = await touchPage.locator('[data-frame-choice] strong').allTextContents();
     assert.equal(frameNames[0], 'No frame');
     assert.deepEqual(frameNames.slice(1), frameNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
@@ -218,6 +225,20 @@ async function run() {
     await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="reef"]').click();
+    const sceneSearch = page.getByRole('searchbox', { name: 'Search scenes' });
+    await sceneSearch.fill('Jesus');
+    assert.equal(await page.locator('[data-scene-choice]:visible').count(), 1);
+    assert.equal(await page.locator('[data-scene-choice]:visible').getAttribute('data-scene-choice'), 'chapel');
+    await sceneSearch.fill('cafe');
+    assert.equal(await page.locator('[data-scene-choice]:visible').getAttribute('data-scene-choice'), 'cafe');
+    await sceneSearch.fill('hot balloon');
+    assert.equal(await page.locator('[data-scene-choice]:visible').getAttribute('data-scene-choice'), 'balloons');
+    await sceneSearch.fill('no-such-scene');
+    assert.equal(await page.locator('[data-scene-choice]:visible').count(), 0);
+    assert.match(await page.locator('[data-search-status]').textContent(), /No matching scenes/);
+    assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
+    await page.locator('[data-clear-search]').click();
+    assert.equal(await page.locator('[data-scene-choice]:visible').count(), 30);
     const sceneNames = await page.locator('[data-scene-choice] strong').allTextContents();
     assert.equal(sceneNames[0], 'Classroom Original');
     assert.deepEqual(sceneNames.slice(1), sceneNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
@@ -289,7 +310,7 @@ async function run() {
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
       assert.deepEqual(imageStyle, { animation: 'none', transform: 'none' });
-      if (['balloons', 'retro-arcade'].includes(id)) {
+      if (['balloons', 'retro-arcade', 'chapel'].includes(id)) {
         const glow = page.locator('#launchScenePreview .launch-scene-particles i').first();
         const contrast = await glow.evaluate(element => {
           const animation = element.getAnimations()[0];

@@ -69,6 +69,34 @@
     const pinned = item => item.id === "none" || item.id === "original";
     return Number(pinned(b)) - Number(pinned(a)) || a.name.localeCompare(b.name, "en", { sensitivity: "base" });
   });
+  function attachChooserSearch(dialog, kind) {
+    const options = dialog.querySelector(".launch-scene-options");
+    const controls = document.createElement("div");
+    controls.className = "launch-chooser-search";
+    controls.innerHTML = `<label for="launchChooserSearch">Search ${kind}</label><div class="launch-chooser-search-row"><input id="launchChooserSearch" type="search" placeholder="Search ${kind}…" autocomplete="off" spellcheck="false"><button type="button" class="outline-btn" data-clear-search>Clear</button></div><p role="status" aria-live="polite" data-search-status></p>`;
+    options.before(controls);
+    const input = controls.querySelector("input");
+    const clear = controls.querySelector("[data-clear-search]");
+    const status = controls.querySelector("[data-search-status]");
+    const normalize = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("en");
+    const cards = [...options.children].map(button => ({
+      button,
+      text: normalize(button.querySelector("strong").textContent + " " + button.querySelector("small").textContent)
+    }));
+    const filter = () => {
+      const terms = normalize(input.value).trim().split(/\s+/).filter(Boolean);
+      let count = 0;
+      cards.forEach(({ button, text }) => {
+        button.hidden = !terms.every(term => text.includes(term));
+        if (!button.hidden) count++;
+      });
+      clear.disabled = !input.value;
+      status.textContent = count ? `${count} of ${cards.length} ${kind}` : `No matching ${kind}. Try another search or clear it.`;
+    };
+    input.addEventListener("input", filter);
+    clear.addEventListener("click", () => { input.value = ""; filter(); input.focus(); });
+    filter();
+  }
   let guestMotion = true;
   let gearHideTimer;
   function settleGear(keyboard) {
@@ -197,6 +225,7 @@
         refreshPreview();
       }));
       dialog.querySelector("#launchSceneMotion").addEventListener("change", event => { draft.motion = event.target.checked; refreshPreview(); });
+      attachChooserSearch(dialog, "scenes");
       dialog.querySelector("#saveLaunchScene").addEventListener("click", async event => {
         const keyboard = event.detail === 0;
         const button = dialog.querySelector("#saveLaunchScene");
@@ -235,6 +264,7 @@
         try { const updated = await save(draft); close(); onSave(updated); settleGear(keyboard); }
         catch (error) { dialog.querySelector("#launchFrameSaveStatus").textContent = error.message; dialog.querySelector("#saveLaunchFrame").disabled = false; }
       });
+      attachChooserSearch(dialog, "frames");
       dialog.showModal();
     });
   }
