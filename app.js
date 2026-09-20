@@ -1700,10 +1700,27 @@ const PROFILE_FRAMES = [
   ["none", "No Frame", "Keep it classic"], ["colt", "Colt Pride", "Crimson & silver"],
   ["neon", "Neon Circuit", "Electric teal"], ["stars", "Star Voyager", "A little cosmic magic"],
   ["flame", "Phoenix Flame", "Bring the spark"], ["pixel", "Pixel Quest", "Level up your look"],
-  ["pumpkin", "Pumpkin Patch", "Friendly fall spirit"]
+  ["pumpkin", "Pumpkin Patch", "Friendly fall spirit"],
+  ["ocean", "Ocean Pearl", "Aqua waves & ivory pearls"],
+  ["laurel", "Royal Laurel", "Navy enamel & golden leaves"],
+  ["sakura", "Sakura Bloom", "Pink blossoms & rose gold"],
+  ["grove", "Enchanted Forest", "Emerald vines & firefly gems"]
 ];
-function normalizeProfileFrame(value) { return ["colt", "neon", "stars", "flame", "pixel", "pumpkin"].includes(value) ? value : "none"; }
+function normalizeProfileFrame(value) { return PROFILE_FRAMES.some(([id]) => id === value) ? value : "none"; }
 function profileFrameArt(frame) {
+  const pearls = Array.from({ length: 12 }, (_, i) => {
+    const angle = i * Math.PI / 6;
+    return `<circle cx="${50 + 44 * Math.cos(angle)}" cy="${50 + 44 * Math.sin(angle)}" r="3" fill="#fff7e6" stroke="#68b9be" stroke-width=".8"/>`;
+  }).join("");
+  const leaves = (fill, stroke) => Array.from({ length: 10 }, (_, i) => `<g transform="rotate(${i * 28 - 126} 50 50)"><path d="M50 6Q37 0 40 12Q46 15 50 6ZM50 6Q63 0 60 12Q54 15 50 6Z" fill="${fill}" stroke="${stroke}" stroke-width=".7"/></g>`).join("");
+  const blossoms = [[16, 17], [85, 23], [49, 92]].map(([x, y]) => `<g transform="translate(${x} ${y})">${Array.from({ length: 5 }, (_, i) => `<ellipse cx="0" cy="-4" rx="3" ry="4.5" transform="rotate(${i * 72})" fill="#ffc5df" stroke="#c55d92" stroke-width=".7"/>`).join("")}<circle r="2" fill="#ffe5a4"/></g>`).join("");
+  const extra = {
+    ocean: `<circle cx="50" cy="50" r="44" fill="none" stroke="#9af9ec" stroke-width="1.5"/>${pearls}<path d="M38 92q3-16 12-8 9-8 12 8l-12 5Z" fill="#ffeccf" stroke="#6db8bd"/><path d="m50 96-6-9m6 9v-11m0 11 6-9" stroke="#cba980" fill="none"/>`,
+    laurel: leaves("#f6d780", "#9d742b") + '<path d="m44 91 6-7 6 7-6 7Z" fill="#82bfff" stroke="#ffdf8e" stroke-width="2"/>',
+    sakura: '<circle cx="50" cy="50" r="44" fill="none" stroke="#efb9a6" stroke-width="2"/>' + blossoms,
+    grove: leaves("#77bc78", "#24593f") + '<g fill="#fff3aa" stroke="#699452"><circle cx="8" cy="49" r="3"/><circle cx="92" cy="49" r="3"/><path d="m45 91 5-8 5 8-5 7Z"/></g>'
+  };
+  if (extra[frame]) return `<svg class="profile-frame-art" viewBox="0 0 100 100" aria-hidden="true">${extra[frame]}</svg>`;
   const art = {
     colt: '<path d="M42 83v8a8 8 0 0 0 16 0v-8h-5v8a3 3 0 0 1-6 0v-8Z" fill="#eef3fa" stroke="#687888"/><path d="m8 43 2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1Zm84 0 2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1Z" fill="#eef3fa"/>',
     neon: '<g fill="none" stroke="#7ffff1" stroke-width="3"><path d="M4 37V22l17-17h15M64 5h15l17 17v15M96 64v14L80 95H64M36 95H20L4 79V64"/><path d="M8 29h8m68 42h8"/></g><g fill="#c6fff8"><circle cx="36" cy="5" r="3"/><circle cx="64" cy="95" r="3"/></g>',

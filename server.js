@@ -24,8 +24,8 @@ function homeSceneForSession(session, db) {
   return cleanHomeScene(session.role === "teacher" ? db.teacherHomeScene
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeScene);
 }
-const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin"]);
-const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon"]);
+const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove"]);
+const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove"]);
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner

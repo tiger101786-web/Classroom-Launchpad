@@ -10287,6 +10287,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .frame-pixel::before { background: repeating-conic-gradient(#547d4d 0% 12.5%, #203348 12.5% 25%); }
 .frame-pumpkin { background: #d4bf70; }
 .frame-pumpkin::before { background: repeating-conic-gradient(#ff9a3d 0deg 24deg, #bd5722 24deg 30deg); }
+.profile-frame.frame-ocean { background: #cffcf2; }
+.profile-frame.frame-ocean::before { background: conic-gradient(#06485c, #4fd5d0, #146581, #86efdc, #06485c); }
+.profile-frame.frame-laurel { background: #f5d78f; }
+.profile-frame.frame-laurel::before { background: conic-gradient(#111d3c, #304b77, #0e1832, #436494, #111d3c); }
+.profile-frame.frame-sakura { background: #efb9a6; }
+.profile-frame.frame-sakura::before { background: conic-gradient(#612e58, #ec9bc2, #88385f, #ffcadc, #612e58); }
+.profile-frame.frame-grove { background: #bddc8f; }
+.profile-frame.frame-grove::before { background: conic-gradient(#123f34, #4c9865, #173e32, #85b26a, #123f34); }
 .profile-frame-picker { grid-column: 1 / -1; min-width: 0; margin: 8px 0 0; padding: 18px 0 0; border: 0; border-top: 1px solid var(--border); }
 .profile-frame-picker legend { padding: 0 10px 0 0; font-weight: 900; font-size: 1rem; }
 .profile-frame-picker > p { margin: 0 0 16px; font-size: .85rem; color: var(--muted); }

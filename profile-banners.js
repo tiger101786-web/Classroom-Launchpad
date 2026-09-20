@@ -1,5 +1,5 @@
 (() => {
-  const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon']];
+  const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon'], ['ocean', 'Ocean Pearl'], ['laurel', 'Royal Laurel'], ['sakura', 'Sakura Bloom'], ['grove', 'Enchanted Forest']];
   const normalize = value => choices.some(([id]) => id === value) ? value : 'none';
   const cover = value => {
     const id = normalize(value);
