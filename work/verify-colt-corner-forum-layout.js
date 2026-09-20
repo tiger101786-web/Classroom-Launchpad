@@ -120,7 +120,7 @@ async function run() {
     await context.addCookies([{ name: cookieName, value: cookieValue, url: baseUrl }]);
     const page = await context.newPage();
     await page.goto(baseUrl, { waitUntil: "networkidle" });
-    await require('./verify-motto-plaques')({ page, browser, baseUrl, request, studentCookie, teacherCookie, dataDir });
+    assert.equal(await page.locator('[data-action="mottoPlaque"], .motto-plaque').count(), 0);
     // Homepage scene choices are personal, persistent, and previewed before saving.
     assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
     await page.locator('.launch-scene-stage').hover();
@@ -685,7 +685,6 @@ async function run() {
 
     console.log(JSON.stringify({
       forumDesktopTwoColumnLayout: true,
-      personalMottoPlaquesPersistAndFit: true,
       homepageScenesPersistPerAccount: true,
       sceneMotionPauseAndReducedMotion: true,
       scenePreviewCancelAndSaveFailure: true,
