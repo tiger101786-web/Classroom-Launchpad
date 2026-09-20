@@ -146,16 +146,23 @@ async function run() {
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 9);
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 15);
     assert(await touchPage.locator('.launch-frame-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
     await touchPage.locator('.launch-frame-dialog').screenshot({ path: path.join(dataDir, 'scene-frames-touch.png') });
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
-    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid']) {
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost']) {
       await page.locator(`[data-frame-choice="${frame}"]`).click();
       assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
+      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost'].includes(frame)) {
+        await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
+        const saved = await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'reef', motion: false, frame } });
+        assert.equal(saved.status, 200);
+        assert.equal(saved.payload.session.homeScene.frame, frame);
+      }
     }
+    await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'original', motion: true, frame: 'none' } });
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.frame, 'none');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.home-scene-feature [data-scene-frame]').getAttribute('data-scene-frame'), 'none');

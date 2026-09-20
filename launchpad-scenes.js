@@ -36,7 +36,13 @@
     { id: "neon", name: "Neon Duo", description: "Electric cyan and violet" },
     { id: "prism", name: "Prism Glass", description: "Faceted rainbow reflections" },
     { id: "onyx", name: "Onyx Luxe", description: "Dark metal, gold accents" },
-    { id: "braid", name: "Silver Braid", description: "Interwoven silver strands" }
+    { id: "braid", name: "Silver Braid", description: "Interwoven silver strands" },
+    { id: "bronze", name: "Copper Rivets", description: "Burnished metal & brass studs" },
+    { id: "velvet", name: "Velvet Stitch", description: "Burgundy trim & ivory stitching" },
+    { id: "mosaic", name: "Mosaic Pop", description: "Colorful tiles & dark grout" },
+    { id: "carbon", name: "Carbon Weave", description: "Woven graphite & silver edging" },
+    { id: "deco", name: "Deco Orbit", description: "Golden dashes & midnight enamel" },
+    { id: "frost", name: "Frosted Crystal", description: "Icy facets & a cool blue halo" }
   ];
   let guestMotion = true;
   const settings = session => ({
