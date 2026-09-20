@@ -7,6 +7,7 @@ const zlib = require("zlib");
 const { Readable } = require("stream");
 const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
+const mottoPlaques = require("./motto-plaques");
 const {
   hashNormalizedMessage,
   moderateMessage,
@@ -23,6 +24,10 @@ function cleanHomeScene(value) {
 function homeSceneForSession(session, db) {
   return cleanHomeScene(session.role === "teacher" ? db.teacherHomeScene
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeScene);
+}
+function homePlaqueForSession(session, db) {
+  return mottoPlaques.clean(session.role === "teacher" ? db.teacherHomePlaque
+    : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homePlaque);
 }
 const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove"]);
 const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove"]);
@@ -853,6 +858,7 @@ function normalizeApprovedStudents(entries) {
       profileFrame: cleanProfileFrame(source.profileFrame),
       profileBanner: cleanProfileBanner(source.profileBanner),
       homeScene: cleanHomeScene(source.homeScene),
+      homePlaque: mottoPlaques.clean(source.homePlaque),
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
   }).sort((a, b) => a.email.localeCompare(b.email));
@@ -1245,6 +1251,7 @@ function writeDb(db) {
       : null,
     teacherProfileFrame: cleanProfileFrame(db.teacherProfileFrame),
     teacherHomeScene: cleanHomeScene(db.teacherHomeScene),
+    teacherHomePlaque: mottoPlaques.clean(db.teacherHomePlaque),
     teacherAvatarUpdatedAt: Number.isFinite(Date.parse(db.teacherAvatarUpdatedAt))
       ? new Date(db.teacherAvatarUpdatedAt).toISOString()
       : "",
@@ -1371,7 +1378,8 @@ function publicSession(session, db = null) {
     avatarUrl: profileAvatarUrlForSession(session, sourceDb),
     profileFrame: profileFrameForSession(session, sourceDb),
     profileBanner: profileBannerForSession(session, sourceDb),
-    homeScene: homeSceneForSession(session, sourceDb)
+    homeScene: homeSceneForSession(session, sourceDb),
+    homePlaque: homePlaqueForSession(session, sourceDb)
   };
 }
 function requireRole(req, res, roles) {
@@ -3500,6 +3508,29 @@ async function handleApi(req, res, pathname) {
         const student = students.find(item => item.email === normalizeEmail(allowed.email));
         if (!student) throw new Error("Your approved student account could not be found.");
         student.homeScene = scene;
+        db.approvedStudents = students;
+      }
+      writeDb(db);
+      sendJson(res, 200, { ok: true, session: publicSession(allowed, db) });
+    } catch (error) { sendJson(res, 400, { error: error.message }); }
+    return true;
+  }
+
+  if (pathname === "/api/home-plaque" && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      if (!mottoPlaques.valid(body)) throw new Error("Choose an available plaque and motto.");
+      const db = readDb();
+      const plaque = mottoPlaques.clean(body);
+      if (allowed.role === "teacher") db.teacherHomePlaque = plaque;
+      else {
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(item => item.email === normalizeEmail(allowed.email));
+        if (!student) throw new Error("Your approved student account could not be found.");
+        student.homePlaque = plaque;
         db.approvedStudents = students;
       }
       writeDb(db);
