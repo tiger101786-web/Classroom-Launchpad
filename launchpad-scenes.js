@@ -47,7 +47,15 @@
     { id: "blossom", name: "Cherry Blossom", description: "Rose-gold branches & pink flowers", decorative: true },
     { id: "guardian", name: "Dragon Guardian", description: "Emerald scales & amber jewels", decorative: true },
     { id: "woodland", name: "Enchanted Forest", description: "Twisting vines & tiny mushrooms", decorative: true },
-    { id: "orbit", name: "Cosmic Explorer", description: "Golden stars, moon & ringed planet", decorative: true }
+    { id: "orbit", name: "Cosmic Explorer", description: "Golden stars, moon & ringed planet", decorative: true },
+    {"id":"treasure","name":"Ocean Treasure","description":"Coral, seashells & pearls","decorative":true},
+    {"id":"royal","name":"Royal Crown","description":"Gold filigree & ruby jewels","decorative":true},
+    {"id":"phoenix","name":"Phoenix Flame","description":"Copper feathers & fiery tips","decorative":true},
+    {"id":"butterfly","name":"Butterfly Garden","description":"Colorful wings & flowers","decorative":true},
+    {"id":"frost-dragon","name":"Frost Dragon","description":"Silver scales & blue crystals","decorative":true},
+    {"id":"clockwork","name":"Clockwork","description":"Brass gears & copper details","decorative":true},
+    {"id":"library","name":"Enchanted Library","description":"Little books & feather quill","decorative":true},
+    {"id":"champion","name":"Sports Champion","description":"Golden laurels & hanging medal","decorative":true}
   ];
   let guestMotion = true;
   const settings = session => ({

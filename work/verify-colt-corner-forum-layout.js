@@ -146,7 +146,7 @@ async function run() {
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 19);
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 27);
     assert.equal(await touchPage.locator('.launch-frame-options').evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
     await touchPage.locator('[data-frame-choice="blossom"]').tap();
     await touchPage.locator('#launchScenePreview .scene-frame-artwork').evaluate(image => image.decode());
@@ -155,10 +155,10 @@ async function run() {
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
-    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit']) {
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion']) {
       await page.locator(`[data-frame-choice="${frame}"]`).click();
       assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
-      if (['blossom', 'guardian', 'woodland', 'orbit'].includes(frame)) {
+      if (['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion'].includes(frame)) {
         const alpha = await page.locator('#launchScenePreview .scene-frame-artwork').evaluate(async image => {
           await image.decode();
           const canvas = document.createElement('canvas');
@@ -168,7 +168,7 @@ async function run() {
         });
         assert.deepEqual(alpha, { center: 0, corner: 0, clicks: 'none' });
       }
-      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit'].includes(frame)) {
+      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion'].includes(frame)) {
         await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
         const saved = await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'reef', motion: false, frame } });
         assert.equal(saved.status, 200);
@@ -243,6 +243,7 @@ async function run() {
     await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
+    await page.waitForFunction(() => document.querySelector('#toggleLaunchScene')?.disabled === true);
     assert(await page.locator('#toggleLaunchScene').isDisabled());
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
