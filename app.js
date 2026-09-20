@@ -321,6 +321,7 @@ function normalizeThreads(items) {
       message: reply.message || "",
       avatarUrl: normalizeProfileAvatarUrl(reply.avatarUrl),
       profileFrame: normalizeProfileFrame(reply.profileFrame),
+      profileBanner: window.ProfileBanners.normalize(reply.profileBanner),
       createdAt: reply.createdAt || new Date().toISOString()
     })) : [];
     return {
@@ -332,6 +333,7 @@ function normalizeThreads(items) {
       body: item.body || item.message || "",
       avatarUrl: normalizeProfileAvatarUrl(item.avatarUrl),
       profileFrame: normalizeProfileFrame(item.profileFrame),
+      profileBanner: window.ProfileBanners.normalize(item.profileBanner),
       replies,
       createdAt: item.createdAt || new Date().toISOString()
     };
@@ -1723,7 +1725,8 @@ function renderForumAvatar(name, avatarUrl, extraClass = "", profileFrame = "non
 
 function renderForumAuthor(post, label = "Member") {
   return `
-    <aside class="forum-post-author">
+    <aside class="forum-post-author ${window.ProfileBanners.normalize(post.profileBanner) !== 'none' ? 'has-profile-banner' : ''}">
+      ${window.ProfileBanners.cover(post.profileBanner)}
       ${renderForumAvatar(post.studentName, post.avatarUrl, "", post.profileFrame)}
       <strong>${escapeHtml(post.studentName || "Student")}</strong>
       <span>${escapeHtml(forumRoleLabel(post.grade))}</span>
@@ -1736,13 +1739,16 @@ function renderForumProfileEditor(compact = false) {
   if (!isSignedIn()) return "";
   return `
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
+      ${window.ProfileBanners.cover(authSession.profileBanner)}
       <div id="profileFramePreview">${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame)}</div>
       <div class="forum-profile-copy">
         <span class="feature-kicker">Colt Corner Profile</span>
         <h3 id="forumProfileHeading">Make it yours</h3>
+        <strong>${escapeHtml(authSession.name || "Your profile")}</strong>
         <p>Choose a school-appropriate JPG, PNG, or WebP image. It will be cropped to a square for the forum.</p>
       </div>
       <div class="forum-profile-actions">
+        <button type="button" class="outline-btn" id="changeProfileBanner">Change banner</button>
         <label class="primary-btn forum-profile-choose" for="forumProfileImage">${authSession.avatarUrl ? "Change Picture" : "Choose Picture"}</label>
         <input id="forumProfileImage" type="file" accept="image/jpeg,image/png,image/webp" hidden>
         ${authSession.avatarUrl ? '<button type="button" class="outline-btn" id="removeForumProfileImage">Remove</button>' : ""}
@@ -12659,6 +12665,14 @@ function attachForumProfileEditor() {
   const input = document.getElementById("forumProfileImage");
   if (!input || input.dataset.ready === "true") return;
   input.dataset.ready = "true";
+  document.getElementById("changeProfileBanner")?.addEventListener("click", () => window.ProfileBanners.open({
+    selected: authSession.profileBanner,
+    avatar: renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame),
+    name: escapeHtml(authSession.name || "Student"),
+    role: escapeHtml(forumRoleLabel(authSession.role === "teacher" ? "teacher" : authSession.grade)),
+    save: profileBanner => sharedBackend.request("/api/profile-banner", { method: "POST", body: JSON.stringify({ profileBanner }) }),
+    onSave: result => { authSession = result.session; classThreads = normalizeThreads(result.threads); profileAvatarMessage = "Profile banner saved!"; render(); }
+  }));
   let selectedFrame = normalizeProfileFrame(authSession.profileFrame);
   const saveFrame = document.getElementById("saveProfileFrame");
   const frameButtons = [...document.querySelectorAll("[data-profile-frame]")];

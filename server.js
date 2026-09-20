@@ -25,6 +25,12 @@ function homeSceneForSession(session, db) {
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeScene);
 }
 const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin"]);
+const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon"]);
+function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
+function profileBannerForSession(session, db) {
+  return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner
+    : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.profileBanner);
+}
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
   return cleanProfileFrame(session.role === "teacher" ? db.teacherProfileFrame
@@ -563,7 +569,8 @@ function normalizeModeratedPost(source, type) {
     normalizedMessageHash: cleanText(source && source.normalizedMessageHash, 128),
     authorKey: cleanText(source && source.authorKey, 128),
     avatarUrl: cleanProfileAvatarUrl(source && source.avatarUrl),
-    profileFrame: cleanProfileFrame(source && source.profileFrame)
+    profileFrame: cleanProfileFrame(source && source.profileFrame),
+    profileBanner: cleanProfileBanner(source && source.profileBanner)
   };
   if (type === "topic") {
     return {
@@ -677,7 +684,8 @@ function publicPost(post, type) {
     audienceGrade: post.audienceGrade || "",
     createdAt: post.createdAt,
     avatarUrl: cleanProfileAvatarUrl(post.avatarUrl),
-    profileFrame: cleanProfileFrame(post.profileFrame)
+    profileFrame: cleanProfileFrame(post.profileFrame),
+    profileBanner: cleanProfileBanner(post.profileBanner)
   };
   return type === "topic"
     ? {
@@ -843,6 +851,7 @@ function normalizeApprovedStudents(entries) {
       activationIssuedAt: Number.isFinite(Date.parse(source.activationIssuedAt)) ? new Date(source.activationIssuedAt).toISOString() : "",
       avatarUpdatedAt: Number.isFinite(Date.parse(source.avatarUpdatedAt)) ? new Date(source.avatarUpdatedAt).toISOString() : "",
       profileFrame: cleanProfileFrame(source.profileFrame),
+      profileBanner: cleanProfileBanner(source.profileBanner),
       homeScene: cleanHomeScene(source.homeScene),
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
@@ -1361,6 +1370,7 @@ function publicSession(session, db = null) {
     grade: session.role === "student" ? session.grade || "" : "Teacher",
     avatarUrl: profileAvatarUrlForSession(session, sourceDb),
     profileFrame: profileFrameForSession(session, sourceDb),
+    profileBanner: profileBannerForSession(session, sourceDb),
     homeScene: homeSceneForSession(session, sourceDb)
   };
 }
@@ -3498,6 +3508,34 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === "/api/profile-banner" && req.method === "POST") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      if (!profileBannerIds.has(body.profileBanner)) throw new Error("Choose one of the available banners.");
+      const db = readDb();
+      const profileBanner = body.profileBanner;
+      if (allowed.role === "teacher") db.teacherProfileBanner = profileBanner;
+      else {
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(item => item.email === normalizeEmail(allowed.email));
+        if (!student) throw new Error("Your approved student account could not be found.");
+        student.profileBanner = profileBanner;
+        db.approvedStudents = students;
+      }
+      const authorKey = allowed.role === "teacher" ? "teacher" : studentAuthorKey(allowed);
+      db.threads = normalizeModeratedThreads(db.threads).map(thread => ({
+        ...thread, ...(thread.authorKey === authorKey ? { profileBanner } : {}),
+        replies: thread.replies.map(reply => reply.authorKey === authorKey ? { ...reply, profileBanner } : reply)
+      }));
+      writeDb(db);
+      sendJson(res, 200, { ok: true, session: publicSession(allowed, db), threads: visibleApprovedThreads(db.threads, allowed) });
+    } catch (error) { sendJson(res, 400, { error: error.message }); }
+    return true;
+  }
+
   if (pathname === "/api/profile-frame" && req.method === "POST") {
     if (!requireSameOrigin(req, res)) return true;
     const allowed = requireRole(req, res, ["student", "teacher"]);
@@ -3894,6 +3932,7 @@ async function handleApi(req, res, pathname) {
         grade,
         avatarUrl: profileAvatarUrlForSession(allowed, db),
         profileFrame: profileFrameForSession(allowed, db),
+        profileBanner: profileBannerForSession(allowed, db),
         audienceGrade,
         title,
         body: message,
@@ -3966,6 +4005,7 @@ async function handleApi(req, res, pathname) {
         grade,
         avatarUrl: profileAvatarUrlForSession(allowed, db),
         profileFrame: profileFrameForSession(allowed, db),
+        profileBanner: profileBannerForSession(allowed, db),
         message,
         createdAt: submittedAt,
         ...moderationFields(result, allowed, submittedAt)

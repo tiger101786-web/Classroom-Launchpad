@@ -10440,6 +10440,33 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   background: var(--paper);
 }
 
+.profile-banner-cover { position: relative; overflow: hidden; border-radius: 12px; background: #241424; min-width: 0; }
+.profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.forum-profile-editor > .profile-banner-cover { grid-column: 1 / -1; height: clamp(110px, 17vw, 220px); }
+.forum-profile-editor:has(> .profile-banner-cover) > #profileFramePreview { margin-top: -45px; position: relative; z-index: 1; }
+.profile-banner-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--paper); margin: 18px 0; }
+.profile-banner-card > .profile-banner-cover { border-radius: 0; height: 150px; }
+.profile-banner-identity { display: flex; align-items: center; gap: 20px; padding: 20px; }
+.profile-banner-card:has(.profile-banner-cover) .profile-banner-identity > .profile-frame { margin-top: -42px; }
+.profile-banner-identity > div { min-width: 0; overflow-wrap: anywhere; }
+.profile-banner-identity strong { display: block; font-size: 1.25rem; }
+.profile-banner-identity span:not(.profile-frame, .forum-avatar) { display: block; color: var(--muted); }
+.profile-banner-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.profile-banner-options button { min-width: 0; display: grid; gap: 10px; padding: 8px; border: 2px solid var(--border); border-radius: 14px; color: var(--ink); background: var(--paper); cursor: pointer; }
+.profile-banner-options button[aria-pressed="true"] { border-color: var(--blue); box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue) 20%, transparent); }
+.profile-banner-options button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.profile-banner-options .profile-banner-cover, .profile-banner-blank { height: 85px; }
+.profile-banner-blank { display: grid; place-items: center; border-radius: 10px; background: var(--paper-soft, #25232b); color: #fff; font-size: .8rem; }
+.forum-post-author.has-profile-banner { position: relative; padding-top: 80px; }
+.forum-post-author > .profile-banner-cover { position: absolute; inset: 0 0 auto; height: 90px; border-radius: 12px 12px 0 0; }
+.forum-post-author.has-profile-banner > .profile-frame { position: relative; z-index: 1; }
+@media (max-width: 640px) {
+  .profile-banner-options { gap: 8px; }
+  .profile-banner-options .profile-banner-cover, .profile-banner-blank { height: 65px; }
+  .forum-post-author.has-profile-banner { padding-top: 80px; }
+  .profile-banner-identity { gap: 14px; padding: 16px; }
+}
+
 .forum-thread-view > .forum-profile-editor {
   margin: 20px 20px 0;
 }

@@ -422,6 +422,40 @@ async function run() {
     await page.screenshot({ path: path.join(dataDir, "forum-thread-desktop.png"), fullPage: true });
 
     assert.equal(await page.locator('[data-profile-frame]').count(), 7);
+    assert.equal((await request('/api/profile-banner', { method: 'POST', body: { profileBanner: 'colt' } })).status, 401);
+    assert.equal((await request('/api/profile-banner', { method: 'POST', cookie: studentCookie, body: { profileBanner: '../bad' } })).status, 400);
+    await page.locator('#changeProfileBanner').click();
+    assert.equal(await page.locator('[data-banner-choice]').count(), 5);
+    for (const id of ['colt', 'neon', 'cosmic', 'horizon']) {
+      await page.locator(`[data-banner-choice="${id}"]`).click();
+      assert.equal(await page.locator('#profileBannerPreview [data-banner]').getAttribute('data-banner'), id);
+      await page.locator('#profileBannerPreview img').first().evaluate(image => image.decode());
+    }
+    await page.keyboard.press('Escape');
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.profileBanner, 'none');
+    await page.locator('#changeProfileBanner').click();
+    await page.locator('[data-banner-choice="colt"]').click();
+    await page.route('**/api/profile-banner', route => route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Banner save test error' }) }));
+    await page.locator('#saveProfileBanner').click();
+    await page.getByText('Banner save test error', { exact: true }).waitFor();
+    assert(await page.locator('#saveProfileBanner').isEnabled());
+    await page.unroute('**/api/profile-banner');
+    await page.locator('.profile-banner-dialog').screenshot({ path: path.join(dataDir, 'banner-chooser-desktop.png') });
+    await page.locator('#saveProfileBanner').click();
+    await page.getByText('Profile banner saved!', { exact: true }).waitFor();
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.profileBanner, 'colt');
+    assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.profileBanner, 'none');
+    assert(await page.locator('.forum-post-author [data-banner="colt"]').isVisible());
+    await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-banner-desktop.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('#changeProfileBanner').click();
+    assert(await page.locator('.profile-banner-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
+    await page.locator('.profile-banner-dialog').screenshot({ path: path.join(dataDir, 'banner-chooser-mobile.png') });
+    await page.locator('[data-banner-choice="none"]').click();
+    await page.locator('#saveProfileBanner').click();
+    await page.locator('.profile-banner-dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.locator('.forum-post-author [data-banner]').count(), 0);
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.locator('[data-profile-frame="colt"]').click();
     assert(await page.locator('#profileFramePreview .frame-colt').isVisible());
     assert.equal(await page.locator('.forum-post-author .frame-colt').count(), 0, "Preview must not save immediately.");
