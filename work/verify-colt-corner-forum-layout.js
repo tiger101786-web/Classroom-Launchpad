@@ -145,7 +145,34 @@ async function run() {
     const menuBounds = await touchPage.locator('#launchSceneMenu').boundingBox();
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
+    await touchPage.locator('#chooseLaunchFrame').tap();
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 9);
+    assert(await touchPage.locator('.launch-frame-dialog').evaluate(dialog => dialog.scrollWidth <= dialog.clientWidth));
+    await touchPage.locator('.launch-frame-dialog').screenshot({ path: path.join(dataDir, 'scene-frames-touch.png') });
     await touchContext.close();
+    await openSceneSettings();
+    await page.locator('#chooseLaunchFrame').click();
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid']) {
+      await page.locator(`[data-frame-choice="${frame}"]`).click();
+      assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
+    }
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.frame, 'none');
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.home-scene-feature [data-scene-frame]').getAttribute('data-scene-frame'), 'none');
+    await openSceneSettings();
+    await page.locator('#chooseLaunchFrame').click();
+    await page.locator('[data-frame-choice="gold"]').click();
+    await page.locator('.launch-frame-dialog').screenshot({ path: path.join(dataDir, 'scene-frames-desktop.png') });
+    await page.route('**/api/home-scene', route => route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Frame test save failure' }) }));
+    await page.locator('#saveLaunchFrame').click();
+    await page.getByText('Frame test save failure', { exact: true }).waitFor();
+    assert.equal(await page.locator('#saveLaunchFrame').isEnabled(), true);
+    await page.unroute('**/api/home-scene');
+    await page.locator('#saveLaunchFrame').click();
+    await page.locator('.launch-frame-dialog').waitFor({ state: 'detached' });
+    assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.frame, 'gold');
+    assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.homeScene.frame, 'none');
+    assert.equal((await request('/api/home-scene', { method: 'POST', cookie: studentCookie, body: { id: 'original', motion: true, frame: '../bad' } })).status, 400);
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'original');
     await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
@@ -155,6 +182,7 @@ async function run() {
     await page.locator('#saveLaunchScene').click();
     await page.locator('.launch-scene-dialog').waitFor({ state: 'detached' });
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
+    assert.equal(await page.locator('.home-scene-feature [data-scene-frame]').getAttribute('data-scene-frame'), 'gold');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => image.complete && image.naturalWidth > 0), true);
     await openSceneSettings();
     await page.locator('#toggleLaunchScene').click();
@@ -179,6 +207,9 @@ async function run() {
     await page.locator('.home-scene-feature [data-scene="reef"]').waitFor();
     await page.unroute('**/api/auth/session');
     assert.equal(await page.evaluate(() => window.sawOriginalSceneDuringLoad), false);
+    assert.equal(await page.locator('.home-scene-feature [data-scene-frame]').getAttribute('data-scene-frame'), 'gold');
+    const frameAfterLegacySave = await request('/api/home-scene', { method: 'POST', cookie: studentCookie, body: { id: 'reef', motion: false } });
+    assert.equal(frameAfterLegacySave.payload.session.homeScene.frame, 'gold');
     assert.equal(await page.locator('.home-scene-feature .launch-scene').getAttribute('data-scene'), 'reef');
     assert(await page.locator('.home-scene-feature .launch-scene').evaluate(element => element.classList.contains('is-paused')));
     assert.equal((await request('/api/auth/session', { cookie: teacherCookie })).payload.session.homeScene.id, 'original');

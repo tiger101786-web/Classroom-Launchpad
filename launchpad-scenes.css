@@ -62,6 +62,35 @@
 .launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
 .launch-scene.is-paused *::before, .launch-scene.is-paused *::after { animation-play-state: paused !important; }
 .launch-scene-stage { position: relative; flex: 0 0 auto; }
+.scene-frame { --frame-metal: conic-gradient(from 35deg, #6c747e, #f8ffff 12%, #777e88 21%, #252b35 30%, #eaf6ff 43%, #919dac 55%, #fff 64%, #444d59 76%, #cbdbe8 88%, #6c747e); position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
+.scene-frame::before { content: ""; position: absolute; inset: 0; padding: 10px; border-radius: 50%; background: var(--frame-metal); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; }
+.scene-frame::after { content: ""; position: absolute; inset: 2px; border: 1px solid #ffffff80; border-radius: 50%; box-shadow: inset 0 0 0 2px #0005, 0 0 0 1px #0006; }
+.scene-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.frame-track { fill: none; stroke: #ffffff60; stroke-width: 1; }
+.frame-gem { display: none; }
+.scene-frame-none { display: none; }
+.scene-frame-gold { --frame-metal: conic-gradient(from 25deg, #603c0d, #ffeabb 12%, #ae7728 24%, #fff5d4 36%, #8a5311 48%, #e5b854 63%, #fff1af 76%, #95601f 90%, #603c0d); }
+.scene-frame-rose { --frame-metal: conic-gradient(from 15deg, #693c42, #ffe5d5 13%, #b16e75 25%, #ffddd3 38%, #784249 51%, #dfa291 65%, #fff0e3 78%, #9d5862 90%, #693c42); }
+.scene-frame-pearl { --frame-metal: linear-gradient(135deg, #ffefd9, #baadce 45%, #f9faff 65%, #c4b8d5); }
+.scene-frame-pearl .frame-gem { display: block; fill: #fff2eb; stroke: #b6a2b1; stroke-width: 1; filter: drop-shadow(0 1px 1px #574159aa); }
+.scene-frame-pearl::before { padding: 6px; }
+.scene-frame-neon { --frame-metal: conic-gradient(#9a65ff, #55f4ff 25%, #184f92 40%, #d77dff 65%, #6c39b5 85%, #9a65ff); filter: drop-shadow(0 0 5px #9c63ff99); }
+.scene-frame-neon::before { padding: 5px; }
+.scene-frame-neon::after { inset: 8px; border: 2px solid #7eefff; box-shadow: 0 0 7px #54caff88; }
+.scene-frame-prism { --frame-metal: repeating-conic-gradient(from 12deg, #c6c0ff 0deg 12deg, #fce8f5 12deg 24deg, #9de6ee 24deg 36deg, #609dbb 36deg 48deg, #a888cf 48deg 60deg); }
+.scene-frame-prism::before { padding: 12px; }
+.scene-frame-onyx { --frame-metal: conic-gradient(#17191f, #66707b 15%, #13151b 29%, #3d444f 48%, #11141a 65%, #646a75 82%, #17191f); }
+.scene-frame-onyx::after { border-color: #d7b575; box-shadow: inset 0 0 0 5px #0005; }
+.scene-frame-onyx .frame-gem { display: block; fill: #ffdb94; stroke: #71532b; stroke-width: .8; }
+.scene-frame-braid { --frame-metal: repeating-conic-gradient(from 5deg, #363e4c 0deg 3deg, #b5c6d9 3deg 5deg, #f2f8ff 5deg 7deg, #617086 7deg 10deg); }
+.scene-frame-braid::before { padding: 11px; }
+.scene-frame-braid .frame-track { stroke: #202b40; stroke-width: 2; stroke-dasharray: 5 4; }
+.frame-swatch { position: relative; display: block; margin: 6px; }
+.launch-frame-options .frame-swatch img, .launch-frame-options .scene-original-thumb { width: 84px; height: 84px; }
+@media (max-width: 480px) { .launch-frame-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.frame-swatch .scene-frame::before { padding: 5px; }
+.frame-swatch .scene-frame-neon::after { inset: 5px; border-width: 1px; }
+.launch-scene-settings { z-index: 2; }
 .launch-scene-settings { position: absolute; right: 8%; bottom: 8%; display: grid; place-items: center; width: 44px; height: 44px; padding: 10px; border: 1px solid #a6526a; border-radius: 50%; background: #190c13ed; color: #fff0f5; cursor: pointer; box-shadow: 0 3px 12px #0006; }
 .launch-scene-settings svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
 .launch-scene-settings:focus-visible { outline: 3px solid #f197b5; outline-offset: 3px; }

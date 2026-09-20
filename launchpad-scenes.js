@@ -27,11 +27,33 @@
     { id: "bookshop", name: "Cozy Bookshop", description: "Book displays, shop cat & rainy window", image: "assets/launchpad-scene-bookshop-v2.png" }
   ];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const frames = [
+    { id: "none", name: "No frame", description: "Original clean border" },
+    { id: "chrome", name: "Liquid Silver", description: "Sculpted polished chrome" },
+    { id: "gold", name: "Golden Edge", description: "Layered warm gold" },
+    { id: "rose", name: "Rose Halo", description: "Soft rose-gold metal" },
+    { id: "pearl", name: "Pearl Crown", description: "A circle of luminous pearls" },
+    { id: "neon", name: "Neon Duo", description: "Electric cyan and violet" },
+    { id: "prism", name: "Prism Glass", description: "Faceted rainbow reflections" },
+    { id: "onyx", name: "Onyx Luxe", description: "Dark metal, gold accents" },
+    { id: "braid", name: "Silver Braid", description: "Interwoven silver strands" }
+  ];
   let guestMotion = true;
   const settings = session => ({
     id: session.authenticated && scenes.some(scene => scene.id === session.homeScene?.id) ? session.homeScene.id : "original",
-    motion: session.authenticated ? session.homeScene?.motion !== false : guestMotion
+    motion: session.authenticated ? session.homeScene?.motion !== false : guestMotion,
+    frame: session.authenticated && frames.some(frame => frame.id === session.homeScene?.frame) ? session.homeScene.frame : "none"
   });
+  function frameArt(id) {
+    const frame = frames.find(item => item.id === id) || frames[0];
+    return `<span class="scene-frame scene-frame-${frame.id}" data-scene-frame="${frame.id}" aria-hidden="true"><svg viewBox="0 0 320 320"><circle class="frame-track" cx="160" cy="160" r="153"/>${Array.from({ length: frame.id === "pearl" ? 48 : 12 }, (_, i) => {
+      const angle = i * Math.PI * 2 / (frame.id === "pearl" ? 48 : 12);
+      return `<circle class="frame-gem" cx="${160 + 153 * Math.cos(angle)}" cy="${160 + 153 * Math.sin(angle)}" r="${frame.id === "pearl" ? 5 : 2.5}"/>`;
+    }).join("")}</svg></span>`;
+  }
+  function framedArtwork(scene, video, preview = true) {
+    return `<div class="launch-scene-stage">${artwork(scene.id, scene.motion, video, preview)}${frameArt(scene.frame)}</div>`;
+  }
   function artwork(id, motion, video, preview = false) {
     const scene = scenes.find(item => item.id === id) || scenes[0];
     const paused = !motion || reduced.matches;
@@ -46,10 +68,11 @@
     if (!sessionReady) return `<section class="home-feature home-scene-feature" aria-busy="true"><div class="school-photo launch-scene scene-loading" role="status">Loading your scene…</div></section>`;
     const scene = settings(session);
     return `<section class="home-feature home-scene-feature">
-      <div class="launch-scene-stage">${artwork(scene.id, scene.motion, video)}
+      <div class="launch-scene-stage">${artwork(scene.id, scene.motion, video)}${frameArt(scene.frame)}
       <button type="button" id="launchSceneSettings" class="launch-scene-settings" aria-label="Scene settings" title="Scene settings" aria-expanded="false" aria-controls="launchSceneMenu" popovertarget="launchSceneMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button>
       </div><div id="launchSceneMenu" class="launch-scene-controls" popover="auto" aria-label="Scene settings">
         ${session.authenticated ? '<button type="button" id="chooseLaunchScene">✦ Choose scene</button>' : ""}
+        ${session.authenticated ? '<button type="button" id="chooseLaunchFrame">◇ Choose frame</button>' : ""}
         <button type="button" id="toggleLaunchScene" aria-pressed="${!scene.motion}">${reduced.matches ? "Motion reduced" : scene.motion ? "Pause scene" : "Resume scene"}</button>
       </div><span id="launchSceneStatus" class="launch-scene-status" role="status"></span>
     </section>`;
@@ -71,7 +94,7 @@
       if (event.newState === "open") {
         const rect = gear.getBoundingClientRect();
         menu.style.left = `${Math.max(8, Math.min(rect.right - 190, window.innerWidth - 198))}px`;
-        menu.style.top = `${Math.max(8, Math.min(rect.top - 112, window.innerHeight - 120))}px`;
+        menu.style.top = `${Math.max(8, Math.min(rect.top - 154, window.innerHeight - 162))}px`;
       }
       gear.setAttribute("aria-expanded", String(event.newState === "open"));
     });
@@ -104,7 +127,7 @@
       dialog.setAttribute("aria-labelledby", "launchSceneTitle");
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Your own little world</span><h2 id="launchSceneTitle">Choose your Launchpad scene</h2></div><button type="button" class="outline-btn" data-scene-close aria-label="Close scene chooser">✕</button></div>
         <p>Only your homepage changes. Your profile picture and classmates’ pages stay the same.</p>
-        <div id="launchScenePreview">${artwork(draft.id, draft.motion, video, true)}</div>
+        <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
         <div class="launch-scene-options">${scenes.map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
         <label class="launch-scene-motion"><input type="checkbox" id="launchSceneMotion" ${draft.motion ? "checked" : ""}> Gentle effects (or original video playback)</label>
         <p class="launch-scene-hint">Scene artwork stays still; only the silent effects move inside the circle. Reduced-motion preferences are always respected.</p>
@@ -113,7 +136,7 @@
       const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };
       dialog.querySelectorAll("[data-scene-close]").forEach(button => button.addEventListener("click", close));
       dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
-      const refreshPreview = () => { dialog.querySelector("#launchScenePreview").innerHTML = artwork(draft.id, draft.motion, video, true); };
+      const refreshPreview = () => { dialog.querySelector("#launchScenePreview").innerHTML = framedArtwork(draft, video); };
       dialog.querySelectorAll("[data-scene-choice]").forEach(button => button.addEventListener("click", () => {
         draft.id = button.dataset.sceneChoice;
         dialog.querySelectorAll("[data-scene-choice]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
@@ -126,6 +149,35 @@
         dialog.querySelector("#launchSceneSaveStatus").textContent = "Saving your scene…";
         try { const updated = await save(draft); close(); onSave(updated); document.getElementById("launchSceneSettings")?.focus(); }
         catch (error) { dialog.querySelector("#launchSceneSaveStatus").textContent = error.message; button.disabled = false; }
+      });
+      dialog.showModal();
+    });
+    document.getElementById("chooseLaunchFrame")?.addEventListener("click", () => {
+      menu.hidePopover();
+      const draft = settings(session);
+      const dialog = document.createElement("dialog");
+      dialog.className = "launch-scene-dialog launch-frame-dialog";
+      dialog.setAttribute("aria-labelledby", "launchFrameTitle");
+      const image = scenes.find(scene => scene.id === draft.id)?.image;
+      dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Make it yours</span><h2 id="launchFrameTitle">Choose your scene frame</h2></div><button type="button" class="outline-btn" data-frame-close aria-label="Close frame chooser">✕</button></div>
+        <p>Every frame fits every scene. Your scene, effects, and small profile-picture frame stay unchanged.</p>
+        <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
+        <div class="launch-scene-options launch-frame-options">${frames.map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img src="${image}" alt="">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
+        <p id="launchFrameSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-frame-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchFrame">Save frame</button></div>`;
+      document.body.append(dialog);
+      const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };
+      dialog.querySelectorAll("[data-frame-close]").forEach(button => button.addEventListener("click", close));
+      dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
+      dialog.querySelectorAll("[data-frame-choice]").forEach(button => button.addEventListener("click", () => {
+        draft.frame = button.dataset.frameChoice;
+        dialog.querySelectorAll("[data-frame-choice]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+        dialog.querySelector("#launchScenePreview").innerHTML = framedArtwork(draft, video);
+      }));
+      dialog.querySelector("#saveLaunchFrame").addEventListener("click", async event => {
+        event.currentTarget.disabled = true;
+        dialog.querySelector("#launchFrameSaveStatus").textContent = "Saving your frame…";
+        try { const updated = await save(draft); close(); onSave(updated); document.getElementById("launchSceneSettings")?.focus(); }
+        catch (error) { dialog.querySelector("#launchFrameSaveStatus").textContent = error.message; dialog.querySelector("#saveLaunchFrame").disabled = false; }
       });
       dialog.showModal();
     });

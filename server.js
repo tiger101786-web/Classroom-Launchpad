@@ -16,8 +16,9 @@ const {
 
 const root = __dirname;
 const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observatory", "dragon", "cabin", "neon", "castle", "koi", "crystal", "pumpkin", "volcano", "football", "basketball", "championship", "soccer", "baseball", "softball", "cafe", "aurora", "train", "lantern", "bookshop"]);
+const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "neon", "prism", "onyx", "braid"]);
 function cleanHomeScene(value) {
-  return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false };
+  return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
 function homeSceneForSession(session, db) {
   return cleanHomeScene(session.role === "teacher" ? db.teacherHomeScene
@@ -3480,8 +3481,9 @@ async function handleApi(req, res, pathname) {
     try {
       const body = await readBody(req);
       if (!homeSceneIds.has(body.id) || typeof body.motion !== "boolean") throw new Error("Choose an available scene and motion setting.");
+      if (body.frame !== undefined && !homeSceneFrameIds.has(body.frame)) throw new Error("Choose an available scene frame.");
       const db = readDb();
-      const scene = cleanHomeScene(body);
+      const scene = cleanHomeScene({ ...body, frame: body.frame ?? homeSceneForSession(allowed, db).frame });
       if (allowed.role === "teacher") db.teacherHomeScene = scene;
       else {
         const students = normalizeApprovedStudents(db.approvedStudents);
