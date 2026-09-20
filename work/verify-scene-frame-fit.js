@@ -20,7 +20,7 @@ const { chromium } = require('playwright');
     for (const file of ['styles.css', 'launchpad-scenes.css', 'scene-frame-fit.css']) await page.addStyleTag({ content: fs.readFileSync(path.join(root, file), 'utf8') });
     await page.addScriptTag({ content: fs.readFileSync(path.join(root, 'launchpad-scenes.js'), 'utf8') });
     await page.addStyleTag({ content: 'body {display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:28px;background:#271c24} .sample {text-align:center;color:white} .home-scene-feature {position:static;transform:none;display:flex;align-items:center} .school-photo {width:280px;height:280px} h2{font-size:16px} .launch-scene-settings {opacity:1;pointer-events:auto}' });
-    const ids = ['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans'];
+    const ids = ['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans', 'sunflower', 'peacock', 'harvest', 'evergreen'];
     await page.evaluate(ids => {
       document.body.innerHTML = ids.map(frame => `<div class="sample"><h2>${frame}</h2>${window.LaunchpadScenes.render({ authenticated:true, homeScene:{ id:'cafe',motion:false,frame } }, '')}</div>`).join('');
     }, ids);
@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
         const style = getComputedStyle(scene);
         return { clip:style.clipPath.startsWith('polygon('),border:style.borderTopWidth,shadow:style.boxShadow };
       }));
-      assert.equal(fitted.length, 14);
+      assert.equal(fitted.length, 18);
       fitted.forEach(fit => assert.deepEqual(fit,{clip:true,border:'0px',shadow:'none'}));
       await page.screenshot({ path:path.join(output, `frames-${size}.png`),fullPage:true });
     }

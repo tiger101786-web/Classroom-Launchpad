@@ -65,7 +65,11 @@
     {"id":"library","name":"Enchanted Library","description":"Little books & feather quill","decorative":true},
     {"id":"champion","name":"Sports Champion","description":"Golden laurels & hanging medal","decorative":true},
     { id: "halloween", name: "Halloween Magic", description: "Smiling pumpkins, bats & a friendly ghost", decorative: true },
-    { id: "new-orleans", name: "New Orleans", description: "French Quarter lanterns & Mardi Gras jewels", decorative: true }
+    { id: "new-orleans", name: "New Orleans", description: "French Quarter lanterns & Mardi Gras jewels", decorative: true },
+    { id: "sunflower", name: "Sunflower Wreath", description: "Golden flowers, daisies & amber jewels", decorative: true },
+    { id: "peacock", name: "Peacock Jewels", description: "Iridescent feathers & gold filigree", decorative: true },
+    { id: "harvest", name: "Autumn Harvest", description: "Copper leaves, acorns & little pumpkins", decorative: true },
+    { id: "evergreen", name: "Christmas Evergreen", description: "Holly, velvet ribbon & golden bells", decorative: true }
   ];
   // Keep the reset choice first without mutating the catalog or saved IDs.
   const alphabetically = items => [...items].sort((a, b) => {

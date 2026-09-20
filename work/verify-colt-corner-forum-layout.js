@@ -148,14 +148,14 @@ async function run() {
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 29);
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 33);
     await touchPage.getByRole('searchbox', { name: 'Search frames' }).fill('DRAGON');
     assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 2);
     await touchPage.getByRole('searchbox', { name: 'Search frames' }).fill('no-such-frame');
     assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 0);
     assert.match(await touchPage.locator('[data-search-status]').textContent(), /No matching frames/);
     await touchPage.locator('[data-clear-search]').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 29);
+    assert.equal(await touchPage.locator('[data-frame-choice]:visible').count(), 33);
     const frameNames = await touchPage.locator('[data-frame-choice] strong').allTextContents();
     assert.equal(frameNames[0], 'No frame');
     assert.deepEqual(frameNames.slice(1), frameNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
@@ -177,10 +177,10 @@ async function run() {
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
-    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans']) {
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans', 'sunflower', 'peacock', 'harvest', 'evergreen']) {
       await page.locator(`[data-frame-choice="${frame}"]`).click();
       assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
-      if (['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans'].includes(frame)) {
+      if (['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans', 'sunflower', 'peacock', 'harvest', 'evergreen'].includes(frame)) {
         const alpha = await page.locator('#launchScenePreview .scene-frame-artwork').evaluate(async image => {
           await image.decode();
           const canvas = document.createElement('canvas');
@@ -196,7 +196,7 @@ async function run() {
         assert.deepEqual(fit, { clipped: true, border: '0px' });
         assert(await page.locator(`[data-frame-choice="${frame}"] .frame-swatch > img, [data-frame-choice="${frame}"] .frame-swatch > .scene-original-thumb`).evaluate(scene => getComputedStyle(scene).clipPath.startsWith('polygon(')));
       }
-      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans'].includes(frame)) {
+      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans', 'sunflower', 'peacock', 'harvest', 'evergreen'].includes(frame)) {
         await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
         const saved = await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'reef', motion: false, frame } });
         assert.equal(saved.status, 200);
