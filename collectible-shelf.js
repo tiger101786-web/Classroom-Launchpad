@@ -8,7 +8,8 @@
     ['Technology', ['robot','Robot'], ['computer','Retro Computer'], ['controller','Game Controller'], ['arcade','Arcade Cabinet'], ['camera','Camera'], ['headphones','Headphones']],
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
-    ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust']]
+    ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee']],
+    ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']]
   ];
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -31,10 +32,19 @@
     'all-might': { source:'assets/shelf-all-might.png', width:1537, height:1023, bounds:[414,13,712,999] },
     naruto: { source:'assets/shelf-naruto.png', width:1120, height:1405, bounds:[44,7,1066,1376] }
   };
+  // Individually framed viewports retain transparent gutters between the new sprites.
+  const expansion = {
+    goku:[40,8,227,306], pikachu:[368,28,238,284], eevee:[667,13,229,303],
+    'crystal-dragon':[977,6,243,309], 'moon-astronaut':[40,319,241,306],
+    'race-car':[298,412,317,183], 'ship-bottle':[629,378,352,237],
+    'knight-helmet':[1004,314,237,318], streetcar:[20,680,304,240],
+    saxophone:[386,602,169,326], pinball:[653,622,234,310],
+    'snow-globe':[972,634,251,297], 'owl-books':[25,924,264,320]
+  };
   function sprite(id) {
     const item = items.find(item => item.id === id);
     if (!item) return '<span class="shelf-empty" aria-label="Empty spot"></span>';
-    const asset = standalone[item.id];
+    const asset = standalone[item.id] || (expansion[item.id] ? { source:'assets/shelf-collectibles-expansion.png', width:1254, height:1254, bounds:expansion[item.id] } : null);
     const [x,y,w,h] = asset ? asset.bounds : bounds[item.row * 6 + item.column];
     const source = asset?.source || 'assets/shelf-collectibles.png';
     const scale = 200 / Math.max(w,h);

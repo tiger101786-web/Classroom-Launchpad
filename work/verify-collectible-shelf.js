@@ -22,16 +22,16 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await open();
   assert.equal(await page.locator('[data-shelf-item="medal"]').count(),0);
   await page.locator('#shelfCategory').selectOption({label:'Anime'});
-  assert.equal(await page.locator('[data-shelf-item]').count(),4);
+  assert.equal(await page.locator('[data-shelf-item]').count(),7);
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),39);
+  assert.equal(await page.locator('[data-shelf-item]').count(),52);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
   await page.locator('[data-shelf-slot="1"]').click();
   await page.locator('#shelfSearch').fill('crystal');
-  assert.equal(await page.locator('[data-shelf-item]').count(),2);
+  assert.equal(await page.locator('[data-shelf-item]').count(),3);
   await page.locator('[data-shelf-item="crystal"]').click();
   await page.locator('#shelfSearch').fill('nothing-matches');
   assert.equal(await page.locator('[data-shelf-item]').count(),1);
@@ -114,6 +114,16 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.reload({waitUntil:'networkidle'});
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['all-might','naruto','tanjiro']);
   await page.screenshot({path:path.join(dataDir,'shelf-anime-statues.png')});
+  const newItems = ['goku','pikachu','eevee','crystal-dragon','moon-astronaut','race-car','ship-bottle','knight-helmet','streetcar','saxophone','pinball','snow-globe','owl-books'];
+  for (const id of newItems) {
+    const result = await post({enabled:true,slots:[id,'none','none']});
+    assert.equal(result.status,200);
+    assert.equal(result.payload.session.homeShelf.slots[0],id);
+  }
+  await post({enabled:true,slots:['goku','pikachu','eevee']});
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('.home-collectible-shelf [aria-label="Pikachu"]').count(),1);
+  await page.screenshot({path:path.join(dataDir,'shelf-goku-pokemon.png')});
   const guest=await browser.newPage();
   await guest.goto(baseUrl,{waitUntil:'networkidle'});
   assert.equal(await guest.locator('.home-collectible-shelf, [data-action="collectibleShelf"]').count(),0);
