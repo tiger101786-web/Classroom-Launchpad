@@ -61,6 +61,18 @@
 @keyframes scene-confetti { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 10%, 85% { opacity: .85; } 100% { transform: translate(25px, 350px) rotate(540deg); opacity: 0; } }
 @keyframes scene-stadium-glow { 0%, 100% { opacity: .25; } 50% { opacity: .75; } }
 @keyframes scene-trophy-sparkle { 0%, 100% { transform: scale(.3) rotate(0); opacity: .1; } 50% { transform: scale(1) rotate(90deg); opacity: .9; } }
+/* Effects align to the still artwork; no scene or subject movement. */
+.scene-crawfish .launch-scene-particles i { left: calc(62% + var(--n) * 3%); top: 43%; width: 8%; height: 12%; border-radius: 50%; background: radial-gradient(ellipse, #fff5e8aa, #e8e3dc55 40%, transparent 72%); filter: blur(1px); box-shadow: none; animation: scene-boil-steam 3s linear infinite; animation-delay: calc(var(--n) * -1s); }
+.scene-crawfish .launch-scene-particles i:nth-child(n+4) { display: none; }
+@keyframes scene-boil-steam { 0% { transform: translate(0, 10%) scale(.65); opacity: 0; } 20% { opacity: .65; } 65% { opacity: .45; } 100% { transform: translate(-35%, -160%) scale(1.7); opacity: 0; } }
+.scene-balloons .launch-scene-particles i, .scene-robotics .launch-scene-particles i, .scene-retro-arcade .launch-scene-particles i { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; animation-delay: 0s; }
+.scene-balloons .launch-scene-particles i { background: radial-gradient(ellipse 1.5% 3% at 50% 48%, #fffde8, #ffcf4bdd 42%, transparent 100%), radial-gradient(ellipse 8% 5% at 50% 46%, #ffb43c88, transparent 100%); animation: scene-burner-glow 2.8s ease-in-out infinite; }
+.scene-robotics .launch-scene-particles i { background: radial-gradient(ellipse 4% 4.5% at 43% 38.5%, #57edff99, transparent 100%), radial-gradient(ellipse 4% 4.5% at 57% 38.5%, #57edff99, transparent 100%), radial-gradient(circle at 49.6% 59.4%, #d5ffb4dd 0 .8%, #70ff6077 1.5%, transparent 4%); animation: scene-robot-lights 3.2s ease-in-out infinite; }
+.scene-retro-arcade .launch-scene-particles i { background: radial-gradient(ellipse 11% 10% at 15% 44%, #53cfff66, transparent 100%), radial-gradient(ellipse 11% 10% at 84% 45%, #ee64ff66, transparent 100%), radial-gradient(ellipse 14% 12% at 50% 17%, #935bff55, transparent 100%); mix-blend-mode: screen; animation: scene-arcade-lights 3.6s ease-in-out infinite; }
+.scene-balloons .launch-scene-particles i:nth-child(n+2), .scene-robotics .launch-scene-particles i:nth-child(n+2), .scene-retro-arcade .launch-scene-particles i:nth-child(n+2) { display: none; }
+@keyframes scene-burner-glow { 0%, 100% { opacity: .2; } 35% { opacity: .95; } 55% { opacity: .55; } 72% { opacity: .85; } }
+@keyframes scene-robot-lights { 0%, 100% { opacity: .15; } 50% { opacity: .95; } }
+@keyframes scene-arcade-lights { 0%, 100% { opacity: .15; } 50% { opacity: .95; } }
 .launch-scene.is-paused *, .launch-scene.is-paused { animation-play-state: paused !important; }
 .launch-scene.is-paused *::before, .launch-scene.is-paused *::after { animation-play-state: paused !important; }
 .launch-scene-stage { position: relative; flex: 0 0 auto; }

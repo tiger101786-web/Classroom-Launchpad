@@ -260,10 +260,10 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['gymnastics', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain']]) {
+    for (const [id, effect] of [['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['gymnastics', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain'], ['crawfish', 'scene-boil-steam'], ['balloons', 'scene-burner-glow'], ['robotics', 'scene-robot-lights'], ['retro-arcade', 'scene-arcade-lights']]) {
       await openSceneSettings();
       await page.locator('#chooseLaunchScene').click();
-      assert.equal(await page.locator('[data-scene-choice]').count(), 25);
+      assert.equal(await page.locator('[data-scene-choice]').count(), 29);
       await page.locator(`[data-scene-choice="${id}"]`).click();
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
@@ -378,12 +378,13 @@ async function run() {
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
       if (['football', 'basketball', 'championship', 'soccer', 'baseball', 'softball', 'gymnastics'].includes(id)) await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `sports-${id}.png`) });
-      if (['cafe', 'aurora', 'train', 'lantern', 'bookshop'].includes(id)) {
+      if (['cafe', 'aurora', 'train', 'lantern', 'bookshop', 'crawfish', 'balloons', 'robotics', 'retro-arcade'].includes(id)) {
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `cozy-${id}.png`) });
         const effectLayer = page.locator('.home-scene-feature .launch-scene-particles i').first();
-        const before = await effectLayer.evaluate(element => getComputedStyle(element).transform);
+        const property = ['balloons', 'robotics', 'retro-arcade'].includes(id) ? 'opacity' : 'transform';
+        const before = await effectLayer.evaluate((element, property) => getComputedStyle(element)[property], property);
         await page.waitForTimeout(350);
-        assert.notEqual(await effectLayer.evaluate(element => getComputedStyle(element).transform), before);
+        assert.notEqual(await effectLayer.evaluate((element, property) => getComputedStyle(element)[property], property), before);
       }
     }
     await openSceneSettings();
