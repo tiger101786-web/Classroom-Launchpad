@@ -2,14 +2,15 @@
   'use strict';
   // IDs and row order are stable: each row maps to the six-column artwork atlas.
   const rows = [
-    ['Sports', ['trophy','Gold Trophy'], ['basketball','Basketball'], ['soccer','Soccer Ball'], ['baseball','Baseball & Glove'], ['helmet','Colt Football Helmet'], ['medal','Gold Medal']],
+    ['Sports', ['trophy','Gold Trophy'], ['basketball','Basketball'], ['soccer','Soccer Ball'], ['baseball','Baseball & Glove'], ['helmet','Colt Football Helmet'], ['tanjiro','Tanjiro Bust']],
     ['Space', ['astronaut','Astronaut'], ['rocket','Rocket'], ['planet','Ringed Planet'], ['ufo','UFO'], ['alien','Friendly Alien'], ['moon','Moon Globe']],
     ['Creatures & Colt Pride', ['dragon','Baby Dragon'], ['dinosaur','Dinosaur'], ['owl','Owl'], ['turtle','Sea Turtle'], ['horse','Colt Horse'], ['horseshoe','Golden Horseshoe']],
     ['Technology', ['robot','Robot'], ['computer','Retro Computer'], ['controller','Game Controller'], ['arcade','Arcade Cabinet'], ['camera','Camera'], ['headphones','Headphones']],
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
-    ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']]
+    ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
+    ['Anime']
   ];
-  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category, row, column })));
+  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
   const bounds = [
@@ -20,16 +21,18 @@
     [17,836,179,188],[224,833,192,197],[458,837,138,194],[660,832,153,198],[874,834,159,197],[1073,834,166,197],
     [16,1025,181,211],[242,1033,147,203],[415,1032,226,206],[654,1028,176,205],[896,1041,115,194],[1075,1062,164,170]
   ];
-  const ids = new Set(['none', ...items.map(item => item.id)]);
+  // Accept the retired ID only to migrate existing saved medal selections.
+  const ids = new Set(['none', 'medal', ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id));
-  const clean = value => valid(value) ? { enabled: value.enabled, slots: [...value.slots] } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
+  const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => id === 'medal' ? 'tanjiro' : id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   function sprite(id) {
     const item = items.find(item => item.id === id);
     if (!item) return '<span class="shelf-empty" aria-label="Empty spot"></span>';
-    const [x,y,w,h] = bounds[item.row * 6 + item.column];
+    const [x,y,w,h] = item.id === 'tanjiro' ? [228,22,835,1215] : bounds[item.row * 6 + item.column];
+    const source = item.id === 'tanjiro' ? 'assets/shelf-tanjiro-bust.png' : 'assets/shelf-collectibles.png';
     const scale = 200 / Math.max(w,h);
-    return `<svg class="shelf-object" role="img" aria-label="${item.name}" viewBox="0 0 220 220"><svg x="${(220-w*scale)/2}" y="${216-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="assets/shelf-collectibles.png" width="1254" height="1254"/></svg></svg>`;
+    return `<svg class="shelf-object" role="img" aria-label="${item.name}" viewBox="0 0 220 220"><svg x="${(220-w*scale)/2}" y="${216-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="1254" height="1254"/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);

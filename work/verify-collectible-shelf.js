@@ -13,6 +13,12 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
     await page.locator('#shelfSettingsMenu [data-action="collectibleShelf"]').click();
   }
   await open();
+  assert.equal(await page.locator('[data-shelf-item="medal"]').count(),0);
+  await page.locator('#shelfCategory').selectOption({label:'Anime'});
+  assert.equal(await page.locator('[data-shelf-item]').count(),2);
+  await page.locator('[data-shelf-item="tanjiro"]').click();
+  assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
+  await page.locator('#shelfCategory').selectOption('');
   assert.equal(await page.locator('[data-shelf-item]').count(),37);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
@@ -71,6 +77,13 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('#saveShelf').click();
   await page.locator('.shelf-dialog').waitFor({state:'detached'});
   assert.equal(await page.locator('.home-collectible-shelf .shelf-empty').count(),1);
+  const migrated = await post({enabled:true,slots:['medal','crystal','planet']});
+  assert.deepEqual(migrated.payload.session.homeShelf.slots,['tanjiro','crystal','planet']);
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('.home-collectible-shelf [aria-label="Tanjiro Bust"]').count(),1);
+  await page.screenshot({path:path.join(dataDir,'shelf-tanjiro-desktop.png')});
+  await post({enabled:true,slots:['none','crystal','planet']});
+  await page.reload({waitUntil:'networkidle'});
   await page.locator('.home-collectible-shelf').hover();
   await page.locator('.shelf-customize').click();
   await page.getByRole('button',{name:'Hide shelf',exact:true}).click();

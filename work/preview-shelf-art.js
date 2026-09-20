@@ -8,6 +8,7 @@ const shelf = require('../collectible-shelf');
   try {
     const page = await browser.newPage({ viewport:{width:1200,height:1100} });
     const atlas = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname,'../assets/shelf-collectibles.png')).toString('base64');
+    const bust = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname,'../assets/shelf-tanjiro-bust.png')).toString('base64');
     let gallery = '';
     for (let index=0; index<shelf.items.length; index+=3) {
       const group = shelf.items.slice(index,index+3);
@@ -15,7 +16,7 @@ const shelf = require('../collectible-shelf');
     }
     const board = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname,'../assets/collectible-shelf-colt.png')).toString('base64');
     const css = fs.readFileSync(path.join(__dirname,'../collectible-shelf.css'),'utf8').replaceAll('assets/collectible-shelf-colt.png',board);
-    await page.setContent(`<style>${css}*{box-sizing:border-box}body{margin:0;padding:24px;background:#171015;color:#f8e8ed;font:12px system-ui;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}p{text-align:center}</style>${gallery.replaceAll('assets/shelf-collectibles.png',atlas)}`);
+    await page.setContent(`<style>${css}*{box-sizing:border-box}body{margin:0;padding:24px;background:#171015;color:#f8e8ed;font:12px system-ui;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}p{text-align:center}</style>${gallery.replaceAll('assets/shelf-collectibles.png',atlas).replaceAll('assets/shelf-tanjiro-bust.png',bust)}`);
     const misplaced = await page.evaluate(() => [...document.querySelectorAll('.collectible-shelf')].flatMap(shelf => {
       const board = shelf.getBoundingClientRect();
       return [...shelf.querySelectorAll('.shelf-object')].filter(item => {
