@@ -2204,6 +2204,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
         ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         <h1>${escapeHtml(title)}</h1>
+        ${!back && title === "Classroom Launchpad" && homeSceneSessionReady ? window.CollectibleShelf.render(authSession) : ""}
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
       </div>
       ${trailing || fallbackTrailing}
@@ -2274,6 +2275,7 @@ function renderAuthButton() {
             <span><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(roleLabel)}</small></span>
           </div>
           <div class="header-account-links">
+            <button type="button" data-action="collectibleShelf">Customize shelf</button>
             <button type="button" data-action="${isTeacher() ? "openColtCorner" : "account"}"><span aria-hidden="true">&#9673;</span>My Profile</button>
             ${isTeacher()
               ? `<button type="button" data-action="teacherDashboard"><span aria-hidden="true">&#9638;</span>Teacher Dashboard</button>
@@ -13026,6 +13028,21 @@ app.addEventListener("click", async event => {
   if (action === "login") {
     authMessage = "";
     setScreen({ name: "login" });
+  }
+  if (action === "collectibleShelf") {
+    if (!isSignedIn()) return;
+    const owner = { role: authSession.role, email: authSession.email };
+    window.CollectibleShelf.open({
+      selected: authSession.homeShelf,
+      save: value => sharedBackend.request("/api/home-shelf", { method: "POST", body: JSON.stringify(value) }),
+      onSave: result => {
+        if (!isSignedIn() || authSession.role !== owner.role || authSession.email !== owner.email) return;
+        authSession = result.session;
+        render();
+        document.querySelector('.header-account-summary')?.focus();
+      }
+    });
+    return;
   }
   if (action === "account") {
     accountPasswordMessage = "";

@@ -121,6 +121,7 @@ async function run() {
     const page = await context.newPage();
     await page.goto(baseUrl, { waitUntil: "networkidle" });
     assert.equal(await page.locator('[data-action="mottoPlaque"], .motto-plaque').count(), 0);
+    await require('./verify-collectible-shelf')({ page, browser, baseUrl, request, studentCookie, teacherCookie, dataDir });
     // Homepage scene choices are personal, persistent, and previewed before saving.
     assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
     await page.locator('.launch-scene-stage').hover();
@@ -685,6 +686,7 @@ async function run() {
 
     console.log(JSON.stringify({
       forumDesktopTwoColumnLayout: true,
+      collectibleShelfChoicesPersistenceAndLayout: true,
       homepageScenesPersistPerAccount: true,
       sceneMotionPauseAndReducedMotion: true,
       scenePreviewCancelAndSaveFailure: true,
