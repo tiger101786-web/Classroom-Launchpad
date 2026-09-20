@@ -125,6 +125,8 @@ async function run() {
     await page.locator('.launch-scene-stage').hover();
     await page.getByRole('button', { name: 'Scene settings', exact: true }).click();
     assert.equal(await page.locator('#chooseLaunchScene').isVisible(), true);
+    assert.equal(await page.locator('#chooseLaunchScene').textContent(), 'Choose scene');
+    assert.equal(await page.locator('#chooseLaunchFrame').textContent(), 'Choose frame');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#chooseLaunchScene').isVisible(), false);
     await page.getByRole('button', { name: 'Scene settings', exact: true }).click();
@@ -147,6 +149,8 @@ async function run() {
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
     assert.equal(await touchPage.locator('[data-frame-choice]').count(), 27);
+    const frameNames = await touchPage.locator('[data-frame-choice] strong').allTextContents();
+    assert.deepEqual(frameNames, [...frameNames].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
     assert.equal(await touchPage.locator('.launch-frame-options').evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
     await touchPage.locator('[data-frame-choice="blossom"]').tap();
     await touchPage.locator('#launchScenePreview .scene-frame-artwork').evaluate(image => image.decode());
@@ -203,6 +207,8 @@ async function run() {
     await openSceneSettings();
     await page.locator('#chooseLaunchScene').click();
     await page.locator('[data-scene-choice="reef"]').click();
+    const sceneNames = await page.locator('[data-scene-choice] strong').allTextContents();
+    assert.deepEqual(sceneNames, [...sceneNames].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
     assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
     assert.equal((await request('/api/auth/session', { cookie: studentCookie })).payload.session.homeScene.id, 'original');
     await page.locator('#saveLaunchScene').click();

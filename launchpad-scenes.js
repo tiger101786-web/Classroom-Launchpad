@@ -57,6 +57,7 @@
     {"id":"library","name":"Enchanted Library","description":"Little books & feather quill","decorative":true},
     {"id":"champion","name":"Sports Champion","description":"Golden laurels & hanging medal","decorative":true}
   ];
+  const alphabetically = items => [...items].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   let guestMotion = true;
   const settings = session => ({
     id: session.authenticated && scenes.some(scene => scene.id === session.homeScene?.id) ? session.homeScene.id : "original",
@@ -91,8 +92,8 @@
       <div class="launch-scene-stage">${artwork(scene.id, scene.motion, video)}${frameArt(scene.frame)}
       <button type="button" id="launchSceneSettings" class="launch-scene-settings" aria-label="Scene settings" title="Scene settings" aria-expanded="false" aria-controls="launchSceneMenu" popovertarget="launchSceneMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button>
       </div><div id="launchSceneMenu" class="launch-scene-controls" popover="auto" aria-label="Scene settings">
-        ${session.authenticated ? '<button type="button" id="chooseLaunchScene">✦ Choose scene</button>' : ""}
-        ${session.authenticated ? '<button type="button" id="chooseLaunchFrame">◇ Choose frame</button>' : ""}
+        ${session.authenticated ? '<button type="button" id="chooseLaunchScene">Choose scene</button>' : ""}
+        ${session.authenticated ? '<button type="button" id="chooseLaunchFrame">Choose frame</button>' : ""}
         <button type="button" id="toggleLaunchScene" aria-pressed="${!scene.motion}">${reduced.matches ? "Motion reduced" : scene.motion ? "Pause scene" : "Resume scene"}</button>
       </div><span id="launchSceneStatus" class="launch-scene-status" role="status"></span>
     </section>`;
@@ -148,7 +149,7 @@
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Your own little world</span><h2 id="launchSceneTitle">Choose your Launchpad scene</h2></div><button type="button" class="outline-btn" data-scene-close aria-label="Close scene chooser">✕</button></div>
         <p>Only your homepage changes. Your profile picture and classmates’ pages stay the same.</p>
         <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
-        <div class="launch-scene-options">${scenes.map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
+        <div class="launch-scene-options">${alphabetically(scenes).map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
         <label class="launch-scene-motion"><input type="checkbox" id="launchSceneMotion" ${draft.motion ? "checked" : ""}> Gentle effects (or original video playback)</label>
         <p class="launch-scene-hint">Scene artwork stays still; only the silent effects move inside the circle. Reduced-motion preferences are always respected.</p>
         <p id="launchSceneSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-scene-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchScene">Save Scene</button></div>`;
@@ -182,7 +183,7 @@
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Make it yours</span><h2 id="launchFrameTitle">Choose your scene frame</h2></div><button type="button" class="outline-btn" data-frame-close aria-label="Close frame chooser">✕</button></div>
         <p>Every frame fits every scene. Your scene, effects, and small profile-picture frame stay unchanged.</p>
         <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
-        <div class="launch-scene-options launch-frame-options">${frames.map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img src="${image}" alt="">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
+        <div class="launch-scene-options launch-frame-options">${alphabetically(frames).map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img src="${image}" alt="">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
         <p id="launchFrameSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-frame-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchFrame">Save frame</button></div>`;
       document.body.append(dialog);
       const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };
