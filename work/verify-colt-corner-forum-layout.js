@@ -148,7 +148,7 @@ async function run() {
     assert(menuBounds.x >= 0 && menuBounds.x + menuBounds.width <= 390);
     await touchPage.screenshot({ path: path.join(dataDir, 'scene-settings-touch.png') });
     await touchPage.locator('#chooseLaunchFrame').tap();
-    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 27);
+    assert.equal(await touchPage.locator('[data-frame-choice]').count(), 29);
     const frameNames = await touchPage.locator('[data-frame-choice] strong').allTextContents();
     assert.deepEqual(frameNames, [...frameNames].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
     assert.equal(await touchPage.locator('.launch-frame-options').evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
@@ -159,10 +159,10 @@ async function run() {
     await touchContext.close();
     await openSceneSettings();
     await page.locator('#chooseLaunchFrame').click();
-    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion']) {
+    for (const frame of ['none', 'chrome', 'gold', 'rose', 'pearl', 'neon', 'prism', 'onyx', 'braid', 'bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans']) {
       await page.locator(`[data-frame-choice="${frame}"]`).click();
       assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'), frame);
-      if (['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion'].includes(frame)) {
+      if (['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans'].includes(frame)) {
         const alpha = await page.locator('#launchScenePreview .scene-frame-artwork').evaluate(async image => {
           await image.decode();
           const canvas = document.createElement('canvas');
@@ -178,7 +178,7 @@ async function run() {
         assert.deepEqual(fit, { clipped: true, border: '0px' });
         assert(await page.locator(`[data-frame-choice="${frame}"] .frame-swatch > img, [data-frame-choice="${frame}"] .frame-swatch > .scene-original-thumb`).evaluate(scene => getComputedStyle(scene).clipPath.startsWith('polygon(')));
       }
-      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion'].includes(frame)) {
+      if (['bronze', 'velvet', 'mosaic', 'carbon', 'deco', 'frost', 'blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans'].includes(frame)) {
         await page.locator('#launchScenePreview').screenshot({ path: path.join(dataDir, `scene-frame-${frame}.png`) });
         const saved = await request('/api/home-scene', { method: 'POST', cookie: teacherCookie, body: { id: 'reef', motion: false, frame } });
         assert.equal(saved.status, 200);

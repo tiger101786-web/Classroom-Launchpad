@@ -55,7 +55,9 @@
     {"id":"frost-dragon","name":"Frost Dragon","description":"Silver scales & blue crystals","decorative":true},
     {"id":"clockwork","name":"Clockwork","description":"Brass gears & copper details","decorative":true},
     {"id":"library","name":"Enchanted Library","description":"Little books & feather quill","decorative":true},
-    {"id":"champion","name":"Sports Champion","description":"Golden laurels & hanging medal","decorative":true}
+    {"id":"champion","name":"Sports Champion","description":"Golden laurels & hanging medal","decorative":true},
+    { id: "halloween", name: "Halloween Magic", description: "Smiling pumpkins, bats & a friendly ghost", decorative: true },
+    { id: "new-orleans", name: "New Orleans", description: "French Quarter lanterns & Mardi Gras jewels", decorative: true }
   ];
   const alphabetically = items => [...items].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   let guestMotion = true;

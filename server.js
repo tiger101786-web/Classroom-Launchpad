@@ -16,7 +16,7 @@ const {
 
 const root = __dirname;
 const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observatory", "dragon", "cabin", "neon", "castle", "koi", "crystal", "pumpkin", "volcano", "football", "basketball", "championship", "soccer", "baseball", "softball", "gymnastics", "cafe", "aurora", "train", "lantern", "bookshop"]);
-const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "neon", "prism", "onyx", "braid", "bronze", "velvet", "mosaic", "carbon", "deco", "frost", "blossom", "guardian", "woodland", "orbit", "treasure", "royal", "phoenix", "butterfly", "frost-dragon", "clockwork", "library", "champion"]);
+const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "neon", "prism", "onyx", "braid", "bronze", "velvet", "mosaic", "carbon", "deco", "frost", "blossom", "guardian", "woodland", "orbit", "treasure", "royal", "phoenix", "butterfly", "frost-dragon", "clockwork", "library", "champion", "halloween", "new-orleans"]);
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
