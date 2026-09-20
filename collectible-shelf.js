@@ -39,12 +39,28 @@
   }
   function render(session) {
     if (!session?.authenticated || !clean(session.homeShelf).enabled) return '';
-    return `<section class="home-collectible-shelf" aria-label="Your collectible shelf">${art(session.homeShelf)}<button class="shelf-customize" type="button" data-action="collectibleShelf" aria-label="Customize your collectible shelf">Customize shelf</button></section>`;
+    return `<section class="home-collectible-shelf" aria-label="Your collectible shelf">${art(session.homeShelf)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu" aria-label="Shelf settings" title="Shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu" class="shelf-settings-menu" popover="auto" aria-label="Shelf settings"><button type="button" data-action="collectibleShelf">Customize shelf</button><button type="button" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus" role="status"></span></div></section>`;
+  }
+  let hideTimer;
+  function restoreGear(keyboard) {
+    const gear = document.querySelector('.shelf-customize');
+    if (!gear) { document.querySelector('.header-account-summary')?.focus(); return; }
+    gear.focus({ preventScroll:true });
+    clearTimeout(hideTimer);
+    if (keyboard) return;
+    gear.classList.add('is-recent');
+    hideTimer = setTimeout(() => {
+      if (!gear.isConnected || document.querySelector('.shelf-dialog') || gear.getAttribute('aria-expanded') === 'true') return;
+      gear.classList.remove('is-recent'); gear.classList.add('is-idle');
+      if (document.activeElement === gear) gear.blur();
+    },2500);
   }
   function open({ selected, save, onSave }) {
     if (document.querySelector('.shelf-dialog')) return;
+    document.querySelector('#shelfSettingsMenu:popover-open')?.hidePopover();
     let draft = clean(selected), active = 0, saving = false;
     const opener = document.activeElement;
+    const keyboard = !!opener?.matches(':focus-visible');
     const dialog = document.createElement('dialog');
     dialog.className = 'launch-scene-dialog shelf-dialog';
     dialog.setAttribute('aria-labelledby', 'shelfTitle');
@@ -79,7 +95,8 @@
     const close = () => {
       if (saving) return;
       dialog.close(); dialog.remove();
-      if (opener?.isConnected) opener.focus();
+      if (opener?.closest('#shelfSettingsMenu')) restoreGear(keyboard);
+      else if (opener?.isConnected) opener.focus();
       else document.querySelector('.header-account-summary')?.focus();
     };
     dialog.querySelectorAll('[data-shelf-close]').forEach(button => button.addEventListener('click', close));
@@ -90,7 +107,7 @@
       dialog.querySelector('#shelfSaveStatus').textContent = 'Saving your shelf…';
       try {
         const result = await save(clean(draft));
-        saving = false; close(); onSave(result);
+        saving = false; close(); onSave(result); restoreGear(keyboard);
       } catch (error) {
         saving = false;
         dialog.querySelectorAll('button,input,select').forEach(control => { control.disabled = false; });
@@ -101,5 +118,22 @@
   }
   const api = { items, valid, clean, render, open, art };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  else root.CollectibleShelf = api;
+  else {
+    root.CollectibleShelf = api;
+    document.addEventListener('toggle', event => {
+      if (event.target.id !== 'shelfSettingsMenu') return;
+      const gear = document.querySelector('.shelf-customize');
+      if (!gear) return;
+      gear.setAttribute('aria-expanded', String(event.newState === 'open'));
+      if (event.newState !== 'open') return;
+      clearTimeout(hideTimer);
+      gear.classList.remove('is-idle');
+      const box = gear.getBoundingClientRect(), menu = event.target;
+      menu.style.left = `${Math.max(8,Math.min(box.right-menu.offsetWidth,innerWidth-menu.offsetWidth-8))}px`;
+      menu.style.top = `${Math.max(8,Math.min(box.bottom+6,innerHeight-menu.offsetHeight-8))}px`;
+    },true);
+    for (const event of ['pointermove','pointerdown','focusin']) document.addEventListener(event, e => {
+      e.target.closest?.('.home-collectible-shelf')?.querySelector('.shelf-customize')?.classList.remove('is-idle');
+    });
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

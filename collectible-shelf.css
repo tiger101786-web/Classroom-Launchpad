@@ -6,8 +6,16 @@
 .shelf-display-slot { min-width:0; }
 .shelf-empty { display:block; width:100%; aspect-ratio:1; }
 .shelf-board { position:absolute; inset:0; background:url('assets/collectible-shelf-colt.png') center / 100% 100% no-repeat; pointer-events:none; }
-.shelf-customize { position:absolute; bottom:-1px; right:10px; border:1px solid #965169; border-radius:12px; padding:3px 10px; background:#210e17; color:#ffe9f0; font:inherit; font-size:11px; cursor:pointer; }
-@media(hover:hover) and (pointer:fine) { .shelf-customize { opacity:0; transition:opacity .15s; } .home-collectible-shelf:hover .shelf-customize,.home-collectible-shelf:focus-within .shelf-customize { opacity:1; } }
+.shelf-customize { position:absolute; bottom:0; right:7px; display:grid; place-items:center; width:44px; height:44px; z-index:2; border:1px solid #a6526a; border-radius:50%; padding:10px; background:#190c13ed; color:#fff0f5; cursor:pointer; box-shadow:0 3px 12px #0006; transition:opacity .25s ease; }
+.shelf-customize svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
+@media(hover:hover) and (pointer:fine) { .shelf-customize { opacity:0; pointer-events:none; } .home-collectible-shelf:hover .shelf-customize,.home-collectible-shelf:focus-within .shelf-customize,.shelf-customize.is-recent { opacity:1; pointer-events:auto; } }
+.home-collectible-shelf .shelf-customize.is-idle { opacity:0; pointer-events:none; }
+.shelf-customize[aria-expanded=true] { opacity:1; pointer-events:auto; }
+.shelf-settings-menu { position:fixed; inset:auto; margin:0; width:190px; padding:8px; border:1px solid #a6526a; border-radius:14px; background:#190c13; color:#fff0f5; box-shadow:0 8px 28px #0008; }
+.shelf-settings-menu:popover-open { display:grid; gap:6px; }
+.shelf-settings-menu button { padding:8px 12px; border:1px solid #a6526a; border-radius:18px; background:#190c13; color:#fff0f5; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+.shelf-settings-menu button:focus-visible { outline:3px solid #f197b5; outline-offset:2px; }
+#shelfHideStatus { font-size:12px; } #shelfHideStatus:empty { display:none; }
 .hero-panel:has(.home-collectible-shelf) { height:auto; min-height:500px; }
 .shelf-dialog { width:min(800px,calc(100vw - 28px)); }
 #shelfPreview { max-width:360px; margin:16px auto 8px; padding:8px 8px 24px; border-radius:15px; background:radial-gradient(ellipse at bottom,#5c122b,#171115 70%); }

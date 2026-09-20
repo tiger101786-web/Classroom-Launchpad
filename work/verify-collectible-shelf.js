@@ -10,6 +10,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   async function open() {
     await page.locator('.home-collectible-shelf').hover();
     await page.locator('.shelf-customize').click();
+    await page.locator('#shelfSettingsMenu [data-action="collectibleShelf"]').click();
   }
   await open();
   assert.equal(await page.locator('[data-shelf-item]').count(),37);
@@ -70,6 +71,13 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('#saveShelf').click();
   await page.locator('.shelf-dialog').waitFor({state:'detached'});
   assert.equal(await page.locator('.home-collectible-shelf .shelf-empty').count(),1);
+  await page.locator('.home-collectible-shelf').hover();
+  await page.locator('.shelf-customize').click();
+  await page.getByRole('button',{name:'Hide shelf',exact:true}).click();
+  await page.locator('.home-collectible-shelf').waitFor({state:'detached'});
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('.home-collectible-shelf').count(),0);
+  assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf, {enabled:false,slots:['none','crystal','planet']});
   const guest=await browser.newPage();
   await guest.goto(baseUrl,{waitUntil:'networkidle'});
   assert.equal(await guest.locator('.home-collectible-shelf, [data-action="collectibleShelf"]').count(),0);

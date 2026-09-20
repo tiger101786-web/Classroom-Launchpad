@@ -13029,6 +13029,21 @@ app.addEventListener("click", async event => {
     authMessage = "";
     setScreen({ name: "login" });
   }
+  if (action === "hideCollectibleShelf") {
+    if (!isSignedIn()) return;
+    const owner = { role: authSession.role, email: authSession.email };
+    const menu = document.getElementById('shelfSettingsMenu');
+    menu?.querySelectorAll('button').forEach(button => { button.disabled = true; });
+    try {
+      const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(authSession.homeShelf), enabled:false }) });
+      if (!isSignedIn() || authSession.role !== owner.role || authSession.email !== owner.email) return;
+      authSession = result.session; render();
+      document.querySelector('.header-account-summary')?.focus();
+    } catch (error) {
+      if (menu?.isConnected) menu.querySelector('#shelfHideStatus').textContent = error.message || 'Could not hide shelf. Please try again.';
+    } finally { menu?.querySelectorAll('button').forEach(button => { button.disabled = false; }); }
+    return;
+  }
   if (action === "collectibleShelf") {
     if (!isSignedIn()) return;
     const owner = { role: authSession.role, email: authSession.email };
