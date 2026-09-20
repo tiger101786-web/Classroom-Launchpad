@@ -1,4 +1,7 @@
 .home-collectible-shelf { position:relative; width:min(100%,350px); margin-top:22px; padding-bottom:22px; }
+.shelf-restore { margin-top:20px; display:grid; justify-items:start; gap:6px; }
+.shelf-restore button { font-size:12px; padding:7px 12px; }
+#shelfShowStatus { font-size:12px; }
 .collectible-shelf { position:relative; width:100%; aspect-ratio:1903 / 826; padding:0; isolation:isolate; }
 /* Bases land at 60% of the artwork height, inside the 53–64% tabletop. */
 .shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:39%; z-index:1; }

@@ -8,7 +8,7 @@
     ['Technology', ['robot','Robot'], ['computer','Retro Computer'], ['controller','Game Controller'], ['arcade','Arcade Cabinet'], ['camera','Camera'], ['headphones','Headphones']],
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
-    ['Anime']
+    ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust']]
   ];
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -26,13 +26,19 @@
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id));
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => id === 'medal' ? 'tanjiro' : id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
+  const standalone = {
+    tanjiro: { source:'assets/shelf-tanjiro-bust.png', width:1254, height:1254, bounds:[228,22,835,1215] },
+    'all-might': { source:'assets/shelf-all-might.png', width:1537, height:1023, bounds:[414,13,712,999] },
+    naruto: { source:'assets/shelf-naruto.png', width:1120, height:1405, bounds:[44,7,1066,1376] }
+  };
   function sprite(id) {
     const item = items.find(item => item.id === id);
     if (!item) return '<span class="shelf-empty" aria-label="Empty spot"></span>';
-    const [x,y,w,h] = item.id === 'tanjiro' ? [228,22,835,1215] : bounds[item.row * 6 + item.column];
-    const source = item.id === 'tanjiro' ? 'assets/shelf-tanjiro-bust.png' : 'assets/shelf-collectibles.png';
+    const asset = standalone[item.id];
+    const [x,y,w,h] = asset ? asset.bounds : bounds[item.row * 6 + item.column];
+    const source = asset?.source || 'assets/shelf-collectibles.png';
     const scale = 200 / Math.max(w,h);
-    return `<svg class="shelf-object" role="img" aria-label="${item.name}" viewBox="0 0 220 220"><svg x="${(220-w*scale)/2}" y="${216-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="1254" height="1254"/></svg></svg>`;
+    return `<svg class="shelf-object" role="img" aria-label="${item.name}" viewBox="0 0 220 220"><svg x="${(220-w*scale)/2}" y="${216-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
@@ -41,7 +47,8 @@
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
   function render(session) {
-    if (!session?.authenticated || !clean(session.homeShelf).enabled) return '';
+    if (!session?.authenticated) return '';
+    if (!clean(session.homeShelf).enabled) return '<div class="shelf-restore"><button type="button" class="outline-btn" data-action="showCollectibleShelf">Show shelf</button><span id="shelfShowStatus" role="status"></span></div>';
     return `<section class="home-collectible-shelf" aria-label="Your collectible shelf">${art(session.homeShelf)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu" aria-label="Shelf settings" title="Shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu" class="shelf-settings-menu" popover="auto" aria-label="Shelf settings"><button type="button" data-action="collectibleShelf">Customize shelf</button><button type="button" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus" role="status"></span></div></section>`;
   }
   let hideTimer;
@@ -69,6 +76,7 @@
     dialog.setAttribute('aria-labelledby', 'shelfTitle');
     dialog.innerHTML = `<div class="launch-scene-dialog-heading"><h2 id="shelfTitle">Your collectible shelf</h2><button type="button" class="outline-btn" data-shelf-close aria-label="Close shelf chooser">✕</button></div><p>Pick a spot, then choose its collectible. Your shelf is personal to your account.</p><div id="shelfPreview"></div><label class="shelf-show"><input id="shelfEnabled" type="checkbox" ${draft.enabled ? 'checked' : ''}> Show shelf on my homepage</label><div class="shelf-filters"><label>Search objects<input id="shelfSearch" type="search" placeholder="Search 36 collectibles…" autocomplete="off"></label><label>Category<select id="shelfCategory"><option value="">All categories</option>${rows.map(([category]) => `<option>${category}</option>`).join('')}</select></label></div><p id="shelfResults" role="status"></p><div id="shelfChoices" class="shelf-choice-grid"></div><p id="shelfSaveStatus" role="status"></p><div class="launch-scene-dialog-actions shelf-dialog-actions"><button type="button" class="outline-btn" data-shelf-close>Cancel</button><button type="button" class="primary-btn" id="saveShelf">Save shelf</button></div>`;
     document.body.append(dialog);
+    dialog.querySelector('#shelfSearch').placeholder = `Search ${items.length} collectibles…`;
     const preview = dialog.querySelector('#shelfPreview');
     const choices = dialog.querySelector('#shelfChoices');
     const update = () => {

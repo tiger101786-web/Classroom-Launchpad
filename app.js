@@ -2275,8 +2275,8 @@ function renderAuthButton() {
             <span><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(roleLabel)}</small></span>
           </div>
           <div class="header-account-links">
-            <button type="button" data-action="collectibleShelf">Customize shelf</button>
             <button type="button" data-action="${isTeacher() ? "openColtCorner" : "account"}"><span aria-hidden="true">&#9673;</span>My Profile</button>
+            <button type="button" data-action="collectibleShelf"><span aria-hidden="true">&#9881;</span>Customize shelf</button>
             ${isTeacher()
               ? `<button type="button" data-action="teacherDashboard"><span aria-hidden="true">&#9638;</span>Teacher Dashboard</button>
                  <button type="button" data-action="teacherSettings"><span aria-hidden="true">&#9881;</span>Settings</button>`
@@ -13029,18 +13029,19 @@ app.addEventListener("click", async event => {
     authMessage = "";
     setScreen({ name: "login" });
   }
-  if (action === "hideCollectibleShelf") {
+  if (action === "hideCollectibleShelf" || action === "showCollectibleShelf") {
     if (!isSignedIn()) return;
     const owner = { role: authSession.role, email: authSession.email };
-    const menu = document.getElementById('shelfSettingsMenu');
+    const showing = action === 'showCollectibleShelf';
+    const menu = showing ? document.querySelector('.shelf-restore') : document.getElementById('shelfSettingsMenu');
     menu?.querySelectorAll('button').forEach(button => { button.disabled = true; });
     try {
-      const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(authSession.homeShelf), enabled:false }) });
+      const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(authSession.homeShelf), enabled:showing }) });
       if (!isSignedIn() || authSession.role !== owner.role || authSession.email !== owner.email) return;
       authSession = result.session; render();
       document.querySelector('.header-account-summary')?.focus();
     } catch (error) {
-      if (menu?.isConnected) menu.querySelector('#shelfHideStatus').textContent = error.message || 'Could not hide shelf. Please try again.';
+      if (menu?.isConnected) menu.querySelector('[role="status"]').textContent = error.message || 'Could not update shelf. Please try again.';
     } finally { menu?.querySelectorAll('button').forEach(button => { button.disabled = false; }); }
     return;
   }

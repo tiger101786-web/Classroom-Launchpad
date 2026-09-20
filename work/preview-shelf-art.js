@@ -12,10 +12,11 @@ const shelf = require('../collectible-shelf');
     let gallery = '';
     for (let index=0; index<shelf.items.length; index+=3) {
       const group = shelf.items.slice(index,index+3);
-      gallery += `<section>${shelf.art({enabled:true, slots:group.map(item=>item.id)})}<p>${group.map(item=>item.name).join(' · ')}</p></section>`;
+      gallery += `<section>${shelf.art({enabled:true, slots:[...group.map(item=>item.id), 'none', 'none'].slice(0,3)})}<p>${group.map(item=>item.name).join(' · ')}</p></section>`;
     }
     const board = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname,'../assets/collectible-shelf-colt.png')).toString('base64');
     const css = fs.readFileSync(path.join(__dirname,'../collectible-shelf.css'),'utf8').replaceAll('assets/collectible-shelf-colt.png',board);
+    for (const id of ['all-might','naruto']) gallery = gallery.replaceAll(`assets/shelf-${id}.png`, 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname,`../assets/shelf-${id}.png`)).toString('base64'));
     await page.setContent(`<style>${css}*{box-sizing:border-box}body{margin:0;padding:24px;background:#171015;color:#f8e8ed;font:12px system-ui;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}p{text-align:center}</style>${gallery.replaceAll('assets/shelf-collectibles.png',atlas).replaceAll('assets/shelf-tanjiro-bust.png',bust)}`);
     const misplaced = await page.evaluate(() => [...document.querySelectorAll('.collectible-shelf')].flatMap(shelf => {
       const board = shelf.getBoundingClientRect();
@@ -25,7 +26,7 @@ const shelf = require('../collectible-shelf');
         return base < board.top + board.height * .53 || base > board.top + board.height * .64 || box.left < board.left || box.right > board.right;
       }).map(item => item.getAttribute('aria-label'));
     }));
-    require('node:assert/strict').deepEqual(misplaced, [], 'All 36 collectible bases must rest on the tabletop');
+    require('node:assert/strict').deepEqual(misplaced, [], 'All collectible bases must rest on the tabletop');
     await page.screenshot({path:process.argv[2] || path.join(require('node:os').tmpdir(),'shelf-art-gallery.png'),fullPage:true});
   } finally { await browser.close(); }
 })().catch(error=>{console.error(error);process.exitCode=1;});
