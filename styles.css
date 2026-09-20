@@ -10444,9 +10444,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-banner-cover[data-banner="colt"] img { object-position: right center; }
 .forum-profile-editor > .profile-banner-cover { grid-column: 1 / -1; height: clamp(110px, 17vw, 220px); }
+.forum-profile-editor > .profile-banner-cover[data-banner="colt"] { height: auto; aspect-ratio: 3 / 1; }
 .forum-profile-editor:has(> .profile-banner-cover) > #profileFramePreview { margin-top: -45px; position: relative; z-index: 1; }
 .profile-banner-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--paper); margin: 18px 0; }
 .profile-banner-card > .profile-banner-cover { border-radius: 0; height: 150px; }
+.profile-banner-card > .profile-banner-cover[data-banner="colt"] { height: auto; aspect-ratio: 3 / 1; }
 .profile-banner-identity { display: flex; align-items: center; gap: 20px; padding: 20px; }
 .profile-banner-card:has(.profile-banner-cover) .profile-banner-identity > .profile-frame { margin-top: -42px; }
 .profile-banner-identity > div { min-width: 0; overflow-wrap: anywhere; }

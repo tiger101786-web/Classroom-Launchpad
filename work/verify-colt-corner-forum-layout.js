@@ -461,6 +461,12 @@ async function run() {
     assert(await page.locator('.forum-post-author [data-banner="colt"]').isVisible());
     assert.equal(await page.locator('.forum-post-author [data-banner="colt"] img').evaluate(image => getComputedStyle(image).objectPosition), '100% 50%');
     await page.locator('.forum-post-author').screenshot({ path: path.join(dataDir, 'colt-banner-author-desktop.png') });
+    const bannerCrop = await page.locator('.forum-profile-editor > [data-banner="colt"] img').evaluate(async image => {
+      await image.decode();
+      const box = image.getBoundingClientRect();
+      return Math.abs(box.width / box.height - image.naturalWidth / image.naturalHeight);
+    });
+    assert(bannerCrop < .02, 'Wide Colt banner must show the full image without vertical cropping');
     await page.locator('.forum-profile-editor').screenshot({ path: path.join(dataDir, 'profile-banner-desktop.png') });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#changeProfileBanner').click();
