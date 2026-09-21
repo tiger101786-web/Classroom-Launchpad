@@ -173,7 +173,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   const shelfThemes = require('../collectible-shelf').themes;
   for (const theme of shelfThemes) {
     await open();
-    assert.equal(await page.locator('[data-shelf-theme-choice]').count(),13);
+    assert.equal(await page.locator('[data-shelf-theme-choice]').count(),19);
     await page.locator(`[data-shelf-theme-choice="${theme.id}"]`).click();
     assert.equal(await page.locator('#shelfPreview .collectible-shelf').getAttribute('data-shelf-theme'),theme.id);
     assert.equal(await page.locator('#shelfPreview [aria-label="Nezuko Statue"]').count(),1);
@@ -189,7 +189,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await open();
   await page.locator('[data-shelf-theme-choice="ice"]').click();
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
-  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'steampunk');
+  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'holiday');
   await open();
   await page.locator('[data-shelf-theme-choice="ocean"]').click();
   await page.route('**/api/home-shelf', route=>route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({error:'Theme save failed'})}));
@@ -203,7 +203,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.getByRole('button',{name:'Hide shelf',exact:true}).click();
   await page.getByRole('button',{name:'Show shelf',exact:true}).click();
   await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'steampunk');
+  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'holiday');
   await page.setViewportSize({width:390,height:844});
   await open();
   await page.locator('.shelf-theme-grid .shelf-board').evaluateAll(boards => Promise.all(boards.map(board => {

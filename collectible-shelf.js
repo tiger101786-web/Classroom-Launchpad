@@ -6,14 +6,20 @@
     {id:'temple',name:'Ancient Temple'},
     {id:'celestial',name:'Celestial Night'},
     {id:'blossom',name:'Cherry Blossom'},
+    {id:'cyber',name:'Cyber Circuit'},
+    {id:'desert',name:'Desert Sunset'},
     {id:'dragon',name:'Dragon Obsidian'},
     {id:'forest',name:'Enchanted Forest'},
     {id:'ice',name:'Frost Crystal'},
+    {id:'cathedral',name:'Gothic Cathedral'},
     {id:'halloween',name:'Halloween Glow'},
     {id:'mardi-gras',name:'Mardi Gras'},
     {id:'ocean',name:'Ocean Pearl'},
+    {id:'pirate',name:'Pirate Cove'},
     {id:'royal',name:'Royal Gold'},
-    {id:'steampunk',name:'Steampunk Brass'}
+    {id:'sakura-moon',name:'Sakura Moon'},
+    {id:'steampunk',name:'Steampunk Brass'},
+    {id:'holiday',name:'Winter Holiday'}
   ];
   const themeIds = new Set(themes.map(theme => theme.id));
   // IDs and row order are stable: each row maps to the six-column artwork atlas.
