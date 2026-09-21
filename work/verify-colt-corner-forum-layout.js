@@ -240,7 +240,7 @@ async function run() {
     assert.match(await page.locator('[data-search-status]').textContent(), /No matching scenes/);
     assert.equal(await page.locator('#launchScenePreview .launch-scene').getAttribute('data-scene'), 'reef');
     await page.locator('[data-clear-search]').click();
-    assert.equal(await page.locator('[data-scene-choice]:visible').count(), 34);
+    assert.equal(await page.locator('[data-scene-choice]:visible').count(), 35);
     const sceneNames = await page.locator('[data-scene-choice] strong').allTextContents();
     assert.equal(sceneNames[0], 'Classroom Original');
     assert.deepEqual(sceneNames.slice(1), sceneNames.slice(1).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
@@ -304,10 +304,10 @@ async function run() {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).animationName), 'none');
     assert.equal(await page.locator('.launch-scene-image').evaluate(image => getComputedStyle(image).transform), 'none');
-    for (const [id, effect] of [['alien', 'scene-alien-console'], ['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['gymnastics', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain'], ['crawfish', 'scene-boil-steam'], ['balloons', 'scene-burner-glow'], ['robotics', 'scene-robot-lights'], ['retro-arcade', 'scene-arcade-lights'], ['chapel', 'scene-chapel-light'], ['bonfire', 'scene-bonfire-glow'], ['oasis', 'scene-oasis-shimmer'], ['christmas-chapel', 'scene-christmas-glow']]) {
+    for (const [id, effect] of [['anime', 'scene-petals'], ['alien', 'scene-alien-console'], ['forest', 'scene-firefly-flow'], ['pixel', 'scene-pixel-glow'], ['observatory', 'scene-stars'], ['dragon', 'scene-dust'], ['cabin', 'scene-snow'], ['neon', 'scene-rain'], ['castle', 'scene-sun-rays'], ['koi', 'scene-petals'], ['crystal', 'scene-crystal-flow'], ['pumpkin', 'scene-leaves'], ['volcano', 'scene-embers'], ['football', 'scene-confetti'], ['basketball', 'scene-court-lights'], ['championship', 'scene-confetti'], ['soccer', 'scene-court-lights'], ['baseball', 'scene-court-lights'], ['softball', 'scene-court-lights'], ['gymnastics', 'scene-court-lights'], ['cafe', 'scene-rain'], ['aurora', 'scene-aurora-flow'], ['train', 'scene-leaves'], ['lantern', 'scene-petals'], ['bookshop', 'scene-rain'], ['crawfish', 'scene-boil-steam'], ['balloons', 'scene-burner-glow'], ['robotics', 'scene-robot-lights'], ['retro-arcade', 'scene-arcade-lights'], ['chapel', 'scene-chapel-light'], ['bonfire', 'scene-bonfire-glow'], ['oasis', 'scene-oasis-shimmer'], ['christmas-chapel', 'scene-christmas-glow']]) {
       await openSceneSettings();
       await page.locator('#chooseLaunchScene').click();
-      assert.equal(await page.locator('[data-scene-choice]').count(), 34);
+      assert.equal(await page.locator('[data-scene-choice]').count(), 35);
       await page.locator(`[data-scene-choice="${id}"]`).click();
       await page.locator('#launchScenePreview img').evaluate(image => image.decode());
       const imageStyle = await page.locator('#launchScenePreview img').evaluate(image => ({ animation: getComputedStyle(image).animationName, transform: getComputedStyle(image).transform }));
@@ -456,7 +456,7 @@ async function run() {
       }
       if (id === 'pixel') await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, 'pixel-spinning-coins.png') });
       if (['football', 'basketball', 'championship', 'soccer', 'baseball', 'softball', 'gymnastics'].includes(id)) await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `sports-${id}.png`) });
-      if (['cafe', 'aurora', 'train', 'lantern', 'bookshop', 'crawfish', 'balloons', 'robotics', 'retro-arcade', 'chapel', 'bonfire', 'oasis', 'christmas-chapel'].includes(id)) {
+      if (['anime', 'cafe', 'aurora', 'train', 'lantern', 'bookshop', 'crawfish', 'balloons', 'robotics', 'retro-arcade', 'chapel', 'bonfire', 'oasis', 'christmas-chapel'].includes(id)) {
         await page.locator('.home-scene-feature .launch-scene').screenshot({ path: path.join(dataDir, `cozy-${id}.png`) });
         const effectLayer = page.locator('.home-scene-feature .launch-scene-particles i').first();
         const property = ['balloons', 'robotics', 'retro-arcade', 'chapel', 'bonfire', 'oasis', 'christmas-chapel'].includes(id) ? 'opacity' : 'transform';

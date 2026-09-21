@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "anime", name: "Anime Sunset", description: "Original anime friends, a glowing town & drifting cherry petals", image: "assets/launchpad-scene-anime.png" },
     { id: "alien", name: "Alien Observatory", description: "Gray alien explorers & a glowing star-map console", image: "assets/launchpad-scene-alien.png" },
     { id: "reef", name: "Coral Cove", description: "Sunlit reef & rising bubbles", image: "assets/launchpad-scene-reef.png" },
     { id: "forest", name: "Firefly Forest", description: "Twilight stream & drifting lights", image: "assets/launchpad-scene-forest.png" },
