@@ -28,11 +28,11 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('[data-shelf-item="ceramic-fox"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Ceramic Fox"]').count(),1);
   await page.locator('#shelfCategory').selectOption({label:'Anime'});
-  assert.equal(await page.locator('[data-shelf-item]').count(),9);
+  assert.equal(await page.locator('[data-shelf-item]').count(),11);
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),94);
+  assert.equal(await page.locator('[data-shelf-item]').count(),96);
   assert.equal(await page.locator('[data-shelf-item="book-nook"]').count(),0);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
@@ -137,6 +137,16 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);
     assert.equal(result.payload.session.homeShelf.slots[0],id);
+  }
+  for (const id of ['sailor-moon','rumi']) {
+    await open();
+    await page.locator('#shelfSearch').fill(id === 'rumi' ? 'Rumi' : 'Sailor Moon');
+    await page.locator(`[data-shelf-item="${id}"]`).click();
+    await page.locator('#saveShelf').click();
+    await page.locator('.shelf-dialog').waitFor({state:'detached'});
+    await page.reload({waitUntil:'networkidle'});
+    assert((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots.includes(id));
+    assert.equal(await page.locator(`.home-collectible-shelf image[href="assets/shelf-${id}.png"]`).count(),1);
   }
   await post({enabled:true,slots:['goku','pikachu','eevee']});
   await page.reload({waitUntil:'networkidle'});
