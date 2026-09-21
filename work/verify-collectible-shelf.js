@@ -2,7 +2,8 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 module.exports = async ({ page, browser, baseUrl, request, studentCookie, teacherCookie, dataDir }) => {
   const post = (body, cookie = studentCookie) => request('/api/home-shelf', { method:'POST', body, cookie });
-  const choice = { enabled:true, slots:['trophy','crystal','planet'] };
+  const choice = { enabled:true, slots:['trophy','crystal','planet'], theme:'crimson' };
+  assert.equal((await post({...choice,theme:'../invalid'})).status,400);
   assert.equal((await post(choice, '')).status, 401);
   for (const value of [{ ...choice, slots:['alien'] }, { ...choice, slots:['invalid','none','none'] }, { ...choice, enabled:'yes' }]) assert.equal((await post(value)).status,400);
   assert.equal((await post({ enabled:false, slots:['robot','none','books'] },teacherCookie)).status,200);
@@ -108,7 +109,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('.home-collectible-shelf').waitFor({state:'detached'});
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.home-collectible-shelf').count(),0);
-  assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf, {enabled:false,slots:['none','crystal','planet']});
+  assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf, {enabled:false,slots:['none','crystal','planet'],theme:'crimson'});
   await page.getByRole('button',{name:'Show shelf',exact:true}).click();
   await page.locator('.home-collectible-shelf').waitFor();
   await page.reload({waitUntil:'networkidle'});
@@ -129,7 +130,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   newItems.push('ceramic-fox','succulent','trumpet','hourglass','mantel-clock','microscope','telescope','dna','atom','earth-globe','hot-air-balloon','compass','lighthouse','biplane','steam-train','treasure-chest','phoenix','potion','beignets','cupcake');
   for (const [oldId,newId] of Object.entries({'electric-guitar':'ceramic-fox','drum-kit':'succulent',violin:'hourglass','grand-piano':'mantel-clock'})) {
     const migrated = await post({enabled:false,slots:[oldId,'books','none']});
-    assert.deepEqual(migrated.payload.session.homeShelf,{enabled:false,slots:[newId,'books','none']});
+    assert.deepEqual(migrated.payload.session.homeShelf,{enabled:false,slots:[newId,'books','none'],theme:'crimson'});
   }
   newItems.push('nezuko','red-panda','penguin','axolotl','hedgehog','lucky-cat','terrarium','mushroom-house','lantern','music-box','teacup','rubber-duck','origami-crane','ammonite','geode','message-bottle','jewelry-box','snowman','pumpkin-lantern','sandcastle','luffy','daisy-vase');
   for (const id of newItems) {
@@ -158,6 +159,51 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['nezuko','luffy','daisy-vase']);
   for(const label of ['Nezuko Statue','Luffy Bust','Daisy Vase']) assert.equal(await page.locator(`.home-collectible-shelf [aria-label="${label}"]`).count(),1);
   await page.screenshot({path:path.join(dataDir,'shelf-nezuko-luffy.png')});
+  const shelfThemes = require('../collectible-shelf').themes;
+  for (const theme of shelfThemes) {
+    await open();
+    assert.equal(await page.locator('[data-shelf-theme-choice]').count(),7);
+    await page.locator(`[data-shelf-theme-choice="${theme.id}"]`).click();
+    assert.equal(await page.locator('#shelfPreview .collectible-shelf').getAttribute('data-shelf-theme'),theme.id);
+    assert.equal(await page.locator('#shelfPreview [aria-label="Nezuko Statue"]').count(),1);
+    await page.locator('#saveShelf').click();
+    await page.locator('.shelf-dialog').waitFor({state:'detached'});
+    await page.reload({waitUntil:'networkidle'});
+    const saved = (await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf;
+    assert.equal(saved.theme,theme.id);
+    assert.deepEqual(saved.slots,['nezuko','luffy','daisy-vase']);
+    assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),theme.id);
+  }
+  assert.equal((await request('/api/auth/session',{cookie:teacherCookie})).payload.session.homeShelf.theme,'crimson');
+  await open();
+  await page.locator('[data-shelf-theme-choice="ice"]').click();
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'royal');
+  await open();
+  await page.locator('[data-shelf-theme-choice="ocean"]').click();
+  await page.route('**/api/home-shelf', route=>route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({error:'Theme save failed'})}));
+  await page.locator('#saveShelf').click();
+  await page.getByText('Theme save failed',{exact:true}).waitFor();
+  assert.equal(await page.locator('[data-shelf-theme-choice="ocean"]').isEnabled(),true);
+  await page.unroute('**/api/home-shelf');
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  await page.locator('.home-collectible-shelf').hover();
+  await page.locator('.shelf-customize').click();
+  await page.getByRole('button',{name:'Hide shelf',exact:true}).click();
+  await page.getByRole('button',{name:'Show shelf',exact:true}).click();
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('.home-collectible-shelf .collectible-shelf').getAttribute('data-shelf-theme'),'royal');
+  await page.setViewportSize({width:390,height:844});
+  await open();
+  await page.locator('.shelf-theme-grid .shelf-board').evaluateAll(boards => Promise.all(boards.map(board => {
+    const image = new Image();
+    image.src = getComputedStyle(board).backgroundImage.slice(5,-2);
+    return image.decode();
+  })));
+  assert.equal(await page.locator('.shelf-dialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+  await page.screenshot({path:path.join(dataDir,'shelf-theme-chooser-mobile.png')});
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({width:1280,height:900});
   const guest=await browser.newPage();
   await guest.goto(baseUrl,{waitUntil:'networkidle'});
   assert.equal(await guest.locator('.home-collectible-shelf, [data-action="collectibleShelf"]').count(),0);

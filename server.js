@@ -3524,7 +3524,7 @@ async function handleApi(req, res, pathname) {
     if (!allowed) return true;
     try {
       const body = await readBody(req);
-      if (!collectibleShelf.valid(body)) throw new Error("Choose three available shelf items and a visibility setting.");
+      if (!collectibleShelf.valid(body)) throw new Error("Choose an available shelf theme, three shelf items and a visibility setting.");
       const db = readDb();
       const shelf = collectibleShelf.clean(body);
       if (allowed.role === "teacher") db.teacherHomeShelf = shelf;

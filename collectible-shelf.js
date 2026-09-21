@@ -1,5 +1,15 @@
 (function (root) {
   'use strict';
+  const themes = [
+    {id:'crimson',name:'Crimson Original'},
+    {id:'celestial',name:'Celestial Night'},
+    {id:'forest',name:'Enchanted Forest'},
+    {id:'ice',name:'Frost Crystal'},
+    {id:'halloween',name:'Halloween Glow'},
+    {id:'ocean',name:'Ocean Pearl'},
+    {id:'royal',name:'Royal Gold'}
+  ];
+  const themeIds = new Set(themes.map(theme => theme.id));
   // IDs and row order are stable: each row maps to the six-column artwork atlas.
   const rows = [
     ['Sports', ['trophy','Gold Trophy'], ['basketball','Basketball'], ['soccer','Soccer Ball'], ['baseball','Baseball & Glove'], ['helmet','Colt Football Helmet'], ['tanjiro','Tanjiro Bust']],
@@ -33,8 +43,8 @@
   // Preserve saved shelves when a collectible is replaced.
   const replacements = { medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock' };
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
-  const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id));
-  const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
+  const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id)) && (value.theme === undefined || themeIds.has(value.theme));
+  const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
     'nezuko': {"source":"assets/shelf-nezuko.png","width":1254,"height":1254,"bounds":[137,36,982,1189]},
@@ -96,7 +106,7 @@
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
-    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
+    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
       ? `<button type="button" data-shelf-slot="${index}" aria-pressed="${index === active}" aria-label="${['Left','Middle','Right'][index]} spot: ${name(id)}">${sprite(id)}<span class="shelf-slot-label">${['Left','Middle','Right'][index]}</span></button>`
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
@@ -130,6 +140,7 @@
     dialog.setAttribute('aria-labelledby', 'shelfTitle');
     dialog.innerHTML = `<div class="launch-scene-dialog-heading"><h2 id="shelfTitle">Your collectible shelf</h2><button type="button" class="outline-btn" data-shelf-close aria-label="Close shelf chooser">✕</button></div><p>Pick a spot, then choose its collectible. Your shelf is personal to your account.</p><div id="shelfPreview"></div><label class="shelf-show"><input id="shelfEnabled" type="checkbox" ${draft.enabled ? 'checked' : ''}> Show shelf on my homepage</label><div class="shelf-filters"><label>Search objects<input id="shelfSearch" type="search" placeholder="Search 36 collectibles…" autocomplete="off"></label><label>Category<select id="shelfCategory"><option value="">All categories</option>${rows.map(([category]) => `<option>${category}</option>`).join('')}</select></label></div><p id="shelfResults" role="status"></p><div id="shelfChoices" class="shelf-choice-grid"></div><p id="shelfSaveStatus" role="status"></p><div class="launch-scene-dialog-actions shelf-dialog-actions"><button type="button" class="outline-btn" data-shelf-close>Cancel</button><button type="button" class="primary-btn" id="saveShelf">Save shelf</button></div>`;
     document.body.append(dialog);
+    dialog.querySelector('#shelfPreview').insertAdjacentHTML('afterend', `<fieldset class="shelf-theme-picker"><legend>Choose your shelf</legend><div class="shelf-theme-grid">${themes.map(theme => `<button type="button" data-shelf-theme-choice="${theme.id}" aria-pressed="${draft.theme === theme.id}"><span class="collectible-shelf" data-shelf-theme="${theme.id}" aria-hidden="true"><span class="shelf-board"></span></span><strong>${theme.name}</strong></button>`).join('')}</div></fieldset>`);
     dialog.querySelector('#shelfSearch').placeholder = `Search ${items.length} collectibles…`;
     const preview = dialog.querySelector('#shelfPreview');
     const choices = dialog.querySelector('#shelfChoices');
@@ -155,6 +166,13 @@
       choices.querySelector(`[data-shelf-item="${id}"]`).focus();
     });
     dialog.querySelector('#shelfSearch').addEventListener('input', update);
+    dialog.querySelector('.shelf-theme-picker').addEventListener('click', event => {
+      const button = event.target.closest('[data-shelf-theme-choice]');
+      if (!button || saving) return;
+      draft.theme = button.dataset.shelfThemeChoice;
+      dialog.querySelectorAll('[data-shelf-theme-choice]').forEach(choice => choice.setAttribute('aria-pressed',String(choice.dataset.shelfThemeChoice === draft.theme)));
+      preview.innerHTML = art(draft,true,active);
+    });
     dialog.querySelector('#shelfCategory').addEventListener('change', update);
     dialog.querySelector('#shelfEnabled').addEventListener('change', event => { draft.enabled = event.target.checked; });
     const close = () => {
@@ -181,7 +199,7 @@
     });
     update(); dialog.showModal();
   }
-  const api = { items, valid, clean, render, open, art };
+  const api = { items, themes, valid, clean, render, open, art };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else {
     root.CollectibleShelf = api;

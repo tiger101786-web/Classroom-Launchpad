@@ -12,7 +12,11 @@ const shelf = require('../collectible-shelf');
       return route.fulfill({contentType:'image/png',body:fs.readFileSync(path.join(__dirname,'../assets',filename))});
     });
     let gallery = '';
+    if (process.argv.includes('--themes')) {
+      for (const theme of shelf.themes) gallery += `<section>${shelf.art({enabled:true,theme:theme.id,slots:['nezuko','luffy','daisy-vase']})}<p>${theme.name}</p></section>`;
+    }
     for (let index=0; index<shelf.items.length; index+=3) {
+      if (process.argv.includes('--themes')) break;
       const group = shelf.items.slice(index,index+3);
       gallery += `<section>${shelf.art({enabled:true, slots:[...group.map(item=>item.id), 'none', 'none'].slice(0,3)})}<p>${group.map(item=>item.name).join(' · ')}</p></section>`;
     }
