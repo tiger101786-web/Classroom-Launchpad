@@ -28,6 +28,12 @@
 [data-shelf-theme="royal"] > .shelf-board { background-image:url('assets/collectible-shelf-royal.png'); }
 [data-shelf-theme="halloween"] > .shelf-board { background-image:url('assets/collectible-shelf-halloween.png'); }
 .shelf-theme-picker { min-width:0; margin:12px 0; padding:12px; border:1px solid var(--border); border-radius:12px; }
+[data-shelf-theme="amethyst"] > .shelf-board { background-image:url('assets/collectible-shelf-amethyst.png'); }
+[data-shelf-theme="temple"] > .shelf-board { background-image:url('assets/collectible-shelf-temple.png'); }
+[data-shelf-theme="blossom"] > .shelf-board { background-image:url('assets/collectible-shelf-blossom.png'); }
+[data-shelf-theme="dragon"] > .shelf-board { background-image:url('assets/collectible-shelf-dragon.png'); }
+[data-shelf-theme="mardi-gras"] > .shelf-board { background-image:url('assets/collectible-shelf-mardi-gras.png'); }
+[data-shelf-theme="steampunk"] > .shelf-board { background-image:url('assets/collectible-shelf-steampunk.png'); }
 .shelf-theme-picker legend { font-weight:800; padding:0 6px; }
 .shelf-theme-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
 .shelf-theme-grid button { min-width:0; padding:8px; border:2px solid #60414e; border-radius:10px; background:#171115; color:#fff0f5; cursor:pointer; }

@@ -2,12 +2,18 @@
   'use strict';
   const themes = [
     {id:'crimson',name:'Crimson Original'},
+    {id:'amethyst',name:'Amethyst Crystal'},
+    {id:'temple',name:'Ancient Temple'},
     {id:'celestial',name:'Celestial Night'},
+    {id:'blossom',name:'Cherry Blossom'},
+    {id:'dragon',name:'Dragon Obsidian'},
     {id:'forest',name:'Enchanted Forest'},
     {id:'ice',name:'Frost Crystal'},
     {id:'halloween',name:'Halloween Glow'},
+    {id:'mardi-gras',name:'Mardi Gras'},
     {id:'ocean',name:'Ocean Pearl'},
-    {id:'royal',name:'Royal Gold'}
+    {id:'royal',name:'Royal Gold'},
+    {id:'steampunk',name:'Steampunk Brass'}
   ];
   const themeIds = new Set(themes.map(theme => theme.id));
   // IDs and row order are stable: each row maps to the six-column artwork atlas.
