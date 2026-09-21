@@ -10,13 +10,14 @@
   transform:none;
 }
 #shelfShowStatus { font-size:12px; }
-.collectible-shelf { position:relative; width:100%; aspect-ratio:1903 / 826; padding:0; isolation:isolate; }
+.collectible-shelf { position:relative; width:100%; aspect-ratio:1640 / 692; padding:0; isolation:isolate; }
 /* Bases land at 60% of the artwork height, inside the 53–64% tabletop. */
 .shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:39%; z-index:1; }
 .shelf-object { display:block; width:100%; height:auto; aspect-ratio:1; overflow:hidden; filter:drop-shadow(0 3px 2px #0005); }
 .shelf-display-slot { min-width:0; }
 .shelf-empty { display:block; width:100%; aspect-ratio:1; }
-.shelf-board { position:absolute; inset:0; background:url('assets/collectible-shelf-colt.png') center / 100% 100% no-repeat; pointer-events:none; }
+/* Viewport (16,32,1640,692) trims transparent margins without stretching the artwork. */
+.shelf-board { position:absolute; inset:0; background:url('assets/collectible-shelf-crimson.png') 50% 12.8514% / 101.9512% 135.9827% no-repeat; pointer-events:none; }
 .shelf-customize { position:absolute; bottom:0; right:7px; display:grid; place-items:center; width:44px; height:44px; z-index:2; border:1px solid #a6526a; border-radius:50%; padding:10px; background:#190c13ed; color:#fff0f5; cursor:pointer; box-shadow:0 3px 12px #0006; transition:opacity .25s ease; }
 .shelf-customize svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
 @media(hover:hover) and (pointer:fine) { .shelf-customize { opacity:0; pointer-events:none; } .home-collectible-shelf:hover .shelf-customize,.home-collectible-shelf:focus-within .shelf-customize,.shelf-customize.is-recent { opacity:1; pointer-events:auto; } }
