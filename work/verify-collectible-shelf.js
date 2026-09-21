@@ -26,7 +26,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),52);
+  assert.equal(await page.locator('[data-shelf-item]').count(),72);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
   await page.locator('[data-shelf-slot="1"]').click();
@@ -115,6 +115,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['all-might','naruto','tanjiro']);
   await page.screenshot({path:path.join(dataDir,'shelf-anime-statues.png')});
   const newItems = ['goku','pikachu','eevee','crystal-dragon','moon-astronaut','race-car','ship-bottle','knight-helmet','streetcar','saxophone','pinball','snow-globe','owl-books'];
+  newItems.push('electric-guitar','drum-kit','trumpet','violin','grand-piano','microscope','telescope','dna','atom','earth-globe','hot-air-balloon','compass','lighthouse','biplane','steam-train','treasure-chest','phoenix','potion','beignets','cupcake');
   for (const id of newItems) {
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);

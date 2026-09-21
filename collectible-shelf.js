@@ -9,7 +9,11 @@
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
     ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee']],
-    ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']]
+    ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']],
+    ['Music', ['electric-guitar','Electric Guitar'], ['drum-kit','Drum Kit'], ['trumpet','Golden Trumpet'], ['violin','Violin'], ['grand-piano','Grand Piano']],
+    ['Science', ['microscope','Microscope'], ['telescope','Brass Telescope'], ['dna','DNA Model'], ['atom','Atom Sculpture'], ['earth-globe','Antique Earth Globe']],
+    ['Travel & Adventure', ['hot-air-balloon','Hot Air Balloon'], ['compass','Nautical Compass'], ['lighthouse','Lighthouse'], ['biplane','Vintage Biplane'], ['steam-train','Steam Locomotive']],
+    ['Fantasy & Treats', ['treasure-chest','Treasure Chest'], ['phoenix','Phoenix Statue'], ['potion','Enchanted Potion'], ['beignets','Beignet Plate'], ['cupcake','Rose Cupcake']]
   ];
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -41,10 +45,20 @@
     saxophone:[386,602,169,326], pinball:[653,622,234,310],
     'snow-globe':[972,634,251,297], 'owl-books':[25,924,264,320]
   };
+  const discovery = {
+    'electric-guitar':[18,0,179,340], 'drum-kit':[207,66,298,263],
+    trumpet:[506,54,285,277], violin:[797,0,154,339], 'grand-piano':[984,22,268,317],
+    microscope:[29,338,189,310], telescope:[249,341,242,307], dna:[536,340,167,309],
+    atom:[752,341,245,309], 'earth-globe':[1016,340,222,310],
+    'hot-air-balloon':[16,653,211,304], compass:[252,651,225,291],
+    lighthouse:[505,651,209,306], biplane:[718,696,296,241], 'steam-train':[1014,681,240,257],
+    'treasure-chest':[8,961,245,279], phoenix:[268,938,236,303], potion:[523,955,190,288],
+    beignets:[718,988,299,252], cupcake:[1026,943,213,299]
+  };
   function sprite(id) {
     const item = items.find(item => item.id === id);
     if (!item) return '<span class="shelf-empty" aria-label="Empty spot"></span>';
-    const asset = standalone[item.id] || (expansion[item.id] ? { source:'assets/shelf-collectibles-expansion.png', width:1254, height:1254, bounds:expansion[item.id] } : null);
+    const asset = standalone[item.id] || (expansion[item.id] ? { source:'assets/shelf-collectibles-expansion.png', width:1254, height:1254, bounds:expansion[item.id] } : null) || (discovery[item.id] ? { source:'assets/shelf-collectibles-discovery.png', width:1254, height:1254, bounds:discovery[item.id] } : null);
     const [x,y,w,h] = asset ? asset.bounds : bounds[item.row * 6 + item.column];
     const source = asset?.source || 'assets/shelf-collectibles.png';
     const scale = 200 / Math.max(w,h);
