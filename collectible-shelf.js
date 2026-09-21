@@ -8,13 +8,16 @@
     ['Technology', ['robot','Robot'], ['computer','Retro Computer'], ['controller','Game Controller'], ['arcade','Arcade Cabinet'], ['camera','Camera'], ['headphones','Headphones']],
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
-    ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee']],
+    ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee'], ['nezuko','Nezuko Statue'], ['luffy','Luffy Bust']],
     ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']],
     ['Music', ['trumpet','Golden Trumpet']],
     ['Shelf Decorations', ['ceramic-fox','Ceramic Fox'], ['succulent','Succulent Pot'], ['hourglass','Brass Hourglass'], ['mantel-clock','Vintage Mantel Clock']],
     ['Science', ['microscope','Microscope'], ['telescope','Brass Telescope'], ['dna','DNA Model'], ['atom','Atom Sculpture'], ['earth-globe','Antique Earth Globe']],
     ['Travel & Adventure', ['hot-air-balloon','Hot Air Balloon'], ['compass','Nautical Compass'], ['lighthouse','Lighthouse'], ['biplane','Vintage Biplane'], ['steam-train','Steam Locomotive']],
-    ['Fantasy & Treats', ['treasure-chest','Treasure Chest'], ['phoenix','Phoenix Statue'], ['potion','Enchanted Potion'], ['beignets','Beignet Plate'], ['cupcake','Rose Cupcake']]
+    ['Fantasy & Treats', ['treasure-chest','Treasure Chest'], ['phoenix','Phoenix Statue'], ['potion','Enchanted Potion'], ['beignets','Beignet Plate'], ['cupcake','Rose Cupcake']],
+    ['Little Animals', ['red-panda','Red Panda Figurine'], ['penguin','Penguin Figurine'], ['axolotl','Axolotl Figurine'], ['hedgehog','Hedgehog Figurine'], ['lucky-cat','Lucky Cat']],
+    ['Cozy Keepsakes', ['terrarium','Glass Terrarium'], ['mushroom-house','Mushroom Cottage'], ['lantern','Mini Lantern'], ['music-box','Ballerina Music Box'], ['teacup','Floral Teacup']],
+    ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -34,6 +37,28 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'nezuko': {"source":"assets/shelf-nezuko.png","width":1254,"height":1254,"bounds":[137,36,982,1189]},
+    'red-panda': {"source":"assets/shelf-red-panda.png","width":1254,"height":1254,"bounds":[217,68,818,1092]},
+    'penguin': {"source":"assets/shelf-penguin.png","width":1254,"height":1254,"bounds":[258,89,741,1083]},
+    'axolotl': {"source":"assets/shelf-axolotl.png","width":1254,"height":1254,"bounds":[135,122,993,1020]},
+    'hedgehog': {"source":"assets/shelf-hedgehog.png","width":1254,"height":1254,"bounds":[186,143,883,977]},
+    'lucky-cat': {"source":"assets/shelf-lucky-cat.png","width":1254,"height":1254,"bounds":[280,95,800,1059]},
+    'terrarium': {"source":"assets/shelf-terrarium.png","width":1254,"height":1254,"bounds":[265,110,724,1031]},
+    'mushroom-house': {"source":"assets/shelf-mushroom-house.png","width":1254,"height":1254,"bounds":[203,94,852,1061]},
+    'lantern': {"source":"assets/shelf-lantern.png","width":1254,"height":1254,"bounds":[330,53,603,1102]},
+    'music-box': {"source":"assets/shelf-music-box.png","width":1254,"height":1254,"bounds":[265,75,757,1090]},
+    'teacup': {"source":"assets/shelf-teacup.png","width":1254,"height":1254,"bounds":[78,283,1098,769]},
+    'rubber-duck': {"source":"assets/shelf-rubber-duck.png","width":1254,"height":1254,"bounds":[245,190,763,895]},
+    'origami-crane': {"source":"assets/shelf-origami-crane.png","width":1254,"height":1254,"bounds":[199,123,958,1016]},
+    'ammonite': {"source":"assets/shelf-ammonite.png","width":1254,"height":1254,"bounds":[241,98,791,1075]},
+    'geode': {"source":"assets/shelf-geode.png","width":1254,"height":1254,"bounds":[306,123,687,1023]},
+    'message-bottle': {"source":"assets/shelf-message-bottle.png","width":1254,"height":1254,"bounds":[378,73,508,1109]},
+    'jewelry-box': {"source":"assets/shelf-jewelry-box.png","width":1254,"height":1254,"bounds":[149,193,963,891]},
+    'snowman': {"source":"assets/shelf-snowman.png","width":1254,"height":1254,"bounds":[266,85,696,1085]},
+    'pumpkin-lantern': {"source":"assets/shelf-pumpkin-lantern.png","width":1254,"height":1254,"bounds":[192,120,876,991]},
+    'sandcastle': {"source":"assets/shelf-sandcastle.png","width":1254,"height":1254,"bounds":[141,86,977,1065]},
+    'luffy': {"source":"assets/shelf-luffy.png","width":1254,"height":1254,"bounds":[234,55,771,1155]},
+    'daisy-vase': {"source":"assets/shelf-daisy-vase.png","width":1254,"height":1254,"bounds":[266,146,743,990]},
     'ceramic-fox': { source:'assets/shelf-ceramic-fox.png', width:1254, height:1254, bounds:[301,74,690,1093] },
     succulent: { source:'assets/shelf-succulent.png', width:1254, height:1254, bounds:[249,108,765,1044] },
     hourglass: { source:'assets/shelf-hourglass.png', width:1254, height:1254, bounds:[343,75,574,1086] },

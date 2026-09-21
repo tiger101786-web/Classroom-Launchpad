@@ -27,11 +27,12 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('[data-shelf-item="ceramic-fox"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Ceramic Fox"]').count(),1);
   await page.locator('#shelfCategory').selectOption({label:'Anime'});
-  assert.equal(await page.locator('[data-shelf-item]').count(),7);
+  assert.equal(await page.locator('[data-shelf-item]').count(),9);
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),72);
+  assert.equal(await page.locator('[data-shelf-item]').count(),94);
+  assert.equal(await page.locator('[data-shelf-item="book-nook"]').count(),0);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
   await page.locator('[data-shelf-slot="1"]').click();
@@ -130,6 +131,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
     const migrated = await post({enabled:false,slots:[oldId,'books','none']});
     assert.deepEqual(migrated.payload.session.homeShelf,{enabled:false,slots:[newId,'books','none']});
   }
+  newItems.push('nezuko','red-panda','penguin','axolotl','hedgehog','lucky-cat','terrarium','mushroom-house','lantern','music-box','teacup','rubber-duck','origami-crane','ammonite','geode','message-bottle','jewelry-box','snowman','pumpkin-lantern','sandcastle','luffy','daisy-vase');
   for (const id of newItems) {
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);
@@ -139,6 +141,23 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.home-collectible-shelf [aria-label="Pikachu"]').count(),1);
   await page.screenshot({path:path.join(dataDir,'shelf-goku-pokemon.png')});
+  await open();
+  await page.locator('#shelfSearch').fill('nezuko');
+  assert.equal(await page.locator('[data-shelf-item]').count(),2);
+  await page.locator('[data-shelf-slot="0"]').click();
+  await page.locator('[data-shelf-item="nezuko"]').click();
+  await page.locator('[data-shelf-slot="1"]').click();
+  await page.locator('#shelfSearch').fill('luffy');
+  await page.locator('[data-shelf-item="luffy"]').click();
+  await page.locator('[data-shelf-slot="2"]').click();
+  await page.locator('#shelfSearch').fill('daisy');
+  await page.locator('[data-shelf-item="daisy-vase"]').click();
+  await page.locator('#saveShelf').click();
+  await page.locator('.shelf-dialog').waitFor({state:'detached'});
+  await page.reload({waitUntil:'networkidle'});
+  assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['nezuko','luffy','daisy-vase']);
+  for(const label of ['Nezuko Statue','Luffy Bust','Daisy Vase']) assert.equal(await page.locator(`.home-collectible-shelf [aria-label="${label}"]`).count(),1);
+  await page.screenshot({path:path.join(dataDir,'shelf-nezuko-luffy.png')});
   const guest=await browser.newPage();
   await guest.goto(baseUrl,{waitUntil:'networkidle'});
   assert.equal(await guest.locator('.home-collectible-shelf, [data-action="collectibleShelf"]').count(),0);
