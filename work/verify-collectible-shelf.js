@@ -21,6 +21,11 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   }
   await open();
   assert.equal(await page.locator('[data-shelf-item="medal"]').count(),0);
+  for (const id of ['electric-guitar','drum-kit','violin','grand-piano']) assert.equal(await page.locator(`[data-shelf-item="${id}"]`).count(),0);
+  await page.locator('#shelfCategory').selectOption({label:'Shelf Decorations'});
+  assert.equal(await page.locator('[data-shelf-item]').count(),5);
+  await page.locator('[data-shelf-item="ceramic-fox"]').click();
+  assert.equal(await page.locator('#shelfPreview [aria-label="Ceramic Fox"]').count(),1);
   await page.locator('#shelfCategory').selectOption({label:'Anime'});
   assert.equal(await page.locator('[data-shelf-item]').count(),7);
   await page.locator('[data-shelf-item="tanjiro"]').click();
@@ -45,6 +50,11 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('#shelfChoices').screenshot({path:path.join(dataDir,'shelf-all-objects.png')});
   await page.locator('#saveShelf').click();
   await page.locator('.shelf-dialog').waitFor({state:'detached'});
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('.shelf-customize')).opacity === '0', { }, {timeout:1800});
+  await page.locator('.home-collectible-shelf').hover();
+  await page.locator('.shelf-customize').click();
+  await page.mouse.click(1,1);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('.shelf-customize')).opacity === '0', { }, {timeout:1800});
   await page.reload({waitUntil:'networkidle'});
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf,choice);
   assert.equal((await request('/api/auth/session',{cookie:teacherCookie})).payload.session.homeShelf.enabled,false);
@@ -115,7 +125,11 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['all-might','naruto','tanjiro']);
   await page.screenshot({path:path.join(dataDir,'shelf-anime-statues.png')});
   const newItems = ['goku','pikachu','eevee','crystal-dragon','moon-astronaut','race-car','ship-bottle','knight-helmet','streetcar','saxophone','pinball','snow-globe','owl-books'];
-  newItems.push('electric-guitar','drum-kit','trumpet','violin','grand-piano','microscope','telescope','dna','atom','earth-globe','hot-air-balloon','compass','lighthouse','biplane','steam-train','treasure-chest','phoenix','potion','beignets','cupcake');
+  newItems.push('ceramic-fox','succulent','trumpet','hourglass','mantel-clock','microscope','telescope','dna','atom','earth-globe','hot-air-balloon','compass','lighthouse','biplane','steam-train','treasure-chest','phoenix','potion','beignets','cupcake');
+  for (const [oldId,newId] of Object.entries({'electric-guitar':'ceramic-fox','drum-kit':'succulent',violin:'hourglass','grand-piano':'mantel-clock'})) {
+    const migrated = await post({enabled:false,slots:[oldId,'books','none']});
+    assert.deepEqual(migrated.payload.session.homeShelf,{enabled:false,slots:[newId,'books','none']});
+  }
   for (const id of newItems) {
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);

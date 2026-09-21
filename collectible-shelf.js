@@ -10,7 +10,8 @@
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
     ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee']],
     ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']],
-    ['Music', ['electric-guitar','Electric Guitar'], ['drum-kit','Drum Kit'], ['trumpet','Golden Trumpet'], ['violin','Violin'], ['grand-piano','Grand Piano']],
+    ['Music', ['trumpet','Golden Trumpet']],
+    ['Shelf Decorations', ['ceramic-fox','Ceramic Fox'], ['succulent','Succulent Pot'], ['hourglass','Brass Hourglass'], ['mantel-clock','Vintage Mantel Clock']],
     ['Science', ['microscope','Microscope'], ['telescope','Brass Telescope'], ['dna','DNA Model'], ['atom','Atom Sculpture'], ['earth-globe','Antique Earth Globe']],
     ['Travel & Adventure', ['hot-air-balloon','Hot Air Balloon'], ['compass','Nautical Compass'], ['lighthouse','Lighthouse'], ['biplane','Vintage Biplane'], ['steam-train','Steam Locomotive']],
     ['Fantasy & Treats', ['treasure-chest','Treasure Chest'], ['phoenix','Phoenix Statue'], ['potion','Enchanted Potion'], ['beignets','Beignet Plate'], ['cupcake','Rose Cupcake']]
@@ -26,12 +27,17 @@
     [17,836,179,188],[224,833,192,197],[458,837,138,194],[660,832,153,198],[874,834,159,197],[1073,834,166,197],
     [16,1025,181,211],[242,1033,147,203],[415,1032,226,206],[654,1028,176,205],[896,1041,115,194],[1075,1062,164,170]
   ];
-  // Accept the retired ID only to migrate existing saved medal selections.
-  const ids = new Set(['none', 'medal', ...items.map(item => item.id)]);
+  // Preserve saved shelves when a collectible is replaced.
+  const replacements = { medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock' };
+  const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id));
-  const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => id === 'medal' ? 'tanjiro' : id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
+  const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id) } : { enabled: true, slots: ['horse', 'crystal', 'planet'] };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'ceramic-fox': { source:'assets/shelf-ceramic-fox.png', width:1254, height:1254, bounds:[301,74,690,1093] },
+    succulent: { source:'assets/shelf-succulent.png', width:1254, height:1254, bounds:[249,108,765,1044] },
+    hourglass: { source:'assets/shelf-hourglass.png', width:1254, height:1254, bounds:[343,75,574,1086] },
+    'mantel-clock': { source:'assets/shelf-mantel-clock.png', width:1254, height:1254, bounds:[64,156,1146,943] },
     tanjiro: { source:'assets/shelf-tanjiro-bust.png', width:1254, height:1254, bounds:[228,22,835,1215] },
     'all-might': { source:'assets/shelf-all-might.png', width:1537, height:1023, bounds:[414,13,712,999] },
     naruto: { source:'assets/shelf-naruto.png', width:1120, height:1405, bounds:[44,7,1066,1376] }
@@ -46,8 +52,7 @@
     'snow-globe':[972,634,251,297], 'owl-books':[25,924,264,320]
   };
   const discovery = {
-    'electric-guitar':[18,0,179,340], 'drum-kit':[207,66,298,263],
-    trumpet:[506,54,285,277], violin:[797,0,154,339], 'grand-piano':[984,22,268,317],
+    trumpet:[506,54,285,277],
     microscope:[29,338,189,310], telescope:[249,341,242,307], dna:[536,340,167,309],
     atom:[752,341,245,309], 'earth-globe':[1016,340,222,310],
     'hot-air-balloon':[16,653,211,304], compass:[252,651,225,291],
@@ -87,7 +92,7 @@
       if (!gear.isConnected || document.querySelector('.shelf-dialog') || gear.getAttribute('aria-expanded') === 'true') return;
       gear.classList.remove('is-recent'); gear.classList.add('is-idle');
       if (document.activeElement === gear) gear.blur();
-    },2500);
+    },900);
   }
   function open({ selected, save, onSave }) {
     if (document.querySelector('.shelf-dialog')) return;
@@ -160,7 +165,10 @@
       const gear = document.querySelector('.shelf-customize');
       if (!gear) return;
       gear.setAttribute('aria-expanded', String(event.newState === 'open'));
-      if (event.newState !== 'open') return;
+      if (event.newState !== 'open') {
+        if (!document.querySelector('.shelf-dialog')) restoreGear(gear.matches(':focus-visible'));
+        return;
+      }
       clearTimeout(hideTimer);
       gear.classList.remove('is-idle');
       const box = gear.getBoundingClientRect(), menu = event.target;
@@ -169,6 +177,16 @@
     },true);
     for (const event of ['pointermove','pointerdown','focusin']) document.addEventListener(event, e => {
       e.target.closest?.('.home-collectible-shelf')?.querySelector('.shelf-customize')?.classList.remove('is-idle');
+    });
+    document.addEventListener('pointerout', event => {
+      const shelf = event.target.closest?.('.home-collectible-shelf');
+      if (!shelf || shelf.contains(event.relatedTarget)) return;
+      const gear = shelf.querySelector('.shelf-customize');
+      if (!gear || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible')) return;
+      clearTimeout(hideTimer);
+      gear.classList.remove('is-recent');
+      gear.classList.add('is-idle');
+      if (document.activeElement === gear) gear.blur();
     });
   }
 })(typeof window !== 'undefined' ? window : globalThis);
