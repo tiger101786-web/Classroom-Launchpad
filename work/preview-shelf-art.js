@@ -20,7 +20,9 @@ const shelf = require('../collectible-shelf');
     }
     for (let index=0; index<shelf.items.length; index+=3) {
       if (process.argv.includes('--themes') || process.argv.includes('--figures')) break;
-      const group = shelf.items.slice(index,index+3);
+      const pool = process.argv.includes('--random20') ? shelf.items.slice(-20) : shelf.items;
+      const group = pool.slice(index,index+3);
+      if (!group.length) break;
       gallery += `<section>${shelf.art({enabled:true, slots:[...group.map(item=>item.id), 'none', 'none'].slice(0,3)})}<p>${group.map(item=>item.name).join(' · ')}</p></section>`;
     }
     const css = fs.readFileSync(path.join(__dirname,'../collectible-shelf.css'),'utf8');

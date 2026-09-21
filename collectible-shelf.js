@@ -35,6 +35,12 @@
     ['Cozy Keepsakes', ['terrarium','Glass Terrarium'], ['mushroom-house','Mushroom Cottage'], ['lantern','Mini Lantern'], ['music-box','Ballerina Music Box'], ['teacup','Floral Teacup']],
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
+  rows.push(
+    ["Animal Friends",["capybara","Capybara Figurine"],["otter","Otter Figurine"],["frog-prince","Frog Prince"],["sleeping-cat","Sleeping Cat"],["hummingbird","Hummingbird Sculpture"]],
+    ["Miniature Treasures",["gumball-machine","Mini Gumball Machine"],["retro-radio","Mini Retro Radio"],["typewriter","Mini Typewriter"],["lava-lamp","Mini Lava Lamp"],["rotary-phone","Mini Rotary Phone"]],
+    ["Tiny Wonders",["seahorse","Seahorse Sculpture"],["kraken","Tiny Kraken"],["unicorn","Unicorn Figurine"],["wizard-hat","Wizard Hat Keepsake"],["dragon-egg","Dragon Egg"]],
+    ["Sweet & Playful",["macaron-tower","Macaron Tower"],["honey-pot","Honey Pot"],["rubiks-cube","Puzzle Cube"],["nesting-doll","Nesting Doll"],["paperweight","Galaxy Paperweight"]],
+  );
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -53,6 +59,26 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'capybara': {"source":"assets/shelf-capybara.png","width":1254,"height":1254,"bounds":[271,83,708,1095]},
+    'otter': {"source":"assets/shelf-otter.png","width":1254,"height":1254,"bounds":[334,64,632,1130]},
+    'frog-prince': {"source":"assets/shelf-frog-prince.png","width":1254,"height":1254,"bounds":[206,49,847,1157]},
+    'sleeping-cat': {"source":"assets/shelf-sleeping-cat.png","width":1254,"height":1254,"bounds":[54,197,1167,891]},
+    'hummingbird': {"source":"assets/shelf-hummingbird.png","width":1254,"height":1254,"bounds":[333,58,740,1142]},
+    'gumball-machine': {"source":"assets/shelf-gumball-machine.png","width":1254,"height":1254,"bounds":[309,19,633,1202]},
+    'retro-radio': {"source":"assets/shelf-retro-radio.png","width":1254,"height":1254,"bounds":[37,176,1187,924]},
+    'typewriter': {"source":"assets/shelf-typewriter.png","width":1254,"height":1254,"bounds":[61,81,1158,1114]},
+    'lava-lamp': {"source":"assets/shelf-lava-lamp.png","width":1254,"height":1254,"bounds":[432,46,386,1163]},
+    'rotary-phone': {"source":"assets/shelf-rotary-phone.png","width":1254,"height":1254,"bounds":[38,130,1194,999]},
+    'seahorse': {"source":"assets/shelf-seahorse.png","width":1254,"height":1254,"bounds":[410,45,475,1165]},
+    'kraken': {"source":"assets/shelf-kraken.png","width":1254,"height":1254,"bounds":[148,129,968,997]},
+    'unicorn': {"source":"assets/shelf-unicorn.png","width":1254,"height":1254,"bounds":[251,32,755,1149]},
+    'wizard-hat': {"source":"assets/shelf-wizard-hat.png","width":1254,"height":1254,"bounds":[213,60,832,1102]},
+    'dragon-egg': {"source":"assets/shelf-dragon-egg.png","width":1254,"height":1254,"bounds":[280,62,707,1122]},
+    'macaron-tower': {"source":"assets/shelf-macaron-tower.png","width":1254,"height":1254,"bounds":[205,66,845,1129]},
+    'honey-pot': {"source":"assets/shelf-honey-pot.png","width":1254,"height":1254,"bounds":[124,109,1064,1060]},
+    'rubiks-cube': {"source":"assets/shelf-rubiks-cube.png","width":1254,"height":1254,"bounds":[92,77,1070,1111]},
+    'nesting-doll': {"source":"assets/shelf-nesting-doll.png","width":1254,"height":1254,"bounds":[288,43,698,1167]},
+    'paperweight': {"source":"assets/shelf-paperweight.png","width":1254,"height":1254,"bounds":[153,132,948,983]},
     'sailor-moon': {source:'assets/shelf-sailor-moon.png',width:1254,height:1254,bounds:[237,10,785,1236]},
     rumi: {source:'assets/shelf-rumi.png',width:1254,height:1254,bounds:[325,11,569,1242]},
     'nezuko': {"source":"assets/shelf-nezuko.png","width":1254,"height":1254,"bounds":[137,36,982,1189]},

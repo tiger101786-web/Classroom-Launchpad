@@ -32,7 +32,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),96);
+  assert.equal(await page.locator('[data-shelf-item]').count(),116);
   assert.equal(await page.locator('[data-shelf-item="book-nook"]').count(),0);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
@@ -133,6 +133,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
     assert.deepEqual(migrated.payload.session.homeShelf,{enabled:false,slots:[newId,'books','none'],theme:'crimson'});
   }
   newItems.push('nezuko','red-panda','penguin','axolotl','hedgehog','lucky-cat','terrarium','mushroom-house','lantern','music-box','teacup','rubber-duck','origami-crane','ammonite','geode','message-bottle','jewelry-box','snowman','pumpkin-lantern','sandcastle','luffy','daisy-vase');
+  newItems.push("capybara","otter","frog-prince","sleeping-cat","hummingbird","gumball-machine","retro-radio","typewriter","lava-lamp","rotary-phone","seahorse","kraken","unicorn","wizard-hat","dragon-egg","macaron-tower","honey-pot","rubiks-cube","nesting-doll","paperweight");
   for (const id of newItems) {
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);
