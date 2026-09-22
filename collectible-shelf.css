@@ -14,6 +14,9 @@
 /* Bases land at 60% of the artwork height, inside the 53–64% tabletop. */
 .shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:39%; z-index:1; }
 .shelf-object { display:block; width:100%; height:auto; aspect-ratio:1; overflow:hidden; filter:drop-shadow(0 3px 2px #0005); }
+.shelf-object-anime { overflow:visible; }
+.home-collectible-shelf:has(.shelf-object-anime) { margin-top:66px; }
+#shelfPreview:has(.shelf-object-anime) { margin-top:60px; }
 .shelf-display-slot { min-width:0; }
 .shelf-empty { display:block; width:100%; aspect-ratio:1; }
 /* Viewport (16,32,1640,692) trims transparent margins without stretching the artwork. */

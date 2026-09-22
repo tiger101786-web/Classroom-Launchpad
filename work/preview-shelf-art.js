@@ -20,18 +20,19 @@ const shelf = require('../collectible-shelf');
     }
     for (let index=0; index<shelf.items.length; index+=3) {
       if (process.argv.includes('--themes') || process.argv.includes('--figures')) break;
-      const pool = process.argv.includes('--random20') ? shelf.items.slice(-20) : shelf.items;
+      const pool = process.argv.includes('--anime') ? shelf.items.filter(item=>item.category==='Anime') : process.argv.includes('--random20') ? shelf.items.slice(-20) : shelf.items;
       const group = pool.slice(index,index+3);
       if (!group.length) break;
       gallery += `<section>${shelf.art({enabled:true, slots:[...group.map(item=>item.id), 'none', 'none'].slice(0,3)})}<p>${group.map(item=>item.name).join(' · ')}</p></section>`;
     }
     const css = fs.readFileSync(path.join(__dirname,'../collectible-shelf.css'),'utf8');
+    if (process.argv.includes('--anime')) gallery = `<style>section{padding-top:65px}</style>${gallery}`;
     await page.setContent(`<base href="http://shelf-preview.local/"><style>${css}*{box-sizing:border-box}body{margin:0;padding:24px;background:#171015;color:#f8e8ed;font:12px system-ui;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}p{text-align:center}</style>${gallery}`);
     const misplaced = await page.evaluate(() => [...document.querySelectorAll('.collectible-shelf')].flatMap(shelf => {
       const board = shelf.getBoundingClientRect();
       return [...shelf.querySelectorAll('.shelf-object')].filter(item => {
         const box = item.getBoundingClientRect();
-        const base = box.bottom - box.height * 4 / 220;
+        const base = box.bottom - box.width * 4 / 220;
         return base < board.top + board.height * .53 || base > board.top + board.height * .64 || box.left < board.left || box.right > board.right;
       }).map(item => item.getAttribute('aria-label'));
     }));

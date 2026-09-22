@@ -126,6 +126,28 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.reload({waitUntil:'networkidle'});
   assert.deepEqual((await request('/api/auth/session',{cookie:studentCookie})).payload.session.homeShelf.slots,['all-might','naruto','tanjiro']);
   await page.screenshot({path:path.join(dataDir,'shelf-anime-statues.png')});
+  for (const width of [1280,390]) {
+    await page.setViewportSize({width,height:900});
+    const layout = await page.locator('.home-collectible-shelf').evaluate(shelf => {
+      const heading = document.querySelector('h1').getBoundingClientRect();
+      const figures = [...shelf.querySelectorAll('.shelf-object-anime')].map(el => {
+        const art = el.querySelector('svg');
+        const box = el.getBoundingClientRect();
+        const scale = box.width / 220;
+        const left = box.left + Number(art.getAttribute('x')) * scale;
+        return {left, right:left + Number(art.getAttribute('width')) * scale, top:box.top + Number(art.getAttribute('y')) * scale};
+      });
+      return {headingBottom:heading.bottom,figures};
+    });
+    assert.equal(layout.figures.length,3);
+    for (const box of layout.figures) {
+      assert(box.top >= layout.headingBottom, `Anime figures clear heading at ${width}`);
+      assert(box.left >= 0 && box.right <= width, `Anime figures fit screen at ${width}`);
+    }
+    for(let i=1;i<layout.figures.length;i++) assert(layout.figures[i-1].right <= layout.figures[i].left,'Anime figures do not overlap');
+    await page.screenshot({path:path.join(dataDir,`shelf-larger-anime-${width}.png`)});
+  }
+  await page.setViewportSize({width:1280,height:900});
   const newItems = ['goku','pikachu','eevee','crystal-dragon','moon-astronaut','race-car','ship-bottle','knight-helmet','streetcar','saxophone','pinball','snow-globe','owl-books'];
   newItems.push('ceramic-fox','succulent','trumpet','hourglass','mantel-clock','microscope','telescope','dna','atom','earth-globe','hot-air-balloon','compass','lighthouse','biplane','steam-train','treasure-chest','phoenix','potion','beignets','cupcake');
   for (const [oldId,newId] of Object.entries({'electric-guitar':'ceramic-fox','drum-kit':'succulent',violin:'hourglass','grand-piano':'mantel-clock'})) {
