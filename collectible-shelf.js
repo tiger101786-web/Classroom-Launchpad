@@ -48,6 +48,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Character Collectibles', ['bluey','Bluey Statue'], ['sonic','Sonic Statue'], ['hello-kitty','Hello Kitty Statue']],
     ["Fall & Halloween",["harvest-gnome","Harvest Gnome"],["scarecrow","Scarecrow Figurine"],["acorn-house","Acorn Cottage"],["apple-basket","Apple Harvest Basket"],["pumpkin-pie","Pumpkin Pie Keepsake"],["friendly-ghost","Friendly Ghost"],["witch-cat","Witch Cat Figurine"],["candy-cauldron","Candy Cauldron"],["haunted-cottage","Haunted Cottage"],["bat-figurine","Little Bat Figurine"]],
     ["Animal Friends",["capybara","Capybara Figurine"],["otter","Otter Figurine"],["frog-prince","Frog Prince"],["sleeping-cat","Sleeping Cat"],["hummingbird","Hummingbird Sculpture"]],
     ["Miniature Treasures",["gumball-machine","Mini Gumball Machine"],["retro-radio","Mini Retro Radio"],["typewriter","Mini Typewriter"],["lava-lamp","Mini Lava Lamp"],["rotary-phone","Mini Rotary Phone"]],
@@ -76,6 +77,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    bluey: {source:'assets/shelf-bluey.png',width:1254,height:1254,bounds:[280,6,781,1242]},
+    sonic: {source:'assets/shelf-sonic.png',width:1254,height:1254,bounds:[299,29,763,1193]},
+    'hello-kitty': {source:'assets/shelf-hello-kitty.png',width:1254,height:1254,bounds:[255,52,799,1159]},
     'harvest-gnome': {"source":"assets/shelf-harvest-gnome.png","width":1254,"height":1254,"bounds":[292,18,683,1219]},
     'scarecrow': {"source":"assets/shelf-scarecrow.png","width":1254,"height":1254,"bounds":[226,0,867,1254]},
     'acorn-house': {"source":"assets/shelf-acorn-house.png","width":1254,"height":1254,"bounds":[180,25,922,1192]},
@@ -126,7 +130,7 @@
     'nesting-doll': {"source":"assets/shelf-nesting-doll.png","width":1254,"height":1254,"bounds":[288,43,698,1167]},
     'paperweight': {"source":"assets/shelf-paperweight.png","width":1254,"height":1254,"bounds":[153,132,948,983]},
     'sailor-moon': {source:'assets/shelf-sailor-moon.png',width:1254,height:1254,bounds:[237,10,785,1236]},
-    rumi: {source:'assets/shelf-rumi.png',width:1254,height:1254,bounds:[325,11,569,1242]},
+    rumi: {source:'assets/shelf-rumi-bust.png',width:1024,height:1536,bounds:[218,25,594,1462]},
     'nezuko': {"source":"assets/shelf-nezuko.png","width":1254,"height":1254,"bounds":[137,36,982,1189]},
     'red-panda': {"source":"assets/shelf-red-panda.png","width":1254,"height":1254,"bounds":[217,68,818,1092]},
     'penguin': {"source":"assets/shelf-penguin.png","width":1254,"height":1254,"bounds":[258,89,741,1083]},
