@@ -205,72 +205,87 @@
   function open({ selected, save, onSave }) {
     if (document.querySelector('.shelf-dialog')) return;
     document.querySelector('#shelfSettingsMenu:popover-open')?.hidePopover();
-    let draft = clean(selected), active = 0, saving = false;
-    const opener = document.activeElement;
-    const keyboard = !!opener?.matches(':focus-visible');
-    const dialog = document.createElement('dialog');
-    dialog.className = 'launch-scene-dialog shelf-dialog';
-    dialog.setAttribute('aria-labelledby', 'shelfTitle');
-    dialog.innerHTML = `<div class="launch-scene-dialog-heading"><h2 id="shelfTitle">Your collectible shelf</h2><button type="button" class="outline-btn" data-shelf-close aria-label="Close shelf chooser">✕</button></div><p>Pick a spot, then choose its collectible. Your shelf is personal to your account.</p><div id="shelfPreview"></div><label class="shelf-show"><input id="shelfEnabled" type="checkbox" ${draft.enabled ? 'checked' : ''}> Show shelf on my homepage</label><div class="shelf-filters"><label>Search objects<input id="shelfSearch" type="search" placeholder="Search 36 collectibles…" autocomplete="off"></label><label>Category<select id="shelfCategory"><option value="">All categories</option>${rows.map(([category]) => `<option>${category}</option>`).join('')}</select></label></div><p id="shelfResults" role="status"></p><div id="shelfChoices" class="shelf-choice-grid"></div><p id="shelfSaveStatus" role="status"></p><div class="launch-scene-dialog-actions shelf-dialog-actions"><button type="button" class="outline-btn" data-shelf-close>Cancel</button><button type="button" class="primary-btn" id="saveShelf">Save shelf</button></div>`;
+    let draft=clean(selected), active=0, saving=false, tab='objects';
+    const pages={objects:0,styles:0}, searches={objects:'',styles:''};
+    const opener=document.activeElement, keyboard=!!opener?.matches(':focus-visible');
+    const dialog=document.createElement('dialog');
+    dialog.className='launch-scene-dialog shelf-dialog';
+    dialog.setAttribute('aria-labelledby','shelfTitle');
+    dialog.innerHTML='<div class="launch-scene-dialog-heading"><h2 id="shelfTitle">Your collectible shelf</h2><button type="button" class="outline-btn" data-shelf-close aria-label="Close shelf chooser">✕</button></div><div class="shelf-preview-area"><div id="shelfPreview"></div><div class="shelf-preview-controls"><p>Choose a spot, then pick an object.</p><button type="button" class="outline-btn" id="shelfClearSlot">Clear selected spot</button><label class="shelf-show"><input id="shelfEnabled" type="checkbox"> Show shelf</label></div></div><div class="shelf-tabs" role="tablist" aria-label="Customize shelf"><button type="button" id="shelfObjectsTab" role="tab" data-shelf-tab="objects" aria-controls="shelfObjectsPanel">Objects</button><button type="button" id="shelfStylesTab" role="tab" data-shelf-tab="styles" aria-controls="shelfStylesPanel">Shelf Styles</button></div><div class="shelf-filters"><label><span id="shelfSearchLabel">Search objects</span><input id="shelfSearch" type="search" autocomplete="off"></label><label id="shelfCategoryLabel">Category<select id="shelfCategory"><option value="">All categories</option>'+[...new Set(rows.map(([category])=>category))].sort().map(category=>'<option>'+category+'</option>').join('')+'</select></label></div><p id="shelfResults" role="status"></p><div class="shelf-browse-area"><section id="shelfObjectsPanel" role="tabpanel" aria-labelledby="shelfObjectsTab"><div id="shelfChoices" class="shelf-choice-grid"></div></section><section id="shelfStylesPanel" role="tabpanel" aria-labelledby="shelfStylesTab" hidden><div class="shelf-theme-grid"></div></section></div><nav class="shelf-pagination" aria-label="Choice pages"><button type="button" class="outline-btn" id="shelfPrevious">Previous</button><span id="shelfPageStatus" role="status"></span><button type="button" class="outline-btn" id="shelfNext">Next</button></nav><div class="shelf-dialog-actions"><span id="shelfSaveStatus" role="status"></span><button type="button" class="outline-btn" data-shelf-close>Cancel</button><button type="button" class="primary-btn" id="saveShelf">Save shelf</button></div>';
     document.body.append(dialog);
-    dialog.querySelector('#shelfPreview').insertAdjacentHTML('afterend', `<fieldset class="shelf-theme-picker"><legend>Choose your shelf</legend><div class="shelf-theme-grid">${themes.map(theme => `<button type="button" data-shelf-theme-choice="${theme.id}" aria-pressed="${draft.theme === theme.id}"><span class="collectible-shelf" data-shelf-theme="${theme.id}" aria-hidden="true"><span class="shelf-board"></span></span><strong>${theme.name}</strong></button>`).join('')}</div></fieldset>`);
-    dialog.querySelector('#shelfSearch').placeholder = `Search ${items.length} collectibles…`;
-    const preview = dialog.querySelector('#shelfPreview');
-    const choices = dialog.querySelector('#shelfChoices');
-    const update = () => {
-      preview.innerHTML = art(draft, true, active);
-      const terms = dialog.querySelector('#shelfSearch').value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-      const category = dialog.querySelector('#shelfCategory').value;
-      const matches = items.filter(item => (!category || item.category === category) && terms.every(term => `${item.name} ${item.category}`.toLowerCase().includes(term))).sort((a,b) => a.name.localeCompare(b.name));
-      choices.innerHTML = `<button type="button" data-shelf-item="none" aria-pressed="${draft.slots[active] === 'none'}"><span class="shelf-clear-art" aria-hidden="true">—</span><strong>Empty spot</strong></button>` + matches.map(item => `<button type="button" data-shelf-item="${item.id}" aria-pressed="${draft.slots[active] === item.id}">${sprite(item.id)}<strong>${item.name}</strong></button>`).join('');
-      dialog.querySelector('#shelfResults').textContent = `${matches.length} collectibles · Choosing for the ${['left','middle','right'][active]} spot${matches.length ? '' : ' — try another search'}`;
+    const preview=dialog.querySelector('#shelfPreview'), choices=dialog.querySelector('#shelfChoices'), themeChoices=dialog.querySelector('.shelf-theme-grid'), search=dialog.querySelector('#shelfSearch'), category=dialog.querySelector('#shelfCategory');
+    dialog.querySelector('#shelfEnabled').checked=draft.enabled;
+    const pageSize=()=>tab==='styles' ? (innerWidth<=600 || innerHeight<650 ? 2 : 6) : (innerWidth<=600 ? (innerHeight<780 ? 3 : 6) : (innerHeight<740 ? 4 : innerHeight<850 ? 8 : 12));
+    const update=()=>{
+      preview.innerHTML=art(draft,true,active);
+      dialog.querySelectorAll('[data-shelf-tab]').forEach(button=>{
+        const selected=button.dataset.shelfTab===tab;
+        button.setAttribute('aria-selected',String(selected)); button.tabIndex=selected?0:-1;
+      });
+      dialog.querySelector('#shelfObjectsPanel').hidden=tab!=='objects';
+      dialog.querySelector('#shelfStylesPanel').hidden=tab!=='styles';
+      dialog.querySelector('#shelfCategoryLabel').hidden=tab!=='objects';
+      dialog.querySelector('#shelfSearchLabel').textContent=tab==='objects'?'Search objects':'Search shelves';
+      search.placeholder=tab==='objects'?'Search '+items.length+' collectibles…':'Search shelf styles…';
+      const terms=searches[tab].toLowerCase().trim().split(/\s+/).filter(Boolean);
+      const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value).sort((a,b)=>a.name.localeCompare(b.name)):themes;
+      const matches=pool.filter(item=>terms.every(term=>(item.name+' '+(item.category||'')).toLowerCase().includes(term)));
+      const size=pageSize(), count=Math.max(1,Math.ceil(matches.length/size));
+      pages[tab]=Math.min(pages[tab],count-1);
+      const visible=matches.slice(pages[tab]*size,(pages[tab]+1)*size);
+      choices.innerHTML=tab==='objects'?visible.map(item=>'<button type="button" data-shelf-item="'+item.id+'" aria-pressed="'+(draft.slots[active]===item.id)+'">'+sprite(item.id)+'<strong>'+item.name+'</strong></button>').join(''):'';
+      themeChoices.innerHTML=tab==='styles'?visible.map(theme=>'<button type="button" data-shelf-theme-choice="'+theme.id+'" aria-pressed="'+(draft.theme===theme.id)+'"><span class="collectible-shelf" data-shelf-theme="'+theme.id+'" aria-hidden="true"><span class="shelf-board"></span></span><strong>'+theme.name+'</strong></button>').join(''):'';
+      dialog.querySelector('#shelfResults').textContent=matches.length?matches.length+' '+(tab==='objects'?'objects · '+['Left','Middle','Right'][active]+' spot':'shelf styles'):'No matches. Try another search or category.';
+      dialog.querySelector('#shelfPageStatus').textContent='Page '+(pages[tab]+1)+' of '+count;
+      dialog.querySelector('#shelfPrevious').disabled=saving || pages[tab]===0;
+      dialog.querySelector('#shelfNext').disabled=saving || pages[tab]===count-1;
+      dialog.querySelector('#shelfClearSlot').disabled=saving || draft.slots[active]==='none';
+      dialog.querySelector('.shelf-browse-area').scrollTop=0;
     };
-    preview.addEventListener('click', event => {
-      const button = event.target.closest('[data-shelf-slot]');
-      if (!button || saving) return;
-      active = Number(button.dataset.shelfSlot); update();
-      preview.querySelector(`[data-shelf-slot="${active}"]`).focus();
+    const switchTab=value=>{if(saving)return;tab=value;search.value=searches[tab];update();};
+    dialog.querySelector('.shelf-tabs').addEventListener('click',event=>{
+      const button=event.target.closest('[data-shelf-tab]');if(button)switchTab(button.dataset.shelfTab);
     });
-    choices.addEventListener('click', event => {
-      const button = event.target.closest('[data-shelf-item]');
-      if (!button || saving) return;
-      const id = button.dataset.shelfItem;
-      draft.slots[active] = id; update();
-      choices.querySelector(`[data-shelf-item="${id}"]`).focus();
+    dialog.querySelector('.shelf-tabs').addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();switchTab(event.key==='Home'?'objects':event.key==='End'?'styles':tab==='objects'?'styles':'objects');
+      dialog.querySelector('[aria-selected="true"]').focus();
     });
-    dialog.querySelector('#shelfSearch').addEventListener('input', update);
-    dialog.querySelector('.shelf-theme-picker').addEventListener('click', event => {
-      const button = event.target.closest('[data-shelf-theme-choice]');
-      if (!button || saving) return;
-      draft.theme = button.dataset.shelfThemeChoice;
-      dialog.querySelectorAll('[data-shelf-theme-choice]').forEach(choice => choice.setAttribute('aria-pressed',String(choice.dataset.shelfThemeChoice === draft.theme)));
-      preview.innerHTML = art(draft,true,active);
+    preview.addEventListener('click',event=>{
+      const button=event.target.closest('[data-shelf-slot]');if(!button || saving)return;
+      active=Number(button.dataset.shelfSlot);update();preview.querySelector('[data-shelf-slot="'+active+'"]').focus();
     });
-    dialog.querySelector('#shelfCategory').addEventListener('change', update);
-    dialog.querySelector('#shelfEnabled').addEventListener('change', event => { draft.enabled = event.target.checked; });
-    const close = () => {
-      if (saving) return;
-      dialog.close(); dialog.remove();
-      if (opener?.closest('#shelfSettingsMenu')) restoreGear(keyboard);
-      else if (opener?.isConnected) opener.focus();
+    choices.addEventListener('click',event=>{
+      const button=event.target.closest('[data-shelf-item]');if(!button || saving)return;
+      const id=button.dataset.shelfItem;draft.slots[active]=id;update();choices.querySelector('[data-shelf-item="'+id+'"]').focus();
+    });
+    themeChoices.addEventListener('click',event=>{
+      const button=event.target.closest('[data-shelf-theme-choice]');if(!button || saving)return;
+      draft.theme=button.dataset.shelfThemeChoice;update();themeChoices.querySelector('[data-shelf-theme-choice="'+draft.theme+'"]').focus();
+    });
+    search.addEventListener('input',()=>{searches[tab]=search.value;pages[tab]=0;update();});
+    category.addEventListener('change',()=>{pages.objects=0;update();});
+    for(const [id,delta] of [['shelfPrevious',-1],['shelfNext',1]])dialog.querySelector('#'+id).addEventListener('click',()=>{if(saving)return;pages[tab]+=delta;update();});
+    dialog.querySelector('#shelfClearSlot').addEventListener('click',()=>{if(saving)return;draft.slots[active]='none';update();preview.querySelector('[data-shelf-slot="'+active+'"]').focus();});
+    dialog.querySelector('#shelfEnabled').addEventListener('change',event=>{draft.enabled=event.target.checked;});
+    const resize=()=>{if(!saving)update();};
+    window.addEventListener('resize',resize);
+    const close=()=>{
+      if(saving)return;
+      window.removeEventListener('resize',resize);dialog.close();dialog.remove();
+      if(opener?.closest('#shelfSettingsMenu'))restoreGear(keyboard);
+      else if(opener?.isConnected)opener.focus();
       else document.querySelector('.header-account-summary')?.focus();
     };
-    dialog.querySelectorAll('[data-shelf-close]').forEach(button => button.addEventListener('click', close));
-    dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
-    dialog.querySelector('#saveShelf').addEventListener('click', async () => {
-      saving = true;
-      dialog.querySelectorAll('button,input,select').forEach(control => { control.disabled = true; });
-      dialog.querySelector('#shelfSaveStatus').textContent = 'Saving your shelf…';
-      try {
-        const result = await save(clean(draft));
-        saving = false; close(); onSave(result); restoreGear(keyboard);
-      } catch (error) {
-        saving = false;
-        dialog.querySelectorAll('button,input,select').forEach(control => { control.disabled = false; });
-        dialog.querySelector('#shelfSaveStatus').textContent = error.message || 'Could not save. Please try again.';
-      }
+    dialog.querySelectorAll('[data-shelf-close]').forEach(button=>button.addEventListener('click',close));
+    dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+    dialog.querySelector('#saveShelf').addEventListener('click',async()=>{
+      saving=true;dialog.querySelectorAll('button,input,select').forEach(control=>{control.disabled=true;});
+      dialog.querySelector('#shelfSaveStatus').textContent='Saving your shelf…';
+      try{const result=await save(clean(draft));saving=false;close();onSave(result);restoreGear(keyboard);}
+      catch(error){saving=false;dialog.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false;});update();dialog.querySelector('#shelfSaveStatus').textContent=error.message||'Could not save. Please try again.';}
     });
-    update(); dialog.showModal();
+    update();dialog.showModal();
   }
   const api = { items, themes, valid, clean, render, open, art };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
