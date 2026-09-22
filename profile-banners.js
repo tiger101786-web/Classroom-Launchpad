@@ -3,6 +3,7 @@
   const normalize = value => choices.some(([id]) => id === value) ? value : 'none';
   choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
   const cover = value => {
+    // Additional themed covers share the existing crop and preview behavior.
     const id = normalize(value);
     return id === 'none' ? '' : `<div class="profile-banner-cover" data-banner="${id}" aria-hidden="true"><img src="assets/profile-banner-${id}.png" alt="" loading="lazy"></div>`;
   };
@@ -41,4 +42,5 @@
     dialog.showModal();
   }
   window.ProfileBanners = { normalize, cover, open };
+  choices.push(['honeybee','Honeybee Garden'], ['volcanic','Volcanic Forge'], ['aurora','Arctic Aurora']);
 })();

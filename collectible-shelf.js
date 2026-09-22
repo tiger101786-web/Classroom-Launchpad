@@ -2,6 +2,9 @@
   'use strict';
   const themes = [
     {id:'crimson',name:'Crimson Original'},
+    {id:'aurora',name:'Arctic Aurora'},
+    {id:'honeybee',name:'Honeybee Garden'},
+    {id:'volcanic',name:'Volcanic Forge'},
     {id:'amethyst',name:'Amethyst Crystal'},
     {id:'temple',name:'Ancient Temple'},
     {id:'art-deco',name:'Art Deco'},
@@ -48,6 +51,8 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Anime', ['anya','Anya Forger Statue'], ['frieren','Frieren Statue'], ['gojo','Satoru Gojo Bust']],
+    ['Character Collectibles', ['peppa','Peppa Pig Statue']],
     ['Character Collectibles', ['bluey','Bluey Statue'], ['sonic','Sonic Statue'], ['hello-kitty','Hello Kitty Statue']],
     ["Fall & Halloween",["harvest-gnome","Harvest Gnome"],["scarecrow","Scarecrow Figurine"],["acorn-house","Acorn Cottage"],["apple-basket","Apple Harvest Basket"],["pumpkin-pie","Pumpkin Pie Keepsake"],["friendly-ghost","Friendly Ghost"],["witch-cat","Witch Cat Figurine"],["candy-cauldron","Candy Cauldron"],["haunted-cottage","Haunted Cottage"],["bat-figurine","Little Bat Figurine"]],
     ["Animal Friends",["capybara","Capybara Figurine"],["otter","Otter Figurine"],["frog-prince","Frog Prince"],["sleeping-cat","Sleeping Cat"],["hummingbird","Hummingbird Sculpture"]],
@@ -77,6 +82,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    gojo: {source:'assets/shelf-gojo.png',width:1254,height:1254,bounds:[244,31,748,1189]},
+    peppa: {source:'assets/shelf-peppa.png',width:1254,height:1254,bounds:[257,22,729,1207]},
+    anya: {source:'assets/shelf-anya.png',width:1254,height:1254,bounds:[279,4,677,1228]},
+    frieren: {source:'assets/shelf-frieren.png',width:1254,height:1254,bounds:[295,6,682,1237]},
     bluey: {source:'assets/shelf-bluey.png',width:1254,height:1254,bounds:[280,6,781,1242]},
     sonic: {source:'assets/shelf-sonic.png',width:1254,height:1254,bounds:[299,29,763,1193]},
     'hello-kitty': {source:'assets/shelf-hello-kitty.png',width:1254,height:1254,bounds:[255,52,799,1159]},

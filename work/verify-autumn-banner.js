@@ -10,7 +10,7 @@ const {chromium}=require('playwright');
    await page.setContent('<base href="http://art.local/"><style>'+css+'</style>');
    await page.addScriptTag({path:path.join(__dirname,'../profile-banners.js')});
    await page.evaluate(()=>ProfileBanners.open({selected:'none',avatar:'',name:'Student',role:'Student',save:async value=>{window.savedBanner=value;return value},onSave:()=>{}}));
-   for (const id of ['storm','clockwork','moon-garden']) {
+   for (const id of ['storm','clockwork','moon-garden','honeybee','volcanic','aurora']) {
     await page.locator(`[data-banner-choice="${id}"]`).click();
     assert.equal(await page.locator('#profileBannerPreview [data-banner]').getAttribute('data-banner'),id);
     await page.locator('#profileBannerPreview img').evaluate(img=>img.decode());

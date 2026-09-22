@@ -59,6 +59,13 @@
 [data-shelf-theme="autumn"] > .shelf-board { background-image:url('assets/collectible-shelf-autumn.png'); }
 [data-shelf-theme="porcelain"] > .shelf-board { background-image:url('assets/collectible-shelf-porcelain.png'); }
 .shelf-theme-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+/* These variants retain the porcelain shelf's tabletop and silhouette. */
+.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
+.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) > .shelf-board { background-size:100% 122.2973%; background-position:50% 0%; }
+.collectible-shelf:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) > .shelf-objects { bottom:45.946%; }
+[data-shelf-theme="honeybee"] > .shelf-board { background-image:url('assets/collectible-shelf-honeybee.png'); }
+[data-shelf-theme="volcanic"] > .shelf-board { background-image:url('assets/collectible-shelf-volcanic.png'); }
+[data-shelf-theme="aurora"] > .shelf-board { background-image:url('assets/collectible-shelf-aurora.png'); }
 .shelf-theme-grid button { min-width:0; padding:8px; border:2px solid #60414e; border-radius:10px; background:#171115; color:#fff0f5; cursor:pointer; }
 .shelf-theme-grid button[aria-pressed="true"] { border-color:#ff94b6; box-shadow:inset 0 0 0 1px #ff94b6; }
 .shelf-theme-grid .collectible-shelf { display:block; }
