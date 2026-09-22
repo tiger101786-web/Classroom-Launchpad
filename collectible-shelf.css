@@ -96,63 +96,78 @@
 @media(max-width:480px) { .shelf-filters { grid-template-columns:1fr; } .shelf-choice-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; } .shelf-choice-grid button { padding:5px; } }
 @media(prefers-reduced-motion:reduce) { .shelf-customize { transition:none; } }
 
-/* Keep the controls fixed; only the bounded choice area may scroll on short screens. */
-.shelf-dialog[open] { display:flex; flex-direction:column; gap:8px; width:min(920px,calc(100vw - 24px)); height:min(900px,calc(100dvh - 24px)); max-height:calc(100dvh - 24px); padding:16px; overflow:hidden; }
-.shelf-dialog > * { flex-shrink:0; min-width:0; }
+/* Independent preview and browser columns prevent a tall shelf from starving choices. */
+.shelf-dialog[open] { display:grid; grid-template-columns:minmax(220px,36%) minmax(0,1fr); grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto; gap:10px 20px; width:min(1120px,calc(100vw - 24px)); height:min(860px,calc(100dvh - 24px)); max-height:calc(100dvh - 24px); margin:auto; padding:16px; overflow:hidden; }
+.shelf-dialog > * { min-width:0; }
 .shelf-dialog [hidden] { display:none !important; }
-.shelf-dialog .launch-scene-dialog-heading { align-items:center; }
+.shelf-dialog .launch-scene-dialog-heading { grid-column:1 / -1; align-items:center; }
 .shelf-dialog h2 { margin:0; font-size:20px; }
-.shelf-preview-area { display:flex; justify-content:space-evenly; align-items:center; gap:24px; min-height:240px; }
-.shelf-dialog #shelfPreview { width:350px; flex-shrink:0; margin:44px 0 0; padding:0 6px 20px; }
-.shelf-preview-controls { font-size:12px; max-width:190px; }
-.shelf-preview-controls p { margin:4px 0 10px; }
-.shelf-preview-controls button { font-size:12px; }
-.shelf-preview-controls .shelf-show { margin:10px 0 0; }
+.shelf-preview-area { grid-column:1; grid-row:2 / 7; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; min-height:0; border-right:1px solid var(--border); padding-right:18px; }
+.shelf-dialog #shelfPreview { width:100%; max-width:350px; flex-shrink:0; margin:44px 0 0; padding:0 6px 22px; }
+.shelf-preview-controls { font-size:13px; }
+.shelf-preview-controls p { margin:0 0 10px; }
+.shelf-preview-controls .shelf-show { margin:12px 0 0; }
+.shelf-dialog > :is(.shelf-tabs,.shelf-filters,#shelfResults,.shelf-browse-area,.shelf-pagination) { grid-column:2; }
 .shelf-tabs { display:flex; gap:8px; }
 .shelf-tabs button { flex:1; padding:9px; border:1px solid #a6526a; border-radius:10px; background:#190c13; color:#fff0f5; font:inherit; font-weight:800; cursor:pointer; }
 .shelf-tabs button[aria-selected=true] { background:#861332; border-color:#ff94b6; box-shadow:inset 0 -3px #ff94b6; }
-.shelf-dialog .shelf-filters { grid-template-columns:1fr 1fr; gap:10px; }
+.shelf-dialog .shelf-filters { grid-template-columns:1fr 1fr; gap:8px; }
 .shelf-dialog .shelf-filters input,.shelf-dialog .shelf-filters select { padding:7px; margin-top:3px; }
 .shelf-dialog #shelfResults { font-size:12px; line-height:1.3; margin:0; }
-.shelf-browse-area { flex:1 1 0; min-height:0; overflow:auto; padding:4px; overscroll-behavior:contain; }
-.shelf-dialog .shelf-choice-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
-.shelf-dialog .shelf-choice-grid button { padding:5px; gap:3px; }
-.shelf-dialog .shelf-choice-grid .shelf-object { width:min(calc(100% - 10px),48px); }
-.shelf-dialog .shelf-choice-grid strong { font-size:11px; }
-.shelf-dialog .shelf-theme-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.shelf-browse-area { min-height:0; overflow:auto; padding:4px; overscroll-behavior:contain; --shelf-card-height:154px; }
+.shelf-dialog :is(.shelf-choice-grid,.shelf-theme-grid) { grid-template-columns:repeat(var(--shelf-columns,3),minmax(0,1fr)); grid-auto-rows:var(--shelf-card-height); gap:8px; }
+.shelf-dialog .shelf-choice-grid button { padding:6px; gap:4px; justify-content:flex-end; overflow:hidden; }
+.shelf-dialog .shelf-choice-grid .shelf-object { width:min(calc(100% - 12px),62px); }
+.shelf-dialog .shelf-choice-grid strong { font-size:12px; line-height:1.3; min-height:2.6em; }
+.shelf-dialog .shelf-theme-grid button { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding:6px; }
 .shelf-dialog .shelf-theme-grid .collectible-shelf { width:min(100%,170px); margin:auto; }
-.shelf-pagination { display:flex; justify-content:center; align-items:center; gap:20px; font-size:12px; }
-.shelf-pagination button { min-width:90px; }
+.shelf-dialog .shelf-theme-grid strong { min-height:2.6em; font-size:12px; }
+.shelf-pagination { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
+.shelf-pagination button { min-width:80px; }
 .shelf-dialog button:disabled { opacity:.45; cursor:default; }
-@media(min-width:800px) and (min-height:651px) {
-  .shelf-dialog .shelf-choice-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
-}
-.shelf-dialog .shelf-dialog-actions { position:static; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:10px 0 0; margin:0; }
+.shelf-dialog .shelf-dialog-actions { grid-column:1 / -1; position:static; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:10px 0 0; margin:0; }
 #shelfSaveStatus { margin-right:auto; font-size:12px; }
-@media(max-width:600px) {
-  .shelf-dialog[open] { padding:12px; gap:7px; }
+@media(max-width:650px) {
+  .shelf-dialog[open] { grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto auto auto auto minmax(0,1fr) auto auto; gap:6px; padding:10px; }
+  .shelf-dialog > :is(.launch-scene-dialog-heading,.shelf-preview-area,.shelf-tabs,.shelf-filters,#shelfResults,.shelf-browse-area,.shelf-pagination,.shelf-dialog-actions) { grid-column:1; grid-row:auto; }
   .shelf-dialog h2 { font-size:17px; }
-  .shelf-preview-area { gap:10px; min-height:148px; }
-  .shelf-dialog #shelfPreview { width:165px; margin-top:22px; }
+  .shelf-preview-area { flex-direction:row; justify-content:space-evenly; gap:10px; border:0; padding:0; }
+  .shelf-dialog #shelfPreview { width:155px; margin-top:20px; padding-bottom:16px; }
   .shelf-preview-controls { font-size:11px; }
-  .shelf-preview-controls button { padding:6px; font-size:11px; }
-  .shelf-dialog .shelf-choice-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-  .shelf-dialog .shelf-theme-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .shelf-dialog .shelf-choice-grid .shelf-object { width:min(calc(100% - 10px),46px); }
+  .shelf-preview-controls p { display:none; }
+  .shelf-dialog .outline-btn,.shelf-dialog .primary-btn { padding:7px 9px; font-size:12px; }
+  .shelf-tabs button { padding:7px; }
+  .shelf-browse-area { --shelf-card-height:138px; }
+  .shelf-dialog .shelf-choice-grid .shelf-object { width:52px; }
 }
 @media(max-height:650px) {
-  .shelf-preview-area { min-height:112px; }
-  .shelf-dialog #shelfPreview { width:135px; margin-top:18px; padding-bottom:14px; }
+  .shelf-dialog[open] { gap:5px 12px; padding:10px; }
+  .shelf-dialog .outline-btn,.shelf-dialog .primary-btn { padding:6px 9px; font-size:12px; }
+  .shelf-tabs button { padding:6px; }
+  .shelf-dialog h2 { font-size:17px; }
+  .shelf-preview-area { gap:10px; }
+  .shelf-dialog #shelfPreview { max-width:230px; margin-top:28px; }
   .shelf-preview-controls p { display:none; }
-  .shelf-dialog[open] { gap:5px; padding:10px; }
+  .shelf-dialog .shelf-dialog-actions { padding-top:5px; }
+  .shelf-browse-area { --shelf-card-height:138px; }
+  .shelf-dialog .shelf-choice-grid .shelf-object { width:52px; }
 }
-@media(max-height:500px) and (min-width:601px) {
-  .shelf-dialog[open] { display:grid; grid-template-columns:180px minmax(0,1fr); grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto; gap:4px 12px; }
-  .shelf-dialog .launch-scene-dialog-heading { grid-column:1 / -1; }
-  .shelf-preview-area { grid-column:1; grid-row:2 / -1; flex-direction:column; justify-content:center; gap:4px; }
-  .shelf-dialog > :is(.shelf-tabs,.shelf-filters,#shelfResults,.shelf-browse-area,.shelf-pagination,.shelf-dialog-actions) { grid-column:2; }
-  .shelf-tabs button { padding:5px; }
-  .shelf-dialog .shelf-dialog-actions { padding-top:4px; }
-  .shelf-dialog .shelf-choice-grid .shelf-object { width:30px; }
-  .shelf-dialog .shelf-choice-grid strong { font-size:10px; }
+@media(max-width:650px) and (max-height:720px) {
+  .shelf-dialog #shelfPreview { width:125px; margin-top:16px; padding-bottom:12px; }
+}
+@media(min-width:651px) and (max-height:500px) {
+  .shelf-dialog[open] { gap:4px 12px; padding:8px; }
+  .shelf-dialog .outline-btn,.shelf-dialog .primary-btn { padding:4px 8px; min-height:28px; line-height:18px; }
+  .shelf-tabs button { padding:4px; font-size:13px; line-height:20px; }
+  .shelf-dialog .shelf-filters :is(input,select) { padding:4px; margin-top:5px; font-size:12px; line-height:18px; }
+  .shelf-dialog .shelf-filters label { font-size:11px; }
+  .shelf-browse-area { --shelf-card-height:112px; }
+  .shelf-dialog .shelf-choice-grid .shelf-object { width:40px; }
+  .shelf-dialog .shelf-theme-grid .collectible-shelf { width:min(100%,110px); }
+  .shelf-dialog .shelf-choice-grid strong,.shelf-dialog .shelf-theme-grid strong { font-size:11px; }
+}
+/* Extreme zoom/keyboard heights: keep controls reachable instead of clipping them. */
+@media(max-height:360px), (max-width:650px) and (max-height:540px) {
+  .shelf-dialog[open] { overflow:auto; }
+  .shelf-browse-area { min-height:146px; }
 }

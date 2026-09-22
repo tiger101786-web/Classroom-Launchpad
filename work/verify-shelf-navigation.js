@@ -7,16 +7,29 @@ const {chromium}=require('playwright');
  try{
   const page=await browser.newPage();
   await page.route('http://shelf.local/assets/*',route=>route.fulfill({contentType:'image/png',body:fs.readFileSync(path.join(__dirname,'../assets',path.basename(new URL(route.request().url()).pathname)))}));
-  const css=['launchpad-scenes.css','collectible-shelf.css'].map(file=>fs.readFileSync(path.join(__dirname,'..',file),'utf8')).join('\n');
-  for(const [width,height] of [[1280,900],[390,844],[390,667],[844,390]]){
+  const css=['styles.css','launchpad-scenes.css','collectible-shelf.css'].map(file=>fs.readFileSync(path.join(__dirname,'..',file),'utf8')).join('\n');
+  // Reduced CSS viewports simulate the usable space at 125% and 150% scaling.
+  for(const [width,height] of [[1920,1080],[1366,668],[1226,653],[1093,534],[911,445],[1280,900],[390,844],[390,667],[844,390]]){
    await page.setViewportSize({width,height});
    await page.setContent('<base href="http://shelf.local/"><style>:root{--paper:#171015;--ink:#fff0f5;--border:#804355;--muted:#e2bccb}body{font-family:Arial}button{padding:7px;cursor:pointer}'+css+'</style><button id="opener">Open</button>');
    await page.addScriptTag({path:path.join(__dirname,'../collectible-shelf.js')});
    const open=()=>page.evaluate(()=>{window.saved=null;CollectibleShelf.open({selected:{enabled:true,theme:'crimson',slots:['goku','planet','controller']},save:async value=>{if(window.failSave)throw Error('Test failed');window.saved=value;return value;},onSave:()=>{}});});
    await open();
-   assert.equal(await page.locator('[data-shelf-item]').count(),width<=600?(height<780?3:6):height<740?4:12);
+   await page.waitForTimeout(80);
+   assert(await page.locator('[data-shelf-item]').count()>0);
+   const checkCards=async()=>{
+    const failures=await page.locator('.shelf-browse-area').evaluate(area=>{
+     const rect=area.getBoundingClientRect();
+     return [...area.querySelectorAll('button')].filter(button=>{
+      const box=button.getBoundingClientRect();
+      return box.top<rect.top || box.bottom>rect.bottom+1 || box.left<rect.left || box.right>rect.right+1;
+     }).map(button=>({text:button.textContent,areaHeight:rect.height,cardHeight:button.getBoundingClientRect().height}));
+    });
+    assert.deepEqual(failures,[],width+'x'+height+': complete cards must fit without scrolling');
+   };
    const seen=new Set();
    do{
+    await checkCards();
     for(const id of await page.locator('[data-shelf-item]').evaluateAll(els=>els.map(el=>el.dataset.shelfItem)))seen.add(id);
     if(await page.locator('#shelfNext').isDisabled())break;
     await page.locator('#shelfNext').click();
@@ -27,7 +40,16 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#shelfPageStatus').textContent(),'Page 1 of 1');
    await page.locator('[data-shelf-item="windmill"]').click();
    await page.locator('[data-shelf-tab="styles"]').click();
+   await page.waitForTimeout(80);
    assert.equal(await page.locator('[data-shelf-theme-choice]').first().getAttribute('data-shelf-theme-choice'),'crimson');
+   const seenThemes=new Set();
+   do{
+    await checkCards();
+    for(const id of await page.locator('[data-shelf-theme-choice]').evaluateAll(els=>els.map(el=>el.dataset.shelfThemeChoice)))seenThemes.add(id);
+    if(await page.locator('#shelfNext').isDisabled())break;
+    await page.locator('#shelfNext').click();
+   }while(true);
+   assert.equal(seenThemes.size,require('../collectible-shelf').themes.length);
    await page.locator('#shelfSearch').fill('porcelain');
    await page.locator('[data-shelf-theme-choice="porcelain"]').click();
    await page.locator('[data-shelf-tab="objects"]').click();

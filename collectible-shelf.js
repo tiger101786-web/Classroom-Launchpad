@@ -215,7 +215,16 @@
     document.body.append(dialog);
     const preview=dialog.querySelector('#shelfPreview'), choices=dialog.querySelector('#shelfChoices'), themeChoices=dialog.querySelector('.shelf-theme-grid'), search=dialog.querySelector('#shelfSearch'), category=dialog.querySelector('#shelfCategory');
     dialog.querySelector('#shelfEnabled').checked=draft.enabled;
-    const pageSize=()=>tab==='styles' ? (innerWidth<=600 || innerHeight<650 ? 2 : 6) : (innerWidth<=600 ? (innerHeight<780 ? 3 : 6) : (innerHeight<740 ? 4 : innerHeight<850 ? 8 : 12));
+    const browse=dialog.querySelector('.shelf-browse-area');
+    // Measure the space left after real fonts, controls, zoom and preview layout.
+    const pageSize=()=>{
+      const style=getComputedStyle(browse);
+      const cardHeight=parseFloat(style.getPropertyValue('--shelf-card-height')) || 154;
+      const columns=Math.max(1,Math.min(tab==='styles'?3:4,Math.floor((browse.clientWidth-8+8)/(tab==='styles'?178:120))));
+      const rowCount=Math.max(1,Math.min(3,Math.floor((browse.clientHeight-8+8)/(cardHeight+8))));
+      browse.style.setProperty('--shelf-columns',columns);
+      return columns*rowCount;
+    };
     const update=()=>{
       preview.innerHTML=art(draft,true,active);
       dialog.querySelectorAll('[data-shelf-tab]').forEach(button=>{
@@ -257,11 +266,11 @@
     });
     choices.addEventListener('click',event=>{
       const button=event.target.closest('[data-shelf-item]');if(!button || saving)return;
-      const id=button.dataset.shelfItem;draft.slots[active]=id;update();choices.querySelector('[data-shelf-item="'+id+'"]').focus();
+      const id=button.dataset.shelfItem;draft.slots[active]=id;update();choices.querySelector('[data-shelf-item="'+id+'"]')?.focus();
     });
     themeChoices.addEventListener('click',event=>{
       const button=event.target.closest('[data-shelf-theme-choice]');if(!button || saving)return;
-      draft.theme=button.dataset.shelfThemeChoice;update();themeChoices.querySelector('[data-shelf-theme-choice="'+draft.theme+'"]').focus();
+      draft.theme=button.dataset.shelfThemeChoice;update();themeChoices.querySelector('[data-shelf-theme-choice="'+draft.theme+'"]')?.focus();
     });
     search.addEventListener('input',()=>{searches[tab]=search.value;pages[tab]=0;update();});
     category.addEventListener('change',()=>{pages.objects=0;update();});
@@ -270,9 +279,14 @@
     dialog.querySelector('#shelfEnabled').addEventListener('change',event=>{draft.enabled=event.target.checked;});
     const resize=()=>{if(!saving)update();};
     window.addEventListener('resize',resize);
+    let resizeFrame;
+    const observer=new ResizeObserver(()=>{
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame=requestAnimationFrame(()=>{if(!saving && dialog.isConnected)update();});
+    });
     const close=()=>{
       if(saving)return;
-      window.removeEventListener('resize',resize);dialog.close();dialog.remove();
+      window.removeEventListener('resize',resize);observer.disconnect();cancelAnimationFrame(resizeFrame);dialog.close();dialog.remove();
       if(opener?.closest('#shelfSettingsMenu'))restoreGear(keyboard);
       else if(opener?.isConnected)opener.focus();
       else document.querySelector('.header-account-summary')?.focus();
@@ -285,7 +299,7 @@
       try{const result=await save(clean(draft));saving=false;close();onSave(result);restoreGear(keyboard);}
       catch(error){saving=false;dialog.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false;});update();dialog.querySelector('#shelfSaveStatus').textContent=error.message||'Could not save. Please try again.';}
     });
-    update();dialog.showModal();
+    dialog.showModal();update();observer.observe(browse);
   }
   const api = { items, themes, valid, clean, render, open, art };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
