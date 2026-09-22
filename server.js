@@ -33,7 +33,7 @@ function homeShelfForSession(session, db) {
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeShelf);
 }
 const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove"]);
-const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove"]);
+const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove", "autumn"]);
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner

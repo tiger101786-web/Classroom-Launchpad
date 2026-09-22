@@ -530,8 +530,8 @@ async function run() {
     assert.equal((await request('/api/profile-banner', { method: 'POST', body: { profileBanner: 'colt' } })).status, 401);
     assert.equal((await request('/api/profile-banner', { method: 'POST', cookie: studentCookie, body: { profileBanner: '../bad' } })).status, 400);
     await page.locator('#changeProfileBanner').click();
-    assert.equal(await page.locator('[data-banner-choice]').count(), 9);
-    for (const id of ['colt', 'neon', 'cosmic', 'horizon', 'ocean', 'laurel', 'sakura', 'grove']) {
+    assert.equal(await page.locator('[data-banner-choice]').count(), 10);
+    for (const id of ['colt', 'neon', 'cosmic', 'horizon', 'ocean', 'laurel', 'sakura', 'grove', 'autumn']) {
       await page.locator(`[data-banner-choice="${id}"]`).click();
       assert.equal(await page.locator('#profileBannerPreview [data-banner]').getAttribute('data-banner'), id);
       await page.locator('#profileBannerPreview img').first().evaluate(image => image.decode());
