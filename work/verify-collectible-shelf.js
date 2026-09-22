@@ -32,7 +32,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   await page.locator('[data-shelf-item="tanjiro"]').click();
   assert.equal(await page.locator('#shelfPreview [aria-label="Tanjiro Bust"]').count(),1);
   await page.locator('#shelfCategory').selectOption('');
-  assert.equal(await page.locator('[data-shelf-item]').count(),116);
+  assert.equal(await page.locator('[data-shelf-item]').count(),135);
   assert.equal(await page.locator('[data-shelf-item="book-nook"]').count(),0);
   assert.equal(await page.locator('[data-shelf-slot]').count(),3);
   await page.locator('[data-shelf-item="trophy"]').click();
@@ -156,6 +156,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   }
   newItems.push('nezuko','red-panda','penguin','axolotl','hedgehog','lucky-cat','terrarium','mushroom-house','lantern','music-box','teacup','rubber-duck','origami-crane','ammonite','geode','message-bottle','jewelry-box','snowman','pumpkin-lantern','sandcastle','luffy','daisy-vase');
   newItems.push("capybara","otter","frog-prince","sleeping-cat","hummingbird","gumball-machine","retro-radio","typewriter","lava-lamp","rotary-phone","seahorse","kraken","unicorn","wizard-hat","dragon-egg","macaron-tower","honey-pot","rubiks-cube","nesting-doll","paperweight");
+  newItems.push("sloth","koala","dachshund","raccoon","flamingo","chameleon","jukebox","sewing-machine","gramophone","vintage-tv","carousel-horse","koi","lotus-bowl","chess-knight","ornate-key","coffee-grinder","ramen-bowl","sushi-plate","windmill");
   for (const id of newItems) {
     const result = await post({enabled:true,slots:[id,'none','none']});
     assert.equal(result.status,200);
@@ -195,7 +196,7 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   const shelfThemes = require('../collectible-shelf').themes;
   for (const theme of shelfThemes) {
     await open();
-    assert.equal(await page.locator('[data-shelf-theme-choice]').count(),19);
+    assert.equal(await page.locator('[data-shelf-theme-choice]').count(),25);
     await page.locator(`[data-shelf-theme-choice="${theme.id}"]`).click();
     assert.equal(await page.locator('#shelfPreview .collectible-shelf').getAttribute('data-shelf-theme'),theme.id);
     assert.equal(await page.locator('#shelfPreview [aria-label="Nezuko Statue"]').count(),1);
@@ -236,6 +237,41 @@ module.exports = async ({ page, browser, baseUrl, request, studentCookie, teache
   assert.equal(await page.locator('.shelf-dialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
   await page.screenshot({path:path.join(dataDir,'shelf-theme-chooser-mobile.png')});
   await page.keyboard.press('Escape');
+  await page.setViewportSize({width:1280,height:900});
+  for (const width of [1280,390]) {
+    await page.setViewportSize({width,height:900});
+    for (const theme of ['crimson','crimson-bastion','crimson-spire','peacock','art-deco','autumn','porcelain']) {
+      await post({enabled:true,theme,slots:['luffy','rumi','sailor-moon']});
+      await page.reload({waitUntil:'networkidle'});
+      const layout = await page.locator('.home-collectible-shelf').evaluate(shelf => {
+        const board = shelf.querySelector('.collectible-shelf');
+        const rect = board.getBoundingClientRect();
+        const style = getComputedStyle(board);
+        const top = Number(style.getPropertyValue('--shelf-surface-top')) || .53;
+        const bottom = Number(style.getPropertyValue('--shelf-surface-bottom')) || .64;
+        return {
+          headingBottom:document.querySelector('h1').getBoundingClientRect().bottom,
+          surfaceTop:rect.top+rect.height*top,
+          surfaceBottom:rect.top+rect.height*bottom,
+          figures:[...shelf.querySelectorAll('.shelf-object')].map(el => {
+            const box=el.getBoundingClientRect(), art=el.querySelector('svg'), scale=box.width/220;
+            const left=box.left+Number(art.getAttribute('x'))*scale;
+            return {left,right:left+Number(art.getAttribute('width'))*scale,top:box.top+Number(art.getAttribute('y'))*scale,base:box.bottom-4*scale,height:Number(art.getAttribute('height'))*scale};
+          })
+        };
+      });
+      assert.equal(layout.figures.length,3);
+      assert(layout.figures[0].height > 95,'Larger figures retain their detail');
+      for (const figure of layout.figures) {
+        assert(figure.top >= layout.headingBottom,`Figure clears heading on ${theme} at ${width}`);
+        assert(figure.left >= 0 && figure.right <= width,'Figure fits viewport');
+        assert(figure.base >= layout.surfaceTop && figure.base <= layout.surfaceBottom,`Figure sits on ${theme} surface`);
+      }
+      for(let i=1;i<3;i++) assert(layout.figures[i-1].right <= layout.figures[i].left,'Large figures do not overlap');
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+      if(theme==='peacock' || theme==='porcelain') await page.screenshot({path:path.join(dataDir,`shelf-new-${theme}-${width}.png`)});
+    }
+  }
   await page.setViewportSize({width:1280,height:900});
   const guest=await browser.newPage();
   await guest.goto(baseUrl,{waitUntil:'networkidle'});
