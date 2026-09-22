@@ -20,6 +20,7 @@ const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observator
 const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "neon", "prism", "onyx", "braid", "bronze", "velvet", "mosaic", "carbon", "deco", "frost", "blossom", "guardian", "woodland", "orbit", "treasure", "royal", "phoenix", "butterfly", "frost-dragon", "clockwork", "library", "champion", "halloween", "new-orleans", "sunflower", "peacock", "harvest", "evergreen"]);
 homeSceneIds.add("alien");
 homeSceneIds.add("anime");
+homeSceneIds.add("ninja-course");
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }

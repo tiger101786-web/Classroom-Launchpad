@@ -48,6 +48,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ["Fall & Halloween",["harvest-gnome","Harvest Gnome"],["scarecrow","Scarecrow Figurine"],["acorn-house","Acorn Cottage"],["apple-basket","Apple Harvest Basket"],["pumpkin-pie","Pumpkin Pie Keepsake"],["friendly-ghost","Friendly Ghost"],["witch-cat","Witch Cat Figurine"],["candy-cauldron","Candy Cauldron"],["haunted-cottage","Haunted Cottage"],["bat-figurine","Little Bat Figurine"]],
     ["Animal Friends",["capybara","Capybara Figurine"],["otter","Otter Figurine"],["frog-prince","Frog Prince"],["sleeping-cat","Sleeping Cat"],["hummingbird","Hummingbird Sculpture"]],
     ["Miniature Treasures",["gumball-machine","Mini Gumball Machine"],["retro-radio","Mini Retro Radio"],["typewriter","Mini Typewriter"],["lava-lamp","Mini Lava Lamp"],["rotary-phone","Mini Rotary Phone"]],
     ["Tiny Wonders",["seahorse","Seahorse Sculpture"],["kraken","Tiny Kraken"],["unicorn","Unicorn Figurine"],["wizard-hat","Wizard Hat Keepsake"],["dragon-egg","Dragon Egg"]],
@@ -75,6 +76,16 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'harvest-gnome': {"source":"assets/shelf-harvest-gnome.png","width":1254,"height":1254,"bounds":[292,18,683,1219]},
+    'scarecrow': {"source":"assets/shelf-scarecrow.png","width":1254,"height":1254,"bounds":[226,0,867,1254]},
+    'acorn-house': {"source":"assets/shelf-acorn-house.png","width":1254,"height":1254,"bounds":[180,25,922,1192]},
+    'apple-basket': {"source":"assets/shelf-apple-basket.png","width":1254,"height":1254,"bounds":[129,48,1060,1158]},
+    'pumpkin-pie': {"source":"assets/shelf-pumpkin-pie.png","width":1254,"height":1254,"bounds":[116,207,1023,873]},
+    'friendly-ghost': {"source":"assets/shelf-friendly-ghost.png","width":1254,"height":1254,"bounds":[220,70,839,1119]},
+    'witch-cat': {"source":"assets/shelf-witch-cat.png","width":1254,"height":1254,"bounds":[285,20,731,1209]},
+    'candy-cauldron': {"source":"assets/shelf-candy-cauldron.png","width":1254,"height":1254,"bounds":[152,55,938,1143]},
+    'haunted-cottage': {"source":"assets/shelf-haunted-cottage.png","width":1254,"height":1254,"bounds":[155,15,1014,1199]},
+    'bat-figurine': {"source":"assets/shelf-bat-figurine.png","width":1254,"height":1254,"bounds":[254,9,791,1230]},
     'sloth': {"source":"assets/shelf-sloth.png","width":1254,"height":1254,"bounds":[186,12,935,1224]},
     'koala': {"source":"assets/shelf-koala.png","width":1254,"height":1254,"bounds":[106,8,1053,1239]},
     'dachshund': {"source":"assets/shelf-dachshund.png","width":1254,"height":1254,"bounds":[36,68,1191,1122]},

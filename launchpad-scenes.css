@@ -3,6 +3,9 @@
 .launch-scene-image, .launch-scene-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .launch-scene-image { transform: none; animation: none; }
 .scene-loading { display: grid; place-items: center; background: #21131d; color: #f3dae3; font-size: .85rem; }
+.scene-ninja-course .launch-scene-particles i { inset:-15%; width:130%; height:130%; border-radius:0; background:conic-gradient(from 175deg at 20% 5%,transparent 0deg,#90cfff66 10deg,transparent 22deg),conic-gradient(from 145deg at 85% 8%,transparent 0deg,#ff74864d 12deg,transparent 25deg); box-shadow:none; transform-origin:50% 8%; animation:scene-ninja-lights 5s ease-in-out infinite alternate; }
+.scene-ninja-course .launch-scene-particles i:nth-child(n+2) { display:none; }
+@keyframes scene-ninja-lights { from { transform:rotate(-10deg); opacity:.45; } to { transform:rotate(12deg); opacity:.95; } }
 .scene-cafe .launch-scene-particles { clip-path: polygon(9% 0, 96% 0, 96% 69%, 9% 67%); }
 .scene-bookshop .launch-scene-particles { clip-path: inset(16% 30% 55% 31%); }
 .scene-bookshop .launch-scene-particles i { left: calc(36% + var(--n) * 5%); top: -12%; width: 1px; height: 19px; border-radius: 1px; background: #b9eaff99; box-shadow: none; animation: scene-rain 2.8s linear infinite; animation-delay: calc(var(--n) * -.31s); }
