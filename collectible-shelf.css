@@ -102,8 +102,8 @@
 .shelf-dialog [hidden] { display:none !important; }
 .shelf-dialog .launch-scene-dialog-heading { align-items:center; }
 .shelf-dialog h2 { margin:0; font-size:20px; }
-.shelf-preview-area { display:flex; justify-content:center; align-items:center; gap:24px; min-height:170px; }
-.shelf-dialog #shelfPreview { width:210px; flex-shrink:0; margin:30px 0 0; padding:0 6px 20px; }
+.shelf-preview-area { display:flex; justify-content:space-evenly; align-items:center; gap:24px; min-height:240px; }
+.shelf-dialog #shelfPreview { width:350px; flex-shrink:0; margin:44px 0 0; padding:0 6px 20px; }
 .shelf-preview-controls { font-size:12px; max-width:190px; }
 .shelf-preview-controls p { margin:4px 0 10px; }
 .shelf-preview-controls button { font-size:12px; }
@@ -124,6 +124,9 @@
 .shelf-pagination { display:flex; justify-content:center; align-items:center; gap:20px; font-size:12px; }
 .shelf-pagination button { min-width:90px; }
 .shelf-dialog button:disabled { opacity:.45; cursor:default; }
+@media(min-width:800px) and (min-height:651px) {
+  .shelf-dialog .shelf-choice-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
+}
 .shelf-dialog .shelf-dialog-actions { position:static; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:10px 0 0; margin:0; }
 #shelfSaveStatus { margin-right:auto; font-size:12px; }
 @media(max-width:600px) {
