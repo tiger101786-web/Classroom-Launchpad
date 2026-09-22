@@ -526,11 +526,11 @@ async function run() {
     assert.equal((await fetch(`${baseUrl}${avatarSrc}`, { headers: { Cookie: studentCookie } })).status, 200);
     await page.screenshot({ path: path.join(dataDir, "forum-thread-desktop.png"), fullPage: true });
 
-    assert.equal(await page.locator('[data-profile-frame]').count(), 11);
+    assert.equal(await page.locator('[data-profile-frame]').count(), 14);
     assert.equal((await request('/api/profile-banner', { method: 'POST', body: { profileBanner: 'colt' } })).status, 401);
     assert.equal((await request('/api/profile-banner', { method: 'POST', cookie: studentCookie, body: { profileBanner: '../bad' } })).status, 400);
     await page.locator('#changeProfileBanner').click();
-    assert.equal(await page.locator('[data-banner-choice]').count(), 10);
+    assert.equal(await page.locator('[data-banner-choice]').count(), 13);
     for (const id of ['colt', 'neon', 'cosmic', 'horizon', 'ocean', 'laurel', 'sakura', 'grove', 'autumn']) {
       await page.locator(`[data-banner-choice="${id}"]`).click();
       assert.equal(await page.locator('#profileBannerPreview [data-banner]').getAttribute('data-banner'), id);

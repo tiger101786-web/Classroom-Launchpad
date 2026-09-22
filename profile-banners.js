@@ -1,6 +1,7 @@
 (() => {
   const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon'], ['ocean', 'Ocean Pearl'], ['laurel', 'Royal Laurel'], ['sakura', 'Sakura Bloom'], ['grove', 'Enchanted Forest'], ['autumn', 'Autumn Harvest']];
   const normalize = value => choices.some(([id]) => id === value) ? value : 'none';
+  choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
   const cover = value => {
     const id = normalize(value);
     return id === 'none' ? '' : `<div class="profile-banner-cover" data-banner="${id}" aria-hidden="true"><img src="assets/profile-banner-${id}.png" alt="" loading="lazy"></div>`;

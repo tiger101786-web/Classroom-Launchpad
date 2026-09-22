@@ -32,8 +32,8 @@ function homeShelfForSession(session, db) {
   return collectibleShelf.clean(session.role === "teacher" ? db.teacherHomeShelf
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeShelf);
 }
-const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove"]);
-const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove", "autumn"]);
+const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove", "storm", "clockwork", "moon-garden"]);
+const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove", "autumn", "storm", "clockwork", "moon-garden"]);
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner

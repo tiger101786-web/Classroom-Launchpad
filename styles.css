@@ -10294,6 +10294,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-frame.frame-sakura { background: #efb9a6; }
 .profile-frame.frame-sakura::before { background: conic-gradient(#612e58, #ec9bc2, #88385f, #ffcadc, #612e58); }
 .profile-frame.frame-grove { background: #bddc8f; }
+.profile-frame.frame-storm { background: #c3eaff; }
+.profile-frame.frame-storm::before { background: conic-gradient(#142b58,#448fdd,#17284a,#629ed2,#142b58); }
+.profile-frame.frame-clockwork { background: #e5bd72; }
+.profile-frame.frame-clockwork::before { background: conic-gradient(#4b281a,#bd8545,#3a211a,#cf9d61,#4b281a); }
+.profile-frame.frame-moon-garden { background: #ded5f4; }
+.profile-frame.frame-moon-garden::before { background: conic-gradient(#241b42,#8c72bb,#30204e,#a48bcc,#241b42); }
 .profile-frame.frame-grove::before { background: conic-gradient(#123f34, #4c9865, #173e32, #85b26a, #123f34); }
 .profile-frame-picker { grid-column: 1 / -1; min-width: 0; margin: 8px 0 0; padding: 18px 0 0; border: 0; border-top: 1px solid var(--border); }
 .profile-frame-picker legend { padding: 0 10px 0 0; font-weight: 900; font-size: 1rem; }
