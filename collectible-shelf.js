@@ -171,9 +171,10 @@
     const [x,y,w,h] = asset ? asset.bounds : bounds[item.row * 6 + item.column];
     const source = asset?.source || 'assets/shelf-collectibles.png';
     const anime = item.category === 'Anime';
-    // Taller statues gain height without stretching or intruding into adjacent spots.
-    const scale = anime ? Math.min(330 / Math.max(w,h), 240 / w) : 200 / Math.max(w,h);
-    const height = Math.max(220, h * scale + 20);
+    // Every collectible shares the statue sizing and bottom baseline. Wide pieces
+    // retain their proportions and stay inside the space between neighboring slots.
+    const scale = Math.min(330 / Math.max(w,h), 240 / w);
+    const height = 350;
     return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
