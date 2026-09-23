@@ -1707,7 +1707,9 @@ const PROFILE_FRAMES = [
   ["grove", "Enchanted Forest", "Emerald vines & firefly gems"],
   ["storm", "Storm Crystal", "Sapphire gems & silver lightning"],
   ["clockwork", "Clockwork Brass", "Antique gears & copper"],
-  ["moon-garden", "Moonlit Garden", "Silver moon & violet leaves"]
+  ["moon-garden", "Moonlit Garden", "Silver moon & violet leaves"],
+  ["silver-rope", "Silver Rope", "Woven silver & charcoal"],
+  ["emerald-jewel", "Emerald Jewel", "Green gemstones & gold trim"]
 ];
 function normalizeProfileFrame(value) { return PROFILE_FRAMES.some(([id]) => id === value) ? value : "none"; }
 function profileFrameArt(frame) {
@@ -1718,6 +1720,8 @@ function profileFrameArt(frame) {
   const leaves = (fill, stroke) => Array.from({ length: 10 }, (_, i) => `<g transform="rotate(${i * 28 - 126} 50 50)"><path d="M50 6Q37 0 40 12Q46 15 50 6ZM50 6Q63 0 60 12Q54 15 50 6Z" fill="${fill}" stroke="${stroke}" stroke-width=".7"/></g>`).join("");
   const blossoms = [[16, 17], [85, 23], [49, 92]].map(([x, y]) => `<g transform="translate(${x} ${y})">${Array.from({ length: 5 }, (_, i) => `<ellipse cx="0" cy="-4" rx="3" ry="4.5" transform="rotate(${i * 72})" fill="#ffc5df" stroke="#c55d92" stroke-width=".7"/>`).join("")}<circle r="2" fill="#ffe5a4"/></g>`).join("");
   const extra = {
+    'silver-rope': '<circle cx="50" cy="50" r="44" fill="none" stroke="#46515e" stroke-width="6"/><circle cx="50" cy="50" r="44" fill="none" stroke="#e2edf7" stroke-width="5" stroke-dasharray="3 3"/><circle cx="50" cy="50" r="40" fill="none" stroke="#a6b5c6" stroke-width="1"/>',
+    'emerald-jewel': '<circle cx="50" cy="50" r="44" fill="none" stroke="#efd391" stroke-width="2"/>' + [0,90,180,270].map(a=>`<g transform="rotate(${a} 50 50)"><path d="m50 1 6 7-6 8-6-8Z" fill="#29b587" stroke="#efd391" stroke-width="1.5"/><path d="M50 1v15m-6-8h12" stroke="#b1f5d8" stroke-width=".7"/></g>`).join(''),
     storm: '<circle cx="50" cy="50" r="44" fill="none" stroke="#c3eaff" stroke-width="1.5"/>' + [0,90,180,270].map(a => `<g transform="rotate(${a} 50 50)"><path d="M50 1 56 9 50 17 44 9Z" fill="#398fea" stroke="#c3eaff"/><path d="M50 1v16m-6-8h12" stroke="#a1d9ff" stroke-width=".7"/></g>`).join(''),
     clockwork: '<circle cx="50" cy="50" r="44" fill="none" stroke="#e5bd72" stroke-width="2"/>' + [0,120,240].map(a => `<g transform="rotate(${a} 50 50) translate(50 8)"><circle r="7" fill="#55321e" stroke="#e5bd72" stroke-width="2"/>${Array.from({length:8},(_,i)=>`<path d="M-1-9h2v4h-2Z" transform="rotate(${i*45})" fill="#e5bd72"/>`).join('')}<circle r="2" fill="#e5bd72"/></g>`).join(''),
     'moon-garden': leaves('#b6a0db','#756293') + '<path d="M56 1a9 9 0 1 0 0 16A9 9 0 0 1 56 1Z" fill="#f1edff" stroke="#b7aad8"/><path d="m50 83 2 6 6 2-6 2-2 6-2-6-6-2 6-2Z" fill="#f1edff"/>',

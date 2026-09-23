@@ -40,6 +40,8 @@ function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.profileBanner);
 }
+['silver-rope','emerald-jewel'].forEach(id => profileFrameIds.add(id));
+['titanium','walnut','ivory'].forEach(id => homeSceneFrameIds.add(id));
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
   return cleanProfileFrame(session.role === "teacher" ? db.teacherProfileFrame

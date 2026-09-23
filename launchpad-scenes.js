@@ -41,6 +41,9 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const frames = [
     { id: "none", name: "No frame", description: "Original clean border" },
+    { id: "titanium", name: "Brushed Titanium", description: "Satin metal & fine engraved lines" },
+    { id: "walnut", name: "Walnut Classic", description: "Warm wood grain & brass trim" },
+    { id: "ivory", name: "Ivory Enamel", description: "Cream enamel & delicate gold edging" },
     { id: "chrome", name: "Liquid Silver", description: "Sculpted polished chrome" },
     { id: "gold", name: "Golden Edge", description: "Layered warm gold" },
     { id: "rose", name: "Rose Halo", description: "Soft rose-gold metal" },
