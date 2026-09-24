@@ -51,6 +51,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Anime', ['muzan','Muzan Kibutsuji Statue'], ['rengoku','Kyojuro Rengoku Statue'], ['mitsuri','Mitsuri Kanroji Statue'], ['muichiro','Muichiro Tokito Statue']],
     ['Anime', ['anya','Anya Forger Statue'], ['frieren','Frieren Statue'], ['gojo','Satoru Gojo Bust']],
     ['Character Collectibles', ['peppa','Peppa Pig Statue']],
     ['Character Collectibles', ['bluey','Bluey Statue'], ['sonic','Sonic Statue'], ['hello-kitty','Hello Kitty Statue']],
@@ -82,6 +83,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    muzan: {source:'assets/shelf-muzan.png',width:1254,height:1254,bounds:[234,0,788,1238]},
+    rengoku: {source:'assets/shelf-rengoku.png',width:1254,height:1254,bounds:[158,17,946,1211]},
+    mitsuri: {source:'assets/shelf-mitsuri.png',width:1254,height:1254,bounds:[381,0,557,1252]},
+    muichiro: {source:'assets/shelf-muichiro.png',width:1254,height:1254,bounds:[315,9,649,1238]},
     gojo: {source:'assets/shelf-gojo.png',width:1254,height:1254,bounds:[244,31,748,1189]},
     peppa: {source:'assets/shelf-peppa.png',width:1254,height:1254,bounds:[257,22,729,1207]},
     anya: {source:'assets/shelf-anya.png',width:1254,height:1254,bounds:[279,4,677,1228]},
