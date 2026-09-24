@@ -60,7 +60,7 @@
 [data-shelf-theme="porcelain"] > .shelf-board { background-image:url('assets/collectible-shelf-porcelain.png'); }
 .shelf-theme-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
 .collectible-shelf[data-shelf-theme="anime-spirit"] { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
-.collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-board { background-image:url('assets/collectible-shelf-anime-spirit.png'); background-size:100% 122.2973%; background-position:50% 0%; }
+.collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-board { background-image:url('assets/collectible-shelf-hokage.png'); background-size:100% 122.2973%; background-position:50% 0%; }
 .collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-objects { bottom:45.946%; }
 /* These variants retain the porcelain shelf's tabletop and silhouette. */
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }

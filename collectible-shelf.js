@@ -2,7 +2,7 @@
   'use strict';
   const themes = [
     {id:'crimson',name:'Crimson Original'},
-    {id:'anime-spirit',name:'Anime Heroes'},
+    {id:'anime-spirit',name:'Hokage Mountain'},
     {id:'aurora',name:'Arctic Aurora'},
     {id:'honeybee',name:'Honeybee Garden'},
     {id:'volcanic',name:'Volcanic Forge'},
