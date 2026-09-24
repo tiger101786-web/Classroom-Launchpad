@@ -91,7 +91,7 @@ const approvedStudentRemovalMigrations = [{
 const maxSubmissionBytes = 15 * 1024 * 1024;
 const maxAssignmentFileBytes = 20 * 1024 * 1024;
 const maxProfileAvatarBytes = 700 * 1024;
-const maxStudentSpotlightBytes = 50 * 1024 * 1024;
+const maxStudentSpotlightBytes = 150 * 1024 * 1024;
 const coltAiEnabled = String(process.env.COLT_AI_ENABLED || "true").toLowerCase() !== "false";
 const coltAiAccountId = cleanEnvironmentValue(process.env.CLOUDFLARE_ACCOUNT_ID, 120);
 const coltAiApiToken = cleanEnvironmentValue(process.env.CLOUDFLARE_AI_API_TOKEN, 500);
@@ -2642,7 +2642,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       let originalName = safeDownloadName(decodeURIComponent(String(req.headers["x-file-name"] || "")));
       let extension = path.extname(originalName).toLowerCase();
       if (!allowedStudentSpotlightTypes.has(extension)) throw new Error("Upload a JPG, PNG, WebP, PDF, or PowerPoint file.");
-      const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 50 MB or smaller.");
+      const buffer = await readBinaryBody(req, maxStudentSpotlightBytes, "The featured-work file must be 150 MB or smaller.");
       if (!buffer.length) throw new Error("The uploaded file is empty.");
       if (!fileMatchesExtension(buffer, extension)) {
         const detectedExtension = detectedImageExtension(buffer);

@@ -10950,7 +10950,7 @@ function renderDashboardStudentSpotlights() {
             <div class="field">
               <label for="spotlightFile">Project file or preview image</label>
               <input id="spotlightFile" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.ppt,.pptx,image/jpeg,image/png,image/webp,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation">
-              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}. ` : ""}For a restricted Google Slides link, upload a PNG or JPG of slide 1 here for a guaranteed thumbnail. Maximum file size: 50 MB.</small>
+              <small>${editing && editing.hasMedia ? `Current file: ${escapeHtml(editing.mediaOriginalName || "uploaded work")}. ` : ""}For a restricted Google Slides link, upload a PNG or JPG of slide 1 here for a guaranteed thumbnail. Maximum file size: 150 MB.</small>
             </div>
             <div class="field">
               <label for="spotlightUrl">Approved project link (optional)</label>
@@ -12510,8 +12510,8 @@ function attachStudentSpotlightForm() {
     const projectUrl = form.elements.projectUrl.value.trim();
     const existing = editing ? studentSpotlights.find(item => item.id === editing) : null;
     status.classList.remove("error");
-    if (file && file.size > 50 * 1024 * 1024) {
-      status.textContent = "That file is larger than the 50 MB Spotlight limit.";
+    if (file && file.size > 150 * 1024 * 1024) {
+      status.textContent = "That file is larger than the 150 MB Spotlight limit.";
       status.classList.add("error");
       return;
     }

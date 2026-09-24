@@ -171,7 +171,10 @@ async function waitForServer() {
     const guestFile = await request(`/api/student-spotlights/${id}/file`);
     assert.equal(guestFile.response.status, 401);
 
-    const pptx = await oneSlidePowerPoint();
+    // Optional real-world fixture stays outside the repository (student work).
+    const pptx = process.env.SPOTLIGHT_TEST_PPTX
+      ? fs.readFileSync(process.env.SPOTLIGHT_TEST_PPTX)
+      : await oneSlidePowerPoint();
     const powerpointUpload = await request(`/api/student-spotlights/${id}/file`, {
       method: "POST",
       headers: {
@@ -184,6 +187,9 @@ async function waitForServer() {
     });
     assert.equal(powerpointUpload.response.status, 201);
     assert.equal(powerpointUpload.payload.spotlight.mediaKind, "powerpoint");
+    const powerpointDownload = await request(`/api/student-spotlights/${id}/file`, { headers: { Cookie: studentCookie } });
+    assert.equal(powerpointDownload.response.status, 200);
+    assert.deepEqual(powerpointDownload.payload, pptx, "PowerPoint upload/download must preserve all bytes.");
     assert.equal(powerpointUpload.payload.spotlight.hasThumbnail, true);
     const powerpointThumbnail = await request(`/api/student-spotlights/${id}/thumbnail`, { headers: { Cookie: studentCookie } });
     assert.equal(powerpointThumbnail.response.status, 200);
