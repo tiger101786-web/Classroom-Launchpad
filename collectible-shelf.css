@@ -59,6 +59,20 @@
 [data-shelf-theme="autumn"] > .shelf-board { background-image:url('assets/collectible-shelf-autumn.png'); }
 [data-shelf-theme="porcelain"] > .shelf-board { background-image:url('assets/collectible-shelf-porcelain.png'); }
 .shelf-theme-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+/* Additional themed shelves share the reference artwork's level tabletop geometry. */
+.collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
+.collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) > .shelf-board { background-size:100% 122.2973%; background-position:50% 0%; }
+.collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) > .shelf-objects { bottom:45.946%; }
+[data-shelf-theme="dinosaur-dig"] > .shelf-board { background-image:url('assets/collectible-shelf-dinosaur-dig.png'); }
+[data-shelf-theme="wizard-library"] > .shelf-board { background-image:url('assets/collectible-shelf-wizard-library.png'); }
+[data-shelf-theme="candy-kingdom"] > .shelf-board { background-image:url('assets/collectible-shelf-candy-kingdom.png'); }
+[data-shelf-theme="storm-fortress"] > .shelf-board { background-image:url('assets/collectible-shelf-storm-fortress.png'); }
+[data-shelf-theme="stained-glass"] > .shelf-board { background-image:url('assets/collectible-shelf-stained-glass.png'); }
+[data-shelf-theme="clockwork-observatory"] > .shelf-board { background-image:url('assets/collectible-shelf-clockwork-observatory.png'); }
+[data-shelf-theme="bamboo-panda"] > .shelf-board { background-image:url('assets/collectible-shelf-bamboo-panda.png'); }
+[data-shelf-theme="racing-garage"] > .shelf-board { background-image:url('assets/collectible-shelf-racing-garage.png'); }
+[data-shelf-theme="firefly-bayou"] > .shelf-board { background-image:url('assets/collectible-shelf-firefly-bayou.png'); }
+[data-shelf-theme="origami-garden"] > .shelf-board { background-image:url('assets/collectible-shelf-origami-garden.png'); }
 .collectible-shelf[data-shelf-theme="anime-spirit"] { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
 .collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-board { background-image:url('assets/collectible-shelf-hokage.png'); background-size:100% 122.2973%; background-position:50% 0%; }
 .collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-objects { bottom:45.946%; }

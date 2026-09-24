@@ -2,6 +2,16 @@
   'use strict';
   const themes = [
     {id:'crimson',name:'Crimson Original'},
+    {id:'dinosaur-dig',name:"Dinosaur Dig"},
+    {id:'wizard-library',name:"Wizard’s Library"},
+    {id:'candy-kingdom',name:"Candy Kingdom"},
+    {id:'storm-fortress',name:"Storm Fortress"},
+    {id:'stained-glass',name:"Stained Glass"},
+    {id:'clockwork-observatory',name:"Clockwork Observatory"},
+    {id:'bamboo-panda',name:"Bamboo Panda"},
+    {id:'racing-garage',name:"Racing Garage"},
+    {id:'firefly-bayou',name:"Firefly Bayou"},
+    {id:'origami-garden',name:"Origami Garden"},
     {id:'anime-spirit',name:'Hokage Mountain'},
     {id:'aurora',name:'Arctic Aurora'},
     {id:'honeybee',name:'Honeybee Garden'},
