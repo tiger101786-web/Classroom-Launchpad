@@ -62,6 +62,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Squishy Toys', ['squishy-pink','Pink Squishy Dumpling'], ['squishy-blue','Blue Squishy Dumpling'], ['squishy-gold','Glitter Gold Squishy Dumpling']],
     ['Animal Friends', ['highland-cow','Highland Cow Statue']],
     ['Anime', ['itachi','Itachi Uchiha Bust']],
     ['Anime', ['sasuke','Sasuke Uchiha Bust'], ['madara','Madara Uchiha Bust'], ['kakashi','Kakashi Hatake Bust'], ['sakura','Sakura Haruno Bust']],
