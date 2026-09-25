@@ -62,6 +62,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Animal Friends', ['highland-cow','Highland Cow Statue']],
     ['Anime', ['itachi','Itachi Uchiha Bust']],
     ['Anime', ['sasuke','Sasuke Uchiha Bust'], ['madara','Madara Uchiha Bust'], ['kakashi','Kakashi Hatake Bust'], ['sakura','Sakura Haruno Bust']],
     ['Anime', ['muzan','Muzan Kibutsuji Bust'], ['rengoku','Kyojuro Rengoku Bust'], ['mitsuri','Mitsuri Kanroji Bust'], ['muichiro','Muichiro Tokito Bust']],
@@ -96,6 +97,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'highland-cow': {source:'assets/shelf-highland-cow.png',width:1254,height:1254,bounds:[152,32,986,1189]},
     itachi: {source:'assets/shelf-itachi-bust.png',width:977,height:1609,bounds:[30,68,920,1489]},
     sasuke: {source:'assets/shelf-sasuke-bust.png',width:1145,height:1374,bounds:[176,11,782,1333]},
     madara: {source:'assets/shelf-madara-bust.png',width:1254,height:1254,bounds:[193,5,951,1243]},
