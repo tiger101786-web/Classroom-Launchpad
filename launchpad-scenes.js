@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "highland", name: "Highland Cattle Meadow", description: "Shaggy Highland cow & calf in a sunset Scottish meadow", image: "assets/launchpad-scene-highland.png" },
     { id: "ninja-course", name: "American Ninja Warrior Arena", description: "Obstacle course, warped wall & sweeping stadium lights", image: "assets/launchpad-scene-ninja-course.png" },
     { id: "anime", name: "Anime Sunset", description: "Original anime friends, a glowing town & drifting cherry petals", image: "assets/launchpad-scene-anime.png" },
     { id: "alien", name: "Alien Observatory", description: "Gray alien explorers & a glowing star-map console", image: "assets/launchpad-scene-alien.png" },
@@ -41,6 +42,7 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const frames = [
     { id: "none", name: "No frame", description: "Original clean border" },
+    { id: "highland", name: "Highland Heather", description: "Rustic oak, bronze Celtic knots, purple heather & tartan", decorative: true },
     { id: "titanium", name: "Brushed Titanium", description: "Satin metal & fine engraved lines" },
     { id: "walnut", name: "Walnut Classic", description: "Warm wood grain & brass trim" },
     { id: "ivory", name: "Ivory Enamel", description: "Cream enamel & delicate gold edging" },

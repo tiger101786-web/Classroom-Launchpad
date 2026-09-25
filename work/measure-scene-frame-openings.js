@@ -8,6 +8,7 @@ const { chromium } = require('playwright');
   try {
     const page = await browser.newPage();
     const ids = ['blossom', 'guardian', 'woodland', 'orbit', 'treasure', 'royal', 'phoenix', 'butterfly', 'frost-dragon', 'clockwork', 'library', 'champion', 'halloween', 'new-orleans', 'sunflower', 'peacock', 'harvest', 'evergreen'];
+    if (process.argv[2]) ids.splice(0, ids.length, process.argv[2]);
     const rules = [];
     for (const id of ids) {
       const source = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, '..', 'assets', `scene-frame-${id}.png`)).toString('base64');

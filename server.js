@@ -21,6 +21,8 @@ const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "n
 homeSceneIds.add("alien");
 homeSceneIds.add("anime");
 homeSceneIds.add("ninja-course");
+homeSceneIds.add("highland");
+homeSceneFrameIds.add("highland");
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
