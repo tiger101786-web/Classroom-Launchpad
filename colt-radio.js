@@ -514,6 +514,15 @@
       note: "This week's family-friendly Top 20, streamed commercial-free by iHeartRadio Family Countdown. No Colt Radio account required."
     },
     {
+      id: "exclusively-michael-jackson",
+      label: "Pop • King of Pop",
+      type: "stream",
+      source: "https://streaming.exclusive.radio/er/michaeljackson/icecast.audio",
+      provider: "YouRadio Exclusively Michael Jackson",
+      searchTerms: "mj michael jackson moonwalk thriller billie jean beat it",
+      note: "Michael Jackson music streamed by YouRadio's Exclusively Michael Jackson station. The provider describes its stations as commercial-free. Clean-only playback is not confirmed; teacher review recommended."
+    },
+    {
       id: "youradio-positively-focus",
       label: "Focus • Positive",
       type: "stream",
@@ -741,6 +750,7 @@
   }
 
   const stationIconPaths = {
+    "exclusively-michael-jackson": '<path d="m4 8 4 3 4-6 4 6 4-3-2 10H6L4 8Z"/><path d="M7 21h10"/>',
     "tejano-express": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M10 7v10m3-10v10m3-10v10M19 8v1m0 3v1m0 3v1"/>',
     "caprice-flamenco": '<path d="m14 10 6-7 2 2-7 6M14 10c-3-4-7-2-6 1-5-1-7 4-4 7s8 1 7-4c3 1 5-1 3-4Z"/><circle cx="9" cy="14" r="1.5"/>',
     "iheart-mardi-gras": '<path d="M3 8c3-2 6 2 9 2s6-4 9-2l-1 6c-2 5-6 3-8 0-2 3-6 5-8 0L3 8Z"/><path d="m6 11 3 1m6 0 3-1M8 5 7 2m9 3 1-3M12 6V2"/>',

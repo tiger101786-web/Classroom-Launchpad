@@ -291,7 +291,7 @@ async function run() {
     });
     assert.equal(radioVisuals.kickerColor, "rgb(239, 68, 82)", JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.panelBackground, "rgb(5, 5, 5)", JSON.stringify(radioVisuals));
-    assert.equal(radioVisuals.stationIcons, 78, JSON.stringify(radioVisuals));
+    assert.equal(radioVisuals.stationIcons, 79, JSON.stringify(radioVisuals));
     assert.equal(radioVisuals.equalizerBars, 24, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.headingArtwork, /colt-radio-header-portrait\.png/, JSON.stringify(radioVisuals));
     assert.match(radioVisuals.artwork, /colt-radio-horse-portrait\.png/, JSON.stringify(radioVisuals));
@@ -320,11 +320,15 @@ async function run() {
     }));
     assert(stationLabelLayout.every(item => item.linesFit && item.nameRight <= item.favoriteLeft), JSON.stringify(stationLabelLayout));
     assert.deepEqual(
-      visibleStationNames.filter(name => !['Spanish Flamenco', 'Tejano Express', 'Mardi Gras NOLA'].includes(name)).map(name => name.replace(" ", " • ")),
+      visibleStationNames.filter(name => !['Pop King of Pop', 'Spanish Flamenco', 'Tejano Express', 'Mardi Gras NOLA'].includes(name)).map(name => name.replace(" ", " • ")),
       ["Lo-Fi • Study", "Lo-Fi • Focus", "Lo-Fi • Chill", "Lo-Fi • Sleep", "Lo-Fi • Gaming", "Lo-Fi • Japan", "Lo-Fi • Hip-Hop", "Synth • Chill", "Synth • Datawave", "Synth • Nightdrive", "Synth • Space", "Electronic • Lounge", "Electronic • Dance", "Electronic • Club", "Electronic • Dr.DIO", "Electronic • Chilltrax", "House • Chill", "Hip-Hop • Urban Heat", "Hip-Hop • Positive", "K-Pop • Hits", "Pop • New Hits", "Pop • Current Hits", "Kids • Pop", "Kids • Movie Music", "Kids • Kidz Bop", "Kids • Calm", "Movies • Soundtracks", "Disney • Walt's Radio", "Games • Soundtracks", "Worship • Modern", "Worship • Faith", "Worship • Bluegrass", "Christian • JOY FM", "Patriotic • Abiding", "Jazz • Laid-Back", "Jazz • Funk & Soul", "Jazz • Acid Groove", "Jazz • Smooth", "Classical", "Medieval • Ancient FM", "Pipe • Organ Organlive", "Celtic • Traditional", "Asian • Caprice", "Hawaiian • KOKO", "Persian • Farsi", "Country • Family", "Oldies • Golden Years", "Instrumental • Brazil", "Fantasy • Adventure", "Focus • Positive", "Focus • Binaural", "Meditation • Positive", "Meditation • Chants", "Calm • Instrumental", "Calm • Zen", "Calm • Rain", "Calm • Birdsong", "Calm • Ocean", "Calm • Tai Chi", "Calm • Spa", "Ambient • Sleeping Pill", "Sleep • Tones", "Feel-Good • Happy", "Halloween • Kids", "Christmas • Evergreen", "Decades • 1920s", "Decades • 1930s", "Decades • 1940s", "Decades • 1950s", "Decades • 1960s", "Decades • 1970s", "Decades • 1980s", "Decades • 1990s", "Decades • 2000s", "Decades • 2010s"]
     );
     const stationSearch = page.getByRole("searchbox", { name: "Search Colt Radio stations or music styles" });
+    assert.equal(visibleStationNames[visibleStationNames.indexOf("Pop Current Hits") + 1], "Pop King of Pop", "MJ should be grouped with Pop stations.");
     for (const [query, expected] of [
+      ["michael jackson", ["Pop King of Pop"]],
+      ["mj", ["Pop King of Pop"]],
+      ["moonwalk", ["Pop King of Pop"]],
       ["flamenco", ["Spanish Flamenco"]],
       ["cumbia", ["Tejano Express"]],
       ["tejano", ["Tejano Express"]],
@@ -545,6 +549,10 @@ async function run() {
     await page.locator('[data-station="walts-radio"]').click();
     assert.equal(await audio.getAttribute("src"), "https://streaming.live365.com/a10182");
     assert.match(await page.locator(".colt-radio-note").innerText(), /Disney movie music/);
+
+    await page.locator('[data-station="exclusively-michael-jackson"]').click();
+    assert.equal(await audio.getAttribute("src"), "https://streaming.exclusive.radio/er/michaeljackson/icecast.audio");
+    assert.match(await page.locator(".colt-radio-note").innerText(), /Clean-only playback is not confirmed/);
 
     await page.getByRole("button", { name: "Classical", exact: true }).click();
     assert.equal(await audio.getAttribute("src"), "https://drive.uber.radio/uber-app/easyclassical/icecast.audio");
