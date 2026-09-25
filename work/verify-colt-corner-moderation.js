@@ -9,18 +9,24 @@ const { spawn } = require("node:child_process");
 const { moderateMessage, normalizeForModeration } = require("../colt-corner-moderation");
 
 assert.equal(moderateMessage("What homework should I finish today?").status, "approved");
-assert.equal(moderateMessage("You are an idiot.").status, "needs_review");
+assert.equal(moderateMessage("You are an idiot.").status, "approved");
 assert.equal(moderateMessage("This is f.u.c.k.i.n.g awful.").status, "blocked");
 assert.equal(moderateMessage("Call me at 504-555-1212.").status, "blocked");
 assert.equal(moderateMessage("Email me at student@example.com.").status, "blocked");
 assert.equal(moderateMessage("My full name is Student Example.").status, "blocked");
-assert.equal(moderateMessage("Visit https://example.com after class.").status, "needs_review");
+assert.equal(moderateMessage("Visit https://example.com after class.").status, "approved");
 assert.equal(moderateMessage("FOLLOW ME ON SOCIAL MEDIA").status, "blocked");
-assert.equal(moderateMessage("THIS MESSAGE USES WAY TOO MANY CAPITAL LETTERS").status, "needs_review");
+assert.equal(moderateMessage("THIS MESSAGE USES WAY TOO MANY CAPITAL LETTERS").status, "approved");
 assert.equal(moderateMessage("<script>alert('x')</script>").status, "blocked");
 assert.equal(moderateMessage("We learned about sex education in health class.").status, "approved");
 assert.equal(normalizeForModeration("f - 0 - 0").compact, "foo");
 
+for (const text of ["Hi", "YES!!!!!!", "I saw it on TikTok", "The assignment is about classic ships.", "We visited Scunthorpe.", "😊😊😊"]) {
+  assert.equal(moderateMessage(text).status, "approved", text);
+}
+for (const text of ["computer class fuck", "sex education and porn", "f.u.c.k.i.n.g", "My Discord username is: student123", "My instagram is student123", "I live at 123 Main Street", "i will kill you"]) {
+  assert.equal(moderateMessage(text).status, "blocked", text);
+}
 function availablePort() {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
@@ -233,80 +239,24 @@ async function runIntegration() {
       cookie: studentCookie,
       body: { message: "This is a respectful classroom reply." }
     });
-    assert.equal(response.payload.moderationStatus, "needs_review");
-    let teacherQueue = await request("/api/moderation", { cookie: teacherCookie });
-    const pendingReply = teacherQueue.payload.moderation.pending.find(item => item.type === "reply");
-    assert(pendingReply);
-    response = await request(`/api/moderation/${pendingReply.id}`, {
-      method: "PATCH",
-      cookie: teacherCookie,
-      body: { action: "approve" }
-    });
-    assert.equal(response.status, 200);
-    const approvedHomework = response.payload.threads.find(thread => thread.id === homeworkThread.id);
-    assert(approvedHomework.replies.some(reply => reply.message === "This is a respectful classroom reply."));
-
-    response = await request("/api/threads", {
-      method: "POST",
-      cookie: studentCookie,
-      body: { title: "Outside link", message: "Can we visit https://example.com for this project?" }
-    });
-    assert.equal(response.payload.moderationStatus, "needs_review");
-    assert(!response.payload.threads.some(thread => thread.title === "Outside link"));
-    assert.equal(response.payload.pendingModeration.length, 1);
-
-    const studentModerationAttempt = await request("/api/moderation", { cookie: studentCookie });
-    assert.equal(studentModerationAttempt.status, 401);
-
-    response = await request("/api/moderation", { cookie: teacherCookie });
-    assert.equal(response.status, 200);
-    const pendingLink = response.payload.moderation.pending.find(item => item.title === "Outside link");
-    assert(pendingLink);
-    assert(pendingLink.moderationReasons.some(item => item.code === "external_link"));
-
-    response = await request(`/api/moderation/${pendingLink.id}`, {
-      method: "PATCH",
-      cookie: teacherCookie,
-      body: { action: "edit_approve", title: "Project resource question", message: "Can we use another approved project resource?" }
-    });
-    assert.equal(response.status, 200);
-    assert(response.payload.threads.some(thread => thread.title === "Project resource question"));
-
-    response = await request("/api/threads", {
-      method: "POST",
-      cookie: studentCookie,
-      body: { title: "Unkind message", message: "You are an idiot." }
-    });
-    assert.equal(response.payload.moderationStatus, "needs_review");
-    const unkindPending = (await request("/api/moderation", { cookie: teacherCookie }))
-      .payload.moderation.pending.find(item => item.title === "Unkind message");
-    assert(unkindPending);
-    response = await request(`/api/moderation/${unkindPending.id}`, {
-      method: "PATCH",
-      cookie: teacherCookie,
-      body: { action: "reject" }
-    });
-    assert.equal(response.status, 200);
-    assert(response.payload.moderation.recent.some(item => (
-      item.id === unkindPending.id && item.moderationStatus === "blocked"
-    )));
-
-    response = await request("/api/threads", {
-      method: "POST",
-      cookie: studentCookie,
-      body: { title: "Delete this review", message: "Can we use https://delete.example.com?" }
-    });
-    assert.equal(response.payload.moderationStatus, "needs_review");
-    const deletePending = (await request("/api/moderation", { cookie: teacherCookie }))
-      .payload.moderation.pending.find(item => item.title === "Delete this review");
-    assert(deletePending);
-    response = await request(`/api/moderation/${deletePending.id}`, {
-      method: "PATCH",
-      cookie: teacherCookie,
-      body: { action: "delete" }
-    });
-    assert.equal(response.status, 200);
-    assert(!response.payload.moderation.pending.some(item => item.id === deletePending.id));
+    assert.equal(response.payload.moderationStatus, "approved");
+    assert(response.payload.threads.find(thread => thread.id === homeworkThread.id).replies.some(reply => reply.message === "This is a respectful classroom reply."));
+    for (const [title, message] of [
+      ["Outside link", "Can we visit https://example.com for this project?"],
+      ["Excited", "THIS IS SO COOL!!!!!!"],
+      ["Short reply", "Hi"],
+      ["Social discussion", "We discussed TikTok and Instagram in class."],
+      ["Opinion", "This game is stupid but I like the artwork."]
+    ]) {
+      response = await request("/api/threads", {method:"POST", cookie:studentCookie, body:{title,message}});
+      assert.equal(response.payload.moderationStatus, "approved", JSON.stringify(response.payload));
+      assert(response.payload.threads.some(thread => thread.title === title));
+      assert.equal(response.payload.pendingModeration.length, 0);
+    }
+    assert.equal((await request("/api/moderation", {cookie:studentCookie})).status, 401);
+    const teacherQueue = await request("/api/moderation", {cookie:teacherCookie});
+    assert.equal(teacherQueue.status, 200);
+    assert.equal(teacherQueue.payload.moderation.pending.length, 0);
 
     response = await request("/api/threads", {
       method: "POST",
@@ -334,13 +284,13 @@ async function runIntegration() {
       cookie: secondStudentCookie,
       body: { title: "Repeated topic", message: "This is the same repeated classroom message." }
     });
-    assert.equal(secondDuplicate.payload.moderationStatus, "needs_review");
+    assert.equal(secondDuplicate.payload.moderationStatus, "approved");
     const thirdDuplicate = await request("/api/threads", {
       method: "POST",
       cookie: secondStudentCookie,
       body: { title: "Repeated topic", message: "This is the same repeated classroom message." }
     });
-    assert.equal(thirdDuplicate.payload.moderationStatus, "blocked");
+    assert.equal(thirdDuplicate.payload.moderationStatus, "approved");
 
     const db = JSON.parse(fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8"));
     assert(!JSON.stringify(db).includes("student@example.com"));

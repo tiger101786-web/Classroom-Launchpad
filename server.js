@@ -1522,76 +1522,6 @@ function moderationPostText(post) {
     : `${post.title || ""}\n${post.body || ""}`;
 }
 
-function editDistance(left, right) {
-  const a = String(left || "");
-  const b = String(right || "");
-  const previous = Array.from({ length: b.length + 1 }, (_, index) => index);
-  for (let row = 1; row <= a.length; row += 1) {
-    let diagonal = previous[0];
-    previous[0] = row;
-    for (let column = 1; column <= b.length; column += 1) {
-      const old = previous[column];
-      previous[column] = Math.min(
-        previous[column] + 1,
-        previous[column - 1] + 1,
-        diagonal + (a[row - 1] === b[column - 1] ? 0 : 1)
-      );
-      diagonal = old;
-    }
-  }
-  return previous[b.length];
-}
-
-function nearlyIdenticalMessage(left, right) {
-  const a = normalizeForModeration(left).reduced;
-  const b = normalizeForModeration(right).reduced;
-  if (!a || !b) return false;
-  if (a === b) return true;
-  if (Math.min(a.length, b.length) < 10) return false;
-  return 1 - editDistance(a, b) / Math.max(a.length, b.length) >= 0.88;
-}
-
-function addModerationReason(result, code, label) {
-  if (!result.reasons.some(item => item.code === code)) result.reasons.push({ code, label });
-}
-
-function applyPostingBehavior(db, session, result, now = Date.now()) {
-  if (!session || session.role !== "student") return result;
-  const authorKey = studentAuthorKey(session);
-  const posts = allModeratedPosts(db).filter(post => post.authorKey === authorKey);
-  const fiveMinutesAgo = now - 5 * 60 * 1000;
-  const duplicateCutoff = now - moderationConfig.limits.duplicateWindowMinutes * 60 * 1000;
-  const recentPosts = posts.filter(post => Date.parse(post.submittedAt || post.createdAt) >= fiveMinutesAgo);
-  const lastPostAt = posts.reduce((latest, post) => Math.max(latest, Date.parse(post.submittedAt || post.createdAt) || 0), 0);
-  const duplicates = posts.filter(post => (
-    Date.parse(post.submittedAt || post.createdAt) >= duplicateCutoff
-    && (
-      (post.normalizedMessageHash && post.normalizedMessageHash === result.normalizedMessageHash)
-      || nearlyIdenticalMessage(moderationPostText(post), result.originalText)
-    )
-  ));
-
-  if (recentPosts.length >= moderationConfig.limits.maximumPostsPerFiveMinutes) {
-    result.status = "blocked";
-    addModerationReason(result, "rate_limit", "Too many messages within five minutes");
-  } else if (lastPostAt && now - lastPostAt < moderationConfig.limits.minimumSecondsBetweenPosts * 1000) {
-    if (result.status === "approved") result.status = "needs_review";
-    addModerationReason(result, "rate_limit", "Messages submitted less than ten seconds apart");
-  }
-
-  if (duplicates.length >= 2) {
-    result.status = "blocked";
-    addModerationReason(result, "duplicate", "Repeated identical or nearly identical message after a warning");
-  } else if (duplicates.length === 1) {
-    if (result.status === "approved") result.status = "needs_review";
-    addModerationReason(result, "duplicate", "Repeated identical or nearly identical message");
-  }
-
-  result.studentMessage = result.status === "approved"
-    ? ""
-    : studentMessageFor(result.status, result.reasons);
-  return result;
-}
 
 function moderationFields(result, session, submittedAt) {
   const approvedByTeacher = session.role === "teacher";
@@ -3949,9 +3879,7 @@ async function handleApi(req, res, pathname) {
         throw new Error("Topic title, message, and at least one grade are required.");
       }
       const submittedAt = new Date().toISOString();
-      const result = allowed.role === "teacher"
-        ? moderateMessage(`${title}\n${message}`)
-        : applyPostingBehavior(db, allowed, moderateMessage(`${title}\n${message}`));
+      const result = moderateMessage(`${title}\n${message}`);
       if (allowed.role === "student" && result.status === "blocked") {
         sendJson(res, 200, {
           ok: false,
@@ -4022,9 +3950,7 @@ async function handleApi(req, res, pathname) {
       const grade = allowed.role === "teacher" ? "Teacher" : cleanColtCornerGrade(allowed.grade);
       if (!message || !grade) throw new Error("A reply message is required.");
       const submittedAt = new Date().toISOString();
-      const result = allowed.role === "teacher"
-        ? moderateMessage(message)
-        : applyPostingBehavior(db, allowed, moderateMessage(message));
+      const result = moderateMessage(message);
       if (allowed.role === "student" && result.status === "blocked") {
         sendJson(res, 200, {
           ok: false,

@@ -48,13 +48,21 @@ function phraseInNormalized(normalized, phrase) {
   const pattern = new RegExp(`(?:^|\\s)${escapePattern(target).replace(/\\ /g, "\\s+")}(?:$|\\s)`, "i");
   if (pattern.test(normalized.reduced)) return true;
   const compactTarget = target.replace(/\s+/g, "");
-  return compactTarget.length >= 4 && normalized.compact.includes(compactTarget);
+  // Match separated letters without matching innocent words like "assignment".
+  return compactTarget.length >= 4 && new RegExp(
+    `(?:^|\\s)${compactTarget.split("").map(escapePattern).join("\\s*")}(?:i\\s*n\\s*g|e\\s*d|e\\s*r\\s*s?|s)?(?:$|\\s)`, "i"
+  ).test(normalized.reduced);
 }
 
 function firstConfiguredMatch(normalized, entries, exceptions) {
-  const exceptionHit = (exceptions || []).some(exception => phraseInNormalized(normalized, exception));
-  if (exceptionHit) return "";
-  return (entries || []).find(entry => phraseInNormalized(normalized, entry)) || "";
+  // Remove only the allowed phrase, never exempt the whole message.
+  let safeText = normalized.reduced;
+  for (const exception of exceptions || []) {
+    const phrase = escapePattern(normalizeForModeration(exception).reduced);
+    safeText = safeText.replace(new RegExp(`\\b${phrase}\\b`, "g"), " ");
+  }
+  const remaining = normalizeForModeration(safeText);
+  return (entries || []).find(entry => phraseInNormalized(remaining, entry)) || "";
 }
 
 function reason(code, label) {
@@ -93,14 +101,11 @@ function moderateMessage(value, config = defaultConfig) {
     reasons.push(reason("personal_information", "Possible email address, phone number, or street address"));
   }
 
-  const socialContact = /(?:@[a-z0-9_.]{3,}|(?:add|follow|message|dm|contact)\s+me\s+(?:on|at)|snapchat|instagram|tiktok|discord\s+(?:name|user|tag))/i.test(text);
+  const socialContact = /(?:@[a-z0-9_.]{3,}|(?:add|follow|message|dm|contact)\s+me\s+(?:on|at)|(?:snapchat|instagram|tiktok|discord)\s+(?:name|user(?:name)?|tag|handle)\s*(?:is|:|=)|my\s+(?:snapchat|instagram|tiktok|discord)\s*(?:is|:|=)|(?:instagram\.com|tiktok\.com|snapchat\.com|discord\.gg)\/[^\s]+)/i.test(text);
   if (socialContact && !email) {
     blocked = true;
     reasons.push(reason("social_contact", "Possible social-media username or outside contact invitation"));
   }
-
-  const externalLink = /(?:https?:\/\/|www\.|\b[a-z0-9-]+\.(?:com|net|org|io|gg|me|tv|app)\b)/i.test(text);
-  if (externalLink) reasons.push(reason("external_link", "External website link"));
 
   const unsafeMarkup = /<\s*script\b|javascript\s*:|onerror\s*=|onload\s*=/i.test(text);
   if (unsafeMarkup) {
@@ -129,35 +134,8 @@ function moderateMessage(value, config = defaultConfig) {
     reasons.push(reason("threat", "Direct threat or encouragement of harm"));
   }
 
-  const warning = firstConfiguredMatch(normalized, config.warningWords, config.allowedExceptions)
-    || firstConfiguredMatch(normalized, config.warningPhrases, config.allowedExceptions);
-  if (warning) reasons.push(reason("bullying", "Possible insult, bullying, or targeted unkind language"));
-
-  const repeatedCharacters = new RegExp(`(.)\\1{${config.limits.maximumRepeatedCharacterRun},}`, "i").test(text);
-  if (repeatedCharacters) reasons.push(reason("repeated_characters", "Excessive repeated characters"));
-
-  const letters = text.match(/[a-z]/gi) || [];
-  const capitals = text.match(/[A-Z]/g) || [];
-  if (
-    letters.length >= config.limits.capitalLetterMinimum
-    && capitals.length / letters.length >= config.limits.capitalLetterRatio
-  ) {
-    reasons.push(reason("excessive_capitals", "Excessive capital letters"));
-  }
-
-  if (normalized.reduced.length > 5) {
-    const symbolCount = (text.match(/[^a-z0-9\s]/gi) || []).length;
-    if (symbolCount / Math.max(1, text.length) > 0.35) {
-      reasons.push(reason("disguised_wording", "Heavily disguised or symbol-separated wording"));
-    }
-  }
-
-  if (normalized.reduced.length < config.limits.minimumMessageLength) {
-    reasons.push(reason("short_spam", "Extremely short message"));
-  }
-
   const uniqueReasons = Array.from(new Map(reasons.map(item => [item.code, item])).values());
-  const status = blocked ? "blocked" : uniqueReasons.length ? "needs_review" : "approved";
+  const status = blocked ? "blocked" : "approved";
   return {
     status,
     reasons: uniqueReasons,

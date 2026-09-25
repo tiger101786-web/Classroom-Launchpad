@@ -2923,7 +2923,7 @@ function renderColtCorner() {
             <li>No bullying, threats, spam, or repeated posts.</li>
           </ol>
           <p class="forum-moderation-note">
-            Colt Corner checks messages for safety. Some messages may be held for Mr. Nieves to review before appearing.
+            Colt Corner checks for bad language and personal information. Messages that pass these checks appear right away.
           </p>
         </section>
       </div>

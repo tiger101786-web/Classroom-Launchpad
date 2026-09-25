@@ -27,16 +27,6 @@ module.exports = Object.freeze({
     "beat you up",
     "bomb the school"
   ],
-  warningWords: [
-    "idiot", "stupid", "dumb", "loser", "ugly", "moron"
-  ],
-  warningPhrases: [
-    "shut up",
-    "i hate you",
-    "nobody likes you",
-    "you are worthless",
-    "go away"
-  ],
   allowedExceptions: [
     "class assignment",
     "computer class",
@@ -44,13 +34,6 @@ module.exports = Object.freeze({
     "sex education"
   ],
   limits: Object.freeze({
-    minimumMessageLength: 3,
-    maximumRepeatedCharacterRun: 5,
-    capitalLetterMinimum: 12,
-    capitalLetterRatio: 0.75,
-    minimumSecondsBetweenPosts: 10,
-    maximumPostsPerFiveMinutes: 5,
-    duplicateWindowMinutes: 30,
     rejectedRetentionDays: 30
   })
 });
