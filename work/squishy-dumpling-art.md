@@ -1,0 +1,23 @@
+# Squishy dumpling collection
+
+Built-in image generation, original PNG files copied unchanged. Frame and toys preserve genuine transparency; CSS/SVG viewports fit the originals without editing pixels. Scene references: three user-supplied squishy toy photos.
+
+## assets/launchpad-scene-squishy.png
+Source: exec-43129921-998b-4c0b-8142-62da010d46b9.png
+Prompt: Use case: stylized-concept. Create a square full-bleed profile scene for a classroom website inspired by the three supplied squishy dumpling toy photos. Input images 1-3 are subject/material references only, not edit targets. Show a charming miniature pastel dumpling-toy cafe, with five large friendly squishy bao bun toys arranged as a close-knit group on a warm wooden counter in little bamboo steamer baskets. They have the same pleated rounded bun shapes, shiny black oval eyes, tiny smiling mouths and rosy cheeks as the references. Main center toy is translucent glittery golden yellow; companions pastel pink, mint green, blue and cream, a mix of smooth soft silicone and sparkly gel textures. Softly glowing pastel cafe backdrop with shelves of bamboo baskets, warm hanging lights and subtle dreamy bokeh. Beautiful polished dimensional toy photography/render, inviting and cheerful, tactile detail, not edible realistic food. Strong readable composition with all five faces inside central 65 percent so circular profile cropping keeps them visible. Center hero bun largest, stagger companions around it, avoid overcrowding. Square full-bleed environment, no frame or border, no text, no watermark, no humans or hands.
+
+## assets/scene-frame-squishy.png
+Source: exec-84788d43-4c2c-423d-bb61-f86c039d6707.png
+Prompt: Create a square transparent PNG ornamental circular profile frame. Premium dimensional miniature bamboo steamer inspired ring with woven bamboo details, warm honey wood, delicate pastel pink and sky blue ribbon accents and tiny gold sparkles embedded in rim. Three tiny cute smiling squishy bao dumpling ornaments clustered along bottom outside rim: pink, blue and glitter gold, pleated bun tops and black oval eyes. Large completely transparent empty circular center, no scene or picture inside. Outer background genuinely transparent alpha too. Continuous opaque inner lip, centered circular opening radius 37% canvas, outer decoration contained within 3% margins. Front view, polished 3D collectible realism, cheerful warm studio light. No text, no watermark, no painted checkerboard. Matches a pastel squishy dumpling cafe scene.
+
+## assets/shelf-squishy-pink.png
+Source: exec-a5ce0b38-cc73-455e-a685-1fd0f3e220c8.png
+Prompt: Product collectible asset, square transparent PNG: ONE pastel pink squishy bao dumpling toy in a low honey-colored bamboo steamer basket. Big glossy black oval eyes, tiny smile and blush cheeks, pleated bun top, soft squeezable silicone realistic texture, adorably plump upright proportions. Facing front, entire toy and level basket base visible, centered filling 90% canvas. Premium polished 3D toy photography, clear large face readable at small shelf size. Genuine transparent alpha exterior, no scenery, no floor or detached shadow, no hands, no lid hiding face, no text or watermark.
+
+## assets/shelf-squishy-blue.png
+Source: exec-af4cbea7-8e3b-4d57-8a21-e4b60fefdc11.png
+Prompt: Product collectible asset, square transparent PNG: ONE bright sky blue squishy bao dumpling toy in a low honey-colored bamboo steamer basket. Big glossy black oval eyes, happy open smile and blush cheeks, pleated bun top, soft squeezable silicone realistic texture, adorably plump upright proportions. Facing front, entire toy and level basket base visible, centered filling 90% canvas. Premium polished 3D toy photography, clear large face readable at small shelf size. Genuine transparent alpha exterior, no scenery, no floor or detached shadow, no hands, no lid hiding face, no text or watermark.
+
+## assets/shelf-squishy-gold.png
+Source: exec-bbf954d1-fb22-4824-8f75-3d1ed4049160.png
+Prompt: Product collectible asset, square transparent PNG: ONE translucent golden yellow glitter-filled squishy bao dumpling toy in a low honey-colored bamboo steamer basket. Big glossy black oval eyes, tiny smile and blush cheeks, pleated bun top, soft squeezable clear gold gel with dense tiny glitter flakes and iridescent sparkle realistic texture, adorably plump upright proportions. Facing front, entire toy and level basket base visible, centered filling 90% canvas. Premium polished 3D toy photography, clear large face readable at small shelf size. Genuine transparent alpha exterior, no scenery, no floor or detached shadow, no hands, no lid hiding face, no text or watermark.
