@@ -83,6 +83,7 @@
     ["Artful Keepsakes",["carousel-horse","Carousel Horse"],["koi","Koi Sculpture"],["lotus-bowl","Lotus Trinket Bowl"],["chess-knight","Chess Knight"],["ornate-key","Ornate Key Keepsake"]],
     ["Little Delights",["coffee-grinder","Mini Coffee Grinder"],["ramen-bowl","Ramen Bowl Keepsake"],["sushi-plate","Sushi Plate Keepsake"],["windmill","Dutch Windmill"]],
   );
+  rows.push(['New Orleans', ['nola-snowball','New Orleans Snowball'], ['nola-king-cake','Mardi Gras King Cake'], ['nola-second-line','Second-Line Umbrella'], ['nola-pelican','Louisiana Pelican']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -101,6 +102,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'nola-snowball': {source:'assets/shelf-nola-snowball.png',width:1254,height:1254,bounds:[240,17,821,1222]},
+    'nola-king-cake': {source:'assets/shelf-nola-king-cake.png',width:1254,height:1254,bounds:[14,169,1227,920]},
+    'nola-second-line': {source:'assets/shelf-nola-second-line.png',width:1254,height:1254,bounds:[77,9,1113,1235]},
+    'nola-pelican': {source:'assets/shelf-nola-pelican.png',width:1254,height:1254,bounds:[229,20,840,1218]},
     'enchanted-rose': {source:'assets/shelf-enchanted-rose.png',width:1254,height:1254,bounds:[265,18,723,1165]},
     'open-bible': {"source":"assets/shelf-open-bible.png","width":1254,"height":1254,"bounds":[39,114,1180,1046]},
     'praying-hands': {"source":"assets/shelf-praying-hands.png","width":1254,"height":1254,"bounds":[245,23,767,1210]},
