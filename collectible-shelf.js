@@ -62,6 +62,7 @@
     ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
+    ['Christian Faith', ["open-bible","Open Bible"], ["praying-hands","Praying Hands"], ["peace-dove","Dove of Peace"], ["holy-family","Holy Family Nativity"], ["good-shepherd","Jesus Good Shepherd"]],
     ['Squishy Toys', ['squishy-pink','Pink Squishy Dumpling'], ['squishy-blue','Blue Squishy Dumpling'], ['squishy-gold','Gold Squishy Dumpling']],
     ['Animal Friends', ['highland-cow','Highland Cow Statue']],
     ['Anime', ['itachi','Itachi Uchiha Bust']],
@@ -80,7 +81,7 @@
     ["Artful Keepsakes",["carousel-horse","Carousel Horse"],["koi","Koi Sculpture"],["lotus-bowl","Lotus Trinket Bowl"],["chess-knight","Chess Knight"],["ornate-key","Ornate Key Keepsake"]],
     ["Little Delights",["coffee-grinder","Mini Coffee Grinder"],["ramen-bowl","Ramen Bowl Keepsake"],["sushi-plate","Sushi Plate Keepsake"],["windmill","Dutch Windmill"]],
   );
-  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : category, row, column })));
+  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
   const bounds = [
@@ -98,6 +99,11 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'open-bible': {"source":"assets/shelf-open-bible.png","width":1254,"height":1254,"bounds":[39,114,1180,1046]},
+    'praying-hands': {"source":"assets/shelf-praying-hands.png","width":1254,"height":1254,"bounds":[245,23,767,1210]},
+    'peace-dove': {"source":"assets/shelf-peace-dove.png","width":1254,"height":1254,"bounds":[150,12,977,1229]},
+    'holy-family': {"source":"assets/shelf-holy-family.png","width":1254,"height":1254,"bounds":[93,3,1068,1223]},
+    'good-shepherd': {"source":"assets/shelf-good-shepherd.png","width":1254,"height":1254,"bounds":[142,11,974,1232]},
     'squishy-pink': {source:'assets/shelf-squishy-pink.png',width:1254,height:1254,bounds:[29,62,1196,1153]},
     'squishy-blue': {source:'assets/shelf-squishy-blue.png',width:1254,height:1254,bounds:[24,37,1207,1185]},
     'squishy-gold': {source:'assets/shelf-squishy-gold.png',width:1254,height:1254,bounds:[13,17,1229,1219]},
