@@ -34,6 +34,8 @@
 .launch-scene-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 50%; }
 .launch-scene-particles i { position: absolute; left: var(--x); top: var(--y); width: 4px; height: 4px; border-radius: 50%; background: #ffe394; box-shadow: 0 0 8px 2px #ffdf8080; animation: scene-firefly 9s ease-in-out infinite alternate; animation-delay: calc(var(--n) * -1.3s); }
 .scene-forest .launch-scene-particles i { top: 110%; animation: scene-firefly-flow 10s linear infinite; animation-delay: calc(var(--n) * -1.11s); }
+/* Continuous meadow motes: no eased reversal or pause between passes. */
+.scene-highland .launch-scene-particles i { left:calc(18% + var(--n) * 7%); top:110%; width:3px; height:3px; animation:scene-firefly-flow 7s linear infinite; animation-delay:calc(var(--n) * -.7777778s); }
 .scene-reef .launch-scene-particles i { top: 110%; width: 9px; height: 9px; background: #dbffff12; border: 1px solid #dcffff8c; box-shadow: inset 1px 1px 2px #fff9; animation: scene-bubble 14s linear infinite; animation-delay: calc(var(--n) * -1.7s); }
 .scene-pixel .launch-scene-particles i { width: 4px; height: 4px; border-radius: 0; background: #ffe98c; box-shadow: 0 0 5px #ffce5780; animation: scene-pixel-glow 7s ease-in-out infinite alternate; animation-delay: calc(var(--n) * -1.2s); }
 .scene-pixel .launch-scene-particles::before, .scene-pixel .launch-scene-particles::after { content: ""; position: absolute; top: 17%; left: 15%; width: 27px; height: 7px; background: #fff6; box-shadow: 6px -6px #fff6, 13px 0 #fff6; animation: scene-cloud 32s linear infinite; }
