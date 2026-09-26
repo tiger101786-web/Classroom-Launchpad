@@ -1,5 +1,9 @@
 # Hero background stabilization
 
+## Withdrawn after playback feedback
+
+The user reported severe shaking in the stabilized version. The desktop player now uses the original `assets/hero-panel-bg.mp4` again, with refreshed cache versions. Do not use the stabilized asset: contact sheets and successful decoding did not establish smooth continuous playback. Original drift remains; a future fix requires full-motion and loop-boundary review before integration.
+
 Original `assets/hero-panel-bg.mp4` preserved. New desktop source: `assets/hero-panel-bg-stable.mp4`.
 
 The page has no translation animation on the background video; drift is embedded in the footage. Stabilization tracks the head region rather than the animated lightning/background. Non-rigid mane/head animation remains; this is not a frozen horse or a still-image replacement. Mobile's separate video is unchanged.
