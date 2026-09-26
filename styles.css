@@ -617,25 +617,20 @@ body[data-theme="night"] .school-logo-frame video {
   min-height: 32px;
   margin-bottom: 8px;
   max-width: 100%;
-  padding: 6px 12px;
-  border-radius: 6px 2px 6px 2px;
-  background: linear-gradient(165deg, #49202c 0%, #21191e 48%, #100e12 52%, #34101c 100%);
-  color: #f4f0f3;
-  border: 1px solid #c64865;
-  border-top-color: #edb9c4;
-  border-bottom: 3px solid #a61940;
-  box-shadow: inset 0 1px 0 #ffffff26, 0 2px 5px #0006;
-  text-shadow: 0 1px 0 #77717b, 1px 2px 0 #5c0e27;
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 0.025em;
-  line-height: 1.35;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--blue-dark);
+  color: var(--white);
+  border: 1px solid rgba(123, 11, 49, 0.35);
+  font-weight: 800;
+  letter-spacing: 0;
   text-transform: uppercase;
   font-size: 0.82rem;
 }
 
 body[data-theme="night"] .teacher-name {
-  color: #f4f0f3;
+  background: var(--blue);
+  color: #ffffff;
 }
 h1 {
   color: var(--blue-dark);
@@ -1235,7 +1230,8 @@ body[data-theme="night"] .school-photo {
 
 @media (min-width: 1100px) {
   .hero-panel {
-    height: 500px;
+    height: auto;
+    min-height: 420px;
   }
 
   .home-feature,

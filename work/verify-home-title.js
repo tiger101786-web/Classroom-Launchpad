@@ -27,10 +27,13 @@ const server = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...pro
         const t = title.getBoundingClientRect();
         const hero = document.querySelector('.hero-panel').getBoundingClientRect();
         const scene = document.querySelector('.school-photo')?.getBoundingClientRect();
-        return { width: innerWidth, titleWidth: t.width, titleHeight: t.height, loaded: title.naturalWidth > 0, contained: t.left >= hero.left && t.right <= hero.right, sceneClear: !scene || t.right <= scene.left || t.bottom <= scene.top || t.left >= scene.right, overflow: document.documentElement.scrollWidth > innerWidth };
+        const badge = getComputedStyle(document.querySelector('.teacher-name'));
+        return { width: innerWidth, heroHeight:hero.height, roundedBadge:badge.borderRadius==='999px' && badge.fontStyle==='normal', sceneContained:!scene || (scene.top>=hero.top && scene.bottom<=hero.bottom), titleWidth: t.width, titleHeight: t.height, loaded: title.naturalWidth > 0, contained: t.left >= hero.left && t.right <= hero.right, sceneClear: !scene || t.right <= scene.left || t.bottom <= scene.top || t.left >= scene.right, overflow: document.documentElement.scrollWidth > innerWidth };
       });
       console.log(metrics);
       assert(metrics.loaded && metrics.contained && metrics.sceneClear && !metrics.overflow, JSON.stringify(metrics));
+      assert(metrics.roundedBadge && metrics.sceneContained);
+      if(width>=1100) assert(metrics.heroHeight<=420);
       await page.locator('.hero-panel').screenshot({ path: path.join(__dirname, `home-title-${width}.png`) });
     }
   } finally { if (browser) await browser.close(); server.kill(); }
