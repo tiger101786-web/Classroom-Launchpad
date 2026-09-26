@@ -523,6 +523,33 @@
       note: "Michael Jackson music streamed by YouRadio's Exclusively Michael Jackson station. The provider describes its stations as commercial-free. Clean-only playback is not confirmed; teacher review recommended."
     },
     {
+      id: "exclusively-elvis-presley",
+      label: "Oldies • The King",
+      type: "stream",
+      source: "https://streaming.exclusive.radio/er/elvispresley/icecast.audio",
+      provider: "YouRadio Exclusively Elvis Presley",
+      searchTerms: "elvis presley king rock roll graceland",
+      note: "Elvis Presley music from YouRadio. The provider describes this station as ad-free. Clean-only playback is not confirmed; teacher review recommended."
+    },
+    {
+      id: "exclusively-taylor-swift",
+      label: "Pop • Swift Hits",
+      type: "stream",
+      source: "https://streaming.exclusive.radio/er/taylorswift/icecast.audio",
+      provider: "YouRadio Exclusively Taylor Swift",
+      searchTerms: "taylor swift swifties eras fearless love story",
+      note: "Taylor Swift hits, deep cuts and fan favorites from YouRadio. The provider describes this station as ad-free. Clean-only playback is not confirmed; explicit versions may play. Teacher review recommended."
+    },
+    {
+      id: "youradio-latin-party",
+      label: "Latin • Fiesta",
+      type: "stream",
+      source: "https://live2.mystreaming.net/uber/latinparty/icecast.audio",
+      provider: "YouRadio Latin Party",
+      searchTerms: "latin party fiesta dance spanish reggaeton",
+      note: "Latin party music from YouRadio. The provider describes this station as ad-free. Clean-only playback is not confirmed; explicit versions may play. Teacher review recommended."
+    },
+    {
       id: "youradio-positively-focus",
       label: "Focus • Positive",
       type: "stream",
