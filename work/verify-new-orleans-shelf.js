@@ -5,7 +5,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
  for(const id of ids){
   assert(shelf.items.some(i=>i.id===id&&i.category==='New Orleans'));
   assert(shelf.valid({enabled:true,theme:'crimson',slots:[id,'horse','crystal']}));
-  const {data}=await sharp('assets/shelf-'+id+'.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(data[3],0);
+  const {data}=await sharp('assets/shelf-'+id+(id==='nola-king-cake'?'-flat':'')+'.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(data[3],0);
  }
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
@@ -19,7 +19,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
   await page.locator('#shelfCategory').selectOption('New Orleans');
   for(const id of ids){
    await page.locator('#shelfSearch').fill(shelf.items.find(i=>i.id===id).name);
-   const card=page.locator('[data-shelf-item="'+id+'"]');assert.equal(await card.locator('image').getAttribute('href'),'assets/shelf-'+id+'.png');await card.click();
+   const card=page.locator('[data-shelf-item="'+id+'"]');assert.equal(await card.locator('image').getAttribute('href'),'assets/shelf-'+id+(id==='nola-king-cake'?'-flat':'')+'.png');await card.click();
   }
   console.log('Four New Orleans items: validation, alpha, shelf alignment, category search and selection passed.');
  }finally{await browser.close();}

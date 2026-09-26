@@ -103,7 +103,7 @@
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
     'nola-snowball': {source:'assets/shelf-nola-snowball.png',width:1254,height:1254,bounds:[240,17,821,1222]},
-    'nola-king-cake': {source:'assets/shelf-nola-king-cake.png',width:1254,height:1254,bounds:[14,169,1227,920]},
+    'nola-king-cake': {source:'assets/shelf-nola-king-cake-flat.png',width:1897,height:829,bounds:[37,93,1823,661]},
     'nola-second-line': {source:'assets/shelf-nola-second-line.png',width:1254,height:1254,bounds:[77,9,1113,1235]},
     'nola-pelican': {source:'assets/shelf-nola-pelican.png',width:1254,height:1254,bounds:[229,20,840,1218]},
     'enchanted-rose': {source:'assets/shelf-enchanted-rose.png',width:1254,height:1254,bounds:[265,18,723,1165]},
