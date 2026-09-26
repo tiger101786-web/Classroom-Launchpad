@@ -18,8 +18,8 @@ const {chromium}=require('playwright');
  const tasks=page.locator('.daily-launch-message > ol > li');
  const boxes=await tasks.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y}}));
  assert.equal(boxes.length,2);
- if(width>=900){assert(Math.abs(boxes[0].y-boxes[1].y)<1);assert(boxes[1].x>boxes[0].x);}
- else {assert(boxes[1].y>boxes[0].y);}
+ assert(boxes[1].y>boxes[0].y);assert(Math.abs(boxes[0].x-boxes[1].x)<1);
+ assert(await tasks.evaluateAll(nodes=>nodes.every(n=>{const s=getComputedStyle(n);return s.borderTopWidth==='0px'&&s.backgroundColor==='rgba(0, 0, 0, 0)';})));
  if(teacher)await page.locator('#home-launch').screenshot({path:'work/launch-briefing-teacher-'+width+'.png'});
  if(!teacher)await page.locator('#home-launch').screenshot({path:'work/wide-launch-'+width+'.png'});
  await page.close();
