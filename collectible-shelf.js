@@ -2,6 +2,7 @@
   'use strict';
   const themes = [
     {id:'crimson',name:'Crimson Original'},
+    {id:'christian',name:'Christian Grace'},
     {id:'dinosaur-dig',name:"Dinosaur Dig"},
     {id:'wizard-library',name:"Wizard’s Library"},
     {id:'candy-kingdom',name:"Candy Kingdom"},
