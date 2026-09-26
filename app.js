@@ -2486,7 +2486,6 @@ function renderHomeDefault() {
           <div class="daily-launch-message">${launchMessage}</div>
         </div>
       </section>
-      ${renderRandomActivityCard()}
     </section>
     <section id="home-expectations" class="rules-card home-navigation-anchor">
       <div class="expectations-copy">
