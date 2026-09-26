@@ -5,8 +5,8 @@
   --gold: #55585a;
   --gold-soft: #f1f1f1;
   --paper: #f8f7f6;
-  --ink: #242424;
-  --muted: #666a6d;
+  --ink: #000000;
+  --muted: #000000;
   --border: #d8d8d8;
   --danger: #9b123a;
   --white: #ffffff;
@@ -1608,6 +1608,21 @@ body[data-theme="night"] .random-activity-card.is-locked::after {
   background-size: 44px 76px;
   pointer-events: none;
 }
+
+/* Light surfaces and black copy; keep white lettering on crimson badges. */
+body:not([data-theme="night"]) .rules-card {
+  color: #000;
+  background: radial-gradient(circle at 88% 16%, #f1dce5, transparent 40%), linear-gradient(135deg, #fff, #f7f3f5);
+}
+body:not([data-theme="night"]) .rules-card::after {
+  background-image: linear-gradient(30deg, #7b0b3105 12%, transparent 12.5%, transparent 87%, #7b0b3105 87.5%), linear-gradient(150deg, #7b0b3105 12%, transparent 12.5%, transparent 87%, #7b0b3105 87.5%);
+}
+body:not([data-theme="night"]) :is(.expectations-rules h3, .rules-card li, .expectation-number, .calendar-date, .calendar-year, .calendar-time, .calendar-live) { color:#000; }
+body:not([data-theme="night"]) .expectation-check { background:var(--blue); }
+body:not([data-theme="night"]) .expectations-colt { background:#fff; box-shadow:0 0 0 5px #eee5e9, 0 0 0 8px #d8c4cd, 0 12px 24px #56072020; }
+body:not([data-theme="night"]) .calendar-card { background:linear-gradient(145deg,#fff,#f8eaf0); border-color:#c997aa; box-shadow:0 10px 24px #56072018; }
+body:not([data-theme="night"]) .calendar-icon { background:#f0dce4; color:var(--blue); }
+body:not([data-theme="night"]) .calendar-divider { box-shadow:none; }
 
 .expectations-copy {
   position: relative;
@@ -11376,6 +11391,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   margin-top: 8px;
   color: #6c6266;
 }
+
+body:not([data-theme="night"]) .launchpad-colt-setting-status { color:#000; }
 
 .launchpad-colt-root.is-motion-paused *,
 .launchpad-colt-root.is-motion-paused *::before,
