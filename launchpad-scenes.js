@@ -43,6 +43,7 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const frames = [
     { id: "none", name: "No frame", description: "Original clean border" },
+    { id: "christian", name: "Christian Grace", description: "Golden cross, white lilies, olive branches & dove", decorative: true },
     { id: "squishy", name: "Squishy Sweethearts", description: "Bamboo, pastel ribbons & smiling dumpling toys", decorative: true },
     { id: "highland", name: "Highland Heather", description: "Rustic oak, bronze Celtic knots, purple heather & tartan", decorative: true },
     { id: "titanium", name: "Brushed Titanium", description: "Satin metal & fine engraved lines" },

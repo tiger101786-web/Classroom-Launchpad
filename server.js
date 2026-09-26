@@ -25,6 +25,7 @@ homeSceneIds.add("highland");
 homeSceneIds.add("squishy");
 homeSceneFrameIds.add("squishy");
 homeSceneFrameIds.add("highland");
+homeSceneFrameIds.add("christian");
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
