@@ -18,6 +18,8 @@ const {chromium}=require('playwright');
  if(layout.card>762) { assert(positions.side); assert(layout.message<layout.copy); }
  else { assert(positions.stacked); assert(Math.abs(layout.message-layout.copy)<2); }
  assert.equal(await page.locator('.daily-launch-preview-tab').count(),teacher?3:0);
+ assert.equal(await page.locator('.daily-launch-heading .daily-launch-preview-tab').count(),0);
+ if(teacher) assert(await page.locator('.daily-launch-controls').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.daily-launch-message').getBoundingClientRect().bottom-1));
  const tasks=page.locator('.daily-launch-message > ol > li');
  const boxes=await tasks.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y}}));
  assert.equal(boxes.length,2);

@@ -2468,8 +2468,13 @@ function renderHomeDefault() {
               <div><span class="feature-kicker">Your daily briefing</span><h2>Today's Launch</h2></div>
             </div>
             <div class="daily-launch-audience">
-              ${launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
+              ${!isTeacher() && launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
+            </div>
+          </header>
+          <div class="daily-launch-message">${launchMessage}</div>
           ${isTeacher() ? `
+            <div class="daily-launch-controls">
+            <span class="daily-launch-grade">Teacher View</span>
             <div class="daily-launch-teacher-preview" aria-label="Preview Today's Launch by grade">
               <span>Showing:</span>
               <div role="tablist" aria-label="Choose a grade to preview">
@@ -2485,10 +2490,8 @@ function renderHomeDefault() {
                 `).join("")}
               </div>
             </div>
-          ` : ""}
             </div>
-          </header>
-          <div class="daily-launch-message">${launchMessage}</div>
+          ` : ""}
         </div>
       </section>
     </section>

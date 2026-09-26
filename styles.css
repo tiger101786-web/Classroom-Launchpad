@@ -1405,17 +1405,19 @@ body[data-theme="night"] .daily-launch-message {
 
 /* Compact briefing: heading beside one continuous instruction list. */
 #home-launch .daily-launch-card { display:block; container-type:inline-size; min-height:0; padding:0; border-left:0; border-top:3px solid var(--blue); border-radius:16px; }
-#home-launch .daily-launch-copy { display:grid; grid-template-columns:minmax(280px,30%) minmax(0,1fr); gap:0; align-items:center; }
+#home-launch .daily-launch-copy { display:grid; grid-template-columns:minmax(280px,30%) minmax(0,1fr); gap:0; align-items:start; }
 #home-launch .daily-launch-heading { display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:12px; margin:22px 0; padding:0 24px; border-right:1px solid var(--border); }
 #home-launch .daily-launch-title-group { display:flex; align-items:center; gap:14px; min-width:0; }
 #home-launch .daily-launch-icon { flex:none; width:44px; height:44px; border-radius:12px; font-size:1.4rem; }
 #home-launch .feature-kicker { background:none; padding:0; margin:0 0 6px; font-size:.7rem; letter-spacing:.12em; }
 #home-launch h2 { margin:0; font-size:clamp(1.35rem,2.2vw,1.8rem); }
 #home-launch .daily-launch-audience { display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding-left:58px; }
-#home-launch .daily-launch-audience:has(.daily-launch-teacher-preview) { padding-left:0; }
+#home-launch .daily-launch-audience:empty { display:none; }
+#home-launch .daily-launch-controls { grid-column:1 / -1; display:flex; align-items:center; flex-wrap:wrap; gap:12px 20px; padding:12px 24px; border-top:1px solid var(--border); background:rgba(0,0,0,.12); }
+#home-launch .daily-launch-controls .daily-launch-teacher-preview { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
 #home-launch .daily-launch-grade { margin:0; }
 #home-launch .daily-launch-teacher-preview { margin:0; }
-#home-launch .daily-launch-message { margin:0; padding:24px 26px; border:0; border-radius:0; background:transparent; box-shadow:none; line-height:1.6; }
+#home-launch .daily-launch-message { margin:0; padding:20px 26px; border:0; border-radius:0; background:transparent; box-shadow:none; line-height:1.6; }
 #home-launch .daily-launch-message > :is(ol,ul) { display:block; margin:0; padding-left:24px; }
 #home-launch .daily-launch-message > :is(ol,ul) > li { padding:3px 0 3px 6px; margin:0; border:0; background:transparent; }
 #home-launch .daily-launch-message > :is(ol,ul) > li::marker { font-weight:900; }
