@@ -10153,27 +10153,6 @@ function renderLegacyDashboard() {
         </div>
       </form>
     </section>
-    <section class="form-card random-activity-control">
-      <div>
-        <span class="feature-kicker">Student Choice</span>
-        <h2>Random Activity</h2>
-        <p class="instruction">Control whether students can use the Random Activity picker.</p>
-      </div>
-      <div class="random-lock-panel">
-        <div class="random-lock-status ${randomActivitySettings.locked ? "is-locked" : "is-open"}">
-          <span>Current Status</span>
-          <strong>${randomActivitySettings.locked ? "Locked" : "Available"}</strong>
-          <p>${randomActivitySettings.locked ? "Students can see the pane, but cannot pick a random site." : "Students can use the picker to choose an approved activity."}</p>
-        </div>
-        <label class="toggle-row random-lock-toggle">
-          <span>Lock Random Activity</span>
-          <span class="switch">
-            <input type="checkbox" data-action="toggleRandomActivityLock" ${randomActivitySettings.locked ? "checked" : ""}>
-            <span class="slider"></span>
-          </span>
-        </label>
-      </div>
-    </section>
     <h2 class="section-title">Colt Corner Threads</h2>
     <section class="teacher-list">
       ${classThreads.length ? sortedThreads().map(renderTeacherThread).join("") : emptyCard("No Colt Corner topics yet.")}
@@ -10269,11 +10248,6 @@ function renderDashboardOverview() {
         </div>
       </section>
       <section class="dashboard-status-panel">
-        <div>
-          <span class="dashboard-status-dot ${randomActivitySettings.locked ? "is-locked" : ""}"></span>
-          <span>Random Activity</span>
-          <strong>${randomActivitySettings.locked ? "Locked" : "Available"}</strong>
-        </div>
         <div>
           <span class="dashboard-status-dot ${classTimer.status === "running" ? "" : "is-idle"}"></span>
           <span>Class Timer</span>

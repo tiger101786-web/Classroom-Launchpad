@@ -4850,7 +4850,7 @@ body[data-theme="night"] .colt-run-volume {
 
 .daily-launch-editor {
   display: grid;
-  grid-template-columns: minmax(260px, 0.55fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
   margin-bottom: 22px;
@@ -4861,6 +4861,11 @@ body[data-theme="night"] .colt-run-volume {
   color: var(--blue-dark);
   margin-top: 8px;
 }
+
+.daily-launch-editor > div:first-child { padding-bottom:16px; border-bottom:1px solid var(--border); }
+.daily-launch-editor > div:first-child .instruction { margin-top:8px; }
+.daily-launch-editor #dailyLaunchForm { min-width:0; width:100%; }
+.daily-launch-editor .mini-editor-surface { min-height:200px; overflow-wrap:anywhere; }
 
 .daily-launch-grade-tabs {
   display: grid;
