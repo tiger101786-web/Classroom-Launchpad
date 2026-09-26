@@ -2461,11 +2461,14 @@ function renderHomeDefault() {
         <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
           <source data-src="assets/daily-launch-bg.mp4?v=20260905-optimized1" type="video/mp4">
         </video>
-        <div class="daily-launch-icon" aria-hidden="true">✓</div>
         <div class="daily-launch-copy">
-          <span class="feature-kicker">Start Here</span>
-          <h2>Today's Launch</h2>
-          ${launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
+          <header class="daily-launch-heading">
+            <div class="daily-launch-title-group">
+              <div class="daily-launch-icon" aria-hidden="true">✓</div>
+              <div><span class="feature-kicker">Your daily briefing</span><h2>Today's Launch</h2></div>
+            </div>
+            <div class="daily-launch-audience">
+              ${launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
           ${isTeacher() ? `
             <div class="daily-launch-teacher-preview" aria-label="Preview Today's Launch by grade">
               <span>Showing:</span>
@@ -2483,6 +2486,8 @@ function renderHomeDefault() {
               </div>
             </div>
           ` : ""}
+            </div>
+          </header>
           <div class="daily-launch-message">${launchMessage}</div>
         </div>
       </section>

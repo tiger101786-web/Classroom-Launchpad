@@ -15,6 +15,12 @@ const {chromium}=require('playwright');
  const layout=await page.locator('#home-launch').evaluate(e=>{const c=e.querySelector('.daily-launch-card'),m=e.querySelector('.daily-launch-message'),copy=e.querySelector('.daily-launch-copy');return {row:e.getBoundingClientRect().width,card:c.getBoundingClientRect().width,message:m.getBoundingClientRect().width,copy:copy.getBoundingClientRect().width,overflow:e.scrollWidth>e.clientWidth}});
  assert(Math.abs(layout.row-layout.card)<2);assert(Math.abs(layout.message-layout.copy)<2);assert(!layout.overflow);
  assert.equal(await page.locator('.daily-launch-preview-tab').count(),teacher?3:0);
+ const tasks=page.locator('.daily-launch-message > ol > li');
+ const boxes=await tasks.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y}}));
+ assert.equal(boxes.length,2);
+ if(width>=900){assert(Math.abs(boxes[0].y-boxes[1].y)<1);assert(boxes[1].x>boxes[0].x);}
+ else {assert(boxes[1].y>boxes[0].y);}
+ if(teacher)await page.locator('#home-launch').screenshot({path:'work/launch-briefing-teacher-'+width+'.png'});
  if(!teacher)await page.locator('#home-launch').screenshot({path:'work/wide-launch-'+width+'.png'});
  await page.close();
  }
