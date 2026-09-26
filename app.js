@@ -2427,7 +2427,7 @@ function renderHome() {
     <div class="home-page-content">
     <section id="home-top" class="hero-panel home-navigation-anchor">
       <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/hero-panel-bg.mp4?v=20260905-optimized1" type="video/mp4">
+        <source data-src="assets/hero-panel-bg-stable.mp4?v=20260926-stable1" type="video/mp4">
       </video>
       <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
         <source data-src="assets/hero-panel-bg-mobile.mp4?v=20260905-optimized1" type="video/mp4">
