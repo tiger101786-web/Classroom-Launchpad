@@ -14,6 +14,12 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
   await page.setContent('<base href="http://art.local/"><style>'+fs.readFileSync('collectible-shelf.css','utf8')+'body{background:#241821;color:white;padding:100px 40px}section{width:650px}</style><section>'+shelf.art({enabled:true,theme:'mardi-gras',slots:ids.slice(0,3)})+'</section>');
   const bases=await page.locator('.shelf-object > svg').evaluateAll(ns=>ns.map(n=>+n.getAttribute('y')+ +n.getAttribute('height')));assert(bases.every(b=>Math.abs(b-346)<.01));
   await page.waitForTimeout(600);await page.screenshot({path:'work/new-orleans-shelf-preview.png'});
+  const cake=page.locator('.shelf-object[aria-label="Mardi Gras King Cake"] > svg');
+  assert.equal(Number(await cake.getAttribute('width')),280);
+  // Three cakes are the widest possible neighboring combination.
+  await page.locator('section').evaluate((el,html)=>{el.innerHTML=html;},shelf.art({enabled:true,theme:'mardi-gras',slots:Array(3).fill('nola-king-cake')}));
+  const rects=await page.locator('.shelf-object > svg').evaluateAll(ns=>ns.map(n=>{const r=n.parentElement.getBoundingClientRect(),scale=r.width/220,left=r.left+Number(n.getAttribute('x'))*scale;return {left,right:left+Number(n.getAttribute('width'))*scale};}));
+  assert(rects[0].right<=rects[1].left && rects[1].right<=rects[2].left,'Cakes must not overlap');
   await page.addScriptTag({path:path.resolve('collectible-shelf.js')});
   await page.evaluate(()=>CollectibleShelf.open({selected:{enabled:true,theme:'crimson',slots:['none','none','none']},save:async v=>v,onSave:()=>{}}));
   await page.locator('#shelfCategory').selectOption('New Orleans');

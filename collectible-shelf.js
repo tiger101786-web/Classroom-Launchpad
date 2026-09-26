@@ -103,7 +103,7 @@
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
     'nola-snowball': {source:'assets/shelf-nola-snowball.png',width:1254,height:1254,bounds:[240,17,821,1222]},
-    'nola-king-cake': {source:'assets/shelf-nola-king-cake-flat.png',width:1897,height:829,bounds:[37,93,1823,661]},
+    'nola-king-cake': {source:'assets/shelf-nola-king-cake-flat.png',width:1897,height:829,bounds:[37,93,1823,661],displayWidth:280},
     'nola-second-line': {source:'assets/shelf-nola-second-line.png',width:1254,height:1254,bounds:[77,9,1113,1235]},
     'nola-pelican': {source:'assets/shelf-nola-pelican.png',width:1254,height:1254,bounds:[229,20,840,1218]},
     'enchanted-rose': {source:'assets/shelf-enchanted-rose.png',width:1254,height:1254,bounds:[265,18,723,1165]},
@@ -240,7 +240,9 @@
     const anime = item.category === 'Anime';
     // Every collectible shares the statue sizing and bottom baseline. Wide pieces
     // retain their proportions and stay inside the space between neighboring slots.
-    const scale = Math.min(330 / Math.max(w,h), 240 / w);
+    // The low-profile cake uses more of its slot's horizontal gap, without
+    // stretching the plate or moving its contact point off the shared baseline.
+    const scale = Math.min(330 / Math.max(w,h), (asset?.displayWidth || 240) / w);
     const height = 350;
     return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"/></svg></svg>`;
   }
