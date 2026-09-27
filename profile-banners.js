@@ -18,6 +18,26 @@
     const preview = () => `<div class="profile-banner-card">${cover(draft)}<div class="profile-banner-identity">${avatar}<div><strong>${name}</strong><span>${role}</span></div></div></div>`;
     dialog.innerHTML = `<div class="launch-scene-dialog-heading"><h2 id="profileBannerTitle">Choose your profile banner</h2><button type="button" class="outline-btn" data-banner-close aria-label="Close banner chooser">✕</button></div><p>Your Colt Corner cover. Your picture, avatar frame, and homepage scene stay unchanged.</p><div id="profileBannerPreview">${preview()}</div><div class="profile-banner-options">${choices.map(([id, title]) => `<button type="button" data-banner-choice="${id}" aria-pressed="${id === draft}">${id === 'none' ? '<span class="profile-banner-blank">Simple & clean</span>' : cover(id)}<strong>${title}</strong></button>`).join('')}</div><p id="profileBannerStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-banner-close>Cancel</button><button type="button" class="primary-btn" id="saveProfileBanner">Save banner</button></div>`;
     document.body.append(dialog);
+    const pageSize = 6;
+    let page = Math.floor(Math.max(0, choices.findIndex(([id]) => id === draft)) / pageSize);
+    const pageCount = Math.ceil(choices.length / pageSize);
+    const cards = [...dialog.querySelectorAll('[data-banner-choice]')];
+    const pager = document.createElement('nav');
+    pager.className = 'profile-picker-pages';
+    pager.setAttribute('aria-label', 'Banner pages');
+    dialog.querySelector('.profile-banner-options').after(pager);
+    const showPage = () => {
+      cards.forEach((card, index) => { card.hidden = Math.floor(index / pageSize) !== page; });
+      pager.innerHTML = `<button type="button" class="outline-btn" data-banner-page="-1" ${page === 0 ? 'disabled' : ''}>Previous</button><span role="status">Page ${page + 1} of ${pageCount}</span><button type="button" class="outline-btn" data-banner-page="1" ${page === pageCount - 1 ? 'disabled' : ''}>Next</button>`;
+    };
+    pager.addEventListener('click', event => {
+      const button = event.target.closest('[data-banner-page]');
+      if (!button || button.disabled || saving) return;
+      page = Math.max(0, Math.min(pageCount - 1, page + Number(button.dataset.bannerPage)));
+      showPage();
+      cards[page * pageSize]?.focus({preventScroll:true});
+    });
+    showPage();
     const close = () => { if (saving) return; dialog.close(); dialog.remove(); document.getElementById('changeProfileBanner')?.focus(); };
     dialog.querySelectorAll('[data-banner-close]').forEach(button => button.addEventListener('click', close));
     dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
@@ -38,6 +58,7 @@
         saving = false;
         dialog.querySelector('#profileBannerStatus').textContent = error.message;
         dialog.querySelectorAll('button').forEach(button => { button.disabled = false; });
+        showPage();
       }
     });
     dialog.showModal();
