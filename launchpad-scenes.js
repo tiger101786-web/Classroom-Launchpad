@@ -114,7 +114,13 @@
       const pages = Math.max(1, Math.ceil(count / pageSize));
       page = Math.min(page, pages - 1);
       cards.forEach(({button}) => { button.hidden = true; });
-      matches.slice(page * pageSize, (page + 1) * pageSize).forEach(({button}) => { button.hidden = false; });
+      matches.slice(page * pageSize, (page + 1) * pageSize).forEach(({button}) => {
+        button.hidden = false;
+        button.querySelectorAll('img[data-chooser-src]').forEach(image => {
+          image.src = image.dataset.chooserSrc;
+          image.removeAttribute('data-chooser-src');
+        });
+      });
       pager.hidden = !count;
       pager.innerHTML = `<button type="button" class="outline-btn" data-chooser-page="-1" ${page === 0 ? 'disabled' : ''}>Previous</button><span role="status">Page ${page + 1} of ${pages}</span><button type="button" class="outline-btn" data-chooser-page="1" ${page === pages - 1 ? 'disabled' : ''}>Next</button>`;
       clear.disabled = !input.value;
@@ -152,9 +158,9 @@
     motion: session.authenticated ? session.homeScene?.motion !== false : guestMotion,
     frame: session.authenticated && frames.some(frame => frame.id === session.homeScene?.frame) ? session.homeScene.frame : "none"
   });
-  function frameArt(id) {
+  function frameArt(id, deferred = false) {
     const frame = frames.find(item => item.id === id) || frames[0];
-    if (frame.decorative) return `<span class="scene-frame scene-frame-decorative" data-scene-frame="${frame.id}" aria-hidden="true"><img class="scene-frame-artwork" src="assets/scene-frame-${frame.id}.png" alt="" decoding="async"></span>`;
+    if (frame.decorative) return `<span class="scene-frame scene-frame-decorative" data-scene-frame="${frame.id}" aria-hidden="true"><img class="scene-frame-artwork" ${deferred ? 'data-chooser-src' : 'src'}="assets/scene-frame-${frame.id}.png" alt="" decoding="async"></span>`;
     return `<span class="scene-frame scene-frame-${frame.id}" data-scene-frame="${frame.id}" aria-hidden="true"><svg viewBox="0 0 320 320"><circle class="frame-track" cx="160" cy="160" r="153"/>${Array.from({ length: frame.id === "pearl" ? 48 : 12 }, (_, i) => {
       const angle = i * Math.PI * 2 / (frame.id === "pearl" ? 48 : 12);
       return `<circle class="frame-gem" cx="${160 + 153 * Math.cos(angle)}" cy="${160 + 153 * Math.sin(angle)}" r="${frame.id === "pearl" ? 5 : 2.5}"/>`;
@@ -244,7 +250,7 @@
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Your own little world</span><h2 id="launchSceneTitle">Choose your Launchpad scene</h2></div><button type="button" class="outline-btn" data-scene-close aria-label="Close scene chooser">✕</button></div>
         <p>Only your homepage changes. Your profile picture and classmates’ pages stay the same.</p>
         <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
-        <div class="launch-scene-options">${alphabetically(scenes).map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
+        <div class="launch-scene-options">${alphabetically(scenes).map(scene => `<button type="button" data-scene-choice="${scene.id}" aria-pressed="${draft.id === scene.id}">${scene.image ? `<img data-chooser-src="${scene.image}" alt="" loading="lazy">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}<strong>${scene.name}</strong><small>${scene.description}</small></button>`).join("")}</div>
         <label class="launch-scene-motion"><input type="checkbox" id="launchSceneMotion" ${draft.motion ? "checked" : ""}> Gentle effects (or original video playback)</label>
         <p class="launch-scene-hint">Scene artwork stays still; only the silent effects move inside the circle. Reduced-motion preferences are always respected.</p>
         <p id="launchSceneSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-scene-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchScene">Save Scene</button></div>`;
@@ -280,7 +286,7 @@
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Make it yours</span><h2 id="launchFrameTitle">Choose your scene frame</h2></div><button type="button" class="outline-btn" data-frame-close aria-label="Close frame chooser">✕</button></div>
         <p>Every frame fits every scene. Your scene, effects, and small profile-picture frame stay unchanged.</p>
         <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
-        <div class="launch-scene-options launch-frame-options">${alphabetically(frames).map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img src="${image}" alt="">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
+        <div class="launch-scene-options launch-frame-options">${alphabetically(frames).map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img data-chooser-src="${image}" alt="" decoding="async">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id, true)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
         <p id="launchFrameSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-frame-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchFrame">Save frame</button></div>`;
       document.body.append(dialog);
       const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };
