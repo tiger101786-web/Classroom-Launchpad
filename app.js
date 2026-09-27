@@ -1468,7 +1468,9 @@ let selectedMessageStudentEmail = "";
 let directMessageStatus = "";
 let teacherMessageSearch = "";
 let teacherMessageGrade = "all";
-let teacherMessageHistoryFilter = "all";
+let teacherMessageHistoryFilter = "messaged";
+let teacherMessagePage = 0;
+const teacherMessageDrafts = new Map();
 let activationCodeResults = [];
 let assignments = [];
 let submissions = [];
@@ -9776,7 +9778,7 @@ function renderDirectMessageThread(studentEmail, studentName = "Student") {
       </div>
       <form id="directMessageForm" class="direct-message-composer" data-student-email="${escapeHtml(studentEmail)}">
         <label for="directMessageText">${isTeacher() ? `Message ${escapeHtml(studentName)}` : "Reply to Mr. Nieves"}</label>
-        <textarea id="directMessageText" maxlength="1000" rows="4" placeholder="Type a private message…" required></textarea>
+        <textarea id="directMessageText" maxlength="1000" rows="4" placeholder="Type a private message…" required>${isTeacher() ? escapeHtml(teacherMessageDrafts.get(studentEmail) || "") : ""}</textarea>
         <div>
           <small>Only you and ${isTeacher() ? escapeHtml(studentName) : "Mr. Nieves"} can see this conversation.</small>
           <button class="primary-btn" type="submit">Send Message</button>
@@ -9799,84 +9801,82 @@ function renderStudentMessages() {
   `;
 }
 
-function renderDashboardMessages() {
-  const query = teacherMessageSearch.trim().toLowerCase();
-  const hasConversation = student => directMessageConversation(student.email).length > 0;
-  const messagedCount = approvedStudents.filter(hasConversation).length;
-  const gradeCounts = Object.fromEntries(["4", "5", "6", "7"].map(grade => [
-    grade,
-    approvedStudents.filter(student => studentGradeNumber(student) === grade).length
-  ]));
-  const students = approvedStudents
-    .filter(student => teacherMessageGrade === "all" || studentGradeNumber(student) === teacherMessageGrade)
-    .filter(student => teacherMessageHistoryFilter !== "messaged" || hasConversation(student))
-    .filter(student => !query || [student.name, student.email].some(value => String(value || "").toLowerCase().includes(query)))
-    .map(student => ({ ...student, messageDisplayName: formatStudentFirstLast(student.name || student.email) }))
-    .sort((a, b) => a.messageDisplayName.localeCompare(b.messageDisplayName, undefined, { sensitivity: "base" }));
-  if (selectedMessageStudentEmail && !students.some(student => student.email === selectedMessageStudentEmail)) {
-    selectedMessageStudentEmail = "";
+function teacherInboxRows() {
+  const byStudent = new Map();
+  for (const message of directMessages) {
+    const key = String(message.studentEmail || "").toLowerCase();
+    const row = byStudent.get(key) || { latest: null, unread: 0, count: 0 };
+    row.count++;
+    if (message.senderRole === "student" && !message.readByTeacher) row.unread++;
+    if (!row.latest || (Date.parse(message.createdAt) || 0) >= (Date.parse(row.latest.createdAt) || 0)) row.latest = message;
+    byStudent.set(key, row);
   }
-  const selected = students.find(student => student.email === selectedMessageStudentEmail);
+  return approvedStudents.map(student => {
+    const messages = byStudent.get(String(student.email).toLowerCase()) || { latest: null, unread: 0, count: 0 };
+    return { ...student, ...messages, messageDisplayName: formatStudentFirstLast(student.name || student.email),
+      needsReply: messages.latest?.senderRole === "student" };
+  });
+}
+
+function renderDashboardMessages() {
+  const rows = teacherInboxRows();
+  const query = teacherMessageSearch.trim().toLowerCase();
+  const modes = [
+    ["messaged", "Conversations", rows.filter(s => s.count).length],
+    ["unread", "Unread", rows.filter(s => s.unread).length],
+    ["needs-reply", "Needs Reply", rows.filter(s => s.needsReply).length],
+    ["all", "All Students", rows.length]
+  ];
+  const students = rows.filter(student => teacherMessageGrade === "all" || studentGradeNumber(student) === teacherMessageGrade)
+    .filter(student => teacherMessageHistoryFilter === "all" || (teacherMessageHistoryFilter === "unread" ? student.unread : teacherMessageHistoryFilter === "needs-reply" ? student.needsReply : student.count))
+    .filter(student => !query || [student.name, student.email].some(value => String(value || "").toLowerCase().includes(query)))
+    .sort((a,b) => teacherMessageHistoryFilter === "all"
+      ? a.messageDisplayName.localeCompare(b.messageDisplayName, undefined, { sensitivity: "base" })
+      : Number(!!b.unread)-Number(!!a.unread) || (Date.parse(b.latest?.createdAt)||0)-(Date.parse(a.latest?.createdAt)||0) || a.messageDisplayName.localeCompare(b.messageDisplayName));
+  const pageSize = 8;
+  const pageCount = Math.max(1, Math.ceil(students.length/pageSize));
+  teacherMessagePage = Math.max(0, Math.min(teacherMessagePage, pageCount-1));
+  const visible = students.slice(teacherMessagePage*pageSize, (teacherMessagePage+1)*pageSize);
+  // Keep an opened conversation visible after it is marked read or filters change.
+  const selected = rows.find(student => student.email === selectedMessageStudentEmail);
+  const status = student => student.unread ? `${student.unread} unread` : student.needsReply ? "Needs reply" : student.count ? "Replied" : "No messages";
   return `
-    <section class="teacher-message-center">
-      <div class="teacher-message-roster" aria-label="Approved students">
-        <div class="assignment-manager-heading">
-          <div><span class="feature-kicker">Private Inbox</span><h3>Students</h3></div>
-          <span class="dashboard-count">${students.length}</span>
-        </div>
-        <label class="teacher-message-search" for="teacherMessageSearch">
-          <span class="sr-only">Search students</span>
-          <input id="teacherMessageSearch" type="search" value="${escapeHtml(teacherMessageSearch)}" placeholder="Search students…" autocomplete="off">
-        </label>
-        <div class="teacher-message-history-filter" role="group" aria-label="Filter by conversation history">
-          <button type="button" class="${teacherMessageHistoryFilter === "all" ? "is-active" : ""}" data-action="messageHistoryFilter" data-filter="all">All Students <span>${approvedStudents.length}</span></button>
-          <button type="button" class="${teacherMessageHistoryFilter === "messaged" ? "is-active" : ""}" data-action="messageHistoryFilter" data-filter="messaged">Messaged <span>${messagedCount}</span></button>
-        </div>
-        <nav class="teacher-message-grade-tabs" aria-label="Filter messages by grade">
-          <button type="button" class="${teacherMessageGrade === "all" ? "is-active" : ""}" data-action="messageGrade" data-grade="all">All <span>${approvedStudents.length}</span></button>
-          ${["4", "5", "6", "7"].map(grade => `
-            <button type="button" class="${teacherMessageGrade === grade ? "is-active" : ""}" data-action="messageGrade" data-grade="${grade}">
-              Grade ${grade} <span>${gradeCounts[grade]}</span>
-            </button>
-          `).join("")}
+    <section class="teacher-message-center inbox-organized">
+      <header class="inbox-toolbar">
+        <div><span class="feature-kicker">Private Inbox</span><h3>Stay on top of student messages</h3>
+        <p>Unread conversations come first. Needs Reply means the student sent the latest message.</p></div>
+        <nav class="inbox-views" aria-label="Message views">
+          ${modes.map(([id,label,count]) => `<button type="button" data-action="messageHistoryFilter" data-filter="${id}" aria-pressed="${teacherMessageHistoryFilter===id}" class="${teacherMessageHistoryFilter===id ? "is-active" : ""}">${label}<span>${count}</span></button>`).join("")}
         </nav>
-        <div class="teacher-message-student-list">
-          ${students.length ? students.map(student => {
-            const unread = unreadDirectMessageCount("teacher", student.email);
-            const conversationStarted = hasConversation(student);
-            return `
-              <button type="button" class="teacher-message-student ${student.email === selectedMessageStudentEmail ? "is-active" : ""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}" aria-pressed="${student.email === selectedMessageStudentEmail}" title="${student.email === selectedMessageStudentEmail ? "Click again to close this conversation" : "Open private conversation"}">
-                <span>${escapeHtml(forumInitials(student.messageDisplayName))}</span>
-                <strong>${escapeHtml(student.messageDisplayName)}<small>Grade ${escapeHtml(student.grade || "—")}</small></strong>
-                ${conversationStarted ? `
-                  <span class="teacher-message-conversation-bell ${unread ? "has-unread" : ""}" title="${unread ? `${unread} unread ${unread === 1 ? "response" : "responses"}` : "Conversation started"}" aria-label="${unread ? `${unread} unread ${unread === 1 ? "response" : "responses"}` : "Conversation started"}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"></path><path d="M10 21h4"></path></svg>
-                    ${unread ? `<b>${unread > 99 ? "99+" : unread}</b>` : ""}
-                  </span>
-                ` : ""}
-              </button>
-            `;
-          }).join("") : '<div class="empty-card"><p>No students match this search and grade.</p></div>'}
+      </header>
+      <div class="teacher-message-roster" aria-label="Student conversations">
+        <div class="inbox-filters">
+          <label for="teacherMessageSearch">Find a student<input id="teacherMessageSearch" type="search" value="${escapeHtml(teacherMessageSearch)}" placeholder="Search name or email…" autocomplete="off"></label>
+          <label for="teacherMessageGrade">Grade<select id="teacherMessageGrade"><option value="all">All grades</option>${["4","5","6","7"].map(g=>`<option value="${g}" ${teacherMessageGrade===g?"selected":""}>Grade ${g}</option>`).join("")}</select></label>
         </div>
+        <p class="inbox-list-summary" role="status">${students.length ? `${teacherMessagePage*pageSize+1}–${Math.min((teacherMessagePage+1)*pageSize,students.length)} of ${students.length}` : "No matches"} · ${teacherMessageHistoryFilter==="all" ? "A–Z" : "Unread first, then newest"}</p>
+        <div class="teacher-message-student-list">
+          ${visible.map(student => `
+            <button type="button" class="teacher-message-student inbox-row ${student.unread?"has-unread":""} ${student.email===selectedMessageStudentEmail?"is-active":""}" data-action="selectMessageStudent" data-email="${escapeHtml(student.email)}" aria-pressed="${student.email===selectedMessageStudentEmail}">
+              <span class="inbox-initials">${escapeHtml(forumInitials(student.messageDisplayName))}</span>
+              <span class="inbox-row-content"><strong>${escapeHtml(student.messageDisplayName)}</strong>
+                <span class="inbox-row-meta">Grade ${escapeHtml(student.grade || "—")} ${student.latest ? `· ${escapeHtml(formatDirectMessageTime(student.latest.createdAt))}` : ""}</span>
+                <span class="inbox-snippet">${student.latest ? `${student.latest.senderRole==="teacher"?"You: ":""}${escapeHtml(String(student.latest.message || "").slice(0,110))}` : "Start a private conversation"}</span>
+                <span class="inbox-state ${student.unread?"is-unread":student.needsReply?"needs-reply":""}">${status(student)}</span>
+              </span>
+            </button>`).join("") || `<div class="empty-card"><strong>${teacherMessageHistoryFilter==="unread"?"You're all caught up!":"No conversations here"}</strong><p>Try another view, grade, or student name.</p></div>`}
+        </div>
+        <nav class="inbox-pagination" aria-label="Conversation pages">
+          <button type="button" class="outline-btn" data-action="messagePage" data-page="-1" ${teacherMessagePage===0?"disabled":""}>Previous</button>
+          <span>Page ${teacherMessagePage+1} of ${pageCount}</span>
+          <button type="button" class="outline-btn" data-action="messagePage" data-page="1" ${teacherMessagePage>=pageCount-1?"disabled":""}>Next</button>
+        </nav>
       </div>
       <div class="teacher-message-conversation">
-        ${selected ? `
-          <div class="teacher-message-heading">
-            <div>
-              <span class="feature-kicker">Direct Message</span>
-              <h3>${escapeHtml(selected.messageDisplayName)}</h3>
-              <p>${escapeHtml(selected.email)} · Grade ${escapeHtml(selected.grade || "—")}</p>
-            </div>
-            <button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent" aria-label="Close conversation with ${escapeHtml(selected.messageDisplayName)}">Close Conversation</button>
-          </div>
-          ${renderDirectMessageThread(selected.email, selected.messageDisplayName)}
-        ` : `
-          <div class="teacher-message-empty">
-            <span class="feature-kicker">Direct Message</span>
-            <h3>Choose a student</h3>
-            <p>Adjust the grade or search above to find a student.</p>
-          </div>
-        `}
+        ${selected ? `<div class="teacher-message-heading"><div><span class="feature-kicker">Private conversation</span><h3>${escapeHtml(selected.messageDisplayName)}</h3><p>Grade ${escapeHtml(selected.grade || "—")} · ${selected.count} messages</p></div><button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent">Close</button></div>
+          <div class="inbox-thread-tools"><span>${status(selected)}</span><button type="button" class="outline-btn" data-action="messageLatest">Jump to latest ↓</button></div>
+          ${renderDirectMessageThread(selected.email,selected.messageDisplayName)}
+        ` : `<div class="teacher-message-empty"><span class="inbox-empty-icon" aria-hidden="true">✉</span><h3>Your conversations, in one place</h3><p>Choose a conversation to read and reply.</p><p>Use <strong>Unread</strong> for new messages, <strong>Needs Reply</strong> for follow-ups, or <strong>All Students</strong> to start a conversation.</p><small>Opening a conversation marks its messages as read. Messages are not deleted when you change views.</small></div>`}
       </div>
     </section>
   `;
@@ -11493,6 +11493,9 @@ function attachScreenHandlers() {
 
   const directMessageForm = document.getElementById("directMessageForm");
   if (directMessageForm) {
+    if (isTeacher()) document.getElementById("directMessageText").addEventListener("input", event => {
+      teacherMessageDrafts.set(directMessageForm.dataset.studentEmail, event.target.value);
+    });
     directMessageForm.addEventListener("submit", async event => {
       event.preventDefault();
       const status = document.getElementById("directMessageStatus");
@@ -11503,6 +11506,7 @@ function attachScreenHandlers() {
       status.classList.remove("error");
       try {
         const result = await sharedBackend.sendDirectMessage(directMessageForm.dataset.studentEmail, message);
+        teacherMessageDrafts.delete(directMessageForm.dataset.studentEmail);
         directMessages = normalizeDirectMessages(result && result.directMessages);
         directMessageStatus = "Message sent.";
         render();
@@ -11519,9 +11523,15 @@ function attachScreenHandlers() {
   }
 
   const teacherMessageSearchInput = document.getElementById("teacherMessageSearch");
+  document.getElementById("teacherMessageGrade")?.addEventListener("change", event => {
+    teacherMessageGrade = event.target.value;
+    teacherMessagePage = 0;
+    render();
+  });
   if (teacherMessageSearchInput) {
     teacherMessageSearchInput.addEventListener("input", event => {
       teacherMessageSearch = event.target.value;
+      teacherMessagePage = 0;
       render();
       const next = document.getElementById("teacherMessageSearch");
       if (next) {
@@ -12973,7 +12983,8 @@ app.addEventListener("click", async event => {
         selectedMessageStudentEmail = newest.studentEmail;
         teacherMessageSearch = "";
         teacherMessageGrade = "all";
-        teacherMessageHistoryFilter = "all";
+        teacherMessageHistoryFilter = "messaged";
+        teacherMessagePage = 0;
       }
       sessionStorage.setItem("teacherDashboardSection", dashboardSection);
       setScreen({ name: "dashboard" });
@@ -12998,9 +13009,18 @@ app.addEventListener("click", async event => {
     render();
   }
   if (action === "messageHistoryFilter") {
-    teacherMessageHistoryFilter = target.dataset.filter === "messaged" ? "messaged" : "all";
+    teacherMessageHistoryFilter = ["messaged", "unread", "needs-reply", "all"].includes(target.dataset.filter) ? target.dataset.filter : "messaged";
+    teacherMessagePage = 0;
     directMessageStatus = "";
     render();
+  }
+  if (action === "messagePage") {
+    teacherMessagePage += Number(target.dataset.page) === 1 ? 1 : -1;
+    render();
+  }
+  if (action === "messageLatest") {
+    const history = document.querySelector(".teacher-message-conversation .direct-message-history");
+    if (history) history.scrollTop = history.scrollHeight;
   }
   if (action === "clearMessageStudent") {
     selectedMessageStudentEmail = "";
@@ -13018,6 +13038,10 @@ app.addEventListener("click", async event => {
       directMessageStatus = "";
       await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
       render();
+      requestAnimationFrame(() => {
+        const history = document.querySelector(".teacher-message-conversation .direct-message-history");
+        if (history) history.scrollTop = history.scrollHeight;
+      });
     }
   }
   if (action === "teacherDashboard") {
@@ -13154,10 +13178,12 @@ app.addEventListener("click", async event => {
     accountPasswordMessage = "";
     classThreads = [];
     directMessages = [];
+    teacherMessageDrafts.clear();
+    teacherMessagePage = 0;
     selectedMessageStudentEmail = "";
     teacherMessageSearch = "";
     teacherMessageGrade = "all";
-    teacherMessageHistoryFilter = "all";
+    teacherMessageHistoryFilter = "messaged";
     directMessageStatus = "";
     mutedStudents = [];
     websiteRequests = [];
