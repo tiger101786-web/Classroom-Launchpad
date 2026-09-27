@@ -27,6 +27,7 @@ homeSceneIds.add("squishy");
 homeSceneFrameIds.add("squishy");
 homeSceneFrameIds.add("highland");
 homeSceneFrameIds.add("christian");
+homeSceneFrameIds.add("usa-patriotic");
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }

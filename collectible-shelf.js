@@ -86,6 +86,7 @@
   rows.push(['New Orleans', ['nola-snowball','New Orleans Snowball'], ['nola-king-cake','Mardi Gras King Cake'], ['nola-second-line','Second-Line Umbrella'], ['nola-pelican','Louisiana Pelican']]);
   rows.push(['Character Collectibles', ['bingo','Bingo Statue'], ['chilli','Chilli (Bluey Mom) Statue'], ['bandit','Bandit (Bluey Dad) Statue']]);
   rows.push(['Character Collectibles', ['labubu-cream','Cream Labubu'], ['labubu-pink','Pink Labubu'], ['labubu-sage','Sage Green Labubu']]);
+  rows.push(['USA Patriotic', ['usa-eagle','Bald Eagle Statue'], ['usa-liberty','Statue of Liberty'], ['usa-bell','Liberty Bell'], ['usa-top-hat','Stars & Stripes Top Hat']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -104,6 +105,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'usa-eagle': {source:'assets/shelf-usa-eagle.png',width:1254,height:1254,bounds:[290,0,674,1254]},
+    'usa-liberty': {source:'assets/shelf-usa-liberty.png',width:1254,height:1254,bounds:[408,5,443,1245]},
+    'usa-bell': {source:'assets/shelf-usa-bell.png',width:1254,height:1254,bounds:[13,13,1231,1223]},
+    'usa-top-hat': {source:'assets/shelf-usa-top-hat.png',width:1254,height:1254,bounds:[16,48,1226,1161]},
     'labubu-cream': {source:'assets/shelf-labubu-cream-front.png',width:1024,height:1536,bounds:[100,39,826,1456]},
     'labubu-pink': {source:'assets/shelf-labubu-pink-front.png',width:1024,height:1536,bounds:[120,32,784,1473]},
     'labubu-sage': {source:'assets/shelf-labubu-sage-front.png',width:1024,height:1536,bounds:[104,31,816,1465]},
