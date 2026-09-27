@@ -1711,10 +1711,28 @@ const PROFILE_FRAMES = [
   ["clockwork", "Clockwork Brass", "Antique gears & copper"],
   ["moon-garden", "Moonlit Garden", "Silver moon & violet leaves"],
   ["silver-rope", "Silver Rope", "Woven silver & charcoal"],
-  ["emerald-jewel", "Emerald Jewel", "Green gemstones & gold trim"]
+  ["emerald-jewel", "Emerald Jewel", "Green gemstones & gold trim"],
+  ["anime-crest", "Anime Ninja", "Crimson crest & manga sparks"],
+  ["faith-glass", "Light of Faith", "Stained glass & golden cross"],
+  ["solar-crown", "Solar Crown", "Golden sun rays"],
+  ["lunar-orbit", "Lunar Orbit", "Saturn rings & distant stars"],
+  ["ice-bloom", "Ice Bloom", "Frost blue snowflakes"],
+  ["honeycomb", "Honeycomb", "Amber hexagons & honey"],
+  ["music-mix", "Music Mix", "Violet notes & rhythm"],
+  ["art-splash", "Art Splash", "Bright paint splashes"],
+  ["dragon-scale", "Dragon Scale", "Ruby scales & gold"],
+  ["butterfly", "Butterfly Garden", "Lavender wings"],
+  ["rainbow-arc", "Rainbow Arc", "Colorful skies & clouds"],
+  ["ocean-anchor", "Harbor Blue", "Navy rope & silver anchor"],
+  ["mardi-gras", "Mardi Gras", "Purple, green & gold"],
+  ["robot-tech", "Robot Tech", "Steel bolts & electric blue"],
+  ["book-club", "Book Club", "Golden pages & burgundy"],
+  ["sport-star", "Sport Star", "Stadium stripes & trophy"]
 ];
 function normalizeProfileFrame(value) { return PROFILE_FRAMES.some(([id]) => id === value) ? value : "none"; }
 function profileFrameArt(frame) {
+  const newArt = newProfileFrameArt(frame);
+  if (newArt) return newArt;
   const pearls = Array.from({ length: 12 }, (_, i) => {
     const angle = i * Math.PI / 6;
     return `<circle cx="${50 + 44 * Math.cos(angle)}" cy="${50 + 44 * Math.sin(angle)}" r="3" fill="#fff7e6" stroke="#68b9be" stroke-width=".8"/>`;
@@ -1742,6 +1760,30 @@ function profileFrameArt(frame) {
     pumpkin: '<path d="M50 83v-7l5-3" fill="none" stroke="#9be36c" stroke-width="3"/><ellipse cx="50" cy="90" rx="15" ry="10" fill="#ff9d32" stroke="#bc4e15"/><path d="M46 81c-5 7-5 12 0 18m8-18c5 7 5 12 0 18" fill="none" stroke="#dc691b"/><path d="m43 88 3-3 2 3m5 0 2-3 3 3m-12 5q5 4 10-1" fill="none" stroke="#5b2c19" stroke-width="2"/><path d="M7 32q-5-13 8-17-2 12-8 17M89 27q14-9 5-17-9 5-5 17" fill="#a8ca63"/>'
   };
   return art[frame] ? `<svg class="profile-frame-art" viewBox="0 0 100 100" aria-hidden="true">${art[frame]}</svg>` : "";
+}
+function newProfileFrameArt(frame) {
+  const designs = {
+    'anime-crest': ['#331d43','#ff6070','<path d="m40 6 10-5 10 5-3 9H43Z" fill="#cccde5"/><path d="m45 8 5-4 5 4-5 4Z" fill="#c52249"/><path d="m7 30 8-12-2 14 7-1-13 13 3-12Z" fill="#ffe8a0"/>'],
+    'faith-glass': ['#173e79','#f8d47b','<path d="M47 1h6v6h6v5h-6v11h-6V12h-6V7h6Z" fill="#ffe8a3" stroke="#ac7b28"/><path d="M5 42h9v16H5ZM86 42h9v16h-9Z" fill="#da5979"/><path d="m41 93 9-11 9 11-9 5Z" fill="#67d0dc"/>'],
+    'solar-crown': ['#a7521c','#ffe69a','<path d="m50 0 4 9h-8ZM5 30l10 2-5 8ZM95 30l-10 2 5 8ZM14 81l9-5 1 10ZM86 81l-9-5-1 10Z" fill="#ffe69a"/>'],
+    'lunar-orbit': ['#342b68','#c0baff','<ellipse cx="50" cy="9" rx="15" ry="4" fill="none" stroke="#ffe4a0" transform="rotate(-18 50 9)"/><circle cx="50" cy="9" r="7" fill="#b6a0ef"/><path d="m10 65 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#fff"/>'],
+    'ice-bloom': ['#206789','#bcf8ff','<path d="M50 0v20M41 5l18 10M41 15 59 5M45 1l5 4 5-4M45 19l5-4 5 4" fill="none" stroke="#e5ffff" stroke-width="2"/>'],
+    'honeycomb': ['#74461b','#ffd45d','<g fill="#f9af32" stroke="#ffe6a1"><path d="m44 1 6 3v7l-6 3-6-3V4ZM57 1l6 3v7l-6 3-6-3V4ZM8 42l6 3v7l-6 3-6-3v-7ZM92 42l6 3v7l-6 3-6-3v-7Z"/></g>'],
+    'music-mix': ['#56276d','#f4a5ed','<g fill="#ffe2fd"><path d="M43 4v13h3V8l10-3v9h3V0Z"/><ellipse cx="41" cy="17" rx="5" ry="3"/><ellipse cx="54" cy="14" rx="5" ry="3"/></g><path d="M39 92v5m6-9v10m6-14v14m6-10v10m6-6v5" stroke="#92f1e1" stroke-width="3"/>'],
+    'art-splash': ['#47356e','#ffe487','<g stroke="#fff" stroke-width=".7"><circle cx="12" cy="29" r="7" fill="#f477a9"/><circle cx="81" cy="16" r="7" fill="#6ad9fa"/><circle cx="83" cy="82" r="7" fill="#ffe16b"/><circle cx="28" cy="91" r="6" fill="#70dfa3"/></g>'],
+    'dragon-scale': ['#661f36','#efbe74','<path d="m36 8 7-7 7 7 7-7 7 7-7 8-7-5-7 5ZM4 41l10 7-10 8ZM96 41l-10 7 10 8Z" fill="#db6658" stroke="#ffd091"/>'],
+    'butterfly': ['#694778','#efc1fb','<g fill="#d999ee" stroke="#ffe4fc"><path d="M50 10C25-10 35 27 50 15 65 27 75-10 50 10Z"/><path d="M50 9v12" stroke="#fff" stroke-width="2"/></g>'],
+    'rainbow-arc': ['#5787b2','#e5f4ff','<path d="M18 20Q50-9 82 20" fill="none" stroke="#ff8cab" stroke-width="6"/><path d="M20 24Q50-3 80 24" fill="none" stroke="#ffe18b" stroke-width="4"/><path d="M23 26Q50 3 77 26" fill="none" stroke="#9be4c7" stroke-width="3"/><g fill="#fff"><ellipse cx="17" cy="24" rx="11" ry="6"/><ellipse cx="83" cy="24" rx="11" ry="6"/></g>'],
+    'ocean-anchor': ['#173950','#b7dce7','<g fill="none" stroke="#e2f6ff" stroke-width="2.5"><circle cx="50" cy="81" r="3"/><path d="M50 84v14m-7-10h14m-18 1q0 9 11 9t11-9m-22 0-2 5m24-5 2 5"/></g>'],
+    'mardi-gras': ['#553173','#eecb65','<path d="M35 6q15-8 30 0l-3 12-12-5-12 5Z" fill="#339765" stroke="#ffdf82"/><path d="m39 8 7 2-5 3Zm22 0-7 2 5 3Z" fill="#281735"/><circle cx="8" cy="50" r="5" fill="#edc85a"/><circle cx="92" cy="50" r="5" fill="#edc85a"/>'],
+    'robot-tech': ['#304653','#86e6fa','<g fill="#afc1cb" stroke="#23343f"><rect x="40" y="1" width="20" height="14" rx="3"/><rect x="1" y="43" width="12" height="14" rx="3"/><rect x="87" y="43" width="12" height="14" rx="3"/></g><path d="M44 7h4m4 0h4" stroke="#027d9c" stroke-width="3"/>'],
+    'book-club': ['#6a283d','#e2c083','<path d="M34 84q8-4 16 1 8-5 16-1v13q-8-4-16 0-8-4-16 0Z" fill="#fff1ce" stroke="#aa773e"/><path d="M50 85v12m-12-9 8 1m8 0 8-1m-24 4 8 1m8 0 8-1" stroke="#aa773e"/>'],
+    'sport-star': ['#235744','#f4db87','<path d="M43 1h14v7q0 7-7 7t-7-7Zm4 14h6v5h-6Zm-5 5h16v3H42Z" fill="#ffdc78"/><path d="M43 4h-6q0 8 8 8m12-8h6q0 8-8 8" fill="none" stroke="#ffdc78" stroke-width="2"/>']
+  };
+  const design = designs[frame];
+  if (!design) return '';
+  const [base, trim, motif] = design;
+  return `<svg class="profile-frame-art" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="43" fill="none" stroke="${base}" stroke-width="10"/><circle cx="50" cy="50" r="48" fill="none" stroke="${trim}" stroke-width="1.5"/><circle cx="50" cy="50" r="38" fill="none" stroke="${trim}" stroke-width="1"/>${motif}</svg>`;
 }
 function renderForumAvatar(name, avatarUrl, extraClass = "", profileFrame = "none") {
   const safeUrl = normalizeProfileAvatarUrl(avatarUrl);
@@ -2938,6 +2980,14 @@ function renderColtCorner() {
             Colt Corner checks for bad language and personal information. Messages that pass these checks appear right away.
           </p>
         </section>
+        <div class="forum-energy" aria-hidden="true">
+          <span class="home-header-energy">
+            <svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">
+              <path class="home-header-energy-base" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
+              <path class="home-header-energy-pulse" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
+            </svg>
+          </span>
+        </div>
       </div>
       <form id="threadForm" class="thread-form">
         <div class="field">

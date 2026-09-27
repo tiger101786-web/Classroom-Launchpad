@@ -46,6 +46,7 @@ function profileBannerForSession(session, db) {
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.profileBanner);
 }
 ['silver-rope','emerald-jewel'].forEach(id => profileFrameIds.add(id));
+['anime-crest','faith-glass','solar-crown','lunar-orbit','ice-bloom','honeycomb','music-mix','art-splash','dragon-scale','butterfly','rainbow-arc','ocean-anchor','mardi-gras','robot-tech','book-club','sport-star'].forEach(id => profileFrameIds.add(id));
 ['titanium','walnut','ivory'].forEach(id => homeSceneFrameIds.add(id));
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
