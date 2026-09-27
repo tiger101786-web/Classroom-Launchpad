@@ -101,18 +101,34 @@
       button,
       text: normalize(button.querySelector("strong").textContent + " " + button.querySelector("small").textContent)
     }));
+    const pageSize = 8;
+    let page = Math.floor(Math.max(0, cards.findIndex(({button}) => button.getAttribute('aria-pressed') === 'true')) / pageSize);
+    const pager = document.createElement('nav');
+    pager.className = 'launch-chooser-pages';
+    pager.setAttribute('aria-label', `${kind} pages`);
+    options.after(pager);
     const filter = () => {
       const terms = normalize(input.value).trim().split(/\s+/).filter(Boolean);
-      let count = 0;
-      cards.forEach(({ button, text }) => {
-        button.hidden = !terms.every(term => text.includes(term));
-        if (!button.hidden) count++;
-      });
+      const matches = cards.filter(({text}) => terms.every(term => text.includes(term)));
+      const count = matches.length;
+      const pages = Math.max(1, Math.ceil(count / pageSize));
+      page = Math.min(page, pages - 1);
+      cards.forEach(({button}) => { button.hidden = true; });
+      matches.slice(page * pageSize, (page + 1) * pageSize).forEach(({button}) => { button.hidden = false; });
+      pager.hidden = !count;
+      pager.innerHTML = `<button type="button" class="outline-btn" data-chooser-page="-1" ${page === 0 ? 'disabled' : ''}>Previous</button><span role="status">Page ${page + 1} of ${pages}</span><button type="button" class="outline-btn" data-chooser-page="1" ${page === pages - 1 ? 'disabled' : ''}>Next</button>`;
       clear.disabled = !input.value;
       status.textContent = count ? `${count} of ${cards.length} ${kind}` : `No matching ${kind}. Try another search or clear it.`;
     };
-    input.addEventListener("input", filter);
-    clear.addEventListener("click", () => { input.value = ""; filter(); input.focus(); });
+    pager.addEventListener('click', event => {
+      const button = event.target.closest('[data-chooser-page]');
+      if (!button || button.disabled) return;
+      page = Math.max(0, page + Number(button.dataset.chooserPage));
+      filter();
+      options.querySelector('button:not([hidden])')?.focus({preventScroll:true});
+    });
+    input.addEventListener("input", () => { page = 0; filter(); });
+    clear.addEventListener("click", () => { input.value = ""; page = 0; filter(); input.focus(); });
     filter();
   }
   let guestMotion = true;
