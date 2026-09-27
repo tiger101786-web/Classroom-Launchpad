@@ -65,4 +65,5 @@
   }
   window.ProfileBanners = { normalize, cover, open };
   choices.push(['honeybee','Honeybee Garden'], ['volcanic','Volcanic Forge'], ['aurora','Arctic Aurora']);
+  choices.sort(([a, nameA], [b, nameB]) => a === 'none' ? -1 : b === 'none' ? 1 : nameA.localeCompare(nameB, 'en', { sensitivity: 'base' }));
 })();

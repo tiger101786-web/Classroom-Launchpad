@@ -1729,6 +1729,7 @@ const PROFILE_FRAMES = [
   ["book-club", "Book Club", "Golden pages & burgundy"],
   ["sport-star", "Sport Star", "Stadium stripes & trophy"]
 ];
+PROFILE_FRAMES.sort(([a, nameA], [b, nameB]) => a === 'none' ? -1 : b === 'none' ? 1 : nameA.localeCompare(nameB, 'en', { sensitivity: 'base' }));
 function normalizeProfileFrame(value) { return PROFILE_FRAMES.some(([id]) => id === value) ? value : "none"; }
 function profileFrameArt(frame) {
   const newArt = newProfileFrameArt(frame);
