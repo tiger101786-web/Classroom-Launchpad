@@ -1699,6 +1699,14 @@ function formatStudentFirstLast(name) {
 }
 
 const PROFILE_FRAMES = [
+  ["patriotic-pride","Patriotic Pride","Stars, ribbons & a golden eagle"],
+  ["angelic-peace","Angelic Peace","Ivory feathers, pearls & a cross"],
+  ["highland-haven","Highland Haven","Copper knots, heather & a Highland cow"],
+  ["dumpling-delight","Dumpling Delight","Pastel dumplings & bamboo"],
+  ["prehistoric-jungle","Prehistoric Jungle","Fern leaves & a friendly dinosaur"],
+  ["mermaid-lagoon","Mermaid Lagoon","Pearls, shells & turquoise coral"],
+  ["frontier-sunset","Frontier Sunset","Tooled leather, rope & turquoise"],
+  ["strawberry-picnic","Strawberry Picnic","Red berries & delicate blossoms"],
   ["none", "No Frame", "Keep it classic"], ["colt", "Colt Pride", "Crimson & silver"],
   ["neon", "Neon Circuit", "Electric teal"], ["stars", "Star Voyager", "A little cosmic magic"],
   ["flame", "Phoenix Flame", "Bring the spark"], ["pixel", "Pixel Quest", "Level up your look"],
@@ -1764,6 +1772,7 @@ function profileFrameArt(frame) {
 }
 function newProfileFrameArt(frame) {
   const illustratedFrames = ["anime-crest","faith-glass","dragon-scale","solar-crown","lunar-orbit","ice-bloom","honeycomb","music-mix","art-splash","butterfly","rainbow-arc","ocean-anchor","mardi-gras","robot-tech","book-club","sport-star"];
+  illustratedFrames.push(...["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"]);
   return illustratedFrames.includes(frame)
     ? `<img class="profile-frame-raster" src="assets/profile-frame-${frame}-ornate.png" alt="" aria-hidden="true" loading="lazy">`
     : '';

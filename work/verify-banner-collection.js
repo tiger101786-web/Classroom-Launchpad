@@ -14,7 +14,7 @@ const choices=[["anime-rooftops","Anime Rooftops"],["chapel-light","Chapel Light
  await page.addScriptTag({path:path.resolve('profile-banners.js')});
  for(const [id] of choices){
  await page.evaluate(id=>ProfileBanners.open({selected:id,avatar:'',name:'Test',role:'Student',save:async v=>{window.saved=v;return v;},onSave:r=>{window.result=r;}}),id);
- assert.equal(await page.locator('[data-banner-choice]').count(),32);
+ assert.equal(await page.locator('[data-banner-choice]').count(),40);
  await page.locator('[data-banner-choice="'+id+'"]').click();
  const img=page.locator('#profileBannerPreview img');
  await img.evaluate(i=>i.decode());

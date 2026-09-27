@@ -43,6 +43,7 @@ const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixe
 const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove", "autumn", "storm", "clockwork", "moon-garden"]);
 ['honeybee','volcanic','aurora'].forEach(id => profileBannerIds.add(id));
 ["anime-rooftops","chapel-light","sunlit-peaks","saturn-dream","winter-crystal","honey-meadow","midnight-melody","paint-play","dragon-valley","butterfly-dream","rainbow-clouds","harbor-lights","carnival-glow","robot-city","storybook-nook","stadium-spirit"].forEach(id => profileBannerIds.add(id));
+["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"].forEach(id => profileBannerIds.add(id));
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner
@@ -51,6 +52,7 @@ function profileBannerForSession(session, db) {
 ['silver-rope','emerald-jewel'].forEach(id => profileFrameIds.add(id));
 ['anime-crest','faith-glass','solar-crown','lunar-orbit','ice-bloom','honeycomb','music-mix','art-splash','dragon-scale','butterfly','rainbow-arc','ocean-anchor','mardi-gras','robot-tech','book-club','sport-star'].forEach(id => profileFrameIds.add(id));
 ['titanium','walnut','ivory'].forEach(id => homeSceneFrameIds.add(id));
+["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"].forEach(id => profileFrameIds.add(id));
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
   return cleanProfileFrame(session.role === "teacher" ? db.teacherProfileFrame
