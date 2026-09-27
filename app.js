@@ -10376,54 +10376,40 @@ function renderRecentModerationItem(item) {
   `;
 }
 
+let cornerAdminSection = 'review';
+const cornerAdminPages = {};
+const cornerReplyPages = {};
+function cornerAdminPager(key, count, size = 8, threadId = '') {
+  const pages = Math.max(1, Math.ceil(count / size));
+  const state = threadId ? cornerReplyPages : cornerAdminPages;
+  const page = state[key] = Math.max(0, Math.min(state[key] || 0, pages - 1));
+  return { page, html: count ? `<nav class="profile-picker-pages" aria-label="${threadId ? 'Reply' : 'Moderation'} pages">
+    <button type="button" class="outline-btn" data-action="cornerAdminPage" data-key="${escapeHtml(key)}" data-thread="${escapeHtml(threadId)}" data-page="${page - 1}" ${page === 0 ? 'disabled' : ''}>Previous</button>
+    <span role="status">Page ${page + 1} of ${pages} · ${count} total</span>
+    <button type="button" class="outline-btn" data-action="cornerAdminPage" data-key="${escapeHtml(key)}" data-thread="${escapeHtml(threadId)}" data-page="${page + 1}" ${page === pages - 1 ? 'disabled' : ''}>Next</button></nav>` : '' };
+}
 function renderDashboardColtCorner() {
   const gradeThreads = visibleColtCornerThreads();
-  const gradeModerationQueue = moderationQueue.filter(item => item.audienceGrade === teacherColtCornerGrade);
-  const gradeRecentlyModerated = recentlyModerated.filter(item => item.audienceGrade === teacherColtCornerGrade);
-  return `
-    ${renderColtCornerGradeTabs()}
-    <section class="moderation-dashboard" aria-labelledby="moderationQueueHeading">
-      <div class="dashboard-subheading">
-        <div><span class="feature-kicker">Server-Side Safety Review</span><h3 id="moderationQueueHeading">Colt Corner Moderation</h3></div>
-        <span class="dashboard-count">${gradeModerationQueue.length}</span>
-      </div>
-      <p class="instruction">Messages held here are hidden from students until you approve them.</p>
+  const queue = moderationQueue.filter(item => item.audienceGrade === teacherColtCornerGrade);
+  const history = recentlyModerated.filter(item => item.audienceGrade === teacherColtCornerGrade);
+  const sections = [
+    ['review', 'Needs Review', queue, renderPendingModerationCard, 'Held messages are hidden from students. Review, edit, approve, or reject them here.', 'All caught up—no messages need review.'],
+    ['topics', 'Topics & Replies', gradeThreads, renderTeacherThread, 'Open a topic to read its message and replies or manage individual posts.', 'No topics in this grade yet.'],
+    ['history', 'Review History', history, renderRecentModerationItem, 'Recent moderation decisions for this grade.', 'No recently moderated posts.'],
+    ['muted', 'Muted Students', mutedStudents, renderMutedStudent, 'Posting restrictions across all grades. Unmute a student to restore posting access.', 'No muted students.']
+  ];
+  const active = sections.find(s => s[0] === cornerAdminSection) || sections[0];
+  const [key, label, items, renderer, help, empty] = active;
+  const pagination = cornerAdminPager(teacherColtCornerGrade + '-' + key, items.length);
+  return `${renderColtCornerGradeTabs()}
+    <section class="corner-admin" aria-label="Colt Corner moderation">
+      <header class="dashboard-subheading"><div><span class="feature-kicker">Teacher workspace</span><h3>Colt Corner Moderation</h3><p>Grade ${escapeHtml(teacherColtCornerGrade)} discussions</p></div></header>
+      <nav class="corner-admin-tabs" aria-label="Moderation sections">${sections.map(([id, name, list]) => `<button type="button" class="outline-btn" data-action="cornerAdminSection" data-section="${id}" aria-pressed="${key === id}">${name}<span>${list.length}</span></button>`).join('')}</nav>
+      <div class="corner-admin-panel"><h3 tabindex="-1" id="cornerAdminHeading">${label}</h3><p class="instruction">${help}</p>
       <p id="moderationDashboardStatus" class="request-message" aria-live="polite"></p>
-      <div class="moderation-queue">
-        ${gradeModerationQueue.length
-          ? gradeModerationQueue.map(renderPendingModerationCard).join("")
-          : emptyCard("No Colt Corner messages are waiting for review.")}
-      </div>
-      <details class="moderation-recent">
-        <summary>Recently moderated Grade ${escapeHtml(teacherColtCornerGrade)} posts (${gradeRecentlyModerated.length})</summary>
-        <div class="teacher-list">
-          ${gradeRecentlyModerated.length
-            ? gradeRecentlyModerated.map(renderRecentModerationItem).join("")
-            : emptyCard("No recently moderated posts.")}
-        </div>
-      </details>
-    </section>
-    <div class="dashboard-split-view">
-      <section>
-        <div class="dashboard-subheading">
-          <div><span class="feature-kicker">Grade ${escapeHtml(teacherColtCornerGrade)} Discussion Board</span><h3>Topics & Replies</h3></div>
-          <span class="dashboard-count">${gradeThreads.length}</span>
-        </div>
-        <div class="teacher-list">
-          ${gradeThreads.length ? gradeThreads.map(renderTeacherThread).join("") : emptyCard(`No Grade ${teacherColtCornerGrade} Colt Corner topics yet.`)}
-        </div>
-      </section>
-      <aside>
-        <div class="dashboard-subheading">
-          <div><span class="feature-kicker">Posting Access</span><h3>Muted Students</h3></div>
-          <span class="dashboard-count">${mutedStudents.length}</span>
-        </div>
-        <div class="teacher-list">
-          ${mutedStudents.length ? mutedStudents.map(renderMutedStudent).join("") : emptyCard("No muted students.")}
-        </div>
-      </aside>
-    </div>
-  `;
+      <div class="teacher-list">${items.length ? items.slice(pagination.page * 8, pagination.page * 8 + 8).map(renderer).join('') : emptyCard(empty)}</div>
+      ${pagination.html}</div>
+    </section>`;
 }
 
 function renderDashboardRequests() {
@@ -11066,17 +11052,19 @@ function renderTeacherThread(thread) {
   const submitted = formatShortDate(thread.createdAt);
   const muted = isStudentMuted(thread.studentName);
   const replies = getThreadReplies(thread);
+  const pagination = cornerAdminPager(thread.id, replies.length, 5, thread.id);
   return `
-    <article class="teacher-card thread-teacher-card">
-      <h3>${escapeHtml(thread.title)}</h3>
+    <details class="teacher-card thread-teacher-card" data-admin-thread="${escapeHtml(thread.id)}">
+      <summary><strong>${escapeHtml(thread.title)}</strong><span>${replies.length} ${replies.length === 1 ? 'reply' : 'replies'} · Open topic</span></summary>
       <p class="meta">Grade ${escapeHtml(coltCornerAudienceGrade(thread) || "—")} board • Started by ${escapeHtml(thread.studentName)} • ${escapeHtml(forumRoleLabel(thread.grade))}${submitted ? ` • ${escapeHtml(submitted)}` : ""}${muted ? " • Muted" : ""}</p>
       <p class="instruction">${escapeHtml(thread.body)}</p>
-      ${replies.length ? `<div class="teacher-replies">${replies.map(reply => renderTeacherReply(thread, reply)).join("")}</div>` : ""}
+      <h4>Replies</h4>
+      ${replies.length ? `<div class="teacher-replies">${replies.slice(pagination.page * 5, pagination.page * 5 + 5).map(reply => renderTeacherReply(thread, reply)).join("")}</div>${pagination.html}` : '<p>No replies yet.</p>'}
       <div class="actions">
         <button class="outline-btn" data-action="muteStudent" data-student="${escapeHtml(thread.studentName)}" ${muted ? "disabled" : ""}>${muted ? "Muted" : "Mute Student"}</button>
         <button class="danger-btn" data-action="deleteThread" data-id="${thread.id}">Delete Topic</button>
       </div>
-    </article>
+    </details>
   `;
 }
 
@@ -13059,6 +13047,22 @@ app.addEventListener("click", async event => {
     teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
     else render();
+  }
+  if (action === "cornerAdminSection") {
+    if (!isTeacher()) return;
+    cornerAdminSection = ['review', 'topics', 'history', 'muted'].includes(target.dataset.section) ? target.dataset.section : 'review';
+    render();
+    document.getElementById('cornerAdminHeading')?.focus({preventScroll:true});
+  }
+  if (action === "cornerAdminPage") {
+    if (!isTeacher()) return;
+    const threadId = target.dataset.thread;
+    const state = threadId ? cornerReplyPages : cornerAdminPages;
+    state[target.dataset.key] = Math.max(0, Number(target.dataset.page) || 0);
+    render();
+    const details = threadId && [...document.querySelectorAll('[data-admin-thread]')].find(el => el.dataset.adminThread === threadId);
+    if (details) { details.open = true; details.querySelector('summary')?.focus(); }
+    else document.getElementById('cornerAdminHeading')?.focus();
   }
   if (action === "dashboardLinkPage") {
     dashboardLinkPage = Math.max(1, Number(target.dataset.page) || 1);
