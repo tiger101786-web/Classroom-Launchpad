@@ -22,4 +22,3 @@ const ids=["dinosaur-dig","wizard-library","candy-kingdom","storm-fortress","sta
  console.log('Ten shelf assets validate and render.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
-

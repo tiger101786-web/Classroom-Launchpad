@@ -1,6 +1,16 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'stars-stripes',name:'Stars & Stripes'},
+    {id:'angel-wings',name:'Angel Wings'},
+    {id:'wild-west',name:'Wild West'},
+    {id:'egyptian-gold',name:'Egyptian Gold'},
+    {id:'jungle-ruins',name:'Jungle Ruins'},
+    {id:'tropical-paradise',name:'Tropical Paradise'},
+    {id:'ice-cream-parlor',name:'Ice Cream Parlor'},
+    {id:'music-hall',name:'Music Hall'},
+    {id:'comic-hero',name:'Comic Hero'},
+    {id:'strawberry-garden',name:'Strawberry Garden'},
     {id:'crimson',name:'Crimson Original'},
     {id:'christian',name:'Christian Grace'},
     {id:'dinosaur-dig',name:"Dinosaur Dig"},
