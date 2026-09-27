@@ -103,7 +103,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    bingo: {source:'assets/shelf-bingo.png',width:1254,height:1254,bounds:[242,5,706,1243]},
+    bingo: {source:'assets/shelf-bingo-reference.png',width:1024,height:1536,bounds:[60,34,907,1455]},
     chilli: {source:'assets/shelf-chilli.png',width:1254,height:1254,bounds:[278,6,689,1237]},
     bandit: {source:'assets/shelf-bandit.png',width:1254,height:1254,bounds:[291,9,662,1237]},
     'nola-snowball': {source:'assets/shelf-nola-snowball.png',width:1254,height:1254,bounds:[240,17,821,1222]},

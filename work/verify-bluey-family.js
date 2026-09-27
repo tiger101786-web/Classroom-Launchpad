@@ -3,7 +3,8 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
 (async()=>{
  const ids=['bingo','chilli','bandit'];
  assert(shelf.valid({enabled:true,theme:'crimson',slots:ids}));
- for(const id of ids){assert(shelf.items.some(i=>i.id===id&&i.category==='Character Collectibles'));const {data}=await sharp('assets/shelf-'+id+'.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(data[3],0);}
+ const asset=id=>'assets/shelf-'+id+(id==='bingo'?'-reference':'')+'.png';
+ for(const id of ids){assert(shelf.items.some(i=>i.id===id&&i.category==='Character Collectibles'));const {data}=await sharp(asset(id)).ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(data[3],0);}
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
  const page=await browser.newPage({viewport:{width:800,height:750}});
@@ -15,7 +16,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
  await page.addScriptTag({path:path.resolve('collectible-shelf.js')});
  await page.evaluate(()=>CollectibleShelf.open({selected:{enabled:true,theme:'crimson',slots:['bluey','none','none']},save:async v=>v,onSave:()=>{}}));
  await page.locator('#shelfCategory').selectOption('Character Collectibles');
- for(const id of ids){await page.locator('#shelfSearch').fill(id);const card=page.locator('[data-shelf-item="'+id+'"]');assert.equal(await card.locator('image').getAttribute('href'),'assets/shelf-'+id+'.png');await card.click();}
+ for(const id of ids){await page.locator('#shelfSearch').fill(id);const card=page.locator('[data-shelf-item="'+id+'"]');assert.equal(await card.locator('image').getAttribute('href'),asset(id));await card.click();}
  console.log('Bingo, Chilli and Bandit: category, selection, validation, transparency, statue height and shelf baseline passed.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
