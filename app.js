@@ -1496,6 +1496,8 @@ let dashboardGradebookGrade = "4";
 let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
 let teacherColtCornerGrade = "4";
+let coltCornerTopicPage = 1;
+const COLT_CORNER_TOPICS_PER_PAGE = 15;
 let teacherDailyLaunchGrade = "4";
 let classroomPassData = {
   config: { enabled: true, maxActive: 1, updatedAt: "" },
@@ -1765,7 +1767,7 @@ function renderForumAuthor(post, label = "Member") {
 function renderForumProfileEditor(compact = false) {
   if (!isSignedIn()) return "";
   return `
-    ${compact ? '<details class="forum-profile-menu"><summary>Edit Profile <span>Picture, banner &amp; frame</span></summary>' : ''}
+    ${compact ? '<details class="forum-profile-menu"><summary><svg class="profile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3M19 2v6M16 5h6"/></svg><span class="profile-menu-label"><strong>Edit Profile</strong><small>Picture · Banner · Frame</small></span><span class="profile-menu-chevron" aria-hidden="true">⌄</span></summary>' : ''}
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
       ${window.ProfileBanners.cover(authSession.profileBanner)}
       <div id="profileFramePreview">${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame)}</div>
@@ -2998,16 +3000,25 @@ function renderColtCornerPage() {
 }
 
 function renderThreadTable(threads) {
+  const pages = Math.max(1, Math.ceil(threads.length / COLT_CORNER_TOPICS_PER_PAGE));
+  coltCornerTopicPage = Math.min(pages, Math.max(1, Math.floor(Number(coltCornerTopicPage) || 1)));
+  const start = (coltCornerTopicPage - 1) * COLT_CORNER_TOPICS_PER_PAGE;
+  const pageThreads = threads.slice(start, start + COLT_CORNER_TOPICS_PER_PAGE);
   return `
     <section class="thread-list" aria-label="Colt Corner topics">
-      <h2 class="thread-list-heading">Class Topics</h2>
+      <h2 class="thread-list-heading" tabindex="-1">Class Topics</h2>
       <div class="thread-row thread-head">
         <span>Topic</span>
         <span>Started By</span>
         <span>Replies</span>
         <span>Last Post</span>
       </div>
-      ${threads.length ? threads.map(renderThreadRow).join("") : emptyCard("No topics yet. Start Colt Corner with the first one.")}
+      ${threads.length ? pageThreads.map(renderThreadRow).join("") : emptyCard("No topics yet. Start Colt Corner with the first one.")}
+      ${threads.length ? `<nav class="thread-pagination" aria-label="Topic pages">
+        <span role="status">${start + 1}–${start + pageThreads.length} of ${threads.length} topics · Page ${coltCornerTopicPage} of ${pages}</span>
+        <div><button type="button" class="outline-btn" data-action="coltCornerTopicPage" data-page="${coltCornerTopicPage - 1}" ${coltCornerTopicPage === 1 ? 'disabled' : ''}>Previous</button>
+        <button type="button" class="outline-btn" data-action="coltCornerTopicPage" data-page="${coltCornerTopicPage + 1}" ${coltCornerTopicPage === pages ? 'disabled' : ''}>Next</button></div>
+      </nav>` : ''}
     </section>
   `;
 }
@@ -12307,6 +12318,7 @@ function attachThreadForm() {
       status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
       status.classList.toggle("success", result && result.moderationStatus === "approved");
       if (result && result.moderationStatus !== "blocked") {
+        coltCornerTopicPage = 1;
         threadForm.reset();
         const activeGradeInput = threadForm.querySelector(`input[name="threadGrade"][value="${teacherColtCornerGrade}"]`);
         if (activeGradeInput) activeGradeInput.checked = true;
@@ -12991,6 +13003,7 @@ app.addEventListener("click", async event => {
     });
   }
   if (action === "coltCornerGrade") {
+    coltCornerTopicPage = 1;
     teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
     else render();
@@ -13000,6 +13013,16 @@ app.addEventListener("click", async event => {
     render();
 
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if (action === "coltCornerTopicPage") {
+    coltCornerTopicPage = Number(target.dataset.page) || 1;
+    const list = document.querySelector(".thread-list");
+    if (list) {
+      list.outerHTML = renderThreadTable(visibleColtCornerThreads());
+      const heading = document.querySelector(".thread-list-heading");
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: "start" });
+    }
   }
   if (action === "gradebookGrade") {
     dashboardGradebookGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";

@@ -10512,16 +10512,32 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .forum-profile-menu { grid-column: 1 / -1; min-width: 0; }
 .forum-profile-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
   width: fit-content;
   padding: 12px 18px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--paper);
-  color: var(--ink);
+  background: linear-gradient(120deg, #850d38, #3b1425 65%, #211e25);
+  color: #fff;
+  box-shadow: inset 0 1px 0 #ffffff35, 0 4px 12px #0002;
   font-weight: 800;
   cursor: pointer;
 }
-.forum-profile-menu > summary span { margin-left: 8px; font-weight: 400; font-size: .85rem; }
+.forum-profile-menu > summary::-webkit-details-marker { display: none; }
+.profile-menu-icon { width: 34px; height: 34px; padding: 6px; box-sizing: content-box; border: 1px solid #ffffff60; border-radius: 12px; background: #ffffff12; }
+.profile-menu-label { display: grid; gap: 3px; }
+.profile-menu-label strong { font-size: 1rem; }
+.profile-menu-label small { font-size: .75rem; font-weight: 500; color: #fff; }
+.profile-menu-chevron { font-size: 1.5rem; margin-left: 8px; }
+.forum-profile-menu[open] .profile-menu-chevron { transform: rotate(180deg); }
+.forum-profile-menu > summary:hover { border-color: #e7abbf; box-shadow: inset 0 1px 0 #ffffff50, 0 4px 14px #8c123840; }
+.thread-pagination { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px; border-top: 1px solid var(--border); }
+.thread-pagination > span { font-size: .85rem; color: var(--ink); }
+.thread-pagination > div { display: flex; gap: 8px; }
+.thread-pagination button:disabled { opacity: .45; cursor: default; }
 .forum-profile-menu > summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .forum-profile-menu > .forum-profile-editor { margin-top: 12px; }
 .forum-thread-view > .forum-profile-menu { margin: 20px; }

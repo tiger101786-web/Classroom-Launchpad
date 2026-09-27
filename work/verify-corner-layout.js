@@ -7,6 +7,7 @@ const {chromium}=require('playwright');
  try {
  for(const teacher of [false,true]) for(const width of [390,1200]) for(const theme of ['night','light']) {
  const ctx={isSignedIn:()=>true,isTeacher:()=>teacher,authSession:{name:'Test Member',grade:'4',profileFrame:'none'},teacherColtCornerGrade:'4',visibleColtCornerThreads:()=>[],renderColtCornerGradeTabs:()=>'<nav class="colt-corner-grade-tabs">Grade 4 / Grade 5 / Grade 6 / Grade 7</nav>',escapeHtml:x=>x,window:{ProfileBanners:{cover:()=>''}},renderForumAvatar:()=>'<span>Avatar</span>',PROFILE_FRAMES:[['none','No Frame','Classic']],normalizeProfileFrame:x=>x,profileAvatarMessage:'',pendingModeration:[],emptyCard:x=>'<p>'+x+'</p>'};
+ ctx.coltCornerTopicPage=1;ctx.COLT_CORNER_TOPICS_PER_PAGE=15;
  const html=vm.runInNewContext(extract('renderForumProfileEditor','hasSharedData')+extract('renderColtCorner','renderColtCornerPage')+extract('renderThreadTable','renderThreadRow')+';renderColtCorner()',ctx);
  const page=await browser.newPage({viewport:{width,height:1000}});
  await page.setContent('<style>'+fs.readFileSync('styles.css','utf8').replace(/^\uFEFF/,'')+'</style><body data-theme="'+theme+'">'+html+'</body>');
