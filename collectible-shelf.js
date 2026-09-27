@@ -84,6 +84,7 @@
     ["Little Delights",["coffee-grinder","Mini Coffee Grinder"],["ramen-bowl","Ramen Bowl Keepsake"],["sushi-plate","Sushi Plate Keepsake"],["windmill","Dutch Windmill"]],
   );
   rows.push(['New Orleans', ['nola-snowball','New Orleans Snowball'], ['nola-king-cake','Mardi Gras King Cake'], ['nola-second-line','Second-Line Umbrella'], ['nola-pelican','Louisiana Pelican']]);
+  rows.push(['Character Collectibles', ['bingo','Bingo Statue'], ['chilli','Chilli (Bluey Mom) Statue'], ['bandit','Bandit (Bluey Dad) Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -102,6 +103,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    bingo: {source:'assets/shelf-bingo.png',width:1254,height:1254,bounds:[242,5,706,1243]},
+    chilli: {source:'assets/shelf-chilli.png',width:1254,height:1254,bounds:[278,6,689,1237]},
+    bandit: {source:'assets/shelf-bandit.png',width:1254,height:1254,bounds:[291,9,662,1237]},
     'nola-snowball': {source:'assets/shelf-nola-snowball.png',width:1254,height:1254,bounds:[240,17,821,1222]},
     'nola-king-cake': {source:'assets/shelf-nola-king-cake-flat.png',width:1897,height:829,bounds:[37,93,1823,661],displayWidth:280},
     'nola-second-line': {source:'assets/shelf-nola-second-line.png',width:1254,height:1254,bounds:[77,9,1113,1235]},
