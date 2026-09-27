@@ -2213,7 +2213,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
         ${back ? `<button class="back-btn" data-action="back"> Back</button>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
-        ${!back && title === "Classroom Launchpad" ? `<h1 class="home-title-art"><img src="assets/classroom-launchpad-title.png" width="2172" height="724" alt="Classroom Launchpad" fetchpriority="high"></h1>` : `<h1>${escapeHtml(title)}</h1>`}
+        ${!back && title === "Classroom Launchpad" ? `<h1 class="home-title-art" aria-label="Classroom Launchpad"><img src="assets/classroom-launchpad-title.png" width="2172" height="724" alt="" fetchpriority="high"></h1>` : `<h1>${escapeHtml(title)}</h1>`}
         ${!back && title === "Classroom Launchpad" && homeSceneSessionReady ? window.CollectibleShelf.render(authSession) : ""}
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
       </div>

@@ -18,6 +18,19 @@ const server = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...pro
     assert(metadata.hasAlpha, 'Title requires transparency');
     browser = await chromium.launch({ headless: true, executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe' });
     const page = await browser.newPage();
+    // Hold the artwork back to simulate a cold-cache refresh on slow Wi-Fi.
+    let releaseTitle;
+    const titleGate=new Promise(resolve=>{releaseTitle=resolve;});
+    await page.route('**/assets/classroom-launchpad-title.png',async route=>{await titleGate;await route.continue();});
+    await page.goto('http://localhost:8097/',{waitUntil:'domcontentloaded'});
+    await page.locator('.home-title-art').waitFor();
+    assert.equal(await page.locator('.home-title-art img').getAttribute('alt'),'');
+    assert.equal(await page.getByRole('heading',{name:'Classroom Launchpad',exact:true}).count(),1);
+    assert.equal(await page.locator('.home-title-art').textContent(),'');
+    assert(await page.locator('.home-title-art').evaluate(el=>el.getBoundingClientRect().height>0));
+    releaseTitle();
+    await page.locator('.home-title-art img').evaluate(img=>img.decode());
+    await page.unroute('**/assets/classroom-launchpad-title.png');
     for (const width of [1600, 1440, 1024, 768, 390]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto('http://localhost:8097/', { waitUntil: 'networkidle' });
