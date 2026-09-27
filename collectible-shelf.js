@@ -104,9 +104,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'labubu-cream': {source:'assets/shelf-labubu-cream.png',width:1024,height:1536,bounds:[86,30,850,1478]},
-    'labubu-pink': {source:'assets/shelf-labubu-pink.png',width:1024,height:1536,bounds:[113,8,811,1512]},
-    'labubu-sage': {source:'assets/shelf-labubu-sage.png',width:1024,height:1536,bounds:[99,28,824,1473]},
+    'labubu-cream': {source:'assets/shelf-labubu-cream-front.png',width:1024,height:1536,bounds:[100,39,826,1456]},
+    'labubu-pink': {source:'assets/shelf-labubu-pink-front.png',width:1024,height:1536,bounds:[120,32,784,1473]},
+    'labubu-sage': {source:'assets/shelf-labubu-sage-front.png',width:1024,height:1536,bounds:[104,31,816,1465]},
     bingo: {source:'assets/shelf-bingo-reference.png',width:1024,height:1536,bounds:[60,34,907,1455]},
     chilli: {source:'assets/shelf-chilli.png',width:1254,height:1254,bounds:[278,6,689,1237]},
     bandit: {source:'assets/shelf-bandit.png',width:1254,height:1254,bounds:[291,9,662,1237]},
