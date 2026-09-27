@@ -9751,6 +9751,8 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .inbox-organized .teacher-message-empty p,.inbox-organized .teacher-message-empty small { color:var(--ink); line-height:1.6; }
 .inbox-thread-tools { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:14px 0; font-size:.8rem; font-weight:750; }
 .inbox-thread-tools button { padding:7px 10px; font-size:.75rem; }
+.inbox-thread-tools { flex-wrap:wrap; }
+.inbox-thread-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .inbox-organized .direct-message-history { min-height:180px; max-height:380px; }
 .inbox-organized .teacher-message-heading { align-items:start; }
 .inbox-organized button:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }

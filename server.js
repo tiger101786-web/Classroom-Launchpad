@@ -368,6 +368,7 @@ function normalizeDirectMessages(entries) {
       message,
       createdAt: Number.isFinite(Date.parse(entry.createdAt)) ? new Date(entry.createdAt).toISOString() : new Date().toISOString(),
       readByTeacher: Boolean(entry.readByTeacher),
+      noReplyNeeded: senderRole === "student" && entry.noReplyNeeded === true,
       readByStudent: Boolean(entry.readByStudent)
     }];
   }).sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
@@ -3826,6 +3827,28 @@ async function handleApi(req, res, pathname) {
         readByStudent: allowed.role === "student"
       };
       db.directMessages = [...normalizeDirectMessages(db.directMessages), record];
+      writeDb(db);
+      sendJson(res, 200, { ok: true, directMessages: visibleDirectMessages(db.directMessages, allowed) });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return true;
+  }
+
+  if (pathname === "/api/direct-messages/reply-status" && req.method === "PATCH") {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["teacher"]);
+    if (!allowed) return true;
+    try {
+      const body = await readBody(req);
+      if (typeof body.noReplyNeeded !== "boolean") throw new Error("Choose a valid reply status.");
+      const db = readDb();
+      const messages = normalizeDirectMessages(db.directMessages);
+      const message = messages.find(item => item.id === body.messageId && item.studentEmail === normalizeEmail(body.studentEmail) && item.senderRole === "student");
+      if (!message) throw new Error("Student message not found.");
+      // Resolve only the message the teacher saw, never a newer incoming message.
+      message.noReplyNeeded = body.noReplyNeeded;
+      db.directMessages = messages;
       writeDb(db);
       sendJson(res, 200, { ok: true, directMessages: visibleDirectMessages(db.directMessages, allowed) });
     } catch (error) {

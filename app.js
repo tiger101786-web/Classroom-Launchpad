@@ -1590,6 +1590,7 @@ function normalizeDirectMessages(entries) {
     message: String(item && item.message || ""),
     createdAt: String(item && item.createdAt || ""),
     readByTeacher: Boolean(item && item.readByTeacher),
+    noReplyNeeded: item?.senderRole === "student" && item.noReplyNeeded === true,
     readByStudent: Boolean(item && item.readByStudent)
   })).filter(item => item.id && item.studentEmail && item.message);
 }
@@ -9814,7 +9815,7 @@ function teacherInboxRows() {
   return approvedStudents.map(student => {
     const messages = byStudent.get(String(student.email).toLowerCase()) || { latest: null, unread: 0, count: 0 };
     return { ...student, ...messages, messageDisplayName: formatStudentFirstLast(student.name || student.email),
-      needsReply: messages.latest?.senderRole === "student" };
+      needsReply: messages.latest?.senderRole === "student" && !messages.latest.noReplyNeeded };
   });
 }
 
@@ -9839,12 +9840,12 @@ function renderDashboardMessages() {
   const visible = students.slice(teacherMessagePage*pageSize, (teacherMessagePage+1)*pageSize);
   // Keep an opened conversation visible after it is marked read or filters change.
   const selected = rows.find(student => student.email === selectedMessageStudentEmail);
-  const status = student => student.unread ? `${student.unread} unread` : student.needsReply ? "Needs reply" : student.count ? "Replied" : "No messages";
+  const status = student => student.unread ? `${student.unread} unread` : student.needsReply ? "Needs reply" : student.latest?.noReplyNeeded ? "No reply needed" : student.count ? "Replied" : "No messages";
   return `
     <section class="teacher-message-center inbox-organized">
       <header class="inbox-toolbar">
         <div><span class="feature-kicker">Private Inbox</span><h3>Stay on top of student messages</h3>
-        <p>Unread conversations come first. Needs Reply means the student sent the latest message.</p></div>
+        <p>Unread conversations come first. Mark a conversation “No reply needed” when there is nothing to answer.</p></div>
         <nav class="inbox-views" aria-label="Message views">
           ${modes.map(([id,label,count]) => `<button type="button" data-action="messageHistoryFilter" data-filter="${id}" aria-pressed="${teacherMessageHistoryFilter===id}" class="${teacherMessageHistoryFilter===id ? "is-active" : ""}">${label}<span>${count}</span></button>`).join("")}
         </nav>
@@ -9874,7 +9875,7 @@ function renderDashboardMessages() {
       </div>
       <div class="teacher-message-conversation">
         ${selected ? `<div class="teacher-message-heading"><div><span class="feature-kicker">Private conversation</span><h3>${escapeHtml(selected.messageDisplayName)}</h3><p>Grade ${escapeHtml(selected.grade || "—")} · ${selected.count} messages</p></div><button type="button" class="outline-btn teacher-message-close" data-action="clearMessageStudent">Close</button></div>
-          <div class="inbox-thread-tools"><span>${status(selected)}</span><button type="button" class="outline-btn" data-action="messageLatest">Jump to latest ↓</button></div>
+          <div class="inbox-thread-tools"><span>${status(selected)}</span><div class="inbox-thread-actions">${selected.latest?.senderRole === "student" ? `<button type="button" class="outline-btn" data-action="messageReplyStatus" data-email="${escapeHtml(selected.email)}" data-message-id="${escapeHtml(selected.latest.id)}" data-resolved="${!selected.latest.noReplyNeeded}">${selected.latest.noReplyNeeded ? "Mark as needs reply" : "No reply needed"}</button>` : ""}<button type="button" class="outline-btn" data-action="messageLatest">Jump to latest ↓</button></div></div>
           ${renderDirectMessageThread(selected.email,selected.messageDisplayName)}
         ` : `<div class="teacher-message-empty"><span class="inbox-empty-icon" aria-hidden="true">✉</span><h3>Your conversations, in one place</h3><p>Choose a conversation to read and reply.</p><p>Use <strong>Unread</strong> for new messages, <strong>Needs Reply</strong> for follow-ups, or <strong>All Students</strong> to start a conversation.</p><small>Opening a conversation marks its messages as read. Messages are not deleted when you change views.</small></div>`}
       </div>
@@ -13016,6 +13017,20 @@ app.addEventListener("click", async event => {
   }
   if (action === "messagePage") {
     teacherMessagePage += Number(target.dataset.page) === 1 ? 1 : -1;
+    render();
+  }
+  if (action === "messageReplyStatus" && isTeacher()) {
+    target.disabled = true;
+    try {
+      const result = await sharedBackend.request("/api/direct-messages/reply-status", {
+        method: "PATCH",
+        body: JSON.stringify({ studentEmail: target.dataset.email, messageId: target.dataset.messageId, noReplyNeeded: target.dataset.resolved === "true" })
+      });
+      directMessages = normalizeDirectMessages(result.directMessages);
+      directMessageStatus = target.dataset.resolved === "true" ? "Marked as no reply needed." : "Marked as needs reply.";
+    } catch (error) {
+      directMessageStatus = error.message;
+    }
     render();
   }
   if (action === "messageLatest") {

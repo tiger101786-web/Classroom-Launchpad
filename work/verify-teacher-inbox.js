@@ -18,6 +18,7 @@ const fs=require('fs'),assert=require('assert/strict'),{chromium}=require('playw
  const normalizeDirectMessages=x=>x;
  const sharedBackend={sendDirectMessage:async(email,message)=>{if(window.failSend)throw Error('Connection unavailable');directMessages.push({id:'sent',studentEmail:email,studentName:'Student',senderRole:'teacher',readByTeacher:true,message,createdAt:new Date().toISOString()});return {directMessages};}};
  async function markCurrentDirectMessagesRead(email){directMessages=directMessages.map(m=>m.studentEmail===email?{...m,readByTeacher:true}:m);}
+ sharedBackend.request=async(url,opts)=>{if(window.failResolve)throw Error("Could not update");const body=JSON.parse(opts.body);directMessages=directMessages.map(m=>m.id===body.messageId?{...m,noReplyNeeded:body.noReplyNeeded}:m);return {directMessages};};
  ${renderCode}
  function render(){document.getElementById('test').innerHTML=renderDashboardMessages();${forms}}
  document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;${actions}});
@@ -34,6 +35,18 @@ const fs=require('fs'),assert=require('assert/strict'),{chromium}=require('playw
   assert.equal(await page.locator('.teacher-message-heading h3').innerText(),'Student 04');
   assert.equal(await page.locator('.inbox-row').count(),2); // read conversation stays open, leaves unread list
   await page.locator('#directMessageText').fill('My unfinished reply <keep>');
+  await page.evaluate(()=>window.failResolve=true);
+  await page.locator('[data-action="messageReplyStatus"]').click();
+  assert.match(await page.locator('#directMessageStatus').innerText(),/Could not update/);
+  assert.equal(await page.locator('[data-action="messageReplyStatus"]').innerText(),'No reply needed');
+  await page.evaluate(()=>window.failResolve=false);
+  await page.locator('[data-action="messageReplyStatus"]').click();
+  assert.equal(await page.locator('.inbox-thread-tools > span').innerText(),'No reply needed');
+  assert.equal(await page.locator('#directMessageText').inputValue(),'My unfinished reply <keep>');
+  await page.evaluate(()=>render());
+  assert.equal(await page.locator('[data-action="messageReplyStatus"]').innerText(),'Mark as needs reply');
+  await page.locator('[data-action="messageReplyStatus"]').click();
+  assert.equal(await page.locator('.inbox-thread-tools > span').innerText(),'Needs reply');
   await page.locator('[data-filter="all"]').click();
   assert.equal(await page.locator('#directMessageText').inputValue(),'My unfinished reply <keep>');
   await page.locator('#teacherMessageSearch').fill('Student 22');assert.equal(await page.locator('.inbox-row').count(),1);
