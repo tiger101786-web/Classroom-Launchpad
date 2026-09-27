@@ -1767,7 +1767,7 @@ function renderForumAuthor(post, label = "Member") {
 function renderForumProfileEditor(compact = false) {
   if (!isSignedIn()) return "";
   return `
-    ${compact ? '<details class="forum-profile-menu"><summary><svg class="profile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3M19 2v6M16 5h6"/></svg><span class="profile-menu-label"><strong>Edit Profile</strong><small>Picture · Banner · Frame</small></span><span class="profile-menu-chevron" aria-hidden="true">⌄</span></summary>' : ''}
+    ${compact ? '<details class="forum-profile-menu"><summary><svg class="profile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3M19 2v6M16 5h6"/></svg><span class="profile-menu-label"><strong>Edit Profile</strong><small>Picture · Banner · Frame</small></span><svg class="profile-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 9 7 7 7-7"/></svg></summary>' : ''}
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
       ${window.ProfileBanners.cover(authSession.profileBanner)}
       <div id="profileFramePreview">${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame)}</div>

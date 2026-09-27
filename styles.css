@@ -10531,7 +10531,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-menu-label { display: grid; gap: 3px; }
 .profile-menu-label strong { font-size: 1rem; }
 .profile-menu-label small { font-size: .75rem; font-weight: 500; color: #fff; }
-.profile-menu-chevron { font-size: 1.5rem; margin-left: 8px; }
+.profile-menu-chevron { display: block; width: 24px; height: 24px; flex: 0 0 24px; margin-left: 8px; }
 .forum-profile-menu[open] .profile-menu-chevron { transform: rotate(180deg); }
 .forum-profile-menu > summary:hover { border-color: #e7abbf; box-shadow: inset 0 1px 0 #ffffff50, 0 4px 14px #8c123840; }
 .thread-pagination { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px; border-top: 1px solid var(--border); }
