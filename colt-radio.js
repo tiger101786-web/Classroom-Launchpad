@@ -541,6 +541,24 @@
       note: "Taylor Swift hits, deep cuts and fan favorites from YouRadio. The provider describes this station as ad-free. Clean-only playback is not confirmed; explicit versions may play. Teacher review recommended."
     },
     {
+      id: "youradio-todays-country",
+      label: "Country • Today's Hits",
+      type: "stream",
+      source: "https://drive.uber.radio/uber-app/cmrtodayscountry/icecast.audio",
+      provider: "YouRadio Today's Country",
+      searchTerms: "country today todays modern nashville hits",
+      note: "Modern country music from YouRadio's Today's Country station. YouRadio describes its stations as commercial-free. Clean-only playback is not confirmed; teacher review recommended."
+    },
+    {
+      id: "afropulse-fm",
+      label: "Afrobeats • Afro Pulse",
+      type: "stream",
+      source: "https://cp12.serverse.com/proxy/densma/stream",
+      provider: "AfroPulse FM",
+      searchTerms: "afropulse afro pulse afrobeats african naija nigerian highlife dancehall",
+      note: "African and Nigerian music from AfroPulse FM. Its website advertises an ads-free listening experience. Clean-only playback is not confirmed; explicit tracks may play. Teacher review recommended."
+    },
+    {
       id: "youradio-latin-party",
       label: "Latin • Fiesta",
       type: "stream",
@@ -778,6 +796,8 @@
 
   const stationIconPaths = {
     "exclusively-michael-jackson": '<path d="m4 8 4 3 4-6 4 6 4-3-2 10H6L4 8Z"/><path d="M7 21h10"/>',
+    "youradio-todays-country": '<path d="M3 15c3 2 15 2 18 0M6 15l2-9 4 2 4-2 2 9M8 12h8"/>',
+    "afropulse-fm": '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="m4 6 3 14q5 3 10 0l3-14M7 9l10 11M17 9 7 20"/>',
     "tejano-express": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M10 7v10m3-10v10m3-10v10M19 8v1m0 3v1m0 3v1"/>',
     "caprice-flamenco": '<path d="m14 10 6-7 2 2-7 6M14 10c-3-4-7-2-6 1-5-1-7 4-4 7s8 1 7-4c3 1 5-1 3-4Z"/><circle cx="9" cy="14" r="1.5"/>',
     "iheart-mardi-gras": '<path d="M3 8c3-2 6 2 9 2s6-4 9-2l-1 6c-2 5-6 3-8 0-2 3-6 5-8 0L3 8Z"/><path d="m6 11 3 1m6 0 3-1M8 5 7 2m9 3 1-3M12 6V2"/>',
