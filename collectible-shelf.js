@@ -85,6 +85,7 @@
   );
   rows.push(['New Orleans', ['nola-snowball','New Orleans Snowball'], ['nola-king-cake','Mardi Gras King Cake'], ['nola-second-line','Second-Line Umbrella'], ['nola-pelican','Louisiana Pelican']]);
   rows.push(['Character Collectibles', ['bingo','Bingo Statue'], ['chilli','Chilli (Bluey Mom) Statue'], ['bandit','Bandit (Bluey Dad) Statue']]);
+  rows.push(['Character Collectibles', ['labubu-cream','Cream Labubu'], ['labubu-pink','Pink Labubu'], ['labubu-sage','Sage Green Labubu']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -103,6 +104,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'labubu-cream': {source:'assets/shelf-labubu-cream.png',width:1024,height:1536,bounds:[86,30,850,1478]},
+    'labubu-pink': {source:'assets/shelf-labubu-pink.png',width:1024,height:1536,bounds:[113,8,811,1512]},
+    'labubu-sage': {source:'assets/shelf-labubu-sage.png',width:1024,height:1536,bounds:[99,28,824,1473]},
     bingo: {source:'assets/shelf-bingo-reference.png',width:1024,height:1536,bounds:[60,34,907,1455]},
     chilli: {source:'assets/shelf-chilli.png',width:1254,height:1254,bounds:[278,6,689,1237]},
     bandit: {source:'assets/shelf-bandit.png',width:1254,height:1254,bounds:[291,9,662,1237]},
