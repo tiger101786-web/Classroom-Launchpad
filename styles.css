@@ -10510,6 +10510,23 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   background: var(--paper);
 }
 
+.forum-profile-menu { grid-column: 1 / -1; min-width: 0; }
+.forum-profile-menu > summary {
+  width: fit-content;
+  padding: 12px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+.forum-profile-menu > summary span { margin-left: 8px; font-weight: 400; font-size: .85rem; }
+.forum-profile-menu > summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.forum-profile-menu > .forum-profile-editor { margin-top: 12px; }
+.forum-thread-view > .forum-profile-menu { margin: 20px; }
+.thread-list-heading { margin: 0; padding: 16px; font-size: 1.3rem; }
+
 .profile-banner-cover { position: relative; overflow: hidden; border-radius: 12px; background: #241424; min-width: 0; }
 .profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-banner-cover[data-banner="colt"] img { object-position: right center; }

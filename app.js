@@ -1765,6 +1765,7 @@ function renderForumAuthor(post, label = "Member") {
 function renderForumProfileEditor(compact = false) {
   if (!isSignedIn()) return "";
   return `
+    ${compact ? '<details class="forum-profile-menu"><summary>Edit Profile <span>Picture, banner &amp; frame</span></summary>' : ''}
     <section class="forum-profile-editor ${compact ? "is-compact" : ""}" aria-labelledby="forumProfileHeading">
       ${window.ProfileBanners.cover(authSession.profileBanner)}
       <div id="profileFramePreview">${renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame)}</div>
@@ -1787,6 +1788,7 @@ function renderForumProfileEditor(compact = false) {
       </fieldset>
       <p id="forumProfileStatus" class="request-message ${profileAvatarMessage ? "success" : ""}" aria-live="polite">${escapeHtml(profileAvatarMessage)}</p>
     </section>
+    ${compact ? '</details>' : ''}
   `;
 }
 function hasSharedData() {
@@ -2915,9 +2917,10 @@ function renderColtCorner() {
         </div>
       `}
       ${renderForumProfileEditor(true)}
+      ${renderThreadTable(visibleThreads)}
       <div class="colt-corner-heading">
         <span class="feature-kicker">Class Forum</span>
-        <h2>Grade ${escapeHtml(activeGrade)} Colt Corner</h2>
+        <h2>Start a New Topic</h2>
         <p>Start a teacher-approved topic, ask a question, or respond respectfully to a classmate.</p>
         <section class="forum-rules-card" aria-label="Colt Corner forum rules">
           <h3>Forum Rules</h3>
@@ -2978,7 +2981,6 @@ function renderColtCorner() {
           <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">
         </video>
       </figure>
-      ${renderThreadTable(visibleThreads)}
     </section>
   `;
 }
@@ -2998,6 +3000,7 @@ function renderColtCornerPage() {
 function renderThreadTable(threads) {
   return `
     <section class="thread-list" aria-label="Colt Corner topics">
+      <h2 class="thread-list-heading">Class Topics</h2>
       <div class="thread-row thread-head">
         <span>Topic</span>
         <span>Started By</span>
