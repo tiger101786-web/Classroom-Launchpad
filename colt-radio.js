@@ -517,10 +517,10 @@
       id: "exclusively-michael-jackson",
       label: "Pop • King of Pop",
       type: "stream",
-      source: "https://streaming.exclusive.radio/er/michaeljackson/icecast.audio",
-      provider: "YouRadio Exclusively Michael Jackson",
+      source: "https://streaming.exclusive.radio/er-app/michaeljacksonhits/icecast.audio",
+      provider: "YouRadio Exclusively Michael Jackson - HITS",
       searchTerms: "mj michael jackson moonwalk thriller billie jean beat it",
-      note: "Michael Jackson music streamed by YouRadio's Exclusively Michael Jackson station. The provider describes its stations as commercial-free. Clean-only playback is not confirmed; teacher review recommended."
+      note: "Michael Jackson hits streamed by YouRadio's Exclusively Michael Jackson - HITS station. The provider describes its stations as commercial-free. Clean-only playback is not confirmed; teacher review recommended."
     },
     {
       id: "exclusively-elvis-presley",
