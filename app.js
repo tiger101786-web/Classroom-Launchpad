@@ -2347,6 +2347,15 @@ function renderAuthButton() {
   `;
 }
 
+function renderHeaderEnergyPaths() {
+  const wave = "M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15";
+  return `<path class="home-header-energy-base" d="${wave}"></path><path class="home-header-energy-pulse" d="${wave}"></path>`;
+}
+
+function renderStudentForumEnergy() {
+  return `<div class="student-forum-energy" aria-hidden="true"><span class="home-header-energy"><svg focusable="false"><defs><pattern id="studentForumEnergyWave" width="240" height="30" patternUnits="userSpaceOnUse">${renderHeaderEnergyPaths()}</pattern></defs><rect width="100%" height="30" fill="url(#studentForumEnergyWave)"></rect></svg></span></div>`;
+}
+
 function renderHomeHeaderControls() {
   return `
     <div class="header-actions home-header-actions">
@@ -2357,8 +2366,7 @@ function renderHomeHeaderControls() {
         </div>
         <span class="home-header-energy" aria-hidden="true">
           <svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">
-            <path class="home-header-energy-base" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
-            <path class="home-header-energy-pulse" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
+            ${renderHeaderEnergyPaths()}
           </svg>
         </span>
         <div class="home-header-user">${renderAuthButton()}</div>
@@ -2948,7 +2956,7 @@ function renderColtCorner() {
   const visibleThreads = visibleColtCornerThreads();
   const activeGrade = isTeacher() ? teacherColtCornerGrade : String(authSession.grade || "");
   return `
-    <section class="colt-corner-card">
+    <section class="colt-corner-card ${!isTeacher() ? "student-colt-corner" : ""}">
       ${isTeacher() ? renderColtCornerGradeTabs() : `
         <div class="colt-corner-grade-scope" role="status">
           <strong>Grade ${escapeHtml(activeGrade)} Colt Corner</strong>
@@ -2975,14 +2983,7 @@ function renderColtCorner() {
             Colt Corner checks for bad language and personal information. Messages that pass these checks appear right away.
           </p>
         </section>
-        <div class="forum-energy" aria-hidden="true">
-          <span class="home-header-energy">
-            <svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">
-              <path class="home-header-energy-base" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
-              <path class="home-header-energy-pulse" d="M0 15 L30 15 L40 12 L49 18 L60 15 L91 15 L101 9 L112 21 L123 15 L152 15 L162 12 L171 18 L182 15 L240 15"></path>
-            </svg>
-          </span>
-        </div>
+        ${isTeacher() ? `<div class="forum-energy" aria-hidden="true"><span class="home-header-energy"><svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">${renderHeaderEnergyPaths()}</svg></span></div>` : ""}
       </div>
       <form id="threadForm" class="thread-form">
         <div class="field">
@@ -3016,13 +3017,16 @@ function renderColtCorner() {
           </fieldset>
         ` : ""}
         <button class="primary-btn" type="submit">Start Topic</button>
-        ${!isTeacher() && pendingModeration.length ? `
+        ${isTeacher() ? '<p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>' : ""}
+      </form>
+      ${!isTeacher() ? `<div class="student-topic-feedback">
+        ${pendingModeration.length ? `
           <p class="colt-corner-pending-note" role="status">
             ${pendingModeration.length} ${pendingModeration.length === 1 ? "message is" : "messages are"} waiting for Mr. Nieves to review.
           </p>
         ` : ""}
         <p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
-      </form>
+      </div>${renderStudentForumEnergy()}` : ""}
       <figure class="colt-corner-banner thread-form-banner">
         <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
           <source data-src="assets/colt-corner-join-herd.mp4" type="video/mp4">

@@ -2195,6 +2195,17 @@ body[data-theme="night"] .request-spirit {
 .colt-corner-card > .colt-corner-heading > .feature-kicker { align-self: flex-start; }
 .forum-energy { display: flex; align-items: center; justify-content: center; flex: 1; min-height: 80px; margin-top: 14px; }
 .forum-energy .home-header-energy { display: block; flex: 1; max-width: 100%; height: 46px; }
+.colt-corner-card.student-colt-corner > .thread-form { margin-bottom:0; align-self:stretch; align-content:stretch; grid-template-rows:auto auto minmax(170px,1fr) auto; }
+.student-colt-corner > .colt-corner-heading > .feature-kicker { justify-self:start; }
+.student-colt-corner > .thread-form > .field:has(#threadBody) { align-self:stretch; display:flex; flex-direction:column; }
+.student-colt-corner #threadBody { flex:1; min-height:170px; width:100%; }
+.colt-corner-card.student-colt-corner > .colt-corner-heading { display:grid; grid-template-rows:auto auto auto 1fr; align-content:stretch; }
+.student-colt-corner > .colt-corner-heading > .forum-rules-card { margin-top:8px; }
+.student-topic-feedback { grid-column:1 / -1; }
+.student-topic-feedback:not(:has(.colt-corner-pending-note)):has(#threadStatus:empty) { display:none; }
+.student-forum-energy { grid-column:1 / -1; width:100%; padding:12px 0; }
+.student-forum-energy .home-header-energy { display:block; width:100%; max-width:none; height:30px; }
+@media(max-width:720px) { .colt-corner-card.student-colt-corner > .thread-form { grid-template-rows:none; } .student-colt-corner > .colt-corner-heading > .forum-rules-card { margin-top:8px; } }
 
 .colt-corner-grade-tabs,
 .colt-corner-grade-scope {
