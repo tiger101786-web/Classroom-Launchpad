@@ -3158,10 +3158,22 @@ function threadReplyPageData(thread) {
   return { replies, pages, page, start, visible: replies.slice(start, start + THREAD_REPLIES_PER_PAGE) };
 }
 
+function renderThreadReplyPager(thread, location) {
+  const { pages, page } = threadReplyPageData(thread);
+  if (pages <= 1) return "";
+  const numbers = [...new Set([1, pages, ...Array.from({ length: 5 }, (_, i) => page - 2 + i).filter(n => n > 0 && n <= pages)])].sort((a, b) => a - b);
+  const button = (target, label, content) => `<button type="button" data-action="threadReplyPage" data-thread-id="${escapeHtml(thread.id)}" data-page="${target}" aria-label="${label}"${target === page ? ' aria-current="page"' : ""}>${content}</button>`;
+  return `<nav class="thread-reply-pages" aria-label="Reply pages ${location}"><span>Page:</span>${page > 1 ? button(page - 1, "Previous page", "‹") : ""}${numbers.map((n, i) => `${i && n > numbers[i - 1] + 1 ? '<span aria-hidden="true">…</span>' : ""}${button(n, `Page ${n}`, n)}`).join("")}${page < pages ? button(page + 1, "Next page", "›") : ""}</nav>`;
+}
+
+function refreshThreadReplyTopPager(thread) {
+  const top = document.querySelector(".thread-top-pages");
+  if (top) top.innerHTML = renderThreadReplyPager(thread, "top");
+}
+
 function renderThreadReplyList(thread) {
   const { replies, pages, page, start, visible } = threadReplyPageData(thread);
-  const pager = location => pages > 1 ? `<nav class="thread-reply-pages" aria-label="Reply pages ${location}"><span role="status">${start + 1}–${start + visible.length} of ${replies.length} replies · Page ${page} of ${pages}</span><div>${[[1,"First"],[page-1,"Previous"],[page+1,"Next"],[pages,"Latest"]].map(([target,label]) => `<button type="button" class="outline-btn" data-action="threadReplyPage" data-thread-id="${escapeHtml(thread.id)}" data-page="${target}" ${(label === "First" || label === "Previous" ? page === 1 : page === pages) ? "disabled" : ""}>${label}</button>`).join("")}</div></nav>` : "";
-  return `<div class="forum-reply-heading" tabindex="-1"><h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3><span>Classmates in this grade only</span></div>${pager("top")}${visible.length ? visible.map((reply,index)=>renderThreadReply(reply,start+index+1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}${pager("bottom")}`;
+  return `<div class="forum-reply-heading" tabindex="-1"><h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3><span>Classmates in this grade only</span></div>${visible.length ? visible.map((reply,index)=>renderThreadReply(reply,start+index+1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}${renderThreadReplyPager(thread, "bottom")}`;
 }
 
 function renderThreadDetail(threadId) {
@@ -3181,9 +3193,9 @@ function renderThreadDetail(threadId) {
   const replies = getThreadReplies(thread);
   return `
     ${pageHeader("Colt Corner", "", true)}
-    <nav class="thread-quick-links" aria-label="Thread navigation">
+    <div class="thread-navigation-row"><nav class="thread-quick-links" aria-label="Thread navigation">
       <button type="button" data-action="back">Return</button><span aria-hidden="true">·</span><button type="button" data-action="threadJumpBottom">Jump to Bottom</button>
-    </nav>
+    </nav><div class="thread-top-pages">${renderThreadReplyPager(thread, "top")}</div></div>
     <section class="thread-detail-card forum-thread-view">
       <div class="forum-thread-titlebar">
         <span>Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")} Discussion</span>
@@ -12752,6 +12764,7 @@ function attachReplyForm() {
       if (updated && list) {
         if (result?.moderationStatus === "approved") threadReplyPages.set(threadId, Math.max(1, Math.ceil(getThreadReplies(updated).length / THREAD_REPLIES_PER_PAGE)));
         list.innerHTML = renderThreadReplyList(updated);
+        refreshThreadReplyTopPager(updated);
         markVisibleColtCornerTopicsSeen();
         const count = document.querySelector(".forum-thread-titlebar strong");
         if (count) count.textContent = `${getThreadReplies(updated).length} ${getThreadReplies(updated).length === 1 ? "Reply" : "Replies"}`;
@@ -13545,6 +13558,7 @@ app.addEventListener("click", async event => {
       const list = document.querySelector(".thread-reply-list");
       if (list) {
         list.innerHTML = renderThreadReplyList(thread);
+        refreshThreadReplyTopPager(thread);
         markVisibleColtCornerTopicsSeen();
         const heading = list.querySelector(".forum-reply-heading");
         heading?.focus({ preventScroll:true });

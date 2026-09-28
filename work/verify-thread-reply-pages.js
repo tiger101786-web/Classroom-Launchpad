@@ -11,19 +11,29 @@ const fs=require("fs"),assert=require("assert/strict"),{chromium}=require("playw
  for(const width of [1100,390]){
  await page.setViewportSize({width,height:900});
  await page.evaluate(()=>{threadReplyPages.set("a",1);document.querySelector(".thread-reply-list").innerHTML=renderThreadReplyList(classThreads[0]);});
+ await page.evaluate(()=>{
+   if(!document.querySelector('.thread-top-pages')) document.querySelector('.thread-reply-list').insertAdjacentHTML('beforebegin','<div class="thread-navigation-row"><nav class="thread-quick-links"><button>Return</button> · <button>Jump to Bottom</button></nav><div class="thread-top-pages"></div></div>');
+   refreshThreadReplyTopPager(classThreads[0]);
+ });
+ assert.equal(await page.locator('.thread-reply-list nav[aria-label="Reply pages top"]').count(),0);
+ assert.equal(await page.locator('.thread-top-pages nav').count(),1);
  assert.equal(await page.locator(".thread-reply-post").count(),15);
  await page.locator("#replyMessage").fill("Keep this unfinished reply");
- await page.getByRole("button",{name:"Next",exact:true}).first().click();
+ await page.getByRole("button",{name:"Next page",exact:true}).first().click();
  assert.match(await page.locator(".thread-reply-post").first().innerText(),/Reply #16/i);
- await page.getByRole("button",{name:"Latest",exact:true}).first().click();assert.equal(await page.locator(".thread-reply-post").count(),1);
+ assert.equal(await page.locator('.thread-top-pages [aria-current="page"]').innerText(),'2');
+ assert.equal(await page.locator('.thread-reply-list [aria-current="page"]').innerText(),'2');
+ await page.getByRole("button",{name:"Page 4",exact:true}).first().click();assert.equal(await page.locator(".thread-reply-post").count(),1);
  assert.match(await page.locator(".thread-reply-post").innerText(),/Reply #46/i);
  assert.equal(await page.locator("#replyMessage").inputValue(),"Keep this unfinished reply");
  await page.screenshot({path:"work/thread-reply-pages-"+width+".png",fullPage:true});
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.getByRole("button",{name:"Previous",exact:true}).last().click();assert.equal(await page.locator(".thread-reply-post").count(),15);
+ await page.getByRole("button",{name:"Previous page",exact:true}).last().click();assert.equal(await page.locator(".thread-reply-post").count(),15);
  }
  const counts=await page.evaluate(()=>[0,1,15,16,30,31].map(n=>{const t={id:"test",replies:Array.from({length:n},(_,i)=>({message:"test",id:String(i)}))};threadReplyPages.set("test",999);const d=threadReplyPageData(t);return [d.pages,d.visible.length];}));
  assert.deepEqual(counts,[[1,0],[1,1],[1,15],[2,1],[2,15],[3,1]]);
- console.log("Reply pages: 15/page, next/previous/first/latest, global numbering, preserved draft, boundary/deletion clamping and mobile overflow passed.");
+ const compact=await page.evaluate(()=>renderThreadReplyPager({id:'huge',replies:Array.from({length:15000},()=>({}))},'top'));
+ assert((compact.match(/<button/g)||[]).length<=8);
+ console.log("Reply pages: compact numbered top/bottom navigation, synchronized current page, 15/page, next/previous, global numbering, preserved draft, bounded controls, boundary/deletion clamping and mobile overflow passed.");
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
