@@ -1499,6 +1499,8 @@ let dashboardGradebookAssignment = "all";
 let dashboardGradebookSearch = "";
 let teacherColtCornerGrade = "4";
 let coltCornerTopicPage = 1;
+const threadReplyPages = new Map();
+const THREAD_REPLIES_PER_PAGE = 15;
 const COLT_CORNER_TOPICS_PER_PAGE = 15;
 let teacherDailyLaunchGrade = "4";
 let classroomPassData = {
@@ -1698,7 +1700,8 @@ function markVisibleColtCornerTopicsSeen() {
     const thread = classThreads.find(item => item.id === screen.id);
     if (!thread) return;
     const read = loadTeacherCornerReadActivity();
-    read[thread.id] = teacherCornerActivity(thread);
+    const page = threadReplyPageData(thread);
+    read[thread.id] = [...new Set([...(Array.isArray(read[thread.id]) ? read[thread.id] : []), ...teacherCornerActivity({ ...thread, replies: page.visible })])];
     const liveIds = new Set(classThreads.map(item => String(item.id)));
     try {
       localStorage.setItem(`${key}:activity`, JSON.stringify(Object.fromEntries(Object.entries(read).filter(([id]) => liveIds.has(id)))));
@@ -3148,6 +3151,21 @@ function renderThreadTopicHeading(thread) {
   </section>`;
 }
 
+function threadReplyPageData(thread) {
+  const replies = getThreadReplies(thread);
+  const pages = Math.max(1, Math.ceil(replies.length / THREAD_REPLIES_PER_PAGE));
+  const page = Math.max(1, Math.min(pages, Math.floor(Number(threadReplyPages.get(thread.id)) || 1)));
+  threadReplyPages.set(thread.id, page);
+  const start = (page - 1) * THREAD_REPLIES_PER_PAGE;
+  return { replies, pages, page, start, visible: replies.slice(start, start + THREAD_REPLIES_PER_PAGE) };
+}
+
+function renderThreadReplyList(thread) {
+  const { replies, pages, page, start, visible } = threadReplyPageData(thread);
+  const pager = location => pages > 1 ? `<nav class="thread-reply-pages" aria-label="Reply pages ${location}"><span role="status">${start + 1}–${start + visible.length} of ${replies.length} replies · Page ${page} of ${pages}</span><div>${[[1,"First"],[page-1,"Previous"],[page+1,"Next"],[pages,"Latest"]].map(([target,label]) => `<button type="button" class="outline-btn" data-action="threadReplyPage" data-thread-id="${escapeHtml(thread.id)}" data-page="${target}" ${(label === "First" || label === "Previous" ? page === 1 : page === pages) ? "disabled" : ""}>${label}</button>`).join("")}</div></nav>` : "";
+  return `<div class="forum-reply-heading" tabindex="-1"><h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3><span>Classmates in this grade only</span></div>${pager("top")}${visible.length ? visible.map((reply,index)=>renderThreadReply(reply,start+index+1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}${pager("bottom")}`;
+}
+
 function renderThreadDetail(threadId) {
   if (!isSignedIn()) {
     return `
@@ -3184,11 +3202,7 @@ function renderThreadDetail(threadId) {
         </div>
       </article>
       <section class="thread-reply-list" aria-label="Thread replies">
-        <div class="forum-reply-heading">
-          <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
-          <span>Classmates in this grade only</span>
-        </div>
-        ${replies.length ? replies.map((reply, index) => renderThreadReply(reply, index + 1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}
+        ${renderThreadReplyList(thread)}
       </section>
       ${renderForumProfileEditor(true)}
       <form id="replyForm" class="reply-form forum-reply-composer" data-thread-id="${thread.id}">
@@ -12741,11 +12755,11 @@ function attachReplyForm() {
       const updated = classThreads.find(thread => thread.id === threadId);
       const list = document.querySelector(".thread-reply-list");
       if (updated && list) {
-        const replies = getThreadReplies(updated);
-        list.innerHTML = `
-          <h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3>
-          ${replies.map((reply, index) => renderThreadReply(reply, index + 1)).join("")}
-        `;
+        if (result?.moderationStatus === "approved") threadReplyPages.set(threadId, Math.max(1, Math.ceil(getThreadReplies(updated).length / THREAD_REPLIES_PER_PAGE)));
+        list.innerHTML = renderThreadReplyList(updated);
+        markVisibleColtCornerTopicsSeen();
+        const count = document.querySelector(".forum-thread-titlebar strong");
+        if (count) count.textContent = `${getThreadReplies(updated).length} ${getThreadReplies(updated).length === 1 ? "Reply" : "Replies"}`;
       }
     } catch (submissionError) {
       status.textContent = submissionError.message;
@@ -13523,6 +13537,20 @@ app.addEventListener("click", async event => {
   if (action === "openColtRun") {
     window.dispatchEvent(new CustomEvent("colt-run-opening"));
     setScreen({ name: "coltRun" });
+  }
+  if (action === "threadReplyPage") {
+    const thread = classThreads.find(item => item.id === target.dataset.threadId);
+    if (thread && screen.name === "thread" && screen.id === thread.id) {
+      threadReplyPages.set(thread.id, Number(target.dataset.page) || 1);
+      const list = document.querySelector(".thread-reply-list");
+      if (list) {
+        list.innerHTML = renderThreadReplyList(thread);
+        markVisibleColtCornerTopicsSeen();
+        const heading = list.querySelector(".forum-reply-heading");
+        heading?.focus({ preventScroll:true });
+        heading?.scrollIntoView({ block:"start", behavior:"instant" });
+      }
+    }
   }
   if (action === "openThread") setScreen({ name: "thread", id: target.dataset.id });
   if (action === "openGoogleApp") {

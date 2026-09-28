@@ -2383,6 +2383,12 @@ body[data-theme="night"] .corner-grade-bell svg { color:#fff; }
 .corner-topic-heading h2 { margin:0; color:var(--ink); font-size:clamp(1.25rem,2.6vw,1.9rem); line-height:1.25; font-weight:850; overflow-wrap:anywhere; }
 @media(max-width:600px) { .corner-topic-heading { padding:16px; gap:12px; } .corner-topic-icon { flex-basis:40px; width:40px; height:40px; } }
 
+.thread-reply-pages { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 14px; background:var(--paper); color:var(--ink); border:1px solid var(--border); border-radius:10px; font-size:.85rem; }
+.thread-reply-pages > div { display:flex; flex-wrap:wrap; gap:7px; }
+.thread-reply-pages button { padding:7px 12px; font-size:.8rem; }
+.thread-reply-pages button:disabled { opacity:.45; cursor:default; }
+.forum-reply-heading { scroll-margin-top:20px; }
+
 .forum-rules-card {
   display: grid;
   gap: 9px;

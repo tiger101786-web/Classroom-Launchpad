@@ -5,7 +5,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),{chromiu
  const tabs=app.slice(app.indexOf('function renderColtCornerGradeTabs()'),app.indexOf('function setHomeNavigationMobileOpen('));
  const storage=new Map();
  const ctx=vm.createContext({escapeHtml:x=>String(x),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},COLT_CORNER_SEEN_TOPICS_KEY:'test',isTeacher:()=>true,isSignedIn:()=>true,isApprovedStudent:()=>false,authSession:{},teacherColtCornerGrade:'4',screen:{name:'coltCorner'},getThreadReplies:t=>t.replies||[],coltCornerAudienceGrade:t=>t.audienceGrade||t.grade,classThreads:[{id:'a',grade:'4',replies:[{id:'r1',grade:'4'}]},{id:'b',grade:'Teacher',audienceGrade:'5',replies:[{id:'r2',grade:'5'},{id:'r3',grade:'Teacher'}]},{id:'c',grade:'6',replies:[]}]});
- vm.runInContext(helpers+tabs,ctx);
+ vm.runInContext("const threadReplyPages=new Map(),THREAD_REPLIES_PER_PAGE=15;"+app.slice(app.indexOf("function threadReplyPageData("),app.indexOf("function renderThreadDetail("))+helpers+tabs,ctx);
  assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[0]),2);
  assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[1]),1);
  ctx.markVisibleColtCornerTopicsSeen();assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[0]),2);
@@ -22,6 +22,12 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),{chromiu
  ctx.classThreads[1].replies.push({id:"after-clear",grade:"5"});
  assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[1]),1);
  assert.equal(ctx.markColtCornerGradeRead("8"),false);
+ ctx.classThreads[2].replies=Array.from({length:31},(_,i)=>({id:"many"+i,grade:"6"}));
+ ctx.screen={name:"thread",id:"c"};ctx.markVisibleColtCornerTopicsSeen();
+ assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[2]),16);
+ vm.runInContext('threadReplyPages.set("c",2)',ctx);ctx.markVisibleColtCornerTopicsSeen();
+ assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[2]),1);
+ ctx.markColtCornerGradeRead("6");assert.equal(ctx.teacherCornerUnreadCount(ctx.classThreads[2]),0);
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
  const page=await browser.newPage();
