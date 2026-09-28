@@ -3145,10 +3145,8 @@ function renderThreadRow(thread) {
 }
 
 function renderThreadTopicHeading(thread) {
-  return `<section class="corner-topic-heading" aria-label="Current discussion">
-    <span class="corner-topic-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M6 5h20a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H14l-8 5v-5a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z"/><path d="M10 12h12M10 17h8"/></svg></span>
-    <div><span class="corner-topic-label">Now discussing · Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")}</span><h2>${escapeHtml(thread.title)}</h2></div>
-  </section>`;
+  const started = formatShortDate(thread.createdAt);
+  return `<header class="forum-topic-heading"><h2>${escapeHtml(thread.title)}</h2>${started ? `<time>Posted ${escapeHtml(started)}</time>` : ""}</header>`;
 }
 
 function threadReplyPageData(thread) {
@@ -3181,10 +3179,11 @@ function renderThreadDetail(threadId) {
     `;
   }
   const replies = getThreadReplies(thread);
-  const started = formatShortDate(thread.createdAt);
   return `
     ${pageHeader("Colt Corner", "", true)}
-    ${renderThreadTopicHeading(thread)}
+    <nav class="thread-quick-links" aria-label="Thread navigation">
+      <button type="button" data-action="back">Return</button><span aria-hidden="true">·</span><button type="button" data-action="threadJumpBottom">Jump to Bottom</button>
+    </nav>
     <section class="thread-detail-card forum-thread-view">
       <div class="forum-thread-titlebar">
         <span>Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")} Discussion</span>
@@ -3193,11 +3192,7 @@ function renderThreadDetail(threadId) {
       <article class="thread-starter forum-post forum-post-starter">
         ${renderForumAuthor(thread, "Topic Starter")}
         <div class="forum-post-content">
-          <header class="forum-post-meta">
-            <span>Original Post</span>
-            ${started ? `<time>${escapeHtml(started)}</time>` : ""}
-          </header>
-          <h2>${escapeHtml(thread.title)}</h2>
+          ${renderThreadTopicHeading(thread)}
           <p class="forum-post-message">${escapeHtml(thread.body)}</p>
         </div>
       </article>
@@ -13537,6 +13532,11 @@ app.addEventListener("click", async event => {
   if (action === "openColtRun") {
     window.dispatchEvent(new CustomEvent("colt-run-opening"));
     setScreen({ name: "coltRun" });
+  }
+  if (action === "threadJumpBottom" && screen.name === "thread") {
+    const composer = document.getElementById("replyForm");
+    composer?.scrollIntoView({ block: "end", behavior: "instant" });
+    document.getElementById("replyMessage")?.focus({ preventScroll: true });
   }
   if (action === "threadReplyPage") {
     const thread = classThreads.find(item => item.id === target.dataset.threadId);
