@@ -3141,6 +3141,13 @@ function renderThreadRow(thread) {
   `;
 }
 
+function renderThreadTopicHeading(thread) {
+  return `<section class="corner-topic-heading" aria-label="Current discussion">
+    <span class="corner-topic-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M6 5h20a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H14l-8 5v-5a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z"/><path d="M10 12h12M10 17h8"/></svg></span>
+    <div><span class="corner-topic-label">Now discussing · Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")}</span><h2>${escapeHtml(thread.title)}</h2></div>
+  </section>`;
+}
+
 function renderThreadDetail(threadId) {
   if (!isSignedIn()) {
     return `
@@ -3158,7 +3165,8 @@ function renderThreadDetail(threadId) {
   const replies = getThreadReplies(thread);
   const started = formatShortDate(thread.createdAt);
   return `
-    ${pageHeader("Colt Corner", thread.title, true)}
+    ${pageHeader("Colt Corner", "", true)}
+    ${renderThreadTopicHeading(thread)}
     <section class="thread-detail-card forum-thread-view">
       <div class="forum-thread-titlebar">
         <span>Grade ${escapeHtml(coltCornerAudienceGrade(thread) || authSession.grade || "—")} Discussion</span>
