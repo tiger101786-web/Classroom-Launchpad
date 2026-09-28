@@ -35,6 +35,8 @@
 @keyframes scene-coin-spin { 0% { transform: scaleX(1); } 25% { transform: scaleX(.16); } 50% { transform: scaleX(-1); } 75% { transform: scaleX(-.16); } 100% { transform: scaleX(1); } }
 .launch-scene-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 50%; }
 .launch-scene-particles i { position: absolute; left: var(--x); top: var(--y); width: 4px; height: 4px; border-radius: 50%; background: #ffe394; box-shadow: 0 0 8px 2px #ffdf8080; animation: scene-firefly 9s ease-in-out infinite alternate; animation-delay: calc(var(--n) * -1.3s); }
+/* Holiday particles travel through the scene instead of barely drifting in place. */
+:is(.scene-holiday-christmas, .scene-holiday-thanksgiving, .scene-holiday-easter, .scene-holiday-valentine, .scene-holiday-st-patrick, .scene-holiday-mardi-gras, .scene-holiday-halloween, .scene-holiday-new-year, .scene-holiday-usa) .launch-scene-particles i { top:110%; animation:scene-firefly-flow 7s linear infinite; animation-delay:calc(var(--n) * -.7777778s); }
 .scene-forest .launch-scene-particles i { top: 110%; animation: scene-firefly-flow 10s linear infinite; animation-delay: calc(var(--n) * -1.11s); }
 /* Continuous meadow/café motes: no eased reversal or pause between passes. */
 .scene-highland .launch-scene-particles i, .scene-squishy .launch-scene-particles i { left:calc(18% + var(--n) * 7%); top:110%; width:3px; height:3px; animation:scene-firefly-flow 7s linear infinite; animation-delay:calc(var(--n) * -.7777778s); }
