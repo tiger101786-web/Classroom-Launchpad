@@ -1650,10 +1650,46 @@ function openNewColtCornerTopic() {
   setScreen({ name: "thread", id: newest.id });
 }
 
+function loadTeacherCornerReadActivity() {
+  try {
+    const value = JSON.parse(localStorage.getItem(`${coltCornerSeenTopicsStorageKey()}:activity`) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch { return {}; }
+}
+
+function teacherCornerActivity(thread) {
+  return [thread, ...getThreadReplies(thread)].filter(post => String(post.grade || "").toLowerCase() !== "teacher")
+    .map(post => `${post === thread ? "topic" : "reply"}:${post.id}`);
+}
+
+function teacherCornerUnreadCount(thread, read = loadTeacherCornerReadActivity()) {
+  if (!isTeacher()) return 0;
+  const seen = new Set(Array.isArray(read[thread.id]) ? read[thread.id] : []);
+  // Preserve the older topic-only read marker; replies are tracked separately.
+  if (loadSeenColtCornerTopicIds().has(String(thread.id))) seen.add(`topic:${thread.id}`);
+  return teacherCornerActivity(thread).filter(id => !seen.has(id)).length;
+}
+
 function markVisibleColtCornerTopicsSeen() {
   if (!isSignedIn()) return;
   const key = coltCornerSeenTopicsStorageKey();
   if (!key) return;
+  if (isTeacher()) {
+    // Browsing a grade must not dismiss activity in unopened topics.
+    if (screen.name !== "thread") return;
+    const thread = classThreads.find(item => item.id === screen.id);
+    if (!thread) return;
+    const read = loadTeacherCornerReadActivity();
+    read[thread.id] = teacherCornerActivity(thread);
+    const liveIds = new Set(classThreads.map(item => String(item.id)));
+    try {
+      localStorage.setItem(`${key}:activity`, JSON.stringify(Object.fromEntries(Object.entries(read).filter(([id]) => liveIds.has(id)))));
+      const seen = loadSeenColtCornerTopicIds();
+      seen.add(String(thread.id));
+      localStorage.setItem(key, JSON.stringify([...seen].slice(-500)));
+    } catch { /* Notifications must never prevent opening a conversation. */ }
+    return;
+  }
   const seen = loadSeenColtCornerTopicIds();
   const grade = String(authSession.grade || "");
   classThreads.forEach(thread => {
@@ -3073,12 +3109,13 @@ function renderThreadTable(threads) {
 }
 
 function renderThreadRow(thread) {
+  const unreadActivity = teacherCornerUnreadCount(thread);
   const lastPost = getThreadLastPost(thread);
   const replyCount = getThreadReplies(thread).length;
   const lastDate = formatShortDate(lastPost.createdAt || thread.createdAt);
   return `
     <button class="thread-row" data-action="openThread" data-id="${thread.id}">
-      <span class="thread-topic">${escapeHtml(thread.title)}</span>
+      <span class="thread-topic">${escapeHtml(thread.title)}${unreadActivity ? `<small class="corner-unread-topic">${unreadActivity} new ${unreadActivity === 1 ? "post" : "posts"}</small>` : ""}</span>
       <span>${escapeHtml(thread.studentName)}<small>${escapeHtml(forumRoleLabel(thread.grade))}</small></span>
       <span class="thread-replies">${replyCount}</span>
       <span>${lastDate ? escapeHtml(lastDate) : "New"}<small>${escapeHtml(lastPost.studentName || thread.studentName)}</small></span>
@@ -11310,6 +11347,8 @@ function visibleColtCornerThreads() {
 
 function renderColtCornerGradeTabs() {
   if (!isTeacher()) return "";
+  const read = loadTeacherCornerReadActivity();
+  const counts = Object.fromEntries(["4", "5", "6", "7"].map(grade => [grade, classThreads.filter(thread => coltCornerAudienceGrade(thread) === grade).reduce((total, thread) => total + teacherCornerUnreadCount(thread, read), 0)]));
   return `
     <nav class="colt-corner-grade-tabs" aria-label="Choose a Colt Corner grade">
       ${["4", "5", "6", "7"].map(grade => `
@@ -11318,8 +11357,10 @@ function renderColtCornerGradeTabs() {
           class="colt-corner-grade-tab ${teacherColtCornerGrade === grade ? "is-active" : ""}"
           data-action="coltCornerGrade"
           data-grade="${grade}"
+          aria-label="Grade ${grade}, ${counts[grade] ? `${counts[grade]} unread student posts and replies` : "no unread student activity"}"
+          title="${counts[grade] ? "Open this grade, then read the marked topics to clear notifications" : "No unread student activity"}"
           ${teacherColtCornerGrade === grade ? 'aria-current="page"' : ""}
-        >Grade ${grade}</button>
+        ><span>Grade ${grade}</span><span class="corner-grade-bell ${counts[grade] ? "has-unread" : ""}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></svg>${counts[grade] ? `<b>${counts[grade] > 99 ? "99+" : counts[grade]}</b>` : ""}</span></button>
       `).join("")}
     </nav>
   `;

@@ -2208,6 +2208,17 @@ body[data-theme="night"] .request-spirit {
 @media(max-width:720px) { .colt-corner-card.student-colt-corner > .thread-form { grid-template-rows:none; } .student-colt-corner > .colt-corner-heading > .forum-rules-card { margin-top:8px; } }
 
 .colt-corner-grade-tabs,
+.colt-corner-grade-tabs .colt-corner-grade-tab { min-width:0; }
+.colt-corner-grade-tab { display:flex; justify-content:center; align-items:center; gap:10px; }
+.corner-grade-bell { display:inline-flex; align-items:center; gap:4px; opacity:.45; }
+.corner-grade-bell svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.corner-grade-bell.has-unread { opacity:1; }
+.corner-grade-bell b { display:grid; place-items:center; min-width:22px; height:22px; padding:0 5px; border-radius:99px; background:var(--blue); color:white; font-size:11px; }
+.is-active .corner-grade-bell b { background:white; color:var(--blue); }
+.thread-topic .corner-unread-topic { display:inline-block; margin:5px 0 0 8px; padding:3px 7px; border-radius:6px; background:var(--blue); color:white; font-size:11px; }
+@media(max-width:480px) { .colt-corner-grade-tab { flex-wrap:wrap; gap:4px; } }
+
+.colt-corner-grade-tabs,
 .colt-corner-grade-scope {
   grid-column: 1 / -1;
 }
