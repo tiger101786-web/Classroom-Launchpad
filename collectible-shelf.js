@@ -101,6 +101,7 @@
   rows.push(['USA Patriotic', ['uncle-sam','Uncle Sam Statue']]);
   rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
+  rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -120,6 +121,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'six-seven': {source:'assets/shelf-six-seven.png',width:1403,height:1121,bounds:[195,62,1010,1025]},
     'asta': {source:'assets/shelf-asta.png',width:1146,height:1372,bounds:[157,0,833,1347]},
     'zoro': {source:'assets/shelf-zoro.png',width:1045,height:1505,bounds:[42,61,960,1398]},
     'sukuna': {source:'assets/shelf-sukuna.png',width:1131,height:1391,bounds:[70,18,1000,1364]},
