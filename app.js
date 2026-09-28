@@ -3110,9 +3110,16 @@ function renderThreadTable(threads) {
   coltCornerTopicPage = Math.min(pages, Math.max(1, Math.floor(Number(coltCornerTopicPage) || 1)));
   const start = (coltCornerTopicPage - 1) * COLT_CORNER_TOPICS_PER_PAGE;
   const pageThreads = threads.slice(start, start + COLT_CORNER_TOPICS_PER_PAGE);
+  const pager = location => {
+    if (pages <= 1) return "";
+    const page = coltCornerTopicPage;
+    const numbers = [...new Set([1, pages, ...Array.from({ length: 5 }, (_, i) => page - 2 + i).filter(n => n > 0 && n <= pages)])].sort((a, b) => a - b);
+    const button = (target, label, content) => `<button type="button" data-action="coltCornerTopicPage" data-page="${target}" aria-label="${label}"${target === page ? ' aria-current="page"' : ""}>${content}</button>`;
+    return `<nav class="thread-reply-pages" aria-label="Topic pages ${location}"><span>Page:</span>${page > 1 ? button(page - 1, "Previous page", "‹") : ""}${numbers.map((n, i) => `${i && n > numbers[i - 1] + 1 ? '<span aria-hidden="true">…</span>' : ""}${button(n, `Page ${n}`, n)}`).join("")}${page < pages ? button(page + 1, "Next page", "›") : ""}</nav>`;
+  };
   return `
     <section class="thread-list" aria-label="Colt Corner topics">
-      <h2 class="thread-list-heading" tabindex="-1">Class Topics</h2>
+      <div class="thread-list-topbar"><h2 class="thread-list-heading" tabindex="-1">Class Topics</h2>${pager("top")}</div>
       <div class="thread-row thread-head">
         <span>Topic</span>
         <span>Started By</span>
@@ -3120,11 +3127,7 @@ function renderThreadTable(threads) {
         <span>Last Post</span>
       </div>
       ${threads.length ? pageThreads.map(renderThreadRow).join("") : emptyCard("No topics yet. Start Colt Corner with the first one.")}
-      ${threads.length ? `<nav class="thread-pagination" aria-label="Topic pages">
-        <span role="status">${start + 1}–${start + pageThreads.length} of ${threads.length} topics · Page ${coltCornerTopicPage} of ${pages}</span>
-        <div><button type="button" class="outline-btn" data-action="coltCornerTopicPage" data-page="${coltCornerTopicPage - 1}" ${coltCornerTopicPage === 1 ? 'disabled' : ''}>Previous</button>
-        <button type="button" class="outline-btn" data-action="coltCornerTopicPage" data-page="${coltCornerTopicPage + 1}" ${coltCornerTopicPage === pages ? 'disabled' : ''}>Next</button></div>
-      </nav>` : ''}
+      ${pager("bottom")}
     </section>
   `;
 }

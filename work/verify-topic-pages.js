@@ -12,8 +12,13 @@ for(const count of [0,1,15,16,30,31,100]){
  const ids=[...html.matchAll(/data-topic="(\d+)"/g)].map(m=>+m[1]);
  assert.deepEqual(ids,ctx.threads.slice((page-1)*15,page*15).map(t=>t.id));
  assert(ids.length<=15);
- if(count){assert(html.includes(`Page ${page} of ${pages}`));assert.equal(/data-page="\d+" disabled>Previous/.test(html),page===1);assert.equal(/data-page="\d+" disabled>Next/.test(html),page===pages);}
- else assert(!html.includes('thread-pagination'));
+ if(pages>1){
+ assert.equal((html.match(/aria-current="page"/g)||[]).length,2);
+ assert(html.includes(`aria-label="Page ${page}" aria-current="page"`));
+ assert.equal(html.includes('aria-label="Previous page"'),page>1);
+ assert.equal(html.includes('aria-label="Next page"'),page<pages);
+ assert(html.includes('aria-label="Topic pages top"'));assert(html.includes('aria-label="Topic pages bottom"'));
+ } else assert(!html.includes('aria-label="Topic pages'));
  }
  ctx.coltCornerTopicPage=999;
  vm.runInContext('renderThreadTable(threads)',ctx);
@@ -25,5 +30,5 @@ ctx.action='coltCornerTopicPage';ctx.target={dataset:{page:'2'}};ctx.visibleColt
 let focused=false,scrolled=false;const list={outerHTML:''};
 ctx.document={querySelector:s=>s==='.thread-list'?list:{focus:()=>{focused=true},scrollIntoView:()=>{scrolled=true}}};
 vm.runInContext(handler,ctx);
-assert.equal(ctx.coltCornerTopicPage,2);assert(list.outerHTML.includes('Page 2 of 7'));assert(focused&&scrolled);
+assert.equal(ctx.coltCornerTopicPage,2);assert(list.outerHTML.includes('aria-label="Page 2" aria-current="page"'));assert(focused&&scrolled);
 console.log('Pagination passed: 0/1/15/16/30/31/100 topics, boundary controls, last-page clamping, grade reset and page handler.');
