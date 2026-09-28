@@ -1854,6 +1854,7 @@ function renderForumAuthor(post, label = "Member") {
       <strong>${escapeHtml(post.studentName || "Student")}</strong>
       <span>${escapeHtml(forumRoleLabel(post.grade))}</span>
       <small>${escapeHtml(label)}</small>
+      <button type="button" class="forum-back-to-top" data-action="threadBackToTop">Back to top</button>
     </aside>
   `;
 }
@@ -13553,6 +13554,14 @@ app.addEventListener("click", async event => {
   if (action === "openColtRun") {
     window.dispatchEvent(new CustomEvent("colt-run-opening"));
     setScreen({ name: "coltRun" });
+  }
+  if (action === "threadBackToTop" && screen.name === "thread") {
+    const heading = app.querySelector("h1");
+    if (heading) {
+      heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
   }
   if (action === "threadJumpBottom" && screen.name === "thread") {
     const composer = document.getElementById("replyForm");

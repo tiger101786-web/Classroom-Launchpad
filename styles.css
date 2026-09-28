@@ -10380,6 +10380,11 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
   font-size: 0.98rem;
 }
 
+.forum-back-to-top { margin-top:auto; align-self:flex-start; padding:22px 0 0; border:0; background:none; color:var(--muted); font:inherit; font-size:.65rem; font-weight:400; line-height:1.5; cursor:pointer; }
+.forum-back-to-top:hover { color:var(--ink); text-decoration:underline; }
+.forum-back-to-top:focus-visible { outline:2px solid var(--blue); outline-offset:4px; }
+@media(max-width:760px) { .forum-post-author .forum-back-to-top { grid-column:1 / -1; justify-self:start; padding-top:12px; } }
+
 .forum-post-author span,
 .forum-post-author small {
   color: var(--muted);
