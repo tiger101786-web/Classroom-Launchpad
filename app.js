@@ -1650,6 +1650,24 @@ function openNewColtCornerTopic() {
   setScreen({ name: "thread", id: newest.id });
 }
 
+let cornerGradeReadStatus = "";
+
+function markColtCornerGradeRead(grade) {
+  if (!isTeacher() || !["4", "5", "6", "7"].includes(grade)) return false;
+  const read = loadTeacherCornerReadActivity();
+  const seen = loadSeenColtCornerTopicIds();
+  classThreads.filter(thread => coltCornerAudienceGrade(thread) === grade).forEach(thread => {
+    read[thread.id] = teacherCornerActivity(thread);
+    seen.add(String(thread.id));
+  });
+  try {
+    const key = coltCornerSeenTopicsStorageKey();
+    localStorage.setItem(`${key}:activity`, JSON.stringify(read));
+    localStorage.setItem(key, JSON.stringify([...seen].slice(-500)));
+    return true;
+  } catch { return false; }
+}
+
 function loadTeacherCornerReadActivity() {
   try {
     const value = JSON.parse(localStorage.getItem(`${coltCornerSeenTopicsStorageKey()}:activity`) || "{}");
@@ -11363,6 +11381,10 @@ function renderColtCornerGradeTabs() {
         ><span>Grade ${grade}</span><span class="corner-grade-bell ${counts[grade] ? "has-unread" : ""}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></svg>${counts[grade] ? `<b>${counts[grade] > 99 ? "99+" : counts[grade]}</b>` : ""}</span></button>
       `).join("")}
     </nav>
+    <div class="corner-grade-read-controls">
+      <span role="status">${escapeHtml(cornerGradeReadStatus || (counts[teacherColtCornerGrade] ? `Grade ${teacherColtCornerGrade}: ${counts[teacherColtCornerGrade]} unread posts and replies` : `Grade ${teacherColtCornerGrade} is up to date`))}</span>
+      <button type="button" class="outline-btn" data-action="markCornerGradeRead" data-grade="${teacherColtCornerGrade}" ${counts[teacherColtCornerGrade] ? "" : "disabled"}>Mark Grade ${teacherColtCornerGrade} as read</button>
+    </div>
   `;
 }
 
@@ -13136,10 +13158,18 @@ app.addEventListener("click", async event => {
     });
   }
   if (action === "coltCornerGrade") {
+    cornerGradeReadStatus = "";
     coltCornerTopicPage = 1;
     teacherColtCornerGrade = ["4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "4";
     if (screen.name === "thread") setScreen({ name: "coltCorner" });
     else render();
+  }
+  if (action === "markCornerGradeRead" && isTeacher()) {
+    const grade = target.dataset.grade;
+    cornerGradeReadStatus = markColtCornerGradeRead(grade)
+      ? `Grade ${grade} marked as read. New activity will notify you again.`
+      : "Could not save read status. Check that browser storage is available.";
+    render();
   }
   if (action === "cornerAdminSection") {
     if (!isTeacher()) return;

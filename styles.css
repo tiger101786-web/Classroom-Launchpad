@@ -2210,7 +2210,11 @@ body[data-theme="night"] .request-spirit {
 .colt-corner-grade-tabs,
 .colt-corner-grade-tabs .colt-corner-grade-tab { min-width:0; }
 .colt-corner-grade-tab { display:flex; justify-content:center; align-items:center; gap:10px; }
-.corner-grade-bell { display:inline-flex; align-items:center; gap:4px; opacity:.45; }
+.corner-grade-bell { display:inline-flex; align-items:center; gap:4px; opacity:1; }
+body[data-theme="night"] .corner-grade-bell svg { color:#fff; }
+.corner-grade-read-controls { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:.8rem; color:var(--ink); }
+.corner-grade-read-controls button { font-size:.8rem; padding:8px 12px; }
+.corner-grade-read-controls button:disabled { opacity:.5; cursor:default; }
 .corner-grade-bell svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .corner-grade-bell.has-unread { opacity:1; }
 .corner-grade-bell b { display:grid; place-items:center; min-width:22px; height:22px; padding:0 5px; border-radius:99px; background:var(--blue); color:white; font-size:11px; }
