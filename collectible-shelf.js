@@ -99,6 +99,7 @@
   rows.push(['USA Patriotic', ['usa-eagle','Bald Eagle Statue'], ['usa-liberty','Statue of Liberty'], ['usa-bell','Liberty Bell'], ['usa-top-hat','Stars & Stripes Top Hat']]);
   rows.push(['Christian Faith', ['archangel-michael','Archangel Michael Statue'], ['archangel-gabriel','Archangel Gabriel Statue']]);
   rows.push(['USA Patriotic', ['uncle-sam','Uncle Sam Statue']]);
+  rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -117,6 +118,11 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'highland-pumpkin': {source:'assets/shelf-highland-pumpkin.png',width:1145,height:1374,bounds:[121,13,894,1288]},
+    'highland-sunflower-bow': {source:'assets/shelf-highland-sunflower-bow.png',width:1243,height:1266,bounds:[131,49,990,1176]},
+    'highland-sunflower-bouquet': {source:'assets/shelf-highland-sunflower-bouquet.png',width:1237,height:1271,bounds:[76,26,1085,1206]},
+    'highland-lavender-basket': {source:'assets/shelf-highland-lavender-basket.png',width:1236,height:1273,bounds:[121,21,1016,1210]},
+    'highland-lavender-bow': {source:'assets/shelf-highland-lavender-bow.png',width:1234,height:1274,bounds:[103,9,1031,1247]},
     'archangel-michael': {source:'assets/shelf-archangel-michael.png',width:1254,height:1254,bounds:[283,17,689,1180]},
     'archangel-gabriel': {source:'assets/shelf-archangel-gabriel.png',width:1254,height:1254,bounds:[309,12,636,1228]},
     'uncle-sam': {source:'assets/shelf-uncle-sam.png',width:1254,height:1254,bounds:[395,14,487,1215]},
