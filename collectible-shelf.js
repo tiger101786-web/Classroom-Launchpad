@@ -99,6 +99,7 @@
   rows.push(['USA Patriotic', ['usa-eagle','Bald Eagle Statue'], ['usa-liberty','Statue of Liberty'], ['usa-bell','Liberty Bell'], ['usa-top-hat','Stars & Stripes Top Hat']]);
   rows.push(['Christian Faith', ['archangel-michael','Archangel Michael Statue'], ['archangel-gabriel','Archangel Gabriel Statue']]);
   rows.push(['USA Patriotic', ['uncle-sam','Uncle Sam Statue']]);
+  rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -118,6 +119,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'sukuna': {source:'assets/shelf-sukuna.png',width:1131,height:1391,bounds:[70,18,1000,1364]},
+    'midoriya': {source:'assets/shelf-midoriya.png',width:1199,height:1312,bounds:[62,15,1077,1282]},
     'highland-pumpkin': {source:'assets/shelf-highland-pumpkin.png',width:1145,height:1374,bounds:[121,13,894,1288]},
     'highland-sunflower-bow': {source:'assets/shelf-highland-sunflower-bow.png',width:1243,height:1266,bounds:[131,49,990,1176]},
     'highland-sunflower-bouquet': {source:'assets/shelf-highland-sunflower-bouquet.png',width:1237,height:1271,bounds:[76,26,1085,1206]},
