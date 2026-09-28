@@ -3250,7 +3250,7 @@ function renderThreadReply(reply, position = 1) {
   const submitted = formatShortDate(reply.createdAt);
   return `
     <article class="thread-reply-post forum-post">
-      ${renderForumAuthor(reply, "Classmate")}
+      ${renderForumAuthor(reply, String(reply.grade || "").toLowerCase() === "teacher" ? "Moderator" : "Classmate")}
       <div class="forum-post-content">
         <header class="forum-post-meta">
           <span>Reply #${escapeHtml(String(position))}</span>
