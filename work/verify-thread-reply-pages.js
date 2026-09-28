@@ -18,13 +18,17 @@ const fs=require("fs"),assert=require("assert/strict"),{chromium}=require("playw
  assert.equal(await page.locator('.thread-reply-list nav[aria-label="Reply pages top"]').count(),0);
  assert.equal(await page.locator('.thread-top-pages nav').count(),1);
  assert.equal(await page.locator(".thread-reply-post").count(),15);
+ assert.equal(await page.locator('.thread-return-board').innerText(),'Return to Board');
+ assert.equal(await page.locator('.thread-return-board').getAttribute('data-action'),'back');
  await page.locator("#replyMessage").fill("Keep this unfinished reply");
- await page.getByRole("button",{name:"Next page",exact:true}).first().click();
+ await page.getByRole("button",{name:"Next Page »",exact:true}).click();
  assert.match(await page.locator(".thread-reply-post").first().innerText(),/Reply #16/i);
  assert.equal(await page.locator('.thread-top-pages [aria-current="page"]').innerText(),'2');
  assert.equal(await page.locator('.thread-reply-list [aria-current="page"]').innerText(),'2');
  await page.getByRole("button",{name:"Page 4",exact:true}).first().click();assert.equal(await page.locator(".thread-reply-post").count(),1);
  assert.match(await page.locator(".thread-reply-post").innerText(),/Reply #46/i);
+ assert.equal(await page.locator('.thread-next-page').count(),0);
+ assert.equal(await page.locator('.thread-return-board').count(),1);
  assert.equal(await page.locator("#replyMessage").inputValue(),"Keep this unfinished reply");
  await page.screenshot({path:"work/thread-reply-pages-"+width+".png",fullPage:true});
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

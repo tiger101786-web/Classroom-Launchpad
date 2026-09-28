@@ -2391,7 +2391,13 @@ body[data-theme="night"] .corner-grade-bell svg { color:#fff; }
 .thread-reply-pages button[aria-current="page"] { border-color:var(--border); background:var(--paper); font-weight:800; }
 .thread-reply-pages button:hover { text-decoration:underline; }
 .thread-reply-pages button:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
-.thread-reply-list > .thread-reply-pages { padding:12px 16px; }
+.thread-bottom-navigation { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px 12px; padding:12px 16px 20px; }
+.thread-bottom-navigation .thread-reply-pages { grid-column:3; grid-row:1; padding:0; }
+.thread-next-page { grid-column:2; grid-row:1; justify-self:center; padding:2px 8px; border:1px solid var(--border); border-radius:20px; background:var(--paper); color:var(--ink); font:inherit; font-size:.75rem; cursor:pointer; }
+.thread-return-board { grid-column:1 / -1; grid-row:2; justify-self:center; padding:5px 8px; border:0; background:none; color:var(--ink); font:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+.thread-next-page:hover, .thread-return-board:hover { text-decoration:underline; }
+.thread-next-page:focus-visible, .thread-return-board:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+@media(max-width:600px) { .thread-bottom-navigation { grid-template-columns:auto 1fr; } .thread-next-page { grid-column:1; } .thread-bottom-navigation .thread-reply-pages { grid-column:2; } }
 .forum-reply-heading { scroll-margin-top:20px; }
 
 .forum-rules-card {

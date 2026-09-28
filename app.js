@@ -3176,7 +3176,12 @@ function refreshThreadReplyTopPager(thread) {
 
 function renderThreadReplyList(thread) {
   const { replies, pages, page, start, visible } = threadReplyPageData(thread);
-  return `<div class="forum-reply-heading" tabindex="-1"><h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3><span>Classmates in this grade only</span></div>${visible.length ? visible.map((reply,index)=>renderThreadReply(reply,start+index+1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}${renderThreadReplyPager(thread, "bottom")}`;
+  const footer = `<div class="thread-bottom-navigation">
+    ${page < pages ? `<button type="button" class="thread-next-page" data-action="threadReplyPage" data-thread-id="${escapeHtml(thread.id)}" data-page="${page + 1}">Next Page »</button>` : ""}
+    ${renderThreadReplyPager(thread, "bottom")}
+    <button type="button" class="thread-return-board" data-action="back">Return to Board</button>
+  </div>`;
+  return `<div class="forum-reply-heading" tabindex="-1"><h3>${escapeHtml(`${replies.length} ${replies.length === 1 ? "Reply" : "Replies"}`)}</h3><span>Classmates in this grade only</span></div>${visible.length ? visible.map((reply,index)=>renderThreadReply(reply,start+index+1)).join("") : emptyCard("No replies yet. Ask the first question or add a helpful response.")}${footer}`;
 }
 
 function renderThreadDetail(threadId) {
