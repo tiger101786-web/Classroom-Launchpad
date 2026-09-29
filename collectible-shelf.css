@@ -1,4 +1,5 @@
 .home-collectible-shelf { position:relative; width:min(100%,350px); margin-top:66px; padding-bottom:22px; }
+.home-collectible-shelf:has(.shelf-tall-object) { margin-top:100px; }
 .shelf-restore { margin-top:20px; display:grid; justify-items:start; gap:6px; }
 .shelf-restore button { font-size:12px; padding:7px 12px; }
 .shelf-restore button:hover,

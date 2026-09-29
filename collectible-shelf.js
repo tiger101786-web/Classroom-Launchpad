@@ -103,6 +103,7 @@
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
   rows.push(['Pokémon', ['charizard-flames','Charizard Flame Statue'], ['bulbasaur-vines','Bulbasaur Vine Statue'], ['gengar-flames','Gengar Ghost Flame Statue'], ['dragonite-pillow','Dragonite Pillow Statue']]);
+  rows.push(['Pokémon', ['growlithe','Growlithe Statue'], ['ash-pikachu','Ash & Pikachu Statue'], ['mew-console','Mew Console Statue']]);
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
@@ -123,9 +124,13 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'charizard-flames': {source:'assets/shelf-charizard-flames.png',width:753,height:1285,bounds:[0,0,750,1257]},
+    'growlithe': {source:'assets/shelf-growlithe.png',width:1200,height:1200,bounds:[249,87,708,1017]},
+    'ash-pikachu': {source:'assets/shelf-ash-pikachu.png',width:896,height:1152,bounds:[106,58,732,1052]},
+    'mew-console': {source:'assets/shelf-mew-console.png',width:1621,height:1280,bounds:[359,131,779,1048]},
+    'charizard-flames': {source:'assets/shelf-charizard-flames.png',width:753,height:1285,bounds:[0,0,750,1257],displaySize:445,displayWidth:270},
     'bulbasaur-vines': {source:'assets/shelf-bulbasaur-vines.png',width:570,height:712,bounds:[39,22,516,652]},
-    'gengar-flames': {source:'assets/shelf-gengar-flames.png',width:1080,height:1350,bounds:[105,10,966,1208]},
+    // Exclude the detached upper-right logo in the SVG presentation, preserving the supplied PNG.
+    'gengar-flames': {source:'assets/shelf-gengar-flames.png',width:1080,height:1350,bounds:[105,172,853,1046],clip:'polygon(0 0, 77.777778% 0, 77.777778% 17.777778%, 100% 17.777778%, 100% 100%, 0 100%)'},
     'dragonite-pillow': {source:'assets/shelf-dragonite-pillow.png',width:1200,height:1200,bounds:[208,163,774,929]},
     'jdm-anime-supra': {source:'assets/shelf-jdm-anime-supra.png',width:1774,height:887,bounds:[7,116,1756,737]},
     'jdm-black-red-nsx': {source:'assets/shelf-jdm-black-red-nsx.png',width:1810,height:869,bounds:[12,82,1788,709]},
@@ -298,9 +303,9 @@
     // retain their proportions and stay inside the space between neighboring slots.
     // The low-profile cake uses more of its slot's horizontal gap, without
     // stretching the plate or moving its contact point off the shared baseline.
-    const scale = Math.min(330 / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
+    const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
-    return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"/></svg></svg>`;
+    return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"${asset?.clip ? ` style="clip-path:${asset.clip};clip-rule:nonzero"` : ''}/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
