@@ -1759,6 +1759,14 @@ function formatStudentFirstLast(name) {
 }
 
 const PROFILE_FRAMES = [
+  ["capybara-springs","Capybara Springs","Bamboo, orange blossoms & a capybara"],
+  ["lavender-cottage","Lavender Cottage","Lavender sprigs & purple ribbons"],
+  ["sunflower-meadow","Sunflower Meadow","Golden petals & meadow leaves"],
+  ["ninja-dojo","Ninja Dojo","Crimson lacquer & silver crests"],
+  ["enchanted-mushrooms","Enchanted Mushrooms","Tiny mushrooms & glowing moss"],
+  ["polar-penguins","Polar Penguins","Icy crystals & playful penguins"],
+  ["royal-peacock","Royal Peacock","Jewel feathers & golden filigree"],
+  ["dragon-treasure","Dragon Treasure","Ruby scales & a dragon crest"],
   ["patriotic-pride","Patriotic Pride","Stars, ribbons & a golden eagle"],
   ["angelic-peace","Angelic Peace","Ivory feathers, pearls & a cross"],
   ["highland-haven","Highland Haven","Copper knots, heather & a Highland cow"],
@@ -1833,6 +1841,7 @@ function profileFrameArt(frame) {
 function newProfileFrameArt(frame) {
   const illustratedFrames = ["anime-crest","faith-glass","dragon-scale","solar-crown","lunar-orbit","ice-bloom","honeycomb","music-mix","art-splash","butterfly","rainbow-arc","ocean-anchor","mardi-gras","robot-tech","book-club","sport-star"];
   illustratedFrames.push(...["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"]);
+  illustratedFrames.push(...["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"]);
   return illustratedFrames.includes(frame)
     ? `<img class="profile-frame-raster" src="assets/profile-frame-${frame}-ornate.png" alt="" aria-hidden="true" loading="lazy">`
     : '';

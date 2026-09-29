@@ -1,5 +1,5 @@
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict'),sharp=require('sharp'),{chromium}=require('playwright');
-const ids=["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"];
+const ids=["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"];
 (async()=>{
  const source=fs.readFileSync('app.js','utf8'),server=fs.readFileSync('server.js','utf8');
  const ctx=vm.createContext({normalizeProfileAvatarUrl:()=>'',escapeHtml:x=>x,forumInitials:()=> 'CC'});
@@ -23,7 +23,7 @@ const ids=["patriotic-pride","angelic-peace","highland-haven","dumpling-delight"
    await page.setViewportSize({width,height:1000});
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
    assert(await page.locator('.sizes .profile-frame').evaluateAll(ns=>ns.every(n=>{const a=n.getBoundingClientRect(),b=n.querySelector('.profile-frame-raster').getBoundingClientRect();return b.width<=a.width+1&&b.height<=a.height+1;})));
-   await page.screenshot({path:'work/corner-matching-sets-'+width+'.png',fullPage:true});
+   await page.screenshot({path:'work/corner-new-sets-sept28-'+width+'.png',fullPage:true});
    for(const id of ids){
     await page.evaluate(id=>ProfileBanners.open({selected:id,avatar:'',name:'Test',role:'Student',save:async v=>{window.saved=v;return v},onSave:()=>{}}),id);
     assert.equal(await page.locator('[data-banner-choice]').count(),48);

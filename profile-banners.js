@@ -4,6 +4,7 @@
   choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
   choices.push(...[["anime-rooftops","Anime Rooftops"],["chapel-light","Chapel Light"],["sunlit-peaks","Sunlit Peaks"],["saturn-dream","Saturn Dream"],["winter-crystal","Winter Crystal"],["honey-meadow","Honey Meadow"],["midnight-melody","Midnight Melody"],["paint-play","Paint Play"],["dragon-valley","Dragon Valley"],["butterfly-dream","Butterfly Dream"],["rainbow-clouds","Rainbow Clouds"],["harbor-lights","Harbor Lights"],["carnival-glow","Carnival Glow"],["robot-city","Robot City"],["storybook-nook","Storybook Nook"],["stadium-spirit","Stadium Spirit"]]);
   choices.push(...[["patriotic-pride","Patriotic Pride"],["angelic-peace","Angelic Peace"],["highland-haven","Highland Haven"],["dumpling-delight","Dumpling Delight"],["prehistoric-jungle","Prehistoric Jungle"],["mermaid-lagoon","Mermaid Lagoon"],["frontier-sunset","Frontier Sunset"],["strawberry-picnic","Strawberry Picnic"]]);
+  choices.push(...[["capybara-springs","Capybara Springs"],["lavender-cottage","Lavender Cottage"],["sunflower-meadow","Sunflower Meadow"],["ninja-dojo","Ninja Dojo"],["enchanted-mushrooms","Enchanted Mushrooms"],["polar-penguins","Polar Penguins"],["royal-peacock","Royal Peacock"],["dragon-treasure","Dragon Treasure"]]);
   const cover = value => {
     // Additional themed covers share the existing crop and preview behavior.
     const id = normalize(value);
