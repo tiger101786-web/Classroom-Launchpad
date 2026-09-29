@@ -2385,10 +2385,12 @@ body[data-theme="night"] .corner-grade-bell svg { color:#fff; }
 
 .thread-navigation-row { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px 20px; margin-bottom:12px; }
 .thread-navigation-row .thread-quick-links { margin:0; }
-.thread-top-pages { margin-left:auto; }
-.thread-reply-pages { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:5px; padding:8px 0; color:var(--ink); font-size:.75rem; }
-.thread-reply-pages button { min-width:20px; padding:1px 3px; border:1px solid transparent; border-radius:0; background:none; color:var(--ink); font:inherit; line-height:1.25; cursor:pointer; }
-.thread-reply-pages button[aria-current="page"] { border-color:var(--border); background:var(--paper); font-weight:800; }
+.thread-top-pages { margin-left:auto; max-width:100%; }
+.thread-reply-pages { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:0; min-width:0; padding:0; color:var(--ink); font-size:.75rem; }
+/* Keep the text subtle, but give each page its own non-overlapping touch target. */
+.thread-reply-pages button { position:relative; isolation:isolate; min-width:44px; min-height:44px; padding:12px 10px; border:0; border-radius:0; background:none; color:var(--ink); font:inherit; line-height:1.25; cursor:pointer; }
+.thread-reply-pages button[aria-current="page"] { font-weight:800; }
+.thread-reply-pages button[aria-current="page"]::before { content:""; position:absolute; inset:12px 10px; z-index:-1; border:1px solid var(--border); background:var(--paper); pointer-events:none; }
 .thread-reply-pages button:hover { text-decoration:underline; }
 .thread-reply-pages button:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
 .thread-bottom-navigation { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px 12px; padding:12px 16px 20px; }
