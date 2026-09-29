@@ -102,6 +102,7 @@
   rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
+  rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -121,6 +122,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'jdm-anime-supra': {source:'assets/shelf-jdm-anime-supra.png',width:1774,height:887,bounds:[7,116,1756,737]},
+    'jdm-black-red-nsx': {source:'assets/shelf-jdm-black-red-nsx.png',width:1810,height:869,bounds:[12,82,1788,709]},
+    'jdm-blue-skyline': {source:'assets/shelf-jdm-blue-skyline.png',width:1672,height:941,bounds:[27,179,1614,629]},
+    'jdm-neon-gtr': {source:'assets/shelf-jdm-neon-gtr.png',width:1890,height:832,bounds:[19,108,1857,654]},
+    'jdm-purple-green-supra': {source:'assets/shelf-jdm-purple-green-supra.png',width:1536,height:1024,bounds:[24,39,1508,900]},
+    'jdm-red-skyline': {source:'assets/shelf-jdm-red-skyline.png',width:1871,height:841,bounds:[12,107,1858,646]},
     'six-seven': {source:'assets/shelf-six-seven.png',width:1403,height:1121,bounds:[195,62,1010,1025]},
     'asta': {source:'assets/shelf-asta.png',width:1146,height:1372,bounds:[157,0,833,1347]},
     'zoro': {source:'assets/shelf-zoro.png',width:1045,height:1505,bounds:[42,61,960,1398]},
