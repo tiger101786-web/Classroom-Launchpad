@@ -41,8 +41,12 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
      await page.locator('#shelfPreview [data-shelf-slot="'+slot+'"]').click();
      await page.locator('#shelfSearch').fill(shelf.items.find(i=>i.id===id).name);
      const card=page.locator('[data-shelf-item="'+id+'"]');assert(await card.isVisible());
+     const dimensions=await card.locator('.shelf-car-thumbnail').evaluate(e=>{const r=e.getBoundingClientRect(),v=e.viewBox.baseVal;return {width:Math.min(r.width,r.height*v.width/v.height),height:Math.min(r.height,r.width*v.height/v.width),card:e.parentElement.getBoundingClientRect().toJSON(),rect:r.toJSON()};});
+     assert(dimensions.width>75,'Car thumbnail should use its card width');
+     assert(dimensions.rect.top>=dimensions.card.top&&dimensions.rect.bottom<=dimensions.card.bottom,'Car thumbnail stays inside card');
      assert.equal(await card.locator('image').getAttribute('href'),'assets/shelf-'+id+'.png');await card.click();
     }
+    await page.screenshot({path:`work/jdm-chooser-${width}.png`});
     await page.locator('#saveShelf').click();
     assert.deepEqual(await page.evaluate(()=>window.savedShelf),selection);
    }

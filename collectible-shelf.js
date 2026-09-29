@@ -280,24 +280,26 @@
     'treasure-chest':[8,961,245,279], phoenix:[268,938,236,303], potion:[523,955,190,288],
     beignets:[718,988,299,252], cupcake:[1026,943,213,299]
   };
-  function sprite(id) {
+  function sprite(id, thumbnail = false) {
     const item = items.find(item => item.id === id);
     if (!item) return '<span class="shelf-empty" aria-label="Empty spot"></span>';
     const asset = standalone[item.id] || (expansion[item.id] ? { source:'assets/shelf-collectibles-expansion.png', width:1254, height:1254, bounds:expansion[item.id] } : null) || (discovery[item.id] ? { source:'assets/shelf-collectibles-discovery.png', width:1254, height:1254, bounds:discovery[item.id] } : null);
     const [x,y,w,h] = asset ? asset.bounds : bounds[item.row * 6 + item.column];
     const source = asset?.source || 'assets/shelf-collectibles.png';
+    const car = item.category === 'JDM Model Cars';
+    if (car && thumbnail) return `<svg class="shelf-object shelf-car-thumbnail" role="img" aria-label="${item.name}" viewBox="${x} ${y} ${w} ${h}"><image href="${source}" width="${asset.width}" height="${asset.height}"/></svg>`;
     const anime = item.category === 'Anime';
     // Every collectible shares the statue sizing and bottom baseline. Wide pieces
     // retain their proportions and stay inside the space between neighboring slots.
     // The low-profile cake uses more of its slot's horizontal gap, without
     // stretching the plate or moving its contact point off the shared baseline.
-    const scale = Math.min(330 / Math.max(w,h), (asset?.displayWidth || 240) / w);
+    const scale = Math.min(330 / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
     return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
-    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
+    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}${state.slots.some(id => id.startsWith('jdm-')) ? ' shelf-has-cars' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
       ? `<button type="button" data-shelf-slot="${index}" aria-pressed="${index === active}" aria-label="${['Left','Middle','Right'][index]} spot: ${name(id)}">${sprite(id)}<span class="shelf-slot-label">${['Left','Middle','Right'][index]}</span></button>`
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
@@ -360,7 +362,7 @@
       const size=pageSize(), count=Math.max(1,Math.ceil(matches.length/size));
       pages[tab]=Math.min(pages[tab],count-1);
       const visible=matches.slice(pages[tab]*size,(pages[tab]+1)*size);
-      choices.innerHTML=tab==='objects'?visible.map(item=>'<button type="button" data-shelf-item="'+item.id+'" aria-pressed="'+(draft.slots[active]===item.id)+'">'+sprite(item.id)+'<strong>'+item.name+'</strong></button>').join(''):'';
+      choices.innerHTML=tab==='objects'?visible.map(item=>'<button type="button" data-shelf-item="'+item.id+'" aria-pressed="'+(draft.slots[active]===item.id)+'">'+sprite(item.id,true)+'<strong>'+item.name+'</strong></button>').join(''):'';
       themeChoices.innerHTML=tab==='styles'?visible.map(theme=>'<button type="button" data-shelf-theme-choice="'+theme.id+'" aria-pressed="'+(draft.theme===theme.id)+'"><span class="collectible-shelf" data-shelf-theme="'+theme.id+'" aria-hidden="true"><span class="shelf-board"></span></span><strong>'+theme.name+'</strong></button>').join(''):'';
       dialog.querySelector('#shelfResults').textContent=matches.length?matches.length+' '+(tab==='objects'?'objects · '+['Left','Middle','Right'][active]+' spot':'shelf styles'):'No matches. Try another search or category.';
       dialog.querySelector('#shelfPageStatus').textContent='Page '+(pages[tab]+1)+' of '+count;
