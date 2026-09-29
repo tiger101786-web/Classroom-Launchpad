@@ -102,6 +102,7 @@
   rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
+  rows.push(['Pokémon', ['charizard-flames','Charizard Flame Statue'], ['bulbasaur-vines','Bulbasaur Vine Statue'], ['gengar-flames','Gengar Ghost Flame Statue'], ['dragonite-pillow','Dragonite Pillow Statue']]);
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
@@ -122,6 +123,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'charizard-flames': {source:'assets/shelf-charizard-flames.png',width:753,height:1285,bounds:[0,0,750,1257]},
+    'bulbasaur-vines': {source:'assets/shelf-bulbasaur-vines.png',width:570,height:712,bounds:[39,22,516,652]},
+    'gengar-flames': {source:'assets/shelf-gengar-flames.png',width:1080,height:1350,bounds:[105,10,966,1208]},
+    'dragonite-pillow': {source:'assets/shelf-dragonite-pillow.png',width:1200,height:1200,bounds:[208,163,774,929]},
     'jdm-anime-supra': {source:'assets/shelf-jdm-anime-supra.png',width:1774,height:887,bounds:[7,116,1756,737]},
     'jdm-black-red-nsx': {source:'assets/shelf-jdm-black-red-nsx.png',width:1810,height:869,bounds:[12,82,1788,709]},
     'jdm-blue-skyline': {source:'assets/shelf-jdm-blue-skyline.png',width:1672,height:941,bounds:[27,179,1614,629]},
