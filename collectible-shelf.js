@@ -62,7 +62,7 @@
     ['Nature', ['crystal','Amethyst Crystal'], ['bonsai','Bonsai Tree'], ['cactus','Cactus'], ['sunflower','Sunflower'], ['shell','Seashell'], ['butterfly','Butterfly Dome']],
     ['Culture, Faith & Books', ['mask','Mardi Gras Mask'], ['fleur','Fleur-de-lis'], ['crawfish','Crawfish'], ['church','Little Church'], ['cross','Golden Cross'], ['books','Book Stack']],
     ['Anime', ['all-might','All Might Statue'], ['naruto','Naruto Sage Mode Bust'], ['goku','Goku Statue'], ['pikachu','Pikachu'], ['eevee','Eevee'], ['nezuko','Nezuko Statue'], ['luffy','Luffy Bust'], ['sailor-moon','Sailor Moon Figurine'], ['rumi','Rumi Statue']],
-    ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['race-car','Race Car'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']],
+    ['Display Pieces', ['crystal-dragon','Crystal Dragon'], ['moon-astronaut','Moon Astronaut'], ['ship-bottle','Ship in a Bottle'], ['knight-helmet','Knight Helmet'], ['streetcar','New Orleans Streetcar'], ['saxophone','Jazz Saxophone'], ['pinball','Pinball Machine'], ['snow-globe','Mountain Snow Globe'], ['owl-books','Spellbook Owl']],
     ['Music', ['trumpet','Golden Trumpet']],
     ['Shelf Decorations', ['ceramic-fox','Ceramic Fox'], ['succulent','Succulent Pot'], ['hourglass','Brass Hourglass'], ['mantel-clock','Vintage Mantel Clock']],
     ['Science', ['microscope','Microscope'], ['telescope','Brass Telescope'], ['dna','DNA Model'], ['atom','Atom Sculpture'], ['earth-globe','Antique Earth Globe']],
@@ -108,7 +108,7 @@
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   rows.push(['Disney', ['disney-elsa-bust','Elsa Bust'], ['disney-maleficent-bust','Maleficent Bust'], ['disney-evil-queen-bust','Evil Queen Bust'], ['disney-ursula-bust','Ursula Bust'], ['disney-jafar-bust','Jafar Bust'], ['disney-hans-bust','Hans Bust'], ['disney-gaston-bust','Gaston Bust'], ['disney-aladdin-bust','Aladdin Bust'], ['disney-beast-bust','Beast Bust'], ['disney-hercules-bust','Hercules Bust'], ['disney-kristoff-bust','Kristoff Bust']]);
-  rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust']]);
+  rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -121,21 +121,22 @@
     [16,1025,181,211],[242,1033,147,203],[415,1032,226,206],[654,1028,176,205],[896,1041,115,194],[1075,1062,164,170]
   ];
   // Preserve saved shelves when a collectible is replaced.
-  const replacements = { medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
+  const replacements = { medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id)) && (value.theme === undefined || themeIds.has(value.theme));
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'disney-genie-bust': {source:'assets/shelf-disney-genie-bust.png',width:1312,height:1504,bounds:[228,41,858,1405]},
     'disney-prince-eric-bust': {source:'assets/shelf-disney-prince-eric-bust.png',width:1408,height:1408,bounds:[253,44,889,1290]},
     'disney-pocahontas-bust': {source:'assets/shelf-disney-pocahontas-bust.png',width:1600,height:1200,bounds:[414,26,730,1124]},
     'disney-elsa-bust': {source:'assets/shelf-disney-elsa-bust.png',width:1408,height:1408,bounds:[317,44,919,1318]},
-    'disney-maleficent-bust': {source:'assets/shelf-disney-maleficent-bust.png',width:1408,height:1408,bounds:[322,10,757,1365]},
+    'disney-maleficent-bust': {source:'assets/shelf-disney-maleficent-bust.png',width:1408,height:1408,bounds:[322,10,757,1365],displaySize:400},
     'disney-evil-queen-bust': {source:'assets/shelf-disney-evil-queen-bust.png',width:1408,height:1408,bounds:[370,21,688,1348]},
     'disney-ursula-bust': {source:'assets/shelf-disney-ursula-bust.png',width:1408,height:1408,bounds:[447,49,815,1281]},
     'disney-jafar-bust': {source:'assets/shelf-disney-jafar-bust.png',width:1408,height:1408,bounds:[311,16,788,1325]},
     'disney-hans-bust': {source:'assets/shelf-disney-hans-bust.png',width:1408,height:1408,bounds:[192,37,1002,1303]},
-    'disney-gaston-bust': {source:'assets/shelf-disney-gaston-bust.png',width:1408,height:1408,bounds:[78,43,1259,1288]},
+    'disney-gaston-bust': {source:'assets/shelf-disney-gaston-bust.png',width:1408,height:1408,bounds:[78,43,1259,1288],displayWidth:300},
     'disney-aladdin-bust': {source:'assets/shelf-disney-aladdin-bust.png',width:1408,height:1408,bounds:[318,50,808,1299]},
     'disney-beast-bust': {source:'assets/shelf-disney-beast-bust.png',width:1408,height:1408,bounds:[215,20,952,1348]},
     'disney-hercules-bust': {source:'assets/shelf-disney-hercules-bust.png',width:1408,height:1408,bounds:[185,34,948,1335]},
@@ -144,7 +145,7 @@
     'disney-ariel-bust': {source:'assets/shelf-disney-ariel-bust.png',width:1408,height:1408,bounds:[286,88,861,1173]},
     'disney-tiana-bust': {source:'assets/shelf-disney-tiana-bust-v2.png',width:1408,height:1408,bounds:[365,40,955,1304]},
     'disney-cinderella-bust': {source:'assets/shelf-disney-cinderella-bust.png',width:1408,height:1408,bounds:[344,29,764,1338]},
-    'disney-rapunzel-bust': {source:'assets/shelf-disney-rapunzel-bust.png',width:1408,height:1408,bounds:[289,26,801,1305]},
+    'disney-rapunzel-bust': {source:'assets/shelf-disney-rapunzel-bust.png',width:1408,height:1408,bounds:[289,26,801,1305],displaySize:380},
     'disney-belle-bust': {source:'assets/shelf-disney-belle-bust.png',width:1408,height:1408,bounds:[221,50,918,1300]},
     'disney-anna-bust': {source:'assets/shelf-disney-anna-bust.png',width:1408,height:1408,bounds:[217,35,940,1329]},
     'disney-jasmine-bust': {source:'assets/shelf-disney-jasmine-bust.png',width:1408,height:1408,bounds:[305,46,927,1311]},
