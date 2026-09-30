@@ -102,6 +102,7 @@
   rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
+  rows.push(['Disney', ['elsa','Elsa Ice Castle Statue'], ['anna','Anna Frozen Statue'], ['jasmine','Jasmine Magic Lamp Statue'], ['belle','Belle Bust'], ['ariel','Ariel Bust'], ['beast','Beast Bust']]);
   rows.push(['Pokémon', ['charizard-flames','Charizard Flame Statue'], ['bulbasaur-vines','Bulbasaur Vine Statue'], ['gengar-flames','Gengar Ghost Flame Statue'], ['dragonite-pillow','Dragonite Pillow Statue']]);
   rows.push(['Pokémon', ['growlithe','Growlithe Statue'], ['ash-pikachu','Ash & Pikachu Statue'], ['mew-console','Mew Console Statue']]);
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
@@ -124,6 +125,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'elsa': {source:'assets/shelf-elsa.png',width:375,height:869,bounds:[12,19,342,845]},
+    'anna': {source:'assets/shelf-anna.png',width:556,height:844,bounds:[20,9,527,827]},
+    'jasmine': {source:'assets/shelf-jasmine.png',width:2000,height:2000,bounds:[54,206,1931,1669]},
+    'belle': {source:'assets/shelf-belle.png',width:516,height:516,bounds:[127,20,246,496]},
+    'ariel': {source:'assets/shelf-ariel.png',width:1024,height:1024,bounds:[243,66,597,920],clip:'polygon(0 0, 100% 0, 100% 84.960938%, 82.03125% 84.960938%, 82.03125% 100%, 0 100%)'},
+    'beast': {source:'assets/shelf-beast.png',width:500,height:500,bounds:[93,27,284,451]},
     'growlithe': {source:'assets/shelf-growlithe.png',width:1200,height:1200,bounds:[249,87,708,1017]},
     'ash-pikachu': {source:'assets/shelf-ash-pikachu.png',width:896,height:1152,bounds:[106,58,732,1052]},
     'mew-console': {source:'assets/shelf-mew-console.png',width:1621,height:1280,bounds:[359,131,779,1048]},
