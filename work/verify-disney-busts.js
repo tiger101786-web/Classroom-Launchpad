@@ -2,7 +2,8 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict');
 const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../collectible-shelf');
 (async()=>{
  const ids=["disney-snow-white-bust","disney-ariel-bust","disney-tiana-bust","disney-cinderella-bust","disney-rapunzel-bust","disney-belle-bust","disney-anna-bust","disney-jasmine-bust","disney-mulan-bust","disney-aurora-bust"];
- const selections=[ids.slice(0,3),ids.slice(3,6),ids.slice(6,9),[ids[9],ids[0],'enchanted-rose']].map(slots=>({enabled:true,theme:'crimson',slots}));
+ ids.push(...["disney-elsa-bust","disney-maleficent-bust","disney-evil-queen-bust","disney-ursula-bust","disney-jafar-bust","disney-hans-bust","disney-gaston-bust","disney-aladdin-bust","disney-beast-bust","disney-hercules-bust","disney-kristoff-bust"]);
+ const selections=Array.from({length:7},(_,n)=>ids.slice(n*3,n*3+3)).concat([['disney-aurora-bust','disney-elsa-bust','enchanted-rose']]).map(slots=>({enabled:true,theme:'crimson',slots}));
  for(const selection of selections){assert(shelf.valid(selection));assert.deepEqual(shelf.clean(selection),selection);}
  for(const id of ids){
   assert.equal(shelf.items.filter(i=>i.id===id).length,1);
@@ -12,7 +13,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
  }
  assert.deepEqual(shelf.clean({enabled:true,theme:'crimson',slots:['elsa','beast','enchanted-rose']}).slots,['none','none','enchanted-rose']);
  for(const id of ['anna','ariel','belle','jasmine'])assert.equal(shelf.clean({enabled:true,slots:[id,'horse','planet']}).slots[0],'disney-'+id+'-bust');
- assert.equal(shelf.items.filter(i=>i.category==='Disney').length,11);
+ assert.equal(shelf.items.filter(i=>i.category==='Disney').length,22);
  for(const id of ['elsa','beast','anna','ariel','belle','jasmine'])assert(!shelf.items.some(i=>i.id===id));
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
@@ -28,7 +29,9 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
    await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('image')].map(i=>new Promise((ok,bad)=>{const img=new Image();img.onload=ok;img.onerror=bad;img.src=i.getAttribute('href');})));});
    const bases=await page.locator('.shelf-object > svg').evaluateAll(ns=>ns.map(n=>+n.getAttribute('y')+ +n.getAttribute('height')));assert(bases.every(b=>Math.abs(b-346)<.01));
    const rects=await page.locator('.shelf-object > svg').evaluateAll(ns=>ns.map(n=>{const r=n.parentElement.getBoundingClientRect(),s=r.width/220,l=r.left+Number(n.getAttribute('x'))*s;return {l,r:l+Number(n.getAttribute('width'))*s};}));
-   for(const n of [0,3])assert(rects[n].r<rects[n+1].l&&rects[n+1].r<rects[n+2].l);
+   for(let n=0;n<rects.length;n+=3)assert(rects[n].r<rects[n+1].l&&rects[n+1].r<rects[n+2].l);
+   const auroraHeight=await page.locator('section').last().locator('.shelf-object > svg').first().getAttribute('height');
+   assert(Number(auroraHeight)>328,'Aurora should now be approximately as tall as the other busts');
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
    await page.screenshot({path:`work/disney-busts-cars-${width}.png`,fullPage:true});
    for(const selection of selections){
@@ -40,7 +43,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
      if(await page.locator('#shelfNext').isDisabled())break;
      await page.locator('#shelfNext').click();
     }while(true);
-    assert.equal(names.length,11);assert.deepEqual(names,[...names].sort((a,b)=>a.localeCompare(b)));
+    assert.equal(names.length,22);assert.deepEqual(names,[...names].sort((a,b)=>a.localeCompare(b)));
     for(const [slot,id] of selection.slots.entries()){
      await page.locator('#shelfPreview [data-shelf-slot="'+slot+'"]').click();
      await page.locator('#shelfSearch').fill(shelf.items.find(i=>i.id===id).name);
@@ -52,6 +55,6 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
     assert.deepEqual(await page.evaluate(()=>window.savedShelf),selection);
    }
   }
-  console.log('All ten Disney busts passed alpha, catalog, saved selection, search/category, alphabetical order, shelf baseline, non-overlap and mobile/desktop checks.');
+  console.log('All 21 Disney busts and Enchanted Rose passed catalog, alpha, save, search/category, alphabetical order, baseline, non-overlap and mobile/desktop checks; Aurora size verified.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
