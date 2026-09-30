@@ -3,17 +3,19 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
 (async()=>{
  const ids=["disney-snow-white-bust","disney-ariel-bust","disney-tiana-bust","disney-cinderella-bust","disney-rapunzel-bust","disney-belle-bust","disney-anna-bust","disney-jasmine-bust","disney-mulan-bust","disney-aurora-bust"];
  ids.push(...["disney-elsa-bust","disney-maleficent-bust","disney-evil-queen-bust","disney-ursula-bust","disney-jafar-bust","disney-hans-bust","disney-gaston-bust","disney-aladdin-bust","disney-beast-bust","disney-hercules-bust","disney-kristoff-bust"]);
- const selections=Array.from({length:7},(_,n)=>ids.slice(n*3,n*3+3)).concat([['disney-aurora-bust','disney-elsa-bust','enchanted-rose']]).map(slots=>({enabled:true,theme:'crimson',slots}));
+ ids.push('disney-prince-eric-bust','disney-pocahontas-bust');
+ const assetPath=id=>'assets/shelf-'+id+(id==='disney-tiana-bust'?'-v2':'')+'.png';
+ const selections=Array.from({length:7},(_,n)=>ids.slice(n*3,n*3+3)).concat([['disney-prince-eric-bust','disney-tiana-bust','disney-pocahontas-bust'],['disney-aurora-bust','disney-elsa-bust','enchanted-rose']]).map(slots=>({enabled:true,theme:'crimson',slots}));
  for(const selection of selections){assert(shelf.valid(selection));assert.deepEqual(shelf.clean(selection),selection);}
  for(const id of ids){
   assert.equal(shelf.items.filter(i=>i.id===id).length,1);
   assert.equal(shelf.items.find(i=>i.id===id).category,'Disney');
-  const {data,info}=await sharp('assets/shelf-'+id+'.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const {data,info}=await sharp(assetPath(id)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
   assert.equal(data[3],0);assert(info.width>=375);
  }
  assert.deepEqual(shelf.clean({enabled:true,theme:'crimson',slots:['elsa','beast','enchanted-rose']}).slots,['none','none','enchanted-rose']);
  for(const id of ['anna','ariel','belle','jasmine'])assert.equal(shelf.clean({enabled:true,slots:[id,'horse','planet']}).slots[0],'disney-'+id+'-bust');
- assert.equal(shelf.items.filter(i=>i.category==='Disney').length,22);
+ assert.equal(shelf.items.filter(i=>i.category==='Disney').length,24);
  for(const id of ['elsa','beast','anna','ariel','belle','jasmine'])assert(!shelf.items.some(i=>i.id===id));
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
@@ -43,18 +45,18 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
      if(await page.locator('#shelfNext').isDisabled())break;
      await page.locator('#shelfNext').click();
     }while(true);
-    assert.equal(names.length,22);assert.deepEqual(names,[...names].sort((a,b)=>a.localeCompare(b)));
+    assert.equal(names.length,24);assert.deepEqual(names,[...names].sort((a,b)=>a.localeCompare(b)));
     for(const [slot,id] of selection.slots.entries()){
      await page.locator('#shelfPreview [data-shelf-slot="'+slot+'"]').click();
      await page.locator('#shelfSearch').fill(shelf.items.find(i=>i.id===id).name);
      const card=page.locator('[data-shelf-item="'+id+'"]');assert(await card.isVisible());
-     assert.equal(await card.locator('image').getAttribute('href'),'assets/shelf-'+id+'.png');await card.click();
+     assert.equal(await card.locator('image').getAttribute('href'),assetPath(id));await card.click();
     }
     await page.screenshot({path:`work/disney-busts-chooser-${width}.png`});
     await page.locator('#saveShelf').click();
     assert.deepEqual(await page.evaluate(()=>window.savedShelf),selection);
    }
   }
-  console.log('All 21 Disney busts and Enchanted Rose passed catalog, alpha, save, search/category, alphabetical order, baseline, non-overlap and mobile/desktop checks; Aurora size verified.');
+  console.log('All 23 Disney busts and Enchanted Rose passed catalog, alpha, save, search/category, alphabetical order, baseline, non-overlap and mobile/desktop checks; Aurora size and updated Tiana verified.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

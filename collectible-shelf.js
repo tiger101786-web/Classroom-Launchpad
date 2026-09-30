@@ -108,6 +108,7 @@
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   rows.push(['Disney', ['disney-elsa-bust','Elsa Bust'], ['disney-maleficent-bust','Maleficent Bust'], ['disney-evil-queen-bust','Evil Queen Bust'], ['disney-ursula-bust','Ursula Bust'], ['disney-jafar-bust','Jafar Bust'], ['disney-hans-bust','Hans Bust'], ['disney-gaston-bust','Gaston Bust'], ['disney-aladdin-bust','Aladdin Bust'], ['disney-beast-bust','Beast Bust'], ['disney-hercules-bust','Hercules Bust'], ['disney-kristoff-bust','Kristoff Bust']]);
+  rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -126,6 +127,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'disney-prince-eric-bust': {source:'assets/shelf-disney-prince-eric-bust.png',width:1408,height:1408,bounds:[253,44,889,1290]},
+    'disney-pocahontas-bust': {source:'assets/shelf-disney-pocahontas-bust.png',width:1600,height:1200,bounds:[414,26,730,1124]},
     'disney-elsa-bust': {source:'assets/shelf-disney-elsa-bust.png',width:1408,height:1408,bounds:[317,44,919,1318]},
     'disney-maleficent-bust': {source:'assets/shelf-disney-maleficent-bust.png',width:1408,height:1408,bounds:[322,10,757,1365]},
     'disney-evil-queen-bust': {source:'assets/shelf-disney-evil-queen-bust.png',width:1408,height:1408,bounds:[370,21,688,1348]},
@@ -139,7 +142,7 @@
     'disney-kristoff-bust': {source:'assets/shelf-disney-kristoff-bust.png',width:1408,height:1408,bounds:[237,44,947,1302]},
     'disney-snow-white-bust': {source:'assets/shelf-disney-snow-white-bust.png',width:1408,height:1408,bounds:[369,60,728,1268]},
     'disney-ariel-bust': {source:'assets/shelf-disney-ariel-bust.png',width:1408,height:1408,bounds:[286,88,861,1173]},
-    'disney-tiana-bust': {source:'assets/shelf-disney-tiana-bust.png',width:1408,height:1408,bounds:[376,47,666,1295]},
+    'disney-tiana-bust': {source:'assets/shelf-disney-tiana-bust-v2.png',width:1408,height:1408,bounds:[365,40,955,1304]},
     'disney-cinderella-bust': {source:'assets/shelf-disney-cinderella-bust.png',width:1408,height:1408,bounds:[344,29,764,1338]},
     'disney-rapunzel-bust': {source:'assets/shelf-disney-rapunzel-bust.png',width:1408,height:1408,bounds:[289,26,801,1305]},
     'disney-belle-bust': {source:'assets/shelf-disney-belle-bust.png',width:1408,height:1408,bounds:[221,50,918,1300]},
