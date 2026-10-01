@@ -111,6 +111,7 @@
   rows.push(['Disney', ['disney-elsa-bust','Elsa Bust'], ['disney-maleficent-bust','Maleficent Bust'], ['disney-evil-queen-bust','Evil Queen Bust'], ['disney-ursula-bust','Ursula Bust'], ['disney-jafar-bust','Jafar Bust'], ['disney-hans-bust','Hans Bust'], ['disney-gaston-bust','Gaston Bust'], ['disney-aladdin-bust','Aladdin Bust'], ['disney-beast-bust','Beast Bust'], ['disney-hercules-bust','Hercules Bust'], ['disney-kristoff-bust','Kristoff Bust']]);
   rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
   rows.push(['Superheroes', ['superhero-winter-soldier-bust','Winter Soldier Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
+  rows.push(['Music', ['michael-jackson-blue-bust','Michael Jackson Blue Base Bust'], ['michael-jackson-gold-bust','Michael Jackson Gold Base Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -129,6 +130,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'michael-jackson-blue-bust': {source:'assets/shelf-michael-jackson-blue-bust.png',width:1152,height:1728,bounds:[203,44,749,1598],displaySize:460,displayWidth:340},
+    'michael-jackson-gold-bust': {source:'assets/shelf-michael-jackson-gold-bust.png',width:1152,height:1728,bounds:[35,49,1100,1631],displaySize:460,displayWidth:340},
     'pokemon-mew-statue': {"source":"assets/shelf-pokemon-mew-statue.png","width":1392,"height":1424,"bounds":[202,8,992,1391],"displaySize":460,"displayWidth":340},
     'pokemon-mimikyu-statue': {"source":"assets/shelf-pokemon-mimikyu-statue.png","width":1248,"height":1584,"bounds":[247,1,866,1559],"displaySize":460,"displayWidth":340},
     'pokemon-umbreon-statue': {"source":"assets/shelf-pokemon-umbreon-statue.png","width":1280,"height":1536,"bounds":[101,18,1099,1468],"displaySize":460,"displayWidth":340},
@@ -370,7 +373,7 @@
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
-    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}${state.slots.some(id => id.startsWith('jdm-')) ? ' shelf-has-cars' : ''}${state.slots.some(id => id.startsWith('superhero-') || id.startsWith('pokemon-') || ['pikachu','eevee'].includes(id)) ? ' shelf-has-superheroes' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
+    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}${state.slots.some(id => id.startsWith('jdm-')) ? ' shelf-has-cars' : ''}${state.slots.some(id => id.startsWith('michael-jackson-') || id.startsWith('superhero-') || id.startsWith('pokemon-') || ['pikachu','eevee'].includes(id)) ? ' shelf-has-superheroes' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
       ? `<button type="button" data-shelf-slot="${index}" aria-pressed="${index === active}" aria-label="${['Left','Middle','Right'][index]} spot: ${name(id)}">${sprite(id)}<span class="shelf-slot-label">${['Left','Middle','Right'][index]}</span></button>`
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
