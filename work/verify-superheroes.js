@@ -5,6 +5,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
  const assetPath=id=>'assets/shelf-'+id+(['superhero-loki-bust','superhero-hulk-bust','superhero-thor-bust','superhero-juggernaut-bust'].includes(id)?'-v2':'')+'.png';
  const selections=Array.from({length:4},(_,n)=>({enabled:true,theme:'crimson',slots:Array.from({length:3},(_,slot)=>ids[(n*3+slot)%ids.length])}));
  selections.push({enabled:true,theme:'crimson',slots:['superhero-iron-man-bust','superhero-sabretooth-bust','superhero-thor-bust']});
+ selections.push({enabled:true,theme:'crimson',slots:['superhero-juggernaut-bust','superhero-juggernaut-bust','superhero-juggernaut-bust']});
  assert(!shelf.items.some(i=>i.id==='superhero-falcon-bust'));
  assert.deepEqual(shelf.clean({enabled:true,theme:'crimson',slots:['superhero-falcon-bust','superhero-loki-bust','superhero-winter-soldier-bust']}).slots,['none','superhero-loki-bust','superhero-winter-soldier-bust']);
  for(const selection of selections){assert(shelf.valid(selection));assert.deepEqual(shelf.clean(selection),selection);}
