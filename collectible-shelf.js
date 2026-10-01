@@ -104,14 +104,14 @@
   rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust'], ['sung-jin-woo','Sung Jin-woo Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
   rows.push(['Disney', ['disney-snow-white-bust','Snow White Bust'], ['disney-ariel-bust','Ariel Bust'], ['disney-tiana-bust','Tiana Bust'], ['disney-cinderella-bust','Cinderella Bust'], ['disney-rapunzel-bust','Rapunzel Bust'], ['disney-belle-bust','Belle Bust'], ['disney-anna-bust','Anna Bust'], ['disney-jasmine-bust','Jasmine Bust'], ['disney-mulan-bust','Mulan Bust'], ['disney-aurora-bust','Aurora Bust']]);
-  rows.push(['Pokémon', ['charizard-flames','Charizard Flame Statue'], ['bulbasaur-vines','Bulbasaur Vine Statue'], ['gengar-flames','Gengar Ghost Flame Statue'], ['dragonite-pillow','Dragonite Pillow Statue']]);
-  rows.push(['Pokémon', ['growlithe','Growlithe Statue'], ['ash-pikachu','Ash & Pikachu Statue'], ['mew-console','Mew Console Statue']]);
+  rows.push(['Pokémon', ['pokemon-mew-statue','Mew Statue'], ['pokemon-mimikyu-statue','Mimikyu Statue'], ['pokemon-umbreon-statue','Umbreon Statue'], ['pokemon-snorlax-statue','Snorlax Statue'], ['pokemon-lucario-statue','Lucario Statue'], ['pokemon-gardevoir-statue','Gardevoir Statue'], ['pokemon-dragonite-statue','Dragonite Statue'], ['pokemon-rayquaza-statue','Rayquaza Statue'], ['pokemon-mewtwo-statue','Mewtwo Statue'], ['pokemon-garchomp-statue','Garchomp Statue'], ['pokemon-arcanine-statue','Arcanine Statue'], ['pokemon-squirtle-statue','Squirtle Statue'], ['pokemon-gengar-statue','Gengar Statue'], ['pokemon-bulbasaur-statue','Bulbasaur Statue'], ['pokemon-charizard-statue','Charizard Statue'], ['pokemon-charmander-statue','Charmander Statue'], ['pokemon-gyarados-statue','Gyarados Statue']]);
+
   rows.push(['JDM Model Cars', ['jdm-purple-green-supra','Purple & Green Supra'], ['jdm-anime-supra','Purple Anime Supra'], ['jdm-red-skyline','Red LBWK Skyline'], ['jdm-blue-skyline','Blue Skyline GT-R'], ['jdm-black-red-nsx','Black & Red NSX'], ['jdm-neon-gtr','Neon Anime GT-R']]);
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   rows.push(['Disney', ['disney-elsa-bust','Elsa Bust'], ['disney-maleficent-bust','Maleficent Bust'], ['disney-evil-queen-bust','Evil Queen Bust'], ['disney-ursula-bust','Ursula Bust'], ['disney-jafar-bust','Jafar Bust'], ['disney-hans-bust','Hans Bust'], ['disney-gaston-bust','Gaston Bust'], ['disney-aladdin-bust','Aladdin Bust'], ['disney-beast-bust','Beast Bust'], ['disney-hercules-bust','Hercules Bust'], ['disney-kristoff-bust','Kristoff Bust']]);
   rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
   rows.push(['Superheroes', ['superhero-winter-soldier-bust','Winter Soldier Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
-  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
+  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
   const bounds = [
@@ -123,12 +123,31 @@
     [16,1025,181,211],[242,1033,147,203],[415,1032,226,206],[654,1028,176,205],[896,1041,115,194],[1075,1062,164,170]
   ];
   // Preserve saved shelves when a collectible is replaced.
-  const replacements = { medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', 'superhero-falcon-bust':'none', 'superhero-hawkeye-bust':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
+  const replacements = { 'charizard-flames':'pokemon-charizard-statue', 'bulbasaur-vines':'pokemon-bulbasaur-statue', 'gengar-flames':'pokemon-gengar-statue', 'dragonite-pillow':'pokemon-dragonite-statue', growlithe:'none', 'ash-pikachu':'none', 'mew-console':'pokemon-mew-statue', medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', 'superhero-falcon-bust':'none', 'superhero-hawkeye-bust':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id)) && (value.theme === undefined || themeIds.has(value.theme));
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'pokemon-mew-statue': {"source":"assets/shelf-pokemon-mew-statue.png","width":1392,"height":1424,"bounds":[202,8,992,1391],"displaySize":460,"displayWidth":340},
+    'pokemon-mimikyu-statue': {"source":"assets/shelf-pokemon-mimikyu-statue.png","width":1248,"height":1584,"bounds":[247,1,866,1559],"displaySize":460,"displayWidth":340},
+    'pokemon-umbreon-statue': {"source":"assets/shelf-pokemon-umbreon-statue.png","width":1280,"height":1536,"bounds":[101,18,1099,1468],"displaySize":460,"displayWidth":340},
+    'pokemon-snorlax-statue': {"source":"assets/shelf-pokemon-snorlax-statue.png","width":1408,"height":1408,"bounds":[207,52,1016,1305],"displaySize":460,"displayWidth":340},
+    'pokemon-lucario-statue': {"source":"assets/shelf-pokemon-lucario-statue.png","width":1136,"height":1744,"bounds":[93,24,963,1678],"displaySize":460,"displayWidth":340},
+    'pokemon-gardevoir-statue': {"source":"assets/shelf-pokemon-gardevoir-statue.png","width":1104,"height":1792,"bounds":[59,93,1020,1648],"displaySize":460,"displayWidth":340},
+    'pokemon-dragonite-statue': {"source":"assets/shelf-pokemon-dragonite-statue.png","width":1232,"height":1600,"bounds":[5,44,1227,1498],"displaySize":460,"displayWidth":340},
+    'pokemon-rayquaza-statue': {"source":"assets/shelf-pokemon-rayquaza-statue.png","width":1408,"height":1408,"bounds":[160,19,1090,1362],"displaySize":460,"displayWidth":340},
+    'pokemon-mewtwo-statue': {"source":"assets/shelf-pokemon-mewtwo-statue.png","width":1264,"height":1552,"bounds":[111,23,1084,1504],"displaySize":460,"displayWidth":340},
+    'pokemon-garchomp-statue': {"source":"assets/shelf-pokemon-garchomp-statue.png","width":1408,"height":1408,"bounds":[101,50,1244,1292],"displaySize":460,"displayWidth":340},
+    'pokemon-arcanine-statue': {"source":"assets/shelf-pokemon-arcanine-statue.png","width":1408,"height":1408,"bounds":[119,20,1204,1357],"displaySize":460,"displayWidth":340},
+    'pokemon-squirtle-statue': {"source":"assets/shelf-pokemon-squirtle-statue.png","width":1408,"height":1408,"bounds":[107,80,1227,1275],"displaySize":460,"displayWidth":340},
+    'pokemon-gengar-statue': {"source":"assets/shelf-pokemon-gengar-statue.png","width":1328,"height":1488,"bounds":[194,45,973,1392],"displaySize":460,"displayWidth":340},
+    'pokemon-bulbasaur-statue': {"source":"assets/shelf-pokemon-bulbasaur-statue.png","width":1456,"height":1360,"bounds":[181,53,1124,1265],"displaySize":460,"displayWidth":340},
+    'pokemon-charizard-statue': {"source":"assets/shelf-pokemon-charizard-statue.png","width":1552,"height":1264,"bounds":[49,17,1480,1232],"displaySize":460,"displayWidth":340},
+    'pokemon-charmander-statue': {"source":"assets/shelf-pokemon-charmander-statue.png","width":1328,"height":1504,"bounds":[77,41,1187,1414],"displaySize":460,"displayWidth":340},
+    'pokemon-gyarados-statue': {"source":"assets/shelf-pokemon-gyarados-statue.png","width":1408,"height":1408,"bounds":[268,7,923,1338],"displaySize":460,"displayWidth":340},
+    pikachu: {source:'assets/shelf-collectibles-expansion.png',width:1254,height:1254,bounds:[368,28,238,284],displaySize:460,displayWidth:340},
+    eevee: {source:'assets/shelf-collectibles-expansion.png',width:1254,height:1254,bounds:[667,13,229,303],displaySize:460,displayWidth:340},
     'superhero-winter-soldier-bust': {source:'assets/shelf-superhero-winter-soldier-bust.png',width:1152,height:1728,bounds:[34,50,1062,1604],displaySize:400,displayWidth:320},
     'superhero-hawkeye-bust': {source:'assets/shelf-superhero-hawkeye-bust.png',width:1264,height:1568,bounds:[184,8,946,1480],displaySize:400,displayWidth:320},
     'superhero-iron-man-bust': {source:'assets/shelf-superhero-iron-man-bust.png',width:1392,height:1424,bounds:[133,46,1046,1324],displaySize:400,displayWidth:320},
@@ -351,7 +370,7 @@
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);
-    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}${state.slots.some(id => id.startsWith('jdm-')) ? ' shelf-has-cars' : ''}${state.slots.some(id => id.startsWith('superhero-')) ? ' shelf-has-superheroes' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
+    return `<div class="collectible-shelf${interactive ? ' shelf-preview' : ''}${state.slots.some(id => id.startsWith('jdm-')) ? ' shelf-has-cars' : ''}${state.slots.some(id => id.startsWith('superhero-') || id.startsWith('pokemon-') || ['pikachu','eevee'].includes(id)) ? ' shelf-has-superheroes' : ''}" data-shelf-theme="${state.theme}"><div class="shelf-objects">${state.slots.map((id, index) => interactive
       ? `<button type="button" data-shelf-slot="${index}" aria-pressed="${index === active}" aria-label="${['Left','Middle','Right'][index]} spot: ${name(id)}">${sprite(id)}<span class="shelf-slot-label">${['Left','Middle','Right'][index]}</span></button>`
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
