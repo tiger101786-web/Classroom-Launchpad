@@ -1,9 +1,12 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');
 const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../collectible-shelf');
 (async()=>{
- const ids=["superhero-falcon-bust","superhero-hawkeye-bust","superhero-iron-man-bust","superhero-black-widow-bust","superhero-captain-america-bust","superhero-juggernaut-bust","superhero-sabretooth-bust","superhero-spider-man-bust","superhero-wolverine-bust","superhero-loki-bust","superhero-hulk-bust","superhero-thor-bust"];
- const assetPath=id=>'assets/shelf-'+id+'.png';
+ const ids=["superhero-winter-soldier-bust","superhero-hawkeye-bust","superhero-iron-man-bust","superhero-black-widow-bust","superhero-captain-america-bust","superhero-juggernaut-bust","superhero-sabretooth-bust","superhero-spider-man-bust","superhero-wolverine-bust","superhero-loki-bust","superhero-hulk-bust","superhero-thor-bust"];
+ const assetPath=id=>'assets/shelf-'+id+(id==='superhero-loki-bust'?'-v2':'')+'.png';
  const selections=Array.from({length:4},(_,n)=>({enabled:true,theme:'crimson',slots:ids.slice(n*3,n*3+3)}));
+ selections.push({enabled:true,theme:'crimson',slots:['superhero-iron-man-bust','superhero-sabretooth-bust','superhero-thor-bust']});
+ assert(!shelf.items.some(i=>i.id==='superhero-falcon-bust'));
+ assert.deepEqual(shelf.clean({enabled:true,theme:'crimson',slots:['superhero-falcon-bust','superhero-loki-bust','superhero-winter-soldier-bust']}).slots,['none','superhero-loki-bust','superhero-winter-soldier-bust']);
  for(const selection of selections){assert(shelf.valid(selection));assert.deepEqual(shelf.clean(selection),selection);}
  for(const id of ids){
   assert.equal(shelf.items.filter(i=>i.id===id).length,1);

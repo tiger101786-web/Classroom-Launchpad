@@ -17,6 +17,7 @@
 .shelf-object { display:block; width:100%; height:auto; aspect-ratio:220 / 350; overflow:visible; filter:drop-shadow(0 3px 2px #0005); }
 .shelf-display-slot { min-width:0; }
 .shelf-has-cars > .shelf-objects { left:4%; right:4%; }
+.shelf-has-superheroes > .shelf-objects { left:4%; right:4%; gap:12%; }
 .shelf-empty { display:block; width:100%; aspect-ratio:1; }
 /* Viewport (16,32,1640,692) trims transparent margins without stretching the artwork. */
 .shelf-board { position:absolute; inset:0; background:url('assets/collectible-shelf-crimson.png') 50% 12.8514% / 101.9512% 135.9827% no-repeat; pointer-events:none; }
