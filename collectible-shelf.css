@@ -44,6 +44,10 @@
 [data-shelf-theme="music-hall"] > .shelf-board { background-image:url('assets/collectible-shelf-music-hall.png'); }
 [data-shelf-theme="comic-hero"] > .shelf-board { background-image:url('assets/collectible-shelf-comic-hero.png'); }
 [data-shelf-theme="strawberry-garden"] > .shelf-board { background-image:url('assets/collectible-shelf-strawberry-garden.png'); }
+/* Full castle supports retained; tabletop spans roughly y=540–594 in the original PNG. */
+.collectible-shelf[data-shelf-theme][data-shelf-theme="disney-castle"] { aspect-ratio:1445 / 1020; --shelf-surface-top:.5294; --shelf-surface-bottom:.5824; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="disney-castle"] > .shelf-board { background-image:url('assets/collectible-shelf-disney-castle.png'); background-size:100% 106.6667%; background-position:50% 0%; }
+.collectible-shelf[data-shelf-theme="disney-castle"] > .shelf-objects { bottom:44.3137%; }
 .shelf-theme-picker { min-width:0; margin:12px 0; padding:12px; border:1px solid var(--border); border-radius:12px; }
 [data-shelf-theme="amethyst"] > .shelf-board { background-image:url('assets/collectible-shelf-amethyst.png'); }
 [data-shelf-theme="temple"] > .shelf-board { background-image:url('assets/collectible-shelf-temple.png'); }
