@@ -35,9 +35,10 @@ function homeSceneForSession(session, db) {
   return cleanHomeScene(session.role === "teacher" ? db.teacherHomeScene
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeScene);
 }
-function homeShelfForSession(session, db) {
-  return collectibleShelf.clean(session.role === "teacher" ? db.teacherHomeShelf
-    : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.homeShelf);
+function homeShelfForSession(session, db, side = 'left') {
+  const key = side === 'right' ? 'homeShelfRight' : 'homeShelf';
+  return collectibleShelf.clean(session.role === "teacher" ? db[side === 'right' ? 'teacherHomeShelfRight' : 'teacherHomeShelf']
+    : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.[key]);
 }
 const profileFrameIds = new Set(["none", "colt", "neon", "stars", "flame", "pixel", "pumpkin", "ocean", "laurel", "sakura", "grove", "storm", "clockwork", "moon-garden"]);
 const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "ocean", "laurel", "sakura", "grove", "autumn", "storm", "clockwork", "moon-garden"]);
@@ -879,6 +880,7 @@ function normalizeApprovedStudents(entries) {
       profileBanner: cleanProfileBanner(source.profileBanner),
       homeScene: cleanHomeScene(source.homeScene),
       homeShelf: collectibleShelf.clean(source.homeShelf),
+      homeShelfRight: collectibleShelf.clean(source.homeShelfRight),
       createdAt: Number.isFinite(Date.parse(source.createdAt)) ? new Date(source.createdAt).toISOString() : new Date().toISOString()
     }];
   }).sort((a, b) => a.email.localeCompare(b.email));
@@ -1272,6 +1274,7 @@ function writeDb(db) {
     teacherProfileFrame: cleanProfileFrame(db.teacherProfileFrame),
     teacherHomeScene: cleanHomeScene(db.teacherHomeScene),
     teacherHomeShelf: collectibleShelf.clean(db.teacherHomeShelf),
+    teacherHomeShelfRight: collectibleShelf.clean(db.teacherHomeShelfRight),
     teacherAvatarUpdatedAt: Number.isFinite(Date.parse(db.teacherAvatarUpdatedAt))
       ? new Date(db.teacherAvatarUpdatedAt).toISOString()
       : "",
@@ -1399,7 +1402,8 @@ function publicSession(session, db = null) {
     profileFrame: profileFrameForSession(session, sourceDb),
     profileBanner: profileBannerForSession(session, sourceDb),
     homeScene: homeSceneForSession(session, sourceDb),
-    homeShelf: homeShelfForSession(session, sourceDb)
+    homeShelf: homeShelfForSession(session, sourceDb),
+    homeShelfRight: homeShelfForSession(session, sourceDb, 'right')
   };
 }
 function requireRole(req, res, roles) {
@@ -3473,14 +3477,16 @@ async function handleApi(req, res, pathname) {
     try {
       const body = await readBody(req);
       if (!collectibleShelf.valid(body)) throw new Error("Choose an available shelf theme, three shelf items and a visibility setting.");
+      if (body.side !== undefined && !['left','right'].includes(body.side)) throw new Error("Choose the left or right shelf.");
+      const rightShelf = body.side === 'right';
       const db = readDb();
       const shelf = collectibleShelf.clean(body);
-      if (allowed.role === "teacher") db.teacherHomeShelf = shelf;
+      if (allowed.role === "teacher") db[rightShelf ? 'teacherHomeShelfRight' : 'teacherHomeShelf'] = shelf;
       else {
         const students = normalizeApprovedStudents(db.approvedStudents);
         const student = students.find(item => item.email === normalizeEmail(allowed.email));
         if (!student) throw new Error("Your approved student account could not be found.");
-        student.homeShelf = shelf;
+        student[rightShelf ? 'homeShelfRight' : 'homeShelf'] = shelf;
         db.approvedStudents = students;
       }
       writeDb(db);

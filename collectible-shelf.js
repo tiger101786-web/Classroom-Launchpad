@@ -354,14 +354,18 @@
       ? `<button type="button" data-shelf-slot="${index}" aria-pressed="${index === active}" aria-label="${['Left','Middle','Right'][index]} spot: ${name(id)}">${sprite(id)}<span class="shelf-slot-label">${['Left','Middle','Right'][index]}</span></button>`
       : `<div class="shelf-display-slot">${sprite(id)}</div>`).join('')}</div><div class="shelf-board" aria-hidden="true"></div></div>`;
   }
-  function render(session) {
+  function render(session, side = 'left') {
     if (!session?.authenticated) return '';
-    if (!clean(session.homeShelf).enabled) return '<div class="shelf-restore"><button type="button" class="outline-btn" data-action="showCollectibleShelf">Show shelf</button><span id="shelfShowStatus" role="status"></span></div>';
-    return `<section class="home-collectible-shelf" aria-label="Your collectible shelf">${art(session.homeShelf)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu" aria-label="Shelf settings" title="Shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu" class="shelf-settings-menu" popover="auto" aria-label="Shelf settings"><button type="button" data-action="collectibleShelf">Customize shelf</button><button type="button" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus" role="status"></span></div></section>`;
+    side = side === 'right' ? 'right' : 'left';
+    const value = side === 'right' ? session.homeShelfRight : session.homeShelf;
+    const suffix = side === 'right' ? 'Right' : '';
+    const label = side === 'right' ? 'Right' : 'Left';
+    if (!clean(value).enabled) return `<div class="shelf-restore"><button type="button" class="outline-btn" data-shelf-side="${side}" data-action="showCollectibleShelf">Show ${side} shelf</button><span id="shelfShowStatus${suffix}" role="status"></span></div>`;
+    return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button><button type="button" data-shelf-side="${side}" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus${suffix}" role="status"></span></div></section>`;
   }
   let hideTimer;
-  function restoreGear(keyboard) {
-    const gear = document.querySelector('.shelf-customize');
+  function restoreGear(keyboard, side = 'left') {
+    const gear = document.querySelector('.home-collectible-shelf[data-shelf-side="'+side+'"] .shelf-customize');
     if (!gear) { document.querySelector('.header-account-summary')?.focus(); return; }
     gear.focus({ preventScroll:true });
     clearTimeout(hideTimer);
@@ -373,9 +377,9 @@
       if (document.activeElement === gear) gear.blur();
     },900);
   }
-  function open({ selected, save, onSave }) {
+  function open({ selected, save, onSave, side = 'left' }) {
     if (document.querySelector('.shelf-dialog')) return;
-    document.querySelector('#shelfSettingsMenu:popover-open')?.hidePopover();
+    document.querySelectorAll('.shelf-settings-menu:popover-open').forEach(menu => menu.hidePopover());
     let draft=clean(selected), active=0, saving=false, tab='objects';
     const pages={objects:0,styles:0}, searches={objects:'',styles:''};
     const opener=document.activeElement, keyboard=!!opener?.matches(':focus-visible');
@@ -383,6 +387,7 @@
     dialog.className='launch-scene-dialog shelf-dialog';
     dialog.setAttribute('aria-labelledby','shelfTitle');
     dialog.innerHTML='<div class="launch-scene-dialog-heading"><h2 id="shelfTitle">Your collectible shelf</h2><button type="button" class="outline-btn" data-shelf-close aria-label="Close shelf chooser">✕</button></div><div class="shelf-preview-area"><div id="shelfPreview"></div><div class="shelf-preview-controls"><p>Choose a spot, then pick an object.</p><button type="button" class="outline-btn" id="shelfClearSlot">Clear selected spot</button><label class="shelf-show"><input id="shelfEnabled" type="checkbox"> Show shelf</label></div></div><div class="shelf-tabs" role="tablist" aria-label="Customize shelf"><button type="button" id="shelfObjectsTab" role="tab" data-shelf-tab="objects" aria-controls="shelfObjectsPanel">Objects</button><button type="button" id="shelfStylesTab" role="tab" data-shelf-tab="styles" aria-controls="shelfStylesPanel">Shelf Styles</button></div><div class="shelf-filters"><label><span id="shelfSearchLabel">Search objects</span><input id="shelfSearch" type="search" autocomplete="off"></label><label id="shelfCategoryLabel">Category<select id="shelfCategory"><option value="">All categories</option>'+[...new Set(rows.map(([category])=>category))].sort().map(category=>'<option>'+category+'</option>').join('')+'</select></label></div><p id="shelfResults" role="status"></p><div class="shelf-browse-area"><section id="shelfObjectsPanel" role="tabpanel" aria-labelledby="shelfObjectsTab"><div id="shelfChoices" class="shelf-choice-grid"></div></section><section id="shelfStylesPanel" role="tabpanel" aria-labelledby="shelfStylesTab" hidden><div class="shelf-theme-grid"></div></section></div><nav class="shelf-pagination" aria-label="Choice pages"><button type="button" class="outline-btn" id="shelfPrevious">Previous</button><span id="shelfPageStatus" role="status"></span><button type="button" class="outline-btn" id="shelfNext">Next</button></nav><div class="shelf-dialog-actions"><span id="shelfSaveStatus" role="status"></span><button type="button" class="outline-btn" data-shelf-close>Cancel</button><button type="button" class="primary-btn" id="saveShelf">Save shelf</button></div>';
+    dialog.querySelector('#shelfTitle').textContent = side === 'right' ? 'Your right collectible shelf' : 'Your left collectible shelf';
     document.body.append(dialog);
     const preview=dialog.querySelector('#shelfPreview'), choices=dialog.querySelector('#shelfChoices'), themeChoices=dialog.querySelector('.shelf-theme-grid'), search=dialog.querySelector('#shelfSearch'), category=dialog.querySelector('#shelfCategory');
     dialog.querySelector('#shelfEnabled').checked=draft.enabled;
@@ -458,7 +463,7 @@
     const close=()=>{
       if(saving)return;
       window.removeEventListener('resize',resize);observer.disconnect();cancelAnimationFrame(resizeFrame);dialog.close();dialog.remove();
-      if(opener?.closest('#shelfSettingsMenu'))restoreGear(keyboard);
+      if(opener?.closest('.shelf-settings-menu'))restoreGear(keyboard, side);
       else if(opener?.isConnected)opener.focus();
       else document.querySelector('.header-account-summary')?.focus();
     };
@@ -467,7 +472,7 @@
     dialog.querySelector('#saveShelf').addEventListener('click',async()=>{
       saving=true;dialog.querySelectorAll('button,input,select').forEach(control=>{control.disabled=true;});
       dialog.querySelector('#shelfSaveStatus').textContent='Saving your shelf…';
-      try{const result=await save(clean(draft));saving=false;close();onSave(result);restoreGear(keyboard);}
+      try{const result=await save(clean(draft));saving=false;close();onSave(result);restoreGear(keyboard, side);}
       catch(error){saving=false;dialog.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false;});update();dialog.querySelector('#shelfSaveStatus').textContent=error.message||'Could not save. Please try again.';}
     });
     dialog.showModal();update();observer.observe(browse);
@@ -477,12 +482,12 @@
   else {
     root.CollectibleShelf = api;
     document.addEventListener('toggle', event => {
-      if (event.target.id !== 'shelfSettingsMenu') return;
-      const gear = document.querySelector('.shelf-customize');
+      if (!event.target.classList?.contains('shelf-settings-menu')) return;
+      const gear = event.target.closest('.home-collectible-shelf')?.querySelector('.shelf-customize');
       if (!gear) return;
       gear.setAttribute('aria-expanded', String(event.newState === 'open'));
       if (event.newState !== 'open') {
-        if (!document.querySelector('.shelf-dialog')) restoreGear(gear.matches(':focus-visible'));
+        if (!document.querySelector('.shelf-dialog')) restoreGear(gear.matches(':focus-visible'), event.target.closest('.home-collectible-shelf').dataset.shelfSide);
         return;
       }
       clearTimeout(hideTimer);

@@ -1,5 +1,25 @@
 .home-collectible-shelf { position:relative; width:min(100%,350px); margin-top:66px; padding-bottom:22px; }
 .home-collectible-shelf:has(.shelf-tall-object) { margin-top:100px; }
+/* Two equal shelf positions flank the scene; a hidden shelf keeps its position. */
+.home-display-row { display:grid; grid-template-columns:minmax(0,350px) minmax(0,310px) minmax(0,350px); justify-content:space-between; align-items:center; gap:28px; margin-top:88px; padding-bottom:12px; }
+.home-display-row > .home-shelf-position { min-width:0; width:100%; }
+.home-display-row .home-collectible-shelf { width:100%; margin:0; padding:0; aspect-ratio:1445 / 1020; }
+/* Anchor both tabletops to one baseline, independent of artwork/support height. */
+.home-display-row .home-collectible-shelf > .collectible-shelf { position:absolute; top:55.6863%; transform:translateY(calc(var(--shelf-object-bottom,39%) - 100%)); }
+.home-display-row > .home-scene-feature { position:relative; inset:auto; margin:0; min-width:0; }
+.home-display-row .launch-scene-stage { width:100%; }
+.home-display-row .school-photo { box-sizing:border-box; width:100%; height:auto; aspect-ratio:1; }
+.home-display-row .shelf-restore { justify-items:center; margin:0; }
+.home-display-row:not(:has(.home-collectible-shelf,.shelf-restore)) { grid-template-columns:1fr; margin-top:22px; }
+.home-display-row:not(:has(.home-collectible-shelf,.shelf-restore)) > .home-shelf-position { display:none; }
+.home-display-row:not(:has(.home-collectible-shelf,.shelf-restore)) > .home-scene-feature { width:min(100%,310px); justify-self:center; }
+@media(max-width:800px) {
+  .home-display-row { grid-template-columns:repeat(2,minmax(0,350px)); gap:100px 28px; margin-top:24px; }
+  .home-display-row > .home-scene-feature { grid-column:1 / -1; grid-row:1; width:min(100%,310px); justify-self:center; }
+}
+@media(max-width:480px) {
+  .home-display-row { grid-template-columns:minmax(0,350px); justify-content:center; }
+}
 .shelf-restore { margin-top:20px; display:grid; justify-items:start; gap:6px; }
 .shelf-restore button { font-size:12px; padding:7px 12px; }
 .shelf-restore button:hover,
@@ -13,7 +33,7 @@
 #shelfShowStatus { font-size:12px; }
 .collectible-shelf { position:relative; width:100%; aspect-ratio:1640 / 692; padding:0; isolation:isolate; }
 /* Bases land at 60% of the artwork height, inside the 53–64% tabletop. */
-.shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:39%; z-index:1; }
+.shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:var(--shelf-object-bottom,39%); z-index:1; }
 .shelf-object { display:block; width:100%; height:auto; aspect-ratio:220 / 350; overflow:visible; filter:drop-shadow(0 3px 2px #0005); }
 .shelf-display-slot { min-width:0; }
 .shelf-has-cars > .shelf-objects { left:4%; right:4%; }
@@ -34,7 +54,7 @@
    The top surface is around y=454–510; object bases sit at y=486. */
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="stars-stripes"],[data-shelf-theme="angel-wings"],[data-shelf-theme="wild-west"],[data-shelf-theme="egyptian-gold"],[data-shelf-theme="jungle-ruins"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="ice-cream-parlor"],[data-shelf-theme="music-hall"],[data-shelf-theme="comic-hero"],[data-shelf-theme="strawberry-garden"]) { aspect-ratio:1445 / 1000; --shelf-surface-top:.454; --shelf-surface-bottom:.510; }
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="stars-stripes"],[data-shelf-theme="angel-wings"],[data-shelf-theme="wild-west"],[data-shelf-theme="egyptian-gold"],[data-shelf-theme="jungle-ruins"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="ice-cream-parlor"],[data-shelf-theme="music-hall"],[data-shelf-theme="comic-hero"],[data-shelf-theme="strawberry-garden"]) > .shelf-board { background-size:100% 108.8%; background-position:50% 0%; }
-.collectible-shelf:is([data-shelf-theme="stars-stripes"],[data-shelf-theme="angel-wings"],[data-shelf-theme="wild-west"],[data-shelf-theme="egyptian-gold"],[data-shelf-theme="jungle-ruins"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="ice-cream-parlor"],[data-shelf-theme="music-hall"],[data-shelf-theme="comic-hero"],[data-shelf-theme="strawberry-garden"]) > .shelf-objects { bottom:51.4%; }
+.collectible-shelf:is([data-shelf-theme="stars-stripes"],[data-shelf-theme="angel-wings"],[data-shelf-theme="wild-west"],[data-shelf-theme="egyptian-gold"],[data-shelf-theme="jungle-ruins"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="ice-cream-parlor"],[data-shelf-theme="music-hall"],[data-shelf-theme="comic-hero"],[data-shelf-theme="strawberry-garden"]) { --shelf-object-bottom:51.4%; }
 [data-shelf-theme="stars-stripes"] > .shelf-board { background-image:url('assets/collectible-shelf-stars-stripes.png'); }
 [data-shelf-theme="angel-wings"] > .shelf-board { background-image:url('assets/collectible-shelf-angel-wings.png'); }
 [data-shelf-theme="wild-west"] > .shelf-board { background-image:url('assets/collectible-shelf-wild-west.png'); }
@@ -48,7 +68,7 @@
 /* Full castle supports retained; tabletop spans roughly y=540–594 in the original PNG. */
 .collectible-shelf[data-shelf-theme][data-shelf-theme="disney-castle"] { aspect-ratio:1445 / 1020; --shelf-surface-top:.5294; --shelf-surface-bottom:.5824; }
 .collectible-shelf[data-shelf-theme][data-shelf-theme="disney-castle"] > .shelf-board { background-image:url('assets/collectible-shelf-disney-castle.png'); background-size:100% 106.6667%; background-position:50% 0%; }
-.collectible-shelf[data-shelf-theme="disney-castle"] > .shelf-objects { bottom:44.3137%; }
+.collectible-shelf[data-shelf-theme="disney-castle"] { --shelf-object-bottom:44.3137%; }
 .shelf-theme-picker { min-width:0; margin:12px 0; padding:12px; border:1px solid var(--border); border-radius:12px; }
 [data-shelf-theme="amethyst"] > .shelf-board { background-image:url('assets/collectible-shelf-amethyst.png'); }
 [data-shelf-theme="temple"] > .shelf-board { background-image:url('assets/collectible-shelf-temple.png'); }
@@ -66,14 +86,14 @@
 /* Extra room for longer supports; preserve the same image scale and tabletop height. */
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="cathedral"],[data-shelf-theme="pirate"]) { aspect-ratio:1672 / 800; }
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="cathedral"],[data-shelf-theme="pirate"]) > .shelf-board { background-size:100% 117.625%; background-position:50% 8.5106%; }
-.collectible-shelf:is([data-shelf-theme="cathedral"],[data-shelf-theme="pirate"]) > .shelf-objects { bottom:43.27%; }
+.collectible-shelf:is([data-shelf-theme="cathedral"],[data-shelf-theme="pirate"]) { --shelf-object-bottom:43.27%; }
 /* New chunky shelf silhouettes use their own 1448 x 888 viewport and surface height.
    The PNG remains unmodified; keep every lower support and the full crest visible. */
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="crimson-spire"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"],[data-shelf-theme="autumn"],[data-shelf-theme="porcelain"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="crimson-spire"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"],[data-shelf-theme="autumn"],[data-shelf-theme="porcelain"]) > .shelf-board { background-size:100% 122.2973%; background-position:50% 0%; }
-.collectible-shelf:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="crimson-spire"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"],[data-shelf-theme="autumn"],[data-shelf-theme="porcelain"]) > .shelf-objects { bottom:45.946%; }
+.collectible-shelf:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="crimson-spire"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"],[data-shelf-theme="autumn"],[data-shelf-theme="porcelain"]) { --shelf-object-bottom:45.946%; }
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"]) { --shelf-surface-top:.423; --shelf-surface-bottom:.514; }
-.collectible-shelf:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"]) > .shelf-objects { bottom:51.0135%; }
+.collectible-shelf:is([data-shelf-theme="crimson-bastion"],[data-shelf-theme="peacock"],[data-shelf-theme="art-deco"]) { --shelf-object-bottom:51.0135%; }
 [data-shelf-theme="crimson-bastion"] > .shelf-board { background-image:url('assets/collectible-shelf-crimson-bastion.png'); }
 [data-shelf-theme="crimson-spire"] > .shelf-board { background-image:url('assets/collectible-shelf-crimson-spire.png'); }
 [data-shelf-theme="peacock"] > .shelf-board { background-image:url('assets/collectible-shelf-peacock.png'); }
@@ -84,10 +104,10 @@
 /* Additional themed shelves share the reference artwork's level tabletop geometry. */
 .collectible-shelf[data-shelf-theme="christian"] { aspect-ratio:1448 / 888; --shelf-surface-top:.50; --shelf-surface-bottom:.57; }
 .collectible-shelf[data-shelf-theme="christian"] > .shelf-board { background-image:url('assets/collectible-shelf-christian.png'); background-size:100% 122.2973%; background-position:50% 0%; }
-.collectible-shelf[data-shelf-theme="christian"] > .shelf-objects { bottom:45.946%; }
+.collectible-shelf[data-shelf-theme="christian"] { --shelf-object-bottom:45.946%; }
 .collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
 .collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) > .shelf-board { background-size:100% 122.2973%; background-position:50% 0%; }
-.collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) > .shelf-objects { bottom:45.946%; }
+.collectible-shelf:is([data-shelf-theme="dinosaur-dig"],[data-shelf-theme="wizard-library"],[data-shelf-theme="candy-kingdom"],[data-shelf-theme="storm-fortress"],[data-shelf-theme="stained-glass"],[data-shelf-theme="clockwork-observatory"],[data-shelf-theme="bamboo-panda"],[data-shelf-theme="racing-garage"],[data-shelf-theme="firefly-bayou"],[data-shelf-theme="origami-garden"]) { --shelf-object-bottom:45.946%; }
 [data-shelf-theme="dinosaur-dig"] > .shelf-board { background-image:url('assets/collectible-shelf-dinosaur-dig.png'); }
 [data-shelf-theme="wizard-library"] > .shelf-board { background-image:url('assets/collectible-shelf-wizard-library.png'); }
 [data-shelf-theme="candy-kingdom"] > .shelf-board { background-image:url('assets/collectible-shelf-candy-kingdom.png'); }
@@ -100,11 +120,11 @@
 [data-shelf-theme="origami-garden"] > .shelf-board { background-image:url('assets/collectible-shelf-origami-garden.png'); }
 .collectible-shelf[data-shelf-theme="anime-spirit"] { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
 .collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-board { background-image:url('assets/collectible-shelf-hokage.png'); background-size:100% 122.2973%; background-position:50% 0%; }
-.collectible-shelf[data-shelf-theme="anime-spirit"] > .shelf-objects { bottom:45.946%; }
+.collectible-shelf[data-shelf-theme="anime-spirit"] { --shelf-object-bottom:45.946%; }
 /* These variants retain the porcelain shelf's tabletop and silhouette. */
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) { aspect-ratio:1448 / 888; --shelf-surface-top:.48; --shelf-surface-bottom:.564; }
 .collectible-shelf[data-shelf-theme]:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) > .shelf-board { background-size:100% 122.2973%; background-position:50% 0%; }
-.collectible-shelf:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) > .shelf-objects { bottom:45.946%; }
+.collectible-shelf:is([data-shelf-theme="honeybee"],[data-shelf-theme="volcanic"],[data-shelf-theme="aurora"]) { --shelf-object-bottom:45.946%; }
 [data-shelf-theme="honeybee"] > .shelf-board { background-image:url('assets/collectible-shelf-honeybee.png'); }
 [data-shelf-theme="volcanic"] > .shelf-board { background-image:url('assets/collectible-shelf-volcanic.png'); }
 [data-shelf-theme="aurora"] > .shelf-board { background-image:url('assets/collectible-shelf-aurora.png'); }

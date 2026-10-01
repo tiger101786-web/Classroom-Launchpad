@@ -2322,7 +2322,6 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
         ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<h1 class="home-title-art" aria-label="Classroom Launchpad"><img src="assets/classroom-launchpad-title.png" width="2172" height="724" alt="" fetchpriority="high"></h1>` : `<h1>${escapeHtml(title)}</h1>`}
-        ${!back && title === "Classroom Launchpad" && homeSceneSessionReady ? window.CollectibleShelf.render(authSession) : ""}
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
       </div>
       ${trailing || fallbackTrailing}
@@ -2394,7 +2393,8 @@ function renderAuthButton() {
           </div>
           <div class="header-account-links">
             <button type="button" data-action="${isTeacher() ? "openColtCorner" : "account"}"><span aria-hidden="true">&#9673;</span>My Profile</button>
-            <button type="button" data-action="collectibleShelf"><span aria-hidden="true">&#9881;</span>Customize shelf</button>
+            <button type="button" data-action="collectibleShelf" data-shelf-side="left"><span aria-hidden="true">&#9881;</span>Customize left shelf</button>
+            <button type="button" data-action="collectibleShelf" data-shelf-side="right"><span aria-hidden="true">&#9881;</span>Customize right shelf</button>
             ${isTeacher()
               ? `<button type="button" data-action="teacherDashboard"><span aria-hidden="true">&#9638;</span>Teacher Dashboard</button>
                  <button type="button" data-action="teacherSettings"><span aria-hidden="true">&#9881;</span>Settings</button>`
@@ -2554,7 +2554,11 @@ function renderHome() {
         false,
         renderHomeHeaderControls()
       )}
-      ${window.LaunchpadScenes.render(authSession, homeProfileVideo, homeSceneSessionReady)}
+      <div class="home-display-row">
+        <div class="home-shelf-position" data-shelf-position="left">${homeSceneSessionReady ? window.CollectibleShelf.render(authSession, 'left') : ""}</div>
+        ${window.LaunchpadScenes.render(authSession, homeProfileVideo, homeSceneSessionReady)}
+        <div class="home-shelf-position" data-shelf-position="right">${homeSceneSessionReady ? window.CollectibleShelf.render(authSession, 'right') : ""}</div>
+      </div>
     </section>
     <section id="homeBody">
       ${renderHomeDefault()}
@@ -13277,10 +13281,12 @@ app.addEventListener("click", async event => {
     if (!isSignedIn()) return;
     const owner = { role: authSession.role, email: authSession.email };
     const showing = action === 'showCollectibleShelf';
-    const menu = showing ? document.querySelector('.shelf-restore') : document.getElementById('shelfSettingsMenu');
+    const side = target.dataset.shelfSide === 'right' ? 'right' : 'left';
+    const selectedShelf = side === 'right' ? authSession.homeShelfRight : authSession.homeShelf;
+    const menu = showing ? target.closest('.shelf-restore') : document.getElementById(side === 'right' ? 'shelfSettingsMenuRight' : 'shelfSettingsMenu');
     menu?.querySelectorAll('button').forEach(button => { button.disabled = true; });
     try {
-      const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(authSession.homeShelf), enabled:showing }) });
+      const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(selectedShelf), enabled:showing, side }) });
       if (!isSignedIn() || authSession.role !== owner.role || authSession.email !== owner.email) return;
       authSession = result.session; render();
       document.querySelector('.header-account-summary')?.focus();
@@ -13292,9 +13298,11 @@ app.addEventListener("click", async event => {
   if (action === "collectibleShelf") {
     if (!isSignedIn()) return;
     const owner = { role: authSession.role, email: authSession.email };
+    const side = target.dataset.shelfSide === 'right' ? 'right' : 'left';
     window.CollectibleShelf.open({
-      selected: authSession.homeShelf,
-      save: value => sharedBackend.request("/api/home-shelf", { method: "POST", body: JSON.stringify(value) }),
+      side,
+      selected: side === 'right' ? authSession.homeShelfRight : authSession.homeShelf,
+      save: value => sharedBackend.request("/api/home-shelf", { method: "POST", body: JSON.stringify({...value, side}) }),
       onSave: result => {
         if (!isSignedIn() || authSession.role !== owner.role || authSession.email !== owner.email) return;
         authSession = result.session;
