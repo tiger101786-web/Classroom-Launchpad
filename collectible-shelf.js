@@ -110,6 +110,7 @@
   rows.push(['Animal Friends', ['highland-pumpkin','Highland Cow Pumpkin Glow'], ['highland-sunflower-bow','Highland Cow Sunflower Bow'], ['highland-sunflower-bouquet','Highland Cow Sunflower Bouquet'], ['highland-lavender-basket','Highland Cow Lavender Basket'], ['highland-lavender-bow','Highland Cow Lavender Bow']]);
   rows.push(['Disney', ['disney-elsa-bust','Elsa Bust'], ['disney-maleficent-bust','Maleficent Bust'], ['disney-evil-queen-bust','Evil Queen Bust'], ['disney-ursula-bust','Ursula Bust'], ['disney-jafar-bust','Jafar Bust'], ['disney-hans-bust','Hans Bust'], ['disney-gaston-bust','Gaston Bust'], ['disney-aladdin-bust','Aladdin Bust'], ['disney-beast-bust','Beast Bust'], ['disney-hercules-bust','Hercules Bust'], ['disney-kristoff-bust','Kristoff Bust']]);
   rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
+  rows.push(['Superheroes', ['superhero-falcon-bust','Falcon Bust'], ['superhero-hawkeye-bust','Hawkeye Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -128,6 +129,18 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'superhero-falcon-bust': {source:'assets/shelf-superhero-falcon-bust.png',width:1728,height:1152,bounds:[28,24,1678,1088],displayWidth:280},
+    'superhero-hawkeye-bust': {source:'assets/shelf-superhero-hawkeye-bust.png',width:1264,height:1568,bounds:[184,8,946,1480],displaySize:370},
+    'superhero-iron-man-bust': {source:'assets/shelf-superhero-iron-man-bust.png',width:1392,height:1424,bounds:[133,46,1046,1324]},
+    'superhero-black-widow-bust': {source:'assets/shelf-superhero-black-widow-bust.png',width:1504,height:1312,bounds:[438,24,721,1248]},
+    'superhero-captain-america-bust': {source:'assets/shelf-superhero-captain-america-bust.png',width:1264,height:1568,bounds:[128,13,998,1520]},
+    'superhero-juggernaut-bust': {source:'assets/shelf-superhero-juggernaut-bust.png',width:1408,height:1408,bounds:[76,100,1244,1227],displayWidth:280},
+    'superhero-sabretooth-bust': {source:'assets/shelf-superhero-sabretooth-bust.png',width:1408,height:1408,bounds:[130,12,1117,1358]},
+    'superhero-spider-man-bust': {source:'assets/shelf-superhero-spider-man-bust.png',width:1408,height:1408,bounds:[339,49,827,1267]},
+    'superhero-wolverine-bust': {source:'assets/shelf-superhero-wolverine-bust.png',width:1408,height:1408,bounds:[64,44,1022,1291]},
+    'superhero-loki-bust': {source:'assets/shelf-superhero-loki-bust.png',width:1152,height:1728,bounds:[134,20,832,1686],displaySize:410},
+    'superhero-hulk-bust': {source:'assets/shelf-superhero-hulk-bust.png',width:1408,height:1408,bounds:[156,17,1107,1329],displayWidth:280},
+    'superhero-thor-bust': {source:'assets/shelf-superhero-thor-bust.png',width:1408,height:1408,bounds:[73,8,1276,1338],displayWidth:280},
     'disney-genie-bust': {source:'assets/shelf-disney-genie-bust.png',width:1312,height:1504,bounds:[228,41,858,1405]},
     'disney-prince-eric-bust': {source:'assets/shelf-disney-prince-eric-bust.png',width:1408,height:1408,bounds:[253,44,889,1290]},
     'disney-pocahontas-bust': {source:'assets/shelf-disney-pocahontas-bust.png',width:1600,height:1200,bounds:[414,26,730,1124]},
