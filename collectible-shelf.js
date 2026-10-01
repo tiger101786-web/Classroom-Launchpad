@@ -101,7 +101,7 @@
   rows.push(['Christian Faith', ['archangel-michael','Archangel Michael Statue'], ['archangel-gabriel','Archangel Gabriel Statue']]);
   rows.push(['USA Patriotic', ['uncle-sam','Uncle Sam Statue']]);
   rows.push(['Anime', ['sukuna','Ryomen Sukuna Bust'], ['midoriya','Izuku Midoriya (Deku) Bust']]);
-  rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust']]);
+  rows.push(['Anime', ['asta','Asta Bust'], ['zoro','Roronoa Zoro Bust'], ['sung-jin-woo','Sung Jin-woo Bust']]);
   rows.push(['Display Pieces', ['six-seven','67 Hands Statue']]);
   rows.push(['Disney', ['disney-snow-white-bust','Snow White Bust'], ['disney-ariel-bust','Ariel Bust'], ['disney-tiana-bust','Tiana Bust'], ['disney-cinderella-bust','Cinderella Bust'], ['disney-rapunzel-bust','Rapunzel Bust'], ['disney-belle-bust','Belle Bust'], ['disney-anna-bust','Anna Bust'], ['disney-jasmine-bust','Jasmine Bust'], ['disney-mulan-bust','Mulan Bust'], ['disney-aurora-bust','Aurora Bust']]);
   rows.push(['Pokémon', ['charizard-flames','Charizard Flame Statue'], ['bulbasaur-vines','Bulbasaur Vine Statue'], ['gengar-flames','Gengar Ghost Flame Statue'], ['dragonite-pillow','Dragonite Pillow Statue']]);
@@ -134,13 +134,14 @@
     'superhero-iron-man-bust': {source:'assets/shelf-superhero-iron-man-bust.png',width:1392,height:1424,bounds:[133,46,1046,1324],displaySize:400,displayWidth:320},
     'superhero-black-widow-bust': {source:'assets/shelf-superhero-black-widow-bust.png',width:1504,height:1312,bounds:[438,24,721,1248],displaySize:400,displayWidth:320},
     'superhero-captain-america-bust': {source:'assets/shelf-superhero-captain-america-bust.png',width:1264,height:1568,bounds:[128,13,998,1520],displaySize:400,displayWidth:320},
-    'superhero-juggernaut-bust': {source:'assets/shelf-superhero-juggernaut-bust.png',width:1408,height:1408,bounds:[76,100,1244,1227],displaySize:400,displayWidth:320},
+    'superhero-juggernaut-bust': {source:'assets/shelf-superhero-juggernaut-bust-v2.png',width:1248,height:1584,bounds:[31,15,1207,1534],displaySize:400,displayWidth:320},
+    'sung-jin-woo': {source:'assets/shelf-sung-jin-woo-bust.png',width:1040,height:1888,bounds:[87,28,946,1800]},
     'superhero-sabretooth-bust': {source:'assets/shelf-superhero-sabretooth-bust.png',width:1408,height:1408,bounds:[130,12,1117,1358],displaySize:420,displayWidth:340},
     'superhero-spider-man-bust': {source:'assets/shelf-superhero-spider-man-bust.png',width:1408,height:1408,bounds:[339,49,827,1267],displaySize:400,displayWidth:320},
     'superhero-wolverine-bust': {source:'assets/shelf-superhero-wolverine-bust.png',width:1408,height:1408,bounds:[64,44,1022,1291],displaySize:400,displayWidth:320},
     'superhero-loki-bust': {source:'assets/shelf-superhero-loki-bust-v2.png',width:1152,height:1728,bounds:[59,20,1063,1660],displaySize:440,displayWidth:300},
-    'superhero-hulk-bust': {source:'assets/shelf-superhero-hulk-bust-v2.png',width:1136,height:1728,bounds:[109,43,940,1619],displaySize:400,displayWidth:320},
-    'superhero-thor-bust': {source:'assets/shelf-superhero-thor-bust-v2.png',width:1136,height:1728,bounds:[94,39,940,1630],displaySize:400,displayWidth:320},
+    'superhero-hulk-bust': {source:'assets/shelf-superhero-hulk-bust-v2.png',width:1136,height:1728,bounds:[109,43,940,1619],displaySize:460,displayWidth:340},
+    'superhero-thor-bust': {source:'assets/shelf-superhero-thor-bust-v2.png',width:1136,height:1728,bounds:[94,39,940,1630],displaySize:460,displayWidth:340},
     'disney-genie-bust': {source:'assets/shelf-disney-genie-bust.png',width:1312,height:1504,bounds:[228,41,858,1405]},
     'disney-prince-eric-bust': {source:'assets/shelf-disney-prince-eric-bust.png',width:1408,height:1408,bounds:[253,44,889,1290]},
     'disney-pocahontas-bust': {source:'assets/shelf-disney-pocahontas-bust.png',width:1600,height:1200,bounds:[414,26,730,1124]},

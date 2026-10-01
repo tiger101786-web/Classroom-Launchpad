@@ -2,7 +2,7 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict');
 const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../collectible-shelf');
 (async()=>{
  const ids=["superhero-winter-soldier-bust","superhero-iron-man-bust","superhero-black-widow-bust","superhero-captain-america-bust","superhero-juggernaut-bust","superhero-sabretooth-bust","superhero-spider-man-bust","superhero-wolverine-bust","superhero-loki-bust","superhero-hulk-bust","superhero-thor-bust"];
- const assetPath=id=>'assets/shelf-'+id+(['superhero-loki-bust','superhero-hulk-bust','superhero-thor-bust'].includes(id)?'-v2':'')+'.png';
+ const assetPath=id=>'assets/shelf-'+id+(['superhero-loki-bust','superhero-hulk-bust','superhero-thor-bust','superhero-juggernaut-bust'].includes(id)?'-v2':'')+'.png';
  const selections=Array.from({length:4},(_,n)=>({enabled:true,theme:'crimson',slots:Array.from({length:3},(_,slot)=>ids[(n*3+slot)%ids.length])}));
  selections.push({enabled:true,theme:'crimson',slots:['superhero-iron-man-bust','superhero-sabretooth-bust','superhero-thor-bust']});
  assert(!shelf.items.some(i=>i.id==='superhero-falcon-bust'));
@@ -12,7 +12,7 @@ const {chromium}=require('playwright'),sharp=require('sharp'),shelf=require('../
   assert.equal(shelf.items.filter(i=>i.id===id).length,1);
   assert.equal(shelf.items.find(i=>i.id===id).category,'Superheroes');
   const {data,info}=await sharp(assetPath(id)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
-  if(!['superhero-hulk-bust','superhero-thor-bust'].includes(id))assert.equal(data[3],0);assert(info.width>=375);
+  if(!['superhero-hulk-bust','superhero-thor-bust','superhero-juggernaut-bust'].includes(id))assert.equal(data[3],0);assert(info.width>=375);
  }
  assert.equal(shelf.items.filter(i=>i.category==='Superheroes').length,11);
  assert.equal(shelf.items.filter(i=>i.category==='Disney').length,25);
