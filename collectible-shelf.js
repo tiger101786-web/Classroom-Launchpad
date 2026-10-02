@@ -146,7 +146,7 @@
     'pokemon-squirtle-statue': {"source":"assets/shelf-pokemon-squirtle-statue.png","width":1408,"height":1408,"bounds":[107,80,1227,1275],"displaySize":460,"displayWidth":340},
     'pokemon-gengar-statue': {"source":"assets/shelf-pokemon-gengar-statue.png","width":1328,"height":1488,"bounds":[194,45,973,1392],"displaySize":460,"displayWidth":340},
     'pokemon-bulbasaur-statue': {"source":"assets/shelf-pokemon-bulbasaur-statue.png","width":1456,"height":1360,"bounds":[181,53,1124,1265],"displaySize":460,"displayWidth":340},
-    'pokemon-charizard-statue': {"source":"assets/shelf-pokemon-charizard-statue.png","width":1552,"height":1264,"bounds":[49,17,1480,1232],"displaySize":460,"displayWidth":340},
+    'pokemon-charizard-statue': {"source":"assets/shelf-pokemon-charizard-statue.png","width":1552,"height":1264,"bounds":[49,17,1480,1232],"displaySize":500,"displayWidth":500},
     'pokemon-charmander-statue': {"source":"assets/shelf-pokemon-charmander-statue.png","width":1328,"height":1504,"bounds":[77,41,1187,1414],"displaySize":460,"displayWidth":340},
     'pokemon-gyarados-statue': {"source":"assets/shelf-pokemon-gyarados-statue.png","width":1408,"height":1408,"bounds":[268,7,923,1338],"displaySize":460,"displayWidth":340},
     pikachu: {source:'assets/shelf-collectibles-expansion.png',width:1254,height:1254,bounds:[368,28,238,284],displaySize:460,displayWidth:340},

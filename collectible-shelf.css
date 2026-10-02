@@ -38,6 +38,11 @@
 .shelf-display-slot { min-width:0; }
 .shelf-has-cars > .shelf-objects { left:4%; right:4%; }
 .shelf-has-superheroes > .shelf-objects { left:2%; right:2%; gap:14%; }
+/* Keep the existing statue scale, but pull the outer pedestals onto the tabletop. */
+.shelf-has-superheroes > .shelf-objects > :first-child { transform:translateX(24%); }
+.shelf-has-superheroes > .shelf-objects > :last-child { transform:translateX(-24%); }
+/* Wide wings can sit behind the neighboring statues without hiding their bases. */
+.shelf-has-superheroes > .shelf-objects > :has([aria-label="Charizard Statue"]) { position:relative; z-index:-1; }
 .shelf-empty { display:block; width:100%; aspect-ratio:1; }
 /* Viewport (16,32,1640,692) trims transparent margins without stretching the artwork. */
 .shelf-board { position:absolute; inset:0; background:url('assets/collectible-shelf-crimson.png') 50% 12.8514% / 101.9512% 135.9827% no-repeat; pointer-events:none; }
