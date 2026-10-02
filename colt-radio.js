@@ -3,6 +3,23 @@
 
   const stations = [
     {
+      id: "radio-forever-anime",
+      label: "Anime • Radio Forever Anime",
+      type: "stream",
+      source: "https://app.sonicpanelradio.com:8088/stream",
+      provider: "Radio Forever Anime",
+      note: "Live anime radio from radiofa.net. Programming is provided by the station."
+    },
+    {
+      id: "iheart-katseye",
+      embedHeight: 300,
+      label: "Pop • KATSEYE Radio",
+      type: "embed",
+      source: "https://www.iheart.com/artist/katseye-43402886/?embed=true&cid=oembed&keyid%5B0%5D=KATSEYE&sc=artist_widget",
+      provider: "iHeartRadio",
+      note: "KATSEYE artist radio through iHeartRadio's official player. Playback may require sign-in and depends on regional availability."
+    },
+    {
       id: "studying",
       label: "Lo-Fi • Study",
       type: "stream",
@@ -1587,7 +1604,11 @@
       clearEmbeddedPlayer();
       if (station.type === "embed") {
         iframe.src = station.source;
-        iframe.title = `Lofi Cafe ${station.label} station`;
+        if (station.embedHeight) {
+          iframe.style.height = `${station.embedHeight}px`;
+          iframe.style.width = "100%";
+        }
+        iframe.title = `${station.provider || 'Colt Radio'} ${station.label} station`;
         iframe.hidden = false;
       } else if (station.type === "playlist") {
         audio.setAttribute("aria-label", `${station.label} station audio controls`);
