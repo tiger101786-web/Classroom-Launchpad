@@ -138,9 +138,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'anime-luck-voltia-statue': {"source":"assets/shelf-anime-luck-voltia-statue.png","width":1264,"height":1568,"bounds":[258,22,788,1516],"displaySize":330,"displayWidth":280},
+    'anime-luck-voltia-statue': {"source":"assets/shelf-anime-luck-voltia-statue-v2.png","width":1376,"height":1440,"bounds":[122,0,1201,1411],"displaySize":330,"displayWidth":280},
     'nee-doh-stack-statue': {"source":"assets/shelf-nee-doh-stack-statue.png","width":1408,"height":1408,"bounds":[317,40,817,1288],"displaySize":330,"displayWidth":280},
-    'anime-megumi-statue': {"source":"assets/shelf-anime-megumi-statue.png","width":1152,"height":1728,"bounds":[107,32,976,1625],"displaySize":330,"displayWidth":280},
+    'anime-megumi-statue': {"source":"assets/shelf-anime-megumi-statue-v2.png","width":1408,"height":1408,"bounds":[253,1,926,1377],"displaySize":330,"displayWidth":280},
     'anime-ichigo-statue': {"source":"assets/shelf-anime-ichigo-statue.png","width":1104,"height":1776,"bounds":[1,132,1103,1552],"displaySize":330,"displayWidth":280},
     'music-pop-singer-statue': {"source":"assets/shelf-music-pop-singer-statue.png","width":1680,"height":1184,"bounds":[300,10,949,1153],"displaySize":330,"displayWidth":280},
     'disney-lilo-stitch-statue': {"source":"assets/shelf-disney-lilo-stitch-statue.png","width":1504,"height":1312,"bounds":[130,46,1247,1230],"displaySize":330,"displayWidth":280},
