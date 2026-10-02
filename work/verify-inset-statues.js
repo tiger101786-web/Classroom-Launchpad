@@ -16,11 +16,11 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
    });
    assert(result[0].left>=result[0].shelfLeft,'Left statue contained');
    assert(result[2].right<=result[2].shelfRight,'Right statue contained');
-   assert(result[1].height>400,'Charizard significantly enlarged');
+   assert(result[1].height>330&&result[1].height<370,'Charizard is slightly taller than the standard 330 size');
    assert(result.every(r=>Math.abs(r.base-346)<.01),'Bases aligned');
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
    await page.screenshot({path:'work/inset-statues-'+width+'.png'});
   }
-  console.log('Inset outer statues, enlarged Charizard, unchanged baseline and responsive containment passed.');
+  console.log('Inset outer statues, balanced Charizard, unchanged baseline and responsive containment passed.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
