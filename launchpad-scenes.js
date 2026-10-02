@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "jdm", name: "JDM Neon Garage", description: "Japanese tuner cars, neon workshop lights & a rainy Tokyo skyline", image: "assets/launchpad-scene-jdm.png" },
     { id: "squishy", name: "Squishy Dumpling Café", description: "Smiling pastel bao toys, glitter-gold dumpling & cozy bamboo baskets", image: "assets/launchpad-scene-squishy.png" },
     { id: "highland", name: "Highland Cattle Meadow", description: "Shaggy Highland cow & calf in a sunset Scottish meadow", image: "assets/launchpad-scene-highland.png" },
     { id: "ninja-course", name: "American Ninja Warrior Arena", description: "Obstacle course, warped wall & sweeping stadium lights", image: "assets/launchpad-scene-ninja-course.png" },

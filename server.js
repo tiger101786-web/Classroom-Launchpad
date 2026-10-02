@@ -23,6 +23,7 @@ homeSceneIds.add("anime");
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
 homeSceneIds.add("squishy");
+homeSceneIds.add("jdm");
 ["holiday-christmas","holiday-thanksgiving","holiday-easter","holiday-valentine","holiday-st-patrick","holiday-mardi-gras","holiday-halloween","holiday-new-year","holiday-usa"].forEach(id => homeSceneIds.add(id));
 homeSceneFrameIds.add("squishy");
 homeSceneFrameIds.add("highland");
