@@ -7502,7 +7502,8 @@ body[data-theme="night"] .colt-radio-station {
 .colt-radio-station-style {
   display: block;
   min-width: 0;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .colt-radio-station-item.has-long-name .colt-radio-station-name {
