@@ -59,9 +59,22 @@ async function request(url,body,cookie=''){
  let current=(await request('/api/auth/session',null,student.cookie)).data.session;
  assert.deepEqual(current.homeShelf,left);assert.equal(current.homeShelfRight.slots[0],'superhero-winter-soldier-bust');
  await menu('right');await page.locator('#shelfSettingsMenuRight [data-action="hideCollectibleShelf"]').click();
- await page.locator('[data-shelf-position="right"] .shelf-restore').waitFor();
+ await page.locator('[data-shelf-position="right"] .shelf-restore').waitFor({state:'attached'});
+ assert.equal(await page.locator('[data-action="showCollectibleShelf"]').count(),0);
  assert.equal(await page.locator('[data-shelf-position="left"] .home-collectible-shelf').count(),1);
- await page.locator('[data-shelf-position="right"] [data-action="showCollectibleShelf"]').click();
+ await page.locator('.header-account-summary').click();
+ await page.locator('.header-account-links [data-action="collectibleShelf"][data-shelf-side="right"]').click();
+ await page.locator('#shelfStylesTab').click();
+ const styleNames=[];
+ do {
+  styleNames.push(...await page.locator('[data-shelf-theme-choice] strong').allTextContents());
+  if(await page.locator('#shelfNext').isDisabled())break;
+  await page.locator('#shelfNext').click();
+ }while(true);
+ assert.equal(styleNames.length,require('../collectible-shelf.js').themes.length);
+ assert.deepEqual(styleNames,[...styleNames].sort((a,b)=>a.localeCompare(b)));
+ await page.locator('#shelfEnabled').check();
+ await page.locator('#saveShelf').click();
  await page.locator('[data-shelf-position="right"] .home-collectible-shelf').waitFor();
  await page.reload({waitUntil:'domcontentloaded'});await page.locator('[data-shelf-position="right"] .home-collectible-shelf').waitFor();
  current=(await request('/api/auth/session',null,student.cookie)).data.session;

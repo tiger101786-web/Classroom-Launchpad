@@ -383,7 +383,8 @@
     const value = side === 'right' ? session.homeShelfRight : session.homeShelf;
     const suffix = side === 'right' ? 'Right' : '';
     const label = side === 'right' ? 'Right' : 'Left';
-    if (!clean(value).enabled) return `<div class="shelf-restore"><button type="button" class="outline-btn" data-shelf-side="${side}" data-action="showCollectibleShelf">Show ${side} shelf</button><span id="shelfShowStatus${suffix}" role="status"></span></div>`;
+    // Keep the scene layout stable; hidden shelves are restored from the account menu.
+    if (!clean(value).enabled) return '<div class="shelf-restore" aria-hidden="true"></div>';
     return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button><button type="button" data-shelf-side="${side}" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus${suffix}" role="status"></span></div></section>`;
   }
   let hideTimer;
@@ -436,7 +437,7 @@
       dialog.querySelector('#shelfSearchLabel').textContent=tab==='objects'?'Search objects':'Search shelves';
       search.placeholder=tab==='objects'?'Search '+items.length+' collectibles…':'Search shelf styles…';
       const terms=searches[tab].toLowerCase().trim().split(/\s+/).filter(Boolean);
-      const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value).sort((a,b)=>a.name.localeCompare(b.name)):themes;
+      const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value).sort((a,b)=>a.name.localeCompare(b.name)):[...themes].sort((a,b)=>a.name.localeCompare(b.name));
       const matches=pool.filter(item=>terms.every(term=>(item.name+' '+(item.category||'')).toLowerCase().includes(term)));
       const size=pageSize(), count=Math.max(1,Math.ceil(matches.length/size));
       pages[tab]=Math.min(pages[tab],count-1);
