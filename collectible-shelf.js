@@ -112,6 +112,8 @@
   rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
   rows.push(['Superheroes', ['superhero-winter-soldier-bust','Winter Soldier Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
   rows.push(['Music', ['michael-jackson-blue-bust','Michael Jackson Blue Base Bust'], ['michael-jackson-gold-bust','Michael Jackson Gold Base Bust']]);
+  rows.push(['Music', ['music-pop-singer-statue','Pop Singer Guitar Statue']]);
+  rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
   rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
@@ -133,6 +135,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'music-pop-singer-statue': {"source":"assets/shelf-music-pop-singer-statue.png","width":1680,"height":1184,"bounds":[300,10,949,1153],"displaySize":330,"displayWidth":280},
+    'disney-lilo-stitch-statue': {"source":"assets/shelf-disney-lilo-stitch-statue.png","width":1504,"height":1312,"bounds":[130,46,1247,1230],"displaySize":330,"displayWidth":280},
+    'disney-moana-statue': {"source":"assets/shelf-disney-moana-statue.png","width":992,"height":1984,"bounds":[25,53,967,1831],"displaySize":330,"displayWidth":280},
     'superhero-captain-marvel-statue': {"source":"assets/shelf-superhero-captain-marvel-statue.png","width":1296,"height":1520,"bounds":[19,11,1272,1455],"displaySize":330,"displayWidth":280},
     'superhero-black-panther-statue': {"source":"assets/shelf-superhero-black-panther-statue.png","width":1360,"height":1456,"bounds":[255,17,904,1401],"displaySize":330,"displayWidth":280},
     'superhero-batman-statue': {"source":"assets/shelf-superhero-batman-statue.png","width":1136,"height":1744,"bounds":[51,41,1042,1645],"displaySize":330,"displayWidth":280},
@@ -141,7 +146,7 @@
     'superhero-green-lantern-statue': {"source":"assets/shelf-superhero-green-lantern-statue.png","width":1136,"height":1728,"bounds":[46,66,1005,1579],"displaySize":330,"displayWidth":280},
     'disney-camp-rock-statue': {"source":"assets/shelf-disney-camp-rock-statue.png","width":1600,"height":1200,"bounds":[265,5,1076,1178],"displaySize":330,"displayWidth":280},
     'superhero-flash-statue': {"source":"assets/shelf-superhero-flash-statue.png","width":2000,"height":992,"bounds":[510,0,1029,962],"displaySize":330,"displayWidth":280},
-    'superhero-superman-statue': {"source":"assets/shelf-superhero-superman-statue.png","width":1792,"height":1008,"bounds":[319,0,1329,983],"displaySize":480,"displayWidth":480},
+    'superhero-superman-statue': {"source":"assets/shelf-superhero-superman-statue.png","width":1792,"height":1008,"bounds":[319,0,1329,983],"displaySize":440,"displayWidth":440,"displayOffsetX":30},
     'superhero-hawkeye-statue': {"source":"assets/shelf-superhero-hawkeye-statue.png","width":1200,"height":1600,"bounds":[53,43,1038,1484],"displaySize":330,"displayWidth":280},
     'superhero-deadpool-statue': {"source":"assets/shelf-superhero-deadpool-statue.png","width":1232,"height":1600,"bounds":[199,82,859,1442],"displaySize":330,"displayWidth":280},
     'pokemon-lugia-statue': {"source":"assets/shelf-pokemon-lugia-statue.png","width":1408,"height":1408,"bounds":[209,17,1015,1360],"displaySize":330,"displayWidth":280},
@@ -389,7 +394,7 @@
     // stretching the plate or moving its contact point off the shared baseline.
     const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
-    return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"${asset?.clip ? ` style="clip-path:${asset.clip};clip-rule:nonzero"` : ''}/></svg></svg>`;
+    return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0))}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"${asset?.clip ? ` style="clip-path:${asset.clip};clip-rule:nonzero"` : ''}/></svg></svg>`;
   }
   function art(value, interactive = false, active = 0) {
     const state = clean(value);

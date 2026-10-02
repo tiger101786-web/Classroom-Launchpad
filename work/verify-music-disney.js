@@ -1,7 +1,7 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),shelf=require('../collectible-shelf');
-const ids=["superhero-captain-marvel-statue","superhero-black-panther-statue","superhero-batman-statue","superhero-thanos-statue","superhero-wonder-woman-statue","superhero-green-lantern-statue","disney-camp-rock-statue","superhero-flash-statue","superhero-superman-statue","superhero-hawkeye-statue","superhero-deadpool-statue"];
+const ids=["music-pop-singer-statue","disney-lilo-stitch-statue","disney-moana-statue"];
 (async()=>{
-for(const id of ids)assert.equal(shelf.items.find(i=>i.id===id).category,id.startsWith('disney-')?'Disney':'Superheroes');
+for(const id of ids)assert.equal(shelf.items.find(i=>i.id===id).category,id.startsWith('disney-')?'Disney':'Music');
 const selections=ids.map(id=>({enabled:true,theme:'crimson',slots:[id,id,id]}));
 for(const s of selections){assert(shelf.valid(s));assert.deepEqual(shelf.clean(s),s);}
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
@@ -15,15 +15,14 @@ await page.setViewportSize({width,height:900});
 await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('image')].map(i=>new Promise((ok,bad)=>{const img=new Image();img.onload=ok;img.onerror=bad;img.src=i.getAttribute('href');})));});
 const boxes=await page.locator('.shelf-object > svg').evaluateAll(ns=>ns.map(n=>{const r=n.parentElement.getBoundingClientRect(),s=r.width/220,l=r.left+Number(n.getAttribute('x'))*s;return {l,r:l+Number(n.getAttribute('width'))*s,base:+n.getAttribute('y')+ +n.getAttribute('height'),h:+n.getAttribute('height')};}));
 assert(boxes.every(b=>Math.abs(b.base-346)<.01));
-assert(boxes[ids.indexOf('superhero-superman-statue')*3].h>320 && boxes[ids.indexOf('superhero-superman-statue')*3].h<330);
 // Superman intentionally has a wider cape; other figures must not overlap.
 for(let i=0;i<boxes.length;i+=3)if(ids[i/3]!=='superhero-superman-statue')assert(boxes[i].r<boxes[i+1].l&&boxes[i+1].r<boxes[i+2].l);
 assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-await page.screenshot({path:'work/new-heroes-'+width+'.png',fullPage:true});
+await page.screenshot({path:'work/music-disney-'+width+'.png',fullPage:true});
 await page.evaluate(selected=>CollectibleShelf.open({selected,save:async value=>{window.saved=value;return value;},onSave:()=>{}}),selections[0]);
 
 for(const id of ids){
-await page.locator('#shelfCategory').selectOption(id.startsWith('disney-')?'Disney':'Superheroes');
+await page.locator('#shelfCategory').selectOption(id.startsWith('disney-')?'Disney':'Music');
 await page.locator('#shelfSearch').fill(shelf.items.find(i=>i.id===id).name);
 assert(await page.locator('[data-shelf-item="'+id+'"]').isVisible());
 await page.locator('[data-shelf-item="'+id+'"]').click();
@@ -31,6 +30,6 @@ await page.locator('[data-shelf-item="'+id+'"]').click();
 await page.locator('#saveShelf').click();
 assert.equal((await page.evaluate(()=>window.saved)).slots[0],ids[ids.length-1]);
 }
-console.log('Eleven additions passed category, image loading, save, baseline and desktop/mobile checks; Superman cape overlap is intentional.');
+console.log('Three statues passed category, image loading, save, alignment and desktop/mobile checks.');
 }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
