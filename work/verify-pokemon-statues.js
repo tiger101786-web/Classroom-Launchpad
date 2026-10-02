@@ -1,5 +1,6 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),shelf=require('../collectible-shelf');
 const ids=["pikachu","eevee","pokemon-mew-statue","pokemon-mimikyu-statue","pokemon-umbreon-statue","pokemon-snorlax-statue","pokemon-lucario-statue","pokemon-gardevoir-statue","pokemon-dragonite-statue","pokemon-rayquaza-statue","pokemon-mewtwo-statue","pokemon-garchomp-statue","pokemon-arcanine-statue","pokemon-squirtle-statue","pokemon-gengar-statue","pokemon-bulbasaur-statue","pokemon-charizard-statue","pokemon-charmander-statue","pokemon-gyarados-statue"];
+ids.push('pokemon-lugia-statue','pokemon-ash-statue','pokemon-ho-oh-statue','pokemon-jigglypuff-statue','pokemon-groudon-statue','pokemon-entei-statue');
 (async()=>{
 assert.deepEqual(shelf.items.filter(i=>i.category==='Pokémon').map(i=>i.id).sort(),[...ids].sort());
 assert.deepEqual(shelf.clean({enabled:true,slots:['charizard-flames','growlithe','pikachu']}).slots,['pokemon-charizard-statue','none','pikachu']);
@@ -30,6 +31,6 @@ await page.locator('[data-shelf-item="'+id+'"]').click();
 await page.locator('#saveShelf').click();
 assert.equal((await page.evaluate(()=>window.saved)).slots[0],ids[ids.length-1]);
 }
-console.log('19 Pokémon passed catalog, migration, image loading, selection/save, alignment and spacing checks (intentional Charizard wing overlap) on desktop/mobile.');
+console.log('25 Pokémon passed catalog, migration, image loading, selection/save, alignment and spacing checks (intentional Charizard wing overlap) on desktop/mobile.');
 }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

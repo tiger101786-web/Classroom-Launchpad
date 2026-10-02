@@ -112,6 +112,7 @@
   rows.push(['Disney', ['disney-prince-eric-bust','Prince Eric Bust'], ['disney-pocahontas-bust','Pocahontas Bust'], ['disney-genie-bust','Genie Bust']]);
   rows.push(['Superheroes', ['superhero-winter-soldier-bust','Winter Soldier Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
   rows.push(['Music', ['michael-jackson-blue-bust','Michael Jackson Blue Base Bust'], ['michael-jackson-gold-bust','Michael Jackson Gold Base Bust']]);
+  rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -130,6 +131,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'pokemon-lugia-statue': {"source":"assets/shelf-pokemon-lugia-statue.png","width":1408,"height":1408,"bounds":[209,17,1015,1360],"displaySize":330,"displayWidth":280},
+    'pokemon-ash-statue': {"source":"assets/shelf-pokemon-ash-statue.png","width":1200,"height":1600,"bounds":[130,34,982,1516],"displaySize":330,"displayWidth":280},
+    'pokemon-ho-oh-statue': {"source":"assets/shelf-pokemon-ho-oh-statue.png","width":1408,"height":1408,"bounds":[259,0,907,1385],"displaySize":330,"displayWidth":280},
+    'pokemon-jigglypuff-statue': {"source":"assets/shelf-pokemon-jigglypuff-statue.png","width":1440,"height":1360,"bounds":[308,22,923,1283],"displaySize":330,"displayWidth":280},
+    'pokemon-groudon-statue': {"source":"assets/shelf-pokemon-groudon-statue.png","width":1408,"height":1408,"bounds":[103,109,1241,1223],"displaySize":330,"displayWidth":280},
+    'pokemon-entei-statue': {"source":"assets/shelf-pokemon-entei-statue.png","width":1344,"height":1472,"bounds":[67,15,1242,1403],"displaySize":330,"displayWidth":280},
     'michael-jackson-blue-bust': {source:'assets/shelf-michael-jackson-blue-bust.png',width:1152,height:1728,bounds:[203,44,749,1598],displaySize:330,displayWidth:280},
     'michael-jackson-gold-bust': {source:'assets/shelf-michael-jackson-gold-bust.png',width:1152,height:1728,bounds:[35,49,1100,1631],displaySize:330,displayWidth:280},
     'pokemon-mew-statue': {"source":"assets/shelf-pokemon-mew-statue.png","width":1392,"height":1424,"bounds":[202,8,992,1391],"displaySize":330,"displayWidth":280},
