@@ -11,15 +11,6 @@
       note: "Live anime radio from radiofa.net. Programming is provided by the station."
     },
     {
-      id: "iheart-katseye",
-      embedHeight: 300,
-      label: "Pop • KATSEYE Radio",
-      type: "embed",
-      source: "https://www.iheart.com/artist/katseye-43402886/?embed=true&cid=oembed&keyid%5B0%5D=KATSEYE&sc=artist_widget",
-      provider: "iHeartRadio",
-      note: "KATSEYE artist radio through iHeartRadio's official player. Playback may require sign-in and depends on regional availability."
-    },
-    {
       id: "studying",
       label: "Lo-Fi • Study",
       type: "stream",

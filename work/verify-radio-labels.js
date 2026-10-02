@@ -31,12 +31,9 @@ await page.locator('[data-station="radio-forever-anime"]').screenshot({path:'wor
 await page.locator('.colt-radio-search-input').fill('');
 await page.locator('[data-station="radio-forever-anime"]').click();
 assert.equal(await page.locator('audio').getAttribute('src'),'https://app.sonicpanelradio.com:8088/stream');
-await page.locator('[data-station="iheart-katseye"]').click();
-const frame=page.locator('.colt-radio-player iframe');
-assert(await frame.isVisible());assert((await frame.getAttribute('src')).includes('katseye-43402886'));
-assert.equal(await frame.evaluate(el=>el.getBoundingClientRect().height),300);
+assert.equal(await page.locator('[data-station="iheart-katseye"]').count(),0);
 await page.getByRole('button',{name:'Stop Colt Radio',exact:true}).click();
 assert.equal(await page.locator('.colt-radio-player iframe').getAttribute('src'),null);
-console.log('Calendar dates fit at desktop/mobile widths; Radiofa selection and KATSEYE embed selection/stop passed. Provider playback is not mocked as verified.');
+console.log('Calendar and Radiofa UI checks passed; KATSEYE is absent. Live provider playback is not tested here.');
 }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
