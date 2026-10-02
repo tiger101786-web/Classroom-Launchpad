@@ -113,6 +113,7 @@
   rows.push(['Superheroes', ['superhero-winter-soldier-bust','Winter Soldier Bust'], ['superhero-iron-man-bust','Iron Man Bust'], ['superhero-black-widow-bust','Black Widow Bust'], ['superhero-captain-america-bust','Captain America Bust'], ['superhero-juggernaut-bust','Juggernaut Bust'], ['superhero-sabretooth-bust','Sabretooth Bust'], ['superhero-spider-man-bust','Spider-Man Bust'], ['superhero-wolverine-bust','Wolverine Bust'], ['superhero-loki-bust','Loki Bust'], ['superhero-hulk-bust','Hulk Bust'], ['superhero-thor-bust','Thor Bust']]);
   rows.push(['Music', ['michael-jackson-blue-bust','Michael Jackson Blue Base Bust'], ['michael-jackson-gold-bust','Michael Jackson Gold Base Bust']]);
   rows.push(['Music', ['music-pop-singer-statue','Pop Singer Guitar Statue']]);
+  rows.push(['Anime', ['anime-ichigo-statue','Ichigo Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
@@ -135,6 +136,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'anime-ichigo-statue': {"source":"assets/shelf-anime-ichigo-statue.png","width":1104,"height":1776,"bounds":[1,132,1103,1552],"displaySize":330,"displayWidth":280},
     'music-pop-singer-statue': {"source":"assets/shelf-music-pop-singer-statue.png","width":1680,"height":1184,"bounds":[300,10,949,1153],"displaySize":330,"displayWidth":280},
     'disney-lilo-stitch-statue': {"source":"assets/shelf-disney-lilo-stitch-statue.png","width":1504,"height":1312,"bounds":[130,46,1247,1230],"displaySize":330,"displayWidth":280},
     'disney-moana-statue': {"source":"assets/shelf-disney-moana-statue.png","width":992,"height":1984,"bounds":[25,53,967,1831],"displaySize":330,"displayWidth":280},
@@ -146,7 +148,7 @@
     'superhero-green-lantern-statue': {"source":"assets/shelf-superhero-green-lantern-statue.png","width":1136,"height":1728,"bounds":[46,66,1005,1579],"displaySize":330,"displayWidth":280},
     'disney-camp-rock-statue': {"source":"assets/shelf-disney-camp-rock-statue.png","width":1600,"height":1200,"bounds":[265,5,1076,1178],"displaySize":330,"displayWidth":280},
     'superhero-flash-statue': {"source":"assets/shelf-superhero-flash-statue.png","width":2000,"height":992,"bounds":[510,0,1029,962],"displaySize":330,"displayWidth":280},
-    'superhero-superman-statue': {"source":"assets/shelf-superhero-superman-statue.png","width":1792,"height":1008,"bounds":[319,0,1329,983],"displaySize":440,"displayWidth":440,"displayOffsetX":30},
+    'superhero-superman-statue': {"source":"assets/shelf-superhero-superman-statue.png","width":1792,"height":1008,"bounds":[319,0,1329,983],"displaySize":440,"displayWidth":440,"displayOffsetX":80},
     'superhero-hawkeye-statue': {"source":"assets/shelf-superhero-hawkeye-statue.png","width":1200,"height":1600,"bounds":[53,43,1038,1484],"displaySize":330,"displayWidth":280},
     'superhero-deadpool-statue': {"source":"assets/shelf-superhero-deadpool-statue.png","width":1232,"height":1600,"bounds":[199,82,859,1442],"displaySize":330,"displayWidth":280},
     'pokemon-lugia-statue': {"source":"assets/shelf-pokemon-lugia-statue.png","width":1408,"height":1408,"bounds":[209,17,1015,1360],"displaySize":330,"displayWidth":280},
