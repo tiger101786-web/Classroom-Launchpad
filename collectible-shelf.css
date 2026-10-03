@@ -73,6 +73,9 @@
 .collectible-shelf[data-shelf-theme][data-shelf-theme="disney-castle"] > .shelf-board { background-image:url('assets/collectible-shelf-disney-castle.png'); background-size:100% 106.6667%; background-position:50% 0%; }
 .collectible-shelf[data-shelf-theme="disney-castle"] { --shelf-object-bottom:44.3137%; }
 .shelf-theme-picker { min-width:0; margin:12px 0; padding:12px; border:1px solid var(--border); border-radius:12px; }
+/* Unmodified nugget artwork: display surface at y=520 in the 1448x1086 canvas. */
+.collectible-shelf[data-shelf-theme][data-shelf-theme="chicken-nuggets"] { aspect-ratio:1448 / 1086; --shelf-object-bottom:52.1179%; --shelf-surface-top:.45; --shelf-surface-bottom:.50; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="chicken-nuggets"] > .shelf-board { background-image:url('assets/collectible-shelf-chicken-nuggets.png'); background-size:100% 100%; background-position:center; }
 [data-shelf-theme="amethyst"] > .shelf-board { background-image:url('assets/collectible-shelf-amethyst.png'); }
 [data-shelf-theme="temple"] > .shelf-board { background-image:url('assets/collectible-shelf-temple.png'); }
 [data-shelf-theme="blossom"] > .shelf-board { background-image:url('assets/collectible-shelf-blossom.png'); }

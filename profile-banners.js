@@ -1,6 +1,7 @@
 (() => {
   const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon'], ['ocean', 'Ocean Pearl'], ['laurel', 'Royal Laurel'], ['sakura', 'Sakura Bloom'], ['grove', 'Enchanted Forest'], ['autumn', 'Autumn Harvest']];
   const normalize = value => choices.some(([id]) => id === value) ? value : 'none';
+  choices.push(['blue-fire', 'Blue Fire'], ['rainbow-fire', 'Rainbow Fire'], ['nugget-party', 'Nugget Party']);
   choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
   choices.push(...[["anime-rooftops","Anime Rooftops"],["chapel-light","Chapel Light"],["sunlit-peaks","Sunlit Peaks"],["saturn-dream","Saturn Dream"],["winter-crystal","Winter Crystal"],["honey-meadow","Honey Meadow"],["midnight-melody","Midnight Melody"],["paint-play","Paint Play"],["dragon-valley","Dragon Valley"],["butterfly-dream","Butterfly Dream"],["rainbow-clouds","Rainbow Clouds"],["harbor-lights","Harbor Lights"],["carnival-glow","Carnival Glow"],["robot-city","Robot City"],["storybook-nook","Storybook Nook"],["stadium-spirit","Stadium Spirit"]]);
   choices.push(...[["patriotic-pride","Patriotic Pride"],["angelic-peace","Angelic Peace"],["highland-haven","Highland Haven"],["dumpling-delight","Dumpling Delight"],["prehistoric-jungle","Prehistoric Jungle"],["mermaid-lagoon","Mermaid Lagoon"],["frontier-sunset","Frontier Sunset"],["strawberry-picnic","Strawberry Picnic"]]);

@@ -1,0 +1,61 @@
+{
+  "tool": "Built-in image generation",
+  "assets": [
+    [
+      "revisedShelf",
+      "collectible-shelf-chicken-nuggets.png"
+    ],
+    [
+      "blue-fire",
+      "scene-frame-blue-fire.png"
+    ],
+    [
+      "rainbow-fire",
+      "scene-frame-rainbow-fire.png"
+    ],
+    [
+      "banner-blue-fire",
+      "profile-banner-blue-fire.png"
+    ],
+    [
+      "banner-rainbow-fire",
+      "profile-banner-rainbow-fire.png"
+    ],
+    [
+      "banner-nugget",
+      "profile-banner-nugget-party.png"
+    ]
+  ],
+  "prompts": [
+    [
+      "shelf",
+      true,
+      "Use case: stylized-concept. Create a NEW chicken-nugget collectible shelf matching the two reference shelves' polished sculpted fantasy-game art style, front-facing symmetrical ornate silhouette, long shallow display ledge, decorative raised central back crest, and elegant hanging side brackets. References are STYLE AND LAYOUT ONLY: do NOT copy their colors, ice cream, castle, wood, metal or trim. EVERY visible structural and decorative component must be made ONLY of recognizable individual chicken nuggets. Use distinct classic boot, bell, oval and rounded nugget shapes overlapping in carefully sculpted fan arrangements for the crest, front fascia and curved side brackets. Each nugget must have individually resolved crisp golden breading, small irregular crags, amber browned ridges and buttery highlights; appetizing clean golden brown, not orange blocks, not smooth gold metal. Nugget seams and shapes clearly readable even at small UI size. Long shallow level tabletop assembled from flattened interlocking nuggets, not deep countertop. Tabletop at about 50% canvas height, central crest up to 10%, hanging side brackets to 90%. Same polished dimensional collectible rendering and balanced silhouette as references. Transparent background and clear open space below shelf. No glow cloud, no shadow backdrop, no text, sauce, fries, plate, wood, metal, or non-nugget materials. Landscape 4:3 canvas, entire shelf fits with small clear edge margins."
+    ],
+    [
+      "blue-fire",
+      true,
+      "Square transparent PNG game UI circular scene frame composed entirely of vivid blue fire. Perfect centered circular EMPTY transparent opening diameter 70% of canvas. Unbroken thin ring of cyan-white flame cores surrounding that clear opening, rich cobalt and electric blue flame tongues flowing outward to diameter 96% of canvas. All flame details remain outside the central circular opening. Symmetric balanced ring, premium realistic magical fire, crisp edges, luminous saturated details visible on black backgrounds. No metal, no scene, no text, no objects inside. Both central hole and exterior genuinely transparent."
+    ],
+    [
+      "rainbow-fire",
+      true,
+      "Square transparent PNG game UI circular scene frame composed entirely of vivid rainbow fire. Perfect centered circular EMPTY transparent opening diameter 70% of canvas. Unbroken thin ring of luminous flame cores surrounding clear opening, flame tongues flowing outward to diameter 96% canvas. Continuous smooth spectrum around circle: red orange yellow green cyan blue violet magenta. All flame details outside central circular opening. Symmetric balanced ring, premium realistic magical fire, crisp edges, saturated visible on black. No metal, no scene, no text, no objects inside. Central hole and exterior genuinely transparent."
+    ],
+    [
+      "banner-blue-fire",
+      false,
+      "Wide 3:1 profile cover banner, premium digital fantasy artwork. Brilliant electric blue and cobalt flames rising from bottom corners and flowing along edges, tiny cyan embers over deep midnight navy background, subtle smoke and dramatic cinematic illumination. Center upper region relatively calm and dark for UI overlay. Cohesive blue-fire theme, rich detailed realistic flame texture, no characters, no text, no logo, full bleed."
+    ],
+    [
+      "banner-rainbow-fire",
+      false,
+      "Wide 3:1 profile cover banner, premium digital fantasy artwork. Flowing rainbow flames in smooth red orange gold green cyan blue violet magenta spectrum across lower edge, curled flame wisps on sides, subtle colorful embers against near-black midnight backdrop. Center upper region calm dark for UI overlay. Saturated beautiful luminous realistic flame texture, no characters, no text, no logos, full bleed."
+    ],
+    [
+      "banner-nugget",
+      false,
+      "Wide 3:1 whimsical premium profile cover banner celebrating golden crispy chicken nuggets. Detailed delicious breaded nuggets tumbling in a playful arc along lower edge and corners against warm caramel and amber gradient with soft golden sparkles. Only chicken nuggets, no sauces, fries, plates, packaging, text or logo. Clean spacious central upper area for profile UI overlay, photorealistic food rendered as polished collectible game artwork. Full bleed."
+    ]
+  ]
+}

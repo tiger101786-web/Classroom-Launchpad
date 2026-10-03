@@ -1,6 +1,7 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'chicken-nuggets',name:'Chicken Nuggets'},
     {id:'disney-castle',name:'Disney Storybook Castle'},
     {id:'stars-stripes',name:'Stars & Stripes'},
     {id:'angel-wings',name:'Angel Wings'},

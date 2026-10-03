@@ -29,6 +29,7 @@ homeSceneFrameIds.add("squishy");
 homeSceneFrameIds.add("highland");
 homeSceneFrameIds.add("christian");
 homeSceneFrameIds.add("usa-patriotic");
+['blue-fire', 'rainbow-fire'].forEach(id => homeSceneFrameIds.add(id));
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
@@ -48,6 +49,7 @@ const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "
 ["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"].forEach(id => profileBannerIds.add(id));
 ["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"].forEach(id => profileBannerIds.add(id));
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
+['blue-fire', 'rainbow-fire', 'nugget-party'].forEach(id => profileBannerIds.add(id));
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner
     : normalizeApprovedStudents(db.approvedStudents).find(item => item.email === normalizeEmail(session.email))?.profileBanner);
