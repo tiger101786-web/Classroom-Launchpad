@@ -120,6 +120,7 @@
   rows.push(['Anime', ["anime-mikasa-statue","Mikasa Ackerman Statue"], ["anime-armored-titan-statue","Armored Titan Statue"], ["anime-attack-titan-statue","Attack Titan Statue"], ["anime-eren-statue","Eren Yeager Statue"], ["anime-colossal-titan-statue","Colossal Titan Statue"]]);
   rows.push(['Anime', ["anime-akaza-statue","Akaza Statue"], ["anime-zenitsu-statue","Zenitsu Agatsuma Statue"], ["anime-shinobu-statue","Shinobu Kocho Statue"], ["anime-tanjiro-statue","Tanjiro Kamado Statue"], ["anime-inosuke-statue","Inosuke Hashibira Statue"], ["anime-giyu-statue","Giyu Tomioka Statue"]]);
   rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
+  rows.push(['Anime', ["anime-kirishima-statue","Eijiro Kirishima Statue"], ["anime-bakugo-statue","Katsuki Bakugo Statue"], ["anime-iida-statue","Tenya Iida Statue"], ["anime-uraraka-statue","Ochaco Uraraka Statue"], ["anime-tsuyu-statue","Tsuyu Asui Statue"], ["anime-todoroki-statue","Shoto Todoroki Statue"], ["anime-kaminari-statue","Denki Kaminari Statue"], ["anime-toga-statue","Himiko Toga Statue"]]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
@@ -143,6 +144,14 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'anime-kirishima-statue': {"source":"assets/shelf-anime-kirishima-statue.png","width":880,"height":1184,"bounds":[22,0,855,1156],"displaySize":330,"displayWidth":280},
+    'anime-bakugo-statue': {"source":"assets/shelf-anime-bakugo-statue.png","width":1504,"height":1312,"bounds":[384,0,792,1276],"displaySize":330,"displayWidth":280},
+    'anime-iida-statue': {"source":"assets/shelf-anime-iida-statue.png","width":1408,"height":1408,"bounds":[207,30,1091,1346],"displaySize":330,"displayWidth":280},
+    'anime-uraraka-statue': {"source":"assets/shelf-anime-uraraka-statue.png","width":1408,"height":1408,"bounds":[278,22,833,1356],"displaySize":330,"displayWidth":280},
+    'anime-tsuyu-statue': {"source":"assets/shelf-anime-tsuyu-statue.png","width":992,"height":1984,"bounds":[16,0,958,1941],"displaySize":330,"displayWidth":280},
+    'anime-todoroki-statue': {"source":"assets/shelf-anime-todoroki-statue.png","width":1136,"height":1744,"bounds":[159,6,857,1724],"displaySize":330,"displayWidth":280},
+    'anime-kaminari-statue': {"source":"assets/shelf-anime-kaminari-statue.png","width":1152,"height":1728,"bounds":[27,0,1098,1709],"displaySize":330,"displayWidth":280},
+    'anime-toga-statue': {"source":"assets/shelf-anime-toga-statue.png","width":880,"height":2240,"bounds":[10,87,869,2048],"displaySize":330,"displayWidth":280},
     'pokemon-meowth-statue': {"source":"assets/shelf-pokemon-meowth-statue.png","width":1408,"height":1408,"bounds":[261,5,895,1387],"displaySize":330,"displayWidth":280},
     'pokemon-tyranitar-statue': {"source":"assets/shelf-pokemon-tyranitar-statue.png","width":1296,"height":1520,"bounds":[135,19,1066,1455],"displaySize":330,"displayWidth":280},
     'pokemon-blastoise-statue': {"source":"assets/shelf-pokemon-blastoise-statue.png","width":1360,"height":1456,"bounds":[127,64,1142,1328],"displaySize":330,"displayWidth":280},
@@ -390,7 +399,7 @@
     hourglass: { source:'assets/shelf-hourglass.png', width:1254, height:1254, bounds:[343,75,574,1086] },
     'mantel-clock': { source:'assets/shelf-mantel-clock.png', width:1254, height:1254, bounds:[64,156,1146,943] },
     tanjiro: { source:'assets/shelf-tanjiro-bust.png', width:1254, height:1254, bounds:[228,22,835,1215] },
-    'all-might': { source:'assets/shelf-all-might.png', width:1537, height:1023, bounds:[414,13,712,999] },
+    'all-might': {"source":"assets/shelf-all-might-v2.png","width":1136,"height":1744,"bounds":[132,23,909,1640],"displaySize":330,"displayWidth":280},
     naruto: { source:'assets/shelf-naruto.png', width:1120, height:1405, bounds:[44,7,1066,1376] }
   };
   // Individually framed viewports retain transparent gutters between the new sprites.
