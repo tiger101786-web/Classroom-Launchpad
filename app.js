@@ -9955,7 +9955,6 @@ function renderDashboardMessages() {
   return `
     <section class="teacher-message-center inbox-organized">
       <header class="inbox-toolbar">
-        <div><button type="button" class="outline-btn" data-action="dashboardSection" data-section="requests">← Back to Launchpad Feedback</button></div>
         <div><span class="feature-kicker">Private Inbox</span><h3>Stay on top of student messages</h3>
         <p>Unread conversations come first. Mark a conversation “No reply needed” when there is nothing to answer.</p></div>
         <nav class="inbox-views" aria-label="Message views">
