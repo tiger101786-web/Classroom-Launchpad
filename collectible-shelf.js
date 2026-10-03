@@ -130,8 +130,8 @@
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
   rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
   rows.push(['Superheroes', ["superhero-harley-quinn-statue","Harley Quinn Statue"], ["superhero-joker-statue","Joker Statue"]]);
-  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"], ["simba-statue","Simba Statue"]]);
-  rows.push(['Disney', ["merida-statue","Merida Statue"]]);
+  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"]]);
+  rows.push(['Disney', ["merida-statue","Merida Statue"], ["simba-statue","Simba Statue"]]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.

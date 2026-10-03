@@ -7979,16 +7979,13 @@ body[data-theme="night"] .colt-radio-station.is-active {
   margin-left: 12px;
 }
 
-/* Reserve room for full-size controls before allocating space to the title. */
+/* Give the title its own line so the full-size controls cannot shrink it. */
+.hero-panel .topbar { flex-direction:column; }
+.hero-panel .topbar > .title-group { flex:none; width:min(100%,620px); max-width:620px; }
+.hero-panel .home-header-actions { flex:none; width:100%; min-width:0; margin-left:0; }
 @media (min-width: 981px) {
-  .home-header-actions { flex:1 0 750px; min-width:750px; }
   .home-header-rail .home-header-energy { min-width:70px; }
   .home-header-rail .header-account-summary { gap:14px; min-width:213px; }
-}
-@media (min-width: 981px) and (max-width: 1280px) {
-  .hero-panel .topbar { flex-direction:column; }
-  .hero-panel .topbar > .title-group { flex:0 1 auto; }
-  .home-header-actions { flex:0 1 auto; width:100%; margin-left:0; }
 }
 
 .hero-panel > .topbar:has(.google-apps-menu[open]),
@@ -7996,13 +7993,6 @@ body[data-theme="night"] .colt-radio-station.is-active {
   z-index: 30;
 }
 
-@media (min-width: 981px) {
-  .hero-panel .title-group {
-    flex: 0 1 540px;
-    width: 540px;
-    max-width: 540px;
-  }
-}
 
 .home-header-rail {
   display: flex;
