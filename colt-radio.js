@@ -948,7 +948,11 @@
     const stop = buildElement("button", "colt-radio-icon-btn", "×");
     stop.type = "button";
     stop.setAttribute("aria-label", "Stop Colt Radio");
-    headerActions.append(minimize, stop);
+    const popout = buildElement("button", "colt-radio-icon-btn", "↗");
+    popout.type = "button";
+    popout.title = "Pop out Colt Radio (keep Launchpad open)";
+    popout.setAttribute("aria-label", "Pop out Colt Radio");
+    headerActions.append(popout, minimize, stop);
     header.append(heading, headerActions);
 
     const stationFilters = buildElement("div", "colt-radio-filters");
@@ -1567,7 +1571,78 @@
       launcher.classList.toggle("is-playing", Boolean(activeStation));
     }
 
+    let floatingWindow = null;
+    let openingFloat = false;
+    function returnPlayer() {
+      const win = floatingWindow;
+      floatingWindow = null;
+      root.append(panel);
+      popout.textContent = "↗";
+      popout.setAttribute("aria-label", "Pop out Colt Radio");
+      popout.title = "Pop out Colt Radio (keep Launchpad open)";
+      if (win && !win.closed) win.close();
+    }
+    async function floatPlayer() {
+      if (floatingWindow) { returnPlayer(); openPanel(); return; }
+      if (openingFloat) return;
+      openingFloat = true;
+      popout.disabled = true;
+      let win;
+      try {
+        if (globalObject.documentPictureInPicture?.requestWindow) {
+          win = await globalObject.documentPictureInPicture.requestWindow({ width:420, height:620 });
+        } else {
+          win = globalObject.open('', 'colt-radio-floating', 'popup,width=420,height=620');
+          if (!win) throw new Error('Popup blocked');
+        }
+        const doc = win.document;
+        doc.title = 'Colt Radio';
+        const base = doc.createElement('base');
+        base.href = document.baseURI;
+        doc.head.append(base);
+        document.querySelectorAll('link[rel="stylesheet"],style').forEach(node => {
+          try {
+            const copy = doc.createElement('style');
+            copy.textContent = [...node.sheet.cssRules].map(rule => rule.cssText).join('\n');
+            doc.head.append(copy);
+          } catch {
+            const copy = node.cloneNode(true);
+            if (node.tagName === 'LINK') copy.href = node.href;
+            doc.head.append(copy);
+          }
+        });
+        doc.body.className = document.body.className;
+        if (document.body.dataset.theme) doc.body.dataset.theme = document.body.dataset.theme;
+        const style = doc.createElement('style');
+        style.textContent = 'html,body{margin:0!important;padding:0!important;min-width:0!important;width:100%;height:100%;overflow:auto;background:#10090d}body .colt-radio-panel{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;box-sizing:border-box;margin:0!important;border-radius:0}.colt-radio-header{flex-wrap:wrap;gap:8px}.colt-radio-header-actions{margin-left:auto}';
+        doc.head.append(style);
+        floatingWindow = win;
+        // Keep the audio element in its original document so moving controls cannot restart playback.
+        root.append(audio);
+        doc.body.append(panel);
+        panel.hidden = false;
+        popout.textContent = '↙';
+        popout.title = 'Return to Launchpad';
+        popout.setAttribute('aria-label', 'Return Colt Radio to Launchpad');
+        win.addEventListener('pagehide', () => {
+          if (floatingWindow !== win) return;
+          returnPlayer();
+          panel.hidden = false;
+          launcher.hidden = true;
+          launcher.setAttribute('aria-expanded','true');
+        }, { once:true });
+      } catch (error) {
+        if (win && !win.closed) win.close();
+        note.textContent = 'Could not open the floating player. Allow pop-ups for Launchpad and try again.';
+      } finally {
+        openingFloat = false;
+        popout.disabled = false;
+      }
+    }
+    globalObject.addEventListener('pagehide', returnPlayer);
+    popout.addEventListener('click', floatPlayer);
     function minimizePanel({ focusLauncher = true } = {}) {
+      returnPlayer();
       panel.hidden = true;
       launcher.hidden = false;
       launcher.setAttribute("aria-expanded", "false");
@@ -1630,6 +1705,7 @@
     }
 
     function openPanel() {
+      if (floatingWindow) { floatingWindow.focus(); return; }
       if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       if (!streamArtworkImage.src) streamArtworkImage.src = streamArtworkImage.dataset.src;
       panel.hidden = false;
