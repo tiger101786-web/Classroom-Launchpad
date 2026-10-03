@@ -130,7 +130,8 @@
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
   rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
   rows.push(['Superheroes', ["superhero-harley-quinn-statue","Harley Quinn Statue"], ["superhero-joker-statue","Joker Statue"]]);
-  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"], ["simba-statue","Simba Statue"], ["merida-statue","Merida Statue"]]);
+  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"], ["simba-statue","Simba Statue"]]);
+  rows.push(['Disney', ["merida-statue","Merida Statue"]]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -149,7 +150,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue.png","width":1728,"height":1152,"bounds":[386,6,981,1111],"displaySize":440,"displayWidth":440,"displayOffsetX":-20,"directImage":true},
+    'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue.png","width":1728,"height":1152,"bounds":[386,6,981,1111],"displaySize":330,"displayWidth":330,"displayOffsetX":-15,"directImage":true},
     'superhero-joker-statue': {"source":"assets/shelf-superhero-joker-statue.png","width":1264,"height":1568,"bounds":[166,2,978,1534],"displaySize":330,"displayWidth":280,"directImage":true},
     'luigi-statue': {"source":"assets/shelf-luigi-statue.png","width":1232,"height":1600,"bounds":[261,26,731,1518],"displaySize":330,"displayWidth":280,"directImage":true},
     'mario-statue': {"source":"assets/shelf-mario-statue.png","width":960,"height":2064,"bounds":[52,36,870,1956],"displaySize":330,"displayWidth":280,"directImage":true},
