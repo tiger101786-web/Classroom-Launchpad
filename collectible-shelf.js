@@ -129,6 +129,8 @@
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
   rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
+  rows.push(['Superheroes', ["superhero-harley-quinn-statue","Harley Quinn Statue"], ["superhero-joker-statue","Joker Statue"]]);
+  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"], ["simba-statue","Simba Statue"], ["merida-statue","Merida Statue"]]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -147,6 +149,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue.png","width":1728,"height":1152,"bounds":[386,6,981,1111],"displaySize":440,"displayWidth":440,"displayOffsetX":-20,"directImage":true},
+    'superhero-joker-statue': {"source":"assets/shelf-superhero-joker-statue.png","width":1264,"height":1568,"bounds":[166,2,978,1534],"displaySize":330,"displayWidth":280,"directImage":true},
+    'luigi-statue': {"source":"assets/shelf-luigi-statue.png","width":1232,"height":1600,"bounds":[261,26,731,1518],"displaySize":330,"displayWidth":280,"directImage":true},
+    'mario-statue': {"source":"assets/shelf-mario-statue.png","width":960,"height":2064,"bounds":[52,36,870,1956],"displaySize":330,"displayWidth":280,"directImage":true},
+    'simba-statue': {"source":"assets/shelf-simba-statue.png","width":1600,"height":1232,"bounds":[324,17,1039,1189],"displaySize":330,"displayWidth":280,"directImage":true},
+    'merida-statue': {"source":"assets/shelf-merida-statue.png","width":1152,"height":1712,"bounds":[192,60,880,1580],"displaySize":330,"displayWidth":280,"directImage":true},
     'peace-sign-girl': {source:'assets/shelf-peace-sign-girl.png',width:1122,height:1402,bounds:[134,2,877,1396],displaySize:330,displayWidth:280},
     'verity-statue': {source:'assets/shelf-verity-statue.png',width:1152,height:1728,bounds:[70,21,1046,1672],displaySize:330,displayWidth:280},
     'toy-story-buzz': {source:'assets/shelf-toy-story-buzz.png',width:1600,height:1200,bounds:[271,25,1110,1148],displaySize:330,displayWidth:280},
@@ -462,7 +470,7 @@
     // stretching the plate or moving its contact point off the shared baseline.
     const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
-    if (anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
+    if (asset?.directImage || anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
       return `<div class="shelf-object shelf-direct-image${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${((220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0)))/220*100}%;bottom:${4/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${(asset?.width || 1254)/w*100}%;height:${(asset?.height || 1254)/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto${asset?.clip ? `;clip-path:${asset.clip};clip-rule:nonzero` : ''}"></div></div>`;
     }

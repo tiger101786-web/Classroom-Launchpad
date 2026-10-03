@@ -566,7 +566,14 @@
     const close = buildElement("button", "colt-assistant-close", "×");
     close.type = "button";
     close.setAttribute("aria-label", "Close Colt Assistant");
-    header.append(headingWrap, close);
+    const popout = buildElement("button", "colt-assistant-close", "↗");
+    popout.type = "button";
+    popout.title = "Pop out Colt Assistant (keep Launchpad open)";
+    popout.setAttribute("aria-label", "Pop out Colt Assistant");
+    const headerActions = buildElement("div", "colt-assistant-header-actions");
+    headerActions.style.cssText = "display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1";
+    headerActions.append(popout, close);
+    header.append(headingWrap, headerActions);
 
     const toolbar = buildElement("nav", "colt-assistant-toolbar");
     toolbar.setAttribute("aria-label", "Colt Assistant controls");
@@ -909,7 +916,76 @@
       input.focus();
     }
 
+    let floatingWindow = null;
+    let openingFloat = false;
+    function returnAssistant() {
+      const win = floatingWindow;
+      floatingWindow = null;
+      root.append(panel);
+      popout.textContent = "↗";
+      popout.setAttribute("aria-label", "Pop out Colt Assistant");
+      popout.title = "Pop out Colt Assistant (keep Launchpad open)";
+      if (win && !win.closed) win.close();
+    }
+    async function floatAssistant() {
+      if (floatingWindow) { returnAssistant(); openPanel(); return; }
+      if (openingFloat) return;
+      openingFloat = true;
+      popout.disabled = true;
+      let win;
+      try {
+        if (globalObject.documentPictureInPicture?.requestWindow) {
+          win = await globalObject.documentPictureInPicture.requestWindow({ width:460, height:700 });
+        } else {
+          win = globalObject.open('', 'colt-assistant-floating', 'popup,width=460,height=700');
+          if (!win) throw new Error('Popup blocked');
+        }
+        const doc = win.document;
+        doc.title = 'Colt Assistant';
+        const base = doc.createElement('base');
+        base.href = document.baseURI;
+        doc.head.append(base);
+        document.querySelectorAll('link[rel="stylesheet"],style').forEach(node => {
+          try {
+            const copy = doc.createElement('style');
+            copy.textContent = [...node.sheet.cssRules].map(rule => rule.cssText).join('\n');
+            doc.head.append(copy);
+          } catch {
+            const copy = node.cloneNode(true);
+            if (node.tagName === 'LINK') copy.href = node.href;
+            doc.head.append(copy);
+          }
+        });
+        doc.body.className = document.body.className;
+        if (document.body.dataset.theme) doc.body.dataset.theme = document.body.dataset.theme;
+        const style = doc.createElement('style');
+        style.textContent = 'html,body{margin:0!important;padding:0!important;min-width:0!important;width:100%;height:100%;overflow:auto;background:#10090d}body .colt-assistant-panel{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;box-sizing:border-box;margin:0!important;border-radius:0}.colt-assistant-header{flex-wrap:wrap;gap:8px}.colt-assistant-header-actions{margin-left:auto}';
+        doc.head.append(style);
+        floatingWindow = win;
+        doc.body.append(panel);
+        panel.hidden = false;
+        popout.textContent = '↙';
+        popout.title = 'Return to Launchpad';
+        popout.setAttribute('aria-label', 'Return Colt Assistant to Launchpad');
+        win.addEventListener('pagehide', () => {
+          if (floatingWindow !== win) return;
+          returnAssistant();
+          panel.hidden = false;
+          launcher.hidden = true;
+          launcher.setAttribute('aria-expanded','true');
+        }, { once:true });
+      } catch (error) {
+        if (win && !win.closed) win.close();
+        globalObject.alert('Could not open Colt Assistant. Allow pop-ups for Launchpad and try again.');
+      } finally {
+        openingFloat = false;
+        popout.disabled = false;
+      }
+    }
+    globalObject.addEventListener('pagehide', returnAssistant);
+    popout.addEventListener('click', floatAssistant);
     function openPanel() {
+      if (floatingWindow) { floatingWindow.focus(); return; }
       if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       panel.hidden = false;
       launcher.setAttribute("aria-expanded", "true");
@@ -919,6 +995,7 @@
     }
 
     function closePanel() {
+      returnAssistant();
       stopReading();
       panel.hidden = true;
       launcher.hidden = false;
@@ -994,6 +1071,7 @@
       root.hidden = shouldHide;
       root.classList.toggle("has-class-timer", Boolean(document.querySelector(".class-timer-badge")));
       if (shouldHide && !panel.hidden) {
+        returnAssistant();
         panel.hidden = true;
         launcher.hidden = false;
       }
