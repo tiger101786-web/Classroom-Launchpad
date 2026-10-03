@@ -35,6 +35,9 @@
 /* Bases land at 60% of the artwork height, inside the 53–64% tabletop. */
 .shelf-objects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; gap:8%; padding:0; position:absolute; left:8%; right:8%; bottom:var(--shelf-object-bottom,39%); z-index:1; }
 .shelf-object { display:block; width:100%; height:auto; aspect-ratio:220 / 350; overflow:visible; filter:drop-shadow(0 3px 2px #0005); }
+/* Keep Iida's fine armor and glasses details crisp at shelf scale. */
+.shelf-object[aria-label="Tenya Iida Statue"] { filter:none; }
+.shelf-object[aria-label="Tenya Iida Statue"] image { image-rendering:-webkit-optimize-contrast; }
 .shelf-display-slot { min-width:0; }
 .shelf-has-cars > .shelf-objects { left:4%; right:4%; }
 .shelf-has-superheroes > .shelf-objects { left:2%; right:2%; gap:14%; }

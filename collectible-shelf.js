@@ -121,6 +121,7 @@
   rows.push(['Anime', ["anime-akaza-statue","Akaza Statue"], ["anime-zenitsu-statue","Zenitsu Agatsuma Statue"], ["anime-shinobu-statue","Shinobu Kocho Statue"], ["anime-tanjiro-statue","Tanjiro Kamado Statue"], ["anime-inosuke-statue","Inosuke Hashibira Statue"], ["anime-giyu-statue","Giyu Tomioka Statue"]]);
   rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
   rows.push(['Anime', ["anime-kirishima-statue","Eijiro Kirishima Statue"], ["anime-bakugo-statue","Katsuki Bakugo Statue"], ["anime-iida-statue","Tenya Iida Statue"], ["anime-uraraka-statue","Ochaco Uraraka Statue"], ["anime-tsuyu-statue","Tsuyu Asui Statue"], ["anime-todoroki-statue","Shoto Todoroki Statue"], ["anime-kaminari-statue","Denki Kaminari Statue"], ["anime-toga-statue","Himiko Toga Statue"]]);
+  rows.push(['Anime', ["anime-pain-statue","Pain Statue"], ["anime-levi-statue","Levi Ackerman Statue"], ["anime-guts-statue","Guts Statue"], ["anime-orochimaru-statue","Orochimaru Statue"], ["anime-light-yagami-statue","Light Yagami Statue"], ["anime-naruto-six-paths-statue","Naruto Six Paths Statue"], ["anime-sasuke-susanoo-statue","Sasuke Susanoo Statue"], ["anime-naruto-kurama-statue","Naruto & Kurama Statue"]]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
@@ -144,6 +145,14 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'anime-pain-statue': {"source":"assets/shelf-anime-pain-statue.png","width":896,"height":2224,"bounds":[21,35,875,2101],"displaySize":330,"displayWidth":280},
+    'anime-levi-statue': {"source":"assets/shelf-anime-levi-statue.png","width":1056,"height":1872,"bounds":[43,61,975,1736],"displaySize":330,"displayWidth":280},
+    'anime-guts-statue': {"source":"assets/shelf-anime-guts-statue.png","width":1152,"height":1728,"bounds":[47,65,1105,1595],"displaySize":330,"displayWidth":280},
+    'anime-orochimaru-statue': {"source":"assets/shelf-anime-orochimaru-statue.png","width":1264,"height":1568,"bounds":[87,47,1107,1478],"displaySize":330,"displayWidth":280},
+    'anime-light-yagami-statue': {"source":"assets/shelf-anime-light-yagami-statue.png","width":1152,"height":1728,"bounds":[126,20,946,1673],"displaySize":330,"displayWidth":280},
+    'anime-naruto-six-paths-statue': {"source":"assets/shelf-anime-naruto-six-paths-statue.png","width":1424,"height":1392,"bounds":[43,18,1368,1345],"displaySize":330,"displayWidth":280},
+    'anime-sasuke-susanoo-statue': {"source":"assets/shelf-anime-sasuke-susanoo-statue.png","width":1264,"height":1552,"bounds":[70,35,1146,1477],"displaySize":330,"displayWidth":280},
+    'anime-naruto-kurama-statue': {"source":"assets/shelf-anime-naruto-kurama-statue.png","width":832,"height":1248,"bounds":[31,11,778,1225],"displaySize":330,"displayWidth":280},
     'anime-kirishima-statue': {"source":"assets/shelf-anime-kirishima-statue.png","width":880,"height":1184,"bounds":[22,0,855,1156],"displaySize":330,"displayWidth":280},
     'anime-bakugo-statue': {"source":"assets/shelf-anime-bakugo-statue.png","width":1504,"height":1312,"bounds":[384,0,792,1276],"displaySize":330,"displayWidth":280},
     'anime-iida-statue': {"source":"assets/shelf-anime-iida-statue.png","width":1408,"height":1408,"bounds":[207,30,1091,1346],"displaySize":330,"displayWidth":280},
