@@ -116,6 +116,8 @@
   rows.push(['Music', ['music-pop-singer-statue','Pop Singer Guitar Statue']]);
   rows.push(['Anime', ['anime-ichigo-statue','Ichigo Statue']]);
   rows.push(['Anime', ['anime-luck-voltia-statue','Luck Voltia Statue'], ['anime-megumi-statue','Megumi Fushiguro Statue']]);
+  rows.push(['Anime', ["anime-akaza-statue","Akaza Statue"], ["anime-zenitsu-statue","Zenitsu Agatsuma Statue"], ["anime-shinobu-statue","Shinobu Kocho Statue"], ["anime-tanjiro-statue","Tanjiro Kamado Statue"], ["anime-inosuke-statue","Inosuke Hashibira Statue"], ["anime-giyu-statue","Giyu Tomioka Statue"]]);
+  rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
@@ -139,6 +141,16 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'anime-akaza-statue': {"source":"assets/shelf-anime-akaza-statue.png","width":1312,"height":1504,"bounds":[91,6,1182,1444],"displaySize":330,"displayWidth":280},
+    'anime-zenitsu-statue': {"source":"assets/shelf-anime-zenitsu-statue.png","width":1424,"height":1392,"bounds":[189,17,1186,1297],"displaySize":330,"displayWidth":280},
+    'anime-shinobu-statue': {"source":"assets/shelf-anime-shinobu-statue.png","width":1168,"height":1680,"bounds":[35,46,1105,1571],"displaySize":330,"displayWidth":280},
+    'anime-tanjiro-statue': {"source":"assets/shelf-anime-tanjiro-statue.png","width":1200,"height":1648,"bounds":[163,10,1037,1614],"displaySize":330,"displayWidth":280},
+    'anime-inosuke-statue': {"source":"assets/shelf-anime-inosuke-statue.png","width":1168,"height":1680,"bounds":[156,49,889,1600],"displaySize":330,"displayWidth":280},
+    'anime-giyu-statue': {"source":"assets/shelf-anime-giyu-statue.png","width":992,"height":2000,"bounds":[17,26,969,1892],"displaySize":330,"displayWidth":280},
+    'pokemon-espeon-statue': {"source":"assets/shelf-pokemon-espeon-statue.png","width":1440,"height":1376,"bounds":[197,15,1051,1327],"displaySize":330,"displayWidth":280},
+    'pokemon-arceus-statue': {"source":"assets/shelf-pokemon-arceus-statue.png","width":1408,"height":1408,"bounds":[320,18,848,1352],"displaySize":330,"displayWidth":280},
+    'pokemon-machamp-statue': {"source":"assets/shelf-pokemon-machamp-statue.png","width":1408,"height":1408,"bounds":[189,1,1020,1380],"displaySize":330,"displayWidth":280},
+    'pokemon-ninetales-statue': {"source":"assets/shelf-pokemon-ninetales-statue.png","width":1408,"height":1408,"bounds":[140,25,1196,1344],"displaySize":330,"displayWidth":280},
     'anime-luck-voltia-statue': {"source":"assets/shelf-anime-luck-voltia-statue-v2.png","width":1376,"height":1440,"bounds":[122,0,1201,1411],"displaySize":330,"displayWidth":280},
     'nee-doh-stack-statue': {"source":"assets/shelf-nee-doh-stack-statue.png","width":1408,"height":1408,"bounds":[317,40,817,1288],"displaySize":330,"displayWidth":280},
     'anime-megumi-statue': {"source":"assets/shelf-anime-megumi-statue-v2.png","width":1408,"height":1408,"bounds":[253,1,926,1377],"displaySize":330,"displayWidth":280},
