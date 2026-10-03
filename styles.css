@@ -644,7 +644,7 @@ body[data-theme="night"] h1 {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
 }
 
-.hero-panel .home-title-art { width: min(100%, 620px); margin:8px 0 12px; line-height:0; }
+.hero-panel .home-title-art { width: min(100%, 440px); margin:8px 0 12px; line-height:0; }
 .hero-panel .home-title-art img { display:block; width:100%; height:auto; }
 
 h2 {
@@ -7979,12 +7979,14 @@ body[data-theme="night"] .colt-radio-station.is-active {
   margin-left: 12px;
 }
 
-/* Give the title its own line so the full-size controls cannot shrink it. */
-.hero-panel .topbar { flex-direction:column; }
-.hero-panel .topbar > .title-group { flex:none; width:min(100%,620px); max-width:620px; }
-.hero-panel .home-header-actions { flex:none; width:100%; min-width:0; margin-left:0; }
+/* Keep the desktop header compact; the logo grows below the controls,
+   without making the school logo or the whole header column wider. */
 @media (min-width: 981px) {
-  .home-header-rail .home-header-energy { min-width:70px; }
+  .hero-panel .topbar { flex-direction:row; flex-wrap:wrap; }
+  .hero-panel .topbar > .title-group { flex:1 1 320px; max-width:360px; }
+  .hero-panel .home-title-art { width:440px; max-width:none; }
+  .hero-panel .home-header-actions { flex:1 1 680px; margin-left:0; }
+  .home-header-rail .home-header-energy { min-width:38px; }
   .home-header-rail .header-account-summary { gap:14px; min-width:213px; }
 }
 
