@@ -7994,6 +7994,7 @@ body[data-theme="night"] .colt-radio-station.is-active {
 
 .home-header-rail {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -8016,6 +8017,10 @@ body[data-theme="night"] .colt-radio-station.is-active {
   gap: 7px;
   min-width: 0;
 }
+
+.home-header-apps { flex-shrink:0; }
+.home-header-apps > button,
+.home-header-apps > .portal-btn { flex-shrink:0; }
 
 .home-header-user {
   flex: 0 0 auto;

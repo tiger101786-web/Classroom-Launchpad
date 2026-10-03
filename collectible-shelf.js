@@ -123,7 +123,7 @@
   rows.push(['Anime', ["anime-kirishima-statue","Eijiro Kirishima Statue"], ["anime-bakugo-statue","Katsuki Bakugo Statue"], ["anime-iida-statue","Tenya Iida Statue"], ["anime-uraraka-statue","Ochaco Uraraka Statue"], ["anime-tsuyu-statue","Tsuyu Asui Statue"], ["anime-todoroki-statue","Shoto Todoroki Statue"], ["anime-kaminari-statue","Denki Kaminari Statue"], ["anime-toga-statue","Himiko Toga Statue"]]);
   rows.push(['Anime', ["anime-pain-statue","Pain Statue"], ["anime-levi-statue","Levi Ackerman Statue"], ["anime-guts-statue","Guts Statue"], ["anime-orochimaru-statue","Orochimaru Statue"], ["anime-light-yagami-statue","Light Yagami Statue"], ["anime-naruto-six-paths-statue","Naruto Six Paths Statue"], ["anime-sasuke-susanoo-statue","Sasuke Susanoo Statue"], ["anime-naruto-kurama-statue","Naruto & Kurama Statue"]]);
   rows.push(['Anime', ["anime-gon-statue","Gon Freecss Statue"], ["anime-hinata-statue","Shoyo Hinata Statue"], ["anime-obanai-statue","Obanai Iguro Statue"], ["anime-tengen-statue","Tengen Uzui Statue"], ["anime-isagi-statue","Yoichi Isagi Statue"], ["anime-gray-statue","Yuno Grinberryall Statue"], ["anime-nobara-statue","Nobara Kugisaki Statue"], ["anime-kirito-statue","Kirito Statue"], ["anime-natsu-statue","Natsu Dragneel Statue"], ["anime-gyomei-statue","Gyomei Himejima Statue"], ["anime-sanemi-statue","Sanemi Shinazugawa Statue"]]);
-  rows.push(['Character Collectibles', ['peace-sign-girl','Peace Sign Girl Statue'], ['verity-statue','Verity Statue']]);
+  rows.push(['Character Collectibles', ['peace-sign-girl','Peace Sign Girl Statue'], ['verity-statue','Verity Statue'], ['toy-story-buzz','Buzz Lightyear Statue'], ['toy-story-rex','Rex Statue'], ['toy-story-woody','Woody Statue']]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
@@ -149,6 +149,9 @@
   const standalone = {
     'peace-sign-girl': {source:'assets/shelf-peace-sign-girl.png',width:1122,height:1402,bounds:[134,2,877,1396],displaySize:330,displayWidth:280},
     'verity-statue': {source:'assets/shelf-verity-statue.png',width:1152,height:1728,bounds:[70,21,1046,1672],displaySize:330,displayWidth:280},
+    'toy-story-buzz': {source:'assets/shelf-toy-story-buzz.png',width:1600,height:1200,bounds:[271,25,1110,1148],displaySize:330,displayWidth:280},
+    'toy-story-rex': {source:'assets/shelf-toy-story-rex.png',width:1344,height:1472,bounds:[224,37,837,1376],displaySize:330,displayWidth:280},
+    'toy-story-woody': {source:'assets/shelf-toy-story-woody.png',width:1264,height:1568,bounds:[249,13,780,1537],displaySize:330,displayWidth:280},
     'anime-gon-statue': {"source":"assets/shelf-anime-gon-statue.png","width":896,"height":2208,"bounds":[35,43,824,2049],"displaySize":330,"displayWidth":280},
     'anime-hinata-statue': {"source":"assets/shelf-anime-hinata-statue.png","width":1152,"height":1712,"bounds":[216,22,738,1625],"displaySize":330,"displayWidth":280},
     'anime-obanai-statue': {"source":"assets/shelf-anime-obanai-statue.png","width":1696,"height":1168,"bounds":[545,9,626,1150],"displaySize":330,"displayWidth":280},
@@ -459,7 +462,7 @@
     // stretching the plate or moving its contact point off the shared baseline.
     const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
-    if (anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue') {
+    if (anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
       return `<div class="shelf-object shelf-direct-image${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${((220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0)))/220*100}%;bottom:${4/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${(asset?.width || 1254)/w*100}%;height:${(asset?.height || 1254)/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto${asset?.clip ? `;clip-path:${asset.clip};clip-rule:nonzero` : ''}"></div></div>`;
     }
