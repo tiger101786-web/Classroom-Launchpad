@@ -3343,6 +3343,21 @@ body[data-theme="night"] .feature-media {
   align-items: flex-start;
 }
 
+.request-card > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.request-card > .actions {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+.request-card > .actions button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .primary-btn, .outline-btn, .danger-btn {
   min-height: 44px;
   border-radius: 8px;
@@ -5776,6 +5791,16 @@ body[data-theme="night"] .class-timer-badge {
 
   .request-card {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .request-card > .actions {
+    margin-top: 0;
+  }
+
+  .request-card > .actions button {
+    padding-inline: 10px;
+    font-size: 0.85rem;
   }
 
   .category-feature {
