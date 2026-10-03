@@ -7979,6 +7979,18 @@ body[data-theme="night"] .colt-radio-station.is-active {
   margin-left: 12px;
 }
 
+/* Reserve room for full-size controls before allocating space to the title. */
+@media (min-width: 981px) {
+  .home-header-actions { flex:1 0 750px; min-width:750px; }
+  .home-header-rail .home-header-energy { min-width:70px; }
+  .home-header-rail .header-account-summary { gap:14px; min-width:213px; }
+}
+@media (min-width: 981px) and (max-width: 1280px) {
+  .hero-panel .topbar { flex-direction:column; }
+  .hero-panel .topbar > .title-group { flex:0 1 auto; }
+  .home-header-actions { flex:0 1 auto; width:100%; margin-left:0; }
+}
+
 .hero-panel > .topbar:has(.google-apps-menu[open]),
 .hero-panel > .topbar:has(.header-account-menu[open]) {
   z-index: 30;
@@ -7995,7 +8007,6 @@ body[data-theme="night"] .colt-radio-station.is-active {
 .home-header-rail {
   display: flex;
   flex-wrap: nowrap;
-  container-type: inline-size;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -8183,21 +8194,6 @@ body[data-theme="night"] .colt-radio-station.is-active {
   display: none;
 }
 
-/* Compact controls according to the rail's available space, never wrap them. */
-@container (max-width: 600px) {
-  .home-header-energy { display:none; }
-  .home-header-apps, .home-header-user { gap:5px; }
-  .home-header-rail .portal-btn,
-  .home-header-rail .google-signin-btn { padding-inline:9px; font-size:0.85rem; }
-  .home-header-user { flex:0 1 auto; }
-  .header-account-summary {
-    min-width:140px;
-    grid-template-columns:32px minmax(0,1fr) 12px;
-    gap:6px;
-    padding-inline:5px;
-  }
-  .header-account-summary .header-account-avatar { width:32px; height:32px; }
-}
 
 .header-account-avatar {
   display: grid;
