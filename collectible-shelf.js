@@ -116,6 +116,8 @@
   rows.push(['Music', ['music-pop-singer-statue','Pop Singer Guitar Statue']]);
   rows.push(['Anime', ['anime-ichigo-statue','Ichigo Statue']]);
   rows.push(['Anime', ['anime-luck-voltia-statue','Luck Voltia Statue'], ['anime-megumi-statue','Megumi Fushiguro Statue']]);
+  rows.push(['Pokémon', ["pokemon-meowth-statue","Meowth Statue"], ["pokemon-tyranitar-statue","Tyranitar Statue"], ["pokemon-blastoise-statue","Blastoise Statue"], ["pokemon-vileplume-statue","Vileplume Statue"], ["pokemon-poliwrath-statue","Poliwrath Statue"]]);
+  rows.push(['Anime', ["anime-mikasa-statue","Mikasa Ackerman Statue"], ["anime-armored-titan-statue","Armored Titan Statue"], ["anime-attack-titan-statue","Attack Titan Statue"], ["anime-eren-statue","Eren Yeager Statue"], ["anime-colossal-titan-statue","Colossal Titan Statue"]]);
   rows.push(['Anime', ["anime-akaza-statue","Akaza Statue"], ["anime-zenitsu-statue","Zenitsu Agatsuma Statue"], ["anime-shinobu-statue","Shinobu Kocho Statue"], ["anime-tanjiro-statue","Tanjiro Kamado Statue"], ["anime-inosuke-statue","Inosuke Hashibira Statue"], ["anime-giyu-statue","Giyu Tomioka Statue"]]);
   rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
@@ -141,6 +143,16 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'pokemon-meowth-statue': {"source":"assets/shelf-pokemon-meowth-statue.png","width":1408,"height":1408,"bounds":[261,5,895,1387],"displaySize":330,"displayWidth":280},
+    'pokemon-tyranitar-statue': {"source":"assets/shelf-pokemon-tyranitar-statue.png","width":1296,"height":1520,"bounds":[135,19,1066,1455],"displaySize":330,"displayWidth":280},
+    'pokemon-blastoise-statue': {"source":"assets/shelf-pokemon-blastoise-statue.png","width":1360,"height":1456,"bounds":[127,64,1142,1328],"displaySize":330,"displayWidth":280},
+    'pokemon-vileplume-statue': {"source":"assets/shelf-pokemon-vileplume-statue.png","width":1408,"height":1408,"bounds":[100,28,1246,1351],"displaySize":330,"displayWidth":280},
+    'pokemon-poliwrath-statue': {"source":"assets/shelf-pokemon-poliwrath-statue.png","width":1408,"height":1408,"bounds":[68,120,1298,1207],"displaySize":330,"displayWidth":280},
+    'anime-mikasa-statue': {"source":"assets/shelf-anime-mikasa-statue.png","width":1200,"height":1648,"bounds":[270,15,680,1581],"displaySize":330,"displayWidth":280},
+    'anime-armored-titan-statue': {"source":"assets/shelf-anime-armored-titan-statue.png","width":1376,"height":1440,"bounds":[249,0,892,1425],"displaySize":330,"displayWidth":280},
+    'anime-attack-titan-statue': {"source":"assets/shelf-anime-attack-titan-statue.png","width":1408,"height":1408,"bounds":[285,28,820,1349],"displaySize":330,"displayWidth":280},
+    'anime-eren-statue': {"source":"assets/shelf-anime-eren-statue.png","width":1008,"height":1968,"bounds":[116,44,892,1822],"displaySize":330,"displayWidth":280},
+    'anime-colossal-titan-statue': {"source":"assets/shelf-anime-colossal-titan-statue.png","width":1056,"height":1872,"bounds":[20,35,995,1770],"displaySize":330,"displayWidth":280},
     'anime-akaza-statue': {"source":"assets/shelf-anime-akaza-statue.png","width":1312,"height":1504,"bounds":[91,6,1182,1444],"displaySize":330,"displayWidth":280},
     'anime-zenitsu-statue': {"source":"assets/shelf-anime-zenitsu-statue.png","width":1424,"height":1392,"bounds":[189,17,1186,1297],"displaySize":330,"displayWidth":280},
     'anime-shinobu-statue': {"source":"assets/shelf-anime-shinobu-statue.png","width":1168,"height":1680,"bounds":[35,46,1105,1571],"displaySize":330,"displayWidth":280},
