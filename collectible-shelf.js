@@ -122,6 +122,7 @@
   rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
   rows.push(['Anime', ["anime-kirishima-statue","Eijiro Kirishima Statue"], ["anime-bakugo-statue","Katsuki Bakugo Statue"], ["anime-iida-statue","Tenya Iida Statue"], ["anime-uraraka-statue","Ochaco Uraraka Statue"], ["anime-tsuyu-statue","Tsuyu Asui Statue"], ["anime-todoroki-statue","Shoto Todoroki Statue"], ["anime-kaminari-statue","Denki Kaminari Statue"], ["anime-toga-statue","Himiko Toga Statue"]]);
   rows.push(['Anime', ["anime-pain-statue","Pain Statue"], ["anime-levi-statue","Levi Ackerman Statue"], ["anime-guts-statue","Guts Statue"], ["anime-orochimaru-statue","Orochimaru Statue"], ["anime-light-yagami-statue","Light Yagami Statue"], ["anime-naruto-six-paths-statue","Naruto Six Paths Statue"], ["anime-sasuke-susanoo-statue","Sasuke Susanoo Statue"], ["anime-naruto-kurama-statue","Naruto & Kurama Statue"]]);
+  rows.push(['Anime', ["anime-gon-statue","Gon Freecss Statue"], ["anime-hinata-statue","Shoyo Hinata Statue"], ["anime-obanai-statue","Obanai Iguro Statue"], ["anime-tengen-statue","Tengen Uzui Statue"], ["anime-isagi-statue","Yoichi Isagi Statue"], ["anime-gray-statue","Gray Fullbuster Statue"], ["anime-nobara-statue","Nobara Kugisaki Statue"], ["anime-kirito-statue","Kirito Statue"], ["anime-natsu-statue","Natsu Dragneel Statue"], ["anime-gyomei-statue","Gyomei Himejima Statue"], ["anime-sanemi-statue","Sanemi Shinazugawa Statue"]]);
   rows.push(['Character Collectibles', ['peace-sign-girl','Peace Sign Girl Statue']]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
@@ -147,6 +148,17 @@
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
     'peace-sign-girl': {source:'assets/shelf-peace-sign-girl.png',width:1122,height:1402,bounds:[134,2,877,1396],displaySize:330,displayWidth:280},
+    'anime-gon-statue': {"source":"assets/shelf-anime-gon-statue.png","width":896,"height":2208,"bounds":[35,43,824,2049],"displaySize":330,"displayWidth":280},
+    'anime-hinata-statue': {"source":"assets/shelf-anime-hinata-statue.png","width":1152,"height":1712,"bounds":[216,22,738,1625],"displaySize":330,"displayWidth":280},
+    'anime-obanai-statue': {"source":"assets/shelf-anime-obanai-statue.png","width":1696,"height":1168,"bounds":[545,9,626,1150],"displaySize":330,"displayWidth":280},
+    'anime-tengen-statue': {"source":"assets/shelf-anime-tengen-statue.png","width":1552,"height":1280,"bounds":[265,7,1039,1252],"displaySize":330,"displayWidth":280},
+    'anime-isagi-statue': {"source":"assets/shelf-anime-isagi-statue.png","width":1200,"height":1648,"bounds":[279,15,724,1572],"displaySize":330,"displayWidth":280},
+    'anime-gray-statue': {"source":"assets/shelf-anime-gray-statue.png","width":1152,"height":1728,"bounds":[181,9,816,1660],"displaySize":330,"displayWidth":280},
+    'anime-nobara-statue': {"source":"assets/shelf-anime-nobara-statue.png","width":992,"height":1984,"bounds":[38,0,954,1916],"displaySize":330,"displayWidth":280},
+    'anime-kirito-statue': {"source":"assets/shelf-anime-kirito-statue.png","width":832,"height":2368,"bounds":[30,216,802,1909],"displaySize":330,"displayWidth":280},
+    'anime-natsu-statue': {"source":"assets/shelf-anime-natsu-statue.png","width":1152,"height":1728,"bounds":[208,18,792,1677],"displaySize":330,"displayWidth":280},
+    'anime-gyomei-statue': {"source":"assets/shelf-anime-gyomei-statue.png","width":1168,"height":1680,"bounds":[113,14,959,1617],"displaySize":330,"displayWidth":280},
+    'anime-sanemi-statue': {"source":"assets/shelf-anime-sanemi-statue.png","width":1072,"height":1856,"bounds":[64,24,976,1792],"displaySize":330,"displayWidth":280},
     'anime-pain-statue': {"source":"assets/shelf-anime-pain-statue.png","width":896,"height":2224,"bounds":[21,35,875,2101],"displaySize":330,"displayWidth":280},
     'anime-levi-statue': {"source":"assets/shelf-anime-levi-statue.png","width":1056,"height":1872,"bounds":[43,61,975,1736],"displaySize":330,"displayWidth":280},
     'anime-guts-statue': {"source":"assets/shelf-anime-guts-statue.png","width":1152,"height":1728,"bounds":[47,65,1105,1595],"displaySize":330,"displayWidth":280},

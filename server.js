@@ -4193,6 +4193,7 @@ async function handleApi(req, res, pathname) {
         db.websiteRequests = [{
           id: crypto.randomUUID(),
           studentName: studentDisplayName(allowed),
+          studentEmail: String(allowed.email || "").trim().toLowerCase(),
           grade,
           feedbackType,
           websiteName,

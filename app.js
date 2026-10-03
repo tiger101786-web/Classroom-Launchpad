@@ -300,6 +300,7 @@ function normalizeRequests(items) {
   return (Array.isArray(items) ? items : []).filter(item => item && item.id !== DAILY_LAUNCH_REQUEST_ID && item.id !== CLASS_TIMER_REQUEST_ID && item.id !== RANDOM_ACTIVITY_REQUEST_ID).map(item => ({
     id: item.id || makeId(),
     studentName: item.studentName || "",
+    studentEmail: String(item.studentEmail || "").trim().toLowerCase(),
     grade: item.grade || "",
     feedbackType: LAUNCHPAD_FEEDBACK_TYPES.includes(item.feedbackType) ? item.feedbackType : "Website suggestion",
     websiteName: item.websiteName || "",
@@ -11151,6 +11152,15 @@ function renderDashboard() {
   `;
 }
 
+function feedbackMessageStudent(request) {
+  const email = String(request.studentEmail || "").trim().toLowerCase();
+  const matches = approvedStudents.filter(student => email
+    ? String(student.email).toLowerCase() === email
+    : String(student.name || "").trim().toLowerCase() === String(request.studentName || "").trim().toLowerCase()
+      && String(student.grade) === String(request.grade));
+  return matches.length === 1 ? matches[0] : null;
+}
+
 function renderWebsiteRequest(request) {
   const submitted = formatShortDate(request.createdAt);
   return `
@@ -11162,6 +11172,7 @@ function renderWebsiteRequest(request) {
         ${submitted ? `<p class="url-text">Submitted ${escapeHtml(submitted)}</p>` : ""}
       </div>
       <div class="actions">
+        <button type="button" class="outline-btn" data-action="messageFeedbackStudent" data-id="${escapeHtml(request.id)}">Message Student</button>
         <button class="danger-btn" data-action="deleteRequest" data-id="${request.id}">Delete</button>
       </div>
     </article>
@@ -13122,6 +13133,29 @@ app.addEventListener("click", async event => {
     } else {
       setScreen({ name: "login" });
     }
+  }
+  if (action === "messageFeedbackStudent" && isTeacher()) {
+    await loadApprovedStudents();
+    const feedback = websiteRequests.find(request => request.id === target.dataset.id);
+    const student = feedback && feedbackMessageStudent(feedback);
+    if (!student) {
+      window.alert("This feedback cannot be linked to one approved student. Please verify the student in Private Messages before starting a conversation.");
+      return;
+    }
+    selectedMessageStudentEmail = student.email;
+    teacherMessageSearch = "";
+    teacherMessageGrade = "all";
+    teacherMessageHistoryFilter = "all";
+    teacherMessagePage = 0;
+    directMessageStatus = "";
+    dashboardSection = "messages";
+    sessionStorage.setItem("teacherDashboardSection", dashboardSection);
+    setScreen({ name: "dashboard" });
+    await markCurrentDirectMessagesRead(selectedMessageStudentEmail);
+    render();
+    requestAnimationFrame(() => {
+      document.getElementById("directMessageText")?.focus();
+    });
   }
   if (action === "messageGrade") {
     teacherMessageGrade = ["all", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";
