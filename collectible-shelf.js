@@ -122,6 +122,7 @@
   rows.push(['Pokémon', ["pokemon-espeon-statue","Espeon Statue"], ["pokemon-arceus-statue","Arceus Statue"], ["pokemon-machamp-statue","Machamp Statue"], ["pokemon-ninetales-statue","Ninetales Statue"]]);
   rows.push(['Anime', ["anime-kirishima-statue","Eijiro Kirishima Statue"], ["anime-bakugo-statue","Katsuki Bakugo Statue"], ["anime-iida-statue","Tenya Iida Statue"], ["anime-uraraka-statue","Ochaco Uraraka Statue"], ["anime-tsuyu-statue","Tsuyu Asui Statue"], ["anime-todoroki-statue","Shoto Todoroki Statue"], ["anime-kaminari-statue","Denki Kaminari Statue"], ["anime-toga-statue","Himiko Toga Statue"]]);
   rows.push(['Anime', ["anime-pain-statue","Pain Statue"], ["anime-levi-statue","Levi Ackerman Statue"], ["anime-guts-statue","Guts Statue"], ["anime-orochimaru-statue","Orochimaru Statue"], ["anime-light-yagami-statue","Light Yagami Statue"], ["anime-naruto-six-paths-statue","Naruto Six Paths Statue"], ["anime-sasuke-susanoo-statue","Sasuke Susanoo Statue"], ["anime-naruto-kurama-statue","Naruto & Kurama Statue"]]);
+  rows.push(['Character Collectibles', ['peace-sign-girl','Peace Sign Girl Statue']]);
   rows.push(['Squishy Toys', ['nee-doh-stack-statue','Nee Doh Stack Statue']]);
   rows.push(['Disney', ['disney-lilo-stitch-statue','Lilo & Stitch Surfing Statue'], ['disney-moana-statue','Moana Statue']]);
   rows.push(['Superheroes', ['superhero-captain-marvel-statue','Captain Marvel Statue'], ['superhero-black-panther-statue','Black Panther Statue'], ['superhero-batman-statue','Batman Statue'], ['superhero-thanos-statue','Thanos Statue'], ['superhero-wonder-woman-statue','Wonder Woman Statue'], ['superhero-green-lantern-statue','Green Lantern Statue'], ['superhero-flash-statue','The Flash Statue'], ['superhero-superman-statue','Superman Statue'], ['superhero-hawkeye-statue','Hawkeye Statue'], ['superhero-deadpool-statue','Deadpool Statue']]);
@@ -145,6 +146,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'peace-sign-girl': {source:'assets/shelf-peace-sign-girl.png',width:1122,height:1402,bounds:[134,2,877,1396],displaySize:330,displayWidth:280},
     'anime-pain-statue': {"source":"assets/shelf-anime-pain-statue.png","width":896,"height":2224,"bounds":[21,35,875,2101],"displaySize":330,"displayWidth":280},
     'anime-levi-statue': {"source":"assets/shelf-anime-levi-statue.png","width":1056,"height":1872,"bounds":[43,61,975,1736],"displaySize":330,"displayWidth":280},
     'anime-guts-statue': {"source":"assets/shelf-anime-guts-statue.png","width":1152,"height":1728,"bounds":[47,65,1105,1595],"displaySize":330,"displayWidth":280},
@@ -444,9 +446,9 @@
     // stretching the plate or moving its contact point off the shared baseline.
     const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
     const height = 350;
-    if (['anime-iida-statue','anime-guts-statue'].includes(id)) {
+    if (anime || item.category === 'Superheroes' || id === 'peace-sign-girl') {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
-      return `<div class="shelf-object shelf-direct-image shelf-tall-object" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${(220-w*scale)/2/220*100}%;bottom:${4/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${asset.width/w*100}%;height:${asset.height/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto"></div></div>`;
+      return `<div class="shelf-object shelf-direct-image${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${((220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0)))/220*100}%;bottom:${4/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${(asset?.width || 1254)/w*100}%;height:${(asset?.height || 1254)/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto${asset?.clip ? `;clip-path:${asset.clip};clip-rule:nonzero` : ''}"></div></div>`;
     }
     return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0))}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"${asset?.clip ? ` style="clip-path:${asset.clip};clip-rule:nonzero"` : ''}/></svg></svg>`;
   }

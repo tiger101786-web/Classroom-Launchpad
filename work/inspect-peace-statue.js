@@ -1,0 +1,3 @@
+const sharp=require('sharp');
+const files=[{id:"peace-sign-girl",file:"C:/Users/Sinister/Desktop/Glossy Girl Bust with Peace Sign.png"}];
+(async()=>{for(const {id,file} of files){const {data,info}=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});let x=info.width,y=info.height,r=0,b=0,transparent=0;for(let j=0;j<info.height;j++)for(let i=0;i<info.width;i++){const p=(j*info.width+i)*4;if(data[p+3]===0)transparent++;if(data[p+3]>32&&Math.min(data[p],data[p+1],data[p+2])<220){x=Math.min(x,i);y=Math.min(y,j);r=Math.max(r,i);b=Math.max(b,j);}}x=Math.max(0,x-5);y=Math.max(0,y-5);r=Math.min(info.width-1,r+5);b=Math.min(info.height-1,b+5);console.log(JSON.stringify({id,width:info.width,height:info.height,bounds:[x,y,r-x+1,b-y+1],transparent}));}})();

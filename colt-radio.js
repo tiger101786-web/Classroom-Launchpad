@@ -3,6 +3,14 @@
 
   const stations = [
     {
+      id: "calm-ocean",
+      label: "Ocean Waves • Calm Ocean",
+      type: "stream",
+      source: "https://drive.uber.radio/uber/calmocean/icecast.audio",
+      provider: "Calm Ocean",
+      note: "Ocean waves and coastal sound recordings streamed by Calm Ocean. Programming is provided by the station."
+    },
+    {
       id: "radio-forever-anime",
       label: "Anime • Radio Forever Anime",
       type: "stream",
