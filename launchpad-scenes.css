@@ -298,3 +298,12 @@
 /* A broad moving reflection, not outdoor particles, for the indoor arena. */
 .scene-pokemon-indoor-arena .launch-scene-particles i { background:linear-gradient(115deg,transparent 30%,#fff8d966 40%,#f4ffffcc 47%,#fff6ce88 52%,transparent 63%); background-size:250% 100%; animation:scene-arena-shine 2s ease-in-out infinite; animation-delay:0s; }
 @keyframes scene-arena-shine { 0% {background-position:100% 0;opacity:.35} 50% {opacity:.85} 100% {background-position:0% 0;opacity:.35} }
+/* Match each glow to the sun painted into its artwork; leaves stay independent. */
+.scene-hidden-leaf-overlook { --sun-x:36.6%; --sun-y:34.5%; }
+.scene-hidden-leaf-rooftops { --sun-x:24.5%; --sun-y:30.5%; }
+:is(.scene-hidden-leaf-overlook,.scene-hidden-leaf-rooftops) .launch-scene-particles::before { content:""; position:absolute; left:var(--sun-x); top:var(--sun-y); width:32%; height:32%; border-radius:50%; background:radial-gradient(circle,#fff9d9e6 0%,#ffe9a6b3 12%,#ffc75580 30%,#ffb02e33 50%,transparent 72%); animation:scene-leaf-sun-glow 2.4s ease-in-out infinite alternate; }
+:is(.scene-hidden-leaf-overlook,.scene-hidden-leaf-rooftops) .launch-scene-particles::after { content:""; position:absolute; left:var(--sun-x); top:var(--sun-y); width:42%; height:42%; border-radius:50%; background:repeating-conic-gradient(from 10deg,transparent 0deg,#ffe6a680 5deg,transparent 12deg,transparent 30deg); mask-image:radial-gradient(circle,#000 0%,#000 15%,transparent 68%); animation:scene-leaf-sun-rays 2.4s ease-in-out infinite alternate; }
+@keyframes scene-leaf-sun-glow { from {transform:translate(-50%,-50%) scale(.8);opacity:.55} to {transform:translate(-50%,-50%) scale(1.2);opacity:.95} }
+@keyframes scene-leaf-sun-rays { from {transform:translate(-50%,-50%) rotate(-8deg) scale(.9);opacity:.5} to {transform:translate(-50%,-50%) rotate(8deg) scale(1.15);opacity:.9} }
+:is(.scene-hidden-leaf-overlook,.scene-hidden-leaf-rooftops) .launch-scene-particles::before,
+:is(.scene-hidden-leaf-overlook,.scene-hidden-leaf-rooftops) .launch-scene-particles::after { transform:translate(-50%,-50%); }

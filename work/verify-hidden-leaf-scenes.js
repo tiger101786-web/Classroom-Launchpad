@@ -46,6 +46,9 @@ ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
         assert(await page.locator('.launch-scene-image').evaluate(img=>img.naturalWidth>0));
         const particle=page.locator('.launch-scene-particles i').first();
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+        if (id.startsWith('hidden-leaf')) {
+          for (const pseudo of ['::before','::after']) assert.equal(await page.locator('.launch-scene-particles').evaluate((el,p)=>getComputedStyle(el,p).animationPlayState,pseudo),'paused');
+        }
         await page.locator('.launch-scene').evaluate(el=>el.classList.remove('is-paused'));
         const duration = await particle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration));
         const subtle = id === 'moonlit-cherry-village';
@@ -55,8 +58,16 @@ ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
         if (id === 'forest-temple' || id === 'mha-ua-campus') assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),id === 'forest-temple' ? 'scene-leaves' : 'scene-ua-sunbeams');
         assert(subtle ? duration >= 3 && duration <= 5 : duration > 0 && duration <= 2.4, `${id}: unexpected duration ${duration}`);
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+        if (id.startsWith('hidden-leaf')) {
+          const radiance = await page.locator('.launch-scene-particles').evaluate(el=>['::before','::after'].map(p=>{const s=getComputedStyle(el,p);return {name:s.animationName,state:s.animationPlayState,duration:s.animationDuration};}));
+          assert.deepEqual(radiance.map(s=>s.name),['scene-leaf-sun-glow','scene-leaf-sun-rays']);
+          assert(radiance.every(s=>s.state==='running' && s.duration==='2.4s'));
+        }
         await page.emulateMedia({reducedMotion:'reduce'});
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),'none');
+        if (id.startsWith('hidden-leaf')) {
+          for (const pseudo of ['::before','::after']) assert.equal(await page.locator('.launch-scene-particles').evaluate((el,p)=>getComputedStyle(el,p).animationName,pseudo),'none');
+        }
         await page.emulateMedia({reducedMotion:'no-preference'});
         await page.screenshot({path:path.join(os.tmpdir(),`${id}-${width}.png`)});
         await page.evaluate(()=>document.getElementById('chooseLaunchScene').click());
