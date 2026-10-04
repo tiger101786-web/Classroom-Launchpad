@@ -347,7 +347,9 @@
 @keyframes scene-park-color { from {background-position:100% 0;opacity:.55} to {background-position:0% 0;opacity:.95} }
 .scene-disney-hollywood-hotel .launch-scene-particles i { background:radial-gradient(ellipse 18% 5% at 49% 35%,#ffbf6377,#ff871544 65%,transparent),radial-gradient(ellipse 8% 3% at 56% 38%,#ffe2a8aa,transparent); animation:scene-park-lamps 2s ease-in-out infinite alternate; }
 .scene-disney-haunted-mansion .launch-scene-particles i { background:radial-gradient(ellipse 6% 8% at 22% 60%,#fff1acdd,#ffb74066 40%,transparent 75%),radial-gradient(ellipse 6% 8% at 73% 60%,#fff1acdd,#ffb74066 40%,transparent 75%),radial-gradient(ellipse 3% 4% at 45% 56%,#ffe6a1bb,transparent),radial-gradient(ellipse 3% 4% at 52% 55%,#ffe6a1bb,transparent); animation:scene-park-lamps 2.2s ease-in-out infinite alternate; }
-@keyframes scene-park-lamps { from {opacity:.3} to {opacity:.9} }
+/* Modest extra brightness and pulse contrast for these three night scenes only. */
+:is(.scene-disney-hollywood-hotel,.scene-disney-haunted-mansion,.scene-disney-twilight-boulevard) .launch-scene-particles i { filter:brightness(1.25); }
+@keyframes scene-park-lamps { from {opacity:.2} to {opacity:1} }
 .scene-disney-twilight-boulevard .launch-scene-particles i { background:radial-gradient(ellipse 4% 5% at 27% 57%,#fff2a8dd,transparent),radial-gradient(ellipse 4% 5% at 88% 58%,#fff2a8dd,transparent),radial-gradient(ellipse 3% 4% at 40% 61%,#fff2a8dd,transparent),radial-gradient(ellipse 3% 4% at 78% 62%,#fff2a8dd,transparent),radial-gradient(ellipse 5% 10% at 32% 80%,#ffd68599,transparent),radial-gradient(ellipse 5% 10% at 74% 81%,#ffd68599,transparent); animation:scene-park-lamps 2.2s ease-in-out infinite alternate; }
 .scene-disney-castle-fountain .launch-scene-particles { clip-path:inset(0 0 25% 0); }
 .scene-disney-castle-fountain .launch-scene-particles i { left:calc(43% + var(--n) * 1.7%); top:62%; width:3px; height:8px; border-radius:50%; background:linear-gradient(transparent,#efffff 40%,#9feaff); box-shadow:0 0 4px #b9faff; animation:scene-castle-cascade 1.6s linear infinite; animation-delay:calc(var(--n) * -.18s); }
