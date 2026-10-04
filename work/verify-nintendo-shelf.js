@@ -29,7 +29,7 @@ const root=path.resolve(__dirname,'..');
     assert.equal(await page.locator('img').count(),9);
     const boxes=await page.locator('.shelf-direct-image > div').evaluateAll(nodes=>nodes.map(n=>({bottom:n.style.bottom,height:parseFloat(n.style.height)})));
     assert(boxes.every(b=>b.bottom===boxes[0].bottom&&b.height<=98));
-    assert(boxes[0].height>88 && boxes[0].height<92, 'Bowser should be slightly shorter than the upright statues, with room for his arms');
+    assert(boxes[0].height>82 && boxes[0].height<85, 'Bowser should have a smaller footprint while retaining room for his arms');
     await page.screenshot({path:path.join(os.tmpdir(),'nintendo-shelf-desktop.png'),fullPage:true});
     await page.evaluate(()=>CollectibleShelf.open({selected:{enabled:true,theme:'comic-hero',slots:['none','none','none']},save:async draft=>{window.savedShelf=draft;}}));
     await page.locator('#shelfCategory').selectOption({label:'Nintendo'});

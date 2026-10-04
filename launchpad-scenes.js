@@ -2,6 +2,9 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "moonlit-cherry-village", name: "Moonlit Cherry Blossom Village", description: "Japanese lantern-lit village, red bridge, cherry petals & moonlit reflections", image: "assets/launchpad-scene-moonlit-cherry-village.png" },
+    { id: "walled-city-fountain", name: "Walled City • Fountain Square", description: "Towering city walls, a sunny market square & softly shimmering fountain", image: "assets/launchpad-scene-walled-city-fountain.png" },
+    { id: "walled-city-market", name: "Walled City • Market Street", description: "Colorful market awnings, cobblestone streets & gently drifting golden light", image: "assets/launchpad-scene-walled-city-market.png" },
     { id: "demon-slayer-nezuko", name: "Nezuko • Pink Moon", description: "Demon Slayer: Nezuko, cherry blossoms & pink flames", image: "assets/launchpad-scene-demon-slayer-nezuko.png" },
     { id: "demon-slayer-shinobu", name: "Shinobu • Wisteria Garden", description: "Demon Slayer: Shinobu, purple wisteria & glowing butterflies", image: "assets/launchpad-scene-demon-slayer-shinobu.png" },
     { id: "demon-slayer-akaza", name: "Akaza • Infinity Castle", description: "Demon Slayer: Akaza beneath the castle's golden lanterns", image: "assets/launchpad-scene-demon-slayer-akaza.png" },

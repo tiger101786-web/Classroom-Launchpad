@@ -152,7 +152,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:400,displayWidth:400,directImage:true},
+    'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:370,displayWidth:370,directImage:true},
     'nintendo-fox-statue': {source:'assets/shelf-nintendo-fox-statue.png',width:1040,height:1904,bounds:[60,4,980,1835],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-samus-statue': {source:'assets/shelf-nintendo-samus-statue.png',width:1360,height:1456,bounds:[263,7,834,1397],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-link-statue': {source:'assets/shelf-nintendo-link-statue.png',width:1232,height:1600,bounds:[190,9,835,1553],displaySize:330,displayWidth:280,directImage:true},
