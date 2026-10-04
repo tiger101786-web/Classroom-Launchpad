@@ -10,6 +10,8 @@ const ids=['hidden-leaf-overlook','hidden-leaf-rooftops',...['nezuko','shinobu',
 ids.push('walled-city-fountain','walled-city-market','moonlit-cherry-village');
 ids.push('pokemon-campus','pokemon-indoor-arena');
 ids.push('forest-temple','mha-ua-campus');
+const additions={'floating-sky-tower':['Floating Sky Tower','scene-ua-sunbeams'],'soccer-training-complex':['Soccer Training Complex','scene-training-lights'],'sunset-school-gym':['Sunset School Gym','scene-leaf-sun-rays'],'tokyo-cherry-night':['Tokyo Cherry Blossom Night','scene-petals'],'kame-house-island':['Kame House Island','scene-ua-sunbeams']};
+ids.push(...Object.keys(additions));
 ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
 (async()=>{
   const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
@@ -52,6 +54,7 @@ ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
         await page.locator('.launch-scene').evaluate(el=>el.classList.remove('is-paused'));
         const duration = await particle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration));
         const subtle = id === 'moonlit-cherry-village';
+        if (additions[id]) assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),additions[id][1]);
         if (id.startsWith('pokemon-')) assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),id === 'pokemon-indoor-arena' ? 'scene-arena-shine' : 'scene-leaves');
         if (id === 'royal-castle-city' || id === 'sunlit-palace-harbor') assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),id === 'royal-castle-city' ? 'scene-ua-sunbeams' : 'scene-harbor-ripples');
         if (id === 'walled-city-fountain') assert.equal(await page.locator('.launch-scene-particles').evaluate(el=>getComputedStyle(el).clipPath),'inset(0px 0px 21%)');
@@ -72,8 +75,8 @@ ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
         await page.screenshot({path:path.join(os.tmpdir(),`${id}-${width}.png`)});
         await page.evaluate(()=>document.getElementById('chooseLaunchScene').click());
         const search = id === 'royal-castle-city' ? 'Royal Castle City' : id === 'sunlit-palace-harbor' ? 'Sunlit Palace Harbor' : id === 'forest-temple' ? 'Forest Temple' : id === 'mha-ua-campus' ? 'MHA' : id.startsWith('pokemon-') ? 'Pokémon' : id.startsWith('walled-city') ? 'Walled City' : id === 'moonlit-cherry-village' ? 'Moonlit Cherry Blossom' : id.startsWith('hidden-leaf') ? 'Hidden Leaf' : 'Demon Slayer';
-        await page.locator('#launchChooserSearch').fill(search);
-        assert.equal(await page.locator('[data-scene-choice]:visible').count(),id.startsWith('demon-slayer')?6:id.startsWith('pokemon-')?3:['moonlit-cherry-village','forest-temple','mha-ua-campus','royal-castle-city','sunlit-palace-harbor'].includes(id)?1:2);
+        await page.locator('#launchChooserSearch').fill(additions[id]?.[0] || (id === 'moonlit-cherry-village' ? 'Moonlit Cherry Blossom Village' : search));
+        assert.equal(await page.locator('[data-scene-choice]:visible').count(),additions[id]?1:id.startsWith('demon-slayer')?6:id.startsWith('pokemon-')?3:['moonlit-cherry-village','forest-temple','mha-ua-campus','royal-castle-city','sunlit-palace-harbor'].includes(id)?1:2, `Search results for ${id}`);
         await page.locator(`[data-scene-choice="${id}"]`).click();
         assert.equal(await page.locator(`#launchScenePreview [data-scene="${id}"]`).count(),1);
         await page.locator('#saveLaunchScene').click();

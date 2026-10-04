@@ -2,6 +2,11 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "floating-sky-tower", name: "Floating Sky Tower", description: "A soaring fortress above the clouds with bright upper-right sun rays", image: "assets/launchpad-scene-floating-sky-tower.png" },
+    { id: "soccer-training-complex", name: "Soccer Training Complex", description: "Evening practice fields with animated stadium floodlights", image: "assets/launchpad-scene-soccer-training-complex.png" },
+    { id: "sunset-school-gym", name: "Sunset School Gym", description: "A golden school sunset with rays radiating from the sun", image: "assets/launchpad-scene-sunset-school-gym.png" },
+    { id: "tokyo-cherry-night", name: "Tokyo Cherry Blossom Night", description: "Tokyo Tower, moonlit river and falling pink cherry blossoms", image: "assets/launchpad-scene-tokyo-cherry-night.png" },
+    { id: "kame-house-island", name: "Kame House Island", description: "Dragon Ball's tropical island with bright upper-right sun rays", image: "assets/launchpad-scene-kame-house-island.png" },
     { id: "royal-castle-city", name: "Royal Castle City", description: "A towering castle above the town with bright sweeping sun rays", image: "assets/launchpad-scene-royal-castle-city.png" },
     { id: "sunlit-palace-harbor", name: "Sunlit Palace Harbor", description: "A sailing ship and hilltop palace with animated blue water ripples", image: "assets/launchpad-scene-sunlit-palace-harbor.png" },
     { id: "pokemon-center-gardens", name: "Pokémon • Center Gardens", description: "A sunny Pokémon Center with flowers and falling leaves", image: "assets/launchpad-scene-pokemon-center-gardens.png" },

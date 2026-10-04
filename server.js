@@ -27,6 +27,7 @@ homeSceneIds.add("walled-city-fountain");
 homeSceneIds.add("walled-city-market");
 homeSceneIds.add("moonlit-cherry-village");
 homeSceneIds.add("pokemon-campus");
+["floating-sky-tower", "soccer-training-complex", "sunset-school-gym", "tokyo-cherry-night", "kame-house-island"].forEach(id => homeSceneIds.add(id));
 homeSceneIds.add("royal-castle-city");
 homeSceneIds.add("sunlit-palace-harbor");
 homeSceneIds.add("pokemon-center-gardens");
