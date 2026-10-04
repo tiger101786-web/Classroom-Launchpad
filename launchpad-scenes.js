@@ -2,6 +2,8 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "hidden-leaf-overlook", name: "Hidden Leaf Forest Overlook", description: "Naruto's Hidden Leaf Village, Hokage Monument & a leafy sunset trail", image: "assets/launchpad-scene-hidden-leaf-overlook.png" },
+    { id: "hidden-leaf-rooftops", name: "Hidden Leaf Rooftop Sunset", description: "Naruto's Hidden Leaf Village rooftops & Hokage Monument beneath a golden sky", image: "assets/launchpad-scene-hidden-leaf-rooftops.png" },
     { id: "jdm", name: "JDM Neon Garage", description: "Japanese tuner cars, neon workshop lights & a rainy Tokyo skyline", image: "assets/launchpad-scene-jdm.png" },
     { id: "squishy", name: "Squishy Dumpling Café", description: "Smiling pastel bao toys, glitter-gold dumpling & cozy bamboo baskets", image: "assets/launchpad-scene-squishy.png" },
     { id: "highland", name: "Highland Cattle Meadow", description: "Shaggy Highland cow & calf in a sunset Scottish meadow", image: "assets/launchpad-scene-highland.png" },

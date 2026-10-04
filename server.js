@@ -21,6 +21,8 @@ const homeSceneIds = new Set(["original", "reef", "forest", "pixel", "observator
 const homeSceneFrameIds = new Set(["none", "chrome", "gold", "rose", "pearl", "neon", "prism", "onyx", "braid", "bronze", "velvet", "mosaic", "carbon", "deco", "frost", "blossom", "guardian", "woodland", "orbit", "treasure", "royal", "phoenix", "butterfly", "frost-dragon", "clockwork", "library", "champion", "halloween", "new-orleans", "sunflower", "peacock", "harvest", "evergreen"]);
 homeSceneIds.add("alien");
 homeSceneIds.add("anime");
+homeSceneIds.add("hidden-leaf-overlook");
+homeSceneIds.add("hidden-leaf-rooftops");
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
 homeSceneIds.add("squishy");
