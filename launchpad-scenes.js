@@ -2,6 +2,9 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "royal-castle-city", name: "Royal Castle City", description: "A towering castle above the town with bright sweeping sun rays", image: "assets/launchpad-scene-royal-castle-city.png" },
+    { id: "sunlit-palace-harbor", name: "Sunlit Palace Harbor", description: "A sailing ship and hilltop palace with animated blue water ripples", image: "assets/launchpad-scene-sunlit-palace-harbor.png" },
+    { id: "pokemon-center-gardens", name: "Pokémon • Center Gardens", description: "A sunny Pokémon Center with flowers and falling leaves", image: "assets/launchpad-scene-pokemon-center-gardens.png" },
     { id: "forest-temple", name: "Forest Temple", description: "A Japanese mountain temple with falling green leaves", image: "assets/launchpad-scene-forest-temple.png" },
     { id: "mha-ua-campus", name: "MHA • U.A. High School", description: "My Hero Academia campus with bright animated sunbeams from the upper left", image: "assets/launchpad-scene-mha-ua-campus.png" },
     { id: "pokemon-campus", name: "Pokémon • Woodland Campus", description: "A sunny Pokémon campus with gently falling green leaves", image: "assets/launchpad-scene-pokemon-campus.png" },
