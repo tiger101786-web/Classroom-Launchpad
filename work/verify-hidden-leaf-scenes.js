@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');
 const vm=require('node:vm');
 const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
-const ids=['hidden-leaf-overlook','hidden-leaf-rooftops'];
+const ids=['hidden-leaf-overlook','hidden-leaf-rooftops',...['nezuko','shinobu','akaza','tanjiro','rengoku','giyu'].map(name=>`demon-slayer-${name}`)];
 (async()=>{
   const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
   const catalog=server.slice(server.indexOf('const homeSceneIds'),server.indexOf('function homeSceneForSession'));
@@ -40,10 +40,18 @@ const ids=['hidden-leaf-overlook','hidden-leaf-rooftops'];
         await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(img=>img.decode())));
         assert.equal(await page.locator(`[data-scene="${id}"]`).count(),1);
         assert(await page.locator('.launch-scene-image').evaluate(img=>img.naturalWidth>0));
+        const particle=page.locator('.launch-scene-particles i').first();
+        assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+        await page.locator('.launch-scene').evaluate(el=>el.classList.remove('is-paused'));
+        assert(await particle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration)<=2.4));
+        assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+        await page.emulateMedia({reducedMotion:'reduce'});
+        assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),'none');
+        await page.emulateMedia({reducedMotion:'no-preference'});
         await page.screenshot({path:path.join(os.tmpdir(),`${id}-${width}.png`)});
         await page.evaluate(()=>document.getElementById('chooseLaunchScene').click());
-        await page.locator('#launchChooserSearch').fill('Hidden Leaf');
-        assert.equal(await page.locator('[data-scene-choice]:visible').count(),2);
+        await page.locator('#launchChooserSearch').fill(id.startsWith('hidden-leaf')?'Hidden Leaf':'Demon Slayer');
+        assert.equal(await page.locator('[data-scene-choice]:visible').count(),id.startsWith('hidden-leaf')?2:6);
         await page.locator(`[data-scene-choice="${id}"]`).click();
         assert.equal(await page.locator(`#launchScenePreview [data-scene="${id}"]`).count(),1);
         await page.locator('#saveLaunchScene').click();
@@ -51,6 +59,6 @@ const ids=['hidden-leaf-overlook','hidden-leaf-rooftops'];
         assert.deepEqual(saves.at(-1),{id,frame:'blue-fire',motion:false});
       }
     }
-    console.log('Both Hidden Leaf scenes: server validation, desktop/mobile rendering, search, selection, save payload and frame preservation passed.');
+    console.log('Hidden Leaf and six Demon Slayer scenes: validation, desktop/mobile render, search, save payload, frame preservation, brisk motion, pause and reduced motion passed.');
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

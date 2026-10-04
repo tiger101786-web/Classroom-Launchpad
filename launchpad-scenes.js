@@ -2,6 +2,12 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "demon-slayer-nezuko", name: "Nezuko • Pink Moon", description: "Demon Slayer: Nezuko, cherry blossoms & pink flames", image: "assets/launchpad-scene-demon-slayer-nezuko.png" },
+    { id: "demon-slayer-shinobu", name: "Shinobu • Wisteria Garden", description: "Demon Slayer: Shinobu, purple wisteria & glowing butterflies", image: "assets/launchpad-scene-demon-slayer-shinobu.png" },
+    { id: "demon-slayer-akaza", name: "Akaza • Infinity Castle", description: "Demon Slayer: Akaza beneath the castle's golden lanterns", image: "assets/launchpad-scene-demon-slayer-akaza.png" },
+    { id: "demon-slayer-tanjiro", name: "Tanjiro • Water Breathing", description: "Demon Slayer: Tanjiro surrounded by swirling blue waves", image: "assets/launchpad-scene-demon-slayer-tanjiro.png" },
+    { id: "demon-slayer-rengoku", name: "Rengoku • Flame Breathing", description: "Demon Slayer: Rengoku surrounded by golden flames", image: "assets/launchpad-scene-demon-slayer-rengoku.png" },
+    { id: "demon-slayer-giyu", name: "Giyu • Moonlit Water", description: "Demon Slayer: Giyu, moonlight & rushing blue water", image: "assets/launchpad-scene-demon-slayer-giyu.png" },
     { id: "hidden-leaf-overlook", name: "Hidden Leaf Forest Overlook", description: "Naruto's Hidden Leaf Village, Hokage Monument & a leafy sunset trail", image: "assets/launchpad-scene-hidden-leaf-overlook.png" },
     { id: "hidden-leaf-rooftops", name: "Hidden Leaf Rooftop Sunset", description: "Naruto's Hidden Leaf Village rooftops & Hokage Monument beneath a golden sky", image: "assets/launchpad-scene-hidden-leaf-rooftops.png" },
     { id: "jdm", name: "JDM Neon Garage", description: "Japanese tuner cars, neon workshop lights & a rainy Tokyo skyline", image: "assets/launchpad-scene-jdm.png" },

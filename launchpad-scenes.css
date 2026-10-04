@@ -259,3 +259,8 @@
 @keyframes scene-firefly { 0% { transform: translate(-5px, 4px); opacity: .2; } 50% { opacity: .8; } 100% { transform: translate(9px, -10px); opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .launch-scene *, .launch-scene, .launch-scene *::before, .launch-scene *::after { animation: none !important; } }
 @media (max-width: 480px) { .launch-scene-dialog { padding: 16px; } .launch-scene-options { gap: 6px; } .launch-scene-options img, .scene-original-thumb { width: 58px; height: 58px; } .launch-scene-options strong { font-size: .75rem; } .launch-scene-options small { font-size: .66rem; } }
+/* Brisk scene-specific motion; pause and reduced-motion rules still apply. */
+:is(.scene-hidden-leaf-overlook,.scene-hidden-leaf-rooftops) .launch-scene-particles i { top:-10%; width:8px; height:5px; border-radius:0 75% 0 75%; background:#a8d94be6; box-shadow:none; animation:scene-leaves 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }
+:is(.scene-demon-slayer-nezuko,.scene-demon-slayer-shinobu) .launch-scene-particles i { top:-10%; width:7px; height:4px; border-radius:80% 10% 80% 10%; background:#ff9ce9; box-shadow:none; animation:scene-petals 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }
+:is(.scene-demon-slayer-tanjiro,.scene-demon-slayer-giyu) .launch-scene-particles i { top:-10%; width:3px; height:12px; border-radius:50%; background:#9eeaffcc; box-shadow:none; animation:scene-rain 2s linear infinite; animation-delay:calc(var(--n) * -.23s); }
+:is(.scene-demon-slayer-akaza,.scene-demon-slayer-rengoku) .launch-scene-particles i { top:105%; width:4px; height:5px; background:#ffbe63dd; box-shadow:0 0 4px #ff7d32; animation:scene-embers 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }

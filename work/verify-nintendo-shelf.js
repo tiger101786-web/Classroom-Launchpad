@@ -7,7 +7,8 @@ const {chromium}=require('playwright');
 const shelf=require('../collectible-shelf');
 const root=path.resolve(__dirname,'..');
 (async()=>{
-  const ids=['bowser','link','peach','yoshi','zelda'].map(name=>`nintendo-${name}-statue`);
+  const ids=['bowser','link','peach','yoshi','zelda','fox','samus'].map(name=>`nintendo-${name}-statue`);
+  for(const id of ['mario-statue','luigi-statue']) assert.equal(shelf.items.find(item=>item.id===id).category,'Nintendo');
   for(const id of ids){assert.equal(shelf.clean({enabled:true,theme:'comic-hero',slots:[id,'none','none']}).slots[0],id);assert.equal(shelf.items.find(item=>item.id===id).category,'Nintendo');assert(fs.existsSync(path.join(root,`assets/shelf-${id}.png`)));}
   const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'});
   try{
@@ -22,16 +23,17 @@ const root=path.resolve(__dirname,'..');
     await page.addScriptTag({url:'http://shelf.test/collectible-shelf.js'});
     await page.evaluate(ids=>{
       document.body.style.cssText='background:#19151a;padding:130px 24px 24px';
-      document.body.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:24px">'+[ids.slice(0,3),[...ids.slice(3),'mario-statue']].map(slots=>'<section style="width:420px;max-width:100%">'+CollectibleShelf.art({enabled:true,theme:'comic-hero',slots},true)+'</section>').join('')+'</div>';
+      document.body.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:110px 24px">'+[ids.slice(0,3),ids.slice(3,6),[ids[6],'mario-statue','luigi-statue']].map(slots=>'<section style="width:420px;max-width:100%">'+CollectibleShelf.art({enabled:true,theme:'comic-hero',slots},true)+'</section>').join('')+'</div>';
     },ids);
     await page.locator('img').evaluateAll(images=>Promise.all(images.map(img=>img.decode())));
-    assert.equal(await page.locator('img').count(),6);
+    assert.equal(await page.locator('img').count(),9);
     const boxes=await page.locator('.shelf-direct-image > div').evaluateAll(nodes=>nodes.map(n=>({bottom:n.style.bottom,height:parseFloat(n.style.height)})));
-    assert(boxes.every(b=>b.bottom===boxes[0].bottom&&b.height<=95));
+    assert(boxes.every(b=>b.bottom===boxes[0].bottom&&b.height<=98));
+    assert(boxes[0].height>88 && boxes[0].height<92, 'Bowser should be slightly shorter than the upright statues, with room for his arms');
     await page.screenshot({path:path.join(os.tmpdir(),'nintendo-shelf-desktop.png'),fullPage:true});
     await page.evaluate(()=>CollectibleShelf.open({selected:{enabled:true,theme:'comic-hero',slots:['none','none','none']},save:async draft=>{window.savedShelf=draft;}}));
     await page.locator('#shelfCategory').selectOption({label:'Nintendo'});
-    assert.match(await page.locator('#shelfResults').innerText(),/5/);
+    assert.match(await page.locator('#shelfResults').innerText(),/9/);
     await page.locator('#shelfSearch').fill('Zelda');
     await page.locator('[data-shelf-item="nintendo-zelda-statue"]').click();
     await page.locator('#saveShelf').click();

@@ -23,6 +23,7 @@ homeSceneIds.add("alien");
 homeSceneIds.add("anime");
 homeSceneIds.add("hidden-leaf-overlook");
 homeSceneIds.add("hidden-leaf-rooftops");
+["nezuko", "shinobu", "akaza", "tanjiro", "rengoku", "giyu"].forEach(name => homeSceneIds.add(`demon-slayer-${name}`));
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
 homeSceneIds.add("squishy");

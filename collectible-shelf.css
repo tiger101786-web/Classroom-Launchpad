@@ -252,3 +252,7 @@
   .shelf-dialog[open] { overflow:auto; }
   .shelf-browse-area { min-height:146px; }
 }
+/* Bowser's outstretched arms need the same wider arrangement as caped figures. */
+.collectible-shelf:has([aria-label="Bowser Statue"]) > .shelf-objects { left:2%; right:2%; gap:14%; }
+.collectible-shelf:has([aria-label="Bowser Statue"]) > .shelf-objects > :first-child { transform:translateX(24%); }
+.collectible-shelf:has([aria-label="Bowser Statue"]) > .shelf-objects > :last-child { transform:translateX(-24%); }

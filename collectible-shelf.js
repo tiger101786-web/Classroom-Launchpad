@@ -130,9 +130,10 @@
   rows.push(['Disney', ['disney-camp-rock-statue','Camp Rock Statue']]);
   rows.push(['Pokémon', ['pokemon-lugia-statue','Lugia Statue'], ['pokemon-ash-statue','Ash Ketchum Statue'], ['pokemon-ho-oh-statue','Ho-Oh Statue'], ['pokemon-jigglypuff-statue','Jigglypuff Statue'], ['pokemon-groudon-statue','Groudon Statue'], ['pokemon-entei-statue','Entei Statue']]);
   rows.push(['Superheroes', ["superhero-harley-quinn-statue","Harley Quinn Statue"], ["superhero-joker-statue","Joker Statue"]]);
-  rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"]]);
+  rows.push(['Nintendo', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"]]);
   rows.push(['Disney', ["merida-statue","Merida Statue"], ["simba-statue","Simba Statue"]]);
   rows.push(['Nintendo', ['nintendo-bowser-statue','Bowser Statue'], ['nintendo-link-statue','Link Statue'], ['nintendo-peach-statue','Princess Peach Statue'], ['nintendo-yoshi-statue','Yoshi Statue'], ['nintendo-zelda-statue','Princess Zelda Statue']]);
+  rows.push(['Nintendo', ['nintendo-fox-statue','Fox McCloud Statue'], ['nintendo-samus-statue','Samus Aran Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -151,7 +152,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:400,displayWidth:400,directImage:true},
+    'nintendo-fox-statue': {source:'assets/shelf-nintendo-fox-statue.png',width:1040,height:1904,bounds:[60,4,980,1835],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-samus-statue': {source:'assets/shelf-nintendo-samus-statue.png',width:1360,height:1456,bounds:[263,7,834,1397],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-link-statue': {source:'assets/shelf-nintendo-link-statue.png',width:1232,height:1600,bounds:[190,9,835,1553],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-peach-statue': {source:'assets/shelf-nintendo-peach-statue.png',width:1040,height:1888,bounds:[4,4,1029,1869],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-yoshi-statue': {source:'assets/shelf-nintendo-yoshi-statue.png',width:1216,height:1616,bounds:[168,0,987,1598],displaySize:330,displayWidth:280,directImage:true},
