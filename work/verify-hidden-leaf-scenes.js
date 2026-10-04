@@ -14,6 +14,7 @@ const additions={'floating-sky-tower':['Floating Sky Tower','scene-ua-sunbeams']
 ids.push(...Object.keys(additions));
 const disney={agrabah:['Disney Agrabah Palace','scene-disney-gold'],'snow-castle':['Disney Snowy Mountain Castle','scene-snow'],'pride-rock':['Disney Pride Rock','scene-leaf-sun-rays'],'undersea-palace':['Disney Undersea Palace','scene-bubble'],bayou:['Disney Firefly Bayou','scene-disney-fireflies'],'river-valley':['Disney Sunset River Valley','scene-harbor-ripples'],'island-cottage':['Disney Tropical Island Cottage','scene-harbor-ripples'],'alpine-harbor':['Disney Alpine Castle Harbor','scene-harbor-ripples']};
 for (const [name,info] of Object.entries(disney)) {const id=`disney-${name}`; additions[id]=info; ids.push(id);}
+additions['disney-island-cottage'][1]='scene-cottage-surf';
 ids.push('royal-castle-city','sunlit-palace-harbor','pokemon-center-gardens');
 (async()=>{
   const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
