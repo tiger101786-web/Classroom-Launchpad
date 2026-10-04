@@ -281,3 +281,8 @@
 .scene-walled-city-market .launch-scene-particles i { animation-duration:2s; animation-delay:calc(var(--n) * -.23s); }
 .scene-pokemon-campus .launch-scene-particles i { animation-duration:2.4s; animation-delay:calc(var(--n) * -.27s); }
 .scene-pokemon-indoor-arena .launch-scene-particles i { animation-duration:2s; }
+.scene-forest-temple .launch-scene-particles i { top:-10%; width:8px; height:5px; border-radius:0 75% 0 75%; background:#b5d95fe6; box-shadow:none; animation:scene-leaves 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }
+/* Broad, visible beams fan down-right from a fixed upper-left light source. */
+.scene-mha-ua-campus .launch-scene-particles i { left:-15%; top:-15%; width:130%; height:130%; border-radius:0; box-shadow:none; background:conic-gradient(from 105deg at 15% 15%,transparent 0deg,#fff4c9b3 5deg,transparent 12deg,transparent 17deg,#fff9dfcc 23deg,transparent 30deg,transparent 35deg,#fff0b899 40deg,transparent 48deg,transparent 360deg); transform-origin:15% 15%; animation:scene-ua-sunbeams 2.4s ease-in-out infinite alternate; animation-delay:0s; }
+.scene-mha-ua-campus .launch-scene-particles i:nth-child(n+2) { display:none; }
+@keyframes scene-ua-sunbeams { from {transform:rotate(-4deg);opacity:.6} to {transform:rotate(5deg);opacity:.95} }

@@ -2,6 +2,8 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "forest-temple", name: "Forest Temple", description: "A Japanese mountain temple with falling green leaves", image: "assets/launchpad-scene-forest-temple.png" },
+    { id: "mha-ua-campus", name: "MHA • U.A. High School", description: "My Hero Academia campus with bright animated sunbeams from the upper left", image: "assets/launchpad-scene-mha-ua-campus.png" },
     { id: "pokemon-campus", name: "Pokémon • Woodland Campus", description: "A sunny Pokémon campus with gently falling green leaves", image: "assets/launchpad-scene-pokemon-campus.png" },
     { id: "pokemon-indoor-arena", name: "Pokémon • Garden Arena", description: "An indoor botanical battle arena with softly shimmering skylight", image: "assets/launchpad-scene-pokemon-indoor-arena.png" },
     { id: "moonlit-cherry-village", name: "Moonlit Cherry Blossom Village", description: "Japanese lantern-lit village, red bridge, cherry petals & moonlit reflections", image: "assets/launchpad-scene-moonlit-cherry-village.png" },
