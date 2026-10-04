@@ -18,23 +18,25 @@ const root = path.resolve(__dirname, '..');
     await page.addScriptTag({url:'http://shelf.test/collectible-shelf.js'});
     for (const [width,height] of [[1100,900],[390,844],[1100,480]]) {
       await page.setViewportSize({width,height});
+      for (const [theme,name] of [['disney-castle','Disney Storybook Castle'],['strawberry-garden','Strawberry Garden'],['tropical-paradise','Tropical Paradise'],['angel-wings','Angel Wings']]) {
       await page.evaluate(() => CollectibleShelf.open({selected:{enabled:true,theme:'disney-castle',slots:['none','none','none']},save:async draft=>{window.savedShelf=draft;}}));
       await page.locator('#shelfStylesTab').click();
-      await page.locator('#shelfSearch').fill('Disney Storybook Castle');
-      const card = page.locator('[data-shelf-theme-choice="disney-castle"]');
+      await page.locator('#shelfSearch').fill(name);
+      const card = page.locator(`[data-shelf-theme-choice="${theme}"]`);
       await card.click({trial:true});
       const boxes = await card.evaluate(button => {
         const rect = el => {const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right};};
         return {card:rect(button),art:rect(button.querySelector('.collectible-shelf')),label:rect(button.querySelector('strong'))};
       });
-      assert(boxes.art.top >= boxes.card.top+6, 'Castle spire must have space above it');
-      assert(boxes.art.bottom <= boxes.label.top, 'Castle must not overlap its label');
+      assert(boxes.art.top >= boxes.card.top+6, `${name} must have space above it`);
+      assert(boxes.art.bottom <= boxes.label.top, `${name} must not overlap its label`);
       assert(boxes.art.left >= boxes.card.left && boxes.art.right <= boxes.card.right);
-      await card.screenshot({path:path.join(os.tmpdir(),`castle-card-${width}-${height}.png`)});
+      await card.screenshot({path:path.join(os.tmpdir(),`${theme}-card-${width}-${height}.png`)});
       await card.click();
       await page.locator('#saveShelf').click();
-      await page.waitForFunction(() => window.savedShelf?.theme === 'disney-castle');
+      await page.waitForFunction(theme => window.savedShelf?.theme === theme,theme);
+      }
     }
-    console.log('Castle thumbnail fits desktop, mobile and short windows; selection/save passed.');
+    console.log('Castle, Strawberry Garden, Tropical Paradise and Angel Wings thumbnails fit desktop, mobile and short windows; selection/save passed.');
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

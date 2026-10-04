@@ -202,6 +202,7 @@
 /* Reserve the label's space before sizing this taller shelf thumbnail. */
 .shelf-dialog .shelf-theme-grid .collectible-shelf[data-shelf-theme="chicken-nuggets"] { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.333333)); flex-shrink:0; }
 .shelf-dialog .shelf-theme-grid .collectible-shelf[data-shelf-theme="disney-castle"] { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.416667)); flex-shrink:0; }
+.shelf-dialog .shelf-theme-grid .collectible-shelf:is([data-shelf-theme="strawberry-garden"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="angel-wings"]) { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.445)); flex-shrink:0; }
 .shelf-dialog .shelf-theme-grid strong { min-height:2.6em; font-size:12px; }
 .shelf-pagination { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
 .shelf-pagination button { min-width:80px; }
