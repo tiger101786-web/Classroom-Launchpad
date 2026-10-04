@@ -27,6 +27,7 @@ homeSceneIds.add("walled-city-fountain");
 homeSceneIds.add("walled-city-market");
 homeSceneIds.add("moonlit-cherry-village");
 homeSceneIds.add("pokemon-campus");
+["disney-paris-rooftops","disney-olympus","disney-notre-dame","disney-monstropolis","disney-halloween-town","disney-memory-headquarters","disney-toy-bedroom","disney-tropical-lagoon","disney-skull-lagoon","disney-marigold-bridge","disney-radiator-springs","disney-jungle-ruins"].forEach(id => homeSceneIds.add(id));
 ["epcot-night", "hollywood-hotel", "haunted-mansion", "castle-fountain", "twilight-boulevard"].forEach(name => homeSceneIds.add(`disney-${name}`));
 ["agrabah", "snow-castle", "pride-rock", "undersea-palace", "bayou", "river-valley", "island-cottage", "alpine-harbor"].forEach(name => homeSceneIds.add(`disney-${name}`));
 ["floating-sky-tower", "soccer-training-complex", "sunset-school-gym", "tokyo-cherry-night", "kame-house-island"].forEach(id => homeSceneIds.add(id));

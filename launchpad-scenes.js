@@ -2,6 +2,18 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "disney-paris-rooftops", name: "Disney • Paris Moonlit Rooftops", description: "Warm window lights beneath a radiant Paris moon", image: "assets/launchpad-scene-disney-paris-rooftops.png" },
+    { id: "disney-olympus", name: "Disney • Mount Olympus", description: "Golden sun rays over the temples above the clouds", image: "assets/launchpad-scene-disney-olympus.png" },
+    { id: "disney-notre-dame", name: "Disney • Notre Dame Sunset", description: "Sunset radiance above the cathedral and Paris skyline", image: "assets/launchpad-scene-disney-notre-dame.png" },
+    { id: "disney-monstropolis", name: "Disney • Monstropolis After Dark", description: "Moving searchlights above the glowing monster city", image: "assets/launchpad-scene-disney-monstropolis.png" },
+    { id: "disney-halloween-town", name: "Disney • Halloween Town", description: "Glowing jack-o-lanterns beneath Spiral Hill", image: "assets/launchpad-scene-disney-halloween-town.png" },
+    { id: "disney-memory-headquarters", name: "Disney • Memory Headquarters", description: "Inside Out inspired colorful memory orb illumination", image: "assets/launchpad-scene-disney-memory-headquarters.png" },
+    { id: "disney-toy-bedroom", name: "Disney • Toy-Filled Bedroom", description: "Toy Story inspired bedroom with warm window sunbeams", image: "assets/launchpad-scene-disney-toy-bedroom.png" },
+    { id: "disney-tropical-lagoon", name: "Disney • Tropical Mountain Lagoon", description: "Bright moving surf along a tropical island shoreline", image: "assets/launchpad-scene-disney-tropical-lagoon.png" },
+    { id: "disney-skull-lagoon", name: "Disney • Moonlit Skull Lagoon", description: "Shimmering blue water below waterfalls and Skull Rock", image: "assets/launchpad-scene-disney-skull-lagoon.png" },
+    { id: "disney-marigold-bridge", name: "Disney • Marigold Bridge", description: "Coco inspired glowing bridge with drifting golden petals", image: "assets/launchpad-scene-disney-marigold-bridge.png" },
+    { id: "disney-radiator-springs", name: "Disney • Radiator Springs Sunset", description: "Cars inspired Route 66 town with animated neon glow", image: "assets/launchpad-scene-disney-radiator-springs.png" },
+    { id: "disney-jungle-ruins", name: "Disney • Moonlit Jungle Ruins", description: "Ancient jungle temples with moonlit river ripples", image: "assets/launchpad-scene-disney-jungle-ruins.png" },
     { id: "disney-epcot-night", name: "Disney • EPCOT After Dark", description: "Spaceship Earth with flowing violet and golden illumination", image: "assets/launchpad-scene-disney-epcot-night.png" },
     { id: "disney-hollywood-hotel", name: "Disney • Hollywood Tower Hotel", description: "Twilight hotel with glowing neon signage", image: "assets/launchpad-scene-disney-hollywood-hotel.png" },
     { id: "disney-haunted-mansion", name: "Disney • Moonlit Haunted Mansion", description: "A moonlit mansion with animated amber lantern light", image: "assets/launchpad-scene-disney-haunted-mansion.png" },
