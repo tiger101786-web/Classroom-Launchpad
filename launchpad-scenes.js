@@ -2,6 +2,11 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "disney-epcot-night", name: "Disney • EPCOT After Dark", description: "Spaceship Earth with flowing violet and golden illumination", image: "assets/launchpad-scene-disney-epcot-night.png" },
+    { id: "disney-hollywood-hotel", name: "Disney • Hollywood Tower Hotel", description: "Twilight hotel with glowing neon signage", image: "assets/launchpad-scene-disney-hollywood-hotel.png" },
+    { id: "disney-haunted-mansion", name: "Disney • Moonlit Haunted Mansion", description: "A moonlit mansion with animated amber lantern light", image: "assets/launchpad-scene-disney-haunted-mansion.png" },
+    { id: "disney-castle-fountain", name: "Disney • Castle Fountain Gardens", description: "A sunny fairytale castle with cascading fountain water", image: "assets/launchpad-scene-disney-castle-fountain.png" },
+    { id: "disney-twilight-boulevard", name: "Disney • Twilight Castle Boulevard", description: "A glowing castle boulevard with shimmering lamplight reflections", image: "assets/launchpad-scene-disney-twilight-boulevard.png" },
     { id: "disney-agrabah", name: "Disney • Agrabah Palace", description: "Aladdin's golden palace with shimmering domes at sunset", image: "assets/launchpad-scene-disney-agrabah.png" },
     { id: "disney-snow-castle", name: "Disney • Snowy Mountain Castle", description: "A winter fairytale castle with falling snow", image: "assets/launchpad-scene-disney-snow-castle.png" },
     { id: "disney-pride-rock", name: "Disney • Pride Rock", description: "The Lion King savanna with animated golden sun radiance", image: "assets/launchpad-scene-disney-pride-rock.png" },
