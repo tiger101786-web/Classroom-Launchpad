@@ -2,6 +2,14 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "disney-agrabah", name: "Disney • Agrabah Palace", description: "Aladdin's golden palace with shimmering domes at sunset", image: "assets/launchpad-scene-disney-agrabah.png" },
+    { id: "disney-snow-castle", name: "Disney • Snowy Mountain Castle", description: "A winter fairytale castle with falling snow", image: "assets/launchpad-scene-disney-snow-castle.png" },
+    { id: "disney-pride-rock", name: "Disney • Pride Rock", description: "The Lion King savanna with animated golden sun radiance", image: "assets/launchpad-scene-disney-pride-rock.png" },
+    { id: "disney-undersea-palace", name: "Disney • Undersea Palace", description: "The Little Mermaid inspired underwater kingdom with rising bubbles", image: "assets/launchpad-scene-disney-undersea-palace.png" },
+    { id: "disney-bayou", name: "Disney • Firefly Bayou", description: "The Princess and the Frog inspired riverboat sunset with glowing fireflies", image: "assets/launchpad-scene-disney-bayou.png" },
+    { id: "disney-river-valley", name: "Disney • Sunset River Valley", description: "Forest cliffs and a golden river with moving water ripples", image: "assets/launchpad-scene-disney-river-valley.png" },
+    { id: "disney-island-cottage", name: "Disney • Tropical Island Cottage", description: "Lilo and Stitch inspired Hawaiian coastline with shimmering surf", image: "assets/launchpad-scene-disney-island-cottage.png" },
+    { id: "disney-alpine-harbor", name: "Disney • Alpine Castle Harbor", description: "A colorful mountain village and castle with sparkling harbor ripples", image: "assets/launchpad-scene-disney-alpine-harbor.png" },
     { id: "floating-sky-tower", name: "Floating Sky Tower", description: "A soaring fortress above the clouds with bright upper-right sun rays", image: "assets/launchpad-scene-floating-sky-tower.png" },
     { id: "soccer-training-complex", name: "Soccer Training Complex", description: "Evening practice fields with animated stadium floodlights", image: "assets/launchpad-scene-soccer-training-complex.png" },
     { id: "sunset-school-gym", name: "Sunset School Gym", description: "A golden school sunset with rays radiating from the sun", image: "assets/launchpad-scene-sunset-school-gym.png" },
