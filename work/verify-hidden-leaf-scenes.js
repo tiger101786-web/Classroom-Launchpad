@@ -8,6 +8,7 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
 const ids=['hidden-leaf-overlook','hidden-leaf-rooftops',...['nezuko','shinobu','akaza','tanjiro','rengoku','giyu'].map(name=>`demon-slayer-${name}`)];
 ids.push('walled-city-fountain','walled-city-market','moonlit-cherry-village');
+ids.push('pokemon-campus','pokemon-indoor-arena');
 (async()=>{
   const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
   const catalog=server.slice(server.indexOf('const homeSceneIds'),server.indexOf('function homeSceneForSession'));
@@ -24,7 +25,7 @@ ids.push('walled-city-fountain','walled-city-market','moonlit-cherry-village');
       }
       const file=path.join(root,url.pathname);
       if(fs.existsSync(file)&&fs.statSync(file).isFile()) return route.fulfill({path:file});
-      return route.fulfill({contentType:'text/html',body:'<html><head></head><body><main></main></body></html>'});
+      return route.fulfill({contentType:'text/html; charset=utf-8',body:'<html><head><meta charset="utf-8"></head><body><main></main></body></html>'});
     });
     await page.goto('http://scene.test/');
     for(const file of ['styles.css','launchpad-scenes.css','scene-frame-fit.css']) await page.addStyleTag({url:`http://scene.test/${file}`});
@@ -45,15 +46,16 @@ ids.push('walled-city-fountain','walled-city-market','moonlit-cherry-village');
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
         await page.locator('.launch-scene').evaluate(el=>el.classList.remove('is-paused'));
         const duration = await particle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration));
-        const subtle = id.startsWith('walled-city') || id === 'moonlit-cherry-village';
-        assert(subtle ? duration >= 3 && duration <= 5 : duration <= 2.4);
+        const subtle = id === 'moonlit-cherry-village';
+        if (id.startsWith('pokemon-')) assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),id === 'pokemon-campus' ? 'scene-leaves' : 'scene-arena-light');
+        assert(subtle ? duration >= 3 && duration <= 5 : duration > 0 && duration <= 2.4, `${id}: unexpected duration ${duration}`);
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'running');
         await page.emulateMedia({reducedMotion:'reduce'});
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),'none');
         await page.emulateMedia({reducedMotion:'no-preference'});
         await page.screenshot({path:path.join(os.tmpdir(),`${id}-${width}.png`)});
         await page.evaluate(()=>document.getElementById('chooseLaunchScene').click());
-        const search = id.startsWith('walled-city') ? 'Walled City' : id === 'moonlit-cherry-village' ? 'Moonlit Cherry Blossom' : id.startsWith('hidden-leaf') ? 'Hidden Leaf' : 'Demon Slayer';
+        const search = id.startsWith('pokemon-') ? 'Pokémon' : id.startsWith('walled-city') ? 'Walled City' : id === 'moonlit-cherry-village' ? 'Moonlit Cherry Blossom' : id.startsWith('hidden-leaf') ? 'Hidden Leaf' : 'Demon Slayer';
         await page.locator('#launchChooserSearch').fill(search);
         assert.equal(await page.locator('[data-scene-choice]:visible').count(),id.startsWith('demon-slayer')?6:id === 'moonlit-cherry-village'?1:2);
         await page.locator(`[data-scene-choice="${id}"]`).click();
@@ -63,6 +65,6 @@ ids.push('walled-city-fountain','walled-city-market','moonlit-cherry-village');
         assert.deepEqual(saves.at(-1),{id,frame:'blue-fire',motion:false});
       }
     }
-    console.log('Hidden Leaf and six Demon Slayer scenes: validation, desktop/mobile render, search, save payload, frame preservation, brisk motion, pause and reduced motion passed.');
+    console.log(`${ids.length} scenes: validation, desktop/mobile render, search, save payload, frame preservation, scene-specific motion, pause and reduced motion passed.`);
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

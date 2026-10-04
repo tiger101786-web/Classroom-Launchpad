@@ -26,6 +26,8 @@ homeSceneIds.add("hidden-leaf-rooftops");
 homeSceneIds.add("walled-city-fountain");
 homeSceneIds.add("walled-city-market");
 homeSceneIds.add("moonlit-cherry-village");
+homeSceneIds.add("pokemon-campus");
+homeSceneIds.add("pokemon-indoor-arena");
 ["nezuko", "shinobu", "akaza", "tanjiro", "rengoku", "giyu"].forEach(name => homeSceneIds.add(`demon-slayer-${name}`));
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
