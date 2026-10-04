@@ -265,11 +265,12 @@
 :is(.scene-demon-slayer-tanjiro,.scene-demon-slayer-giyu) .launch-scene-particles i { top:-10%; width:3px; height:12px; border-radius:50%; background:#9eeaffcc; box-shadow:none; animation:scene-rain 2s linear infinite; animation-delay:calc(var(--n) * -.23s); }
 :is(.scene-demon-slayer-akaza,.scene-demon-slayer-rengoku) .launch-scene-particles i { top:105%; width:4px; height:5px; background:#ffbe63dd; box-shadow:0 0 4px #ff7d32; animation:scene-embers 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }
 /* Keep the supplied city artwork still; animate only small environmental accents. */
-.scene-walled-city-fountain .launch-scene-particles i { left:0; top:0; width:100%; height:100%; border-radius:0; box-shadow:none; background:radial-gradient(ellipse 1.1% 3% at 42% 75%,#e5f8ff88,transparent),radial-gradient(ellipse 1% 3.5% at 55% 74%,#effcff77,transparent),radial-gradient(ellipse 9% .6% at 49% 81%,#def9ff88,transparent); animation:scene-fountain-shimmer 3s ease-in-out infinite; animation-delay:0s; }
-.scene-walled-city-fountain .launch-scene-particles i:nth-child(n+2) { display:none; }
-.scene-walled-city-market .launch-scene-particles i { left:var(--x); top:var(--y); width:2px; height:2px; border-radius:50%; background:#ffe6a988; box-shadow:0 0 3px #ffefbb44; animation:scene-market-motes 4s ease-in-out infinite; animation-delay:calc(var(--n) * -.47s); }
-@keyframes scene-fountain-shimmer { 0%,100% {opacity:.3;transform:translateY(-1px)} 50% {opacity:.65;transform:translateY(1px)} }
-@keyframes scene-market-motes { 0%,100% {opacity:.15;transform:translate(0,4px)} 50% {opacity:.5;transform:translate(7px,-7px)} }
+.scene-walled-city-fountain .launch-scene-particles i { left:calc(40% + var(--n) * 2%); top:72%; width:3px; height:7px; border-radius:50%; box-shadow:0 0 5px #bdefff; background:linear-gradient(transparent,#f3fdff 40%,#a6eaff); animation:scene-fountain-shimmer 1.8s linear infinite; animation-delay:calc(var(--n) * -.2s); }
+.scene-walled-city-fountain .launch-scene-particles::after { content:""; position:absolute; left:39%; top:81%; width:22%; height:3%; border:2px solid #dcfaff; border-radius:50%; box-shadow:0 0 5px #a6eaff; animation:scene-fountain-ripple 1.8s ease-out infinite; }
+.scene-walled-city-market .launch-scene-particles i { left:var(--x); top:var(--y); width:5px; height:5px; border-radius:50%; background:#ffedac; box-shadow:0 0 5px #ffd66e,0 0 9px #ffeab477; animation:scene-market-motes 2s ease-in-out infinite; animation-delay:calc(var(--n) * -.23s); }
+@keyframes scene-fountain-shimmer { 0% {opacity:0;transform:translateY(-5px) scale(.7)} 15%,70% {opacity:.95} 100% {opacity:0;transform:translateY(26px) scale(.45)} }
+@keyframes scene-fountain-ripple { from {opacity:.8;transform:scale(.5)} to {opacity:0;transform:scale(1.15)} }
+@keyframes scene-market-motes { 0% {opacity:0;transform:translate(-12px,22px) scale(.7)} 20%,70% {opacity:.9} 100% {opacity:0;transform:translate(24px,-32px) scale(1.1)} }
 .scene-moonlit-cherry-village .launch-scene-particles i { top:-10%; width:5px; height:3px; border-radius:80% 10% 80% 10%; background:#ffc2e0bb; box-shadow:none; animation:scene-petals 5s linear infinite; animation-delay:calc(var(--n) * -.56s); }
 .scene-pokemon-campus .launch-scene-particles i { top:-10%; width:7px; height:4px; border-radius:0 75% 0 75%; background:#8ecb55bb; box-shadow:none; animation:scene-leaves 5s linear infinite; animation-delay:calc(var(--n) * -.56s); }
 /* Indoor light only: keep the arena artwork still and avoid outdoor particles. */
