@@ -8,6 +8,7 @@ const { Readable } = require("stream");
 const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
 const collectibleShelf = require("./collectible-shelf");
+const { checkCornerDraft } = require("./colt-corner-coach");
 const {
   hashNormalizedMessage,
   moderateMessage,
@@ -230,7 +231,7 @@ function safeAiEndpoint(value) {
 function coltAiRateAllowed(session, kind) {
   const now = Date.now();
   const windowMs = 10 * 60 * 1000;
-  const maximum = 24;
+  const maximum = kind === "corner" ? 60 : 24;
   const identity = session.role === "student" ? normalizeEmail(session.email) : "teacher";
   const key = `${kind}:${identity}`;
   const recent = (coltAiAttempts.get(key) || []).filter(time => now - time < windowMs);
@@ -286,6 +287,19 @@ async function fetchColtAi(url, options = {}, timeoutMs = 45_000) {
     redirect: "error",
     signal: AbortSignal.timeout(timeoutMs)
   });
+}
+
+async function classifyCornerDraft(system, draft) {
+  if (!coltAiConfigured) throw new Error("Moderation AI is not configured");
+  const endpoint = `${coltAiApiBase}/client/v4/accounts/${encodeURIComponent(coltAiAccountId)}/ai/run/${coltAiTextModel}`;
+  const response = await fetchColtAi(endpoint, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${coltAiApiToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "system", content: system }, { role: "user", content: JSON.stringify(draft) }], temperature: 0, max_tokens: 250 })
+  }, 15000);
+  if (!response.ok) throw new Error("Moderation service unavailable");
+  const payload = await response.json();
+  return payload?.result?.response;
 }
 
 async function handleColtAssistantAiApi(req, res, pathname) {
@@ -1553,6 +1567,28 @@ function moderationFields(result, session, submittedAt) {
     normalizedMessageHash: result.normalizedMessageHash,
     authorKey: session.role === "student" ? studentAuthorKey(session) : "teacher"
   };
+}
+
+// Only serious safety concerns reach the existing private teacher review queue.
+// Routine revisions never become discussion posts or teacher approval chores.
+function recordCornerSafetyReview(db, session, result, draft, parent = null) {
+  if (!result.serious) return;
+  const authorKey = studentAuthorKey(session);
+  const posts = db.threads.flatMap(topic => [topic, ...(topic.replies || [])]);
+  if (posts.some(post => post.authorKey === authorKey && post.normalizedMessageHash === result.normalizedMessageHash
+    && post.moderationStatus === "needs_review")) return;
+  const now = new Date().toISOString();
+  const entry = {
+    id: crypto.randomUUID(), studentName: studentDisplayName(session), grade: cleanColtCornerGrade(session.grade),
+    createdAt: now, ...moderationFields({ ...result, status: "needs_review" }, session, now)
+  };
+  if (parent) {
+    parent.replies.push({ ...entry, message: draft.message });
+    db.threads = db.threads.map(topic => topic.id === parent.id ? parent : topic);
+  } else {
+    db.threads.unshift({ ...entry, audienceGrade: cleanColtCornerGrade(session.grade), title: draft.title, body: draft.message, replies: [] });
+  }
+  writeDb(db);
 }
 
 function preserveNonPublicModeration(existing, incoming) {
@@ -3922,12 +3958,21 @@ async function handleApi(req, res, pathname) {
         throw new Error("Topic title, message, and at least one grade are required.");
       }
       const submittedAt = new Date().toISOString();
-      const result = moderateMessage(`${title}\n${message}`);
+      const result = allowed.role === "teacher" ? moderateMessage(`${title}\n${message}`)
+        : await checkCornerDraft({ title, message }, (system, draft) => {
+          if (!coltAiRateAllowed(allowed, "corner")) throw new Error("Please pause before retrying");
+          return classifyCornerDraft(system, draft);
+        });
+      // Another request may have written while the remote check was running.
+      Object.assign(db, readDb());
+      if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
       if (allowed.role === "student" && result.status === "blocked") {
+        recordCornerSafetyReview(db, allowed, result, { title, message });
         sendJson(res, 200, {
           ok: false,
           moderationStatus: "blocked",
           message: result.studentMessage,
+          feedback: result.feedback,
           reasons: result.reasons.map(item => item.code),
           threads: visibleApprovedThreads(db.threads, allowed),
           pendingModeration: studentPendingModeration(db, allowed)
@@ -3980,7 +4025,7 @@ async function handleApi(req, res, pathname) {
       const db = readDb();
       if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
       const threadId = decodeURIComponent(replySubmission[1]);
-      const thread = migrateGradeScopedThreads(db.threads).find(item => item.id === threadId);
+      let thread = migrateGradeScopedThreads(db.threads).find(item => item.id === threadId);
       if (!thread || !isApprovedPost(thread)) {
         sendJson(res, 404, { error: "That Colt Corner topic is not available." });
         return true;
@@ -3993,12 +4038,25 @@ async function handleApi(req, res, pathname) {
       const grade = allowed.role === "teacher" ? "Teacher" : cleanColtCornerGrade(allowed.grade);
       if (!message || !grade) throw new Error("A reply message is required.");
       const submittedAt = new Date().toISOString();
-      const result = moderateMessage(message);
+      const result = allowed.role === "teacher" ? moderateMessage(message)
+        : await checkCornerDraft({ message, parentTopic: `${thread.title}\n${thread.body}` }, (system, draft) => {
+          if (!coltAiRateAllowed(allowed, "corner")) throw new Error("Please pause before retrying");
+          return classifyCornerDraft(system, draft);
+        });
+      Object.assign(db, readDb());
+      if (allowed.role === "student" && rejectIfMuted(db, allowed, res)) return true;
+      thread = migrateGradeScopedThreads(db.threads).find(item => item.id === threadId);
+      if (!thread || !isApprovedPost(thread) || (allowed.role === "student" && thread.audienceGrade !== cleanColtCornerGrade(allowed.grade))) {
+        sendJson(res, 404, { error: "That Colt Corner topic is no longer available. Your draft has not been posted." });
+        return true;
+      }
       if (allowed.role === "student" && result.status === "blocked") {
+        recordCornerSafetyReview(db, allowed, result, { message }, thread);
         sendJson(res, 200, {
           ok: false,
           moderationStatus: "blocked",
           message: result.studentMessage,
+          feedback: result.feedback,
           reasons: result.reasons.map(item => item.code),
           threads: visibleApprovedThreads(db.threads, allowed),
           pendingModeration: studentPendingModeration(db, allowed)

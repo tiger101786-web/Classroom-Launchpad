@@ -7,6 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { moderateMessage, normalizeForModeration } = require("../colt-corner-moderation");
+const { startCornerAiFixture } = require("./corner-ai-fixture");
 
 assert.equal(moderateMessage("What homework should I finish today?").status, "approved");
 assert.equal(moderateMessage("You are an idiot.").status, "approved");
@@ -50,6 +51,7 @@ async function waitForServer(baseUrl) {
 }
 
 async function runIntegration() {
+  const ai = await startCornerAiFixture();
   const root = path.resolve(__dirname, "..");
   const port = await availablePort();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -72,6 +74,7 @@ async function runIntegration() {
     cwd: root,
     env: {
       ...process.env,
+      ...ai.env,
       PORT: String(port),
       DATA_DIR: dataDir,
       SESSION_SECRET: "moderation-test-session-secret-that-is-long",
@@ -292,12 +295,50 @@ async function runIntegration() {
     });
     assert.equal(thirdDuplicate.payload.moderationStatus, "approved");
 
+    // Routine feedback is returned only to the author, not stored as a post or bot reply.
+    for (const [message, code] of [["only friends of Bob can post here", "exclusion"], ["Who has a crush on Bob?", "dating_gossip"], ["You are an idiot", "harassment"]]) {
+      const revised = await request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:"Try a topic",message}});
+      assert.equal(revised.payload.moderationStatus, "blocked");
+      assert.equal(revised.payload.feedback.issues[0].code, code);
+      assert.equal(revised.payload.feedback.excerpt, message);
+      assert(!revised.payload.threads.some(topic => topic.body === message));
+      const reply = await request(`/api/threads/${homeworkThread.id}/replies`, {method:"POST",cookie:studentCookie,body:{message}});
+      assert.equal(reply.payload.moderationStatus, "blocked");
+      assert.equal(reply.payload.feedback.issues[0].code, code);
+    }
+    assert.equal((await request("/api/moderation", {cookie:teacherCookie})).payload.moderation.pending.length, 0);
+    const fixed = await request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:"Everyone welcome",message:"I love this game! Join in, friends!"}});
+    assert.equal(fixed.payload.moderationStatus, "approved");
+    const titleRevision = await request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:"only friends of Bob can post here",message:"Let's talk about games."}});
+    assert.equal(titleRevision.payload.feedback.field, "title");
+    for (const message of ["SERVICE_DOWN", "BAD_JSON"]) {
+      const unavailable = await request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:"Service test",message}});
+      assert.equal(unavailable.payload.moderationStatus, "blocked");
+      assert.equal(unavailable.payload.feedback.retry, true);
+      assert(!unavailable.payload.threads.some(topic => topic.body === message));
+    }
+    const countBeforePrivate = ai.requests.length;
+    await request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:"Private",message:"My password is secret123"}});
+    assert.equal(ai.requests.length, countBeforePrivate, "Private details must not reach provider");
+    for (let i=0;i<2;i++) {
+      const serious = await request(`/api/threads/${homeworkThread.id}/replies`, {method:"POST",cookie:studentCookie,body:{message:"i will kill you"}});
+      assert.equal(serious.payload.feedback.teacherReview, true);
+      assert(!JSON.stringify(serious.payload.threads).includes("i will kill you"));
+    }
+    assert.equal((await request("/api/moderation", {cookie:teacherCookie})).payload.moderation.pending.length, 1, "Duplicate safety alerts deduplicated");
+    const parallel = await Promise.all(["A", "B"].map(letter => request("/api/threads", {method:"POST",cookie:studentCookie,body:{title:`Concurrent ${letter}`,message:`SLOW_CHECK ${letter}`}})));
+    assert(parallel.every(item => item.payload.moderationStatus === "approved"));
+    const state = await request("/api/threads", {cookie:studentCookie});
+    assert.equal(state.payload.threads.filter(topic => topic.title.startsWith("Concurrent ")).length, 2);
+    assert(!JSON.stringify(state.payload).includes("i will kill you"));
+    assert(ai.requests.every(item => !JSON.stringify(item).includes("moderation.student@scscolts.org")));
     const db = JSON.parse(fs.readFileSync(path.join(dataDir, "classroom-launchpad-db.json"), "utf8"));
     assert(!JSON.stringify(db).includes("student@example.com"));
     assert(!JSON.stringify(db).includes("<script>"));
   } finally {
     child.kill();
     await new Promise(resolve => child.once("exit", resolve));
+    await ai.close();
     const resolvedTemp = path.resolve(dataDir);
     if (resolvedTemp.startsWith(path.resolve(os.tmpdir()))) {
       fs.rmSync(resolvedTemp, { recursive: true, force: true });

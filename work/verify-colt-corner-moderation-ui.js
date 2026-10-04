@@ -7,6 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
+const { startCornerAiFixture } = require("./corner-ai-fixture");
 
 function availablePort() {
   return new Promise((resolve, reject) => {
@@ -30,6 +31,7 @@ async function waitForServer(baseUrl) {
 }
 
 async function run() {
+  const ai = await startCornerAiFixture();
   const root = path.resolve(__dirname, "..");
   const port = await availablePort();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -38,6 +40,7 @@ async function run() {
     cwd: root,
     env: {
       ...process.env,
+      ...ai.env,
       PORT: String(port),
       DATA_DIR: dataDir,
       SESSION_SECRET: "moderation-ui-test-session-secret-that-is-long",
@@ -97,7 +100,7 @@ async function run() {
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert.equal(await studentPage.locator(".colt-corner-card .colt-corner-graphic").count(), 0);
     assert(await studentPage.getByText("Never share personal information.", { exact: true }).isVisible());
-    assert(await studentPage.getByText(/Some messages may be held for Mr\. Nieves to review before appearing/i).isVisible());
+    assert(await studentPage.getByText(/Revision guidance is private to you/i).isVisible());
     const pageColumns = await studentPage.locator(".colt-corner-card").evaluate(card => {
       const heading = card.querySelector(":scope > .colt-corner-heading").getBoundingClientRect();
       const form = card.querySelector(":scope > .thread-form").getBoundingClientRect();
@@ -108,24 +111,7 @@ async function run() {
     });
     assert(pageColumns.aligned);
     assert(pageColumns.widthDifference < 3);
-    await studentPage.waitForFunction(() => {
-      const video = document.querySelector(".colt-corner-card > .thread-form-banner video");
-      return Boolean(video && video.videoWidth && video.videoHeight);
-    });
-    const bannerLayout = await studentPage.locator(".colt-corner-card > .thread-form-banner").evaluate(banner => {
-      const card = banner.parentElement.getBoundingClientRect();
-      const bannerRect = banner.getBoundingClientRect();
-      const video = banner.querySelector("video");
-      const videoRect = video.getBoundingClientRect();
-      return {
-        spansBothColumns: bannerRect.width > card.width * 0.9,
-        ratioDifference: Math.abs(
-          (videoRect.width / videoRect.height) - (video.videoWidth / video.videoHeight)
-        )
-      };
-    });
-    assert(bannerLayout.spansBothColumns);
-    assert(bannerLayout.ratioDifference < 0.02, JSON.stringify(bannerLayout));
+    // Moderation must work without depending on decorative video decoding.
     const formLayout = await studentPage.locator("#threadForm").evaluate(form => {
       const fields = Array.from(form.querySelectorAll(":scope > .field")).map(element => element.getBoundingClientRect());
       const button = form.querySelector("button[type='submit']").getBoundingClientRect();
@@ -152,20 +138,25 @@ async function run() {
     await studentPage.locator("#threadBody").fill("You are an idiot.");
     await studentPage.locator("#threadForm button[type='submit']").click();
     await studentPage.waitForTimeout(750);
-    assert.match(await studentPage.locator("#threadStatus").innerText(), /sent to Mr\. Nieves for review|wait before posting/i);
+    await studentPage.locator('#threadStatus button').waitFor();
+    assert.match(await studentPage.locator("#threadStatus").innerText(), /What to change: Remove the insult/i);
+    assert.equal(await studentPage.locator("#threadBody").inputValue(), "You are an idiot.");
+    assert.equal(await studentPage.locator("#threadForm button[type='submit']").innerText(), "Check Again & Post");
+    await studentPage.getByRole("button", {name:"Edit My Post", exact:true}).click();
+    assert.equal(await studentPage.locator('#threadBody').evaluate(el=>el.value.slice(el.selectionStart,el.selectionEnd)), "You are an idiot");
     assert.equal(await studentPage.getByText("Questionable wording", { exact: true }).count(), 0);
 
     const teacherPage = await teacherContext.newPage();
     await teacherPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await teacherPage.locator('.header-account-summary').click();
     await teacherPage.locator('[data-action="teacherDashboard"]').click();
     await teacherPage.locator('[data-action="dashboardSection"][data-section="corner"]').first().click();
     await teacherPage.locator('[data-action="coltCornerGrade"][data-grade="6"]').first().click();
     await teacherPage.getByRole("heading", { name: "Colt Corner Moderation", exact: true }).waitFor();
-    assert.equal(await teacherPage.locator(".moderation-edit-title").inputValue(), "Questionable wording");
-    assert(await teacherPage.getByText(/Possible insult, bullying/i).isVisible());
-    await teacherPage.getByRole("button", { name: "Approve", exact: true }).click();
-    await teacherPage.getByText("No Colt Corner messages are waiting for review.", { exact: true }).waitFor();
-
+    await teacherPage.getByText("All caught up—no messages need review.", { exact: true }).waitFor();
+    await studentPage.locator("#threadBody").fill("Everyone is welcome to share a favorite game.");
+    await studentPage.locator("#threadForm button[type='submit']").click();
+    await studentPage.getByText("Topic started.", {exact:true}).waitFor();
     await studentPage.reload({ waitUntil: "domcontentloaded" });
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert(await studentPage.getByText("Questionable wording", { exact: true }).isVisible());
@@ -173,9 +164,28 @@ async function run() {
     await studentPage.locator("#threadTitle").fill("Unsafe post");
     await studentPage.locator("#threadBody").fill("My email is student@example.com.");
     await studentPage.locator("#threadForm button[type='submit']").click();
-    await studentPage.getByText(/may contain personal information/i).waitFor();
-    assert(await studentPage.locator("#threadBody").evaluate(element => document.activeElement === element));
+    await studentPage.getByText(/This may share private information/i).waitFor();
+    assert(await studentPage.locator("#threadStatus").evaluate(element => document.activeElement === element));
     assert.equal(await studentPage.getByText("Unsafe post", { exact: true }).count(), 0);
+
+    await studentPage.locator('.thread-row').filter({hasText:"Normal classroom question"}).click();
+    await studentPage.locator('#replyMessage').fill('Who has a crush on Bob?');
+    await studentPage.locator('#replyForm button[type="submit"]').click();
+    await studentPage.locator('#replyStatus button').waitFor();
+    assert.match(await studentPage.locator('#replyStatus').innerText(), /crushes and dating lives are private/);
+    assert.equal(await studentPage.locator('#replyMessage').inputValue(), 'Who has a crush on Bob?');
+    assert(!/Private •|Who has a crush/.test(await studentPage.locator('.thread-reply-list').innerText()));
+    await studentPage.screenshot({path:path.join(os.tmpdir(),'corner-private-coach-desktop.png'),fullPage:true});
+    await studentPage.setViewportSize({width:390,height:844});
+    await studentPage.locator('#replyStatus').evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
+    assert(await studentPage.locator('#replyStatus button').evaluate(el=>{const b=el.getBoundingClientRect();return el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2));}), 'Edit action must not be covered by floating controls');
+    await studentPage.locator('#replyStatus').screenshot({path:path.join(os.tmpdir(),'corner-private-coach-mobile.png')});
+    assert(await studentPage.locator('#replyStatus').evaluate(el=>el.getBoundingClientRect().right<=innerWidth));
+    await studentPage.locator('#replyMessage').fill('Everyone can share a favorite game.');
+    await studentPage.locator('#replyForm button[type="submit"]').click();
+    await studentPage.getByText('Reply posted.',{exact:true}).waitFor();
+    assert.match(await studentPage.locator('.thread-reply-list').innerText(), /Everyone can share a favorite game/);
+    assert.equal(await studentPage.locator('#replyMessage').inputValue(), '');
 
     await teacherContext.close();
     await studentContext.close();
@@ -183,6 +193,7 @@ async function run() {
     await browser.close();
     child.kill();
     if (child.exitCode === null) await new Promise(resolve => child.once("exit", resolve));
+    await ai.close();
     const resolvedTemp = path.resolve(dataDir);
     if (resolvedTemp.startsWith(path.resolve(os.tmpdir()))) {
       fs.rmSync(resolvedTemp, { recursive: true, force: true });

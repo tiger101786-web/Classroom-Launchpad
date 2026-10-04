@@ -96,7 +96,8 @@ function moderateMessage(value, config = defaultConfig) {
   const phone = /(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/.test(text);
   const streetAddress = /\b\d{1,6}\s+[a-z0-9.' -]{2,40}\s(?:street|st|road|rd|avenue|ave|lane|ln|drive|dr|boulevard|blvd|court|ct|place|pl|way)\b/i.test(text);
   const fullName = /\bmy\s+(?:full\s+)?name\s+is\s+[a-z][a-z.'-]+(?:\s+[a-z][a-z.'-]+)+/i.test(text);
-  if (email || phone || streetAddress || fullName) {
+  const credential = /\b(password|passcode|activation\s*code|login\s*code|student\s*id|pin)\s*(is|=|:)\s*\S+/i.test(text);
+  if (email || phone || streetAddress || fullName || credential) {
     blocked = true;
     reasons.push(reason("personal_information", "Possible email address, phone number, or street address"));
   }

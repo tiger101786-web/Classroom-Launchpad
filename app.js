@@ -3040,19 +3040,20 @@ function renderColtCorner() {
       <div class="colt-corner-heading">
         <span class="feature-kicker">Class Forum</span>
         <h2>Start a New Topic</h2>
-        <p>Start a teacher-approved topic, ask a question, or respond respectfully to a classmate.</p>
+        <p>Start a school-appropriate conversation, ask a question, or respond respectfully to a classmate.</p>
         <section class="forum-rules-card" aria-label="Colt Corner forum rules">
           <h3>Forum Rules</h3>
           <ol>
             <li>Be respectful and kind.</li>
             <li>Keep every message school appropriate.</li>
-            <li>School-related topics only.</li>
+            <li>Welcome everyone—no friends-only topics.</li>
+            <li>Keep classmates’ crushes and dating lives private.</li>
             <li>Never share personal information.</li>
             <li>Do not post outside links or usernames.</li>
             <li>No bullying, threats, spam, or repeated posts.</li>
           </ol>
           <p class="forum-moderation-note">
-            Colt Corner checks for bad language and personal information. Messages that pass these checks appear right away.
+            Colt Assistant checks each draft before posting. If something needs a change, you receive private instructions and can edit and try again. Serious safety concerns go privately to Mr. Nieves.
           </p>
         </section>
         ${isTeacher() ? `<div class="forum-energy" aria-hidden="true"><span class="home-header-energy"><svg viewBox="0 0 240 30" preserveAspectRatio="none" focusable="false">${renderHeaderEnergyPaths()}</svg></span></div>` : ""}
@@ -3089,7 +3090,7 @@ function renderColtCorner() {
           </fieldset>
         ` : ""}
         <button class="primary-btn" type="submit">Start Topic</button>
-        ${isTeacher() ? '<p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>' : ""}
+        ${isTeacher() ? '<div id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></div>' : ""}
       </form>
       ${!isTeacher() ? `<div class="student-topic-feedback">
         ${pendingModeration.length ? `
@@ -3097,7 +3098,8 @@ function renderColtCorner() {
             ${pendingModeration.length} ${pendingModeration.length === 1 ? "message is" : "messages are"} waiting for Mr. Nieves to review.
           </p>
         ` : ""}
-        <p id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
+        <div id="threadStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></div>
+        <small class="corner-check-privacy">Colt Assistant checks drafts using Cloudflare Workers AI. Revision guidance is private to you, never a reply in the topic.</small>
       </div>${renderStudentForumEnergy()}` : ""}
       <figure class="colt-corner-banner thread-form-banner">
         <video autoplay muted loop playsinline aria-label="Animated Join the Herd Colt Corner banner">
@@ -3254,7 +3256,8 @@ function renderThreadDetail(threadId) {
             ${pendingModeration.length} ${pendingModeration.length === 1 ? "message is" : "messages are"} waiting for Mr. Nieves to review.
           </p>
         ` : ""}
-        <p id="replyStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></p>
+        <div id="replyStatus" class="request-message colt-assistant-moderation-feedback" aria-live="assertive"></div>
+        <small class="corner-check-privacy">Revision guidance appears privately here, not in the discussion. Drafts are checked using Cloudflare Workers AI.</small>
       </form>
     </section>
   `;
@@ -12448,6 +12451,43 @@ function attachStudentRequestForm() {
   });
 }
 
+function showCornerRevision(status, result, form) {
+  const feedback = result?.feedback;
+  form.dataset.revision = result?.moderationStatus === "blocked" ? "true" : "";
+  if (!feedback || result.moderationStatus !== "blocked") return;
+  status.replaceChildren();
+  const add = (tag, text) => {
+    const element = document.createElement(tag);
+    element.textContent = text;
+    status.appendChild(element);
+  };
+  add("strong", `Private • ${feedback.heading}`);
+  add("p", result.message);
+  if (feedback.excerpt) add("blockquote", feedback.excerpt);
+  for (const issue of feedback.issues || []) {
+    add("p", issue.why);
+    add("p", `What to change: ${issue.fix}`);
+  }
+  if (feedback.teacherReview) add("p", "This safety concern was also sent privately to Mr. Nieves for review. It is not visible in the discussion.");
+  const edit = document.createElement("button");
+  edit.type = "button";
+  edit.className = "outline-btn";
+  edit.textContent = feedback.retry ? "Return to My Draft" : "Edit My Post";
+  edit.addEventListener("click", () => {
+    const field = form.querySelector(feedback.field === "title" ? "#threadTitle" : "#threadBody, #replyMessage");
+    if (!field) return;
+    field.focus();
+    const start = feedback.excerpt ? field.value.indexOf(feedback.excerpt) : -1;
+    if (start >= 0) field.setSelectionRange(start, start + feedback.excerpt.length);
+  });
+  // Keep the editing action near the heading on small screens, above long guidance
+  // and clear of the floating assistant launcher at the bottom of the viewport.
+  status.insertBefore(edit, status.children[1] || null);
+  status.tabIndex = -1;
+  status.focus({ preventScroll: true });
+  status.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
 function attachThreadForm() {
   const threadForm = document.getElementById("threadForm");
   if (!threadForm || threadForm.dataset.ready === "true") return;
@@ -12484,6 +12524,7 @@ function attachThreadForm() {
       classThreads = normalizeThreads(result && result.threads);
       pendingModeration = normalizePendingModeration(result && result.pendingModeration);
       status.textContent = result && result.message ? result.message : "Topic started.";
+      showCornerRevision(status, result, threadForm);
       status.classList.toggle("error", result && result.moderationStatus === "blocked");
       status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
       status.classList.toggle("success", result && result.moderationStatus === "approved");
@@ -12493,7 +12534,7 @@ function attachThreadForm() {
         const activeGradeInput = threadForm.querySelector(`input[name="threadGrade"][value="${teacherColtCornerGrade}"]`);
         if (activeGradeInput) activeGradeInput.checked = true;
       }
-      if (result && result.moderationStatus === "blocked") document.getElementById("threadBody").focus();
+      if (result && result.moderationStatus === "blocked" && !result.feedback) document.getElementById("threadBody").focus();
       const list = document.querySelector(".thread-list");
       if (list) list.outerHTML = renderThreadTable(visibleColtCornerThreads());
     } catch (submissionError) {
@@ -12502,7 +12543,7 @@ function attachThreadForm() {
       document.getElementById("threadBody").focus();
     } finally {
       button.disabled = false;
-      button.textContent = "Start Topic";
+      button.textContent = threadForm.dataset.revision === "true" ? "Check Again & Post" : "Start Topic";
     }
   });
 }
@@ -12787,11 +12828,12 @@ function attachReplyForm() {
       classThreads = normalizeThreads(result && result.threads);
       pendingModeration = normalizePendingModeration(result && result.pendingModeration);
       status.textContent = result && result.message ? result.message : "Reply posted.";
+      showCornerRevision(status, result, replyForm);
       status.classList.toggle("error", result && result.moderationStatus === "blocked");
       status.classList.toggle("pending", result && result.moderationStatus === "needs_review");
       status.classList.toggle("success", result && result.moderationStatus === "approved");
       if (result && result.moderationStatus !== "blocked") replyForm.reset();
-      if (result && result.moderationStatus === "blocked") document.getElementById("replyMessage").focus();
+      if (result && result.moderationStatus === "blocked" && !result.feedback) document.getElementById("replyMessage").focus();
       const updated = classThreads.find(thread => thread.id === threadId);
       const list = document.querySelector(".thread-reply-list");
       if (updated && list) {
@@ -12808,7 +12850,7 @@ function attachReplyForm() {
       document.getElementById("replyMessage").focus();
     } finally {
       button.disabled = false;
-      button.textContent = "Post Reply";
+      button.textContent = replyForm.dataset.revision === "true" ? "Check Again & Post" : "Post Reply";
     }
   });
 }

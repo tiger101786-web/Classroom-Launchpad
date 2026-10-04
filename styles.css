@@ -2205,7 +2205,7 @@ body[data-theme="night"] .request-spirit {
 .colt-corner-card.student-colt-corner > .colt-corner-heading { display:grid; grid-template-rows:auto auto auto 1fr; align-content:stretch; }
 .student-colt-corner > .colt-corner-heading > .forum-rules-card { margin-top:8px; }
 .student-topic-feedback { grid-column:1 / -1; }
-.student-topic-feedback:not(:has(.colt-corner-pending-note)):has(#threadStatus:empty) { display:none; }
+.student-topic-feedback:not(:has(.colt-corner-pending-note, .corner-check-privacy)):has(#threadStatus:empty) { display:none; }
 .student-forum-energy { grid-column:1 / -1; width:100%; padding:12px 0; }
 .student-forum-energy .home-header-energy { display:block; width:100%; max-width:none; height:30px; }
 @media(max-width:720px) { .colt-corner-card.student-colt-corner > .thread-form { grid-template-rows:none; } .student-colt-corner > .colt-corner-heading > .forum-rules-card { margin-top:8px; } }
@@ -12936,3 +12936,9 @@ body[data-theme="night"] .colt-run-volume {
   .colt-run-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .colt-run-volume { grid-column: 1 / -1; }
 }
+/* Private, form-local coaching; never rendered as a discussion reply. */
+.colt-assistant-moderation-feedback > strong { display: block; margin-bottom: 8px; }
+.colt-assistant-moderation-feedback > p { margin: 8px 0; }
+.colt-assistant-moderation-feedback > blockquote { margin: 10px 0; padding: 8px 12px; border-left: 3px solid currentColor; overflow-wrap: anywhere; white-space: pre-wrap; }
+.colt-assistant-moderation-feedback > button { margin-top: 8px; }
+.corner-check-privacy { display: block; line-height: 1.45; opacity: .8; }

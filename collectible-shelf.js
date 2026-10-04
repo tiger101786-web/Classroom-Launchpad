@@ -132,6 +132,7 @@
   rows.push(['Superheroes', ["superhero-harley-quinn-statue","Harley Quinn Statue"], ["superhero-joker-statue","Joker Statue"]]);
   rows.push(['Character Collectibles', ["luigi-statue","Luigi Statue"], ["mario-statue","Mario Statue"]]);
   rows.push(['Disney', ["merida-statue","Merida Statue"], ["simba-statue","Simba Statue"]]);
+  rows.push(['Nintendo', ['nintendo-bowser-statue','Bowser Statue'], ['nintendo-link-statue','Link Statue'], ['nintendo-peach-statue','Princess Peach Statue'], ['nintendo-yoshi-statue','Yoshi Statue'], ['nintendo-zelda-statue','Princess Zelda Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -150,6 +151,11 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-link-statue': {source:'assets/shelf-nintendo-link-statue.png',width:1232,height:1600,bounds:[190,9,835,1553],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-peach-statue': {source:'assets/shelf-nintendo-peach-statue.png',width:1040,height:1888,bounds:[4,4,1029,1869],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-yoshi-statue': {source:'assets/shelf-nintendo-yoshi-statue.png',width:1216,height:1616,bounds:[168,0,987,1598],displaySize:330,displayWidth:280,directImage:true},
+    'nintendo-zelda-statue': {source:'assets/shelf-nintendo-zelda-statue.png',width:1056,height:1888,bounds:[45,11,955,1861],displaySize:330,displayWidth:280,directImage:true},
     'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue.png","width":1728,"height":1152,"bounds":[386,6,981,1111],"displaySize":330,"displayWidth":330,"displayOffsetX":-15,"directImage":true},
     'superhero-joker-statue': {"source":"assets/shelf-superhero-joker-statue.png","width":1264,"height":1568,"bounds":[166,2,978,1534],"displaySize":330,"displayWidth":280,"directImage":true},
     'luigi-statue': {"source":"assets/shelf-luigi-statue.png","width":1232,"height":1600,"bounds":[261,26,731,1518],"displaySize":330,"displayWidth":280,"directImage":true},
