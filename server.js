@@ -47,7 +47,7 @@ homeSceneFrameIds.add("squishy");
 homeSceneFrameIds.add("highland");
 homeSceneFrameIds.add("christian");
 homeSceneFrameIds.add("usa-patriotic");
-['blue-fire', 'rainbow-fire'].forEach(id => homeSceneFrameIds.add(id));
+['blue-fire', 'rainbow-fire', 'hero-armor', 'hero-lightning', 'disney-castle', 'disney-rose'].forEach(id => homeSceneFrameIds.add(id));
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };
 }
