@@ -54,6 +54,8 @@ for (const [id,info] of Object.entries(storyWorlds)) { additions[id]=info; ids.p
         assert.equal(await page.locator(`[data-scene="${id}"]`).count(),1);
         assert(await page.locator('.launch-scene-image').evaluate(img=>img.naturalWidth>0));
         const particle=page.locator('.launch-scene-particles i').first();
+        const radiance=page.locator('.launch-scene-radiance');
+        if (await radiance.count()) assert.equal(await radiance.evaluate(el=>getComputedStyle(el,'::before').animationPlayState),'paused');
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
         if (id.startsWith('hidden-leaf')) {
           for (const pseudo of ['::before','::after']) assert.equal(await page.locator('.launch-scene-particles').evaluate((el,p)=>getComputedStyle(el,p).animationPlayState,pseudo),'paused');
@@ -68,6 +70,11 @@ for (const [id,info] of Object.entries(storyWorlds)) { additions[id]=info; ids.p
         if (id === 'forest-temple' || id === 'mha-ua-campus') assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),id === 'forest-temple' ? 'scene-leaves' : 'scene-ua-sunbeams');
         assert(subtle ? duration >= 3 && duration <= 5 : duration > 0 && duration <= 2.4, `${id}: unexpected duration ${duration}`);
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+        if (await radiance.count()) {
+          const light=await radiance.evaluate(el=>{const s=getComputedStyle(el,'::before');return {name:s.animationName,state:s.animationPlayState};});
+          assert.equal(light.name,['disney-radiator-springs','disney-river-valley'].includes(id)?'scene-background-rays':'scene-moon-halo');
+          assert.equal(light.state,'running');
+        }
         if (id.startsWith('hidden-leaf')) {
           const radiance = await page.locator('.launch-scene-particles').evaluate(el=>['::before','::after'].map(p=>{const s=getComputedStyle(el,p);return {name:s.animationName,state:s.animationPlayState,duration:s.animationDuration};}));
           assert.deepEqual(radiance.map(s=>s.name),['scene-leaf-sun-glow','scene-leaf-sun-rays']);
@@ -75,6 +82,7 @@ for (const [id,info] of Object.entries(storyWorlds)) { additions[id]=info; ids.p
         }
         await page.emulateMedia({reducedMotion:'reduce'});
         assert.equal(await particle.evaluate(el=>getComputedStyle(el).animationName),'none');
+        if (await radiance.count()) assert.equal(await radiance.evaluate(el=>getComputedStyle(el,'::before').animationName),'none');
         if (id.startsWith('hidden-leaf')) {
           for (const pseudo of ['::before','::after']) assert.equal(await page.locator('.launch-scene-particles').evaluate((el,p)=>getComputedStyle(el,p).animationName,pseudo),'none');
         }

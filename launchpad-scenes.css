@@ -357,7 +357,7 @@
 /* Story worlds: independent lighting and environmental overlays, never image zoom. */
 :is(.scene-disney-paris-rooftops,.scene-disney-monstropolis,.scene-disney-halloween-town,.scene-disney-memory-headquarters,.scene-disney-radiator-springs) .launch-scene-particles i { left:0; top:0; width:100%; height:100%; border-radius:0; box-shadow:none; animation:scene-park-lamps 2.2s ease-in-out infinite alternate; animation-delay:0s; }
 :is(.scene-disney-paris-rooftops,.scene-disney-monstropolis,.scene-disney-halloween-town,.scene-disney-memory-headquarters,.scene-disney-radiator-springs,.scene-disney-olympus,.scene-disney-notre-dame,.scene-disney-toy-bedroom) .launch-scene-particles i:nth-child(n+2) { display:none; }
-.scene-disney-paris-rooftops .launch-scene-particles i { background:radial-gradient(ellipse 4% 9% at 17% 52%,#ffe2a9dd,transparent),radial-gradient(ellipse 4% 7% at 37% 67%,#ffe2a9dd,transparent),radial-gradient(ellipse 4% 7% at 49% 68%,#ffe2a9dd,transparent),radial-gradient(ellipse 4% 8% at 50% 87%,#ffe2a9dd,transparent),radial-gradient(ellipse 11% 11% at 72% 18%,#fff6cf88,transparent); }
+.scene-disney-paris-rooftops .launch-scene-particles i { background:radial-gradient(ellipse 5% 10% at 17% 52%,#ffe2a9ee,#ffc56b44 50%,transparent),radial-gradient(ellipse 5% 8% at 37% 67%,#ffe2a9ee,transparent),radial-gradient(ellipse 5% 8% at 49% 68%,#ffe2a9ee,transparent),radial-gradient(ellipse 5% 9% at 50% 87%,#ffe2a9ee,transparent); }
 .scene-disney-olympus { --story-sun-x:15%; --story-sun-y:31%; }
 .scene-disney-notre-dame { --story-sun-x:23%; --story-sun-y:43%; }
 :is(.scene-disney-olympus,.scene-disney-notre-dame) .launch-scene-particles i { left:var(--story-sun-x); top:var(--story-sun-y); width:65%; height:65%; border-radius:50%; box-shadow:none; background:repeating-conic-gradient(from 10deg,transparent 0deg,#ffe6a6cc 5deg,transparent 12deg,transparent 30deg); mask-image:radial-gradient(circle,#000 0%,#000 15%,transparent 68%); transform:translate(-50%,-50%); animation:scene-leaf-sun-rays 2.4s ease-in-out infinite alternate; animation-delay:0s; }
@@ -374,3 +374,21 @@
 .scene-disney-jungle-ruins .launch-scene-particles { clip-path:polygon(44% 66%,66% 66%,78% 72%,64% 84%,55% 95%,38% 88%,26% 83%,46% 77%); }
 .scene-disney-marigold-bridge .launch-scene-particles i { top:-10%; width:9px; height:6px; border-radius:80% 10% 80% 10%; background:#ffcb38; box-shadow:0 0 4px #ff9b2288; animation:scene-petals 2.4s linear infinite; animation-delay:calc(var(--n) * -.27s); }
 .scene-disney-radiator-springs .launch-scene-particles i { background:radial-gradient(ellipse 5% 20% at 15% 38%,#ffcb8588,transparent),radial-gradient(ellipse 8% 5% at 91% 53%,#ffb847aa,transparent),radial-gradient(ellipse 8% 3% at 91% 58%,#a4eeffcc,transparent),radial-gradient(ellipse 4% 5% at 32% 43%,#fff4b9dd,transparent); }
+/* Independent light layer: water masks must not clip moons or background rays. */
+.launch-scene-radiance { position:absolute; inset:0; overflow:hidden; border-radius:50%; pointer-events:none; }
+.scene-disney-paris-rooftops { --moon-x:72%; --moon-y:18%; --moon-size:24%; --moon-color:255,235,184; }
+.scene-disney-halloween-town { --moon-x:63.5%; --moon-y:26%; --moon-size:48%; --moon-color:255,223,145; }
+.scene-disney-jungle-ruins { --moon-x:60.5%; --moon-y:20%; --moon-size:29%; --moon-color:255,241,204; }
+.scene-disney-haunted-mansion { --moon-x:68.5%; --moon-y:15%; --moon-size:29%; --moon-color:178,218,255; }
+.scene-disney-skull-lagoon { --moon-x:63%; --moon-y:16%; --moon-size:33%; --moon-color:175,220,255; }
+:is(.scene-disney-paris-rooftops,.scene-disney-halloween-town,.scene-disney-jungle-ruins,.scene-disney-haunted-mansion,.scene-disney-skull-lagoon) .launch-scene-radiance::before { content:""; position:absolute; left:var(--moon-x); top:var(--moon-y); width:var(--moon-size); height:var(--moon-size); border-radius:50%; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(var(--moon-color),.12) 15%,rgba(var(--moon-color),.32) 32%,rgba(var(--moon-color),.18) 45%,transparent 70%); animation:scene-moon-halo 2.4s ease-in-out infinite alternate; }
+@keyframes scene-moon-halo { from {opacity:.35;transform:translate(-50%,-50%) scale(.93)} to {opacity:.95;transform:translate(-50%,-50%) scale(1.08)} }
+:is(.scene-disney-halloween-town,.scene-disney-radiator-springs) .launch-scene-particles i { filter:brightness(1.18); }
+.scene-disney-hollywood-hotel .launch-scene-particles i { filter:brightness(1.4); }
+.scene-disney-memory-headquarters .launch-scene-particles::after { content:""; position:absolute; left:50%; top:64%; width:24%; height:20%; transform:translate(-50%,-50%); background:radial-gradient(ellipse,#fff4b84d,#ffd77733 40%,transparent 70%); animation:scene-moon-halo 2s ease-in-out infinite alternate; }
+.scene-disney-radiator-springs { --ray-x:80%; --ray-y:42%; }
+.scene-disney-river-valley { --ray-x:46%; --ray-y:32%; }
+:is(.scene-disney-radiator-springs,.scene-disney-river-valley) .launch-scene-radiance::before { content:""; position:absolute; left:var(--ray-x); top:var(--ray-y); width:85%; height:85%; transform:translate(-50%,-50%); background:radial-gradient(circle,#ffe9ac77,transparent 27%),repeating-conic-gradient(from 8deg,transparent 0deg,#ffe6a65c 6deg,transparent 13deg,transparent 30deg); mask-image:radial-gradient(circle,#000 4%,#0008 28%,transparent 68%); animation:scene-background-rays 2.4s ease-in-out infinite alternate; }
+.scene-disney-radiator-springs .launch-scene-radiance { clip-path:polygon(39% 0,100% 0,100% 39%,91% 40%,85% 40%,84% 43%,76% 44%,71% 39%,67% 33%,79% 33%,80% 32%,69% 29%,59% 26%,49% 27%); }
+.scene-disney-river-valley .launch-scene-radiance { clip-path:polygon(0 0,100% 0,100% 29%,86% 23%,79% 24%,74% 25%,74% 41%,63% 39%,54% 38%,49% 39%,49% 35%,46% 33%,40% 33%,40% 23%,0 23%); }
+@keyframes scene-background-rays { from {opacity:.35;transform:translate(-50%,-50%) rotate(-3deg)} to {opacity:.75;transform:translate(-50%,-50%) rotate(3deg)} }
