@@ -394,6 +394,14 @@
       note: "Positive Christian hip-hop streamed commercial-free by BOOST Radio, with no profanity, misogyny, or messages of violence. No account required."
     },
     {
+      id: "positive-radio-faith",
+      label: "Hip-Hop • Faith",
+      type: "stream",
+      source: "https://stream.rcast.net/73844",
+      provider: "Positive Radio",
+      note: "Independent Christian hip-hop, rap, and urban gospel from Positive Radio. The station describes its 24/7 broadcast as commercial-free. No account required."
+    },
+    {
       id: "nova-instrumental",
       label: "Instrumental • Brazil",
       type: "stream",
@@ -844,6 +852,7 @@
     "celtic-traditional": '<path d="M12 3c-3 3-4.5 6-4 9 1 5 7 6 9 2 1.5-3-.5-6-5-6-5 0-8 5-7 9 .8 3.2 4 5.5 7 5.5"/><path d="M12 8c2 2 3 4 2 6-1 2-4 2-5 0"/>',
     "kpop-hits": '<path d="m12 3 2.2 5.3L20 9l-4.3 3.7L17 18l-5-2.8L7 18l1.3-5.3L4 9l5.8-.7L12 3Z"/><path d="M5 21h14"/>',
     "boost-positive": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M17 17c1.5-1 2.5-2.5 3-4"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',
+    "positive-radio-faith": '<path d="M8 4v10.5a3.5 3.5 0 1 1-2-3.2V6l10-2v8.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M19 2v6m-3-3h6"/>',
     "nova-instrumental": '<path d="M12 3v12.5a3.5 3.5 0 1 1-2-3.2V6l8-2v9.5a3.5 3.5 0 1 1-2-3.2V4Z"/><path d="M3 8c2-2 4-2 6 0m6 10c2-2 4-2 6 0"/>',
     "fun-kids-soundtracks": '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="m3 10 4-4 4 4 4-4 4 4M9 14h6m-3-2v4"/>',
     "walts-radio": '<path d="M5 21V10l3 2V7l4 3 4-3v5l3-2v11M9 21v-5h6v5"/><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5Z"/>',

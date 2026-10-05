@@ -24,9 +24,17 @@ const { chromium } = require('playwright');
       await boost.click();
       assert.equal(await page.locator('audio').getAttribute('src'), 'https://gateway.cdnstream1.com/boost-live');
       assert.match(await page.locator('.colt-radio-note').innerText(), /commercial-free by BOOST Radio/);
+      const faith = page.getByRole('button', { name: 'Hip-Hop • Faith', exact: true });
+      assert.equal(await faith.count(), 1);
+      assert(await faith.isVisible());
+      await faith.click();
+      assert.equal(await page.locator('audio').getAttribute('src'), 'https://stream.rcast.net/73844');
+      assert.match(await page.locator('.colt-radio-note').innerText(), /Positive Radio/);
+      await page.locator('.colt-radio-search-input').fill('Positive Radio');
+      assert(await faith.isVisible(), 'Provider search should find Positive Radio');
     }
     await page.getByRole('button', { name: 'Stop Colt Radio', exact: true }).click();
     assert(!await page.locator('audio').getAttribute('src'));
-    console.log('PASS: BOOST appears once as Hip-Hop • Positive, Urban Heat is absent, selection and stop work on desktop/mobile. Provider playback is mocked.');
+    console.log('PASS: BOOST and Positive Radio have distinct themed names; search, selection and stop work on desktop/mobile. Urban Heat is absent. Provider playback is mocked.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
