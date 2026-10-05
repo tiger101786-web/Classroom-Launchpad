@@ -1,0 +1,300 @@
+{
+  "method": "Built-in image_gen; one asset per scene",
+  "shared": "Use case: stylized-concept. Create ONE premium detailed dimensional illustrated circular scene FRAME OVERLAY, not a scene. Square transparent PNG. Genuine alpha transparency in entire empty CENTER and OUTSIDE. Front-on view, concentric circular opening centered at exact canvas center (50%,50%). Continuous opaque inner rim at radius 35% canvas width; hoop and all ornaments within radius 48%. Inner circular area radius 35% COMPLETELY EMPTY TRANSPARENT. Keep all decorations on rim, no figures, no scenery, no background, no text, no watermark or checkerboard. Keep 4-to-5-o'clock rim relatively thin for a settings button. Design must match the colors and environmental motifs of the named scene; school-friendly refined collectible craftsmanship. Design: ",
+  "frames": [
+    {
+      "scene": "disney-paris-rooftops",
+      "frame": "match-disney-paris-rooftops",
+      "design": "Slate-blue Paris roof tiles, wrought-iron balcony scrolls, tiny amber window charms, ivory full moon jewel and a petite Eiffel Tower rim ornament; lavender midnight palette.",
+      "asset": "assets/scene-frame-match-disney-paris-rooftops.png"
+    },
+    {
+      "scene": "disney-olympus",
+      "frame": "match-disney-olympus",
+      "design": "Ivory Greek marble, miniature fluted column segments along rim, warm gold laurel leaves, luminous sun crest and sculpted white cloud curls outside rim.",
+      "asset": "assets/scene-frame-match-disney-olympus.png"
+    },
+    {
+      "scene": "disney-notre-dame",
+      "frame": "match-disney-notre-dame",
+      "design": "Warm sandstone Gothic tracery, tiny rose-window jewel, outward-facing friendly stone gargoyle ornaments, copper Paris roof accents and orange sunset glass.",
+      "asset": "assets/scene-frame-match-disney-notre-dame.png"
+    },
+    {
+      "scene": "disney-monstropolis",
+      "frame": "match-disney-monstropolis",
+      "design": "Purple and teal industrial pipes, little horn-shaped architecture accents, luminous yellow circular eye medallion and cyan monorail-like rim trim.",
+      "asset": "assets/scene-frame-match-disney-monstropolis.png"
+    },
+    {
+      "scene": "disney-halloween-town",
+      "frame": "match-disney-halloween-town",
+      "design": "Charcoal twisted iron curls, miniature smiling jack-o-lanterns, crooked roof ornaments and large pale-gold moon medallion on rim; Spiral Hill curl motif.",
+      "asset": "assets/scene-frame-match-disney-halloween-town.png"
+    },
+    {
+      "scene": "disney-memory-headquarters",
+      "frame": "match-disney-memory-headquarters",
+      "design": "Lavender futuristic console ring with glossy colorful memory-orb beads, tiny multicolored control-button insets and a larger golden orb jewel at top.",
+      "asset": "assets/scene-frame-match-disney-memory-headquarters.png"
+    },
+    {
+      "scene": "disney-toy-bedroom",
+      "frame": "match-disney-toy-bedroom",
+      "design": "Warm wooden toy frame, small primary-color building blocks, blue cloud-pattern enamel, miniature toy rocket, red toy truck and cowboy-hat ornament on rim.",
+      "asset": "assets/scene-frame-match-disney-toy-bedroom.png"
+    },
+    {
+      "scene": "disney-tropical-lagoon",
+      "frame": "match-disney-tropical-lagoon",
+      "design": "Turquoise sculpted surf hoop, lush palm leaves, red hibiscus, small mountain ridgeline relief and cream sand-colored seashell accents.",
+      "asset": "assets/scene-frame-match-disney-tropical-lagoon.png"
+    },
+    {
+      "scene": "disney-skull-lagoon",
+      "frame": "match-disney-skull-lagoon",
+      "design": "Moonlit silver-blue water hoop, cascading waterfall textures on sides, jungle leaves and a small weathered skull-shaped stone crest, school-friendly.",
+      "asset": "assets/scene-frame-match-disney-skull-lagoon.png"
+    },
+    {
+      "scene": "disney-marigold-bridge",
+      "frame": "match-disney-marigold-bridge",
+      "design": "Dense bright orange marigold blossoms on a warm golden arched-bridge hoop, tiny glowing petal jewels, violet city-tower reliefs near rim.",
+      "asset": "assets/scene-frame-match-disney-marigold-bridge.png"
+    },
+    {
+      "scene": "disney-radiator-springs",
+      "frame": "match-disney-radiator-springs",
+      "design": "Polished vintage chrome hoop, red-orange neon tubing, small tire-tread inserts, orange traffic-cone ornament and carved desert sandstone fins.",
+      "asset": "assets/scene-frame-match-disney-radiator-springs.png"
+    },
+    {
+      "scene": "disney-jungle-ruins",
+      "frame": "match-disney-jungle-ruins",
+      "design": "Weathered mossy temple stone hoop, emerald jungle vines, small broken arch motifs, silver-blue river insets and ivory moon crest.",
+      "asset": "assets/scene-frame-match-disney-jungle-ruins.png"
+    },
+    {
+      "scene": "disney-epcot-night",
+      "frame": "match-disney-epcot-night",
+      "design": "Geodesic triangular faceted metallic hoop with rich violet, electric blue, pink and amber illumination, tiny palm fronds at lower rim.",
+      "asset": "assets/scene-frame-match-disney-epcot-night.png"
+    },
+    {
+      "scene": "disney-hollywood-hotel",
+      "frame": "match-disney-hollywood-hotel",
+      "design": "Aged terracotta Art Deco hotel ring, antique elevator grille inserts, orange neon lines, tiny amber window jewels and dark palm accents.",
+      "asset": "assets/scene-frame-match-disney-hollywood-hotel.png"
+    },
+    {
+      "scene": "disney-haunted-mansion",
+      "frame": "match-disney-haunted-mansion",
+      "design": "Midnight-blue Victorian wrought-iron gate scrolls, small Gothic roof details, two amber lantern charms, silver moon crest and wisps hugging outer edge.",
+      "asset": "assets/scene-frame-match-disney-haunted-mansion.png"
+    },
+    {
+      "scene": "disney-castle-fountain",
+      "frame": "match-disney-castle-fountain",
+      "design": "Ivory castle masonry and gold filigree hoop, petite blue-roofed turrets spaced on rim, fountain-water crystal arcs and pink garden blossoms below.",
+      "asset": "assets/scene-frame-match-disney-castle-fountain.png"
+    },
+    {
+      "scene": "disney-twilight-boulevard",
+      "frame": "match-disney-twilight-boulevard",
+      "design": "Gold Victorian streetlamp hoop, purple and blue castle-spire crest, small glowing round lamplights along rim, amber paving-stone insets and tiny clock medallion.",
+      "asset": "assets/scene-frame-match-disney-twilight-boulevard.png"
+    },
+    {
+      "scene": "disney-agrabah",
+      "frame": "match-disney-agrabah",
+      "design": "Opulent Arabian gold filigree, petite golden onion dome ornaments, ivory and magenta palace trim, warm sunset amber jewels and scalloped arches.",
+      "asset": "assets/scene-frame-match-disney-agrabah.png"
+    },
+    {
+      "scene": "disney-snow-castle",
+      "frame": "match-disney-snow-castle",
+      "design": "Frosted silver castle-stone hoop, blue-gray pointed turrets, snow-covered pine sprigs, icy crystals and small warm amber window jewels.",
+      "asset": "assets/scene-frame-match-disney-snow-castle.png"
+    },
+    {
+      "scene": "disney-pride-rock",
+      "frame": "match-disney-pride-rock",
+      "design": "Warm savanna sandstone hoop, Pride Rock ledge-shaped top crest, sun medallion, golden grass tufts and dark green acacia leaves.",
+      "asset": "assets/scene-frame-match-disney-pride-rock.png"
+    },
+    {
+      "scene": "disney-undersea-palace",
+      "frame": "match-disney-undersea-palace",
+      "design": "Ornate sea-green and gold underwater palace arches around a hoop, violet and pink coral, pearl bubbles and petite golden spires.",
+      "asset": "assets/scene-frame-match-disney-undersea-palace.png"
+    },
+    {
+      "scene": "disney-bayou",
+      "frame": "match-disney-bayou",
+      "design": "Dark cypress wood hoop, hanging moss, lily pads and tiny lotus blossoms, warm firefly jewels and petite brass riverboat-wheel ornament.",
+      "asset": "assets/scene-frame-match-disney-bayou.png"
+    },
+    {
+      "scene": "disney-river-valley",
+      "frame": "match-disney-river-valley",
+      "design": "Forest-green pine boughs wrapping a weathered cliff-stone hoop, narrow silver waterfall side details and amber sunset river-glass insets.",
+      "asset": "assets/scene-frame-match-disney-river-valley.png"
+    },
+    {
+      "scene": "disney-island-cottage",
+      "frame": "match-disney-island-cottage",
+      "design": "Weathered turquoise cottage wood hoop with red-roof shingle accents, green palm fronds, cream seashells and vivid aquamarine wave details.",
+      "asset": "assets/scene-frame-match-disney-island-cottage.png"
+    },
+    {
+      "scene": "disney-alpine-harbor",
+      "frame": "match-disney-alpine-harbor",
+      "design": "Warm wooden harbor-pier hoop, blue lake glass, miniature colorful chalet-roof ornaments, tiny alpine pine sprigs and silver mountain peaks.",
+      "asset": "assets/scene-frame-match-disney-alpine-harbor.png"
+    },
+    {
+      "scene": "floating-sky-tower",
+      "frame": "match-floating-sky-tower",
+      "design": "Ivory floating-fortress masonry hoop with bronze structural details, compact soaring tower crest, pale-blue crystals and white cloud curls outside rim.",
+      "asset": "assets/scene-frame-match-floating-sky-tower.png"
+    },
+    {
+      "scene": "soccer-training-complex",
+      "frame": "match-soccer-training-complex",
+      "design": "Dark navy futuristic training-complex hoop, electric-blue window-strip inlays, tiny white floodlight ornaments and a small soccer-ball crest with green turf accents.",
+      "asset": "assets/scene-frame-match-soccer-training-complex.png"
+    },
+    {
+      "scene": "sunset-school-gym",
+      "frame": "match-sunset-school-gym",
+      "design": "Warm school gym wood and beige masonry hoop, curved gym-roof crest, amber window-pane insets, dark green fence lattice and orange sunset jewel.",
+      "asset": "assets/scene-frame-match-sunset-school-gym.png"
+    },
+    {
+      "scene": "tokyo-cherry-night",
+      "frame": "match-tokyo-cherry-night",
+      "design": "Midnight-blue and silver river hoop, bright pink cherry blossom branches, little orange Tokyo Tower rim crest and pale luminous full-moon jewel.",
+      "asset": "assets/scene-frame-match-tokyo-cherry-night.png"
+    },
+    {
+      "scene": "kame-house-island",
+      "frame": "match-kame-house-island",
+      "design": "Pink cottage wood hoop with vivid red roof trim, small palm leaves, clear turquoise wave curls, cream shell accents and tiny orange star-ball ornament.",
+      "asset": "assets/scene-frame-match-kame-house-island.png"
+    },
+    {
+      "scene": "royal-castle-city",
+      "frame": "match-royal-castle-city",
+      "design": "Cream royal castle-stone hoop with miniature copper-roofed city details, gold sun crest, dark blue enamel and tiny green garden foliage.",
+      "asset": "assets/scene-frame-match-royal-castle-city.png"
+    },
+    {
+      "scene": "sunlit-palace-harbor",
+      "frame": "match-sunlit-palace-harbor",
+      "design": "Blue sea-glass and brass maritime hoop, coiled sailing rope, little white sail crest, ivory palace relief details and warm sun-gold accents.",
+      "asset": "assets/scene-frame-match-sunlit-palace-harbor.png"
+    },
+    {
+      "scene": "pokemon-center-gardens",
+      "frame": "match-pokemon-center-gardens",
+      "design": "Polished white and red Pokémon Center inspired hoop, round red-white ball crest, green vines, pink and yellow garden flowers, bright sunny gold highlights.",
+      "asset": "assets/scene-frame-match-pokemon-center-gardens.png"
+    },
+    {
+      "scene": "forest-temple",
+      "frame": "match-forest-temple",
+      "design": "Dark Japanese temple timber hoop, vermilion lacquer details, small curved temple-roof crest, fresh green maple leaves and carved stone lantern ornaments.",
+      "asset": "assets/scene-frame-match-forest-temple.png"
+    },
+    {
+      "scene": "mha-ua-campus",
+      "frame": "match-mha-ua-campus",
+      "design": "Steel-blue high-school architectural hoop, angular glass-window panels, gold heroic sunburst crest and green campus foliage, My Hero Academia inspired.",
+      "asset": "assets/scene-frame-match-mha-ua-campus.png"
+    },
+    {
+      "scene": "pokemon-campus",
+      "frame": "match-pokemon-campus",
+      "design": "Warm cream school stone hoop, red roof-tile accents, lush woodland leaves, little red-white ball medallions and warm sunny window jewels.",
+      "asset": "assets/scene-frame-match-pokemon-campus.png"
+    },
+    {
+      "scene": "pokemon-indoor-arena",
+      "frame": "match-pokemon-indoor-arena",
+      "design": "White and silver botanical arena hoop, curved greenhouse-glass ribs, emerald vines, cyan skylight crystals and a small red-white battle-ball crest.",
+      "asset": "assets/scene-frame-match-pokemon-indoor-arena.png"
+    },
+    {
+      "scene": "moonlit-cherry-village",
+      "frame": "match-moonlit-cherry-village",
+      "design": "Deep mahogany Japanese bridge-rail hoop, small glowing red lanterns, delicate pink cherry blossoms, silver moon medallion and midnight-blue water glass.",
+      "asset": "assets/scene-frame-match-moonlit-cherry-village.png"
+    },
+    {
+      "scene": "walled-city-fountain",
+      "frame": "match-walled-city-fountain",
+      "design": "Tall-city-wall pale masonry hoop, miniature crenellations, blue fountain-water crystals, warm gold sunlight insets and small market flower accents.",
+      "asset": "assets/scene-frame-match-walled-city-fountain.png"
+    },
+    {
+      "scene": "walled-city-market",
+      "frame": "match-walled-city-market",
+      "design": "Warm cobblestone and timber hoop, miniature red and ocher striped awning accents, golden lanterns and city-wall battlement relief.",
+      "asset": "assets/scene-frame-match-walled-city-market.png"
+    },
+    {
+      "scene": "demon-slayer-nezuko",
+      "frame": "match-demon-slayer-nezuko",
+      "design": "Pink geometric kimono-pattern hoop with dark bamboo segments, vivid pink flame curls along outside rim and cherry blossoms, Nezuko theme without character portrait.",
+      "asset": "assets/scene-frame-match-demon-slayer-nezuko.png"
+    },
+    {
+      "scene": "demon-slayer-shinobu",
+      "frame": "match-demon-slayer-shinobu",
+      "design": "Deep violet and pearl butterfly-wing patterned hoop, lavender wisteria clusters, tiny luminous turquoise butterflies and purple gemstone accents, Shinobu theme.",
+      "asset": "assets/scene-frame-match-demon-slayer-shinobu.png"
+    },
+    {
+      "scene": "demon-slayer-akaza",
+      "frame": "match-demon-slayer-akaza",
+      "design": "Indigo and magenta patterned hoop with rhythmic blue stripe engravings, gold Infinity Castle lattice, miniature amber lanterns and icy blue geometric crest, Akaza theme.",
+      "asset": "assets/scene-frame-match-demon-slayer-akaza.png"
+    },
+    {
+      "scene": "demon-slayer-tanjiro",
+      "frame": "match-demon-slayer-tanjiro",
+      "design": "Green-and-black checkered rim segments interwoven with sculpted vivid blue water waves and white foam, burgundy accents and small sunrise-pattern charm, Tanjiro theme.",
+      "asset": "assets/scene-frame-match-demon-slayer-tanjiro.png"
+    },
+    {
+      "scene": "demon-slayer-rengoku",
+      "frame": "match-demon-slayer-rengoku",
+      "design": "Black and gold hoop engulfed only along rim by sculpted golden and crimson flame shapes, flame-shaped guard crest, warm amber jewels, Rengoku theme.",
+      "asset": "assets/scene-frame-match-demon-slayer-rengoku.png"
+    },
+    {
+      "scene": "demon-slayer-giyu",
+      "frame": "match-demon-slayer-giyu",
+      "design": "Deep navy and silver water hoop with sculpted rushing blue waves, half burgundy and half green-gold geometric cloth-pattern rim accents, silver moon crest, Giyu theme.",
+      "asset": "assets/scene-frame-match-demon-slayer-giyu.png"
+    },
+    {
+      "scene": "hidden-leaf-overlook",
+      "frame": "match-hidden-leaf-overlook",
+      "design": "Warm forest wood hoop, dense fresh green leaves, carved Hokage-monument stone relief crest, orange sunset jewel and small ninja leaf-emblem metal plate.",
+      "asset": "assets/scene-frame-match-hidden-leaf-overlook.png"
+    },
+    {
+      "scene": "hidden-leaf-rooftops",
+      "frame": "match-hidden-leaf-rooftops",
+      "design": "Red and orange village roof-tile hoop, carved Hokage stone crest, bronze ninja leaf-emblem plate, amber sunset glass and a few green leaf sprigs.",
+      "asset": "assets/scene-frame-match-hidden-leaf-rooftops.png"
+    },
+    {
+      "scene": "anime",
+      "frame": "match-anime",
+      "design": "Warm rose-gold sunset hoop, lavender town-roof relief details, pink cherry blossom branches, little golden sun jewel and delicate star accents.",
+      "asset": "assets/scene-frame-match-anime.png"
+    }
+  ]
+}

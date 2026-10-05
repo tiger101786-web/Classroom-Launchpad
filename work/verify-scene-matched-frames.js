@@ -1,6 +1,10 @@
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict'),vm=require('node:vm');
 const {chromium}=require('playwright'),sharp=require('sharp');
-const ids=['hero-armor','hero-lightning','disney-castle','disney-rose'];
+const pairs=require('./scene-matched-frame-plan.json').frames;
+const ids=pairs.map(p=>p.frame);
+assert.equal(ids.length,49); assert.equal(new Set(ids).size,49);
+const sceneSource=fs.readFileSync('launchpad-scenes.js','utf8');
+const sceneNames=vm.runInNewContext(sceneSource.slice(sceneSource.indexOf('const scenes ='),sceneSource.indexOf('const frames ='))+';scenes',{matchMedia:()=>({matches:false})});
 (async()=>{
  const server=fs.readFileSync('server.js','utf8');
  const catalog=server.slice(server.indexOf('const homeSceneIds'),server.indexOf('function homeSceneForSession'));
@@ -18,31 +22,30 @@ const ids=['hero-armor','hero-lightning','disney-castle','disney-rose'];
    const homeScene=r.request().postDataJSON();
    await r.fulfill({json:{session:{authenticated:true,homeScene}}});
   });
-  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
   await page.setContent('<meta charset="utf-8"><base href="http://frames.test/"><style>'+css+'body{background:#25191e;color:white;margin:0;padding:30px}main{max-width:400px;margin:auto}.school-photo{width:300px;height:300px}</style><main></main>');
   await page.addScriptTag({path:path.resolve('launchpad-scenes.js')});
   for(const width of [1100,390]){
    await page.setViewportSize({width,height:800});
    for(const id of ids){
-    await page.evaluate(id=>{
-     const session={authenticated:true,homeScene:{id:'disney-twilight-boulevard',frame:id,motion:false}};
+    await page.evaluate(({id,scene})=>{
+     const session={authenticated:true,homeScene:{id:scene,frame:id,motion:false}};
      document.querySelector('main').innerHTML=LaunchpadScenes.render(session,'');
      LaunchpadScenes.attach(session,'',updated=>window.savedFrame=updated.homeScene);
-    },id);
+    },{id,scene:pairs.find(p=>p.frame===id).scene});
     await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
     assert.match(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).clipPath),/^polygon/);
     await page.screenshot({path:path.join(os.tmpdir(),'frame-'+id+'-'+width+'.png')});
     await page.evaluate(()=>document.getElementById('chooseLaunchFrame').click());
-    const label=await page.locator('[data-frame-choice="'+id+'"] strong').textContent();
-    await page.locator('#launchChooserSearch').fill(label);
-    assert.equal(await page.locator('[data-frame-choice]:visible').count(),1);
+    await page.locator('#launchChooserSearch').fill(sceneNames.find(s=>s.id===pairs.find(p=>p.frame===id).scene).name);
+    assert.equal(await page.locator('[data-frame-choice="'+id+'"]:visible').count(),1);
     await page.locator('[data-frame-choice="'+id+'"]').click();
     assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'),id);
     await page.locator('#saveLaunchFrame').click();
     await page.waitForFunction(id=>window.savedFrame?.frame===id,id);
-    assert.deepEqual(await page.evaluate(()=>window.savedFrame),{id:'disney-twilight-boulevard',frame:id,motion:false});
+    assert.deepEqual(await page.evaluate(()=>window.savedFrame),{id:pairs.find(p=>p.frame===id).scene,frame:id,motion:false});
    }
   }
-  console.log('Four frames: transparent centers, server validation, desktop/mobile fit, category search, preview and save passed.');
+  console.log('49 matching frames: transparent centers, server validation, desktop/mobile fit, category search, preview and save passed.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

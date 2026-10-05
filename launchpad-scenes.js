@@ -139,6 +139,68 @@
     { id: "harvest", name: "Autumn Harvest", description: "Copper leaves, acorns & little pumpkins", decorative: true },
     { id: "evergreen", name: "Christmas Evergreen", description: "Holly, velvet ribbon & golden bells", decorative: true }
   ];
+  // One dedicated frame for each Disney/anime scene; existing choices remain independent.
+  const matchedSceneIds = [
+    "disney-paris-rooftops",
+    "disney-olympus",
+    "disney-notre-dame",
+    "disney-monstropolis",
+    "disney-halloween-town",
+    "disney-memory-headquarters",
+    "disney-toy-bedroom",
+    "disney-tropical-lagoon",
+    "disney-skull-lagoon",
+    "disney-marigold-bridge",
+    "disney-radiator-springs",
+    "disney-jungle-ruins",
+    "disney-epcot-night",
+    "disney-hollywood-hotel",
+    "disney-haunted-mansion",
+    "disney-castle-fountain",
+    "disney-twilight-boulevard",
+    "disney-agrabah",
+    "disney-snow-castle",
+    "disney-pride-rock",
+    "disney-undersea-palace",
+    "disney-bayou",
+    "disney-river-valley",
+    "disney-island-cottage",
+    "disney-alpine-harbor",
+    "floating-sky-tower",
+    "soccer-training-complex",
+    "sunset-school-gym",
+    "tokyo-cherry-night",
+    "kame-house-island",
+    "royal-castle-city",
+    "sunlit-palace-harbor",
+    "pokemon-center-gardens",
+    "forest-temple",
+    "mha-ua-campus",
+    "pokemon-campus",
+    "pokemon-indoor-arena",
+    "moonlit-cherry-village",
+    "walled-city-fountain",
+    "walled-city-market",
+    "demon-slayer-nezuko",
+    "demon-slayer-shinobu",
+    "demon-slayer-akaza",
+    "demon-slayer-tanjiro",
+    "demon-slayer-rengoku",
+    "demon-slayer-giyu",
+    "hidden-leaf-overlook",
+    "hidden-leaf-rooftops",
+    "anime"
+  ];
+  matchedSceneIds.forEach(id => {
+    const scene = scenes.find(item => item.id === id);
+    frames.push({
+      id: "match-" + id,
+      name: id.startsWith("disney-") || id === "anime" ? scene.name : "Anime • " + scene.name,
+      description: "Matching frame for " + scene.name,
+      decorative: true,
+      matchedScene: id
+    });
+  });
   // Keep the reset choice first without mutating the catalog or saved IDs.
   const alphabetically = items => [...items].sort((a, b) => {
     const pinned = item => item.id === "none" || item.id === "original";
