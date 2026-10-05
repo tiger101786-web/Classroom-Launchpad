@@ -1760,6 +1760,9 @@ function formatStudentFirstLast(name) {
 }
 
 const PROFILE_FRAMES = [
+  ["blue-fire", "Blue Fire", "Electric blue and cyan flames"],
+  ["regular-fire", "Regular Fire", "Orange, red and golden flames"],
+  ["rainbow-fire", "Rainbow Fire", "Bright multicolored flames"],
   ["capybara-springs","Capybara Springs","Bamboo, orange blossoms & a capybara"],
   ["lavender-cottage","Lavender Cottage","Lavender sprigs & purple ribbons"],
   ["sunflower-meadow","Sunflower Meadow","Golden petals & meadow leaves"],
@@ -1840,6 +1843,8 @@ function profileFrameArt(frame) {
   return art[frame] ? `<svg class="profile-frame-art" viewBox="0 0 100 100" aria-hidden="true">${art[frame]}</svg>` : "";
 }
 function newProfileFrameArt(frame) {
+  if (["blue-fire","rainbow-fire"].includes(frame)) return `<img class="profile-frame-raster" src="assets/scene-frame-${frame}.png" alt="" aria-hidden="true" loading="lazy">`;
+  if (frame === "regular-fire") return '<img class="profile-frame-raster" src="assets/profile-frame-regular-fire-ornate.png" alt="" aria-hidden="true" loading="lazy">';
   const illustratedFrames = ["anime-crest","faith-glass","dragon-scale","solar-crown","lunar-orbit","ice-bloom","honeycomb","music-mix","art-splash","butterfly","rainbow-arc","ocean-anchor","mardi-gras","robot-tech","book-club","sport-star"];
   illustratedFrames.push(...["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"]);
   illustratedFrames.push(...["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"]);
@@ -13399,7 +13404,7 @@ app.addEventListener("click", async event => {
     const showing = action === 'showCollectibleShelf';
     const side = target.dataset.shelfSide === 'right' ? 'right' : 'left';
     const selectedShelf = side === 'right' ? authSession.homeShelfRight : authSession.homeShelf;
-    const menu = showing ? target.closest('.shelf-restore') : document.getElementById(side === 'right' ? 'shelfSettingsMenuRight' : 'shelfSettingsMenu');
+    const menu = target.closest('.shelf-visibility-controls') || (showing ? target.closest('.shelf-restore') : document.getElementById(side === 'right' ? 'shelfSettingsMenuRight' : 'shelfSettingsMenu'));
     menu?.querySelectorAll('button').forEach(button => { button.disabled = true; });
     try {
       const result = await sharedBackend.request('/api/home-shelf', { method:'POST', body:JSON.stringify({ ...window.CollectibleShelf.clean(selectedShelf), enabled:showing, side }) });

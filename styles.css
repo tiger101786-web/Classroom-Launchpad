@@ -10525,6 +10525,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-frame:has(> .profile-frame-raster)::before { display:none; }
 .profile-frame:has(> .profile-frame-raster) > .forum-avatar { width:70%; height:70%; border:0; }
 .profile-frame-raster { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:2; pointer-events:none; }
+.profile-frame:is(.frame-blue-fire,.frame-regular-fire,.frame-rainbow-fire) > .forum-avatar { width:60%; height:60%; }
 .profile-frame-option { display: grid; justify-items: center; align-content: start; gap: 9px; min-width: 0; padding: 18px 8px 12px; border: 1px solid var(--border); border-radius: 14px; color: var(--ink); background: var(--paper); cursor: pointer; transition: border-color .15s, background .15s; }
 .profile-frame-option:hover { border-color: var(--blue); }
 .profile-frame-option[aria-pressed="true"] { border: 2px solid var(--blue); padding: 17px 7px 11px; background: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue) 18%, transparent); }

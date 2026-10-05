@@ -21,6 +21,15 @@
   .home-display-row { grid-template-columns:minmax(0,350px); justify-content:center; }
 }
 .shelf-restore { margin-top:20px; display:grid; justify-items:start; gap:6px; }
+.home-display-row .shelf-restore { position:relative; width:100%; aspect-ratio:1445 / 1020; }
+.shelf-visibility-controls { position:absolute; bottom:0; left:0; z-index:8; font-size:12px; animation:shelf-controls-idle 3.3s forwards; }
+.shelf-visibility-controls button { font-size:12px; padding:7px 12px; }
+.shelf-visibility-controls.is-active { animation:none; opacity:1; pointer-events:auto; }
+.shelf-visibility-controls.is-idle { animation:none; opacity:0; pointer-events:none; }
+.shelf-visibility-controls:has(:focus-visible) { animation:none; opacity:1; pointer-events:auto; }
+.shelf-visibility-controls:has(button:disabled,[role="status"]:not(:empty)) { animation:none; opacity:1; pointer-events:auto; }
+@keyframes shelf-controls-idle { 0%,90% { opacity:1; pointer-events:auto; } 100% { opacity:0; pointer-events:none; } }
+@media(prefers-reduced-motion:reduce) { .shelf-visibility-controls { animation-timing-function:steps(1,end); } }
 .shelf-restore button { font-size:12px; padding:7px 12px; }
 .shelf-restore button:hover,
 .shelf-restore button:focus-visible {

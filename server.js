@@ -78,6 +78,7 @@ function profileBannerForSession(session, db) {
 ['titanium','walnut','ivory'].forEach(id => homeSceneFrameIds.add(id));
 ["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"].forEach(id => profileFrameIds.add(id));
 ["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"].forEach(id => profileFrameIds.add(id));
+['blue-fire','regular-fire','rainbow-fire'].forEach(id => profileFrameIds.add(id));
 function cleanProfileFrame(value) { return profileFrameIds.has(value) ? value : "none"; }
 function profileFrameForSession(session, db) {
   return cleanProfileFrame(session.role === "teacher" ? db.teacherProfileFrame

@@ -498,9 +498,10 @@
     const value = side === 'right' ? session.homeShelfRight : session.homeShelf;
     const suffix = side === 'right' ? 'Right' : '';
     const label = side === 'right' ? 'Right' : 'Left';
-    // Keep the scene layout stable; hidden shelves are restored from the account menu.
-    if (!clean(value).enabled) return '<div class="shelf-restore" aria-hidden="true"></div>';
-    return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button><button type="button" data-shelf-side="${side}" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus${suffix}" role="status"></span></div></section>`;
+    // Keep a hover/touch target in the same position when a shelf is hidden.
+    const visibility = enabled => `<div class="shelf-visibility-controls"><button type="button" class="outline-btn" data-shelf-side="${side}" data-action="${enabled ? 'hide' : 'show'}CollectibleShelf">${enabled ? 'Hide' : 'Show'} ${label.toLowerCase()} shelf</button><span role="status"></span></div>`;
+    if (!clean(value).enabled) return `<div class="shelf-restore" data-shelf-side="${side}">${visibility(false)}</div>`;
+    return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}${visibility(true)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button><button type="button" data-shelf-side="${side}" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus${suffix}" role="status"></span></div></section>`;
   }
   let hideTimer;
   function restoreGear(keyboard, side = 'left') {
@@ -620,6 +621,19 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else {
     root.CollectibleShelf = api;
+    const visibilityTimers = new WeakMap();
+    for (const name of ['pointermove','pointerdown','focusin']) document.addEventListener(name, event => {
+      const region = event.target.closest?.('.home-collectible-shelf,.shelf-restore');
+      const controls = region?.querySelector('.shelf-visibility-controls');
+      if (!controls) return;
+      clearTimeout(visibilityTimers.get(controls));
+      controls.classList.remove('is-idle');
+      controls.classList.add('is-active');
+      visibilityTimers.set(controls, setTimeout(() => {
+        controls.classList.remove('is-active');
+        controls.classList.add('is-idle');
+      }, 3000));
+    });
     document.addEventListener('toggle', event => {
       if (!event.target.classList?.contains('shelf-settings-menu')) return;
       const gear = event.target.closest('.home-collectible-shelf')?.querySelector('.shelf-customize');
