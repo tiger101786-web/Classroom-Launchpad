@@ -278,19 +278,24 @@
   }
   let guestMotion = true;
   let gearHideTimer;
+  function scheduleGearHide(gear) {
+    clearTimeout(gearHideTimer);
+    gear.classList.remove("is-idle");
+    gear.classList.add("is-recent");
+    gearHideTimer = setTimeout(() => {
+      if (!gear.isConnected || gear.getAttribute("aria-expanded") === "true" || gear.matches(":focus-visible")) return;
+      gear.classList.remove("is-recent");
+      gear.classList.add("is-idle");
+      if (document.activeElement === gear) gear.blur();
+    }, 3000);
+  }
   function settleGear(keyboard) {
     const gear = document.getElementById("launchSceneSettings");
     if (!gear) return;
     gear.focus({ preventScroll: true });
-    if (keyboard) return; // Do not hide the control from a keyboard user.
-    gear.classList.add("is-recent");
     clearTimeout(gearHideTimer);
-    gearHideTimer = setTimeout(() => {
-      if (!gear.isConnected || gear.getAttribute("aria-expanded") === "true") return;
-      gear.classList.remove("is-recent");
-      gear.classList.add("is-idle");
-      if (document.activeElement === gear) gear.blur();
-    }, 2500);
+    if (keyboard) return; // Do not hide the control from a keyboard user.
+    scheduleGearHide(gear);
   }
   const settings = session => ({
     id: session.authenticated && scenes.some(scene => scene.id === session.homeScene?.id) ? session.homeScene.id : "original",
@@ -345,9 +350,16 @@
     const gear = document.getElementById("launchSceneSettings");
     const menu = document.getElementById("launchSceneMenu");
     clearTimeout(gearHideTimer);
-    const revealGear = () => gear.classList.remove("is-idle");
+    const revealGear = () => scheduleGearHide(gear);
     gear.closest(".launch-scene-stage").addEventListener("pointermove", revealGear);
     gear.closest(".launch-scene-stage").addEventListener("pointerdown", revealGear);
+    gear.closest(".launch-scene-stage").addEventListener("pointerleave", () => {
+      if (gear.getAttribute("aria-expanded") === "true" || gear.matches(":focus-visible")) return;
+      clearTimeout(gearHideTimer);
+      gear.classList.remove("is-recent");
+      gear.classList.add("is-idle");
+      if (document.activeElement === gear) gear.blur();
+    });
     gear.addEventListener("focus", revealGear);
     menu.addEventListener("beforetoggle", event => {
       if (event.newState === "open") {

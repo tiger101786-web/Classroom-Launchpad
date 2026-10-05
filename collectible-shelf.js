@@ -504,18 +504,23 @@
     return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}${visibility(true)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button></div></section>`;
   }
   const gearHideTimers = new WeakMap();
+  function scheduleGearHide(gear) {
+    clearTimeout(gearHideTimers.get(gear));
+    gear.classList.remove('is-idle');
+    gear.classList.add('is-recent');
+    gearHideTimers.set(gear, setTimeout(() => {
+      if (!gear.isConnected || document.querySelector('.shelf-dialog') || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible')) return;
+      gear.classList.remove('is-recent'); gear.classList.add('is-idle');
+      if (document.activeElement === gear) gear.blur();
+    },3000));
+  }
   function restoreGear(keyboard, side = 'left') {
     const gear = document.querySelector('.home-collectible-shelf[data-shelf-side="'+side+'"] .shelf-customize');
     if (!gear) { document.querySelector('.header-account-summary')?.focus(); return; }
     gear.focus({ preventScroll:true });
     clearTimeout(gearHideTimers.get(gear));
     if (keyboard) return;
-    gear.classList.add('is-recent');
-    gearHideTimers.set(gear, setTimeout(() => {
-      if (!gear.isConnected || document.querySelector('.shelf-dialog') || gear.getAttribute('aria-expanded') === 'true') return;
-      gear.classList.remove('is-recent'); gear.classList.add('is-idle');
-      if (document.activeElement === gear) gear.blur();
-    },2500));
+    scheduleGearHide(gear);
   }
   function open({ selected, save, onSave, side = 'left' }) {
     if (document.querySelector('.shelf-dialog')) return;
@@ -634,6 +639,14 @@
         controls.classList.add('is-idle');
       }, 3000));
     });
+    document.addEventListener('pointerout', event => {
+      const zone = event.target.closest?.('.shelf-visibility-zone');
+      if (!zone || zone.contains(event.relatedTarget)) return;
+      const controls = zone.querySelector('.shelf-visibility-controls');
+      clearTimeout(visibilityTimers.get(controls));
+      controls.classList.remove('is-active');
+      controls.classList.add('is-idle');
+    });
     document.addEventListener('toggle', event => {
       if (!event.target.classList?.contains('shelf-settings-menu')) return;
       const gear = event.target.closest('.home-collectible-shelf')?.querySelector('.shelf-customize');
@@ -650,13 +663,14 @@
       menu.style.top = `${Math.max(8,Math.min(box.bottom+6,innerHeight-menu.offsetHeight-8))}px`;
     },true);
     for (const event of ['pointermove','pointerdown','focusin']) document.addEventListener(event, e => {
-      e.target.closest?.('.home-collectible-shelf')?.querySelector('.shelf-customize')?.classList.remove('is-idle');
+      const gear = e.target.closest?.('.home-collectible-shelf')?.querySelector('.shelf-customize');
+      if (gear) scheduleGearHide(gear);
     });
     document.addEventListener('pointerout', event => {
       const shelf = event.target.closest?.('.home-collectible-shelf');
       if (!shelf || shelf.contains(event.relatedTarget)) return;
       const gear = shelf.querySelector('.shelf-customize');
-      if (!gear || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible') || gear.classList.contains('is-recent')) return;
+      if (!gear || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible')) return;
       clearTimeout(gearHideTimers.get(gear));
       gear.classList.remove('is-recent');
       gear.classList.add('is-idle');

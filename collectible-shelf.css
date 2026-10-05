@@ -158,9 +158,10 @@
 .shelf-theme-grid strong { display:block; font-size:12px; margin-top:5px; }
 @media(max-width:480px) { .shelf-theme-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .shelf-customize { position:absolute; bottom:0; right:7px; display:grid; place-items:center; width:44px; height:44px; z-index:2; border:1px solid #a6526a; border-radius:50%; padding:10px; background:#190c13ed; color:#fff0f5; cursor:pointer; box-shadow:0 3px 12px #0006; transition:opacity .25s ease; }
+.home-collectible-shelf[data-shelf-side="right"] > .shelf-customize { left:7px; right:auto; }
 .shelf-customize svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
 @media(hover:hover) and (pointer:fine) { .shelf-customize { opacity:0; pointer-events:none; } .home-collectible-shelf:hover .shelf-customize,.home-collectible-shelf:focus-within .shelf-customize,.shelf-customize.is-recent { opacity:1; pointer-events:auto; } }
-.home-collectible-shelf .shelf-customize.is-idle { opacity:0; pointer-events:none; }
+.home-collectible-shelf .shelf-customize.is-idle { opacity:0; pointer-events:none; transition:none; }
 .shelf-customize[aria-expanded=true] { opacity:1; pointer-events:auto; }
 .shelf-settings-menu { position:fixed; inset:auto; margin:0; width:190px; padding:8px; border:1px solid #a6526a; border-radius:14px; background:#190c13; color:#fff0f5; box-shadow:0 8px 28px #0008; }
 .shelf-settings-menu:popover-open { display:grid; gap:6px; }

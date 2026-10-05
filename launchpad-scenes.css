@@ -231,7 +231,7 @@
   .launch-scene-settings { opacity: 0; pointer-events: none; }
   .launch-scene-stage:hover .launch-scene-settings, .launch-scene-stage:focus-within .launch-scene-settings, .launch-scene-settings[aria-expanded="true"], .launch-scene-settings.is-recent { opacity: 1; pointer-events: auto; }
 }
-.launch-scene-stage .launch-scene-settings.is-idle { opacity: 0; pointer-events: none; }
+.launch-scene-stage .launch-scene-settings.is-idle { opacity: 0; pointer-events: none; transition: none; }
 @media (prefers-reduced-motion: reduce) { .launch-scene-settings { transition: none; } }
 .launch-scene-controls { position: fixed; inset: auto; margin: 0; width: 190px; box-sizing: border-box; padding: 8px; border: 1px solid #a6526a; border-radius: 14px; background: #190c13; color: #fff0f5; box-shadow: 0 8px 28px #0008; }
 .launch-scene-controls:popover-open { display: grid; gap: 6px; }

@@ -14,7 +14,7 @@ for (const side of ['left', 'right']) {
 function checkTimer(code, call) {
   let delay, callback;
   const classes = new Set();
-  const gear = { isConnected:true, focus(){}, blur(){}, getAttribute(){return 'false'}, classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)} };
+  const gear = { isConnected:true, focus(){}, blur(){}, matches(){return false}, getAttribute(){return 'false'}, classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)} };
   const document = { querySelector:s=>s === '.shelf-dialog' ? null : gear, getElementById:()=>gear, activeElement:gear };
   vm.runInNewContext(code + ';' + call, { document, clearTimeout(){}, setTimeout(fn,ms){delay=ms;callback=fn;return 1} });
   assert(classes.has('is-recent'));
@@ -26,5 +26,5 @@ function checkTimer(code, call) {
 const shelfDelay = checkTimer(source.slice(source.indexOf('  const gearHideTimers'), source.indexOf('  function open({')), "restoreGear(false, 'left')");
 const sceneDelay = checkTimer(sceneSource.slice(sceneSource.indexOf('  let gearHideTimer;'), sceneSource.indexOf('  const settings =')), 'settleGear(false)');
 assert.equal(shelfDelay, sceneDelay);
-assert.equal(shelfDelay, 2500);
-console.log('PASS: both shelf menus retain Customize only; separate Hide buttons remain; shelf and scene gears settle after the same 2500ms.');
+assert.equal(shelfDelay, 3000);
+console.log('PASS: both shelf menus retain Customize only; separate Hide buttons remain; gear inactivity timers match. Pointer-leave behavior is checked separately.');
