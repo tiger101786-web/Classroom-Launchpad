@@ -501,21 +501,21 @@
     // Keep a hover/touch target in the same position when a shelf is hidden.
     const visibility = enabled => `<div class="shelf-visibility-zone"><div class="shelf-visibility-controls"><button type="button" class="outline-btn" data-shelf-side="${side}" data-action="${enabled ? 'hide' : 'show'}CollectibleShelf">${enabled ? 'Hide' : 'Show'} ${label.toLowerCase()} shelf</button><span role="status"></span></div></div>`;
     if (!clean(value).enabled) return `<div class="shelf-restore" data-shelf-side="${side}">${visibility(false)}</div>`;
-    return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}${visibility(true)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button><button type="button" data-shelf-side="${side}" data-action="hideCollectibleShelf">Hide shelf</button><span id="shelfHideStatus${suffix}" role="status"></span></div></section>`;
+    return `<section class="home-collectible-shelf" data-shelf-side="${side}" aria-label="Your ${side} collectible shelf">${art(value)}${visibility(true)}<button class="shelf-customize" type="button" popovertarget="shelfSettingsMenu${suffix}" aria-label="${label} shelf settings" title="${label} shelf settings" aria-expanded="false" aria-controls="shelfSettingsMenu${suffix}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button><div id="shelfSettingsMenu${suffix}" class="shelf-settings-menu" popover="auto" aria-label="${label} shelf settings"><button type="button" data-shelf-side="${side}" data-action="collectibleShelf">Customize shelf</button></div></section>`;
   }
-  let hideTimer;
+  const gearHideTimers = new WeakMap();
   function restoreGear(keyboard, side = 'left') {
     const gear = document.querySelector('.home-collectible-shelf[data-shelf-side="'+side+'"] .shelf-customize');
     if (!gear) { document.querySelector('.header-account-summary')?.focus(); return; }
     gear.focus({ preventScroll:true });
-    clearTimeout(hideTimer);
+    clearTimeout(gearHideTimers.get(gear));
     if (keyboard) return;
     gear.classList.add('is-recent');
-    hideTimer = setTimeout(() => {
+    gearHideTimers.set(gear, setTimeout(() => {
       if (!gear.isConnected || document.querySelector('.shelf-dialog') || gear.getAttribute('aria-expanded') === 'true') return;
       gear.classList.remove('is-recent'); gear.classList.add('is-idle');
       if (document.activeElement === gear) gear.blur();
-    },900);
+    },2500));
   }
   function open({ selected, save, onSave, side = 'left' }) {
     if (document.querySelector('.shelf-dialog')) return;
@@ -643,7 +643,7 @@
         if (!document.querySelector('.shelf-dialog')) restoreGear(gear.matches(':focus-visible'), event.target.closest('.home-collectible-shelf').dataset.shelfSide);
         return;
       }
-      clearTimeout(hideTimer);
+      clearTimeout(gearHideTimers.get(gear));
       gear.classList.remove('is-idle');
       const box = gear.getBoundingClientRect(), menu = event.target;
       menu.style.left = `${Math.max(8,Math.min(box.right-menu.offsetWidth,innerWidth-menu.offsetWidth-8))}px`;
@@ -656,8 +656,8 @@
       const shelf = event.target.closest?.('.home-collectible-shelf');
       if (!shelf || shelf.contains(event.relatedTarget)) return;
       const gear = shelf.querySelector('.shelf-customize');
-      if (!gear || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible')) return;
-      clearTimeout(hideTimer);
+      if (!gear || gear.getAttribute('aria-expanded') === 'true' || gear.matches(':focus-visible') || gear.classList.contains('is-recent')) return;
+      clearTimeout(gearHideTimers.get(gear));
       gear.classList.remove('is-recent');
       gear.classList.add('is-idle');
       if (document.activeElement === gear) gear.blur();

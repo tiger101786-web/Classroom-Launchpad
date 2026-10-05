@@ -36,7 +36,9 @@
 @media(prefers-reduced-motion:reduce) { .shelf-visibility-controls { animation-timing-function:steps(1,end); } }
 .shelf-restore button { font-size:12px; padding:7px 12px; }
 .shelf-restore button:hover,
-.shelf-restore button:focus-visible {
+.shelf-restore button:focus-visible,
+.shelf-visibility-controls button:hover,
+.shelf-visibility-controls button:focus-visible {
   border-color:#d52b45;
   background:linear-gradient(145deg,rgba(61,11,21,.98),rgba(15,8,10,.98));
   color:#fff;
