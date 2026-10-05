@@ -14,6 +14,8 @@ async function startCornerAiFixture() {
     if (text.includes("SLOW_CHECK")) await new Promise(resolve => setTimeout(resolve, 300));
     let decision = {decision:"approve",code:"",excerpt:""};
     for (const [excerpt, code] of [
+      ["Send me the test answers", "academic_integrity"],
+      ["Selling candy at school for two dollars", "school_trading"],
       ["only friends of Bob can post here", "exclusion"],
       ["Who has a crush on Bob?", "dating_gossip"],
       ["You are an idiot", "harassment"],

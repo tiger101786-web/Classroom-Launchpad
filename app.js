@@ -1911,6 +1911,7 @@ function hasSharedData() {
 }
 
 function isEditingForm() {
+  if (document.querySelector("#myProfileDialog[open]")) return true;
   const active = document.activeElement;
   return Boolean(active && active.closest && active.closest("form"));
 }
@@ -2393,7 +2394,7 @@ function renderAuthButton() {
             <span><strong>${escapeHtml(fullName)}</strong><small>${escapeHtml(roleLabel)}</small></span>
           </div>
           <div class="header-account-links">
-            <button type="button" data-action="${isTeacher() ? "openColtCorner" : "account"}"><span aria-hidden="true">&#9673;</span>My Profile</button>
+            <button type="button" data-action="openMyProfile"><span aria-hidden="true">&#9673;</span>My Profile</button>
             <button type="button" data-action="collectibleShelf" data-shelf-side="left"><span aria-hidden="true">&#9881;</span>Customize left shelf</button>
             <button type="button" data-action="collectibleShelf" data-shelf-side="right"><span aria-hidden="true">&#9881;</span>Customize right shelf</button>
             ${isTeacher()
@@ -3051,6 +3052,8 @@ function renderColtCorner() {
             <li>Never share personal information.</li>
             <li>Do not post outside links or usernames.</li>
             <li>No bullying, threats, spam, or repeated posts.</li>
+            <li>No asking for, sharing, or selling test or quiz answers. Ask for study help or practice instead.</li>
+            <li>No arranging buying, selling, or trading things at school through Colt Corner.</li>
           </ol>
           <p class="forum-moderation-note">
             Colt Assistant checks each draft before posting. If something needs a change, you receive private instructions and can edit and try again. Serious safety concerns go privately to Mr. Nieves.
@@ -12899,28 +12902,65 @@ function prepareForumProfileImage(file) {
   });
 }
 
-function attachForumProfileEditor() {
-  const input = document.getElementById("forumProfileImage");
+function openMyProfile() {
+  if (!isSignedIn()) { setScreen({ name: "login" }); return; }
+  if (document.getElementById("myProfileDialog")) return;
+  const opener = document.activeElement?.closest(".header-account-menu")?.querySelector("summary") || document.activeElement;
+  const existing = document.querySelector(".forum-profile-editor");
+  const placeholder = document.createComment("profile editor location");
+  const dialog = document.createElement("dialog");
+  dialog.id = "myProfileDialog";
+  dialog.className = "launch-scene-dialog profile-tool-dialog";
+  dialog.setAttribute("aria-labelledby", "myProfileTitle");
+  dialog.innerHTML = '<div class="launch-scene-dialog-heading"><h2 id="myProfileTitle">My Profile</h2><button type="button" class="outline-btn" data-close-profile aria-label="Close profile">✕</button></div><div class="profile-popup-content"></div>';
+  const content = dialog.querySelector(".profile-popup-content");
+  if (existing) { existing.replaceWith(placeholder); content.append(existing); }
+  else content.innerHTML = renderForumProfileEditor();
+  // Rebind a fresh editor so all lookups and save refreshes stay inside this popup.
+  content.innerHTML = renderForumProfileEditor();
+  document.body.append(dialog);
+  dialog.querySelector("[data-close-profile]").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    if (placeholder.isConnected) {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = renderForumProfileEditor();
+      placeholder.replaceWith(wrapper.firstElementChild);
+      attachForumProfileEditor();
+    }
+    if (opener?.isConnected) opener.focus();
+  }, { once: true });
+  dialog.showModal();
+  attachForumProfileEditor(dialog);
+}
+function attachForumProfileEditor(root = document) {
+  const refresh = () => {
+    if (root instanceof HTMLDialogElement && root.open) {
+      root.querySelector('.profile-popup-content').innerHTML = renderForumProfileEditor();
+      attachForumProfileEditor(root);
+    } else render();
+  };
+  const input = root.querySelector("#" + "forumProfileImage");
   if (!input || input.dataset.ready === "true") return;
   input.dataset.ready = "true";
-  document.getElementById("changeProfileBanner")?.addEventListener("click", () => window.ProfileBanners.open({
+  root.querySelector("#" + "changeProfileBanner")?.addEventListener("click", () => window.ProfileBanners.open({
     selected: authSession.profileBanner,
     avatar: renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame),
     name: escapeHtml(authSession.name || "Student"),
     role: escapeHtml(forumRoleLabel(authSession.role === "teacher" ? "teacher" : authSession.grade)),
     save: profileBanner => sharedBackend.request("/api/profile-banner", { method: "POST", body: JSON.stringify({ profileBanner }) }),
-    onSave: result => { authSession = result.session; classThreads = normalizeThreads(result.threads); profileAvatarMessage = "Profile banner saved!"; render(); }
+    onSave: result => { authSession = result.session; classThreads = normalizeThreads(result.threads); profileAvatarMessage = "Profile banner saved!"; refresh(); }
   }));
   let selectedFrame = normalizeProfileFrame(authSession.profileFrame);
-  const saveFrame = document.getElementById("saveProfileFrame");
-  const frameButtons = [...document.querySelectorAll("[data-profile-frame]")];
+  const saveFrame = root.querySelector("#" + "saveProfileFrame");
+  const frameButtons = [...root.querySelectorAll("[data-profile-frame]")];
   const framePageSize = 8;
   let framePage = Math.floor(Math.max(0, frameButtons.findIndex(b => b.dataset.profileFrame === selectedFrame)) / framePageSize);
   const framePages = Math.ceil(frameButtons.length / framePageSize);
   const pager = document.createElement('nav');
   pager.className = 'profile-picker-pages';
   pager.setAttribute('aria-label', 'Profile frame pages');
-  document.querySelector('.profile-frame-options').after(pager);
+  root.querySelector('.profile-frame-options').after(pager);
   const showFramePage = () => {
     frameButtons.forEach((button, index) => { button.hidden = Math.floor(index / framePageSize) !== framePage; });
     pager.innerHTML = `<button type="button" class="outline-btn" data-frame-page="-1" ${framePage === 0 ? 'disabled' : ''}>Previous</button><span role="status">Page ${framePage + 1} of ${framePages}</span><button type="button" class="outline-btn" data-frame-page="1" ${framePage === framePages - 1 ? 'disabled' : ''}>Next</button>`;
@@ -12936,12 +12976,12 @@ function attachForumProfileEditor() {
   frameButtons.forEach(button => button.addEventListener("click", () => {
     selectedFrame = button.dataset.profileFrame;
     frameButtons.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
-    document.getElementById("profileFramePreview").innerHTML = renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", selectedFrame);
-    document.getElementById("profileFrameSelection").textContent = `${PROFILE_FRAMES.find(([id]) => id === selectedFrame)[1]} selected`;
+    root.querySelector("#" + "profileFramePreview").innerHTML = renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", selectedFrame);
+    root.querySelector("#" + "profileFrameSelection").textContent = `${PROFILE_FRAMES.find(([id]) => id === selectedFrame)[1]} selected`;
     saveFrame.disabled = selectedFrame === normalizeProfileFrame(authSession.profileFrame);
   }));
   saveFrame.addEventListener("click", async () => {
-    const status = document.getElementById("forumProfileStatus");
+    const status = root.querySelector("#" + "forumProfileStatus");
     saveFrame.disabled = true;
     frameButtons.forEach(button => { button.disabled = true; });
     status.textContent = "Saving your frame...";
@@ -12951,7 +12991,7 @@ function attachForumProfileEditor() {
       authSession = result.session;
       classThreads = normalizeThreads(result.threads);
       profileAvatarMessage = "Profile frame saved!";
-      render();
+      refresh();
     } catch (error) {
       status.textContent = error.message;
       status.classList.add("error");
@@ -12960,7 +13000,7 @@ function attachForumProfileEditor() {
     }
   });
   input.addEventListener("change", async () => {
-    const status = document.getElementById("forumProfileStatus");
+    const status = root.querySelector("#" + "forumProfileStatus");
     const file = input.files && input.files[0];
     if (!file) return;
     profileAvatarMessage = "";
@@ -12973,7 +13013,7 @@ function attachForumProfileEditor() {
       authSession = result && result.session ? result.session : authSession;
       classThreads = normalizeThreads(result && result.threads);
       profileAvatarMessage = "Profile picture saved.";
-      render();
+      refresh();
     } catch (error) {
       status.textContent = error.message;
       status.classList.add("error");
@@ -12981,10 +13021,10 @@ function attachForumProfileEditor() {
       input.disabled = false;
     }
   });
-  const remove = document.getElementById("removeForumProfileImage");
+  const remove = root.querySelector("#" + "removeForumProfileImage");
   if (remove) {
     remove.addEventListener("click", async () => {
-      const status = document.getElementById("forumProfileStatus");
+      const status = root.querySelector("#" + "forumProfileStatus");
       remove.disabled = true;
       status.textContent = "Removing profile picture...";
       status.classList.remove("error", "success");
@@ -12993,7 +13033,7 @@ function attachForumProfileEditor() {
         authSession = result && result.session ? result.session : authSession;
         classThreads = normalizeThreads(result && result.threads);
         profileAvatarMessage = "Profile picture removed.";
-        render();
+        refresh();
       } catch (error) {
         status.textContent = error.message;
         status.classList.add("error");
@@ -13388,6 +13428,7 @@ app.addEventListener("click", async event => {
     });
     return;
   }
+  if (action === "openMyProfile") { openMyProfile(); return; }
   if (action === "account") {
     accountPasswordMessage = "";
     setScreen({ name: "account" });

@@ -206,11 +206,29 @@
     const pinned = item => item.id === "none" || item.id === "original";
     return Number(pinned(b)) - Number(pinned(a)) || a.name.localeCompare(b.name, "en", { sensitivity: "base" });
   });
+  function chooserCategory(item, kind) {
+    const id = item.matchedScene || item.id;
+    if (id.startsWith("disney-")) return "Disney";
+    if (id.startsWith("pokemon-")) return "Pokémon";
+    if (matchedSceneIds.includes(id)) return "Anime";
+    if (id.startsWith("hero-")) return "Superheroes";
+    if (id.startsWith("holiday-") || ["pumpkin","halloween","harvest","evergreen","new-orleans","usa-patriotic"].includes(id)) return "Holidays & Celebrations";
+    if (["chapel","christmas-chapel","christian"].includes(id)) return "Christian Faith";
+    if (["football","basketball","championship","soccer","baseball","softball","gymnastics","ninja-course","champion"].includes(id)) return "Sports";
+    if (["pixel","retro-arcade","neon","jdm","robotics","alien","observatory","orbit","clockwork"].includes(id)) return "Games, Space & Technology";
+    if (["dragon","castle","crystal","guardian","royal","phoenix","frost-dragon","blue-fire","rainbow-fire"].includes(id)) return "Fantasy";
+    if (["reef","forest","koi","aurora","volcano","bonfire","oasis","highland","blossom","woodland","treasure","butterfly","sunflower","peacock"].includes(id)) return "Nature & Animals";
+    return kind === "frames" ? "Classic & Decorative" : "Cozy & Everyday";
+  }
   function attachChooserSearch(dialog, kind) {
     const options = dialog.querySelector(".launch-scene-options");
     const controls = document.createElement("div");
     controls.className = "launch-chooser-search";
     controls.innerHTML = `<label for="launchChooserSearch">Search ${kind}</label><div class="launch-chooser-search-row"><input id="launchChooserSearch" type="search" placeholder="Search ${kind}…" autocomplete="off" spellcheck="false"><button type="button" class="outline-btn" data-clear-search>Clear</button></div><p role="status" aria-live="polite" data-search-status></p>`;
+    const catalog = kind === "frames" ? frames : scenes;
+    const categories = [...new Set(catalog.map(item => chooserCategory(item, kind)))].sort();
+    controls.insertAdjacentHTML("beforeend", '<label for="launchChooserCategory">Category</label><select id="launchChooserCategory"><option value="">All categories</option>' + categories.map(category => '<option>' + category + '</option>').join('') + '</select>');
+    const category = controls.querySelector("select");
     options.before(controls);
     const input = controls.querySelector("input");
     const clear = controls.querySelector("[data-clear-search]");
@@ -218,6 +236,7 @@
     const normalize = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("en");
     const cards = [...options.children].map(button => ({
       button,
+      category: chooserCategory(catalog.find(item => item.id === (button.dataset.frameChoice || button.dataset.sceneChoice)), kind),
       text: normalize(button.querySelector("strong").textContent + " " + button.querySelector("small").textContent)
     }));
     const pageSize = 8;
@@ -228,7 +247,7 @@
     options.after(pager);
     const filter = () => {
       const terms = normalize(input.value).trim().split(/\s+/).filter(Boolean);
-      const matches = cards.filter(({text}) => terms.every(term => text.includes(term)));
+      const matches = cards.filter(card => (!category.value || card.category === category.value) && terms.every(term => card.text.includes(term)));
       const count = matches.length;
       const pages = Math.max(1, Math.ceil(count / pageSize));
       page = Math.min(page, pages - 1);
@@ -242,7 +261,7 @@
       });
       pager.hidden = !count;
       pager.innerHTML = `<button type="button" class="outline-btn" data-chooser-page="-1" ${page === 0 ? 'disabled' : ''}>Previous</button><span role="status">Page ${page + 1} of ${pages}</span><button type="button" class="outline-btn" data-chooser-page="1" ${page === pages - 1 ? 'disabled' : ''}>Next</button>`;
-      clear.disabled = !input.value;
+      clear.disabled = !input.value && !category.value;
       status.textContent = count ? `${count} of ${cards.length} ${kind}` : `No matching ${kind}. Try another search or clear it.`;
     };
     pager.addEventListener('click', event => {
@@ -253,7 +272,8 @@
       options.querySelector('button:not([hidden])')?.focus({preventScroll:true});
     });
     input.addEventListener("input", () => { page = 0; filter(); });
-    clear.addEventListener("click", () => { input.value = ""; page = 0; filter(); input.focus(); });
+    category.addEventListener("change", () => { page = 0; filter(); });
+    clear.addEventListener("click", () => { input.value = ""; category.value = ""; page = 0; filter(); input.focus(); });
     filter();
   }
   let guestMotion = true;

@@ -84,6 +84,11 @@ async function run() {
 
     const studentPage = await studentContext.newPage();
     await studentPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await studentPage.locator(".header-account-summary").click();
+    await studentPage.locator('[data-action="openMyProfile"]').click();
+    await studentPage.locator("#myProfileDialog").waitFor();
+    assert.equal(await studentPage.locator(".colt-corner-card").count(),0);
+    await studentPage.locator("#myProfileDialog [data-close-profile]").click();
     await studentPage.locator(".colt-corner-preview .colt-corner-graphic").waitFor();
     assert.equal(await studentPage.locator(".colt-corner-preview .colt-corner-graphic").count(), 1);
     const previewLayout = await studentPage.locator(".colt-corner-preview").evaluate(preview => {
@@ -149,6 +154,12 @@ async function run() {
     const teacherPage = await teacherContext.newPage();
     await teacherPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await teacherPage.locator('.header-account-summary').click();
+    await teacherPage.locator('[data-action="openMyProfile"]').click();
+    await teacherPage.locator("#myProfileDialog").waitFor();
+    assert.equal(await teacherPage.locator(".colt-corner-card").count(),0);
+    await teacherPage.locator("#myProfileDialog [data-close-profile]").click();
+    await teacherPage.locator('.header-account-menu').evaluate(el=>el.open=false);
+    await teacherPage.locator('.header-account-summary').click();
     await teacherPage.locator('[data-action="teacherDashboard"]').click();
     await teacherPage.locator('[data-action="dashboardSection"][data-section="corner"]').first().click();
     await teacherPage.locator('[data-action="coltCornerGrade"][data-grade="6"]').first().click();
@@ -161,6 +172,22 @@ async function run() {
     await studentPage.locator('[data-action="openColtCorner"]').click();
     assert(await studentPage.getByText("Questionable wording", { exact: true }).isVisible());
 
+    for (const [message, corrected, title] of [
+      ["Send me the test answers", "How can I practice fractions?", "Study practice"],
+      ["Selling candy at school for two dollars", "What candy flavors do you like?", "Favorite flavors"]
+    ]) {
+      await studentPage.locator("#threadTitle").fill(title);
+      await studentPage.locator("#threadBody").fill(message);
+      await studentPage.locator("#threadForm button[type='submit']").click();
+      await studentPage.locator("#threadStatus").getByText(/prohibited/).waitFor();
+      assert.equal(await studentPage.locator("#threadBody").inputValue(),message);
+      assert.equal(await studentPage.locator(".thread-row").filter({hasText:title}).count(),0);
+      await studentPage.getByRole("button",{name:"Edit My Post",exact:true}).click();
+      await studentPage.locator("#threadBody").fill(corrected);
+      await studentPage.locator("#threadForm button[type='submit']").click();
+      await studentPage.getByText("Topic started.",{exact:true}).waitFor();
+      assert.equal(await studentPage.locator(".thread-row").filter({hasText:title}).count(),1);
+    }
     await studentPage.locator("#threadTitle").fill("Unsafe post");
     await studentPage.locator("#threadBody").fill("My email is student@example.com.");
     await studentPage.locator("#threadForm button[type='submit']").click();

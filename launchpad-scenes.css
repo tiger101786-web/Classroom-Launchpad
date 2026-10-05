@@ -1,4 +1,20 @@
 .home-scene-feature { flex-direction: column; gap: 10px; }
+.launch-chooser-search select { width:100%; min-height:38px; margin:6px 0 12px; padding:8px; color:var(--ink); background:var(--white); border:1px solid var(--border,#555); border-radius:8px; }
+.launch-chooser-search { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:16px; }
+.launch-chooser-search > label[for="launchChooserSearch"] { grid-column:1; grid-row:1; }
+.launch-chooser-search > .launch-chooser-search-row { grid-column:1; grid-row:2; min-width:0; }
+.launch-chooser-search > label[for="launchChooserCategory"] { grid-column:2; grid-row:1; }
+.launch-chooser-search > select { grid-column:2; grid-row:2; margin:0; }
+.launch-chooser-search > p { grid-column:1 / -1; grid-row:3; }
+@media(max-width:520px) {
+  .launch-chooser-search { grid-template-columns:minmax(0,1fr); }
+  .launch-chooser-search > label[for="launchChooserCategory"] { grid-column:1; grid-row:3; }
+  .launch-chooser-search > select { grid-column:1; grid-row:4; }
+  .launch-chooser-search > p { grid-row:5; }
+}
+.launch-scene-dialog.profile-tool-dialog { width:min(920px,calc(100vw - 32px)); max-height:90vh; overflow:auto; }
+.profile-tool-dialog > .launch-scene-dialog-heading { position:sticky; top:-24px; z-index:5; padding:12px 0; background:var(--paper); }
+.profile-tool-dialog .forum-profile-editor { margin:12px 0 0; }
 /* Castle ornament has a lower opening: cover the source circle's outer margin. */
 .launch-scene-stage:has(> [data-scene-frame="disney-castle"]) :is(.launch-scene-image,.launch-scene-particles,.launch-scene-radiance),
 .frame-swatch:has(> [data-scene-frame="disney-castle"]) > img { transform:scale(1.08); transform-origin:50% 50%; }

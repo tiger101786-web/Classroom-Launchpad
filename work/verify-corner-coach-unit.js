@@ -8,6 +8,19 @@ const {checkCornerDraft, coachSystemPrompt} = require("../colt-corner-coach");
     assert.equal((await checkCornerDraft({message},approve)).status,"approved");
   }
   const before=calls;
+  for (const [code,message,corrected] of [
+    ["academic_integrity","Can someone send me tomorrow's test answers?","Can someone explain how to add fractions?"],
+    ["school_trading","I am selling candy at school for two dollars.","What is your favorite candy?"]
+  ]) {
+    const result=await checkCornerDraft({message},async()=>({decision:"revise",code,excerpt:message}));
+    assert.equal(result.status,"blocked");
+    assert.equal(result.feedback.issues[0].code,code);
+    assert.match(result.feedback.issues[0].why,/prohibited/);
+    assert.equal(result.feedback.teacherReview,false);
+    assert.match(result.studentMessage,/edit it and check again/);
+    assert.equal((await checkCornerDraft({message:corrected},async()=>({decision:"approve",code:"",excerpt:""}))).status,"approved");
+    assert.match(coachSystemPrompt,new RegExp(code));
+  }
   for(const message of ["My email is test@example.com", "My password is secret123", "i will kill you", "This is f.u.c.k.i.n.g awful"])
     assert.equal((await checkCornerDraft({message},approve)).status,"blocked");
   assert.equal(calls,before);
