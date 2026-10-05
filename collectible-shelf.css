@@ -1,7 +1,7 @@
 .home-collectible-shelf { position:relative; width:min(100%,350px); margin-top:66px; padding-bottom:22px; }
 .home-collectible-shelf:has(.shelf-tall-object) { margin-top:100px; }
 /* Two equal shelf positions flank the scene; a hidden shelf keeps its position. */
-.home-display-row { display:grid; grid-template-columns:minmax(0,350px) minmax(0,310px) minmax(0,350px); justify-content:space-between; align-items:center; gap:28px; margin-top:88px; padding-bottom:12px; }
+.home-display-row { display:grid; grid-template-columns:minmax(0,350px) minmax(0,310px) minmax(0,350px); justify-content:space-between; align-items:center; gap:28px; margin-top:88px; padding-bottom:72px; }
 .home-display-row > .home-shelf-position { min-width:0; width:100%; }
 .home-display-row .home-collectible-shelf { width:100%; margin:0; padding:0; aspect-ratio:1445 / 1020; }
 /* Anchor both tabletops to one baseline, independent of artwork/support height. */
@@ -22,7 +22,11 @@
 }
 .shelf-restore { margin-top:20px; display:grid; justify-items:start; gap:6px; }
 .home-display-row .shelf-restore { position:relative; width:100%; aspect-ratio:1445 / 1020; }
-.shelf-visibility-controls { position:absolute; bottom:0; left:0; z-index:8; font-size:12px; animation:shelf-controls-idle 3.3s forwards; }
+/* A small persistent hit area lets hidden buttons return without reacting to the whole shelf. */
+.shelf-visibility-zone { position:absolute; top:calc(100% + 12px); left:0; width:max-content; max-width:calc(100% + 16px); padding:8px; margin:-8px; z-index:8; }
+[data-shelf-side="right"] > .shelf-visibility-zone { left:auto; right:0; text-align:right; }
+.shelf-visibility-controls { position:relative; font-size:12px; animation:shelf-controls-idle 3.3s forwards; }
+.shelf-visibility-controls [role="status"] { display:block; }
 .shelf-visibility-controls button { font-size:12px; padding:7px 12px; }
 .shelf-visibility-controls.is-active { animation:none; opacity:1; pointer-events:auto; }
 .shelf-visibility-controls.is-idle { animation:none; opacity:0; pointer-events:none; }
