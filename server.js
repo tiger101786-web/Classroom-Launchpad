@@ -67,6 +67,7 @@ const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "
 ["anime-rooftops","chapel-light","sunlit-peaks","saturn-dream","winter-crystal","honey-meadow","midnight-melody","paint-play","dragon-valley","butterfly-dream","rainbow-clouds","harbor-lights","carnival-glow","robot-city","storybook-nook","stadium-spirit"].forEach(id => profileBannerIds.add(id));
 ["patriotic-pride","angelic-peace","highland-haven","dumpling-delight","prehistoric-jungle","mermaid-lagoon","frontier-sunset","strawberry-picnic"].forEach(id => profileBannerIds.add(id));
 ["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"].forEach(id => profileBannerIds.add(id));
+['disney-twilight-boulevard', 'disney-agrabah', 'disney-pride-rock', 'anime-hidden-leaf', 'anime-kame-island', 'anime-cherry-village'].forEach(id => profileBannerIds.add(id));
 function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
 ['blue-fire', 'rainbow-fire', 'nugget-party'].forEach(id => profileBannerIds.add(id));
 function profileBannerForSession(session, db) {
