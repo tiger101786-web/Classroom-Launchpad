@@ -21,6 +21,13 @@ const ids=['disney-twilight-boulevard','disney-agrabah','disney-pride-rock','ani
     assert.equal(await selected.getAttribute('aria-pressed'),'true');
     await page.locator('#profileBannerPreview img').evaluate(i=>i.decode());
     assert(await page.locator('#profileBannerPreview img').evaluate(i=>i.naturalWidth>0));
+    assert(await page.locator('#profileBannerPreview img').evaluate(i=>{
+      const style=getComputedStyle(i),box=i.getBoundingClientRect(),parent=i.parentElement.getBoundingClientRect();
+      return style.objectFit==='contain' && style.transform==='none'
+        && box.left>=parent.left-1 && box.right<=parent.right+1
+        && box.top>=parent.top-1 && box.bottom<=parent.bottom+1
+        && Math.abs(box.width/box.height-i.naturalWidth/i.naturalHeight)<.02;
+    }), 'Scene artwork must fit completely without zoom, distortion or clipping');
     assert(await page.locator('.profile-banner-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth));
     await selected.click();
     await page.locator('#saveProfileBanner').click();

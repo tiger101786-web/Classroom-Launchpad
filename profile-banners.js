@@ -21,7 +21,7 @@
     const id = normalize(value);
     const scene = sceneBanners[id];
     const source = scene ? `assets/launchpad-scene-${scene[1]}.png` : `assets/profile-banner-${id}.png`;
-    return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-from-scene' : ''}" data-banner="${id}" aria-hidden="true"><img src="${source}" alt="" loading="lazy"></div>`;
+    return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-from-scene' : ''}" data-banner="${id}" aria-hidden="true">${scene ? `<span class="profile-banner-scene-backdrop" style="background-image:url('${source}')"></span>` : ''}<img src="${source}" alt="" loading="lazy"></div>`;
   };
   function open({ selected, avatar, name, role, save, onSave }) {
     document.querySelector('.profile-banner-dialog')?.remove();
