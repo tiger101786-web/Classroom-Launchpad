@@ -13,7 +13,8 @@
     'disney-pride-rock': ['Disney-inspired • Savannah Sunrise'],
     'anime-hidden-leaf': ['Anime • Hidden Leaf Village'],
     'anime-kame-island': ['Disney-inspired • Tropical Cottage'],
-    'anime-cherry-village': ['Anime-inspired • Moonlit Sakura']
+    'anime-cherry-village': ['Anime-inspired • Moonlit Sakura'],
+    'anime-walled-city': ['Anime • Walled City']
   };
   choices.push(...Object.entries(sceneBanners).map(([id, [title]]) => [id, title]));
   const cover = value => {

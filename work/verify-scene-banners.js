@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),vm=require('node:vm'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
-const ids=['disney-twilight-boulevard','disney-agrabah','disney-pride-rock','anime-hidden-leaf','anime-kame-island','anime-cherry-village'];
+const ids=['disney-twilight-boulevard','disney-agrabah','disney-pride-rock','anime-hidden-leaf','anime-kame-island','anime-cherry-village','anime-walled-city'];
 (async()=>{
  const server=fs.readFileSync('server.js','utf8');
  const catalog=server.slice(server.indexOf('const profileBannerIds'),server.indexOf('function profileBannerForSession'));
@@ -38,6 +38,6 @@ const ids=['disney-twilight-boulevard','disney-agrabah','disney-pride-rock','ani
   await page.evaluate(ids=>{document.body.innerHTML='<main style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px">'+ids.map(id=>'<section><p>'+id+'</p><div class="profile-banner-card">'+ProfileBanners.cover(id)+'</div></section>').join('')+'</main>'},ids);
   await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
   const preview=path.join(os.tmpdir(),'colt-scene-banners.png');await page.screenshot({path:preview});
-  console.log('PASS: six IDs accepted by server; artwork loads; desktop/mobile choices, preview and save payloads work. Preview: '+preview);
+  console.log('PASS: '+ids.length+' IDs accepted by server; artwork loads; desktop/mobile choices, preview and save payloads work. Preview: '+preview);
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
