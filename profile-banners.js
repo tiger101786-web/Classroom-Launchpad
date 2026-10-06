@@ -11,7 +11,7 @@
     'disney-twilight-boulevard': ['Disney-inspired • Starlight Kingdom'],
     'disney-agrabah': ['Disney • Agrabah Palace'],
     'disney-pride-rock': ['Disney-inspired • Savannah Sunrise'],
-    'anime-hidden-leaf': ['Anime-inspired • Ember Village'],
+    'anime-hidden-leaf': ['Anime • Hidden Leaf Village'],
     'anime-kame-island': ['Disney-inspired • Tropical Cottage'],
     'anime-cherry-village': ['Anime-inspired • Moonlit Sakura']
   };
@@ -20,7 +20,7 @@
     // Additional themed covers share the existing crop and preview behavior.
     const id = normalize(value);
     const scene = sceneBanners[id];
-    const source = scene ? `assets/profile-banner-${id}-wide.png` : `assets/profile-banner-${id}.png`;
+    const source = scene ? `assets/profile-banner-${id}-wide.png${id === 'anime-hidden-leaf' ? '?v=20261005-hidden-leaf-v2' : ''}` : `assets/profile-banner-${id}.png`;
     return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-panorama' : ''}" data-banner="${id}" aria-hidden="true"><img src="${source}" alt="" loading="lazy"></div>`;
   };
   function open({ selected, avatar, name, role, save, onSave }) {
