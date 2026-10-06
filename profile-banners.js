@@ -6,22 +6,22 @@
   choices.push(...[["anime-rooftops","Anime Rooftops"],["chapel-light","Chapel Light"],["sunlit-peaks","Sunlit Peaks"],["saturn-dream","Saturn Dream"],["winter-crystal","Winter Crystal"],["honey-meadow","Honey Meadow"],["midnight-melody","Midnight Melody"],["paint-play","Paint Play"],["dragon-valley","Dragon Valley"],["butterfly-dream","Butterfly Dream"],["rainbow-clouds","Rainbow Clouds"],["harbor-lights","Harbor Lights"],["carnival-glow","Carnival Glow"],["robot-city","Robot City"],["storybook-nook","Storybook Nook"],["stadium-spirit","Stadium Spirit"]]);
   choices.push(...[["patriotic-pride","Patriotic Pride"],["angelic-peace","Angelic Peace"],["highland-haven","Highland Haven"],["dumpling-delight","Dumpling Delight"],["prehistoric-jungle","Prehistoric Jungle"],["mermaid-lagoon","Mermaid Lagoon"],["frontier-sunset","Frontier Sunset"],["strawberry-picnic","Strawberry Picnic"]]);
   choices.push(...[["capybara-springs","Capybara Springs"],["lavender-cottage","Lavender Cottage"],["sunflower-meadow","Sunflower Meadow"],["ninja-dojo","Ninja Dojo"],["enchanted-mushrooms","Enchanted Mushrooms"],["polar-penguins","Polar Penguins"],["royal-peacock","Royal Peacock"],["dragon-treasure","Dragon Treasure"]]);
-  // Reuse the original scene files; banner framing never modifies homepage artwork.
+  // Keep saved IDs compatible while replacing circular scenes with original wide artwork.
   const sceneBanners = {
-    'disney-twilight-boulevard': ['Disney • Twilight Castle', 'disney-twilight-boulevard'],
-    'disney-agrabah': ['Disney • Agrabah Palace', 'disney-agrabah'],
-    'disney-pride-rock': ['Disney • Pride Rock', 'disney-pride-rock'],
-    'anime-hidden-leaf': ['Anime • Hidden Leaf Village', 'hidden-leaf-rooftops'],
-    'anime-kame-island': ['Anime • Kame House Island', 'kame-house-island'],
-    'anime-cherry-village': ['Anime • Moonlit Cherry Village', 'moonlit-cherry-village']
+    'disney-twilight-boulevard': ['Disney-inspired • Starlight Kingdom'],
+    'disney-agrabah': ['Disney • Agrabah Palace'],
+    'disney-pride-rock': ['Disney-inspired • Savannah Sunrise'],
+    'anime-hidden-leaf': ['Anime-inspired • Ember Village'],
+    'anime-kame-island': ['Disney-inspired • Tropical Cottage'],
+    'anime-cherry-village': ['Anime-inspired • Moonlit Sakura']
   };
   choices.push(...Object.entries(sceneBanners).map(([id, [title]]) => [id, title]));
   const cover = value => {
     // Additional themed covers share the existing crop and preview behavior.
     const id = normalize(value);
     const scene = sceneBanners[id];
-    const source = scene ? `assets/launchpad-scene-${scene[1]}.png` : `assets/profile-banner-${id}.png`;
-    return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-from-scene' : ''}" data-banner="${id}" aria-hidden="true">${scene ? `<span class="profile-banner-scene-backdrop" style="background-image:url('${source}')"></span>` : ''}<img src="${source}" alt="" loading="lazy"></div>`;
+    const source = scene ? `assets/profile-banner-${id}-wide.png` : `assets/profile-banner-${id}.png`;
+    return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-panorama' : ''}" data-banner="${id}" aria-hidden="true"><img src="${source}" alt="" loading="lazy"></div>`;
   };
   function open({ selected, avatar, name, role, save, onSave }) {
     document.querySelector('.profile-banner-dialog')?.remove();

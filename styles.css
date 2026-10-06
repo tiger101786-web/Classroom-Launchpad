@@ -10710,9 +10710,9 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-banner-cover { position: relative; overflow: hidden; border-radius: 12px; background: #241424; min-width: 0; }
 .profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-banner-cover[data-banner="colt"] img { object-position: right center; }
-/* Keep the complete circular composition; only the decorative backdrop fills/crops. */
-.profile-banner-scene-backdrop { position:absolute; inset:-24px; background-size:cover; background-position:center; filter:blur(18px) brightness(.65); pointer-events:none; }
-.profile-banner-cover.profile-banner-from-scene img { position:relative; margin:auto; width:auto; max-width:100%; height:100%; object-fit:contain; object-position:center; transform:none; mask-image:radial-gradient(circle closest-side,#000 90%,transparent 100%); }
+/* Original wide artwork stays at its native proportions in every banner context. */
+.profile-banner-cover.profile-banner-panorama.profile-banner-panorama { height:auto; aspect-ratio:3 / 1; }
+.profile-banner-cover.profile-banner-panorama img { object-fit:cover; object-position:center; }
 .forum-profile-editor > .profile-banner-cover { grid-column: 1 / -1; height: clamp(110px, 17vw, 220px); }
 .forum-profile-editor > .profile-banner-cover[data-banner="colt"] { height: auto; aspect-ratio: 3 / 1; }
 .forum-profile-editor:has(> .profile-banner-cover) > #profileFramePreview { margin-top: -45px; position: relative; z-index: 1; }
