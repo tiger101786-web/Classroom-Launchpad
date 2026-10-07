@@ -28,7 +28,8 @@ assert.equal(familyIndex('Afrobeats'),familyIndex('Persian')+1);
    for(const id of ['anison-fm','listen-moe-anime']) {
     const button=page.locator('[data-station="'+id+'"]');
     assert(await button.isVisible());
-    assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.scrollWidth<=e.clientWidth));
+    assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.scrollWidth<=e.clientWidth),JSON.stringify(await button.locator('.colt-radio-station-style').evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth,font:getComputedStyle(e).fontSize,station:e.textContent}))));
+    if(id==='anison-fm') assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.getBoundingClientRect().height<=parseFloat(getComputedStyle(e).lineHeight)+1),'ANISON.FM must stay on one line');
     await button.click();
     assert.equal(await page.locator('audio').getAttribute('src'),stations.find(s=>s.id===id).source);
    }

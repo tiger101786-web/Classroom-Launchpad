@@ -7537,6 +7537,22 @@ body[data-theme="night"] .colt-radio-station {
   letter-spacing: -0.025em;
 }
 
+/* Keep this station's domain intact within the compact radio tile. */
+.colt-radio-panel .colt-radio-station[data-station="anison-fm"] {
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 3px;
+}
+.colt-radio-station[data-station="anison-fm"] .colt-radio-station-icon {
+  width: 24px;
+  height: 26px;
+}
+.colt-radio-station[data-station="anison-fm"] .colt-radio-station-style {
+  font-size: 0.5rem;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
 .colt-radio-station:hover {
   border-color: #6f1a24;
   background: linear-gradient(145deg, #1d1113, #080708);
