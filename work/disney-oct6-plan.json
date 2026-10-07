@@ -1,0 +1,102 @@
+{
+  "method": "Built-in image_gen, individual transparent frames; supplied scene PNGs copied unchanged",
+  "shared": "Use case: stylized-concept. Generate ONE premium dimensional illustrated circular scene FRAME OVERLAY, square PNG, genuinely transparent background AND transparent empty center. Front-on, concentric opening exactly centered at 50%,50%. Continuous opaque circular inner rim radius 35% of canvas width. All ornaments on ring between radii 35% and 48%, with no intrusions into the empty opening. Full frame visible with margin; no cropping. No scene in center, no background, no text, no watermark, no checkerboard. Detailed polished collectible artwork matching a Disney-inspired scene. Design: ",
+  "frames": [
+    {
+      "scene": "disney-imperial-palace",
+      "name": "Disney • Imperial Dragon Palace",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_01_09 PM.png",
+      "frame": "match-disney-imperial-palace",
+      "design": "Crimson lacquer and carved gold Chinese dragon rim, jade accents, blue pagoda roof tiles and miniature amber palace lanterns.",
+      "asset": "assets/scene-frame-match-disney-imperial-palace.png"
+    },
+    {
+      "scene": "disney-toontown",
+      "name": "Disney • Mickey's Toontown",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_11_21 PM-3.png",
+      "frame": "match-disney-toontown",
+      "design": "Whimsical pink turquoise yellow enamel, tiny striped shop awnings and flower boxes, black mouse-ear medallion and red bow at top. Playful polished theme park craftsmanship.",
+      "asset": "assets/scene-frame-match-disney-toontown.png"
+    },
+    {
+      "scene": "disney-insect-meadow",
+      "name": "Disney • A Bug's Life Meadow",
+      "source": "C:/Users/Sinister/Desktop/Enchanted Insect Meadow Adventure.png",
+      "frame": "match-disney-insect-meadow",
+      "design": "Interwoven oversized blades of grass and clover leaves, tiny dewdrop gems, dandelions, purple flowers, one little friendly blue ant ornament on outer rim.",
+      "asset": "assets/scene-frame-match-disney-insect-meadow.png"
+    },
+    {
+      "scene": "disney-sugar-rush",
+      "name": "Disney • Sugar Rush Kingdom",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 06_59_59 PM.png",
+      "frame": "match-disney-sugar-rush",
+      "design": "Candy cane striped ring, pink icing, glossy chocolate, rainbow sprinkles, tiny lollipops and sugar gumdrops. Candy racing kingdom palette.",
+      "asset": "assets/scene-frame-match-disney-sugar-rush.png"
+    },
+    {
+      "scene": "disney-zootopia",
+      "name": "Disney • Zootopia Skyline",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_00_17 PM.png",
+      "frame": "match-disney-zootopia",
+      "design": "Sleek gold and teal futuristic city ring, tiny yellow monorail around outer edge, snow crystal and sandstone accents, small rabbit and fox silhouette medallion at top.",
+      "asset": "assets/scene-frame-match-disney-zootopia.png"
+    },
+    {
+      "scene": "disney-highland-castle",
+      "name": "Disney • Brave Highland Castle",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_00_25 PM.png",
+      "frame": "match-disney-highland-castle",
+      "design": "Weathered Scottish castle stone, moss, intricate bronze Celtic knots, purple heather and small turquoise wisp jewels. Refined medieval collectible.",
+      "asset": "assets/scene-frame-match-disney-highland-castle.png"
+    },
+    {
+      "scene": "disney-casita",
+      "name": "Disney • Encanto Casita",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_00_44 PM.png",
+      "frame": "match-disney-casita",
+      "design": "Terracotta roof tiles, warm ochre and pink stucco details, lush magenta bougainvillea and green vines, golden butterfly ornaments, tiny amber lanterns.",
+      "asset": "assets/scene-frame-match-disney-casita.png"
+    },
+    {
+      "scene": "disney-element-city",
+      "name": "Disney • Element City",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 06_59_36 PM.png",
+      "frame": "match-disney-element-city",
+      "design": "Four elements ring: sculpted amber flames on left, translucent blue water on right, emerald leaves below and pearly cloud curls above, polished copper bridges.",
+      "asset": "assets/scene-frame-match-disney-element-city.png"
+    },
+    {
+      "scene": "disney-fireworks-castle",
+      "name": "Disney • Castle Fireworks",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_11_20 PM-2.png",
+      "frame": "match-disney-fireworks-castle",
+      "design": "Royal blue and gold fairytale rim, small pink castle spire at top, sculpted magenta violet gold firework starbursts attached to outer ring, warm lantern gems.",
+      "asset": "assets/scene-frame-match-disney-fireworks-castle.png"
+    },
+    {
+      "scene": "disney-galleon-harbor",
+      "name": "Disney • Moonlit Galleon Harbor",
+      "source": "C:/Users/Sinister/Desktop/Moonlit Mediterranean Harbor and Galleon.png",
+      "frame": "match-disney-galleon-harbor",
+      "design": "Rich dark ship timber and braided nautical ropes, brass compass medallion, ivory sail curls, warm hanging lanterns, sapphire wave trim. No skulls.",
+      "asset": "assets/scene-frame-match-disney-galleon-harbor.png"
+    },
+    {
+      "scene": "disney-walle-wasteland",
+      "name": "Disney • WALL-E Sunset Wasteland",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_04_12 PM.png",
+      "frame": "match-disney-walle-wasteland",
+      "design": "Rusty copper and weathered yellow industrial metal hoop, rivets gears and stacked compacted scrap cubes on outer rim, warm amber sun jewel and tiny green seedling accent.",
+      "asset": "assets/scene-frame-match-disney-walle-wasteland.png"
+    },
+    {
+      "scene": "disney-adventure-falls",
+      "name": "Disney • Adventureland Falls",
+      "source": "C:/Users/Sinister/Desktop/ChatGPT Image Oct 6, 2026, 07_11_20 PM-1.png",
+      "frame": "match-disney-adventure-falls",
+      "design": "Carved sandstone temple ornament, braided rope bridges, palm leaves and bright hibiscus flowers, turquoise waterfall glass flowing around the lower rim, warm lanterns.",
+      "asset": "assets/scene-frame-match-disney-adventure-falls.png"
+    }
+  ]
+}

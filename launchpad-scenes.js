@@ -2,6 +2,18 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    {"id":"disney-imperial-palace","name":"Disney • Imperial Dragon Palace","description":"Drifting crimson leaves and glowing courtyard lanterns","image":"assets/launchpad-scene-disney-imperial-palace.png"},
+    {"id":"disney-toontown","name":"Disney • Mickey's Toontown","description":"Colorful twinkles and pulsing golden window lights","image":"assets/launchpad-scene-disney-toontown.png"},
+    {"id":"disney-insect-meadow","name":"Disney • A Bug's Life Meadow","description":"Floating dandelion seeds and warm meadow sunbeams","image":"assets/launchpad-scene-disney-insect-meadow.png"},
+    {"id":"disney-sugar-rush","name":"Disney • Sugar Rush Kingdom","description":"Falling rainbow sprinkles and flowing candy waterfalls","image":"assets/launchpad-scene-disney-sugar-rush.png"},
+    {"id":"disney-zootopia","name":"Disney • Zootopia Skyline","description":"Traveling monorail lights and shimmering fountain water","image":"assets/launchpad-scene-disney-zootopia.png"},
+    {"id":"disney-highland-castle","name":"Disney • Brave Highland Castle","description":"Drifting Highland mist and blue will-o-the-wisps","image":"assets/launchpad-scene-disney-highland-castle.png"},
+    {"id":"disney-casita","name":"Disney • Encanto Casita","description":"Fluttering golden butterflies and glowing Casita windows","image":"assets/launchpad-scene-disney-casita.png"},
+    {"id":"disney-element-city","name":"Disney • Element City","description":"Rising embers and flowing blue water reflections","image":"assets/launchpad-scene-disney-element-city.png"},
+    {"id":"disney-fireworks-castle","name":"Disney • Castle Fireworks","description":"Expanding fireworks above shimmering castle reflections","image":"assets/launchpad-scene-disney-fireworks-castle.png"},
+    {"id":"disney-galleon-harbor","name":"Disney • Moonlit Galleon Harbor","description":"Glowing ship lanterns and rolling harbor reflections","image":"assets/launchpad-scene-disney-galleon-harbor.png"},
+    {"id":"disney-walle-wasteland","name":"Disney • WALL-E Sunset Wasteland","description":"Drifting golden dust and strong sunset rays","image":"assets/launchpad-scene-disney-walle-wasteland.png"},
+    {"id":"disney-adventure-falls","name":"Disney • Adventureland Falls","description":"Flowing waterfall streaks and bright lagoon ripples","image":"assets/launchpad-scene-disney-adventure-falls.png"},
     { id: "disney-paris-rooftops", name: "Disney • Paris Moonlit Rooftops", description: "Warm window lights beneath a radiant Paris moon", image: "assets/launchpad-scene-disney-paris-rooftops.png" },
     { id: "disney-olympus", name: "Disney • Mount Olympus", description: "Golden sun rays over the temples above the clouds", image: "assets/launchpad-scene-disney-olympus.png" },
     { id: "disney-notre-dame", name: "Disney • Notre Dame Sunset", description: "Sunset radiance above the cathedral and Paris skyline", image: "assets/launchpad-scene-disney-notre-dame.png" },
@@ -141,6 +153,18 @@
   ];
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
+    "disney-imperial-palace",
+    "disney-toontown",
+    "disney-insect-meadow",
+    "disney-sugar-rush",
+    "disney-zootopia",
+    "disney-highland-castle",
+    "disney-casita",
+    "disney-element-city",
+    "disney-fireworks-castle",
+    "disney-galleon-harbor",
+    "disney-walle-wasteland",
+    "disney-adventure-falls",
     "disney-paris-rooftops",
     "disney-olympus",
     "disney-notre-dame",
@@ -313,6 +337,7 @@
   function framedArtwork(scene, video, preview = true) {
     return `<div class="launch-scene-stage">${artwork(scene.id, scene.motion, video, preview)}${frameArt(scene.frame)}</div>`;
   }
+  const disneyExpansionIds = new Set(["disney-imperial-palace","disney-toontown","disney-insect-meadow","disney-sugar-rush","disney-zootopia","disney-highland-castle","disney-casita","disney-element-city","disney-fireworks-castle","disney-galleon-harbor","disney-walle-wasteland","disney-adventure-falls"]);
   function artwork(id, motion, video, preview = false) {
     const scene = scenes.find(item => item.id === id) || scenes[0];
     const paused = !motion || reduced.matches;
@@ -320,7 +345,9 @@
       ? `<img class="launch-scene-image" src="${scene.image}" alt="${scene.name}" decoding="async"><span class="launch-scene-particles" aria-hidden="true">${Array.from({ length: 9 }, (_, index) => `<i style="--n:${index};--x:${9 + (index * 19) % 84}%;--y:${12 + (index * 23) % 72}%"></i>`).join("")}</span>${['disney-paris-rooftops','disney-halloween-town','disney-jungle-ruins','disney-haunted-mansion','disney-skull-lagoon','disney-radiator-springs','disney-river-valley'].includes(scene.id) ? '<span class="launch-scene-radiance" aria-hidden="true"></span>' : ''}`
       : `<video class="launch-scene-video" ${paused ? "" : "autoplay"} muted loop playsinline preload="metadata" aria-label="Mr. Nieves and Colt classroom video"><source ${preview ? "src" : "data-src"}="${video}?v=20260905-profile-optimized1" type="video/mp4"></video>`;
     const coins = scene.id === "pixel" ? `<span class="scene-coin-layer" aria-hidden="true">${[[56.6, 46.9, 2.3], [50.5, 53.1, 2.5], [53.3, 64.1, 3.1], [58.4, 71.9, 3.8]].map(([x, y, size], index) => `<span class="scene-pixel-coin" style="left:${x}%;top:${y}%;width:${size}%;--coin-delay:${index * -.45}s"><svg viewBox="0 0 12 16" shape-rendering="crispEdges"><path fill="#8d4000" d="M4 0h4v1h2v2h1v2h1v6h-1v2h-1v2H8v1H4v-1H2v-2H1v-2H0V5h1V3h1V1h2Z"/><path fill="#ffd12f" d="M4 1h4v1h2v3h1v6h-1v3H8v1H4v-1H2v-3H1V5h1V2h2Z"/><path fill="#ffef85" d="M4 2h3v1H4v10H3V4h1Z"/><path fill="#ed8b06" d="M8 3h1v10H7v1H5v-1h2V4h1Z"/><path fill="#ffef85" d="M5 4h1v7H5Z"/></svg></span>`).join("")}</span>` : "";
-    return `<div class="school-photo launch-scene scene-${scene.id}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}</div>`;
+    const expansion = disneyExpansionIds.has(scene.id);
+    const extraEffects = expansion ? '<span class="disney-extra-effects" aria-hidden="true"><b class="disney-light"></b><b class="disney-water"></b><b class="disney-detail"></b></span>' : '';
+    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}</div>`;
   }
   function render(session, video, sessionReady = true) {
     // Do not create or fetch the default video before the saved account choice is known.
