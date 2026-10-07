@@ -45,7 +45,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
   await page.evaluate(p=>{document.querySelector('main').innerHTML=LaunchpadScenes.render({authenticated:true,homeScene:{id:p.scene,frame:'none',motion:false}},'');},pairs[4]);
   await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
   await page.locator('.launch-scene-stage').screenshot({path:path.join(os.tmpdir(),'disney-no-frame.png')});
-  assert.match(await page.locator('.launch-scene-image').evaluate(e=>getComputedStyle(e).transform),/1.09/);
+  assert.ok(await page.locator('.launch-scene-image').evaluate(e=>new DOMMatrix(getComputedStyle(e).transform).a>1));
   await page.evaluate(p=>{document.querySelector('main').innerHTML=LaunchpadScenes.render({authenticated:true,homeScene:{id:p.scene,frame:p.frame,motion:false}},'');},pairs[3]);
   assert.ok(await page.locator('.launch-scene').evaluate(e=>e.getAnimations({subtree:true}).every(a=>a.playState==='paused')));
   await page.emulateMedia({reducedMotion:'reduce'});

@@ -82,4 +82,48 @@
 
 
 /* The supplied circular PNGs have a baked-in black margin, even without a frame. */
-.scene-oct6 > :is(.launch-scene-image,.launch-scene-particles,.disney-extra-effects) { transform:scale(1.09); transform-origin:center; }
+.launch-scene[data-scene^="disney-"] > :is(.launch-scene-image,.launch-scene-particles,.disney-extra-effects,.launch-scene-radiance,.scene-coin-layer) { transform:scale(var(--disney-crop-scale,1.09)); transform-origin:center; }
+
+/* Match the no-frame preview without enlarging the thumbnail's layout box. */
+.disney-scene-thumbnail { display:block; width:74px; height:74px; overflow:hidden; border-radius:50%; }
+.launch-scene-options .disney-scene-thumbnail > img { width:100%; height:100%; border-radius:0; transform:scale(var(--disney-crop-scale,1.09)); transform-origin:center; }
+@media (max-width:480px) { .disney-scene-thumbnail { width:58px; height:58px; } }
+
+/* Per-source proportional crops, shared by scene cards and live artwork. */
+.launch-scene[data-scene="disney-imperial-palace"], [data-scene-choice="disney-imperial-palace"] { --disney-crop-scale:1.092; }
+.launch-scene[data-scene="disney-toontown"], [data-scene-choice="disney-toontown"] { --disney-crop-scale:1.131; }
+.launch-scene[data-scene="disney-insect-meadow"], [data-scene-choice="disney-insect-meadow"] { --disney-crop-scale:1.071; }
+.launch-scene[data-scene="disney-sugar-rush"], [data-scene-choice="disney-sugar-rush"] { --disney-crop-scale:1.059; }
+.launch-scene[data-scene="disney-zootopia"], [data-scene-choice="disney-zootopia"] { --disney-crop-scale:1.108; }
+.launch-scene[data-scene="disney-highland-castle"], [data-scene-choice="disney-highland-castle"] { --disney-crop-scale:1.139; }
+.launch-scene[data-scene="disney-casita"], [data-scene-choice="disney-casita"] { --disney-crop-scale:1.053; }
+.launch-scene[data-scene="disney-element-city"], [data-scene-choice="disney-element-city"] { --disney-crop-scale:1.057; }
+.launch-scene[data-scene="disney-fireworks-castle"], [data-scene-choice="disney-fireworks-castle"] { --disney-crop-scale:1.108; }
+.launch-scene[data-scene="disney-galleon-harbor"], [data-scene-choice="disney-galleon-harbor"] { --disney-crop-scale:1.062; }
+.launch-scene[data-scene="disney-walle-wasteland"], [data-scene-choice="disney-walle-wasteland"] { --disney-crop-scale:1.085; }
+.launch-scene[data-scene="disney-adventure-falls"], [data-scene-choice="disney-adventure-falls"] { --disney-crop-scale:1.126; }
+.launch-scene[data-scene="disney-paris-rooftops"], [data-scene-choice="disney-paris-rooftops"] { --disney-crop-scale:1.071; }
+.launch-scene[data-scene="disney-olympus"], [data-scene-choice="disney-olympus"] { --disney-crop-scale:1.064; }
+.launch-scene[data-scene="disney-notre-dame"], [data-scene-choice="disney-notre-dame"] { --disney-crop-scale:1.064; }
+.launch-scene[data-scene="disney-monstropolis"], [data-scene-choice="disney-monstropolis"] { --disney-crop-scale:1.044; }
+.launch-scene[data-scene="disney-halloween-town"], [data-scene-choice="disney-halloween-town"] { --disney-crop-scale:1.094; }
+.launch-scene[data-scene="disney-memory-headquarters"], [data-scene-choice="disney-memory-headquarters"] { --disney-crop-scale:1.051; }
+.launch-scene[data-scene="disney-toy-bedroom"], [data-scene-choice="disney-toy-bedroom"] { --disney-crop-scale:1.053; }
+.launch-scene[data-scene="disney-tropical-lagoon"], [data-scene-choice="disney-tropical-lagoon"] { --disney-crop-scale:1.073; }
+.launch-scene[data-scene="disney-skull-lagoon"], [data-scene-choice="disney-skull-lagoon"] { --disney-crop-scale:1.082; }
+.launch-scene[data-scene="disney-marigold-bridge"], [data-scene-choice="disney-marigold-bridge"] { --disney-crop-scale:1.106; }
+.launch-scene[data-scene="disney-radiator-springs"], [data-scene-choice="disney-radiator-springs"] { --disney-crop-scale:1.042; }
+.launch-scene[data-scene="disney-jungle-ruins"], [data-scene-choice="disney-jungle-ruins"] { --disney-crop-scale:1.046; }
+.launch-scene[data-scene="disney-epcot-night"], [data-scene-choice="disney-epcot-night"] { --disney-crop-scale:1.085; }
+.launch-scene[data-scene="disney-hollywood-hotel"], [data-scene-choice="disney-hollywood-hotel"] { --disney-crop-scale:1.094; }
+.launch-scene[data-scene="disney-haunted-mansion"], [data-scene-choice="disney-haunted-mansion"] { --disney-crop-scale:1.104; }
+.launch-scene[data-scene="disney-castle-fountain"], [data-scene-choice="disney-castle-fountain"] { --disney-crop-scale:1.089; }
+.launch-scene[data-scene="disney-twilight-boulevard"], [data-scene-choice="disney-twilight-boulevard"] { --disney-crop-scale:1.144; }
+.launch-scene[data-scene="disney-agrabah"], [data-scene-choice="disney-agrabah"] { --disney-crop-scale:1.094; }
+.launch-scene[data-scene="disney-snow-castle"], [data-scene-choice="disney-snow-castle"] { --disney-crop-scale:1.085; }
+.launch-scene[data-scene="disney-pride-rock"], [data-scene-choice="disney-pride-rock"] { --disney-crop-scale:1.057; }
+.launch-scene[data-scene="disney-undersea-palace"], [data-scene-choice="disney-undersea-palace"] { --disney-crop-scale:1.075; }
+.launch-scene[data-scene="disney-bayou"], [data-scene-choice="disney-bayou"] { --disney-crop-scale:1.099; }
+.launch-scene[data-scene="disney-river-valley"], [data-scene-choice="disney-river-valley"] { --disney-crop-scale:1.075; }
+.launch-scene[data-scene="disney-island-cottage"], [data-scene-choice="disney-island-cottage"] { --disney-crop-scale:1.045; }
+.launch-scene[data-scene="disney-alpine-harbor"], [data-scene-choice="disney-alpine-harbor"] { --disney-crop-scale:1.131; }
