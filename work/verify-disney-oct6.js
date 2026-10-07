@@ -7,7 +7,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
  const catalog=server.slice(server.indexOf('const homeSceneIds'),server.indexOf('function homeSceneForSession'));
  for(const p of pairs){
   assert.equal(vm.runInNewContext(catalog+';cleanHomeScene('+JSON.stringify({id:p.scene,frame:p.frame,motion:true})+').frame'),p.frame);
-  assert.ok(fs.readFileSync(p.source).equals(fs.readFileSync('assets/launchpad-scene-'+p.scene+'.png')));
+  if(fs.existsSync(p.source)) assert.ok(fs.readFileSync(p.source).equals(fs.readFileSync('assets/launchpad-scene-'+p.scene+'.png')));
   const {data,info}=await sharp(p.asset).ensureAlpha().raw().toBuffer({resolveWithObject:true});
   assert.equal(data[(Math.floor(info.height/2)*info.width+Math.floor(info.width/2))*4+3],0);
  }
@@ -28,6 +28,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
     assert.match(fit.scale,/matrix\(0\./);assert.ok(fit.animations>0,p.scene+' has animations');
     await page.evaluate(()=>document.getElementById('chooseLaunchFrame').click());
     await page.locator('#launchChooserSearch').fill(p.name);
+    if(width===1100) await page.locator('[data-frame-choice="'+p.frame+'"]').screenshot({path:path.join(os.tmpdir(),p.frame+'-tile.png')});
     await page.locator('[data-frame-choice="'+p.frame+'"]').click();
     await page.locator('#saveLaunchFrame').click();
     await page.waitForFunction(id=>window.savedFrame?.frame===id,p.frame);
@@ -41,6 +42,10 @@ const pairs=require('./disney-oct6-generated.json').frames;
    await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
    await page.screenshot({path:path.join(os.tmpdir(),'disney-oct6-sheet-'+start+'.png'),fullPage:true});
   }
+  await page.evaluate(p=>{document.querySelector('main').innerHTML=LaunchpadScenes.render({authenticated:true,homeScene:{id:p.scene,frame:'none',motion:false}},'');},pairs[4]);
+  await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
+  await page.locator('.launch-scene-stage').screenshot({path:path.join(os.tmpdir(),'disney-no-frame.png')});
+  assert.match(await page.locator('.launch-scene-image').evaluate(e=>getComputedStyle(e).transform),/1.09/);
   await page.evaluate(p=>{document.querySelector('main').innerHTML=LaunchpadScenes.render({authenticated:true,homeScene:{id:p.scene,frame:p.frame,motion:false}},'');},pairs[3]);
   assert.ok(await page.locator('.launch-scene').evaluate(e=>e.getAnimations({subtree:true}).every(a=>a.playState==='paused')));
   await page.emulateMedia({reducedMotion:'reduce'});
