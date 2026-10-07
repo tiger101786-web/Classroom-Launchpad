@@ -11,12 +11,22 @@
       note: "Ocean waves and coastal sound recordings streamed by Calm Ocean. Programming is provided by the station."
     },
     {
-      id: "radio-forever-anime",
-      label: "Anime • Radio Forever Anime",
+      id: "anison-fm",
+      label: "Anime • ANISON.FM",
       type: "stream",
-      source: "https://app.sonicpanelradio.com:8088/stream",
-      provider: "Radio Forever Anime",
-      note: "Live anime radio from radiofa.net. Programming is provided by the station."
+      source: "https://pool.anison.fm/AniSonFM(128)",
+      provider: "ANISON.FM",
+      searchTerms: "anime openings endings soundtracks anison",
+      note: "Anime music and requests from ANISON.FM. Programming is provided by the station; classroom suitability and ad-free playback are not confirmed."
+    },
+    {
+      id: "listen-moe-anime",
+      label: "Anime • LISTEN.moe",
+      type: "stream",
+      source: "https://listen.moe/stream",
+      provider: "LISTEN.moe",
+      searchTerms: "anime jpop j-pop japanese openings endings",
+      note: "Anime music and J-pop from LISTEN.moe's JPOP stream. Not an English-only or anime-only station; teacher review recommended."
     },
     {
       id: "studying",
@@ -787,8 +797,8 @@
   ];
   const stationFamilyOrder = [
     "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
-    "Movies", "Disney", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
-    "Asian", "Hawaiian", "Persian", "Spanish", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm",
+    "Movies", "Disney", "Anime", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
+    "Asian", "Hawaiian", "Persian", "Afrobeats", "Spanish", "Latin", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm", "Ocean Waves",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
   ];
   const stationFamilyRank = new Map(stationFamilyOrder.map((family, index) => [family, index]));
