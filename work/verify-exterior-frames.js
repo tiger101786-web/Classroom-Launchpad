@@ -31,7 +31,8 @@ const shelf=require('../collectible-shelf');
     await render(scene,f.id);assert.deepEqual(await metrics(),before,'Frame must not change scene or shelves: '+f.id);
     const clearance=await page.evaluate(()=>{const r=document.querySelector('.scene-frame-artwork').getBoundingClientRect(),s=[...document.querySelectorAll('.home-shelf-position')].map(e=>e.getBoundingClientRect());return r.left>=s[0].right&&r.right<=s[1].left});
     assert.ok(clearance,'Frame cannot enter shelf area: '+f.id);
-    assert.ok(await page.evaluate(()=>Number(getComputedStyle(document.querySelector('.launch-scene')).zIndex)>Number(getComputedStyle(document.querySelector('.scene-frame-exterior')).zIndex)),'Scene must paint above frame: '+f.id);
+    assert.ok(await page.evaluate(()=>Number(getComputedStyle(document.querySelector('.launch-scene')).zIndex)<Number(getComputedStyle(document.querySelector('.scene-frame-exterior')).zIndex)),'Frame details must paint above the scene: '+f.id);
+    assert.equal(await page.locator('.scene-frame-exterior').evaluate(e=>getComputedStyle(e).pointerEvents),'none','Frame must not block scene controls');
    }
   }
   // The photo ring must disappear in both themes without changing geometry.

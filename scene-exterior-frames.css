@@ -1,5 +1,5 @@
-/* Thin frames use a separate layer, outside and BEHIND the untouched scene.
-   Never reuse the legacy small-aperture fit rules for these frames. */
+/* Keep scenes at their unframed size. The existing thin artwork paints above
+   the scene, with the user's approved small overlap at the perimeter. */
 .launch-scene-stage:has(> .scene-frame-exterior),
 .frame-swatch:has(> .scene-frame-exterior) { isolation:isolate; }
 .launch-scene-stage { --exterior-photo-border:8px; }
@@ -20,7 +20,7 @@
   position:absolute;
   /* Align the rim to the unchanged scene content, not its photo border. */
   inset:var(--exterior-photo-border,8px);
-  z-index:0;
+  z-index:2;
   pointer-events:none;
 }
 .scene-frame-exterior > img.scene-frame-artwork {
@@ -35,6 +35,7 @@
   object-fit:contain;
 }
 .frame-swatch > .scene-frame-exterior { inset:0; }
+.launch-scene-stage .launch-scene-settings { z-index:3; }
 .frame-swatch:has(> .scene-frame-exterior) > :is(img,.scene-original-thumb,.frame-scene-thumbnail) {
   position:relative;
   z-index:1;
