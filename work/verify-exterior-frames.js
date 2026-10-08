@@ -11,7 +11,7 @@ const shelf=require('../collectible-shelf');
  try{
   const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('http://frames.test/**',r=>r.fulfill({body:fs.readFileSync(path.join(process.cwd(),new URL(r.request().url()).pathname)),contentType:'image/png'}));
-  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css','collectible-shelf.css','scene-exterior-frames.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css','collectible-shelf.css','scene-exterior-frames.css'].map(f=>fs.readFileSync(f,'utf8').replace(/^\uFEFF/,'')).join('\n');
   await page.setContent('<base href="http://frames.test/"><style>'+css+'body{background:#25191e;color:white;padding:20px;margin:0}main{margin:90px auto;max-width:1150px}.home-display-row{margin:0}.home-collectible-shelf{pointer-events:none}</style><main></main>');
   await page.addScriptTag({content:source});
   const shelfHtml=shelf.render({authenticated:true,homeShelf:{enabled:true,theme:'wood',slots:['naruto','anime-asuna-knight-bust','goku']}});
@@ -29,11 +29,35 @@ const shelf=require('../collectible-shelf');
     const scene=f.matchedScene||'hidden-leaf-overlook';
     await render(scene,'none');const before=await metrics();
     await render(scene,f.id);assert.deepEqual(await metrics(),before,'Frame must not change scene or shelves: '+f.id);
-    const clearance=await page.evaluate(()=>{const r=document.querySelector('.scene-frame-exterior').getBoundingClientRect(),s=[...document.querySelectorAll('.home-shelf-position')].map(e=>e.getBoundingClientRect());return r.left>=s[0].right&&r.right<=s[1].left});
+    const clearance=await page.evaluate(()=>{const r=document.querySelector('.scene-frame-artwork').getBoundingClientRect(),s=[...document.querySelectorAll('.home-shelf-position')].map(e=>e.getBoundingClientRect());return r.left>=s[0].right&&r.right<=s[1].left});
     assert.ok(clearance,'Frame cannot enter shelf area: '+f.id);
     assert.ok(await page.evaluate(()=>Number(getComputedStyle(document.querySelector('.launch-scene')).zIndex)>Number(getComputedStyle(document.querySelector('.scene-frame-exterior')).zIndex)),'Scene must paint above frame: '+f.id);
    }
   }
+  // The photo ring must disappear in both themes without changing geometry.
+  for(const width of [1280,390]){
+   await page.setViewportSize({width,height:850});
+   for(const theme of ['light','night']){
+    await page.evaluate(t=>document.body.dataset.theme=t,theme);
+    await render('hidden-leaf-overlook','none');const before=await metrics();
+    assert.notEqual(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).borderTopColor),'rgba(0, 0, 0, 0)','No Frame retains its normal border');
+    for(const f of available){
+     await render('hidden-leaf-overlook',f.id);
+     assert.deepEqual(await metrics(),before,'Ring removal preserves layout: '+f.id);
+     const style=await page.locator('.launch-scene').evaluate(e=>{const s=getComputedStyle(e);return [s.borderTopWidth,s.borderTopColor,s.boxShadow,s.clipPath]});
+     assert.deepEqual(style,['8px','rgba(0, 0, 0, 0)','none','inset(8px round 50%)'],theme+' '+f.id+' hides photo ring');
+    }
+   }
+  }
+  await page.evaluate(()=>document.body.dataset.theme='light');
+  await page.evaluate(()=>document.querySelector('main').id='launchScenePreview');
+  await render('hidden-leaf-overlook','none');const previewBefore=await metrics();
+  for(const f of available){
+   await render('hidden-leaf-overlook',f.id);
+   assert.deepEqual(await metrics(),previewBefore,'Preview preserves scene size: '+f.id);
+   assert.equal(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).clipPath),'inset(5px round 50%)','Preview removes only its 5px border');
+  }
+  await page.evaluate(()=>document.querySelector('main').removeAttribute('id'));
   // Check scene-specific image fitting is unchanged for every image scene.
   await page.setViewportSize({width:1280,height:850});
   for(const s of scenes.filter(s=>s.image)){

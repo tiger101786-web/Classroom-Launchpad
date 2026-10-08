@@ -2,24 +2,35 @@
    Never reuse the legacy small-aperture fit rules for these frames. */
 .launch-scene-stage:has(> .scene-frame-exterior),
 .frame-swatch:has(> .scene-frame-exterior) { isolation:isolate; }
-.launch-scene-stage:has(> .scene-frame-exterior) > .launch-scene { z-index:1; }
+.launch-scene-stage { --exterior-photo-border:8px; }
+#launchScenePreview .launch-scene-stage { --exterior-photo-border:5px; }
+.launch-scene-stage:has(> .scene-frame-exterior) > .launch-scene {
+  z-index:1;
+  /* Keep the 8px border's layout space, but never paint the default photo
+     ring over decorative artwork. Clip its background/effects there too. */
+  border-color:transparent;
+  box-shadow:none;
+  clip-path:inset(var(--exterior-photo-border) round 50%);
+}
 .scene-frame-exterior {
   position:absolute;
-  inset:var(--exterior-frame-inset,-8%);
+  /* Align the rim to the unchanged scene content, not its photo border. */
+  inset:var(--exterior-photo-border,8px);
   z-index:0;
   pointer-events:none;
 }
 .scene-frame-exterior > img.scene-frame-artwork {
   display:block;
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  inset:var(--exterior-frame-inset,-8%);
+  width:calc(100% - 2 * var(--exterior-frame-inset,-8%));
+  height:calc(100% - 2 * var(--exterior-frame-inset,-8%));
   max-width:none;
   border-radius:0;
   background:transparent;
   object-fit:contain;
 }
+.frame-swatch > .scene-frame-exterior { inset:0; }
 .frame-swatch:has(> .scene-frame-exterior) > :is(img,.scene-original-thumb,.frame-scene-thumbnail) {
   position:relative;
   z-index:1;
