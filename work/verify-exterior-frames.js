@@ -46,6 +46,7 @@ const shelf=require('../collectible-shelf');
      assert.deepEqual(await metrics(),before,'Ring removal preserves layout: '+f.id);
      const style=await page.locator('.launch-scene').evaluate(e=>{const s=getComputedStyle(e);return [s.borderTopWidth,s.borderTopColor,s.boxShadow,s.clipPath]});
      assert.deepEqual(style,['8px','rgba(0, 0, 0, 0)','none','inset(8px round 50%)'],theme+' '+f.id+' hides photo ring');
+     assert.equal(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)',theme+' '+f.id+' cannot paint a background ring through transparent scene edges');
     }
    }
   }
@@ -56,6 +57,7 @@ const shelf=require('../collectible-shelf');
    await render('hidden-leaf-overlook',f.id);
    assert.deepEqual(await metrics(),previewBefore,'Preview preserves scene size: '+f.id);
    assert.equal(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).clipPath),'inset(5px round 50%)','Preview removes only its 5px border');
+   assert.equal(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)','Preview cannot show backing through cutout edges');
   }
   await page.evaluate(()=>document.querySelector('main').removeAttribute('id'));
   // Check scene-specific image fitting is unchanged for every image scene.
@@ -66,6 +68,10 @@ const shelf=require('../collectible-shelf');
   }
   await render('hidden-leaf-overlook','match-disney-adventure-falls');
   await page.screenshot({path:path.resolve('work/thin-frames-shelf-layout.png'),fullPage:true});
+  // Reproduce the reported cutout scene/frame combination in night mode.
+  await page.evaluate(()=>document.body.dataset.theme='night');
+  await render('hidden-leaf-overlook','match-hidden-leaf-rooftops');
+  await page.locator('.home-scene-feature').screenshot({path:path.resolve('work/hidden-leaf-transparent-edge.png')});
   assert.deepEqual(errors,[]);
   console.log('PASS: '+available.length+'/'+frames.length+' exterior frames; scene size and crop unchanged; shelf positions unchanged; no frame/shelf overlap at1280/1024/820; all image scenes preserve baseline.');
  }finally{await browser.close()}

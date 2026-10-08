@@ -10,6 +10,10 @@
      ring over decorative artwork. Clip its background/effects there too. */
   border-color:transparent;
   box-shadow:none;
+  /* Cutout scene PNGs have transparent edge pixels. The base photo's
+     --blue-dark fill is pale in night mode and otherwise leaks through
+     those pixels as a second ring, even with the border clipped away. */
+  background:transparent;
   clip-path:inset(var(--exterior-photo-border) round 50%);
 }
 .scene-frame-exterior {
