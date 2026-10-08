@@ -7538,15 +7538,15 @@ body[data-theme="night"] .colt-radio-station {
 }
 
 /* Keep this station's domain intact within the compact radio tile. */
-.colt-radio-panel .colt-radio-station[data-station="anison-fm"] {
+.colt-radio-panel .colt-radio-station:is([data-station="anison-fm"],[data-station="fantasy-adventure"]) {
   grid-template-columns: 24px minmax(0, 1fr);
   gap: 3px;
 }
-.colt-radio-station[data-station="anison-fm"] .colt-radio-station-icon {
+.colt-radio-station:is([data-station="anison-fm"],[data-station="fantasy-adventure"]) .colt-radio-station-icon {
   width: 24px;
   height: 26px;
 }
-.colt-radio-station[data-station="anison-fm"] .colt-radio-station-style {
+.colt-radio-station:is([data-station="anison-fm"],[data-station="fantasy-adventure"]) .colt-radio-station-style {
   font-size: 0.5rem;
   letter-spacing: -0.025em;
   white-space: nowrap;

@@ -24,12 +24,12 @@ assert.equal(familyIndex('Afrobeats'),familyIndex('Persian')+1);
   assert.deepEqual(actual,Array.from(stations,s=>s.id));
   for(const width of [390,1280]) {
    await page.setViewportSize({width,height:850});
-   await page.locator('.colt-radio-search-input').fill('Anime');
-   for(const id of ['anison-fm','listen-moe-anime']) {
+   for(const id of ['anison-fm','listen-moe-anime','fantasy-adventure']) {
+    await page.locator('.colt-radio-search-input').fill(id==='fantasy-adventure'?'Fantasy':'Anime');
     const button=page.locator('[data-station="'+id+'"]');
     assert(await button.isVisible());
     assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.scrollWidth<=e.clientWidth),JSON.stringify(await button.locator('.colt-radio-station-style').evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth,font:getComputedStyle(e).fontSize,station:e.textContent}))));
-    if(id==='anison-fm') assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.getBoundingClientRect().height<=parseFloat(getComputedStyle(e).lineHeight)+1),'ANISON.FM must stay on one line');
+    if(id!=='listen-moe-anime') assert(await button.locator('.colt-radio-station-style').evaluate(e=>e.getBoundingClientRect().height<=parseFloat(getComputedStyle(e).lineHeight)+1),id+' must stay on one line');
     await button.click();
     assert.equal(await page.locator('audio').getAttribute('src'),stations.find(s=>s.id===id).source);
    }
