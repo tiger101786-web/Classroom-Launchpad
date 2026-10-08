@@ -2,6 +2,8 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "disney-sunset-carnival", name: "Disney • Sunset Carnival", description: "Golden carnival lights beneath a glowing sunset", image: "assets/launchpad-scene-disney-sunset-carnival.png" },
+    { id: "disney-sun-palace", name: "Disney • Golden Mountain Palace", description: "A sun-crowned palace above waterfalls and misty mountains", image: "assets/launchpad-scene-disney-sun-palace.png" },
     {"id":"disney-imperial-palace","name":"Disney • Imperial Dragon Palace","description":"Drifting crimson leaves and glowing courtyard lanterns","image":"assets/launchpad-scene-disney-imperial-palace.png"},
     {"id":"disney-toontown","name":"Disney • Mickey's Toontown","description":"Colorful twinkles and pulsing golden window lights","image":"assets/launchpad-scene-disney-toontown.png"},
     {"id":"disney-insect-meadow","name":"Disney • A Bug's Life Meadow","description":"Floating dandelion seeds and warm meadow sunbeams","image":"assets/launchpad-scene-disney-insect-meadow.png"},
@@ -153,6 +155,8 @@
   ];
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
+    "disney-sunset-carnival",
+    "disney-sun-palace",
     "disney-imperial-palace",
     "disney-toontown",
     "disney-insect-meadow",

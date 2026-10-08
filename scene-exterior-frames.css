@@ -46,6 +46,8 @@
 .launch-frame-options .frame-scene-thumbnail > img { display:block; width:100%; height:100%; }
 
 /* Measured transparent rim alignment. Only the frame moves, never the scene. */
+.scene-frame-exterior[data-exterior-frame="match-disney-sunset-carnival"],
+.scene-frame-exterior[data-exterior-frame="match-disney-sun-palace"] { --exterior-frame-inset:-8%; }
 .scene-frame-exterior[data-exterior-frame="match-walled-city-market"] { --exterior-frame-inset:-7.504%; }
 .scene-frame-exterior[data-exterior-frame="match-demon-slayer-shinobu"] { --exterior-frame-inset:-5.461%; }
 .scene-frame-exterior[data-exterior-frame="match-demon-slayer-akaza"] { --exterior-frame-inset:-4.398%; }

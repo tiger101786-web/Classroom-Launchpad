@@ -1,12 +1,12 @@
 const fs=require('fs'),path=require('path'),os=require('os'),assert=require('assert/strict'),vm=require('vm');
 const {chromium}=require('playwright');
-const frames=require('./thin-frame-plan.json').frames;
+const frames=[...require('./thin-frame-plan.json').frames,...require('./carnival-palace-frames.json')];
 const source=fs.readFileSync('launchpad-scenes.js','utf8');
 const scenes=vm.runInNewContext(source.slice(source.indexOf('const scenes ='),source.indexOf('const frames ='))+';scenes',{matchMedia:()=>({matches:false})});
 const shelf=require('../collectible-shelf');
 (async()=>{
  const available=frames.filter(f=>fs.existsSync('assets/scene-frame-'+f.id+'-thin-v2.png'));
- if(!process.argv.includes('--partial')) assert.equal(available.length,89,'All 89 redesigned assets must exist');
+ if(!process.argv.includes('--partial')) assert.equal(available.length,frames.length,'All decorative assets must exist');
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
  try{
   const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));

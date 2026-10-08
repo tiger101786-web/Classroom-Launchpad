@@ -90,6 +90,12 @@
 @media (max-width:480px) { .disney-scene-thumbnail { width:58px; height:58px; } }
 
 /* Per-source proportional crops, shared by scene cards and live artwork. */
+.launch-scene[data-scene="disney-sunset-carnival"], [data-scene-choice="disney-sunset-carnival"] { --disney-crop-scale:1.080; }
+.launch-scene[data-scene="disney-sun-palace"], [data-scene-choice="disney-sun-palace"] { --disney-crop-scale:1.099; }
+.scene-disney-sunset-carnival .launch-scene-particles i { left:calc(13% + var(--n) * 8%); top:calc(48% + var(--n) * 3%); width:3px; height:3px; background:#ffd479; box-shadow:0 0 5px #ffb94b; animation:carnival-twinkle 3s ease-in-out infinite alternate; animation-delay:calc(var(--n) * -.4s); }
+.scene-disney-sun-palace .launch-scene-particles i { left:calc(15% + var(--n) * 7%); top:calc(58% + var(--n) * 3%); width:20%; height:5%; border-radius:50%; background:radial-gradient(ellipse,#ffffff18,transparent 70%); animation:palace-mist 9s ease-in-out infinite alternate; animation-delay:calc(var(--n) * -.8s); }
+@keyframes carnival-twinkle { from { opacity:.25; } to { opacity:.9; } }
+@keyframes palace-mist { from { translate:-5px 0; opacity:.3; } to { translate:6px -3px; opacity:.65; } }
 .launch-scene[data-scene="disney-imperial-palace"], [data-scene-choice="disney-imperial-palace"] { --disney-crop-scale:1.092; }
 .launch-scene[data-scene="disney-toontown"], [data-scene-choice="disney-toontown"] { --disney-crop-scale:1.131; }
 .launch-scene[data-scene="disney-insect-meadow"], [data-scene-choice="disney-insect-meadow"] { --disney-crop-scale:1.071; }
