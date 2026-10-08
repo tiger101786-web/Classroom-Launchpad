@@ -41,7 +41,7 @@ const {chromium}=require('playwright');
    await page.locator('[data-shelf-item="windmill"]').click();
    await page.locator('[data-shelf-tab="styles"]').click();
    await page.waitForTimeout(80);
-   assert.equal(await page.locator('[data-shelf-theme-choice]').first().getAttribute('data-shelf-theme-choice'),'crimson');
+   assert.equal(await page.locator('[data-shelf-theme-choice]').first().getAttribute('data-shelf-theme-choice'),[...require('../collectible-shelf').themes].sort((a,b)=>a.name.localeCompare(b.name))[0].id);
    const seenThemes=new Set();
    do{
     await checkCards();

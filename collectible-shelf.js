@@ -529,6 +529,7 @@
     document.querySelectorAll('.shelf-settings-menu:popover-open').forEach(menu => menu.hidePopover());
     let draft=clean(selected), active=0, saving=false, tab='objects';
     const pages={objects:0,styles:0}, searches={objects:'',styles:''};
+    const pageSizes={objects:0,styles:0}, anchors={objects:null,styles:null};
     const opener=document.activeElement, keyboard=!!opener?.matches(':focus-visible');
     const dialog=document.createElement('dialog');
     dialog.className='launch-scene-dialog shelf-dialog';
@@ -548,8 +549,11 @@
       browse.style.setProperty('--shelf-columns',columns);
       return columns*rowCount;
     };
-    const update=()=>{
-      preview.innerHTML=art(draft,true,active);
+    const update=({layoutOnly=false}={})=>{
+      const focused=document.activeElement;
+      const focusedId=focused?.dataset?.shelfItem || focused?.dataset?.shelfThemeChoice;
+      const scrollTop=browse.scrollTop, dialogScrollTop=dialog.scrollTop;
+      if(!layoutOnly)preview.innerHTML=art(draft,true,active);
       dialog.querySelectorAll('[data-shelf-tab]').forEach(button=>{
         const selected=button.dataset.shelfTab===tab;
         button.setAttribute('aria-selected',String(selected)); button.tabIndex=selected?0:-1;
@@ -563,8 +567,18 @@
       const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value).sort((a,b)=>a.name.localeCompare(b.name)):[...themes].sort((a,b)=>a.name.localeCompare(b.name));
       const matches=pool.filter(item=>terms.every(term=>(item.name+' '+(item.category||'')).toLowerCase().includes(term)));
       const size=pageSize(), count=Math.max(1,Math.ceil(matches.length/size));
+      // A page number is not a stable browsing position when capacity changes.
+      // Keep the focused object (or the original leading object) on screen.
+      if(layoutOnly || (pageSizes[tab] && pageSizes[tab]!==size)){
+        const anchor=layoutOnly && focusedId ? focusedId : anchors[tab];
+        const index=matches.findIndex(item=>item.id===anchor);
+        if(index>=0)pages[tab]=Math.floor(index/size);
+        if(layoutOnly && focusedId)anchors[tab]=focusedId;
+      }
+      pageSizes[tab]=size;
       pages[tab]=Math.min(pages[tab],count-1);
       const visible=matches.slice(pages[tab]*size,(pages[tab]+1)*size);
+      if(!layoutOnly)anchors[tab]=visible[0]?.id || null;
       choices.innerHTML=tab==='objects'?visible.map(item=>'<button type="button" data-shelf-item="'+item.id+'" aria-pressed="'+(draft.slots[active]===item.id)+'">'+sprite(item.id,true)+'<strong>'+item.name+'</strong></button>').join(''):'';
       themeChoices.innerHTML=tab==='styles'?visible.map(theme=>'<button type="button" data-shelf-theme-choice="'+theme.id+'" aria-pressed="'+(draft.theme===theme.id)+'"><span class="collectible-shelf" data-shelf-theme="'+theme.id+'" aria-hidden="true"><span class="shelf-board"></span></span><strong>'+theme.name+'</strong></button>').join(''):'';
       dialog.querySelector('#shelfResults').textContent=matches.length?matches.length+' '+(tab==='objects'?'objects · '+['Left','Middle','Right'][active]+' spot':'shelf styles'):'No matches. Try another search or category.';
@@ -572,7 +586,14 @@
       dialog.querySelector('#shelfPrevious').disabled=saving || pages[tab]===0;
       dialog.querySelector('#shelfNext').disabled=saving || pages[tab]===count-1;
       dialog.querySelector('#shelfClearSlot').disabled=saving || draft.slots[active]==='none';
-      dialog.querySelector('.shelf-browse-area').scrollTop=0;
+      if(layoutOnly){
+        if(focusedId){
+          const attribute=tab==='objects'?'data-shelf-item':'data-shelf-theme-choice';
+          browse.querySelector('['+attribute+'="'+focusedId+'"]')?.focus({preventScroll:true});
+        }
+        browse.scrollTop=scrollTop;
+        dialog.scrollTop=dialogScrollTop;
+      }else browse.scrollTop=0;
     };
     const switchTab=value=>{if(saving)return;tab=value;search.value=searches[tab];update();};
     dialog.querySelector('.shelf-tabs').addEventListener('click',event=>{
@@ -595,18 +616,22 @@
       const button=event.target.closest('[data-shelf-theme-choice]');if(!button || saving)return;
       draft.theme=button.dataset.shelfThemeChoice;update();themeChoices.querySelector('[data-shelf-theme-choice="'+draft.theme+'"]')?.focus();
     });
-    search.addEventListener('input',()=>{searches[tab]=search.value;pages[tab]=0;update();});
-    category.addEventListener('change',()=>{pages.objects=0;update();});
+    search.addEventListener('input',()=>{searches[tab]=search.value;pages[tab]=0;anchors[tab]=null;update();});
+    category.addEventListener('change',()=>{pages.objects=0;anchors.objects=null;update();});
     for(const [id,delta] of [['shelfPrevious',-1],['shelfNext',1]])dialog.querySelector('#'+id).addEventListener('click',()=>{if(saving)return;pages[tab]+=delta;update();});
     dialog.querySelector('#shelfClearSlot').addEventListener('click',()=>{if(saving)return;draft.slots[active]='none';update();preview.querySelector('[data-shelf-slot="'+active+'"]').focus();});
     dialog.querySelector('#shelfEnabled').addEventListener('change',event=>{draft.enabled=event.target.checked;});
-    const resize=()=>{if(!saving)update();};
-    window.addEventListener('resize',resize);
     let resizeFrame;
-    const observer=new ResizeObserver(()=>{
+    const resize=()=>{
       cancelAnimationFrame(resizeFrame);
-      resizeFrame=requestAnimationFrame(()=>{if(!saving && dialog.isConnected)update();});
-    });
+      resizeFrame=requestAnimationFrame(()=>{
+        // Browser resize and ResizeObserver often describe the same change.
+        // Leave DOM, focus and scroll untouched when capacity is unchanged.
+        if(!saving && dialog.isConnected && pageSize()!==pageSizes[tab])update({layoutOnly:true});
+      });
+    };
+    window.addEventListener('resize',resize);
+    const observer=new ResizeObserver(resize);
     const close=()=>{
       if(saving)return;
       window.removeEventListener('resize',resize);observer.disconnect();cancelAnimationFrame(resizeFrame);dialog.close();dialog.remove();
