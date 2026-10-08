@@ -1,0 +1,12 @@
+const fs=require('fs'),path=require('path');const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});try{
+ const p=await b.newPage({viewport:{width:820,height:470}});
+ await p.route('http://frames.test/**',r=>r.fulfill({body:fs.readFileSync(path.join(process.cwd(),new URL(r.request().url()).pathname)),contentType:'image/png'}));
+ await p.setContent('<base href="http://frames.test/"><style>'+['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n')+'body{background:#25191e;color:white;padding:35px;margin:0}main{display:grid;grid-template-columns:repeat(2,350px);gap:50px}.home-scene-feature{position:relative!important;inset:auto!important;transform:none!important;display:flex;align-items:center}.school-photo{box-sizing:border-box;width:310px;height:310px}article{text-align:center} .sample-thin{position:absolute;width:calc((100% - 16px) / .814);height:calc((100% - 16px) / .814);max-width:none;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}</style><main></main>');
+ await p.addScriptTag({path:path.resolve('launchpad-scenes.js')});
+ await p.evaluate(()=>{document.querySelector('main').innerHTML=['No frame','Thin Adventureland sample'].map(label=>'<article><h3>'+label+'</h3>'+LaunchpadScenes.render({authenticated:true,homeScene:{id:'hidden-leaf-overlook',frame:'none',motion:false}},'')+'</article>').join('');const frame=document.createElement('img');frame.src='assets/scene-frame-match-disney-adventure-falls-thin-v2.png';frame.className='sample-thin';document.querySelectorAll('.launch-scene-stage')[1].append(frame)});
+ await p.locator('img').evaluateAll(is=>Promise.all(is.map(i=>i.decode())));
+ const sizes=await p.locator('.launch-scene-image').evaluateAll(es=>es.map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,transform:getComputedStyle(e).transform})));
+ if(JSON.stringify(sizes[0])!==JSON.stringify(sizes[1]))throw Error('Scene size changed');
+ await p.screenshot({path:path.resolve('work/thin-adventureland-comparison.png')});console.log(JSON.stringify({sceneSizes:sizes,preview:'work/thin-adventureland-comparison.png'}));
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

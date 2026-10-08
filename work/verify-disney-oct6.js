@@ -8,7 +8,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
  for(const p of pairs){
   assert.equal(vm.runInNewContext(catalog+';cleanHomeScene('+JSON.stringify({id:p.scene,frame:p.frame,motion:true})+').frame'),p.frame);
   if(fs.existsSync(p.source)) assert.ok(fs.readFileSync(p.source).equals(fs.readFileSync('assets/launchpad-scene-'+p.scene+'.png')));
-  const {data,info}=await sharp(p.asset).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const {data,info}=await sharp('assets/scene-frame-'+p.frame+'-thin-v2.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});
   assert.equal(data[(Math.floor(info.height/2)*info.width+Math.floor(info.width/2))*4+3],0);
  }
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
@@ -16,7 +16,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
   const page=await browser.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.route('http://frames.test/**',r=>r.fulfill({body:fs.readFileSync(path.join(process.cwd(),new URL(r.request().url()).pathname)),contentType:'image/png'}));
   await page.route('**/api/home-scene',r=>r.fulfill({json:{session:{authenticated:true,homeScene:r.request().postDataJSON()}}}));
-  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css','scene-exterior-frames.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
   await page.setContent('<meta charset="utf-8"><base href="http://frames.test/"><style>'+css+'body{background:#25191e;color:white;margin:0;padding:20px}main{max-width:360px;margin:auto}.school-photo{width:300px;height:300px} .sheet{display:grid;grid-template-columns:repeat(3,350px);gap:30px} .sheet article{text-align:center;min-height:365px}</style><main></main>');
   await page.addScriptTag({path:path.resolve('launchpad-scenes.js')});
   for(const width of [1100,390]){
@@ -25,7 +25,7 @@ const pairs=require('./disney-oct6-generated.json').frames;
     await page.evaluate(p=>{const s={authenticated:true,homeScene:{id:p.scene,frame:p.frame,motion:true}};document.querySelector('main').innerHTML=LaunchpadScenes.render(s,'');LaunchpadScenes.attach(s,'',s=>window.savedFrame=s.homeScene);},p);
     await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
     const fit=await page.locator('.launch-scene-image').evaluate(e=>({scale:getComputedStyle(e).transform,animations:e.parentElement.getAnimations({subtree:true}).length}));
-    assert.match(fit.scale,/matrix\(0\./);assert.ok(fit.animations>0,p.scene+' has animations');
+    assert.ok(Number(fit.scale.match(/matrix\(([^,]+)/)[1])>=1);assert.ok(fit.animations>0,p.scene+' has animations');
     await page.evaluate(()=>document.getElementById('chooseLaunchFrame').click());
     await page.locator('#launchChooserSearch').fill(p.name);
     if(width===1100) await page.locator('[data-frame-choice="'+p.frame+'"]').screenshot({path:path.join(os.tmpdir(),p.frame+'-tile.png')});

@@ -10,8 +10,8 @@ const sceneNames=vm.runInNewContext(sceneSource.slice(sceneSource.indexOf('const
  const catalog=server.slice(server.indexOf('const homeSceneIds'),server.indexOf('function homeSceneForSession'));
  for(const id of ids){
   assert.equal(vm.runInNewContext(catalog+';cleanHomeScene({frame:'+JSON.stringify(id)+'}).frame'),id);
-  const {data,info}=await sharp('assets/scene-frame-'+id+'.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});
-  assert.equal(data[3],0);
+  const {data,info}=await sharp('assets/scene-frame-'+id+'-thin-v2.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  assert.ok(data[3]<=2,'Exterior corner must be transparent (allow PNG antialiasing)');
   assert.equal(data[(Math.floor(info.height/2)*info.width+Math.floor(info.width/2))*4+3],0);
  }
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
@@ -22,7 +22,7 @@ const sceneNames=vm.runInNewContext(sceneSource.slice(sceneSource.indexOf('const
    const homeScene=r.request().postDataJSON();
    await r.fulfill({json:{session:{authenticated:true,homeScene}}});
   });
-  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+  const css=['styles.css','launchpad-scenes.css','scene-frame-fit.css','scene-matched-frames.css','disney-oct6-scenes.css','scene-exterior-frames.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
   await page.setContent('<meta charset="utf-8"><base href="http://frames.test/"><style>'+css+'body{background:#25191e;color:white;margin:0;padding:30px}main{max-width:400px;margin:auto}.school-photo{width:300px;height:300px}</style><main></main>');
   await page.addScriptTag({path:path.resolve('launchpad-scenes.js')});
   for(const width of [1100,390]){
@@ -34,13 +34,13 @@ const sceneNames=vm.runInNewContext(sceneSource.slice(sceneSource.indexOf('const
      LaunchpadScenes.attach(session,'',updated=>window.savedFrame=updated.homeScene);
     },{id,scene:pairs.find(p=>p.frame===id).scene});
     await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
-    assert.match(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).clipPath),/^polygon/);
+    assert.equal(await page.locator('.launch-scene').evaluate(e=>getComputedStyle(e).clipPath),'none');
     await page.screenshot({path:path.join(os.tmpdir(),'frame-'+id+'-'+width+'.png')});
     await page.evaluate(()=>document.getElementById('chooseLaunchFrame').click());
     await page.locator('#launchChooserSearch').fill(sceneNames.find(s=>s.id===pairs.find(p=>p.frame===id).scene).name);
     assert.equal(await page.locator('[data-frame-choice="'+id+'"]:visible').count(),1);
     await page.locator('[data-frame-choice="'+id+'"]').click();
-    assert.equal(await page.locator('#launchScenePreview [data-scene-frame]').getAttribute('data-scene-frame'),id);
+    assert.equal(await page.locator('#launchScenePreview [data-exterior-frame]').getAttribute('data-exterior-frame'),id);
     await page.locator('#saveLaunchFrame').click();
     await page.waitForFunction(id=>window.savedFrame?.frame===id,id);
     assert.deepEqual(await page.evaluate(()=>window.savedFrame),{id:pairs.find(p=>p.frame===id).scene,frame:id,motion:false});

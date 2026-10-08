@@ -328,7 +328,7 @@
   });
   function frameArt(id, deferred = false) {
     const frame = frames.find(item => item.id === id) || frames[0];
-    if (frame.decorative) return `<span class="scene-frame scene-frame-decorative" data-scene-frame="${frame.id}" aria-hidden="true"><img class="scene-frame-artwork" ${deferred ? 'data-chooser-src' : 'src'}="assets/scene-frame-${frame.id}.png" alt="" decoding="async"></span>`;
+    if (frame.decorative) return `<span class="scene-frame-exterior" data-exterior-frame="${frame.id}" aria-hidden="true"><img class="scene-frame-artwork" ${deferred ? 'data-chooser-src' : 'src'}="assets/scene-frame-${frame.id}-thin-v2.png" alt="" decoding="async"></span>`;
     return `<span class="scene-frame scene-frame-${frame.id}" data-scene-frame="${frame.id}" aria-hidden="true"><svg viewBox="0 0 320 320"><circle class="frame-track" cx="160" cy="160" r="153"/>${Array.from({ length: frame.id === "pearl" ? 48 : 12 }, (_, i) => {
       const angle = i * Math.PI * 2 / (frame.id === "pearl" ? 48 : 12);
       return `<circle class="frame-gem" cx="${160 + 153 * Math.cos(angle)}" cy="${160 + 153 * Math.sin(angle)}" r="${frame.id === "pearl" ? 5 : 2.5}"/>`;
@@ -464,7 +464,7 @@
       dialog.innerHTML = `<div class="launch-scene-dialog-heading"><div><span class="feature-kicker">Make it yours</span><h2 id="launchFrameTitle">Choose your scene frame</h2></div><button type="button" class="outline-btn" data-frame-close aria-label="Close frame chooser">✕</button></div>
         <p>Every frame fits every scene. Your scene, effects, and small profile-picture frame stay unchanged.</p>
         <div id="launchScenePreview">${framedArtwork(draft, video)}</div>
-        <div class="launch-scene-options launch-frame-options">${alphabetically(frames).map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<img data-chooser-src="${image}" alt="" decoding="async">` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id, true)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
+        <div class="launch-scene-options launch-frame-options">${alphabetically(frames).map(frame => `<button type="button" data-frame-choice="${frame.id}" aria-pressed="${draft.frame === frame.id}"><span class="frame-swatch">${image ? `<span class="frame-scene-thumbnail${draft.id.startsWith('disney-') ? ' disney-scene-thumbnail' : ''}" data-scene-choice="${draft.id}"><img data-chooser-src="${image}" alt="" decoding="async"></span>` : '<span class="scene-original-thumb" aria-hidden="true">▶</span>'}${frameArt(frame.id, true)}</span><strong>${frame.name}</strong><small>${frame.description}</small></button>`).join("")}</div>
         <p id="launchFrameSaveStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-frame-close>Cancel</button><button type="button" class="primary-btn" id="saveLaunchFrame">Save frame</button></div>`;
       document.body.append(dialog);
       const close = () => { dialog.close(); dialog.remove(); document.getElementById("launchSceneSettings")?.focus(); };

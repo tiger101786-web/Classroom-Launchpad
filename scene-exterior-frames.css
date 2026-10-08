@@ -1,0 +1,126 @@
+/* Thin frames use a separate layer, outside and BEHIND the untouched scene.
+   Never reuse the legacy small-aperture fit rules for these frames. */
+.launch-scene-stage:has(> .scene-frame-exterior),
+.frame-swatch:has(> .scene-frame-exterior) { isolation:isolate; }
+.launch-scene-stage:has(> .scene-frame-exterior) > .launch-scene { z-index:1; }
+.scene-frame-exterior {
+  position:absolute;
+  inset:var(--exterior-frame-inset,-8%);
+  z-index:0;
+  pointer-events:none;
+}
+.scene-frame-exterior > img.scene-frame-artwork {
+  display:block;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  max-width:none;
+  border-radius:0;
+  background:transparent;
+  object-fit:contain;
+}
+.frame-swatch:has(> .scene-frame-exterior) > :is(img,.scene-original-thumb,.frame-scene-thumbnail) {
+  position:relative;
+  z-index:1;
+  border-radius:50%;
+}
+.frame-scene-thumbnail {
+  display:block;
+  width:84px;
+  height:84px;
+  overflow:hidden;
+  border-radius:50%;
+}
+.launch-frame-options .frame-scene-thumbnail > img { display:block; width:100%; height:100%; }
+
+/* Measured transparent rim alignment. Only the frame moves, never the scene. */
+.scene-frame-exterior[data-exterior-frame="match-walled-city-market"] { --exterior-frame-inset:-7.504%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-shinobu"] { --exterior-frame-inset:-5.461%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-akaza"] { --exterior-frame-inset:-4.398%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-tanjiro"] { --exterior-frame-inset:-4.876%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-rengoku"] { --exterior-frame-inset:-7.504%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-giyu"] { --exterior-frame-inset:-7.823%; }
+.scene-frame-exterior[data-exterior-frame="match-hidden-leaf-overlook"] { --exterior-frame-inset:-5.363%; }
+.scene-frame-exterior[data-exterior-frame="match-hidden-leaf-rooftops"] { --exterior-frame-inset:-5.265%; }
+.scene-frame-exterior[data-exterior-frame="match-anime"] { --exterior-frame-inset:-4.493%; }
+.scene-frame-exterior[data-exterior-frame="hero-armor"] { --exterior-frame-inset:-5.560%; }
+.scene-frame-exterior[data-exterior-frame="hero-lightning"] { --exterior-frame-inset:-5.758%; }
+.scene-frame-exterior[data-exterior-frame="disney-castle"] { --exterior-frame-inset:-7.188%; }
+.scene-frame-exterior[data-exterior-frame="disney-rose"] { --exterior-frame-inset:-5.659%; }
+.scene-frame-exterior[data-exterior-frame="blue-fire"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="rainbow-fire"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="usa-patriotic"] { --exterior-frame-inset:-7.398%; }
+.scene-frame-exterior[data-exterior-frame="christian"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="squishy"] { --exterior-frame-inset:-5.461%; }
+.scene-frame-exterior[data-exterior-frame="highland"] { --exterior-frame-inset:-6.566%; }
+.scene-frame-exterior[data-exterior-frame="blossom"] { --exterior-frame-inset:-2.303%; }
+.scene-frame-exterior[data-exterior-frame="guardian"] { --exterior-frame-inset:-5.858%; }
+.scene-frame-exterior[data-exterior-frame="woodland"] { --exterior-frame-inset:-4.973%; }
+.scene-frame-exterior[data-exterior-frame="orbit"] { --exterior-frame-inset:-5.659%; }
+.scene-frame-exterior[data-exterior-frame="treasure"] { --exterior-frame-inset:-7.293%; }
+.scene-frame-exterior[data-exterior-frame="royal"] { --exterior-frame-inset:-6.261%; }
+.scene-frame-exterior[data-exterior-frame="phoenix"] { --exterior-frame-inset:-6.059%; }
+.scene-frame-exterior[data-exterior-frame="butterfly"] { --exterior-frame-inset:-3.558%; }
+.scene-frame-exterior[data-exterior-frame="frost-dragon"] { --exterior-frame-inset:-5.758%; }
+.scene-frame-exterior[data-exterior-frame="clockwork"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="library"] { --exterior-frame-inset:-5.265%; }
+.scene-frame-exterior[data-exterior-frame="champion"] { --exterior-frame-inset:-5.858%; }
+.scene-frame-exterior[data-exterior-frame="halloween"] { --exterior-frame-inset:-7.398%; }
+.scene-frame-exterior[data-exterior-frame="new-orleans"] { --exterior-frame-inset:-7.610%; }
+.scene-frame-exterior[data-exterior-frame="sunflower"] { --exterior-frame-inset:-6.159%; }
+.scene-frame-exterior[data-exterior-frame="peacock"] { --exterior-frame-inset:-5.560%; }
+.scene-frame-exterior[data-exterior-frame="harvest"] { --exterior-frame-inset:-4.684%; }
+.scene-frame-exterior[data-exterior-frame="evergreen"] { --exterior-frame-inset:-7.293%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-imperial-palace"] { --exterior-frame-inset:-7.716%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-toontown"] { --exterior-frame-inset:-7.610%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-insect-meadow"] { --exterior-frame-inset:-7.610%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-sugar-rush"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-zootopia"] { --exterior-frame-inset:-6.566%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-highland-castle"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-casita"] { --exterior-frame-inset:-6.875%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-element-city"] { --exterior-frame-inset:-7.823%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-fireworks-castle"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-galleon-harbor"] { --exterior-frame-inset:-7.716%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-walle-wasteland"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-adventure-falls"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-paris-rooftops"] { --exterior-frame-inset:-6.875%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-olympus"] { --exterior-frame-inset:-6.362%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-notre-dame"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-monstropolis"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-halloween-town"] { --exterior-frame-inset:-7.293%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-memory-headquarters"] { --exterior-frame-inset:-6.566%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-toy-bedroom"] { --exterior-frame-inset:-5.958%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-tropical-lagoon"] { --exterior-frame-inset:-5.958%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-skull-lagoon"] { --exterior-frame-inset:-7.610%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-marigold-bridge"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-radiator-springs"] { --exterior-frame-inset:-6.464%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-jungle-ruins"] { --exterior-frame-inset:-6.566%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-epcot-night"] { --exterior-frame-inset:-5.958%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-hollywood-hotel"] { --exterior-frame-inset:-7.398%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-haunted-mansion"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-castle-fountain"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-twilight-boulevard"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-agrabah"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-snow-castle"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-pride-rock"] { --exterior-frame-inset:-6.362%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-undersea-palace"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-bayou"] { --exterior-frame-inset:-4.493%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-river-valley"] { --exterior-frame-inset:-4.780%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-island-cottage"] { --exterior-frame-inset:-7.398%; }
+.scene-frame-exterior[data-exterior-frame="match-disney-alpine-harbor"] { --exterior-frame-inset:-7.931%; }
+.scene-frame-exterior[data-exterior-frame="match-floating-sky-tower"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-soccer-training-complex"] { --exterior-frame-inset:-5.858%; }
+.scene-frame-exterior[data-exterior-frame="match-sunset-school-gym"] { --exterior-frame-inset:-6.772%; }
+.scene-frame-exterior[data-exterior-frame="match-tokyo-cherry-night"] { --exterior-frame-inset:-7.823%; }
+.scene-frame-exterior[data-exterior-frame="match-kame-house-island"] { --exterior-frame-inset:-7.823%; }
+.scene-frame-exterior[data-exterior-frame="match-royal-castle-city"] { --exterior-frame-inset:-6.772%; }
+.scene-frame-exterior[data-exterior-frame="match-sunlit-palace-harbor"] { --exterior-frame-inset:-6.669%; }
+.scene-frame-exterior[data-exterior-frame="match-pokemon-center-gardens"] { --exterior-frame-inset:-7.398%; }
+.scene-frame-exterior[data-exterior-frame="match-forest-temple"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-mha-ua-campus"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-pokemon-campus"] { --exterior-frame-inset:-6.362%; }
+.scene-frame-exterior[data-exterior-frame="match-pokemon-indoor-arena"] { --exterior-frame-inset:-5.758%; }
+.scene-frame-exterior[data-exterior-frame="match-moonlit-cherry-village"] { --exterior-frame-inset:-7.716%; }
+.scene-frame-exterior[data-exterior-frame="match-walled-city-fountain"] { --exterior-frame-inset:-8.000%; }
+.scene-frame-exterior[data-exterior-frame="match-demon-slayer-nezuko"] { --exterior-frame-inset:-7.293%; }

@@ -1,0 +1,601 @@
+{
+  "status": "complete",
+  "method": "Built-in image_gen; one separate generated transparent asset per original frame",
+  "frames": [
+    {
+      "id": "hero-armor",
+      "name": "Superhero • Reactor Armor",
+      "description": "Crimson and gold armor with cyan energy jewels",
+      "decorative": true
+    },
+    {
+      "id": "hero-lightning",
+      "name": "Superhero • Lightning Power",
+      "description": "Cobalt armor, silver trim and golden lightning",
+      "decorative": true
+    },
+    {
+      "id": "disney-castle",
+      "name": "Disney • Fairytale Castle",
+      "description": "Blue castle towers, pearls and golden stars",
+      "decorative": true
+    },
+    {
+      "id": "disney-rose",
+      "name": "Disney • Enchanted Rose",
+      "description": "Ruby roses, emerald leaves and golden filigree",
+      "decorative": true
+    },
+    {
+      "id": "blue-fire",
+      "name": "Blue Fire",
+      "description": "Electric blue flames & a luminous cyan ring",
+      "decorative": true
+    },
+    {
+      "id": "rainbow-fire",
+      "name": "Rainbow Fire",
+      "description": "A full spectrum of vivid curling flames",
+      "decorative": true
+    },
+    {
+      "id": "usa-patriotic",
+      "name": "Stars & Stripes",
+      "description": "USA ribbons, golden eagle & silver stars",
+      "decorative": true
+    },
+    {
+      "id": "christian",
+      "name": "Christian Grace",
+      "description": "Golden cross, white lilies, olive branches & dove",
+      "decorative": true
+    },
+    {
+      "id": "squishy",
+      "name": "Squishy Sweethearts",
+      "description": "Bamboo, pastel ribbons & smiling dumpling toys",
+      "decorative": true
+    },
+    {
+      "id": "highland",
+      "name": "Highland Heather",
+      "description": "Rustic oak, bronze Celtic knots, purple heather & tartan",
+      "decorative": true
+    },
+    {
+      "id": "blossom",
+      "name": "Cherry Blossom",
+      "description": "Rose-gold branches & pink flowers",
+      "decorative": true
+    },
+    {
+      "id": "guardian",
+      "name": "Dragon Guardian",
+      "description": "Emerald scales & amber jewels",
+      "decorative": true
+    },
+    {
+      "id": "woodland",
+      "name": "Enchanted Forest",
+      "description": "Twisting vines & tiny mushrooms",
+      "decorative": true
+    },
+    {
+      "id": "orbit",
+      "name": "Cosmic Explorer",
+      "description": "Golden stars, moon & ringed planet",
+      "decorative": true
+    },
+    {
+      "id": "treasure",
+      "name": "Ocean Treasure",
+      "description": "Coral, seashells & pearls",
+      "decorative": true
+    },
+    {
+      "id": "royal",
+      "name": "Royal Crown",
+      "description": "Gold filigree & ruby jewels",
+      "decorative": true
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix Flame",
+      "description": "Copper feathers & fiery tips",
+      "decorative": true
+    },
+    {
+      "id": "butterfly",
+      "name": "Butterfly Garden",
+      "description": "Colorful wings & flowers",
+      "decorative": true
+    },
+    {
+      "id": "frost-dragon",
+      "name": "Frost Dragon",
+      "description": "Silver scales & blue crystals",
+      "decorative": true
+    },
+    {
+      "id": "clockwork",
+      "name": "Clockwork",
+      "description": "Brass gears & copper details",
+      "decorative": true
+    },
+    {
+      "id": "library",
+      "name": "Enchanted Library",
+      "description": "Little books & feather quill",
+      "decorative": true
+    },
+    {
+      "id": "champion",
+      "name": "Sports Champion",
+      "description": "Golden laurels & hanging medal",
+      "decorative": true
+    },
+    {
+      "id": "halloween",
+      "name": "Halloween Magic",
+      "description": "Smiling pumpkins, bats & a friendly ghost",
+      "decorative": true
+    },
+    {
+      "id": "new-orleans",
+      "name": "New Orleans",
+      "description": "French Quarter lanterns & Mardi Gras jewels",
+      "decorative": true
+    },
+    {
+      "id": "sunflower",
+      "name": "Sunflower Wreath",
+      "description": "Golden flowers, daisies & amber jewels",
+      "decorative": true
+    },
+    {
+      "id": "peacock",
+      "name": "Peacock Jewels",
+      "description": "Iridescent feathers & gold filigree",
+      "decorative": true
+    },
+    {
+      "id": "harvest",
+      "name": "Autumn Harvest",
+      "description": "Copper leaves, acorns & little pumpkins",
+      "decorative": true
+    },
+    {
+      "id": "evergreen",
+      "name": "Christmas Evergreen",
+      "description": "Holly, velvet ribbon & golden bells",
+      "decorative": true
+    },
+    {
+      "id": "match-disney-imperial-palace",
+      "name": "Disney • Imperial Dragon Palace",
+      "description": "Matching frame for Disney • Imperial Dragon Palace",
+      "decorative": true,
+      "matchedScene": "disney-imperial-palace"
+    },
+    {
+      "id": "match-disney-toontown",
+      "name": "Disney • Mickey's Toontown",
+      "description": "Matching frame for Disney • Mickey's Toontown",
+      "decorative": true,
+      "matchedScene": "disney-toontown"
+    },
+    {
+      "id": "match-disney-insect-meadow",
+      "name": "Disney • A Bug's Life Meadow",
+      "description": "Matching frame for Disney • A Bug's Life Meadow",
+      "decorative": true,
+      "matchedScene": "disney-insect-meadow"
+    },
+    {
+      "id": "match-disney-sugar-rush",
+      "name": "Disney • Sugar Rush Kingdom",
+      "description": "Matching frame for Disney • Sugar Rush Kingdom",
+      "decorative": true,
+      "matchedScene": "disney-sugar-rush"
+    },
+    {
+      "id": "match-disney-zootopia",
+      "name": "Disney • Zootopia Skyline",
+      "description": "Matching frame for Disney • Zootopia Skyline",
+      "decorative": true,
+      "matchedScene": "disney-zootopia"
+    },
+    {
+      "id": "match-disney-highland-castle",
+      "name": "Disney • Brave Highland Castle",
+      "description": "Matching frame for Disney • Brave Highland Castle",
+      "decorative": true,
+      "matchedScene": "disney-highland-castle"
+    },
+    {
+      "id": "match-disney-casita",
+      "name": "Disney • Encanto Casita",
+      "description": "Matching frame for Disney • Encanto Casita",
+      "decorative": true,
+      "matchedScene": "disney-casita"
+    },
+    {
+      "id": "match-disney-element-city",
+      "name": "Disney • Element City",
+      "description": "Matching frame for Disney • Element City",
+      "decorative": true,
+      "matchedScene": "disney-element-city"
+    },
+    {
+      "id": "match-disney-fireworks-castle",
+      "name": "Disney • Castle Fireworks",
+      "description": "Matching frame for Disney • Castle Fireworks",
+      "decorative": true,
+      "matchedScene": "disney-fireworks-castle"
+    },
+    {
+      "id": "match-disney-galleon-harbor",
+      "name": "Disney • Moonlit Galleon Harbor",
+      "description": "Matching frame for Disney • Moonlit Galleon Harbor",
+      "decorative": true,
+      "matchedScene": "disney-galleon-harbor"
+    },
+    {
+      "id": "match-disney-walle-wasteland",
+      "name": "Disney • WALL-E Sunset Wasteland",
+      "description": "Matching frame for Disney • WALL-E Sunset Wasteland",
+      "decorative": true,
+      "matchedScene": "disney-walle-wasteland"
+    },
+    {
+      "id": "match-disney-adventure-falls",
+      "name": "Disney • Adventureland Falls",
+      "description": "Matching frame for Disney • Adventureland Falls",
+      "decorative": true,
+      "matchedScene": "disney-adventure-falls"
+    },
+    {
+      "id": "match-disney-paris-rooftops",
+      "name": "Disney • Paris Moonlit Rooftops",
+      "description": "Matching frame for Disney • Paris Moonlit Rooftops",
+      "decorative": true,
+      "matchedScene": "disney-paris-rooftops"
+    },
+    {
+      "id": "match-disney-olympus",
+      "name": "Disney • Mount Olympus",
+      "description": "Matching frame for Disney • Mount Olympus",
+      "decorative": true,
+      "matchedScene": "disney-olympus"
+    },
+    {
+      "id": "match-disney-notre-dame",
+      "name": "Disney • Notre Dame Sunset",
+      "description": "Matching frame for Disney • Notre Dame Sunset",
+      "decorative": true,
+      "matchedScene": "disney-notre-dame"
+    },
+    {
+      "id": "match-disney-monstropolis",
+      "name": "Disney • Monstropolis After Dark",
+      "description": "Matching frame for Disney • Monstropolis After Dark",
+      "decorative": true,
+      "matchedScene": "disney-monstropolis"
+    },
+    {
+      "id": "match-disney-halloween-town",
+      "name": "Disney • Halloween Town",
+      "description": "Matching frame for Disney • Halloween Town",
+      "decorative": true,
+      "matchedScene": "disney-halloween-town"
+    },
+    {
+      "id": "match-disney-memory-headquarters",
+      "name": "Disney • Memory Headquarters",
+      "description": "Matching frame for Disney • Memory Headquarters",
+      "decorative": true,
+      "matchedScene": "disney-memory-headquarters"
+    },
+    {
+      "id": "match-disney-toy-bedroom",
+      "name": "Disney • Toy-Filled Bedroom",
+      "description": "Matching frame for Disney • Toy-Filled Bedroom",
+      "decorative": true,
+      "matchedScene": "disney-toy-bedroom"
+    },
+    {
+      "id": "match-disney-tropical-lagoon",
+      "name": "Disney • Tropical Mountain Lagoon",
+      "description": "Matching frame for Disney • Tropical Mountain Lagoon",
+      "decorative": true,
+      "matchedScene": "disney-tropical-lagoon"
+    },
+    {
+      "id": "match-disney-skull-lagoon",
+      "name": "Disney • Moonlit Skull Lagoon",
+      "description": "Matching frame for Disney • Moonlit Skull Lagoon",
+      "decorative": true,
+      "matchedScene": "disney-skull-lagoon"
+    },
+    {
+      "id": "match-disney-marigold-bridge",
+      "name": "Disney • Marigold Bridge",
+      "description": "Matching frame for Disney • Marigold Bridge",
+      "decorative": true,
+      "matchedScene": "disney-marigold-bridge"
+    },
+    {
+      "id": "match-disney-radiator-springs",
+      "name": "Disney • Radiator Springs Sunset",
+      "description": "Matching frame for Disney • Radiator Springs Sunset",
+      "decorative": true,
+      "matchedScene": "disney-radiator-springs"
+    },
+    {
+      "id": "match-disney-jungle-ruins",
+      "name": "Disney • Moonlit Jungle Ruins",
+      "description": "Matching frame for Disney • Moonlit Jungle Ruins",
+      "decorative": true,
+      "matchedScene": "disney-jungle-ruins"
+    },
+    {
+      "id": "match-disney-epcot-night",
+      "name": "Disney • EPCOT After Dark",
+      "description": "Matching frame for Disney • EPCOT After Dark",
+      "decorative": true,
+      "matchedScene": "disney-epcot-night"
+    },
+    {
+      "id": "match-disney-hollywood-hotel",
+      "name": "Disney • Hollywood Tower Hotel",
+      "description": "Matching frame for Disney • Hollywood Tower Hotel",
+      "decorative": true,
+      "matchedScene": "disney-hollywood-hotel"
+    },
+    {
+      "id": "match-disney-haunted-mansion",
+      "name": "Disney • Moonlit Haunted Mansion",
+      "description": "Matching frame for Disney • Moonlit Haunted Mansion",
+      "decorative": true,
+      "matchedScene": "disney-haunted-mansion"
+    },
+    {
+      "id": "match-disney-castle-fountain",
+      "name": "Disney • Castle Fountain Gardens",
+      "description": "Matching frame for Disney • Castle Fountain Gardens",
+      "decorative": true,
+      "matchedScene": "disney-castle-fountain"
+    },
+    {
+      "id": "match-disney-twilight-boulevard",
+      "name": "Disney • Twilight Castle Boulevard",
+      "description": "Matching frame for Disney • Twilight Castle Boulevard",
+      "decorative": true,
+      "matchedScene": "disney-twilight-boulevard"
+    },
+    {
+      "id": "match-disney-agrabah",
+      "name": "Disney • Agrabah Palace",
+      "description": "Matching frame for Disney • Agrabah Palace",
+      "decorative": true,
+      "matchedScene": "disney-agrabah"
+    },
+    {
+      "id": "match-disney-snow-castle",
+      "name": "Disney • Snowy Mountain Castle",
+      "description": "Matching frame for Disney • Snowy Mountain Castle",
+      "decorative": true,
+      "matchedScene": "disney-snow-castle"
+    },
+    {
+      "id": "match-disney-pride-rock",
+      "name": "Disney • Pride Rock",
+      "description": "Matching frame for Disney • Pride Rock",
+      "decorative": true,
+      "matchedScene": "disney-pride-rock"
+    },
+    {
+      "id": "match-disney-undersea-palace",
+      "name": "Disney • Undersea Palace",
+      "description": "Matching frame for Disney • Undersea Palace",
+      "decorative": true,
+      "matchedScene": "disney-undersea-palace"
+    },
+    {
+      "id": "match-disney-bayou",
+      "name": "Disney • Firefly Bayou",
+      "description": "Matching frame for Disney • Firefly Bayou",
+      "decorative": true,
+      "matchedScene": "disney-bayou"
+    },
+    {
+      "id": "match-disney-river-valley",
+      "name": "Disney • Sunset River Valley",
+      "description": "Matching frame for Disney • Sunset River Valley",
+      "decorative": true,
+      "matchedScene": "disney-river-valley"
+    },
+    {
+      "id": "match-disney-island-cottage",
+      "name": "Disney • Tropical Island Cottage",
+      "description": "Matching frame for Disney • Tropical Island Cottage",
+      "decorative": true,
+      "matchedScene": "disney-island-cottage"
+    },
+    {
+      "id": "match-disney-alpine-harbor",
+      "name": "Disney • Alpine Castle Harbor",
+      "description": "Matching frame for Disney • Alpine Castle Harbor",
+      "decorative": true,
+      "matchedScene": "disney-alpine-harbor"
+    },
+    {
+      "id": "match-floating-sky-tower",
+      "name": "Anime • Floating Sky Tower",
+      "description": "Matching frame for Floating Sky Tower",
+      "decorative": true,
+      "matchedScene": "floating-sky-tower"
+    },
+    {
+      "id": "match-soccer-training-complex",
+      "name": "Anime • Soccer Training Complex",
+      "description": "Matching frame for Soccer Training Complex",
+      "decorative": true,
+      "matchedScene": "soccer-training-complex"
+    },
+    {
+      "id": "match-sunset-school-gym",
+      "name": "Anime • Sunset School Gym",
+      "description": "Matching frame for Sunset School Gym",
+      "decorative": true,
+      "matchedScene": "sunset-school-gym"
+    },
+    {
+      "id": "match-tokyo-cherry-night",
+      "name": "Anime • Tokyo Cherry Blossom Night",
+      "description": "Matching frame for Tokyo Cherry Blossom Night",
+      "decorative": true,
+      "matchedScene": "tokyo-cherry-night"
+    },
+    {
+      "id": "match-kame-house-island",
+      "name": "Anime • Kame House Island",
+      "description": "Matching frame for Kame House Island",
+      "decorative": true,
+      "matchedScene": "kame-house-island"
+    },
+    {
+      "id": "match-royal-castle-city",
+      "name": "Anime • Royal Castle City",
+      "description": "Matching frame for Royal Castle City",
+      "decorative": true,
+      "matchedScene": "royal-castle-city"
+    },
+    {
+      "id": "match-sunlit-palace-harbor",
+      "name": "Anime • Sunlit Palace Harbor",
+      "description": "Matching frame for Sunlit Palace Harbor",
+      "decorative": true,
+      "matchedScene": "sunlit-palace-harbor"
+    },
+    {
+      "id": "match-pokemon-center-gardens",
+      "name": "Anime • Pokémon • Center Gardens",
+      "description": "Matching frame for Pokémon • Center Gardens",
+      "decorative": true,
+      "matchedScene": "pokemon-center-gardens"
+    },
+    {
+      "id": "match-forest-temple",
+      "name": "Anime • Forest Temple",
+      "description": "Matching frame for Forest Temple",
+      "decorative": true,
+      "matchedScene": "forest-temple"
+    },
+    {
+      "id": "match-mha-ua-campus",
+      "name": "Anime • MHA • U.A. High School",
+      "description": "Matching frame for MHA • U.A. High School",
+      "decorative": true,
+      "matchedScene": "mha-ua-campus"
+    },
+    {
+      "id": "match-pokemon-campus",
+      "name": "Anime • Pokémon • Woodland Campus",
+      "description": "Matching frame for Pokémon • Woodland Campus",
+      "decorative": true,
+      "matchedScene": "pokemon-campus"
+    },
+    {
+      "id": "match-pokemon-indoor-arena",
+      "name": "Anime • Pokémon • Garden Arena",
+      "description": "Matching frame for Pokémon • Garden Arena",
+      "decorative": true,
+      "matchedScene": "pokemon-indoor-arena"
+    },
+    {
+      "id": "match-moonlit-cherry-village",
+      "name": "Anime • Moonlit Cherry Blossom Village",
+      "description": "Matching frame for Moonlit Cherry Blossom Village",
+      "decorative": true,
+      "matchedScene": "moonlit-cherry-village"
+    },
+    {
+      "id": "match-walled-city-fountain",
+      "name": "Anime • Walled City • Fountain Square",
+      "description": "Matching frame for Walled City • Fountain Square",
+      "decorative": true,
+      "matchedScene": "walled-city-fountain"
+    },
+    {
+      "id": "match-walled-city-market",
+      "name": "Anime • Walled City • Market Street",
+      "description": "Matching frame for Walled City • Market Street",
+      "decorative": true,
+      "matchedScene": "walled-city-market"
+    },
+    {
+      "id": "match-demon-slayer-nezuko",
+      "name": "Anime • Nezuko • Pink Moon",
+      "description": "Matching frame for Nezuko • Pink Moon",
+      "decorative": true,
+      "matchedScene": "demon-slayer-nezuko"
+    },
+    {
+      "id": "match-demon-slayer-shinobu",
+      "name": "Anime • Shinobu • Wisteria Garden",
+      "description": "Matching frame for Shinobu • Wisteria Garden",
+      "decorative": true,
+      "matchedScene": "demon-slayer-shinobu"
+    },
+    {
+      "id": "match-demon-slayer-akaza",
+      "name": "Anime • Akaza • Infinity Castle",
+      "description": "Matching frame for Akaza • Infinity Castle",
+      "decorative": true,
+      "matchedScene": "demon-slayer-akaza"
+    },
+    {
+      "id": "match-demon-slayer-tanjiro",
+      "name": "Anime • Tanjiro • Water Breathing",
+      "description": "Matching frame for Tanjiro • Water Breathing",
+      "decorative": true,
+      "matchedScene": "demon-slayer-tanjiro"
+    },
+    {
+      "id": "match-demon-slayer-rengoku",
+      "name": "Anime • Rengoku • Flame Breathing",
+      "description": "Matching frame for Rengoku • Flame Breathing",
+      "decorative": true,
+      "matchedScene": "demon-slayer-rengoku"
+    },
+    {
+      "id": "match-demon-slayer-giyu",
+      "name": "Anime • Giyu • Moonlit Water",
+      "description": "Matching frame for Giyu • Moonlit Water",
+      "decorative": true,
+      "matchedScene": "demon-slayer-giyu"
+    },
+    {
+      "id": "match-hidden-leaf-overlook",
+      "name": "Anime • Hidden Leaf Forest Overlook",
+      "description": "Matching frame for Hidden Leaf Forest Overlook",
+      "decorative": true,
+      "matchedScene": "hidden-leaf-overlook"
+    },
+    {
+      "id": "match-hidden-leaf-rooftops",
+      "name": "Anime • Hidden Leaf Rooftop Sunset",
+      "description": "Matching frame for Hidden Leaf Rooftop Sunset",
+      "decorative": true,
+      "matchedScene": "hidden-leaf-rooftops"
+    },
+    {
+      "id": "match-anime",
+      "name": "Anime Sunset",
+      "description": "Matching frame for Anime Sunset",
+      "decorative": true,
+      "matchedScene": "anime"
+    }
+  ]
+}
