@@ -136,6 +136,9 @@
   rows.push(['Disney', ["merida-statue","Merida Statue"], ["simba-statue","Simba Statue"]]);
   rows.push(['Nintendo', ['nintendo-bowser-statue','Bowser Statue'], ['nintendo-link-statue','Link Statue'], ['nintendo-peach-statue','Princess Peach Statue'], ['nintendo-yoshi-statue','Yoshi Statue'], ['nintendo-zelda-statue','Princess Zelda Statue']]);
   rows.push(['Nintendo', ['nintendo-fox-statue','Fox McCloud Statue'], ['nintendo-samus-statue','Samus Aran Statue']]);
+  rows.push(['Music', ['music-prince-purple-bust','Prince Purple Suit Bust'], ['music-prince-purple-rain','Prince Purple Rain Guitar Statue']]);
+  rows.push(['Squishy Toys', ['squishy-butter-stack','Squishy Butter Stack']]);
+  rows.push(['Disney', ['disney-mirabel-bust','Mirabel Bust'], ['disney-dumbo-statue','Dumbo Statue'], ['disney-mickey-wave-statue','Mickey Mouse Waving Statue'], ['disney-mickey-minnie-statue','Mickey & Minnie Statue'], ['disney-joy-statue','Joy Statue'], ['disney-oogie-boogie-bust','Oogie Boogie Bust'], ['disney-sally-bust','Sally Bust'], ['disney-jack-skellington-bust','Jack Skellington Pumpkin Bust'], ['disney-scar-bust','Scar Bust'], ['disney-remy-statue','Remy Chef Statue'], ['disney-miguel-statue','Miguel Guitar Statue'], ['disney-ember-wade-statue','Ember & Wade Statue'], ['disney-jack-sally-zero-statue','Jack, Sally & Zero Statue'], ['disney-bruno-bust','Bruno Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -154,6 +157,23 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'music-prince-purple-bust': {source:'assets/shelf-music-prince-purple-bust-oct8.png',width:1904,height:1040,bounds:[637,0,653,1020],displaySize:330,displayWidth:280,directImage:true},
+    'music-prince-purple-rain': {source:'assets/shelf-music-prince-purple-rain-oct8.png',width:1408,height:1408,bounds:[303,31,1079,1335],displaySize:330,displayWidth:280,directImage:true},
+    'squishy-butter-stack': {source:'assets/shelf-squishy-butter-stack-oct8.png',width:1408,height:1408,bounds:[62,111,1295,1171],displaySize:330,displayWidth:280,directImage:true},
+    'disney-mirabel-bust': {source:'assets/shelf-disney-mirabel-bust-oct8.png',width:1360,height:1456,bounds:[359,69,771,1294],displaySize:330,displayWidth:280,directImage:true},
+    'disney-dumbo-statue': {source:'assets/shelf-disney-dumbo-statue-oct8.png',width:1584,height:1248,bounds:[261,40,1190,1172],displaySize:330,displayWidth:280,directImage:true},
+    'disney-mickey-wave-statue': {source:'assets/shelf-disney-mickey-wave-statue-oct8.png',width:1296,height:1520,bounds:[174,27,1005,1448],displaySize:330,displayWidth:280,directImage:true},
+    'disney-mickey-minnie-statue': {source:'assets/shelf-disney-mickey-minnie-statue-oct8.png',width:1376,height:1424,bounds:[178,31,1056,1349],displaySize:330,displayWidth:280,directImage:true},
+    'disney-joy-statue': {source:'assets/shelf-disney-joy-statue-oct8.png',width:928,height:2112,bounds:[21,41,888,1992],displaySize:330,displayWidth:280,directImage:true},
+    'disney-oogie-boogie-bust': {source:'assets/shelf-disney-oogie-boogie-bust-oct8.png',width:944,height:1088,bounds:[96,8,760,1064],displaySize:330,displayWidth:280,directImage:true},
+    'disney-sally-bust': {source:'assets/shelf-disney-sally-bust-oct8.png',width:1152,height:1728,bounds:[236,51,700,1617],displaySize:330,displayWidth:280,directImage:true},
+    'disney-jack-skellington-bust': {source:'assets/shelf-disney-jack-skellington-bust-oct8.png',width:1056,height:1856,bounds:[65,60,991,1726],displaySize:330,displayWidth:280,directImage:true},
+    'disney-scar-bust': {source:'assets/shelf-disney-scar-bust-oct8.png',width:1408,height:1408,bounds:[371,8,735,1375],displaySize:330,displayWidth:280,directImage:true},
+    'disney-remy-statue': {source:'assets/shelf-disney-remy-statue-oct8.png',width:1408,height:1408,bounds:[299,14,856,1374],displaySize:330,displayWidth:280,directImage:true},
+    'disney-miguel-statue': {source:'assets/shelf-disney-miguel-statue-oct8.png',width:1312,height:1504,bounds:[283,1,955,1479],displaySize:330,displayWidth:280,directImage:true},
+    'disney-ember-wade-statue': {source:'assets/shelf-disney-ember-wade-statue-oct8.png',width:1152,height:1712,bounds:[109,36,948,1629],displaySize:330,displayWidth:280,directImage:true},
+    'disney-jack-sally-zero-statue': {source:'assets/shelf-disney-jack-sally-zero-statue-oct8.png',width:1520,height:1296,bounds:[214,38,1127,1225],displaySize:330,displayWidth:280,directImage:true},
+    'disney-bruno-bust': {source:'assets/shelf-disney-bruno-bust-oct8.png',width:864,height:2288,bounds:[11,79,853,2133],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-bowser-statue': {source:'assets/shelf-nintendo-bowser-statue.png',width:1584,height:1248,bounds:[40,4,1511,1187],displaySize:370,displayWidth:370,directImage:true},
     'nintendo-fox-statue': {source:'assets/shelf-nintendo-fox-statue.png',width:1040,height:1904,bounds:[60,4,980,1835],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-samus-statue': {source:'assets/shelf-nintendo-samus-statue.png',width:1360,height:1456,bounds:[263,7,834,1397],displaySize:330,displayWidth:280,directImage:true},
@@ -161,7 +181,7 @@
     'nintendo-peach-statue': {source:'assets/shelf-nintendo-peach-statue.png',width:1040,height:1888,bounds:[4,4,1029,1869],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-yoshi-statue': {source:'assets/shelf-nintendo-yoshi-statue.png',width:1216,height:1616,bounds:[168,0,987,1598],displaySize:330,displayWidth:280,directImage:true},
     'nintendo-zelda-statue': {source:'assets/shelf-nintendo-zelda-statue.png',width:1056,height:1888,bounds:[45,11,955,1861],displaySize:330,displayWidth:280,directImage:true},
-    'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue.png","width":1728,"height":1152,"bounds":[386,6,981,1111],"displaySize":330,"displayWidth":330,"displayOffsetX":-15,"directImage":true},
+    'superhero-harley-quinn-statue': {"source":"assets/shelf-superhero-harley-quinn-statue-oct8.png","width":1728,"height":1152,"bounds":[384,4,984,1114],"displaySize":330,"displayWidth":330,"displayOffsetX":-15,"directImage":true},
     'superhero-joker-statue': {"source":"assets/shelf-superhero-joker-statue.png","width":1264,"height":1568,"bounds":[166,2,978,1534],"displaySize":330,"displayWidth":280,"directImage":true},
     'luigi-statue': {"source":"assets/shelf-luigi-statue.png","width":1232,"height":1600,"bounds":[261,26,731,1518],"displaySize":330,"displayWidth":280,"directImage":true},
     'mario-statue': {"source":"assets/shelf-mario-statue.png","width":960,"height":2064,"bounds":[52,36,870,1956],"displaySize":330,"displayWidth":280,"directImage":true},

@@ -10,8 +10,6 @@ Use case: style-transfer. Asset type: transparent website shelf skin. Input imag
 
 The final 1448x1086 PNG uses the existing chicken-nugget shelf as its architecture reference. Its clear ledge runs approximately y=508–560; collectible bases anchor at y=542. The shared home layout anchors it to the same tabletop baseline as other shelves. The earlier tray-shaped draft has been replaced. All additions remain uncommitted for one combined batch.
 
-## Object cutout attempt
+## Imported object artwork
 
-Built-in image_gen background extraction was attempted. Some Disney outputs were rejected by the tool; awaiting the user's choice of local background removal or unmodified originals before processing those.
-
-Use case: background-extraction. Input image is the EDIT TARGET. Remove ONLY the white background, floor and cast shadow outside the collectible and replace with true transparent alpha. Keep the complete supplied figurine and its entire pedestal unchanged: preserve identity, pose, facial features, colors, fine details, lettering, material, proportions and white parts belonging to the object. No redesign, no new objects, no cropped extremities. Center full object with small transparent padding. Output clean transparent PNG cutout for a website shelf, no white halo or checkerboard.
+All 18 supplied Desktop PNGs already contain transparent alpha. They are copied byte-for-byte into the asset paths recorded in `oct8-shelf-objects.json`; no image generation, background removal, resizing, or recompression is applied to these objects. Their alpha bounds are used only as display viewports. Fourteen objects are categorized as Disney, two as Music, and one as Squishy Toys. Harley Quinn replaces the artwork of the existing Superheroes item while retaining its saved ID. Earlier generated cutout attempts are unused.
