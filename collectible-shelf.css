@@ -65,6 +65,10 @@
 /* Matching themed surfaces, framed at (0,12,1672,744) with full ornaments visible. */
 .collectible-shelf[data-shelf-theme]:not([data-shelf-theme="crimson"]) { aspect-ratio:1672 / 744; }
 .collectible-shelf[data-shelf-theme]:not([data-shelf-theme="crimson"]) > .shelf-board { background-size:100% 126.4785%; background-position:50% 6.0914%; }
+/* Match the established crest, display ledge, and hanging shelf supports.
+   Object bases sit at y=542 on the original 1448x1086 artwork. */
+.collectible-shelf[data-shelf-theme][data-shelf-theme="squishy-dumplings"] { aspect-ratio:1448 / 1086; --shelf-object-bottom:50.0921%; --shelf-surface-top:.468; --shelf-surface-bottom:.515; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="squishy-dumplings"] > .shelf-board { background-image:url('assets/collectible-shelf-squishy-dumplings.png'); background-size:100% 100%; background-position:center; }
 [data-shelf-theme="ice"] > .shelf-board { background-image:url('assets/collectible-shelf-ice.png'); }
 [data-shelf-theme="forest"] > .shelf-board { background-image:url('assets/collectible-shelf-forest.png'); }
 [data-shelf-theme="ocean"] > .shelf-board { background-image:url('assets/collectible-shelf-ocean.png'); }

@@ -1,0 +1,128 @@
+[
+  {
+    "id": "music-prince-purple-bust",
+    "name": "Prince Purple Suit Bust",
+    "category": "Music",
+    "source": "C:/Users/Sinister/Desktop/grok-image-6393d56f-afa3-4103-bf97-e5125cd64fb3.png",
+    "asset": "assets/shelf-music-prince-purple-bust-oct8.png"
+  },
+  {
+    "id": "squishy-butter-stack",
+    "name": "Squishy Butter Stack",
+    "category": "Squishy Toys",
+    "source": "C:/Users/Sinister/Desktop/grok-image-72278b7d-ae73-49a3-ae91-c3d69a14f6df.png",
+    "asset": "assets/shelf-squishy-butter-stack-oct8.png"
+  },
+  {
+    "id": "disney-mirabel-bust",
+    "name": "Mirabel Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-ab28071f-c6f9-4914-a30d-f338fd4c93f6.png",
+    "asset": "assets/shelf-disney-mirabel-bust-oct8.png"
+  },
+  {
+    "id": "disney-dumbo-statue",
+    "name": "Dumbo Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-8bc9e0a2-e025-4a09-ac34-52dd385bab43.png",
+    "asset": "assets/shelf-disney-dumbo-statue-oct8.png"
+  },
+  {
+    "id": "disney-mickey-wave-statue",
+    "name": "Mickey Mouse Waving Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-02618caa-0ee5-4bce-9229-1d062ec65635.png",
+    "asset": "assets/shelf-disney-mickey-wave-statue-oct8.png"
+  },
+  {
+    "id": "disney-mickey-minnie-statue",
+    "name": "Mickey & Minnie Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-384f14cc-85c7-4e21-83a8-87fcc80746a9.png",
+    "asset": "assets/shelf-disney-mickey-minnie-statue-oct8.png"
+  },
+  {
+    "id": "disney-joy-statue",
+    "name": "Joy Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-2c133f26-ece9-477a-8e0a-570c9b5545bf.png",
+    "asset": "assets/shelf-disney-joy-statue-oct8.png"
+  },
+  {
+    "id": "disney-oogie-boogie-bust",
+    "name": "Oogie Boogie Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-19b61dad-6f5b-4c42-99a3-6da9189388b0.png",
+    "asset": "assets/shelf-disney-oogie-boogie-bust-oct8.png"
+  },
+  {
+    "id": "disney-sally-bust",
+    "name": "Sally Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-8183151d-e293-40ea-93af-f28b4967e2cd.png",
+    "asset": "assets/shelf-disney-sally-bust-oct8.png"
+  },
+  {
+    "id": "disney-jack-skellington-bust",
+    "name": "Jack Skellington Pumpkin Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-2e93994b-8525-47a8-9390-486e4f09d243.png",
+    "asset": "assets/shelf-disney-jack-skellington-bust-oct8.png"
+  },
+  {
+    "id": "disney-scar-bust",
+    "name": "Scar Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-e283cc8b-c34e-456e-9350-b854a9a222ba.png",
+    "asset": "assets/shelf-disney-scar-bust-oct8.png"
+  },
+  {
+    "id": "disney-remy-statue",
+    "name": "Remy Chef Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-8dfe0b4c-b4f8-4953-a256-ed3d1120cb27.png",
+    "asset": "assets/shelf-disney-remy-statue-oct8.png"
+  },
+  {
+    "id": "disney-miguel-statue",
+    "name": "Miguel Guitar Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-b68e86a4-b569-407d-8ee6-c9e4bb85211f.png",
+    "asset": "assets/shelf-disney-miguel-statue-oct8.png"
+  },
+  {
+    "id": "music-prince-purple-rain",
+    "name": "Prince Purple Rain Guitar Statue",
+    "category": "Music",
+    "source": "C:/Users/Sinister/Desktop/grok-image-84fc0154-3a3a-43fd-82d0-20fbb4007b66.png",
+    "asset": "assets/shelf-music-prince-purple-rain-oct8.png"
+  },
+  {
+    "id": "disney-ember-wade-statue",
+    "name": "Ember & Wade Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-1927ac7c-4e69-46d5-80e7-ecf62995b6ab.png",
+    "asset": "assets/shelf-disney-ember-wade-statue-oct8.png"
+  },
+  {
+    "id": "disney-jack-sally-zero-statue",
+    "name": "Jack, Sally & Zero Statue",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-dd0d13ca-5e5c-4165-a3b9-47f50259283b.png",
+    "asset": "assets/shelf-disney-jack-sally-zero-statue-oct8.png"
+  },
+  {
+    "id": "superhero-harley-quinn-statue",
+    "name": "Harley Quinn Statue",
+    "category": "Superheroes",
+    "source": "C:/Users/Sinister/Desktop/grok-image-d3ad3ad8-4006-42a9-affa-8360ed643520.png",
+    "asset": "assets/shelf-superhero-harley-quinn-statue-oct8.png"
+  },
+  {
+    "id": "disney-bruno-bust",
+    "name": "Bruno Bust",
+    "category": "Disney",
+    "source": "C:/Users/Sinister/Desktop/grok-image-bb5873d4-efab-41f4-a2af-d6933d211773.png",
+    "asset": "assets/shelf-disney-bruno-bust-oct8.png"
+  }
+]
