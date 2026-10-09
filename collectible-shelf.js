@@ -143,6 +143,7 @@
   rows.push(['Anime', ['anime-doma-bust','Doma Bust']]);
   rows.push(['Disney', ['disney-mufasa-bust','Mufasa Bust']]);
   rows.push(['Anime', ['anime-kaigaku-bust','Kaigaku Bust'], ['anime-chainsaw-man-statue','Chainsaw Man Statue'], ['anime-gyokko-statue','Gyokko Statue']]);
+  rows.push(['Disney', ['disney-dr-facilier-statue','Dr. Facilier Statue'], ['disney-hades-bust','Hades Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -161,6 +162,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'disney-dr-facilier-statue': {source:'assets/shelf-disney-dr-facilier-statue.webp',width:435,height:800,bounds:[35,11,371,743],displaySize:330,displayWidth:280,directImage:true},
+    'disney-hades-bust': {source:'assets/shelf-disney-hades-bust.png',width:1184,height:1680,bounds:[168,30,857,1595],displaySize:330,displayWidth:280,directImage:true},
     'anime-kaigaku-bust': {source:'assets/shelf-anime-kaigaku-bust.png',width:1376,height:1440,bounds:[68,4,1114,1398],displaySize:330,displayWidth:280,directImage:true},
     'anime-chainsaw-man-statue': {source:'assets/shelf-anime-chainsaw-man-statue.png',width:1168,height:1696,bounds:[76,76,1078,1540],displaySize:330,displayWidth:280,directImage:true},
     'anime-gyokko-statue': {source:'assets/shelf-anime-gyokko-statue.png',width:1104,height:1792,bounds:[8,3,1093,1743],displaySize:330,displayWidth:280,directImage:true},
