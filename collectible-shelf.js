@@ -1,6 +1,7 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'demon-slayer-wisteria',name:'Anime • Demon Slayer Wisteria'},
     {id:'squishy-dumplings',name:'Squishy Dumpling'},
     {id:'chicken-nuggets',name:'Chicken Nuggets'},
     {id:'disney-castle',name:'Disney Storybook Castle'},
@@ -139,6 +140,8 @@
   rows.push(['Music', ['music-prince-purple-bust','Prince Purple Suit Bust'], ['music-prince-purple-rain','Prince Purple Rain Guitar Statue']]);
   rows.push(['Squishy Toys', ['squishy-butter-stack','Squishy Butter Stack']]);
   rows.push(['Disney', ['disney-mirabel-bust','Mirabel Bust'], ['disney-dumbo-statue','Dumbo Statue'], ['disney-mickey-wave-statue','Mickey Mouse Waving Statue'], ['disney-mickey-minnie-statue','Mickey & Minnie Statue'], ['disney-joy-statue','Joy Statue'], ['disney-oogie-boogie-bust','Oogie Boogie Bust'], ['disney-sally-bust','Sally Bust'], ['disney-jack-skellington-bust','Jack Skellington Pumpkin Bust'], ['disney-scar-bust','Scar Bust'], ['disney-remy-statue','Remy Chef Statue'], ['disney-miguel-statue','Miguel Guitar Statue'], ['disney-ember-wade-statue','Ember & Wade Statue'], ['disney-jack-sally-zero-statue','Jack, Sally & Zero Statue'], ['disney-bruno-bust','Bruno Bust']]);
+  rows.push(['Anime', ['anime-doma-bust','Doma Bust']]);
+  rows.push(['Disney', ['disney-mufasa-bust','Mufasa Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -157,6 +160,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'anime-doma-bust': {source:'assets/shelf-anime-doma-bust.png',width:1440,height:1376,bounds:[372,6,745,1338],displaySize:330,displayWidth:280,directImage:true},
+    'disney-mufasa-bust': {source:'assets/shelf-disney-mufasa-bust.png',width:1392,height:1424,bounds:[364,2,683,1412],displaySize:330,displayWidth:280,directImage:true},
     'music-prince-purple-bust': {source:'assets/shelf-music-prince-purple-bust-oct8.png',width:1904,height:1040,bounds:[637,0,653,1020],displaySize:330,displayWidth:280,directImage:true},
     'music-prince-purple-rain': {source:'assets/shelf-music-prince-purple-rain-oct8.png',width:1408,height:1408,bounds:[303,31,1079,1335],displaySize:330,displayWidth:280,directImage:true},
     'squishy-butter-stack': {source:'assets/shelf-squishy-butter-stack-oct8.png',width:1408,height:1408,bounds:[62,111,1295,1171],displaySize:330,displayWidth:280,directImage:true},

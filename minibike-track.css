@@ -1,0 +1,10 @@
+/* Animate only the sun at its measured location in the unchanged square artwork. */
+.scene-minibike-track .launch-scene-particles { display:none; }
+.scene-minibike-track .minibike-track-sun { position:absolute; inset:0; pointer-events:none; --sun-x:71.1%; --sun-y:14.7%; }
+.minibike-track-sun > b { position:absolute; display:block; left:var(--sun-x); top:var(--sun-y); border-radius:50%; mix-blend-mode:screen; }
+.minibike-sun-glow { width:18%; height:18%; background:radial-gradient(circle,#fff8c3b0 0%,#ffd76580 15%,#ffb52d28 45%,transparent 70%); transform:translate(-50%,-50%); animation:minibike-sun-breathe 5.5s ease-in-out infinite; }
+.minibike-sun-rays { width:54%; height:54%; background:repeating-conic-gradient(from 0deg,#ffe79935 0deg 3deg,transparent 7deg 20deg); mask-image:radial-gradient(circle,transparent 4%,#000 9%,#0006 30%,transparent 68%); transform:translate(-50%,-50%) rotate(-3deg); animation:minibike-sun-radiate 8s ease-in-out infinite alternate; }
+@keyframes minibike-sun-breathe { 0%,100% { opacity:.35; transform:translate(-50%,-50%) scale(.9); } 50% { opacity:.8; transform:translate(-50%,-50%) scale(1.08); } }
+@keyframes minibike-sun-radiate { from { opacity:.2; transform:translate(-50%,-50%) rotate(-3deg); } to { opacity:.5; transform:translate(-50%,-50%) rotate(3deg); } }
+.scene-minibike-track.is-paused .minibike-track-sun > b { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .scene-minibike-track .minibike-track-sun > b { animation:none; opacity:.25; } }

@@ -69,6 +69,9 @@
    Object bases sit at y=542 on the original 1448x1086 artwork. */
 .collectible-shelf[data-shelf-theme][data-shelf-theme="squishy-dumplings"] { aspect-ratio:1448 / 1086; --shelf-object-bottom:50.0921%; --shelf-surface-top:.468; --shelf-surface-bottom:.515; }
 .collectible-shelf[data-shelf-theme][data-shelf-theme="squishy-dumplings"] > .shelf-board { background-image:url('assets/collectible-shelf-squishy-dumplings.png'); background-size:100% 100%; background-position:center; }
+/* Full wisteria crest and hanging supports, with bases at y=486 on the ledge. */
+.collectible-shelf[data-shelf-theme][data-shelf-theme="demon-slayer-wisteria"] { aspect-ratio:1448 / 1086; --shelf-object-bottom:55.2486%; --shelf-surface-top:.426; --shelf-surface-bottom:.464; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="demon-slayer-wisteria"] > .shelf-board { background-image:url('assets/collectible-shelf-demon-slayer-wisteria.png'); background-size:100% 100%; background-position:center; }
 [data-shelf-theme="ice"] > .shelf-board { background-image:url('assets/collectible-shelf-ice.png'); }
 [data-shelf-theme="forest"] > .shelf-board { background-image:url('assets/collectible-shelf-forest.png'); }
 [data-shelf-theme="ocean"] > .shelf-board { background-image:url('assets/collectible-shelf-ocean.png'); }

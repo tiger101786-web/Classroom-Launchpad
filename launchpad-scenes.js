@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "minibike-track", name: "Minibike • Sunset Dirt Track", description: "Colorful fat-tire minibikes beside a sunset circuit with gently glowing sun rays", image: "assets/launchpad-scene-minibike-track.png" },
     { id: "disney-sunset-carnival", name: "Disney • Sunset Carnival", description: "Golden carnival lights beneath a glowing sunset", image: "assets/launchpad-scene-disney-sunset-carnival.png" },
     { id: "disney-sun-palace", name: "Disney • Golden Mountain Palace", description: "A sun-crowned palace above waterfalls and misty mountains", image: "assets/launchpad-scene-disney-sun-palace.png" },
     {"id":"disney-imperial-palace","name":"Disney • Imperial Dragon Palace","description":"Drifting crimson leaves and glowing courtyard lanterns","image":"assets/launchpad-scene-disney-imperial-palace.png"},
@@ -153,6 +154,7 @@
     { id: "harvest", name: "Autumn Harvest", description: "Copper leaves, acorns & little pumpkins", decorative: true },
     { id: "evergreen", name: "Christmas Evergreen", description: "Holly, velvet ribbon & golden bells", decorative: true }
   ];
+  frames.push({ id:"match-minibike-track", name:"Minibike • Sunset Dirt Track", description:"A thin tire-tread and chain rim with colorful steel accents", decorative:true, matchedScene:"minibike-track" });
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
     "disney-sunset-carnival",
@@ -236,6 +238,7 @@
   });
   function chooserCategory(item, kind) {
     const id = item.matchedScene || item.id;
+    if (id === "minibike-track") return "Sports";
     if (id.startsWith("disney-")) return "Disney";
     if (id.startsWith("pokemon-")) return "Pokémon";
     if (matchedSceneIds.includes(id)) return "Anime";
@@ -351,7 +354,8 @@
     const coins = scene.id === "pixel" ? `<span class="scene-coin-layer" aria-hidden="true">${[[56.6, 46.9, 2.3], [50.5, 53.1, 2.5], [53.3, 64.1, 3.1], [58.4, 71.9, 3.8]].map(([x, y, size], index) => `<span class="scene-pixel-coin" style="left:${x}%;top:${y}%;width:${size}%;--coin-delay:${index * -.45}s"><svg viewBox="0 0 12 16" shape-rendering="crispEdges"><path fill="#8d4000" d="M4 0h4v1h2v2h1v2h1v6h-1v2h-1v2H8v1H4v-1H2v-2H1v-2H0V5h1V3h1V1h2Z"/><path fill="#ffd12f" d="M4 1h4v1h2v3h1v6h-1v3H8v1H4v-1H2v-3H1V5h1V2h2Z"/><path fill="#ffef85" d="M4 2h3v1H4v10H3V4h1Z"/><path fill="#ed8b06" d="M8 3h1v10H7v1H5v-1h2V4h1Z"/><path fill="#ffef85" d="M5 4h1v7H5Z"/></svg></span>`).join("")}</span>` : "";
     const expansion = disneyExpansionIds.has(scene.id);
     const extraEffects = expansion ? '<span class="disney-extra-effects" aria-hidden="true"><b class="disney-light"></b><b class="disney-water"></b><b class="disney-detail"></b></span>' : '';
-    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}</div>`;
+    const trackSun = scene.id === "minibike-track" ? '<span class="minibike-track-sun" aria-hidden="true"><b class="minibike-sun-glow"></b><b class="minibike-sun-rays"></b></span>' : '';
+    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}${trackSun}</div>`;
   }
   function render(session, video, sessionReady = true) {
     // Do not create or fetch the default video before the saved account choice is known.
