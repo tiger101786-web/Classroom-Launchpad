@@ -148,6 +148,7 @@
   rows.push(['Dogs', ['dog-husky-bust','Husky Bust'], ['dog-golden-retriever-bust','Golden Retriever Bust'], ['dog-black-labrador-bust','Black Labrador Bust']]);
   rows.push(['Disney', ['disney-figment-painter-statue','Figment Painter Statue'], ['disney-figment-rainbow-statue','Figment Rainbow Statue'], ['avatar-aang-air-statue','Aang Airbending Statue'], ['avatar-aang-fire-statue','Aang Firebending Statue'], ['avatar-aang-water-statue','Aang Waterbending Statue']]);
   rows.push(['Music', ['music-bass-clarinet-statue','Bass Clarinet Sculpture']]);
+  rows.push(['Squishy Toys', ['squishy-lime','Lime Glitter Squishy Dumpling'], ['squishy-pearl','Pearl Squishy Dumpling'], ['squishy-monster','Monster Squishy Dumpling'], ['squishy-pumpkin','Pumpkin Squishy Dumpling'], ['squishy-purple-glitter','Purple Glitter Squishy Dumpling'], ['squishy-bat','Bat Squishy Dumpling'], ['squishy-ghost','Ghost Squishy Dumpling'], ['squishy-liberty','Liberty Squishy Dumpling']]);
   // Category changes retain catalog order and IDs used by existing saved shelves.
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : id === 'toy-story-rex' ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
@@ -168,6 +169,14 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'squishy-lime': {source:'assets/shelf-squishy-lime.png',width:1254,height:1254,bounds:[23,85,1213,1164],directImage:true},
+    'squishy-pearl': {source:'assets/shelf-squishy-pearl.png',width:1254,height:1254,bounds:[13,77,1234,1177],directImage:true},
+    'squishy-monster': {source:'assets/shelf-squishy-monster.png',width:1254,height:1254,bounds:[28,81,1198,1137],directImage:true},
+    'squishy-pumpkin': {source:'assets/shelf-squishy-pumpkin.png',width:1254,height:1254,bounds:[28,75,1199,1142],directImage:true},
+    'squishy-purple-glitter': {source:'assets/shelf-squishy-purple-glitter.png',width:1254,height:1254,bounds:[25,66,1205,1152],directImage:true},
+    'squishy-bat': {source:'assets/shelf-squishy-bat.png',width:1254,height:1254,bounds:[25,63,1205,1154],directImage:true},
+    'squishy-ghost': {source:'assets/shelf-squishy-ghost.png',width:1254,height:1254,bounds:[26,68,1202,1149],directImage:true},
+    'squishy-liberty': {source:'assets/shelf-squishy-liberty.png',width:1254,height:1254,bounds:[22,67,1213,1178],directImage:true},
     'disney-dr-facilier-statue': {source:'assets/shelf-disney-dr-facilier-bust.png',width:1040,height:1904,bounds:[103,25,937,1792],displaySize:330,displayWidth:280,directImage:true},
     // Shared visible width and contact baseline keep every minibike at matching scale.
     'minibike-pink-statue': {source:'assets/shelf-minibike-pink-statue.png',width:1424,height:1392,bounds:[78,224,1295,967],displaySize:330,displayWidth:280,directImage:true},
@@ -401,9 +410,9 @@
     'peace-dove': {"source":"assets/shelf-peace-dove.png","width":1254,"height":1254,"bounds":[150,12,977,1229]},
     'holy-family': {"source":"assets/shelf-holy-family.png","width":1254,"height":1254,"bounds":[93,3,1068,1223]},
     'good-shepherd': {"source":"assets/shelf-good-shepherd.png","width":1254,"height":1254,"bounds":[142,11,974,1232]},
-    'squishy-pink': {source:'assets/shelf-squishy-pink.png',width:1254,height:1254,bounds:[29,62,1196,1153]},
-    'squishy-blue': {source:'assets/shelf-squishy-blue.png',width:1254,height:1254,bounds:[24,37,1207,1185]},
-    'squishy-gold': {source:'assets/shelf-squishy-gold.png',width:1254,height:1254,bounds:[13,17,1229,1219]},
+    'squishy-pink': {source:'assets/shelf-squishy-pink.png',width:1254,height:1254,bounds:[29,62,1196,1153],directImage:true},
+    'squishy-blue': {source:'assets/shelf-squishy-blue.png',width:1254,height:1254,bounds:[24,37,1207,1185],directImage:true},
+    'squishy-gold': {source:'assets/shelf-squishy-gold.png',width:1254,height:1254,bounds:[13,17,1229,1219],directImage:true},
     'highland-cow': {source:'assets/shelf-highland-cow.png',width:1254,height:1254,bounds:[152,32,986,1189]},
     itachi: {source:'assets/shelf-itachi-bust.png',width:977,height:1609,bounds:[30,68,920,1489]},
     sasuke: {source:'assets/shelf-sasuke-bust.png',width:1145,height:1374,bounds:[176,11,782,1333]},
@@ -533,7 +542,10 @@
     // retain their proportions and stay inside the space between neighboring slots.
     // The low-profile cake uses more of its slot's horizontal gap, without
     // stretching the plate or moving its contact point off the shared baseline.
-    const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (asset?.displayWidth || (car ? 270 : 240)) / w);
+    // Dumplings share a smaller basket width, while retaining bitmap proportions
+    // and the same flat-bottom contact point as every other collectible.
+    const dumpling = item.category === 'Squishy Toys' && id.startsWith('squishy-') && id !== 'squishy-butter-stack';
+    const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (dumpling ? 160 : (asset?.displayWidth || (car ? 270 : 240))) / w);
     const height = 350;
     if (asset?.directImage || anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
