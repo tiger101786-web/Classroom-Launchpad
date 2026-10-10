@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "nola-audubon-zoo", name: "New Orleans • Audubon Zoo", description: "Palm-lined zoo entrance, flamingos and flowing elephant fountain water", image: "assets/launchpad-scene-nola-audubon-zoo.png" },
     { id: "minibike-track", name: "Minibike • Sunset Dirt Track", description: "Colorful fat-tire minibikes beside a sunset circuit with gently glowing sun rays", image: "assets/launchpad-scene-minibike-track.png" },
     { id: "disney-sunset-carnival", name: "Disney • Sunset Carnival", description: "Golden carnival lights beneath a glowing sunset", image: "assets/launchpad-scene-disney-sunset-carnival.png" },
     { id: "disney-sun-palace", name: "Disney • Golden Mountain Palace", description: "A sun-crowned palace above waterfalls and misty mountains", image: "assets/launchpad-scene-disney-sun-palace.png" },
@@ -155,6 +156,7 @@
     { id: "evergreen", name: "Christmas Evergreen", description: "Holly, velvet ribbon & golden bells", decorative: true }
   ];
   frames.push({ id:"match-minibike-track", name:"Minibike • Sunset Dirt Track", description:"A thin tire-tread and chain rim with colorful steel accents", decorative:true, matchedScene:"minibike-track" });
+  frames.push({ id:"match-nola-audubon-zoo", name:"New Orleans • Audubon Zoo", description:"A thin bronze and palm-leaf rim with elephant and flamingo details", decorative:true, matchedScene:"nola-audubon-zoo" });
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
     "disney-sunset-carnival",
@@ -239,6 +241,7 @@
   function chooserCategory(item, kind) {
     const id = item.matchedScene || item.id;
     if (id === "minibike-track") return "Sports";
+    if (id === "nola-audubon-zoo") return "New Orleans";
     if (id.startsWith("disney-")) return "Disney";
     if (id.startsWith("pokemon-")) return "Pokémon";
     if (matchedSceneIds.includes(id)) return "Anime";

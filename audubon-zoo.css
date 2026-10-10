@@ -1,0 +1,39 @@
+/* Follow the fountain's painted arc from the trunk to the pool. */
+.scene-nola-audubon-zoo .launch-scene-particles i {
+  width: 4px;
+  height: 7px;
+  border-radius: 55%;
+  background: linear-gradient(#ffffff44, #e9ffff);
+  box-shadow: 0 0 3px #b8f6ff, 2px 3px 0 -1px #fff9;
+  animation: audubon-fountain-flow 1.35s linear infinite;
+  animation-delay: calc(var(--n) * -.15s);
+}
+@keyframes audubon-fountain-flow {
+  0% { left:65%; top:37%; opacity:0; transform:rotate(30deg); }
+  8% { left:67%; top:33%; opacity:.95; transform:rotate(30deg); }
+  20% { left:70%; top:29%; transform:rotate(60deg); }
+  32% { left:74%; top:29%; transform:rotate(105deg); }
+  45% { left:78%; top:34%; transform:rotate(150deg); }
+  60% { left:82%; top:44%; transform:rotate(165deg); }
+  78% { left:85%; top:57%; opacity:1; transform:rotate(175deg); }
+  94% { left:86%; top:71%; opacity:1; transform:rotate(180deg); }
+  100% { left:86%; top:73%; opacity:0; transform:rotate(180deg); }
+}
+.scene-nola-audubon-zoo .launch-scene-particles::before,
+.scene-nola-audubon-zoo .launch-scene-particles::after {
+  content:"";
+  position:absolute;
+  left:75%; top:70%; width:22%; height:7%;
+  border:2px solid #e5ffffcc;
+  border-radius:50%;
+  box-shadow:0 0 4px #bdffff80, inset 0 0 3px #fff9;
+  animation:audubon-pool-ripple 1.5s ease-out infinite;
+}
+.scene-nola-audubon-zoo .launch-scene-particles::after {
+  left:32%; top:84%; width:32%; height:7%;
+  animation-delay:-.75s;
+}
+@keyframes audubon-pool-ripple {
+  from { transform:scale(.25); opacity:.9; }
+  to { transform:scale(1.25); opacity:0; }
+}

@@ -52,6 +52,8 @@ homeSceneFrameIds.add("usa-patriotic");
 ["disney-imperial-palace","disney-toontown","disney-insect-meadow","disney-sugar-rush","disney-zootopia","disney-highland-castle","disney-casita","disney-element-city","disney-fireworks-castle","disney-galleon-harbor","disney-walle-wasteland","disney-adventure-falls"].forEach(id => { homeSceneIds.add(id); homeSceneFrameIds.add('match-' + id); });
 ["disney-sunset-carnival", "disney-sun-palace"].forEach(id => { homeSceneIds.add(id); homeSceneFrameIds.add("match-" + id); });
 homeSceneIds.add("minibike-track");
+homeSceneIds.add("nola-audubon-zoo");
+homeSceneFrameIds.add("match-nola-audubon-zoo");
 homeSceneFrameIds.add("match-minibike-track");
 function cleanHomeScene(value) {
   return { id: homeSceneIds.has(value?.id) ? value.id : "original", motion: value?.motion !== false, frame: homeSceneFrameIds.has(value?.frame) ? value.frame : "none" };

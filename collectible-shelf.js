@@ -151,6 +151,7 @@
   rows.push(['Music', ['music-bass-clarinet-statue','Bass Clarinet Sculpture']]);
   rows.push(['Squishy Toys', ['squishy-lime','Lime Glitter Squishy Dumpling'], ['squishy-pearl','Pearl Squishy Dumpling'], ['squishy-monster','Monster Squishy Dumpling'], ['squishy-pumpkin','Pumpkin Squishy Dumpling'], ['squishy-purple-glitter','Purple Glitter Squishy Dumpling'], ['squishy-bat','Bat Squishy Dumpling'], ['squishy-ghost','Ghost Squishy Dumpling'], ['squishy-liberty','Liberty Squishy Dumpling']]);
   // Category changes retain catalog order and IDs used by existing saved shelves.
+  rows.push(['Animal Friends', ['giraffe-statue','Giraffe Statue']]);
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -171,6 +172,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'giraffe-statue': {source:'assets/shelf-giraffe-statue.png',width:1234,height:1275,bounds:[291,12,650,1233],displaySize:330,displayWidth:280,directImage:true},
     'squishy-lime': {source:'assets/shelf-squishy-lime.png',width:1254,height:1254,bounds:[23,85,1213,1164],directImage:true},
     'squishy-pearl': {source:'assets/shelf-squishy-pearl.png',width:1254,height:1254,bounds:[13,77,1234,1177],directImage:true},
     'squishy-monster': {source:'assets/shelf-squishy-monster.png',width:1254,height:1254,bounds:[28,81,1198,1137],directImage:true},
