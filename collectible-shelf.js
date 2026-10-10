@@ -1,6 +1,7 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'audubon-zoo',name:'Audubon Zoo'},
     {id:'demon-slayer-wisteria',name:'Anime • Demon Slayer Wisteria'},
     {id:'squishy-dumplings',name:'Squishy Dumpling'},
     {id:'chicken-nuggets',name:'Chicken Nuggets'},
@@ -153,6 +154,7 @@
   // Category changes retain catalog order and IDs used by existing saved shelves.
   rows.push(['Animal Friends', ['giraffe-statue','Giraffe Statue']]);
   rows.push(['Minibikes', ['minibike-magenta-statue','Pink Custom Minibike Statue']]);
+  rows.push(['Animal Friends', ['giraffe-family-statue','Giraffe Family Statue']]);
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -173,6 +175,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'giraffe-family-statue': {source:'assets/shelf-giraffe-family-statue.png',width:1728,height:1152,bounds:[520,22,690,1107],displaySize:330,displayWidth:280,directImage:true},
     'minibike-magenta-statue': {source:'assets/shelf-minibike-magenta-statue.png',width:1424,height:1392,bounds:[24,249,1394,854],displaySize:330,displayWidth:280,directImage:true},
     'giraffe-statue': {source:'assets/shelf-giraffe-statue.png',width:1234,height:1275,bounds:[291,12,650,1233],displaySize:330,displayWidth:280,directImage:true},
     'squishy-lime': {source:'assets/shelf-squishy-lime.png',width:1254,height:1254,bounds:[23,85,1213,1164],directImage:true},

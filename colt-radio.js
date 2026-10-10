@@ -3,6 +3,15 @@
 
   const stations = [
     {
+      id: "181-classic-buzz",
+      label: "Punk Rock • 181.FM Classic Buzz",
+      type: "stream",
+      source: "https://listen.181fm.com/181-classicbuzz_128k.mp3",
+      provider: "181.FM Classic Buzz (Alternative)",
+      searchTerms: "punk rock pop punk classic alternative green day greenday offspring blink 182 english",
+      note: "English-language classic alternative from 181.FM, grouped under Punk Rock. The station also plays other alternative rock; clean-only songs and ad-free playback are not confirmed."
+    },
+    {
       id: "brazilian-phonk",
       label: "Phonk • Brazilian Phonk",
       type: "stream",
@@ -805,7 +814,7 @@
     }
   ];
   const stationFamilyOrder = [
-    "Lo-Fi", "Synth", "Electronic", "House", "Phonk", "Hip-Hop", "K-Pop", "Pop", "Kids",
+    "Lo-Fi", "Synth", "Electronic", "House", "Phonk", "Hip-Hop", "Punk Rock", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Anime", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
     "Asian", "Hawaiian", "Persian", "Afrobeats", "Spanish", "Latin", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm", "Ocean Waves",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
