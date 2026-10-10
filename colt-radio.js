@@ -3,6 +3,15 @@
 
   const stations = [
     {
+      id: "brazilian-phonk",
+      label: "Phonk • Brazilian Phonk",
+      type: "stream",
+      source: "https://stream.zeno.fm/bo5mblm77w6vv",
+      provider: "Brazilian Phonk on Zeno.FM",
+      searchTerms: "brazil brasil brazilian brazillian brazilien brizilian phonk funk brasileiro",
+      note: "Brazilian Phonk streamed by Zeno.FM. Clean-only programming and ad-free playback are not confirmed; teacher review recommended."
+    },
+    {
       id: "calm-ocean",
       label: "Ocean Waves • Calm Ocean",
       type: "stream",
@@ -796,7 +805,7 @@
     }
   ];
   const stationFamilyOrder = [
-    "Lo-Fi", "Synth", "Electronic", "House", "Hip-Hop", "K-Pop", "Pop", "Kids",
+    "Lo-Fi", "Synth", "Electronic", "House", "Phonk", "Hip-Hop", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Anime", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
     "Asian", "Hawaiian", "Persian", "Afrobeats", "Spanish", "Latin", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm", "Ocean Waves",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
