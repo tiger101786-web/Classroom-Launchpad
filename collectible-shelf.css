@@ -220,12 +220,11 @@
 .shelf-dialog .shelf-choice-grid button { padding:6px; gap:4px; justify-content:flex-end; overflow:hidden; }
 .shelf-dialog .shelf-choice-grid .shelf-object { width:min(calc(100% - 12px),62px); }
 .shelf-dialog .shelf-choice-grid strong { font-size:12px; line-height:1.3; min-height:2.6em; }
-.shelf-dialog .shelf-theme-grid button { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding:6px; }
-.shelf-dialog .shelf-theme-grid .collectible-shelf { width:min(100%,170px); margin:auto; }
-/* Reserve label and padding space so full-height crests stay inside picker cards. */
-.shelf-dialog .shelf-theme-grid .collectible-shelf:is([data-shelf-theme="chicken-nuggets"],[data-shelf-theme="squishy-dumplings"],[data-shelf-theme="demon-slayer-wisteria"]) { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.333333)); flex-shrink:0; }
-.shelf-dialog .shelf-theme-grid .collectible-shelf[data-shelf-theme="disney-castle"] { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.416667)); flex-shrink:0; }
-.shelf-dialog .shelf-theme-grid .collectible-shelf:is([data-shelf-theme="strawberry-garden"],[data-shelf-theme="tropical-paradise"],[data-shelf-theme="angel-wings"]) { width:min(100%,calc((var(--shelf-card-height) - 60px) * 1.445)); flex-shrink:0; }
+.shelf-dialog .shelf-theme-grid button { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding:6px; overflow:hidden; }
+/* Fit every complete source image in the reserved thumbnail area. Homepage
+   shelf crops, object scale and tabletop positions are unaffected. */
+.shelf-dialog .shelf-theme-grid .collectible-shelf { width:min(100%,170px); height:calc(var(--shelf-card-height) - 60px); aspect-ratio:auto; margin:auto; flex-shrink:0; }
+.shelf-dialog .shelf-theme-grid .collectible-shelf > .shelf-board { background-size:contain; background-position:center; }
 .shelf-dialog .shelf-theme-grid strong { min-height:2.6em; font-size:12px; }
 .shelf-pagination { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
 .shelf-pagination button { min-width:80px; }

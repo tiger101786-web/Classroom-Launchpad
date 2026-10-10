@@ -146,7 +146,8 @@
   rows.push(['Disney', ['disney-dr-facilier-statue','Dr. Facilier Bust'], ['disney-hades-bust','Hades Bust']]);
   rows.push(['Minibikes', ['minibike-pink-statue','Pink Minibike Statue'], ['minibike-rust-statue','Rust Custom Minibike Statue'], ['minibike-usa-statue','USA Minibike Statue'], ['minibike-red-flame-statue','Red Flame Minibike Statue']]);
   rows.push(['Dogs', ['dog-husky-bust','Husky Bust'], ['dog-golden-retriever-bust','Golden Retriever Bust'], ['dog-black-labrador-bust','Black Labrador Bust']]);
-  rows.push(['Disney', ['disney-figment-painter-statue','Figment Painter Statue'], ['disney-figment-rainbow-statue','Figment Rainbow Statue'], ['avatar-aang-air-statue','Aang Airbending Statue'], ['avatar-aang-fire-statue','Aang Firebending Statue'], ['avatar-aang-water-statue','Aang Waterbending Statue']]);
+  rows.push(['Disney', ['disney-figment-painter-statue','Figment Painter Statue'], ['disney-figment-rainbow-statue','Figment Rainbow Statue']]);
+  rows.push(['Avatar: The Last Airbender', ['avatar-aang-air-statue','Aang Airbending Statue'], ['avatar-aang-fire-statue','Aang Firebending Statue']]);
   rows.push(['Music', ['music-bass-clarinet-statue','Bass Clarinet Sculpture']]);
   rows.push(['Squishy Toys', ['squishy-lime','Lime Glitter Squishy Dumpling'], ['squishy-pearl','Pearl Squishy Dumpling'], ['squishy-monster','Monster Squishy Dumpling'], ['squishy-pumpkin','Pumpkin Squishy Dumpling'], ['squishy-purple-glitter','Purple Glitter Squishy Dumpling'], ['squishy-bat','Bat Squishy Dumpling'], ['squishy-ghost','Ghost Squishy Dumpling'], ['squishy-liberty','Liberty Squishy Dumpling']]);
   // Category changes retain catalog order and IDs used by existing saved shelves.
@@ -164,6 +165,7 @@
   ];
   // Preserve saved shelves when a collectible is replaced.
   const replacements = { 'charizard-flames':'pokemon-charizard-statue', 'bulbasaur-vines':'pokemon-bulbasaur-statue', 'gengar-flames':'pokemon-gengar-statue', 'dragonite-pillow':'pokemon-dragonite-statue', growlithe:'none', 'ash-pikachu':'none', 'mew-console':'pokemon-mew-statue', medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', 'superhero-falcon-bust':'none', 'superhero-hawkeye-bust':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
+  replacements['avatar-aang-water-statue'] = 'none';
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id)) && (value.theme === undefined || themeIds.has(value.theme));
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
@@ -188,9 +190,8 @@
     'dog-black-labrador-bust': {source:'assets/shelf-dog-black-labrador-bust.png',width:1168,height:1680,bounds:[202,116,798,1465],displaySize:330,displayWidth:280,directImage:true},
     'disney-figment-painter-statue': {source:'assets/shelf-disney-figment-painter-statue.png',width:1200,height:1600,bounds:[120,9,1024,1554],displaySize:330,displayWidth:280,directImage:true},
     'disney-figment-rainbow-statue': {source:'assets/shelf-disney-figment-rainbow-statue.png',width:1408,height:1408,bounds:[238,18,947,1353],displaySize:330,displayWidth:280,directImage:true},
-    'avatar-aang-air-statue': {source:'assets/shelf-avatar-aang-air-statue.png',width:1792,height:1008,bounds:[70,20,1618,970],displaySize:330,displayWidth:280,directImage:true},
+    'avatar-aang-air-statue': {source:'assets/shelf-avatar-aang-air-statue.png',width:1792,height:1008,bounds:[70,20,1618,970],displaySize:330,displayHeight:330,directImage:true},
     'avatar-aang-fire-statue': {source:'assets/shelf-avatar-aang-fire-statue.png',width:1712,height:1152,bounds:[413,8,911,1129],displaySize:330,displayWidth:280,directImage:true},
-    'avatar-aang-water-statue': {source:'assets/shelf-avatar-aang-water-statue.png',width:1936,height:1024,bounds:[447,0,1222,1015],displaySize:330,displayWidth:280,directImage:true},
     'music-bass-clarinet-statue': {source:'assets/shelf-music-bass-clarinet-statue.png',width:880,height:2256,bounds:[97,25,652,2198],displaySize:330,displayWidth:280,directImage:true},
     'disney-hades-bust': {source:'assets/shelf-disney-hades-bust.png',width:1184,height:1680,bounds:[168,30,857,1595],displaySize:330,displayWidth:280,directImage:true},
     'anime-kaigaku-bust': {source:'assets/shelf-anime-kaigaku-bust.png',width:1376,height:1440,bounds:[68,4,1114,1398],displaySize:330,displayWidth:280,directImage:true},
@@ -545,7 +546,7 @@
     // Dumplings share a smaller basket width, while retaining bitmap proportions
     // and the same flat-bottom contact point as every other collectible.
     const dumpling = item.category === 'Squishy Toys' && id.startsWith('squishy-') && id !== 'squishy-butter-stack';
-    const scale = Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (dumpling ? 160 : (asset?.displayWidth || (car ? 270 : 240))) / w);
+    const scale = asset?.displayHeight ? asset.displayHeight / h : Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (dumpling ? 160 : (asset?.displayWidth || (car ? 270 : 240))) / w);
     const height = 350;
     if (asset?.directImage || anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
