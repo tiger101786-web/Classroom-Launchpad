@@ -144,15 +144,15 @@
   rows.push(['Disney', ['disney-mufasa-bust','Mufasa Bust']]);
   rows.push(['Anime', ['anime-kaigaku-bust','Kaigaku Bust'], ['anime-chainsaw-man-statue','Chainsaw Man Statue'], ['anime-gyokko-statue','Gyokko Statue']]);
   rows.push(['Disney', ['disney-dr-facilier-statue','Dr. Facilier Bust'], ['disney-hades-bust','Hades Bust']]);
-  rows.push(['Minibikes', ['minibike-pink-statue','Pink Minibike Statue'], ['minibike-rust-statue','Rust Custom Minibike Statue'], ['minibike-usa-statue','USA Minibike Statue'], ['minibike-red-flame-statue','Red Flame Minibike Statue']]);
+  rows.push(['Minibikes', ['minibike-pink-statue','Blue Flame Minibike Statue'], ['minibike-rust-statue','Rust Custom Minibike Statue'], ['minibike-usa-statue','USA Minibike Statue'], ['minibike-red-flame-statue','Red Flame Minibike Statue']]);
   rows.push(['Dogs', ['dog-husky-bust','Husky Bust'], ['dog-golden-retriever-bust','Golden Retriever Bust'], ['dog-black-labrador-bust','Black Labrador Bust']]);
   rows.push(['Disney', ['disney-figment-painter-statue','Figment Painter Statue'], ['disney-figment-rainbow-statue','Figment Rainbow Statue']]);
-  rows.push(['Avatar: The Last Airbender', ['avatar-aang-air-statue','Aang Airbending Statue'], ['avatar-aang-fire-statue','Aang Firebending Statue']]);
+  rows.push(['Character Collectibles', ['avatar-aang-air-statue','Aang Airbending Statue'], ['avatar-aang-fire-statue','Aang Firebending Statue']]);
   rows.push(['Music', ['music-bass-clarinet-statue','Bass Clarinet Sculpture']]);
   rows.push(['Squishy Toys', ['squishy-lime','Lime Glitter Squishy Dumpling'], ['squishy-pearl','Pearl Squishy Dumpling'], ['squishy-monster','Monster Squishy Dumpling'], ['squishy-pumpkin','Pumpkin Squishy Dumpling'], ['squishy-purple-glitter','Purple Glitter Squishy Dumpling'], ['squishy-bat','Bat Squishy Dumpling'], ['squishy-ghost','Ghost Squishy Dumpling'], ['squishy-liberty','Liberty Squishy Dumpling']]);
   // Category changes retain catalog order and IDs used by existing saved shelves.
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
-  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : id === 'toy-story-rex' ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
+  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
   const bounds = [
@@ -181,7 +181,8 @@
     'squishy-liberty': {source:'assets/shelf-squishy-liberty.png',width:1254,height:1254,bounds:[22,67,1213,1178],directImage:true},
     'disney-dr-facilier-statue': {source:'assets/shelf-disney-dr-facilier-bust.png',width:1040,height:1904,bounds:[103,25,937,1792],displaySize:330,displayWidth:280,directImage:true},
     // Shared visible width and contact baseline keep every minibike at matching scale.
-    'minibike-pink-statue': {source:'assets/shelf-minibike-pink-statue.png',width:1424,height:1392,bounds:[78,224,1295,967],displaySize:330,displayWidth:280,directImage:true},
+    // Retain the former pink bike's ID so saved shelves receive its blue replacement.
+    'minibike-pink-statue': {source:'assets/shelf-minibike-blue-statue.png',width:1728,height:1152,bounds:[187,21,1362,1079],displaySize:330,displayWidth:280,directImage:true},
     'minibike-rust-statue': {source:'assets/shelf-minibike-rust-statue.png',width:1792,height:1008,bounds:[182,32,1440,950],displaySize:330,displayWidth:280,directImage:true},
     'minibike-usa-statue': {source:'assets/shelf-minibike-usa-statue.png',width:1440,height:1376,bounds:[31,192,1384,977],displaySize:330,displayWidth:280,directImage:true},
     'minibike-red-flame-statue': {source:'assets/shelf-minibike-red-flame-statue.png',width:1600,height:1200,bounds:[96,47,1418,1099],displaySize:330,displayWidth:280,directImage:true},
@@ -190,9 +191,9 @@
     'dog-black-labrador-bust': {source:'assets/shelf-dog-black-labrador-bust.png',width:1168,height:1680,bounds:[202,116,798,1465],displaySize:330,displayWidth:280,directImage:true},
     'disney-figment-painter-statue': {source:'assets/shelf-disney-figment-painter-statue.png',width:1200,height:1600,bounds:[120,9,1024,1554],displaySize:330,displayWidth:280,directImage:true},
     'disney-figment-rainbow-statue': {source:'assets/shelf-disney-figment-rainbow-statue.png',width:1408,height:1408,bounds:[238,18,947,1353],displaySize:330,displayWidth:280,directImage:true},
-    'avatar-aang-air-statue': {source:'assets/shelf-avatar-aang-air-statue.png',width:1792,height:1008,bounds:[70,20,1618,970],displaySize:330,displayHeight:330,directImage:true},
+    'avatar-aang-air-statue': {source:'assets/shelf-avatar-aang-air-statue.png',width:1792,height:1008,bounds:[70,20,1618,970],displaySize:330,displayHeight:280,directImage:true},
     'avatar-aang-fire-statue': {source:'assets/shelf-avatar-aang-fire-statue.png',width:1712,height:1152,bounds:[413,8,911,1129],displaySize:330,displayWidth:280,directImage:true},
-    'music-bass-clarinet-statue': {source:'assets/shelf-music-bass-clarinet-statue.png',width:880,height:2256,bounds:[97,25,652,2198],displaySize:330,displayWidth:280,directImage:true},
+    'music-bass-clarinet-statue': {source:'assets/shelf-music-bass-clarinet-statue.png',width:880,height:2256,bounds:[97,25,652,2198],displaySize:430,displayWidth:280,directImage:true},
     'disney-hades-bust': {source:'assets/shelf-disney-hades-bust.png',width:1184,height:1680,bounds:[168,30,857,1595],displaySize:330,displayWidth:280,directImage:true},
     'anime-kaigaku-bust': {source:'assets/shelf-anime-kaigaku-bust.png',width:1376,height:1440,bounds:[68,4,1114,1398],displaySize:330,displayWidth:280,directImage:true},
     'anime-chainsaw-man-statue': {source:'assets/shelf-anime-chainsaw-man-statue.png',width:1168,height:1696,bounds:[76,76,1078,1540],displaySize:330,displayWidth:280,directImage:true},
