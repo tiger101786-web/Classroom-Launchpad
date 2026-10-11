@@ -1,4 +1,26 @@
 /* Scene-specific motion overlays. Original scene images and frame sizing stay fixed. */
+/* Tiny seeds depart the distant dandelion once, fading before foreground grass. */
+.scene-disney-insect-meadow .launch-scene-particles { clip-path:polygon(58% 12%,84% 12%,84% 37%,58% 37%); }
+.scene-disney-insect-meadow .launch-scene-particles i { left:78%; top:28%; width:2px; height:2px; background:radial-gradient(ellipse at 50% 30%,#fffdebd9,transparent 72%); border-radius:50%; box-shadow:none; animation:meadow-background-seed 12s linear infinite; animation-delay:calc(var(--n) * -3s); }
+.scene-disney-insect-meadow .launch-scene-particles i::after { content:""; position:absolute; left:50%; top:1px; width:.5px; height:1.5px; background:#fff8d980; transform:rotate(-20deg); }
+.scene-disney-insect-meadow .launch-scene-particles i:nth-child(n+5) { display:none; }
+@keyframes meadow-background-seed { 0% { left:78%; top:calc(28% + var(--n) * 1%); opacity:0; } 15% { opacity:.45; } 75% { opacity:.3; } 100% { left:61%; top:calc(18% + var(--n) * 1.5%); opacity:0; } }
+
+/* No floating fountain motes, butterflies or wisps in these scenes. */
+:is(.scene-disney-zootopia,.scene-disney-casita,.scene-disney-highland-castle) .launch-scene-particles { display:none; }
+
+/* Casita's warm light stays anchored to the painted window openings. */
+.scene-disney-casita .disney-light { background:radial-gradient(ellipse 3.5% 5% at 30% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 3% at 49% 49%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 4% at 61% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3.5% 5% at 73% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2.5% 4% at 25.5% 66%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 4% at 73% 67%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2.5% 3.5% at 48% 31.5%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2% 3% at 64% 25%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2% 2.5% at 73% 36%,#fff0af,#ffca6399 40%,transparent); mix-blend-mode:screen; animation:casita-window-warmth 4s ease-in-out infinite alternate; }
+.scene-disney-casita .disney-detail { background:conic-gradient(from 190deg at 110% -18%,transparent 0deg,#ffe6a84d 8deg,transparent 14deg,transparent 20deg,#fff1c759 24deg,transparent 30deg,transparent 37deg,#ffedbd40 40deg,transparent 47deg); mask-image:linear-gradient(#0009,#000 25%,transparent 85%); mix-blend-mode:screen; animation:casita-offscreen-rays 8s ease-in-out infinite alternate; }
+@keyframes casita-window-warmth { from { opacity:.45; } to { opacity:1; } }
+@keyframes casita-offscreen-rays { from { opacity:.3; } to { opacity:.7; } }
+
+/* Water-only Highland motion: fixed shoreline masks keep rocks and castle still. */
+.scene-disney-highland-castle .disney-detail { background:repeating-linear-gradient(176deg,transparent 0 5px,#eaf7ff66 6px,transparent 7px 12px); clip-path:polygon(7% 44%,38% 43%,36% 47%,25% 49%,36% 50%,33% 54%,24% 53%,15% 50%,8% 51%,2% 49%,11% 47%); mix-blend-mode:screen; animation:highland-lake-ripples 6s linear infinite; }
+.scene-disney-highland-castle .disney-water { background:repeating-linear-gradient(168deg,transparent 0 7px,#d9f2ff80 8px,transparent 10px 17px); clip-path:polygon(3% 60%,16% 61%,16% 66%,20% 69%,30% 69%,34% 72%,29% 72%,29% 75%,36% 75%,39% 78%,44% 80%,49% 81%,48% 84%,42% 83%,39% 84%,36% 83%,34% 77%,32% 77%,30% 80%,27% 81%,25% 85%,30% 87%,37% 87%,39% 85%,42% 85%,40% 89%,34% 91%,23% 86%,13% 77%,6% 69%); mask-image:linear-gradient(transparent 56%,#0008 70%,#000 86%,transparent 94%); mix-blend-mode:screen; animation:highland-coastal-waves 5s linear infinite; }
+@keyframes highland-lake-ripples { from { background-position:0 0; opacity:.3; } to { background-position:12px 12px; opacity:.3; } }
+@keyframes highland-coastal-waves { from { background-position:0 0; opacity:.55; } 50% { opacity:.8; } to { background-position:0 17px; opacity:.55; } }
+@media (prefers-reduced-motion:reduce) { :is(.scene-disney-insect-meadow,.scene-disney-casita,.scene-disney-highland-castle) * { animation:none !important; } .scene-disney-insect-meadow .launch-scene-particles { display:none; } }
 .scene-jdm .launch-scene-particles i { display:none; }
 .scene-jdm .launch-scene-particles::before,
 .scene-jdm .launch-scene-particles::after { content:""; position:absolute; inset:0; mix-blend-mode:screen; }
