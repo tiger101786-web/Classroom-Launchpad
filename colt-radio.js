@@ -3,13 +3,14 @@
 
   const stations = [
     {
+      // Keep the saved station ID so existing favorites receive the replacement.
       id: "181-classic-buzz",
-      label: "Punk Rock • 181.FM Classic Buzz",
+      label: "Punk 90s till Now",
       type: "stream",
-      source: "https://listen.181fm.com/181-classicbuzz_128k.mp3",
-      provider: "181.FM Classic Buzz (Alternative)",
-      searchTerms: "punk rock pop punk classic alternative green day greenday offspring blink 182 english",
-      note: "English-language classic alternative from 181.FM, grouped under Punk Rock. The station also plays other alternative rock; clean-only songs and ad-free playback are not confirmed."
+      source: "https://securestreams7.autopo.st/?uri=http://162.244.80.131:8052/stream",
+      provider: "Radio Shadow Rock Mix",
+      searchTerms: "punk rock pop punk classic alternative 90s nineties till now radio shadow rock mix english",
+      note: "Radio Shadow Rock Mix plays rock and alternative from the ’90s to today and advertises commercial-free listening. Not exclusively punk; clean-only programming is not confirmed."
     },
     {
       id: "brazilian-phonk",
