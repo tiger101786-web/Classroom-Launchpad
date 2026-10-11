@@ -156,6 +156,8 @@
   rows.push(['Minibikes', ['minibike-magenta-statue','Pink Custom Minibike Statue']]);
   rows.push(['Animal Friends', ['giraffe-family-statue','Giraffe Family Statue']]);
   rows.push(['Dogs', ['dog-chihuahua-bust','Chihuahua Bust'], ['dog-boston-terrier-bust','Boston Terrier Bust'], ['dog-shih-tzu-bust','Shih Tzu Bust'], ['dog-dalmatian-bust','Dalmatian Bust'], ['dog-goldendoodle-bust','Goldendoodle Bust'], ['dog-german-shepherd-bust','German Shepherd Bust'], ['dog-yorkshire-terrier-bust','Yorkshire Terrier Bust'], ['dog-pit-bull-bust','Pit Bull Bust'], ['dog-rottweiler-bust','Rottweiler Bust']]);
+  rows.push(['Dogs', ['dog-corgi-statue','Corgi Statue'], ['dog-shiba-inu-bust','Shiba Inu Bust'], ['dog-beagle-bust','Beagle Bust'], ['dog-boxer-bust','Boxer Bust']]);
+  rows.push(['Superheroes', ['superhero-falcon-statue','Falcon Statue']]);
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -171,11 +173,19 @@
   // Preserve saved shelves when a collectible is replaced.
   const replacements = { 'charizard-flames':'pokemon-charizard-statue', 'bulbasaur-vines':'pokemon-bulbasaur-statue', 'gengar-flames':'pokemon-gengar-statue', 'dragonite-pillow':'pokemon-dragonite-statue', growlithe:'none', 'ash-pikachu':'none', 'mew-console':'pokemon-mew-statue', medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', 'superhero-falcon-bust':'none', 'superhero-hawkeye-bust':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
   replacements['avatar-aang-water-statue'] = 'none';
+  replacements['superhero-falcon-bust'] = 'superhero-falcon-statue';
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
   const valid = value => !!value && typeof value.enabled === 'boolean' && Array.isArray(value.slots) && value.slots.length === 3 && value.slots.every(id => ids.has(id)) && (value.theme === undefined || themeIds.has(value.theme));
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'dog-corgi-statue': {source:'assets/shelf-dog-corgi-statue.png',width:1408,height:1408,bounds:[378,38,670,1319],displaySize:330,displayWidth:280,directImage:true},
+    'dog-shiba-inu-bust': {source:'assets/shelf-dog-shiba-inu-bust.png',width:1296,height:1520,bounds:[239,22,867,1470],displaySize:330,displayWidth:280,directImage:true},
+    'dog-beagle-bust': {source:'assets/shelf-dog-beagle-bust.png',width:1728,height:1152,bounds:[466,19,791,1104],displaySize:330,displayWidth:280,directImage:true},
+    'dog-boxer-bust': {source:'assets/shelf-dog-boxer-bust.png',width:1424,height:1392,bounds:[324,3,797,1371],displaySize:330,displayWidth:280,directImage:true},
+    // Like Charizard, allow wings past the slot. Head-to-base height is ~320
+    // units at this scale, matching the 330-unit superhero busts; no stretching.
+    'superhero-falcon-statue': {source:'assets/shelf-superhero-falcon-statue.png',width:1728,height:1152,bounds:[24,20,1686,1096],displaySize:580,displayWidth:580,directImage:true},
     'dog-chihuahua-bust': {source:'assets/shelf-dog-chihuahua-bust.png',width:1728,height:1152,bounds:[538,6,706,1101],displaySize:330,displayWidth:280,directImage:true},
     'dog-boston-terrier-bust': {source:'assets/shelf-dog-boston-terrier-bust.png',width:1728,height:1152,bounds:[520,18,683,1086],displaySize:330,displayWidth:280,directImage:true},
     'dog-shih-tzu-bust': {source:'assets/shelf-dog-shih-tzu-bust.png',width:1728,height:1152,bounds:[492,18,800,1108],displaySize:330,displayWidth:280,directImage:true},
