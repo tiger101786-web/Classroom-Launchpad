@@ -24,6 +24,12 @@ const ids=['disney-insect-meadow','disney-zootopia','disney-casita','disney-high
   await page.waitForTimeout(500);
   assert.notEqual(await page.locator('.scene-disney-highland-castle .disney-water').evaluate(e=>getComputedStyle(e).backgroundPosition),before);
   await page.screenshot({path:path.join(__dirname,'disney-motion-preview.png'),fullPage:true});
+  // Also inspect the real matched-frame crop at the compact display size.
+  await page.evaluate(ids=>{document.querySelector('main').innerHTML=ids.map(id=>LaunchpadScenes.render({authenticated:true,homeScene:{id,frame:'match-'+id,motion:true}},'')).join('');},ids);
+  await page.addStyleTag({content:'.home-scene-feature{width:260px!important}.launch-scene-stage{width:240px!important;height:240px!important}.launch-scene-stage>.school-photo{width:240px!important;height:240px!important;min-width:0!important;margin:0!important}main{grid-template-columns:280px 280px}'});
+  await page.waitForFunction(()=>[...document.images].every(i=>i.complete&&i.naturalWidth));
+  await page.waitForTimeout(1500);
+  await page.screenshot({path:path.join(__dirname,'disney-motion-framed-preview.png'),fullPage:true});
   await page.evaluate(()=>document.querySelectorAll('.launch-scene').forEach(e=>e.classList.add('is-paused')));
   assert(await page.evaluate(()=>document.getAnimations().every(a=>a.playState==='paused')));
   await page.emulateMedia({reducedMotion:'reduce'});

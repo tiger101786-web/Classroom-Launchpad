@@ -1,8 +1,8 @@
 /* Scene-specific motion overlays. Original scene images and frame sizing stay fixed. */
 /* Tiny seeds depart the distant dandelion once, fading before foreground grass. */
 .scene-disney-insect-meadow .launch-scene-particles { clip-path:polygon(58% 12%,84% 12%,84% 37%,58% 37%); }
-.scene-disney-insect-meadow .launch-scene-particles i { left:78%; top:28%; width:6px; height:3px; background:radial-gradient(ellipse at 50% 35%,#fffef2 35%,#fffdebb3 60%,transparent 80%); border-radius:50%; box-shadow:0 0 1px #fff9; animation:meadow-background-seed 12s linear infinite; animation-delay:calc(var(--n) * -2s); }
-.scene-disney-insect-meadow .launch-scene-particles i::after { content:""; position:absolute; left:50%; top:2px; width:1px; height:3px; background:#fff8d9cc; transform:rotate(-20deg); }
+.scene-disney-insect-meadow .launch-scene-particles i { left:78%; top:28%; width:12px; height:7px; background:repeating-conic-gradient(from -90deg at 50% 100%,#fffef5 0deg 9deg,transparent 9deg 25deg); border-radius:70% 70% 10% 10%; box-shadow:0 0 2px #fff9; animation:meadow-background-seed 10s linear infinite; animation-delay:calc(var(--n) * -1.6667s); }
+.scene-disney-insect-meadow .launch-scene-particles i::after { content:""; position:absolute; left:50%; top:5px; width:1.5px; height:6px; background:#fff8d9; transform:rotate(-20deg); }
 .scene-disney-insect-meadow .launch-scene-particles i:nth-child(n+7) { display:none; }
 @keyframes meadow-background-seed { 0% { left:78%; top:calc(27% + var(--n) * .8%); opacity:0; } 12% { opacity:.95; } 78% { opacity:.8; } 100% { left:61%; top:calc(17% + var(--n) * 1.3%); opacity:0; } }
 
@@ -11,9 +11,9 @@
 
 /* Casita's warm light stays anchored to the painted window openings. */
 .scene-disney-casita .disney-light { background:radial-gradient(ellipse 3.5% 5% at 30% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 3% at 49% 49%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 4% at 61% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3.5% 5% at 73% 48%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2.5% 4% at 25.5% 66%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 3% 4% at 73% 67%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2.5% 3.5% at 48% 31.5%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2% 3% at 64% 25%,#fff0af,#ffca6399 40%,transparent),radial-gradient(ellipse 2% 2.5% at 73% 36%,#fff0af,#ffca6399 40%,transparent); mix-blend-mode:screen; animation:casita-window-warmth 4s ease-in-out infinite alternate; }
-.scene-disney-casita .disney-detail { background:conic-gradient(from 190deg at 110% -18%,transparent 0deg,#ffe6a8b3 7deg,#fff4d1cc 9deg,transparent 15deg,transparent 19deg,#fff1c7cc 23deg,#fff6d9dd 25deg,transparent 31deg,transparent 35deg,#ffedbda6 39deg,#fff4d1bf 41deg,transparent 47deg); mask-image:linear-gradient(#000 0%,#000 48%,#0009 72%,transparent 98%); mix-blend-mode:screen; transform-origin:110% -18%; animation:casita-offscreen-rays 8s ease-in-out infinite alternate; }
+.scene-disney-casita .disney-detail { background:conic-gradient(from 180deg at 110% -18%,transparent 0deg 14deg,#fff6dbe6 15deg 18deg,transparent 20deg 28deg,#fff5d9f2 29deg 33deg,transparent 35deg 43deg,#ffeecbe6 44deg 48deg,transparent 50deg); mask-image:linear-gradient(#000 0%,#000 60%,#000b3 82%,transparent 100%); mix-blend-mode:normal; transform-origin:110% -18%; animation:casita-offscreen-rays 6s ease-in-out infinite alternate; }
 @keyframes casita-window-warmth { from { opacity:.45; } to { opacity:1; } }
-@keyframes casita-offscreen-rays { from { opacity:.65; rotate:-2deg; } to { opacity:1; rotate:2deg; } }
+@keyframes casita-offscreen-rays { from { opacity:.48; rotate:-4deg; } to { opacity:.78; rotate:4deg; } }
 
 /* Water-only Highland motion: fixed shoreline masks keep rocks and castle still. */
 .scene-disney-highland-castle .disney-detail { background:repeating-linear-gradient(176deg,transparent 0 5px,#eaf7ff66 6px,transparent 7px 12px); clip-path:polygon(7% 44%,38% 43%,36% 47%,25% 49%,36% 50%,33% 54%,24% 53%,15% 50%,8% 51%,2% 49%,11% 47%); mix-blend-mode:screen; animation:highland-lake-ripples 6s linear infinite; }
