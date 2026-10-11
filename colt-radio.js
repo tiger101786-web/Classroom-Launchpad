@@ -5,7 +5,7 @@
     {
       // Keep the saved station ID so existing favorites receive the replacement.
       id: "181-classic-buzz",
-      label: "Punk 90s till Now",
+      label: "Punk • 90s till Now",
       type: "stream",
       source: "https://securestreams7.autopo.st/?uri=http://162.244.80.131:8052/stream",
       provider: "Radio Shadow Rock Mix",
@@ -815,7 +815,7 @@
     }
   ];
   const stationFamilyOrder = [
-    "Lo-Fi", "Synth", "Electronic", "House", "Phonk", "Hip-Hop", "Punk Rock", "K-Pop", "Pop", "Kids",
+    "Lo-Fi", "Synth", "Electronic", "House", "Phonk", "Hip-Hop", "Punk", "Punk Rock", "K-Pop", "Pop", "Kids",
     "Movies", "Disney", "Anime", "Games", "Worship", "Christian", "Patriotic", "Jazz", "Classical", "Medieval", "Pipe Organ", "Celtic",
     "Asian", "Hawaiian", "Persian", "Afrobeats", "Spanish", "Latin", "Tejano", "Mardi Gras", "Country", "Oldies", "Instrumental", "Fantasy", "Focus", "Meditation", "Calm", "Ocean Waves",
     "Ambient", "Sleep", "Feel-Good", "Halloween", "Christmas", "Decades"
