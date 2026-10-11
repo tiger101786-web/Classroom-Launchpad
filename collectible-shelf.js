@@ -155,6 +155,7 @@
   rows.push(['Animal Friends', ['giraffe-statue','Giraffe Statue']]);
   rows.push(['Minibikes', ['minibike-magenta-statue','Pink Custom Minibike Statue']]);
   rows.push(['Animal Friends', ['giraffe-family-statue','Giraffe Family Statue']]);
+  rows.push(['Dogs', ['dog-chihuahua-bust','Chihuahua Bust'], ['dog-boston-terrier-bust','Boston Terrier Bust'], ['dog-shih-tzu-bust','Shih Tzu Bust'], ['dog-dalmatian-bust','Dalmatian Bust'], ['dog-goldendoodle-bust','Goldendoodle Bust'], ['dog-german-shepherd-bust','German Shepherd Bust'], ['dog-yorkshire-terrier-bust','Yorkshire Terrier Bust'], ['dog-pit-bull-bust','Pit Bull Bust'], ['dog-rottweiler-bust','Rottweiler Bust']]);
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
@@ -175,6 +176,15 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'dog-chihuahua-bust': {source:'assets/shelf-dog-chihuahua-bust.png',width:1728,height:1152,bounds:[538,6,706,1101],displaySize:330,displayWidth:280,directImage:true},
+    'dog-boston-terrier-bust': {source:'assets/shelf-dog-boston-terrier-bust.png',width:1728,height:1152,bounds:[520,18,683,1086],displaySize:330,displayWidth:280,directImage:true},
+    'dog-shih-tzu-bust': {source:'assets/shelf-dog-shih-tzu-bust.png',width:1728,height:1152,bounds:[492,18,800,1108],displaySize:330,displayWidth:280,directImage:true},
+    'dog-dalmatian-bust': {source:'assets/shelf-dog-dalmatian-bust.png',width:1408,height:1408,bounds:[324,51,748,1311],displaySize:330,displayWidth:280,directImage:true},
+    'dog-goldendoodle-bust': {source:'assets/shelf-dog-goldendoodle-bust.png',width:1200,height:1648,bounds:[249,9,777,1603],displaySize:330,displayWidth:280,directImage:true},
+    'dog-german-shepherd-bust': {source:'assets/shelf-dog-german-shepherd-bust.png',width:1408,height:1408,bounds:[409,28,659,1331],displaySize:330,displayWidth:280,directImage:true},
+    'dog-yorkshire-terrier-bust': {source:'assets/shelf-dog-yorkshire-terrier-bust.png',width:1408,height:1408,bounds:[272,43,894,1294],displaySize:330,displayWidth:280,directImage:true},
+    'dog-pit-bull-bust': {source:'assets/shelf-dog-pit-bull-bust.png',width:1728,height:1152,bounds:[528,25,728,1096],displaySize:330,displayWidth:280,directImage:true},
+    'dog-rottweiler-bust': {source:'assets/shelf-dog-rottweiler-bust.png',width:1600,height:1232,bounds:[401,16,809,1192],displaySize:330,displayWidth:280,directImage:true},
     'giraffe-family-statue': {source:'assets/shelf-giraffe-family-statue.png',width:1728,height:1152,bounds:[520,22,690,1107],displaySize:330,displayWidth:280,directImage:true},
     'minibike-magenta-statue': {source:'assets/shelf-minibike-magenta-statue.png',width:1424,height:1392,bounds:[24,249,1394,854],displaySize:330,displayWidth:280,directImage:true},
     'giraffe-statue': {source:'assets/shelf-giraffe-statue.png',width:1234,height:1275,bounds:[291,12,650,1233],displaySize:330,displayWidth:280,directImage:true},
