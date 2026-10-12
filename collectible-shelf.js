@@ -163,6 +163,7 @@
   rows.push(['Dogs', ['dog-bulldog-bust','Bulldog Bust']]);
   const catIds = new Set(['lucky-cat','witch-cat','sleeping-cat']);
   rows.push(['Disney', ['disney-nick-wilde-statue','Nick Wilde Statue'], ['disney-judy-hopps-statue','Judy Hopps Statue']]);
+  rows.push(['Character Collectibles', ['avatar-zuko-statue','Zuko Firebending Statue'], ['avatar-appa-statue','Appa Statue'], ['avatar-sokka-statue','Sokka Statue'], ['avatar-toph-statue','Toph Earthbending Statue'], ['avatar-katara-statue','Katara Waterbending Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -183,6 +184,11 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'avatar-zuko-statue': {source:'assets/shelf-avatar-zuko-statue.png',width:1280,height:1552,bounds:[108,30,1112,1494],displaySize:375,displayWidth:285,directImage:true},
+    'avatar-appa-statue': {source:'assets/shelf-avatar-appa-statue.png',width:1536,height:1296,bounds:[152,0,1246,1268],displaySize:330,displayWidth:330,directImage:true},
+    'avatar-sokka-statue': {source:'assets/shelf-avatar-sokka-statue.png',width:1280,height:1536,bounds:[208,34,1003,1455],displaySize:330,displayWidth:280,directImage:true},
+    'avatar-toph-statue': {source:'assets/shelf-avatar-toph-statue.png',width:1088,height:1808,bounds:[70,14,1015,1745],displaySize:330,displayWidth:280,directImage:true},
+    'avatar-katara-statue': {source:'assets/shelf-avatar-katara-statue.png',width:1056,height:1872,bounds:[22,33,1011,1771],displaySize:350,displayWidth:280,directImage:true},
     'disney-nick-wilde-statue': {source:'assets/shelf-disney-nick-wilde-statue.png',width:1056,height:1872,bounds:[206,0,809,1825],displaySize:330,displayWidth:280,directImage:true},
     'disney-judy-hopps-statue': {source:'assets/shelf-disney-judy-hopps-statue.png',width:896,height:2208,bounds:[15,4,869,2185],displaySize:330,displayWidth:280,directImage:true},
     'dog-bulldog-bust': {source:'assets/shelf-dog-bulldog-bust.png',width:1664,height:1184,bounds:[444,22,865,1114],displaySize:330,displayWidth:280,directImage:true},
