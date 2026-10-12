@@ -162,6 +162,7 @@
   rows.push(['Cats', ['cat-ragdoll-bust','Ragdoll Cat Bust'], ['cat-sphynx-bust','Sphynx Cat Bust'], ['cat-exotic-shorthair-bust','Exotic Shorthair Cat Bust']]);
   rows.push(['Dogs', ['dog-bulldog-bust','Bulldog Bust']]);
   const catIds = new Set(['lucky-cat','witch-cat','sleeping-cat']);
+  rows.push(['Disney', ['disney-nick-wilde-statue','Nick Wilde Statue'], ['disney-judy-hopps-statue','Judy Hopps Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -182,6 +183,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'disney-nick-wilde-statue': {source:'assets/shelf-disney-nick-wilde-statue.png',width:1056,height:1872,bounds:[206,0,809,1825],displaySize:330,displayWidth:280,directImage:true},
+    'disney-judy-hopps-statue': {source:'assets/shelf-disney-judy-hopps-statue.png',width:896,height:2208,bounds:[15,4,869,2185],displaySize:330,displayWidth:280,directImage:true},
     'dog-bulldog-bust': {source:'assets/shelf-dog-bulldog-bust.png',width:1664,height:1184,bounds:[444,22,865,1114],displaySize:330,displayWidth:280,directImage:true},
     'cat-ragdoll-bust': {source:'assets/shelf-cat-ragdoll-bust.png',width:1264,height:1568,bounds:[277,79,759,1404],displaySize:330,displayWidth:280,directImage:true},
     'cat-sphynx-bust': {source:'assets/shelf-cat-sphynx-bust.png',width:960,height:2064,bounds:[74,53,846,1933],displaySize:330,displayWidth:280,directImage:true},
