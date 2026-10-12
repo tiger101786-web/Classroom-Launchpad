@@ -384,8 +384,9 @@
     return result.session;
   }
   function attach(session, video, onSave) {
-    // A navigation or background refresh must not leave an orphaned dialog.
-    document.querySelector(".launch-scene-dialog")?.remove();
+    // Clean up only dialogs owned by scenes. Shelf/profile pickers share the
+    // visual class and must survive another component's render/attach cycle.
+    document.querySelectorAll('dialog[aria-labelledby="launchSceneTitle"], dialog[aria-labelledby="launchFrameTitle"]').forEach(dialog => dialog.remove());
     const toggle = document.getElementById("toggleLaunchScene");
     if (!toggle) return;
     const gear = document.getElementById("launchSceneSettings");

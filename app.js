@@ -1916,7 +1916,9 @@ function hasSharedData() {
 }
 
 function isEditingForm() {
-  if (document.querySelector("#myProfileDialog[open]")) return true;
+  // Pickers edit drafts outside a <form>; a focused card is still editing.
+  // Keep background shared-state refreshes from interrupting any open dialog.
+  if (document.querySelector("dialog[open]")) return true;
   const active = document.activeElement;
   return Boolean(active && active.closest && active.closest("form"));
 }
