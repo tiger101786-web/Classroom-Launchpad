@@ -579,13 +579,14 @@
     // The low-profile cake uses more of its slot's horizontal gap, without
     // stretching the plate or moving its contact point off the shared baseline.
     // Dumplings share a smaller basket width, while retaining bitmap proportions
-    // and the same flat-bottom contact point as every other collectible.
+    // and a slightly lower contact point so the rounded basket sits on the ledge.
     const dumpling = item.category === 'Squishy Toys' && id.startsWith('squishy-') && id !== 'squishy-butter-stack';
     const scale = asset?.displayHeight ? asset.displayHeight / h : Math.min((thumbnail ? 330 : (asset?.displaySize || 330)) / Math.max(w,h), (dumpling ? 160 : (asset?.displayWidth || (car ? 270 : 240))) / w);
     const height = 350;
+    const bottom = dumpling && !thumbnail ? -8 : 4;
     if (asset?.directImage || anime || item.category === 'Superheroes' || id === 'peace-sign-girl' || id === 'verity-statue' || id.startsWith('toy-story-')) {
       // Render the original bitmap directly at its final layout size, without SVG/filter rasterization.
-      return `<div class="shelf-object shelf-direct-image${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${((220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0)))/220*100}%;bottom:${4/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${(asset?.width || 1254)/w*100}%;height:${(asset?.height || 1254)/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto${asset?.clip ? `;clip-path:${asset.clip};clip-rule:nonzero` : ''}"></div></div>`;
+      return `<div class="shelf-object shelf-direct-image${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" role="img" aria-label="${item.name}" style="position:relative;filter:none;aspect-ratio:220 / 350"><div style="position:absolute;overflow:hidden;left:${((220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0)))/220*100}%;bottom:${bottom/350*100}%;width:${w*scale/220*100}%;height:${h*scale/350*100}%"><img alt="" src="${source}" style="position:absolute;max-width:none;width:${(asset?.width || 1254)/w*100}%;height:${(asset?.height || 1254)/h*100}%;left:${-x/w*100}%;top:${-y/h*100}%;image-rendering:auto${asset?.clip ? `;clip-path:${asset.clip};clip-rule:nonzero` : ''}"></div></div>`;
     }
     return `<svg class="shelf-object${anime ? ' shelf-object-anime' : ''}${asset?.displaySize && !thumbnail ? ' shelf-tall-object' : ''}" style="aspect-ratio:220 / ${height}" role="img" aria-label="${item.name}" viewBox="0 0 220 ${height}"><svg x="${(220-w*scale)/2 + (thumbnail ? 0 : (asset?.displayOffsetX || 0))}" y="${height-4-h*scale}" width="${w*scale}" height="${h*scale}" viewBox="${x} ${y} ${w} ${h}" overflow="hidden"><image href="${source}" width="${asset?.width || 1254}" height="${asset?.height || 1254}"${asset?.clip ? ` style="clip-path:${asset.clip};clip-rule:nonzero"` : ''}/></svg></svg>`;
   }
