@@ -3,6 +3,14 @@
 /* NeeDoh uses stationary reflections instead of unrelated floating fireflies. */
 .scene-needoh .launch-scene-particles i { width:3px; height:2px; background:#e7fbff; box-shadow:0 0 5px #dafaff; animation:needoh-reflection 4s ease-in-out infinite alternate; top:calc(52% + var(--n) * 4%); }
 @keyframes needoh-reflection { from { opacity:.12; } to { opacity:.65; } }
+/* Align the effect to the painted sun at (75.8%, 20.2%) of the scene.
+   The overlay uses the same content box as the image, inside the photo border. */
+.needoh-sun { position:absolute; inset:0; pointer-events:none; overflow:hidden; border-radius:50%; }
+.needoh-sun > b { position:absolute; left:75.8%; top:20.2%; border-radius:50%; transform:translate(-50%,-50%); }
+.needoh-sun-glow { width:23%; height:23%; background:radial-gradient(circle,#fff6cfbb 0%,#ffd47170 24%,#ffc26425 46%,transparent 70%); animation:needoh-sun-warmth 5s ease-in-out infinite alternate; }
+.needoh-sun-rays { width:88%; height:88%; background:repeating-conic-gradient(from 8deg,transparent 0deg 16deg,#ffc557dd 21deg,#ffdf8cf2 25deg,transparent 31deg 40deg); mask-image:radial-gradient(circle,transparent 0% 5%,#000 11% 30%,#0009 46%,transparent 69%); filter:blur(.6px); animation:needoh-sun-rays 7s ease-in-out infinite alternate; }
+@keyframes needoh-sun-warmth { from { opacity:.35; transform:translate(-50%,-50%) scale(.92); } to { opacity:.72; transform:translate(-50%,-50%) scale(1.08); } }
+@keyframes needoh-sun-rays { from { opacity:.3; transform:translate(-50%,-50%) rotate(-4deg) scale(.94); } to { opacity:.65; transform:translate(-50%,-50%) rotate(5deg) scale(1.04); } }
 .launch-scene-stage:has(> .scene-frame-exterior),
 .frame-swatch:has(> .scene-frame-exterior) { isolation:isolate; }
 .launch-scene-stage { --exterior-photo-border:8px; }

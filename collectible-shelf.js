@@ -166,6 +166,7 @@
   rows.push(['Disney', ['disney-nick-wilde-statue','Nick Wilde Statue'], ['disney-judy-hopps-statue','Judy Hopps Statue']]);
   rows.push(['Character Collectibles', ['avatar-zuko-statue','Zuko Firebending Statue'], ['avatar-appa-statue','Appa Statue'], ['avatar-sokka-statue','Sokka Statue'], ['avatar-toph-statue','Toph Earthbending Statue'], ['avatar-katara-statue','Katara Waterbending Statue']]);
   rows.push(['Anime', ['hatsune-miku-statue','Hatsune Miku Statue']]);
+  rows.push(['Anime', ['blue-lock-rin-itoshi','Blue Lock • Rin Itoshi Statue'], ['blue-lock-chigiri','Blue Lock • Hyoma Chigiri Statue'], ['blue-lock-bachira','Blue Lock • Meguru Bachira Statue'], ['blue-lock-nagi','Blue Lock • Seishiro Nagi Statue'], ['blue-lock-kunigami-ready','Blue Lock • Rensuke Kunigami Statue'], ['blue-lock-shidou','Blue Lock • Ryusei Shidou Statue'], ['blue-lock-sae-itoshi','Blue Lock • Sae Itoshi Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -186,6 +187,13 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'blue-lock-rin-itoshi': {source:'assets/shelf-blue-lock-rin-itoshi.png',width:1264,height:1568,bounds:[202,21,901,1526],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-chigiri': {source:'assets/shelf-blue-lock-chigiri.png',width:1408,height:1408,bounds:[397,39,700,1325],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-bachira': {source:'assets/shelf-blue-lock-bachira.png',width:1248,height:1584,bounds:[214,32,840,1506],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-nagi': {source:'assets/shelf-blue-lock-nagi.png',width:1408,height:1408,bounds:[290,49,868,1295],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-kunigami-ready': {source:'assets/shelf-blue-lock-kunigami-ready.png',width:1408,height:1408,bounds:[330,45,764,1298],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-shidou': {source:'assets/shelf-blue-lock-shidou.png',width:1184,height:1664,bounds:[143,44,926,1536],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-sae-itoshi': {source:'assets/shelf-blue-lock-sae-itoshi.png',width:1056,height:1872,bounds:[104,18,845,1801],displaySize:330,displayWidth:280,directImage:true},
     'hatsune-miku-statue': {source:'assets/shelf-hatsune-miku-statue.png',width:1152,height:1728,bounds:[130,47,967,1619],displaySize:330,displayWidth:280,directImage:true},
     'avatar-zuko-statue': {source:'assets/shelf-avatar-zuko-statue.png',width:1280,height:1552,bounds:[108,30,1112,1494],displaySize:375,displayWidth:285,directImage:true},
     'avatar-appa-statue': {source:'assets/shelf-avatar-appa-statue.png',width:1536,height:1296,bounds:[152,0,1246,1268],displaySize:330,displayWidth:330,directImage:true},

@@ -360,7 +360,8 @@
     const expansion = disneyExpansionIds.has(scene.id);
     const extraEffects = expansion ? '<span class="disney-extra-effects" aria-hidden="true"><b class="disney-light"></b><b class="disney-water"></b><b class="disney-detail"></b></span>' : '';
     const trackSun = scene.id === "minibike-track" ? '<span class="minibike-track-sun" aria-hidden="true"><b class="minibike-sun-glow"></b><b class="minibike-sun-rays"></b></span>' : '';
-    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}${trackSun}</div>`;
+    const needohSun = scene.id === "needoh" ? '<span class="needoh-sun" aria-hidden="true"><b class="needoh-sun-glow"></b><b class="needoh-sun-rays"></b></span>' : '';
+    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}${trackSun}${needohSun}</div>`;
   }
   function render(session, video, sessionReady = true) {
     // Do not create or fetch the default video before the saved account choice is known.

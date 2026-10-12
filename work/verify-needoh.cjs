@@ -22,6 +22,13 @@ const root=path.resolve(__dirname,'..'),shelf=require('../collectible-shelf');
  await page.waitForFunction(()=>[...document.images].every(i=>i.complete&&i.naturalWidth));
  await page.evaluate(()=>Promise.all([...document.images].map(i=>i.decode())));
  await page.waitForTimeout(100);
+ const rays=page.locator('.needoh-sun-rays');
+ assert.equal(await rays.evaluate(e=>getComputedStyle(e).animationName),'needoh-sun-rays');
+ const start=await rays.evaluate(e=>getComputedStyle(e).transform);
+ await page.waitForTimeout(400);
+ assert.notEqual(await rays.evaluate(e=>getComputedStyle(e).transform),start);
+ // Inspect the strongest ray phase, not just its low-opacity first frame.
+ await rays.evaluate(e=>e.getAnimations().forEach(a=>a.currentTime=6500));
  assert(await page.locator('.scene-frame-exterior').evaluate(e=>+getComputedStyle(e).zIndex<+getComputedStyle(e.parentElement.querySelector('.launch-scene')).zIndex));
  await page.screenshot({path:path.join(__dirname,`needoh-${width}.png`),fullPage:true});
  await page.evaluate(()=>CollectibleShelf.open({selected:{enabled:true,theme:'needoh',slots:['hatsune-miku-statue','none','none']},save:async v=>window.saved=v}));
