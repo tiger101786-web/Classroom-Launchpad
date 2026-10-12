@@ -231,6 +231,8 @@
    shelf crops, object scale and tabletop positions are unaffected. */
 .shelf-dialog .shelf-theme-grid .collectible-shelf { width:min(100%,170px); height:calc(var(--shelf-card-height) - 60px); aspect-ratio:auto; margin:auto; flex-shrink:0; }
 .shelf-dialog .shelf-theme-grid .collectible-shelf > .shelf-board { background-size:contain; background-position:center; }
+/* Let the full zoo artwork fill its card without changing tabletop placement. */
+.shelf-dialog .shelf-theme-grid .collectible-shelf[data-shelf-theme="audubon-zoo"] { width:100%; height:calc(var(--shelf-card-height) - 48px); }
 .shelf-dialog .shelf-theme-grid strong { min-height:2.6em; font-size:12px; }
 .shelf-pagination { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
 .shelf-pagination button { min-width:80px; }

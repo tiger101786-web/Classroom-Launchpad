@@ -241,7 +241,7 @@
   function chooserCategory(item, kind) {
     const id = item.matchedScene || item.id;
     if (id === "minibike-track") return "Sports";
-    if (id === "nola-audubon-zoo") return "New Orleans";
+    if (["nola-audubon-zoo", "cafe", "holiday-mardi-gras"].includes(id)) return "New Orleans";
     if (id.startsWith("disney-")) return "Disney";
     if (id.startsWith("pokemon-")) return "Pokémon";
     if (matchedSceneIds.includes(id)) return "Anime";
