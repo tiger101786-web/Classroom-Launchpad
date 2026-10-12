@@ -2,6 +2,7 @@
   "use strict";
   const scenes = [
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
+    { id: "needoh", name: "NeeDoh • Nice Cube World", description: "Glossy pink, purple and blue NeeDoh cubes in a dreamy waterside world", image: "assets/launchpad-scene-needoh.png" },
     { id: "nola-audubon-zoo", name: "New Orleans • Audubon Zoo", description: "Palm-lined zoo entrance, flamingos and flowing elephant fountain water", image: "assets/launchpad-scene-nola-audubon-zoo.png" },
     { id: "minibike-track", name: "Minibike • Sunset Dirt Track", description: "Colorful fat-tire minibikes beside a sunset circuit with gently glowing sun rays", image: "assets/launchpad-scene-minibike-track.png" },
     { id: "disney-sunset-carnival", name: "Disney • Sunset Carnival", description: "Golden carnival lights beneath a glowing sunset", image: "assets/launchpad-scene-disney-sunset-carnival.png" },
@@ -157,6 +158,7 @@
   ];
   frames.push({ id:"match-minibike-track", name:"Minibike • Sunset Dirt Track", description:"A thin tire-tread and chain rim with colorful steel accents", decorative:true, matchedScene:"minibike-track" });
   frames.push({ id:"match-nola-audubon-zoo", name:"New Orleans • Audubon Zoo", description:"A thin bronze and palm-leaf rim with elephant and flamingo details", decorative:true, matchedScene:"nola-audubon-zoo" });
+  frames.push({ id:"match-needoh", name:"NeeDoh • Nice Cube", description:"A narrow embossed gel-cube rim outside the scene", decorative:true, matchedScene:"needoh" });
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
     "disney-sunset-carnival",

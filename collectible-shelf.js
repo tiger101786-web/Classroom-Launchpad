@@ -1,6 +1,7 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'needoh',name:'NeeDoh Nice Cube'},
     {id:'audubon-zoo',name:'Audubon Zoo'},
     {id:'demon-slayer-wisteria',name:'Anime • Demon Slayer Wisteria'},
     {id:'squishy-dumplings',name:'Squishy Dumpling'},
@@ -164,6 +165,7 @@
   const catIds = new Set(['lucky-cat','witch-cat','sleeping-cat']);
   rows.push(['Disney', ['disney-nick-wilde-statue','Nick Wilde Statue'], ['disney-judy-hopps-statue','Judy Hopps Statue']]);
   rows.push(['Character Collectibles', ['avatar-zuko-statue','Zuko Firebending Statue'], ['avatar-appa-statue','Appa Statue'], ['avatar-sokka-statue','Sokka Statue'], ['avatar-toph-statue','Toph Earthbending Statue'], ['avatar-katara-statue','Katara Waterbending Statue']]);
+  rows.push(['Anime', ['hatsune-miku-statue','Hatsune Miku Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -184,6 +186,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'hatsune-miku-statue': {source:'assets/shelf-hatsune-miku-statue.png',width:1152,height:1728,bounds:[130,47,967,1619],displaySize:330,displayWidth:280,directImage:true},
     'avatar-zuko-statue': {source:'assets/shelf-avatar-zuko-statue.png',width:1280,height:1552,bounds:[108,30,1112,1494],displaySize:375,displayWidth:285,directImage:true},
     'avatar-appa-statue': {source:'assets/shelf-avatar-appa-statue.png',width:1536,height:1296,bounds:[152,0,1246,1268],displaySize:330,displayWidth:330,directImage:true},
     'avatar-sokka-statue': {source:'assets/shelf-avatar-sokka-statue.png',width:1280,height:1536,bounds:[208,34,1003,1455],displaySize:330,displayWidth:280,directImage:true},

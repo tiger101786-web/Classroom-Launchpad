@@ -53,6 +53,8 @@ homeSceneFrameIds.add("usa-patriotic");
 ["disney-sunset-carnival", "disney-sun-palace"].forEach(id => { homeSceneIds.add(id); homeSceneFrameIds.add("match-" + id); });
 homeSceneIds.add("minibike-track");
 homeSceneIds.add("nola-audubon-zoo");
+homeSceneIds.add("needoh");
+homeSceneFrameIds.add("match-needoh");
 homeSceneFrameIds.add("match-nola-audubon-zoo");
 homeSceneFrameIds.add("match-minibike-track");
 function cleanHomeScene(value) {

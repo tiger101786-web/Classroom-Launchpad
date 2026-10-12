@@ -1,5 +1,8 @@
 /* Keep scenes at their unframed size. The existing thin artwork paints above
    the scene, with the user's approved small overlap at the perimeter. */
+/* NeeDoh uses stationary reflections instead of unrelated floating fireflies. */
+.scene-needoh .launch-scene-particles i { width:3px; height:2px; background:#e7fbff; box-shadow:0 0 5px #dafaff; animation:needoh-reflection 4s ease-in-out infinite alternate; top:calc(52% + var(--n) * 4%); }
+@keyframes needoh-reflection { from { opacity:.12; } to { opacity:.65; } }
 .launch-scene-stage:has(> .scene-frame-exterior),
 .frame-swatch:has(> .scene-frame-exterior) { isolation:isolate; }
 .launch-scene-stage { --exterior-photo-border:8px; }
@@ -23,6 +26,9 @@
   z-index:2;
   pointer-events:none;
 }
+/* The thin NeeDoh rim sits outside, behind the unchanged scene; it cannot
+   obscure scene pixels even where an individual cube has an uneven edge. */
+.scene-frame-exterior[data-exterior-frame="match-needoh"] { --exterior-frame-inset:-9%; z-index:0; }
 .scene-frame-exterior > img.scene-frame-artwork {
   display:block;
   position:absolute;
