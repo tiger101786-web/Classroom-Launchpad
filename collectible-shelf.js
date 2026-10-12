@@ -159,7 +159,10 @@
   rows.push(['Dogs', ['dog-corgi-statue','Corgi Statue'], ['dog-shiba-inu-bust','Shiba Inu Bust'], ['dog-beagle-bust','Beagle Bust'], ['dog-boxer-bust','Boxer Bust']]);
   rows.push(['Superheroes', ['superhero-falcon-statue','Falcon Statue']]);
   const dogIds = new Set(['dachshund','bluey','bingo','chilli','bandit']);
-  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
+  rows.push(['Cats', ['cat-ragdoll-bust','Ragdoll Cat Bust'], ['cat-sphynx-bust','Sphynx Cat Bust'], ['cat-exotic-shorthair-bust','Exotic Shorthair Cat Bust']]);
+  rows.push(['Dogs', ['dog-bulldog-bust','Bulldog Bust']]);
+  const catIds = new Set(['lucky-cat','witch-cat','sleeping-cat']);
+  const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
   const bounds = [
@@ -179,6 +182,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'dog-bulldog-bust': {source:'assets/shelf-dog-bulldog-bust.png',width:1664,height:1184,bounds:[444,22,865,1114],displaySize:330,displayWidth:280,directImage:true},
+    'cat-ragdoll-bust': {source:'assets/shelf-cat-ragdoll-bust.png',width:1264,height:1568,bounds:[277,79,759,1404],displaySize:330,displayWidth:280,directImage:true},
+    'cat-sphynx-bust': {source:'assets/shelf-cat-sphynx-bust.png',width:960,height:2064,bounds:[74,53,846,1933],displaySize:330,displayWidth:280,directImage:true},
+    'cat-exotic-shorthair-bust': {source:'assets/shelf-cat-exotic-shorthair-bust.png',width:1376,height:1440,bounds:[290,36,843,1360],displaySize:330,displayWidth:280,directImage:true},
     'dog-corgi-statue': {source:'assets/shelf-dog-corgi-statue.png',width:1408,height:1408,bounds:[378,38,670,1319],displaySize:330,displayWidth:280,directImage:true},
     'dog-shiba-inu-bust': {source:'assets/shelf-dog-shiba-inu-bust.png',width:1296,height:1520,bounds:[239,22,867,1470],displaySize:330,displayWidth:280,directImage:true},
     'dog-beagle-bust': {source:'assets/shelf-dog-beagle-bust.png',width:1728,height:1152,bounds:[466,19,791,1104],displaySize:330,displayWidth:280,directImage:true},
