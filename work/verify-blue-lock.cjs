@@ -5,7 +5,7 @@ const {chromium} = require('playwright');
 const shelf = require('../collectible-shelf');
 const root = path.resolve(__dirname, '..');
 const ids = shelf.items.filter(i=>i.id.startsWith('blue-lock-')).map(i=>i.id);
-assert.equal(ids.length,7);
+assert.equal(ids.length,10);
 assert(!shelf.items.some(i=>i.id==='blue-lock-kunigami'));
 assert.equal(new Set(shelf.items.map(i => i.id)).size, shelf.items.length);
 for (const id of ids) assert.equal(shelf.items.find(i => i.id === id)?.category, 'Anime');
@@ -28,7 +28,7 @@ for (const id of ids) assert.equal(shelf.items.find(i => i.id === id)?.category,
       for (const id of ids) {
         const selection = {enabled:true,theme:'crimson',slots:[id,'blue-lock-bachira','blue-lock-nagi']};
         assert(shelf.valid(selection));
-        await page.evaluate(s => CollectibleShelf.open({selected:s,save:async v => {window.savedShelf=v;}}),selection);
+        await page.evaluate(s => CollectibleShelf.open({selected:s,save:async v => {window.savedShelf=v;},onSave:()=>{}}),selection);
         await page.locator('#shelfCategory').selectOption('Anime');
         await page.locator('#shelfSearch').fill(shelf.items.find(i => i.id === id).name);
         const card = page.locator(`[data-shelf-item="${id}"]`);
@@ -42,6 +42,6 @@ for (const id of ids) assert.equal(shelf.items.find(i => i.id === id)?.category,
       }
     }
     assert.deepEqual(errors,[]);
-    console.log('PASS: all seven Blue Lock statues load, appear in Anime, select and save at desktop and mobile widths; only the retained Kunigami pose is listed.');
+    console.log('PASS: all ten Blue Lock statues load, appear in Anime, select and save at desktop and mobile widths; only the retained Kunigami pose is listed.');
   } finally {await browser.close();}
 })().catch(e => {console.error(e);process.exitCode=1;});

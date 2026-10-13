@@ -167,6 +167,7 @@
   rows.push(['Character Collectibles', ['avatar-zuko-statue','Zuko Firebending Statue'], ['avatar-appa-statue','Appa Statue'], ['avatar-sokka-statue','Sokka Statue'], ['avatar-toph-statue','Toph Earthbending Statue'], ['avatar-katara-statue','Katara Waterbending Statue']]);
   rows.push(['Anime', ['hatsune-miku-statue','Hatsune Miku Statue']]);
   rows.push(['Anime', ['blue-lock-rin-itoshi','Blue Lock • Rin Itoshi Statue'], ['blue-lock-chigiri','Blue Lock • Hyoma Chigiri Statue'], ['blue-lock-bachira','Blue Lock • Meguru Bachira Statue'], ['blue-lock-nagi','Blue Lock • Seishiro Nagi Statue'], ['blue-lock-kunigami-ready','Blue Lock • Rensuke Kunigami Statue'], ['blue-lock-shidou','Blue Lock • Ryusei Shidou Statue'], ['blue-lock-sae-itoshi','Blue Lock • Sae Itoshi Statue']]);
+  rows.push(['Anime', ['bleach-kenpachi','Bleach • Kenpachi Zaraki Statue'], ['bleach-uryu','Bleach • Uryu Ishida Statue'], ['bleach-byakuya','Bleach • Byakuya Kuchiki Statue'], ['bleach-toshiro','Bleach • Toshiro Hitsugaya Statue'], ['bleach-kisuke','Bleach • Kisuke Urahara Statue'], ['bleach-aizen','Bleach • Sosuke Aizen Statue'], ['bleach-rukia','Bleach • Rukia Kuchiki Statue'], ['bleach-grimmjow','Bleach • Grimmjow Jaegerjaquez Statue'], ['blue-lock-reo','Blue Lock • Reo Mikage Statue'], ['blue-lock-barou','Blue Lock • Shoei Barou Statue'], ['blue-lock-hiori','Blue Lock • Hiori Yo Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -187,6 +188,17 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'bleach-kenpachi': {source:'assets/shelf-bleach-kenpachi.png',width:1152,height:1712,bounds:[61,4,1075,1647],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-uryu': {source:'assets/shelf-bleach-uryu.png',width:1136,height:1744,bounds:[75,64,999,1604],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-byakuya': {source:'assets/shelf-bleach-byakuya.png',width:1632,height:1216,bounds:[170,5,1181,1191],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-toshiro': {source:'assets/shelf-bleach-toshiro.png',width:1408,height:1408,bounds:[374,9,748,1362],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-kisuke': {source:'assets/shelf-bleach-kisuke.png',width:1424,height:1376,bounds:[370,21,727,1323],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-aizen': {source:'assets/shelf-bleach-aizen.png',width:1616,height:1232,bounds:[439,3,810,1209],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-rukia': {source:'assets/shelf-bleach-rukia.png',width:1152,height:1712,bounds:[170,14,855,1641],displaySize:330,displayWidth:280,directImage:true},
+    'bleach-grimmjow': {source:'assets/shelf-bleach-grimmjow.png',width:1152,height:1728,bounds:[2,0,1150,1697],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-reo': {source:'assets/shelf-blue-lock-reo.png',width:1184,height:1680,bounds:[65,45,1092,1585],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-barou': {source:'assets/shelf-blue-lock-barou.png',width:1200,height:1600,bounds:[18,20,1171,1516],displaySize:330,displayWidth:280,directImage:true},
+    'blue-lock-hiori': {source:'assets/shelf-blue-lock-hiori.png',width:1168,height:1696,bounds:[187,43,819,1600],displaySize:330,displayWidth:280,directImage:true},
     'blue-lock-rin-itoshi': {source:'assets/shelf-blue-lock-rin-itoshi.png',width:1264,height:1568,bounds:[202,21,901,1526],displaySize:330,displayWidth:280,directImage:true},
     'blue-lock-chigiri': {source:'assets/shelf-blue-lock-chigiri.png',width:1408,height:1408,bounds:[397,39,700,1325],displaySize:330,displayWidth:280,directImage:true},
     'blue-lock-bachira': {source:'assets/shelf-blue-lock-bachira.png',width:1248,height:1584,bounds:[214,32,840,1506],displaySize:330,displayWidth:280,directImage:true},
