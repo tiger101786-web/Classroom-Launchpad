@@ -1,6 +1,7 @@
 (() => {
   "use strict";
   const scenes = [
+    { id: "bleach-soul-society", name: "Bleach • Soul Society", description: "Seireitei at sunset with drifting spiritual embers", image: "assets/launchpad-scene-bleach-soul-society.png" },
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
     { id: "needoh", name: "NeeDoh • Nice Cube World", description: "Glossy pink, purple and blue NeeDoh cubes in a dreamy waterside world", image: "assets/launchpad-scene-needoh.png" },
     { id: "nola-audubon-zoo", name: "New Orleans • Audubon Zoo", description: "Palm-lined zoo entrance, flamingos and flowing elephant fountain water", image: "assets/launchpad-scene-nola-audubon-zoo.png" },
@@ -159,6 +160,7 @@
   frames.push({ id:"match-minibike-track", name:"Minibike • Sunset Dirt Track", description:"A thin tire-tread and chain rim with colorful steel accents", decorative:true, matchedScene:"minibike-track" });
   frames.push({ id:"match-nola-audubon-zoo", name:"New Orleans • Audubon Zoo", description:"A thin bronze and palm-leaf rim with elephant and flamingo details", decorative:true, matchedScene:"nola-audubon-zoo" });
   frames.push({ id:"match-needoh", name:"NeeDoh • Nice Cube", description:"A narrow embossed gel-cube rim outside the scene", decorative:true, matchedScene:"needoh" });
+  frames.push({ id:"match-bleach-soul-society", name:"Bleach • Soul Society", description:"A narrow black, ivory and silver rim outside the scene", decorative:true, matchedScene:"bleach-soul-society" });
   // One dedicated frame for each Disney/anime scene; existing choices remain independent.
   const matchedSceneIds = [
     "disney-sunset-carnival",
@@ -246,7 +248,7 @@
     if (["nola-audubon-zoo", "cafe", "holiday-mardi-gras"].includes(id)) return "New Orleans";
     if (id.startsWith("disney-")) return "Disney";
     if (id.startsWith("pokemon-")) return "Pokémon";
-    if (matchedSceneIds.includes(id)) return "Anime";
+    if (id.startsWith("bleach-") || matchedSceneIds.includes(id)) return "Anime";
     if (id.startsWith("hero-")) return "Superheroes";
     if (id.startsWith("holiday-") || ["pumpkin","halloween","harvest","evergreen","new-orleans","usa-patriotic"].includes(id)) return "Holidays & Celebrations";
     if (["chapel","christmas-chapel","christian"].includes(id)) return "Christian Faith";

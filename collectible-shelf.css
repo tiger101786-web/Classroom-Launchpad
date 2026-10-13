@@ -77,6 +77,14 @@
 .collectible-shelf[data-shelf-theme][data-shelf-theme="audubon-zoo"] { aspect-ratio:1683 / 935; --shelf-object-bottom:53.8%; --shelf-surface-top:.426; --shelf-surface-bottom:.482; }
 .collectible-shelf[data-shelf-theme][data-shelf-theme="audubon-zoo"] > .shelf-board { background-image:url('assets/collectible-shelf-audubon-zoo.png'); background-size:100% 100%; background-position:center; }
 .collectible-shelf[data-shelf-theme][data-shelf-theme="squishy-dumplings"] > .shelf-board { background-image:url('assets/collectible-shelf-squishy-dumplings.png'); background-size:100% 100%; background-position:center; }
+/* Full original architecture; bases anchored within each generated tabletop. */
+.collectible-shelf[data-shelf-theme][data-shelf-theme="blue-lock"],
+.collectible-shelf[data-shelf-theme][data-shelf-theme="bleach"],
+.collectible-shelf[data-shelf-theme][data-shelf-theme="pokemon"] { aspect-ratio:1672 / 944; --shelf-object-bottom:49%; --shelf-surface-top:.445; --shelf-surface-bottom:.52; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="pokemon"] { --shelf-object-bottom:47%; --shelf-surface-top:.47; --shelf-surface-bottom:.545; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="blue-lock"] > .shelf-board { background-image:url('assets/collectible-shelf-blue-lock.png'); background-size:100% 100%; background-position:center; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="bleach"] > .shelf-board { background-image:url('assets/collectible-shelf-bleach.png'); background-size:100% 100%; background-position:center; }
+.collectible-shelf[data-shelf-theme][data-shelf-theme="pokemon"] > .shelf-board { background-image:url('assets/collectible-shelf-pokemon.png'); background-size:100% 100%; background-position:center; }
 /* Full wisteria crest and hanging supports, with bases at y=486 on the ledge. */
 .collectible-shelf[data-shelf-theme][data-shelf-theme="demon-slayer-wisteria"] { aspect-ratio:1448 / 1086; --shelf-object-bottom:55.2486%; --shelf-surface-top:.426; --shelf-surface-bottom:.464; }
 .collectible-shelf[data-shelf-theme][data-shelf-theme="demon-slayer-wisteria"] > .shelf-board { background-image:url('assets/collectible-shelf-demon-slayer-wisteria.png'); background-size:100% 100%; background-position:center; }

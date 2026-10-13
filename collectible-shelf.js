@@ -1,6 +1,9 @@
 (function (root) {
   'use strict';
   const themes = [
+    {id:'blue-lock',name:'Anime • Blue Lock'},
+    {id:'bleach',name:'Anime • Bleach Soul Society'},
+    {id:'pokemon',name:'Pokémon • Poké Ball'},
     {id:'needoh',name:'NeeDoh Nice Cube'},
     {id:'audubon-zoo',name:'Audubon Zoo'},
     {id:'demon-slayer-wisteria',name:'Anime • Demon Slayer Wisteria'},
@@ -168,6 +171,7 @@
   rows.push(['Anime', ['hatsune-miku-statue','Hatsune Miku Statue']]);
   rows.push(['Anime', ['blue-lock-rin-itoshi','Blue Lock • Rin Itoshi Statue'], ['blue-lock-chigiri','Blue Lock • Hyoma Chigiri Statue'], ['blue-lock-bachira','Blue Lock • Meguru Bachira Statue'], ['blue-lock-nagi','Blue Lock • Seishiro Nagi Statue'], ['blue-lock-kunigami-ready','Blue Lock • Rensuke Kunigami Statue'], ['blue-lock-shidou','Blue Lock • Ryusei Shidou Statue'], ['blue-lock-sae-itoshi','Blue Lock • Sae Itoshi Statue']]);
   rows.push(['Anime', ['bleach-kenpachi','Bleach • Kenpachi Zaraki Statue'], ['bleach-uryu','Bleach • Uryu Ishida Statue'], ['bleach-byakuya','Bleach • Byakuya Kuchiki Statue'], ['bleach-toshiro','Bleach • Toshiro Hitsugaya Statue'], ['bleach-kisuke','Bleach • Kisuke Urahara Statue'], ['bleach-aizen','Bleach • Sosuke Aizen Statue'], ['bleach-rukia','Bleach • Rukia Kuchiki Statue'], ['bleach-grimmjow','Bleach • Grimmjow Jaegerjaquez Statue'], ['blue-lock-reo','Blue Lock • Reo Mikage Statue'], ['blue-lock-barou','Blue Lock • Shoei Barou Statue'], ['blue-lock-hiori','Blue Lock • Hiori Yo Statue']]);
+  rows.push(['Anime', ['blue-lock-kaiser','Blue Lock • Michael Kaiser Statue'], ['jjk-nanami','Jujutsu Kaisen • Kento Nanami Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -188,6 +192,8 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'blue-lock-kaiser': {source:'assets/shelf-blue-lock-kaiser.png',width:1200,height:1600,bounds:[162,33,968,1533],displaySize:330,displayWidth:280,directImage:true},
+    'jjk-nanami': {source:'assets/shelf-jjk-nanami.png',width:1008,height:1792,bounds:[120,40,748,1680],displaySize:330,displayWidth:280,directImage:true},
     'bleach-kenpachi': {source:'assets/shelf-bleach-kenpachi.png',width:1152,height:1712,bounds:[61,4,1075,1647],displaySize:330,displayWidth:280,directImage:true},
     'bleach-uryu': {source:'assets/shelf-bleach-uryu.png',width:1136,height:1744,bounds:[75,64,999,1604],displaySize:330,displayWidth:280,directImage:true},
     'bleach-byakuya': {source:'assets/shelf-bleach-byakuya.png',width:1632,height:1216,bounds:[170,5,1181,1191],displaySize:330,displayWidth:280,directImage:true},

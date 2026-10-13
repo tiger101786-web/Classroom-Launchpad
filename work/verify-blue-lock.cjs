@@ -5,7 +5,7 @@ const {chromium} = require('playwright');
 const shelf = require('../collectible-shelf');
 const root = path.resolve(__dirname, '..');
 const ids = shelf.items.filter(i=>i.id.startsWith('blue-lock-')).map(i=>i.id);
-assert.equal(ids.length,10);
+assert.equal(ids.length,11);
 assert(!shelf.items.some(i=>i.id==='blue-lock-kunigami'));
 assert.equal(new Set(shelf.items.map(i => i.id)).size, shelf.items.length);
 for (const id of ids) assert.equal(shelf.items.find(i => i.id === id)?.category, 'Anime');
@@ -42,6 +42,6 @@ for (const id of ids) assert.equal(shelf.items.find(i => i.id === id)?.category,
       }
     }
     assert.deepEqual(errors,[]);
-    console.log('PASS: all ten Blue Lock statues load, appear in Anime, select and save at desktop and mobile widths; only the retained Kunigami pose is listed.');
+    console.log('PASS: all eleven Blue Lock statues load, appear in Anime, select and save at desktop and mobile widths; only the retained Kunigami pose is listed.');
   } finally {await browser.close();}
 })().catch(e => {console.error(e);process.exitCode=1;});

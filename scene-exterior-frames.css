@@ -37,6 +37,8 @@
 /* The thin NeeDoh rim sits outside, behind the unchanged scene; it cannot
    obscure scene pixels even where an individual cube has an uneven edge. */
 .scene-frame-exterior[data-exterior-frame="match-needoh"] { --exterior-frame-inset:-9%; z-index:0; }
+.scene-frame-exterior[data-exterior-frame="match-bleach-soul-society"] { --exterior-frame-inset:-8%; z-index:0; }
+.scene-bleach-soul-society .launch-scene-particles i { background:#ffc274; box-shadow:0 0 5px #ff971d; }
 .scene-frame-exterior > img.scene-frame-artwork {
   display:block;
   position:absolute;

@@ -54,6 +54,8 @@ homeSceneFrameIds.add("usa-patriotic");
 homeSceneIds.add("minibike-track");
 homeSceneIds.add("nola-audubon-zoo");
 homeSceneIds.add("needoh");
+homeSceneIds.add("bleach-soul-society");
+homeSceneFrameIds.add("match-bleach-soul-society");
 homeSceneFrameIds.add("match-needoh");
 homeSceneFrameIds.add("match-nola-audubon-zoo");
 homeSceneFrameIds.add("match-minibike-track");
