@@ -193,7 +193,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
-    'squishy-cheese': {source:'assets/shelf-squishy-cheese.png',width:1254,height:1254,bounds:[83,64,1117,1169],displaySize:230,displayWidth:220,directImage:true},
+    'squishy-cheese': {source:'assets/shelf-squishy-cheese-front-v2.png',width:1254,height:1254,bounds:[101,91,1059,1050],displaySize:230,displayWidth:220,directImage:true},
     'blue-lock-kaiser': {source:'assets/shelf-blue-lock-kaiser.png',width:1200,height:1600,bounds:[162,33,968,1533],displaySize:330,displayWidth:280,directImage:true},
     'jjk-nanami': {source:'assets/shelf-jjk-nanami.png',width:1008,height:1792,bounds:[120,40,748,1680],displaySize:330,displayWidth:280,directImage:true},
     'bleach-kenpachi': {source:'assets/shelf-bleach-kenpachi.png',width:1152,height:1712,bounds:[61,4,1075,1647],displaySize:330,displayWidth:280,directImage:true},
