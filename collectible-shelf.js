@@ -172,6 +172,7 @@
   rows.push(['Anime', ['blue-lock-rin-itoshi','Blue Lock • Rin Itoshi Statue'], ['blue-lock-chigiri','Blue Lock • Hyoma Chigiri Statue'], ['blue-lock-bachira','Blue Lock • Meguru Bachira Statue'], ['blue-lock-nagi','Blue Lock • Seishiro Nagi Statue'], ['blue-lock-kunigami-ready','Blue Lock • Rensuke Kunigami Statue'], ['blue-lock-shidou','Blue Lock • Ryusei Shidou Statue'], ['blue-lock-sae-itoshi','Blue Lock • Sae Itoshi Statue']]);
   rows.push(['Anime', ['bleach-kenpachi','Bleach • Kenpachi Zaraki Statue'], ['bleach-uryu','Bleach • Uryu Ishida Statue'], ['bleach-byakuya','Bleach • Byakuya Kuchiki Statue'], ['bleach-toshiro','Bleach • Toshiro Hitsugaya Statue'], ['bleach-kisuke','Bleach • Kisuke Urahara Statue'], ['bleach-aizen','Bleach • Sosuke Aizen Statue'], ['bleach-rukia','Bleach • Rukia Kuchiki Statue'], ['bleach-grimmjow','Bleach • Grimmjow Jaegerjaquez Statue'], ['blue-lock-reo','Blue Lock • Reo Mikage Statue'], ['blue-lock-barou','Blue Lock • Shoei Barou Statue'], ['blue-lock-hiori','Blue Lock • Hiori Yo Statue']]);
   rows.push(['Anime', ['blue-lock-kaiser','Blue Lock • Michael Kaiser Statue'], ['jjk-nanami','Jujutsu Kaisen • Kento Nanami Statue']]);
+  rows.push(['Squishy Toys', ['squishy-cheese','Squishy Cheese Toy']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -192,6 +193,7 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'squishy-cheese': {source:'assets/shelf-squishy-cheese.png',width:1254,height:1254,bounds:[83,64,1117,1169],displaySize:230,displayWidth:220,directImage:true},
     'blue-lock-kaiser': {source:'assets/shelf-blue-lock-kaiser.png',width:1200,height:1600,bounds:[162,33,968,1533],displaySize:330,displayWidth:280,directImage:true},
     'jjk-nanami': {source:'assets/shelf-jjk-nanami.png',width:1008,height:1792,bounds:[120,40,748,1680],displaySize:330,displayWidth:280,directImage:true},
     'bleach-kenpachi': {source:'assets/shelf-bleach-kenpachi.png',width:1152,height:1712,bounds:[61,4,1075,1647],displaySize:330,displayWidth:280,directImage:true},
