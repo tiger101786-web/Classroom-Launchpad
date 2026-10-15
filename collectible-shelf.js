@@ -173,6 +173,7 @@
   rows.push(['Anime', ['bleach-kenpachi','Bleach • Kenpachi Zaraki Statue'], ['bleach-uryu','Bleach • Uryu Ishida Statue'], ['bleach-byakuya','Bleach • Byakuya Kuchiki Statue'], ['bleach-toshiro','Bleach • Toshiro Hitsugaya Statue'], ['bleach-kisuke','Bleach • Kisuke Urahara Statue'], ['bleach-aizen','Bleach • Sosuke Aizen Statue'], ['bleach-rukia','Bleach • Rukia Kuchiki Statue'], ['bleach-grimmjow','Bleach • Grimmjow Jaegerjaquez Statue'], ['blue-lock-reo','Blue Lock • Reo Mikage Statue'], ['blue-lock-barou','Blue Lock • Shoei Barou Statue'], ['blue-lock-hiori','Blue Lock • Hiori Yo Statue']]);
   rows.push(['Anime', ['blue-lock-kaiser','Blue Lock • Michael Kaiser Statue'], ['jjk-nanami','Jujutsu Kaisen • Kento Nanami Statue']]);
   rows.push(['Squishy Toys', ['squishy-cheese','Squishy Cheese Toy']]);
+  rows.push(['Music', ['music-dolly-rhinestone','Dolly Rhinestone Guitar Statue'], ['music-dolly-classic','Dolly Classic Guitar Statue']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -194,6 +195,8 @@
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
     'squishy-cheese': {source:'assets/shelf-squishy-cheese-front-v2.png',width:1254,height:1254,bounds:[101,91,1059,1050],displaySize:230,displayWidth:220,directImage:true},
+    'music-dolly-rhinestone': {source:'assets/shelf-music-dolly-rhinestone.png',width:1600,height:1200,bounds:[336,5,1062,1182],displaySize:330,displayWidth:280,directImage:true},
+    'music-dolly-classic': {source:'assets/shelf-music-dolly-classic.png',width:1200,height:1600,bounds:[192,20,1008,1551],displaySize:330,displayWidth:280,directImage:true},
     'blue-lock-kaiser': {source:'assets/shelf-blue-lock-kaiser.png',width:1200,height:1600,bounds:[162,33,968,1533],displaySize:330,displayWidth:280,directImage:true},
     'jjk-nanami': {source:'assets/shelf-jjk-nanami.png',width:1008,height:1792,bounds:[120,40,748,1680],displaySize:330,displayWidth:280,directImage:true},
     'bleach-kenpachi': {source:'assets/shelf-bleach-kenpachi.png',width:1152,height:1712,bounds:[61,4,1075,1647],displaySize:330,displayWidth:280,directImage:true},
