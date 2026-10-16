@@ -57,7 +57,7 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
           const {data,info}=await require('sharp')(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
           const offset=(Math.floor(info.height/2)*info.width+2)*info.channels;
           const rgb=Array.from(data.slice(offset,offset+3));
-          assert(theme==='light' ? rgb.every(v=>v>180) : rgb.every(v=>v<85),`${layout}/${theme}: ${rgb}`);
+          assert(theme==='light' ? rgb.every(v=>v>180) : rgb.every(v=>v<110),`${layout}/${theme}: ${rgb}`);
           assert.equal(await cover.getAttribute('data-custom-layout'),layout==='full'?'full':'half');
           await cover.screenshot({path:path.join(os.tmpdir(),`banner-${layout}-${theme}-${width}.png`)});
         }

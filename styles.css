@@ -10729,6 +10729,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-banner-cover.profile-banner-custom img { object-fit: cover; }
 .profile-banner-custom[data-custom-layout="half"], .profile-banner-custom[data-custom-layout="full"] { background: #000; }
 body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body[data-theme="light"] .profile-banner-custom[data-custom-layout="full"] { background: #fff; }
+.profile-banner-custom:is([data-custom-layout="half"], [data-custom-layout="full"]) {
+  background-image: radial-gradient(ellipse at 22% 48%, rgba(var(--banner-accent, 0,0,0), .30), transparent 75%);
+}
+body[data-theme="light"] .profile-banner-custom:is([data-custom-layout="half"], [data-custom-layout="full"]) {
+  background-image: radial-gradient(ellipse at 22% 48%, rgba(var(--banner-accent, 255,255,255), .20), transparent 75%);
+}
 /* Keep the baked image boundary aligned with the mask even in narrow post cards.
    Hold it fully hidden past 40%, then ease into the photo instead of a hard ramp. */
 .profile-banner-custom[data-custom-layout="half"] img {

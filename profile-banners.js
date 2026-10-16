@@ -2,6 +2,52 @@
   const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon'], ['ocean', 'Ocean Pearl'], ['laurel', 'Royal Laurel'], ['sakura', 'Sakura Bloom'], ['grove', 'Enchanted Forest'], ['autumn', 'Autumn Harvest']];
   const isCustom = value => typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}(?:-(?:full|half))?$/.test(value);
   const normalize = value => isCustom(value) || choices.some(([id]) => id === value) ? value : 'none';
+  // Sample only the visible picture, never the baked blank half. The glow sits
+  // beneath the existing image mask, so it cannot expose the image boundary.
+  const accentCache = new Map();
+  function matchBannerColor(img) {
+    const banner = img.closest('.profile-banner-custom');
+    if (!banner || !['half','full'].includes(banner.dataset.customLayout) || !img.naturalWidth) return;
+    const key = `${banner.dataset.customLayout}:${img.currentSrc || img.src}`;
+    const cacheable = !img.src.startsWith('data:');
+    let accent = accentCache.get(key);
+    if (accent === undefined) {
+      try {
+        const canvas = document.createElement('canvas'); canvas.width = 40; canvas.height = 20;
+        const ctx = canvas.getContext('2d', {willReadFrequently:true});
+        const left = banner.dataset.customLayout === 'half' ? img.naturalWidth * .4 : 0;
+        ctx.drawImage(img, left, 0, img.naturalWidth-left, img.naturalHeight, 0, 0, 40, 20);
+        const pixels = ctx.getImageData(0,0,40,20).data, buckets = new Map();
+        for (let i=0;i<pixels.length;i+=4) {
+          const [r,g,b] = pixels.slice(i,i+3), max = Math.max(r,g,b), min = Math.min(r,g,b);
+          const light = .2126*r + .7152*g + .0722*b;
+          if (light < 25 || light > 235 || max-min < 25) continue;
+          const bucketKey = [r,g,b].map(v=>Math.floor(v/64)).join(',');
+          const bucket = buckets.get(bucketKey) || {count:0,r:0,g:0,b:0};
+          bucket.count++; bucket.r+=r; bucket.g+=g; bucket.b+=b; buckets.set(bucketKey,bucket);
+        }
+        const best = [...buckets.values()].sort((a,b)=>b.count-a.count)[0];
+        accent = best ? [best.r,best.g,best.b].map(v=>Math.round(v/best.count)).join(',') : '';
+        if (cacheable) {
+          if (accentCache.size >= 100) accentCache.delete(accentCache.keys().next().value);
+          accentCache.set(key, accent);
+        }
+      } catch { return; } // A failed sample leaves the original plain background intact.
+    }
+    if (accent) banner.style.setProperty('--banner-accent', accent);
+    else banner.style.removeProperty('--banner-accent');
+  }
+  document.addEventListener('load', event => {
+    if (event.target instanceof HTMLImageElement) matchBannerColor(event.target);
+  }, true);
+  const scanBannerImages = node => {
+    if (!(node instanceof Element)) return;
+    if (node.matches('.profile-banner-custom img')) matchBannerColor(node);
+    node.querySelectorAll('.profile-banner-custom img').forEach(matchBannerColor);
+  };
+  new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(scanBannerImages)))
+    .observe(document.documentElement, {childList:true,subtree:true});
+  scanBannerImages(document.documentElement);
   choices.push(['blue-fire', 'Blue Fire'], ['rainbow-fire', 'Rainbow Fire'], ['nugget-party', 'Nugget Party']);
   choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
   choices.push(...[["anime-rooftops","Anime Rooftops"],["chapel-light","Chapel Light"],["sunlit-peaks","Sunlit Peaks"],["saturn-dream","Saturn Dream"],["winter-crystal","Winter Crystal"],["honey-meadow","Honey Meadow"],["midnight-melody","Midnight Melody"],["paint-play","Paint Play"],["dragon-valley","Dragon Valley"],["butterfly-dream","Butterfly Dream"],["rainbow-clouds","Rainbow Clouds"],["harbor-lights","Harbor Lights"],["carnival-glow","Carnival Glow"],["robot-city","Robot City"],["storybook-nook","Storybook Nook"],["stadium-spirit","Stadium Spirit"]]);

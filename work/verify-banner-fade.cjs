@@ -9,6 +9,7 @@ const sharp=require('sharp');
     const page=await browser.newPage({viewport:{width:1000,height:600}});
     await page.setContent('<body><main></main></body>');
     await page.addStyleTag({path:path.resolve(__dirname,'../styles.css')});
+    await page.addScriptTag({path:path.resolve(__dirname,'../profile-banners.js')});
     for(const theme of ['night','light']) for(const [width,height] of [[180,90],[235,277],[832,277]]) {
       await page.evaluate(({theme,width,height})=>{
         document.body.dataset.theme=theme;
@@ -19,16 +20,24 @@ const sharp=require('sharp');
       },{theme,width,height});
       const banner=page.locator('.profile-banner-custom');
       await banner.locator('img').evaluate(i=>i.decode());
+      await page.waitForFunction(()=>document.querySelector('.profile-banner-custom').style.getPropertyValue('--banner-accent')==='20,58,196');
       const png=await banner.screenshot({path:path.join(os.tmpdir(),`banner-fade-${theme}-${width}.png`)});
       const {data,info}=await sharp(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
       const pixel=x=>Array.from(data.slice((Math.floor(height/2)*width+x)*info.channels,(Math.floor(height/2)*width+x)*info.channels+3));
-      const background=theme==='light'?255:0;
-      for(let x=0;x<Math.floor(width*.42);x++) assert(pixel(x).every(v=>Math.abs(v-background)<=1),'image edge must remain hidden');
+      await banner.locator('img').evaluate(i=>i.style.visibility='hidden');
+      const backgroundPng=await banner.screenshot();
+      const bg=await sharp(backgroundPng).removeAlpha().raw().toBuffer();
+      await banner.locator('img').evaluate(i=>i.style.visibility='');
+      for(let x=0;x<Math.floor(width*.42);x++) {
+        const offset=(Math.floor(height/2)*width+x)*info.channels;
+        assert(pixel(x).every((v,c)=>Math.abs(v-bg[offset+c])<=1),'image edge must remain hidden behind the glow');
+      }
+      assert(pixel(5)[2]>pixel(5)[0],'the blank side receives an image-matched blue tint');
       let largestJump=0;
       for(let x=1;x<width;x++) for(let channel=0;channel<3;channel++) largestJump=Math.max(largestJump,Math.abs(pixel(x)[channel]-pixel(x-1)[channel]));
       assert(largestJump<=9,`${theme} ${width}: abrupt seam (${largestJump})`);
       assert.deepEqual(pixel(width-1),[20,58,196],'right side remains clear');
     }
-    console.log('PASS: smooth half-banner fade in light/dark at profile and narrow-card sizes; no exposed image boundary.');
+    console.log('PASS: automatic image-matched glow and smooth half-banner fade in light/dark at profile and narrow-card sizes; no exposed image boundary.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
