@@ -1336,6 +1336,7 @@ function writeDb(db) {
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,
     teacherProfileFrame: cleanProfileFrame(db.teacherProfileFrame),
+    teacherProfileBanner: cleanProfileBanner(db.teacherProfileBanner),
     teacherHomeScene: cleanHomeScene(db.teacherHomeScene),
     teacherHomeShelf: collectibleShelf.clean(db.teacherHomeShelf),
     teacherHomeShelfRight: collectibleShelf.clean(db.teacherHomeShelfRight),
