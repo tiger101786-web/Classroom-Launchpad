@@ -29,7 +29,7 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
       await upload(400,200);
       await page.waitForFunction(()=>!document.querySelector('#customBannerControls').hidden);
       assert.equal(await page.locator('#customBannerLayout').inputValue(),'framed');
-      assert.equal(await page.locator('#useCustomBanner').textContent(),'Preview my image');
+      assert.equal(await page.locator('#useCustomBanner').textContent(),'Back to my image');
       assert.equal(await page.locator('.custom-banner-actions button').count(),2);
       const actionGap=await page.evaluate(()=>document.querySelector('.custom-banner-actions').getBoundingClientRect().top-document.querySelector('#customBannerQuality').getBoundingClientRect().bottom);
       assert(actionGap>=10,'Banner actions need breathing room below the status text');

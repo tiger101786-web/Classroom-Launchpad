@@ -48,7 +48,7 @@
     const imageActions = document.createElement('div');
     imageActions.className = 'custom-banner-actions';
     const previewImageButton = editor.querySelector('#useCustomBanner');
-    previewImageButton.textContent = 'Preview my image';
+    previewImageButton.textContent = 'Back to my image';
     imageActions.append(previewImageButton, editor.querySelector('#removeCustomBanner'));
     editor.append(imageActions);
     const quality = editor.querySelector('#customBannerQuality');
