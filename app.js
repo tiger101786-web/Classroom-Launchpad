@@ -323,6 +323,7 @@ function normalizeThreads(items) {
       avatarUrl: normalizeProfileAvatarUrl(reply.avatarUrl),
       profileFrame: normalizeProfileFrame(reply.profileFrame),
       profileBanner: window.ProfileBanners.normalize(reply.profileBanner),
+      nameStyle: window.ProfileNameStyles.normalize(reply.nameStyle),
       createdAt: reply.createdAt || new Date().toISOString()
     })) : [];
     return {
@@ -335,6 +336,7 @@ function normalizeThreads(items) {
       avatarUrl: normalizeProfileAvatarUrl(item.avatarUrl),
       profileFrame: normalizeProfileFrame(item.profileFrame),
       profileBanner: window.ProfileBanners.normalize(item.profileBanner),
+      nameStyle: window.ProfileNameStyles.normalize(item.nameStyle),
       replies,
       createdAt: item.createdAt || new Date().toISOString()
     };
@@ -1866,7 +1868,7 @@ function renderForumAuthor(post, label = "Member") {
     <aside class="forum-post-author ${window.ProfileBanners.normalize(post.profileBanner) !== 'none' ? 'has-profile-banner' : ''}">
       ${window.ProfileBanners.cover(post.profileBanner)}
       ${renderForumAvatar(post.studentName, post.avatarUrl, "", post.profileFrame)}
-      <strong>${escapeHtml(post.studentName || "Student")}</strong>
+      ${window.ProfileNameStyles.render(post.studentName || "Student", post.nameStyle)}
       <span>${escapeHtml(forumRoleLabel(post.grade))}</span>
       <small>${escapeHtml(label)}</small>
       <button type="button" class="forum-back-to-top" data-action="threadBackToTop">Back to top</button>
@@ -1884,11 +1886,12 @@ function renderForumProfileEditor(compact = false) {
       <div class="forum-profile-copy">
         <span class="feature-kicker">Colt Corner Profile</span>
         <h3 id="forumProfileHeading">Make it yours</h3>
-        <strong>${escapeHtml(authSession.name || "Your profile")}</strong>
+        ${window.ProfileNameStyles.render(authSession.name || "Your profile", authSession.nameStyle)}
         <p>Choose a school-appropriate JPG, PNG, or WebP image. It will be cropped to a square for the forum.</p>
       </div>
       <div class="forum-profile-actions">
         <button type="button" class="outline-btn" id="changeProfileBanner">Change banner</button>
+        <button type="button" class="outline-btn" id="changeNameStyle">Name style</button>
         <label class="primary-btn forum-profile-choose" for="forumProfileImage">${authSession.avatarUrl ? "Change Picture" : "Choose Picture"}</label>
         <input id="forumProfileImage" type="file" accept="image/jpeg,image/png,image/webp" hidden>
         ${authSession.avatarUrl ? '<button type="button" class="outline-btn" id="removeForumProfileImage">Remove</button>' : ""}
@@ -12950,6 +12953,14 @@ function attachForumProfileEditor(root = document) {
   const input = root.querySelector("#" + "forumProfileImage");
   if (!input || input.dataset.ready === "true") return;
   input.dataset.ready = "true";
+  root.querySelector('#changeNameStyle')?.addEventListener('click', () => window.ProfileNameStyles.open({
+    selected: authSession.nameStyle,
+    name: authSession.name || 'Student',
+    avatar: renderForumAvatar(authSession.name, authSession.avatarUrl, '', authSession.profileFrame),
+    role: forumRoleLabel(authSession.role === 'teacher' ? 'teacher' : authSession.grade),
+    save: nameStyle => sharedBackend.request('/api/profile-name-style', {method:'POST', body:JSON.stringify({nameStyle})}),
+    onSave: result => {authSession=result.session;classThreads=normalizeThreads(result.threads);profileAvatarMessage='Name style saved!';refresh();}
+  }));
   root.querySelector("#" + "changeProfileBanner")?.addEventListener("click", () => window.ProfileBanners.open({
     selected: authSession.profileBanner,
     avatar: renderForumAvatar(authSession.name, authSession.avatarUrl, "forum-profile-preview", authSession.profileFrame),

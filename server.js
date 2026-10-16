@@ -8,6 +8,11 @@ const { Readable } = require("stream");
 const JSZip = require("jszip");
 const moderationConfig = require("./colt-corner-moderation-config");
 const collectibleShelf = require("./collectible-shelf");
+const profileNameStyles = require('./profile-name-styles');
+function nameStyleForSession(session, db) {
+  return profileNameStyles.normalize(session.role === 'teacher' ? db.teacherNameStyle :
+    normalizeApprovedStudents(db.approvedStudents).find(s => s.email === normalizeEmail(session.email))?.nameStyle);
+}
 const { checkCornerDraft } = require("./colt-corner-coach");
 const {
   hashNormalizedMessage,
@@ -660,7 +665,8 @@ function normalizeModeratedPost(source, type) {
     authorKey: cleanText(source && source.authorKey, 128),
     avatarUrl: cleanProfileAvatarUrl(source && source.avatarUrl),
     profileFrame: cleanProfileFrame(source && source.profileFrame),
-    profileBanner: cleanProfileBanner(source && source.profileBanner)
+    profileBanner: cleanProfileBanner(source && source.profileBanner),
+    nameStyle: profileNameStyles.normalize(source && source.nameStyle)
   };
   if (type === "topic") {
     return {
@@ -775,7 +781,8 @@ function publicPost(post, type) {
     createdAt: post.createdAt,
     avatarUrl: cleanProfileAvatarUrl(post.avatarUrl),
     profileFrame: cleanProfileFrame(post.profileFrame),
-    profileBanner: cleanProfileBanner(post.profileBanner)
+    profileBanner: cleanProfileBanner(post.profileBanner),
+    nameStyle: profileNameStyles.normalize(post.nameStyle)
   };
   return type === "topic"
     ? {
@@ -942,6 +949,7 @@ function normalizeApprovedStudents(entries) {
       avatarUpdatedAt: Number.isFinite(Date.parse(source.avatarUpdatedAt)) ? new Date(source.avatarUpdatedAt).toISOString() : "",
       profileFrame: cleanProfileFrame(source.profileFrame),
       profileBanner: cleanProfileBanner(source.profileBanner),
+      nameStyle: profileNameStyles.normalize(source.nameStyle),
       homeScene: cleanHomeScene(source.homeScene),
       homeShelf: collectibleShelf.clean(source.homeShelf),
       homeShelfRight: collectibleShelf.clean(source.homeShelfRight),
@@ -1336,6 +1344,7 @@ function writeDb(db) {
       ? { salt: String(db.teacherPin.salt || ""), hash: String(db.teacherPin.hash || "") }
       : null,
     teacherProfileFrame: cleanProfileFrame(db.teacherProfileFrame),
+    teacherNameStyle: profileNameStyles.normalize(db.teacherNameStyle),
     teacherProfileBanner: cleanProfileBanner(db.teacherProfileBanner),
     teacherHomeScene: cleanHomeScene(db.teacherHomeScene),
     teacherHomeShelf: collectibleShelf.clean(db.teacherHomeShelf),
@@ -1466,6 +1475,7 @@ function publicSession(session, db = null) {
     avatarUrl: profileAvatarUrlForSession(session, sourceDb),
     profileFrame: profileFrameForSession(session, sourceDb),
     profileBanner: profileBannerForSession(session, sourceDb),
+    nameStyle: nameStyleForSession(session, sourceDb),
     homeScene: homeSceneForSession(session, sourceDb),
     homeShelf: homeShelfForSession(session, sourceDb),
     homeShelfRight: homeShelfForSession(session, sourceDb, 'right')
@@ -3596,6 +3606,33 @@ async function handleApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/profile-name-style' && req.method === 'POST') {
+    if (!requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ['student', 'teacher']);
+    if (!allowed) return true;
+    try {
+      const {nameStyle} = await readBody(req);
+      if (!profileNameStyles.valid(nameStyle)) throw new Error('Choose an available name style.');
+      const db = readDb();
+      if (allowed.role === 'teacher') db.teacherNameStyle = nameStyle;
+      else {
+        const students = normalizeApprovedStudents(db.approvedStudents);
+        const student = students.find(s => s.email === normalizeEmail(allowed.email));
+        if (!student) throw new Error('Your approved student account could not be found.');
+        student.nameStyle = nameStyle;
+        db.approvedStudents = students;
+      }
+      const authorKey = allowed.role === 'teacher' ? 'teacher' : studentAuthorKey(allowed);
+      db.threads = normalizeModeratedThreads(db.threads).map(thread => ({
+        ...thread, ...(thread.authorKey === authorKey ? {nameStyle} : {}),
+        replies: thread.replies.map(reply => reply.authorKey === authorKey ? {...reply,nameStyle} : reply)
+      }));
+      writeDb(db);
+      sendJson(res, 200, {ok:true,session:publicSession(allowed,db),threads:visibleApprovedThreads(db.threads,allowed)});
+    } catch(error) {sendJson(res,400,{error:error.message});}
+    return true;
+  }
+
   if (pathname === "/api/profile-banner" && req.method === "POST") {
     if (!requireSameOrigin(req, res)) return true;
     const allowed = requireRole(req, res, ["student", "teacher"]);
@@ -4074,6 +4111,7 @@ async function handleApi(req, res, pathname) {
         avatarUrl: profileAvatarUrlForSession(allowed, db),
         profileFrame: profileFrameForSession(allowed, db),
         profileBanner: profileBannerForSession(allowed, db),
+        nameStyle: nameStyleForSession(allowed, db),
         audienceGrade,
         title,
         body: message,
@@ -4158,6 +4196,7 @@ async function handleApi(req, res, pathname) {
         avatarUrl: profileAvatarUrlForSession(allowed, db),
         profileFrame: profileFrameForSession(allowed, db),
         profileBanner: profileBannerForSession(allowed, db),
+        nameStyle: nameStyleForSession(allowed, db),
         message,
         createdAt: submittedAt,
         ...moderationFields(result, allowed, submittedAt)
