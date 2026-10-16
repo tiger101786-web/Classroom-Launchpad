@@ -36,6 +36,45 @@ let logs=''; server.stderr.on('data',chunk=>logs+=chunk);
     assert.equal(image.status,200,'Saved image must be retrievable after database reload');
     assert.match(image.headers.get('content-type'),/image\/jpeg/);
     assert((await image.arrayBuffer()).byteLength>100);
+    assert.equal((await fetch(origin+'/api/profile-banner-source/'+id,{headers})).status,200);
+    const {chromium} = require('playwright');
+    const browser = await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
+    try {
+      const context = await browser.newContext();
+      const [cookieName,...cookieValue] = headers.Cookie.split('=');
+      await context.addCookies([{name:cookieName,value:cookieValue.join('='),url:origin}]);
+      const page = await context.newPage();
+      await page.goto(origin);
+      await page.evaluate(()=>{document.body.innerHTML='';});
+      await page.addScriptTag({path:path.join(root,'profile-banners.js')});
+      const open = selected => page.evaluate(selected=>ProfileBanners.open({selected,avatar:'',name:'Teacher',role:'Teacher',save:async profileBanner=>{
+        const response=await fetch('/api/profile-banner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profileBanner})});
+        const result=await response.json();if(!response.ok)throw Error(result.error);return result;
+      },onSave:result=>{window.savedBanner=result.session.profileBanner;}}),selected);
+      await open(id);
+      await page.waitForFunction(()=>!document.querySelector('#customBannerLayout').disabled);
+      assert(await page.locator('#customBannerLayout').isVisible());
+      await page.locator('#customBannerLayout').selectOption('framed');
+      await page.locator('#saveProfileBanner').click();
+      await page.waitForFunction(()=>window.savedBanner?.endsWith('-half'));
+      const half=await page.evaluate(()=>window.savedBanner);
+      await open(half);
+      await page.waitForFunction(()=>!document.querySelector('#customBannerLayout').disabled);
+      assert.equal(await page.locator('#customBannerLayout').inputValue(),'framed');
+      await page.locator('#customBannerLayout').selectOption('full');
+      await page.locator('#saveProfileBanner').click();
+      await page.waitForFunction(()=>window.savedBanner?.endsWith('-full'));
+      const full=await page.evaluate(()=>window.savedBanner);
+      // Simulate an older saved banner with no retained source.
+      const owner=full.split('-')[1];
+      fs.unlinkSync(path.join(dataDir,'profile-avatars',`banner-source-${owner}.jpg`));
+      await open(full);
+      await page.waitForFunction(()=>!document.querySelector('#customBannerLayout').disabled);
+      assert(await page.locator('#customBannerLayout').isVisible());
+      await page.locator('#customBannerLayout').selectOption('framed');
+      await page.locator('#saveProfileBanner').click();
+      await page.waitForFunction(()=>window.savedBanner?.endsWith('-half'));
+    } finally {await browser.close();}
     await save('colt');
     assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir,'classroom-launchpad-db.json'),'utf8')).teacherProfileBanner,'colt');
     await save('none');

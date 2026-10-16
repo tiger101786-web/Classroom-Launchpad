@@ -105,6 +105,8 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
   assert.match(saved,/^custom-/);
   assert.equal(db.threads[0].profileBanner,saved);assert.equal(db.threads[0].replies[0].profileBanner,saved);
   assert(fs.existsSync(path.join(dir,`banner-${studentKey}.jpg`)));
+  const retained = await require('@napi-rs/canvas').loadImage(fs.readFileSync(path.join(dir,`banner-source-${studentKey}.jpg`)));
+  assert.equal(retained.width,1600); assert.equal(retained.height,600);
   const imageStart=source.indexOf('  const bannerImageRequest =');
   const imageEnd=source.indexOf('  const avatarRequest =',imageStart);
   const getImage=vm.runInContext(`(async function(req,res,pathname){${source.slice(imageStart,imageEnd)}})`,context);
@@ -118,6 +120,11 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
   assert.equal(imageHeaders['Content-Type'],'image/jpeg');
   assert(Buffer.concat(downloaded).length>0);
   assert.equal(imageHeaders['Cache-Control'],'private, no-cache');
+  role='teacher';
+  await getImage({method:'GET'},{},`/api/profile-banner-source/${saved}`);
+  assert.equal(result.status,404,'Other accounts cannot download the uncropped source');
+  role='student';
+  assert.equal((await call({...payload,sourceImage:'data:image/jpeg;base64,'+fixture(1601,10).toString('base64')})).status,400);
   assert.equal((await call(saved)).status,200);
   assert.equal((await call(`custom-${teacherAuthorKey}-${Date.now()}`)).status,400);
   assert.equal((await call({image:'data:image/svg+xml;base64,abc'})).status,400);

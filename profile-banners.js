@@ -32,6 +32,7 @@
     let saving = false;
     let preparing = false;
     let uploaded = null;
+    let sourceImage = null;
     let customDraft = null;
     let useUpload = false;
     const dialog = document.createElement('dialog');
@@ -45,6 +46,20 @@
     editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Half image (fade on the left)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><button type="button" class="outline-btn" id="removeCustomBanner">Remove banner</button>`;
     dialog.querySelector('#profileBannerPreview').after(editor);
     const quality = editor.querySelector('#customBannerQuality');
+    const encodeSource = image => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, 1600 / Math.max(image.width, image.height));
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#202124'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      for (const q of [.85, .65, .45, .25]) {
+        const data = canvas.toDataURL('image/jpeg', q);
+        if (data.length <= 950000) return data;
+      }
+      throw new Error('This image has too much detail. Choose a smaller image.');
+    };
     const drawUpload = () => {
       if (!uploaded || saving) return;
       const canvas = document.createElement('canvas');
@@ -64,7 +79,7 @@
       // Apply the fade in CSS so saved banners follow each viewer's theme.
       let image = canvas.toDataURL('image/jpeg', .85);
       if (image.length > 950000) image = canvas.toDataURL('image/jpeg', .65);
-      customDraft = {image, layout: framed ? 'half' : 'full'}; useUpload = true;
+      customDraft = {image, sourceImage, layout: framed ? 'half' : 'full'}; useUpload = true;
       quality.textContent = scale > 1.15 ? 'This crop may look blurry. Reduce the zoom or choose a larger picture (1200 × 400 or larger recommended).' : 'This image has enough detail for the current crop.';
       dialog.querySelectorAll('[data-banner-choice]').forEach(b => b.setAttribute('aria-pressed','false'));
       dialog.querySelector('#profileBannerPreview').innerHTML = preview();
@@ -73,7 +88,7 @@
     editor.querySelector('#useCustomBanner').addEventListener('click', drawUpload);
     editor.querySelector('#removeCustomBanner').addEventListener('click', () => {
       if (saving || preparing) return;
-      useUpload = false; customDraft = null; uploaded = null; draft = 'none';
+      useUpload = false; customDraft = null; uploaded = null; sourceImage = null; draft = 'none';
       editor.querySelector('#customBannerControls').hidden = true;
       editor.querySelector('#customBannerFile').value = '';
       quality.textContent = '';
@@ -83,7 +98,7 @@
     });
     editor.querySelector('#customBannerFile').addEventListener('change', async event => {
       const file = event.target.files[0];
-      if (!file || saving) return;
+      if (!file || saving || preparing) return;
       preparing = true;
       dialog.querySelector('#saveProfileBanner').disabled = true;
       event.target.disabled = true;
@@ -97,7 +112,8 @@
         if (image.width*image.height > 40000000) throw new Error('That image is too large. Resize it to under 40 megapixels first.');
         if (image.width < 160 || image.height < 100) throw new Error('This image is too tiny for a banner. Choose one at least 160 × 100 pixels.');
         if (!dialog.isConnected) return;
-        uploaded = image;
+        const encoded = encodeSource(image);
+        uploaded = image; sourceImage = encoded;
         editor.querySelector('#customBannerControls').hidden = false;
         editor.querySelector('#customBannerLayout').value = image.width < 900 || image.height < 300 ? 'framed' : 'full';
         editor.querySelector('#customBannerX').value = editor.querySelector('#customBannerY').value = 50;
@@ -157,6 +173,41 @@
       }
     });
     dialog.showModal();
+    if (isCustom(draft)) {
+      const savedId = draft;
+      preparing = true;
+      editor.querySelector('#customBannerControls').hidden = false;
+      editor.querySelector('#customBannerLayout').value = savedId.endsWith('-half') ? 'framed' : 'full';
+      editor.querySelectorAll('input, select, button').forEach(el => { el.disabled = true; });
+      dialog.querySelector('#saveProfileBanner').disabled = true;
+      quality.textContent = 'Loading your saved image…';
+      (async () => {
+        try {
+          let image = new Image();
+          image.src = `/api/profile-banner-source/${savedId}`;
+          try { await image.decode(); }
+          catch {
+            image = new Image(); image.src = `/api/profile-banner-image/${savedId}`;
+            await image.decode();
+            if (savedId.endsWith('-half')) {
+              const crop = document.createElement('canvas'); crop.width = 720; crop.height = 400;
+              crop.getContext('2d').drawImage(image, 480, 0, 720, 400, 0, 0, 720, 400);
+              image = crop;
+            }
+          }
+          if (!dialog.isConnected) return;
+          sourceImage = encodeSource(image); uploaded = image;
+          quality.textContent = 'Switch between Full banner and Half image, then select Save banner.';
+        } catch {
+          editor.querySelector('#customBannerControls').hidden = true;
+          quality.textContent = 'Your saved image could not be loaded. Try reopening the chooser or upload an image.';
+        } finally {
+          preparing = false;
+          editor.querySelectorAll('input, select, button').forEach(el => { el.disabled = false; });
+          dialog.querySelector('#saveProfileBanner').disabled = false;
+        }
+      })();
+    }
   }
   window.ProfileBanners = { normalize, cover, open };
   choices.push(['honeybee','Honeybee Garden'], ['volcanic','Volcanic Forge'], ['aurora','Arctic Aurora']);

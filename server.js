@@ -86,7 +86,7 @@ const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "
 profileBannerIds.add('anime-walled-city');
 function cleanProfileBanner(value) { return profileBannerIds.has(value) || (typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}(?:-(?:full|half))?$/.test(value)) ? value : "none"; }
 // Check the JPEG header before decoding to avoid huge decompression allocations.
-function isPreparedBannerJpeg(bytes) {
+function isPreparedBannerJpeg(bytes, source = false) {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return false;
   let offset = 2;
   while (offset + 4 <= bytes.length) {
@@ -96,7 +96,11 @@ function isPreparedBannerJpeg(bytes) {
     if (marker === 0xda || marker === 0xd9 || offset + 2 > bytes.length) return false;
     const length = bytes.readUInt16BE(offset);
     if (length < 2 || offset + length > bytes.length) return false;
-    if (marker === 0xc0 || marker === 0xc2) return length >= 8 && bytes.readUInt16BE(offset + 3) === 400 && bytes.readUInt16BE(offset + 5) === 1200;
+    if (marker === 0xc0 || marker === 0xc2) {
+      if (length < 8) return false;
+      const height = bytes.readUInt16BE(offset + 3), width = bytes.readUInt16BE(offset + 5);
+      return source ? width > 0 && height > 0 && width <= 1600 && height <= 1600 : height === 400 && width === 1200;
+    }
     offset += length;
   }
   return false;
@@ -3517,15 +3521,20 @@ async function handleApi(req, res, pathname) {
   if (await handleColtAssistantAiApi(req, res, pathname)) return true;
 
   const session = readSession(req);
-  const bannerImageRequest = pathname.match(/^\/api\/profile-banner-image\/(custom-([a-f0-9]{64})-[0-9]{13}(?:-(?:full|half))?)$/);
+  const bannerImageRequest = pathname.match(/^\/api\/profile-banner-(?:image|source)\/(custom-([a-f0-9]{64})-[0-9]{13}(?:-(?:full|half))?)$/);
   if (req.method === 'GET' && bannerImageRequest) {
-    if (!requireRole(req, res, ['student', 'teacher'])) return true;
+    const allowed = requireRole(req, res, ['student', 'teacher']);
+    if (!allowed) return true;
     const db = readDb();
     const id = bannerImageRequest[1];
     const owner = bannerImageRequest[2];
     const active = (owner === teacherAuthorKey && db.teacherProfileBanner === id) ||
       normalizeApprovedStudents(db.approvedStudents).some(s => s.profileBanner === id && studentAuthorKey(s) === owner);
-    const filename = path.join(profileAvatarDir, `banner-${owner}.jpg`);
+    const source = pathname.startsWith('/api/profile-banner-source/');
+    if (source && owner !== (allowed.role === 'teacher' ? teacherAuthorKey : studentAuthorKey(allowed))) {
+      sendJson(res, 404, {error:'That banner is not available.'}); return true;
+    }
+    const filename = path.join(profileAvatarDir, `banner-${source ? 'source-' : ''}${owner}.jpg`);
     if (!active || !fs.existsSync(filename)) { sendJson(res, 404, {error:'That banner is not available.'}); return true; }
     res.writeHead(200, {'Content-Type':'image/jpeg', 'Cache-Control':'private, no-cache', 'X-Content-Type-Options':'nosniff'});
     fs.createReadStream(filename).pipe(res);
@@ -3643,6 +3652,7 @@ async function handleApi(req, res, pathname) {
       const owner = allowed.role === 'teacher' ? teacherAuthorKey : studentAuthorKey(allowed);
       let profileBanner = body.profileBanner;
       let bannerFile = null;
+      let sourceFile = null;
       if (profileBanner && typeof profileBanner === 'object') {
         const data = profileBanner.image;
         if (typeof data !== 'string' || data.length > 960000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(data)) throw new Error('Choose a valid banner image under 700 KB.');
@@ -3656,6 +3666,22 @@ async function handleApi(req, res, pathname) {
         bannerFile = await canvas.encode('jpeg', 85);
         const layout = body.profileBanner.layout;
         if (layout !== undefined && !['full', 'half'].includes(layout)) throw new Error('Choose Full banner or Half image.');
+        const sourceData = body.profileBanner.sourceImage;
+        if (sourceData !== undefined) {
+          if (typeof sourceData !== 'string' || sourceData.length > 960000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(sourceData)) throw new Error('Choose a valid source image under 700 KB.');
+          const sourceBytes = Buffer.from(sourceData.split(',')[1], 'base64');
+          if (sourceBytes.length > maxProfileAvatarBytes || !isPreparedBannerJpeg(sourceBytes, true)) throw new Error('That source image could not be verified.');
+          const source = await loadImage(sourceBytes);
+          const sourceCanvas = createCanvas(source.width, source.height);
+          sourceCanvas.getContext('2d').drawImage(source, 0, 0);
+          sourceFile = await sourceCanvas.encode('jpeg', 85);
+        } else {
+          // Older clients only send the composed banner. Keep its usable image area.
+          const width = layout === 'half' ? 720 : 1200;
+          const sourceCanvas = createCanvas(width, 400);
+          sourceCanvas.getContext('2d').drawImage(image, 1200 - width, 0, width, 400, 0, 0, width, 400);
+          sourceFile = await sourceCanvas.encode('jpeg', 85);
+        }
         profileBanner = `custom-${owner}-${Date.now()}${layout ? '-' + layout : ''}`;
       } else if (!profileBannerIds.has(profileBanner) && !(cleanProfileBanner(profileBanner) !== 'none' && profileBanner.startsWith(`custom-${owner}-`) && profileBanner === profileBannerForSession(allowed, db))) {
         throw new Error('Choose one of the available banners or upload your own image.');
@@ -3674,6 +3700,10 @@ async function handleApi(req, res, pathname) {
         const temp = `${filename}.${crypto.randomBytes(8).toString('hex')}.tmp`;
         fs.writeFileSync(temp, bannerFile, {flag:'wx'});
         fs.renameSync(temp, filename);
+        const sourceFilename = path.join(profileAvatarDir, `banner-source-${owner}.jpg`);
+        const sourceTemp = `${sourceFilename}.${crypto.randomBytes(8).toString('hex')}.tmp`;
+        fs.writeFileSync(sourceTemp, sourceFile, {flag:'wx'});
+        fs.renameSync(sourceTemp, sourceFilename);
       }
       db.threads = normalizeModeratedThreads(db.threads).map(thread => ({
         ...thread, ...(thread.authorKey === authorKey ? { profileBanner } : {}),
