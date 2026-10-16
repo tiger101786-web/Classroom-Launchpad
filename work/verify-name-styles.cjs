@@ -4,7 +4,10 @@ const {chromium}=require('playwright');
 const styles=require('../profile-name-styles');
 const root=path.resolve(__dirname,'..');
 (async()=>{
-  assert.equal(styles.choices.length,19);
+  assert.equal(styles.choices.length,31);
+  assert.equal(styles.choices[0][0],'none');
+  const titles=styles.choices.slice(1).map(x=>x[1]);
+  assert.deepEqual(titles,[...titles].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'})));
   assert.equal(styles.normalize('invalid'),'none');
   assert(!styles.render('<img src=x onerror=alert(1)>','comic').includes('<img'));
   const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
@@ -13,13 +16,23 @@ const root=path.resolve(__dirname,'..');
     await page.setContent('<body data-theme="night"><button id="changeNameStyle">Name style</button></body>');
     for(const file of ['styles.css','launchpad-scenes.css','profile-name-styles.css'])await page.addStyleTag({path:path.join(root,file)});
     await page.addScriptTag({path:path.join(root,'profile-name-styles.js')});
+    const selectStyle=async id=>{
+      const index=styles.choices.findIndex(([key])=>key===id),target=Math.floor(index/6)+1;
+      while(true){const current=Number((await page.locator('[aria-label="Name style pages"] span').textContent()).match(/Page (\d+)/)[1]);if(current===target)break;await page.locator(`[data-name-page="${current<target?1:-1}"]`).click();}
+      assert(await page.locator('[data-name-choice]:visible').count()<=6);
+      await page.locator(`[data-name-choice="${id}"]`).click();
+    };
     for(const width of [390,1000])for(const theme of ['night','light']) {
       await page.setViewportSize({width,height:1000});
       await page.evaluate(t=>document.body.dataset.theme=t,theme);
       await page.evaluate(()=>ProfileNameStyles.open({selected:'comic',name:'Alex Rivera',avatar:'<div class="forum-avatar forum-avatar-initials">AR</div>',role:'6th Grade',save:async id=>{if(window.fail)throw Error('Try again');window.saved=id;return {};},onSave:()=>{}}));
-      for(const [id] of styles.choices){await page.locator(`[data-name-choice="${id}"]`).click();assert.equal(await page.locator(`[data-name-choice="${id}"]`).getAttribute('aria-pressed'),'true');assert(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth+1));}
-      await page.locator('[data-name-choice="fantasy"]').click();
-      const cardLayout=await page.locator('.name-style-choice').evaluateAll(cards=>cards.map(card=>{
+      assert(await page.locator('[data-name-choice="comic"]').isVisible());
+      for(const [id] of styles.choices){await selectStyle(id);assert.equal(await page.locator(`[data-name-choice="${id}"]`).getAttribute('aria-pressed'),'true');assert(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth+1));}
+      await selectStyle('fantasy');
+      await page.locator('[data-name-page="1"]').click();
+      assert.equal(await page.locator('[data-name-choice="fantasy"]').getAttribute('aria-pressed'),'true');
+      await page.locator('[data-name-page="-1"]').click();
+      const cardLayout=await page.locator('.name-style-choice:visible').evaluateAll(cards=>cards.map(card=>{
         const box=card.getBoundingClientRect(),title=card.querySelector('b').getBoundingClientRect(),description=card.querySelector('small').getBoundingClientRect();
         return {title:title.top-box.top,description:description.top-box.top,gap:description.top-title.bottom,height:box.height};
       }));
@@ -32,7 +45,7 @@ const root=path.resolve(__dirname,'..');
       assert.equal(await page.locator('#saveNameStyle').isEnabled(),true);
       await page.evaluate(()=>window.fail=false);await page.locator('#saveNameStyle').click();assert.equal(await page.evaluate(()=>window.saved),'fantasy');
       await page.evaluate(()=>ProfileNameStyles.open({selected:'fantasy',name:'Alexandria Montgomery-Washington',save:async()=>{throw Error('Cancel must not save');},onSave:()=>{}}));
-      for(const [id] of styles.choices){await page.locator(`[data-name-choice="${id}"]`).click();assert(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth+1));}
+      for(const [id] of styles.choices){await selectStyle(id);assert(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth+1));}
       await page.keyboard.press('Escape');assert.equal(await page.locator('dialog').count(),0);
     }
     assert.deepEqual(errors,[]);
@@ -69,6 +82,6 @@ const root=path.resolve(__dirname,'..');
     assert.equal(disk.teacherNameStyle,'comic');assert.equal(disk.approvedStudents.find(s=>s.email===email).nameStyle,'patch');
     await request('/api/profile-name-style',student,{nameStyle:'none'});
     assert.equal((await request('/api/auth/session',student,undefined,'GET')).data.session.nameStyle,'none');
-    console.log('PASS: all 18 styles plus reset; desktop/mobile, both themes, long names, retry/cancel, auth, validation, unchanged real names, disk persistence and existing/new post styles.');
+    console.log('PASS: 30 styles plus Original, alphabetical order, six-card pages, saved-selection page, draft retention, desktop/mobile, both themes, long names, retry/cancel and student/teacher persistence.');
   } finally {server.kill();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
