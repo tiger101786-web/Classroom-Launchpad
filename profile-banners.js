@@ -1,6 +1,6 @@
 (() => {
   const choices = [['none', 'No banner'], ['colt', 'Colt Pride'], ['neon', 'Neon Studio'], ['cosmic', 'Cosmic Ribbon'], ['horizon', 'Soft Horizon'], ['ocean', 'Ocean Pearl'], ['laurel', 'Royal Laurel'], ['sakura', 'Sakura Bloom'], ['grove', 'Enchanted Forest'], ['autumn', 'Autumn Harvest']];
-  const isCustom = value => typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}$/.test(value);
+  const isCustom = value => typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}(?:-(?:full|half))?$/.test(value);
   const normalize = value => isCustom(value) || choices.some(([id]) => id === value) ? value : 'none';
   choices.push(['blue-fire', 'Blue Fire'], ['rainbow-fire', 'Rainbow Fire'], ['nugget-party', 'Nugget Party']);
   choices.push(['storm', 'Storm Crystal'], ['clockwork', 'Clockwork Brass'], ['moon-garden', 'Moonlit Garden']);
@@ -21,7 +21,7 @@
   const cover = value => {
     // Additional themed covers share the existing crop and preview behavior.
     const id = normalize(value);
-    if (isCustom(id)) return `<div class="profile-banner-cover profile-banner-custom" aria-hidden="true"><img src="/api/profile-banner-image/${id}" alt="" loading="lazy"></div>`;
+    if (isCustom(id)) return `<div class="profile-banner-cover profile-banner-custom" data-custom-layout="${id.endsWith('-half') ? 'half' : id.endsWith('-full') ? 'full' : 'legacy'}" aria-hidden="true"><img src="/api/profile-banner-image/${id}" alt="" loading="lazy"></div>`;
     const scene = sceneBanners[id];
     const source = scene ? `assets/profile-banner-${id}-wide.png${id === 'anime-hidden-leaf' ? '?v=20261005-hidden-leaf-v2' : ''}` : `assets/profile-banner-${id}.png`;
     return id === 'none' ? '' : `<div class="profile-banner-cover${scene ? ' profile-banner-panorama' : ''}" data-banner="${id}" aria-hidden="true"><img src="${source}" alt="" loading="lazy"></div>`;
@@ -37,12 +37,12 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'profile-banner-dialog launch-scene-dialog';
     dialog.setAttribute('aria-labelledby', 'profileBannerTitle');
-    const preview = () => `<div class="profile-banner-card">${useUpload && customDraft ? `<div class="profile-banner-cover profile-banner-custom"><img src="${customDraft.image}" alt="Custom banner preview"></div>` : cover(draft)}<div class="profile-banner-identity">${avatar}<div><strong>${name}</strong><span>${role}</span></div></div></div>`;
+    const preview = () => `<div class="profile-banner-card">${useUpload && customDraft ? `<div class="profile-banner-cover profile-banner-custom" data-custom-layout="${customDraft.layout}"><img src="${customDraft.image}" alt="Custom banner preview"></div>` : cover(draft)}<div class="profile-banner-identity">${avatar}<div><strong>${name}</strong><span>${role}</span></div></div></div>`;
     dialog.innerHTML = `<div class="launch-scene-dialog-heading"><h2 id="profileBannerTitle">Choose your profile banner</h2><button type="button" class="outline-btn" data-banner-close aria-label="Close banner chooser">✕</button></div><p>Your Colt Corner cover. Your picture, avatar frame, and homepage scene stay unchanged.</p><div id="profileBannerPreview">${preview()}</div><div class="profile-banner-options">${choices.map(([id, title]) => `<button type="button" data-banner-choice="${id}" aria-pressed="${id === draft}">${id === 'none' ? '<span class="profile-banner-blank">Simple & clean</span>' : cover(id)}<strong>${title}</strong></button>`).join('')}</div><p id="profileBannerStatus" role="status"></p><div class="launch-scene-dialog-actions"><button type="button" class="outline-btn" data-banner-close>Cancel</button><button type="button" class="primary-btn" id="saveProfileBanner">Save banner</button></div>`;
     document.body.append(dialog);
     const editor = document.createElement('section');
     editor.className = 'custom-banner-editor';
-    editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Blended image (black fade)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><button type="button" class="outline-btn" id="removeCustomBanner">Remove banner</button>`;
+    editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Half image (fade on the left)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><button type="button" class="outline-btn" id="removeCustomBanner">Remove banner</button>`;
     dialog.querySelector('#profileBannerPreview').after(editor);
     const quality = editor.querySelector('#customBannerQuality');
     const drawUpload = () => {
@@ -54,17 +54,17 @@
       editor.querySelector('#customBannerCrop').hidden = false;
       ctx.fillStyle = '#202124'; ctx.fillRect(0, 0, 1200, 400);
       let scale;
-      scale = Math.max(1200 / uploaded.width, 400 / uploaded.height) * Number(editor.querySelector('#customBannerZoom').value);
+      const imageWidth = framed ? 720 : 1200;
+      const imageLeft = 1200 - imageWidth;
+      scale = Math.max(imageWidth / uploaded.width, 400 / uploaded.height) * Number(editor.querySelector('#customBannerZoom').value);
       const w = uploaded.width * scale, h = uploaded.height * scale;
-      ctx.drawImage(uploaded, (1200-w)*Number(editor.querySelector('#customBannerX').value)/100, (400-h)*Number(editor.querySelector('#customBannerY').value)/100, w, h);
-      const fade = ctx.createLinearGradient(0,0,framed ? 1000 : 800,0);
-      fade.addColorStop(0, framed ? '#000' : 'rgba(0,0,0,.78)');
-      if (framed) fade.addColorStop(.25, 'rgba(0,0,0,.94)');
-      fade.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = fade; ctx.fillRect(0,0,1200,400);
+      ctx.save(); ctx.beginPath(); ctx.rect(imageLeft,0,imageWidth,400); ctx.clip();
+      ctx.drawImage(uploaded, imageLeft+(imageWidth-w)*Number(editor.querySelector('#customBannerX').value)/100, (400-h)*Number(editor.querySelector('#customBannerY').value)/100, w, h);
+      ctx.restore();
+      // Apply the fade in CSS so saved banners follow each viewer's theme.
       let image = canvas.toDataURL('image/jpeg', .85);
       if (image.length > 950000) image = canvas.toDataURL('image/jpeg', .65);
-      customDraft = {image}; useUpload = true;
+      customDraft = {image, layout: framed ? 'half' : 'full'}; useUpload = true;
       quality.textContent = scale > 1.15 ? 'This crop may look blurry. Reduce the zoom or choose a larger picture (1200 × 400 or larger recommended).' : 'This image has enough detail for the current crop.';
       dialog.querySelectorAll('[data-banner-choice]').forEach(b => b.setAttribute('aria-pressed','false'));
       dialog.querySelector('#profileBannerPreview').innerHTML = preview();

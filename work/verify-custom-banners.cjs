@@ -43,8 +43,22 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
         const x=c.getContext('2d'); x.drawImage(img,0,0);
         return [Array.from(x.getImageData(0,200,1,1).data),Array.from(x.getImageData(1100,0,1,1).data),Array.from(x.getImageData(1100,399,1,1).data)];
       });
-      assert(pixels[0].slice(0,3).every(v=>v<10),'blended left side fades to black');
       assert(pixels[1][1]>60 && pixels[2][1]>60,'image reaches top and bottom without empty margins');
+      for (const layout of ['full','framed']) {
+        await page.locator('#customBannerLayout').selectOption(layout);
+        for (const theme of ['night','light']) {
+          await page.evaluate(t=>document.body.dataset.theme=t,theme);
+          const cover=page.locator('#profileBannerPreview .profile-banner-cover');
+          const png=await cover.screenshot();
+          const {data,info}=await require('sharp')(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
+          const offset=(Math.floor(info.height/2)*info.width+2)*info.channels;
+          const rgb=Array.from(data.slice(offset,offset+3));
+          assert(theme==='light' ? rgb.every(v=>v>180) : rgb.every(v=>v<85),`${layout}/${theme}: ${rgb}`);
+          assert.equal(await cover.getAttribute('data-custom-layout'),layout==='full'?'full':'half');
+          await cover.screenshot({path:path.join(os.tmpdir(),`banner-${layout}-${theme}-${width}.png`)});
+        }
+      }
+      await page.evaluate(()=>document.body.dataset.theme='night');
       await page.screenshot({path:path.join(os.tmpdir(),`custom-banner-${width}.png`),fullPage:true});
       await page.evaluate(()=>window.failSave=true);
       await page.locator('#saveProfileBanner').click();
@@ -76,7 +90,7 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'banner-api-test-'));
   let body, result, role='student';
   const context={require,Buffer,Date,fs,path,crypto,profileAvatarDir:dir,maxProfileAvatarBytes:700*1024,teacherAuthorKey,
-    profileBannerIds:new Set(['none','colt']),cleanProfileBanner:v=>typeof v==='string'&&/^custom-[a-f0-9]{64}-[0-9]{13}$/.test(v)?v:'none',
+    profileBannerIds:new Set(['none','colt']),cleanProfileBanner:v=>typeof v==='string'&&/^custom-[a-f0-9]{64}-[0-9]{13}(?:-(?:full|half))?$/.test(v)?v:'none',
     requireSameOrigin:()=>true, requireRole:()=>({role,email:'student@test'}),readBody:async()=>body,readDb:()=>structuredClone(db),writeDb:v=>{db=v;},
     studentAuthorKey:()=>studentKey,normalizeEmail:x=>x,normalizeApprovedStudents:x=>x,normalizeModeratedThreads:x=>x,visibleApprovedThreads:x=>x,
     profileBannerForSession:(s,d)=>s.role==='teacher'?d.teacherProfileBanner:d.approvedStudents[0].profileBanner,

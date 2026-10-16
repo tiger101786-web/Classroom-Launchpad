@@ -79,7 +79,7 @@ const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "
 ["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"].forEach(id => profileBannerIds.add(id));
 ['disney-twilight-boulevard', 'disney-agrabah', 'disney-pride-rock', 'anime-hidden-leaf', 'anime-kame-island', 'anime-cherry-village'].forEach(id => profileBannerIds.add(id));
 profileBannerIds.add('anime-walled-city');
-function cleanProfileBanner(value) { return profileBannerIds.has(value) || (typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}$/.test(value)) ? value : "none"; }
+function cleanProfileBanner(value) { return profileBannerIds.has(value) || (typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}(?:-(?:full|half))?$/.test(value)) ? value : "none"; }
 // Check the JPEG header before decoding to avoid huge decompression allocations.
 function isPreparedBannerJpeg(bytes) {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return false;
@@ -3507,7 +3507,7 @@ async function handleApi(req, res, pathname) {
   if (await handleColtAssistantAiApi(req, res, pathname)) return true;
 
   const session = readSession(req);
-  const bannerImageRequest = pathname.match(/^\/api\/profile-banner-image\/(custom-([a-f0-9]{64})-[0-9]{13})$/);
+  const bannerImageRequest = pathname.match(/^\/api\/profile-banner-image\/(custom-([a-f0-9]{64})-[0-9]{13}(?:-(?:full|half))?)$/);
   if (req.method === 'GET' && bannerImageRequest) {
     if (!requireRole(req, res, ['student', 'teacher'])) return true;
     const db = readDb();
@@ -3617,7 +3617,9 @@ async function handleApi(req, res, pathname) {
         const canvas = createCanvas(1200, 400);
         canvas.getContext('2d').drawImage(image, 0, 0);
         bannerFile = await canvas.encode('jpeg', 85);
-        profileBanner = `custom-${owner}-${Date.now()}`;
+        const layout = body.profileBanner.layout;
+        if (layout !== undefined && !['full', 'half'].includes(layout)) throw new Error('Choose Full banner or Half image.');
+        profileBanner = `custom-${owner}-${Date.now()}${layout ? '-' + layout : ''}`;
       } else if (!profileBannerIds.has(profileBanner) && !(cleanProfileBanner(profileBanner) !== 'none' && profileBanner.startsWith(`custom-${owner}-`) && profileBanner === profileBannerForSession(allowed, db))) {
         throw new Error('Choose one of the available banners or upload your own image.');
       }
