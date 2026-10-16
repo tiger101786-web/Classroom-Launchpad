@@ -10741,6 +10741,10 @@ body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body
 .custom-banner-editor input, .custom-banner-editor select { max-width: 100%; width: 100%; }
 .custom-banner-editor button { margin-top: 12px; }
 .custom-banner-editor p { overflow-wrap: anywhere; }
+.custom-banner-editor #customBannerQuality:not(:empty) { margin-top: 12px; }
+.custom-banner-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.custom-banner-actions button { margin-top: 0; }
+.custom-banner-editor:has(#customBannerControls[hidden]) #useCustomBanner { display: none; }
 .custom-banner-editor [hidden] { display: none; }
 .profile-banner-cover[data-banner="colt"] img { object-position: right center; }
 /* Original wide artwork stays at its native proportions in every banner context. */

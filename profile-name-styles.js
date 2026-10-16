@@ -14,7 +14,7 @@
   const valid = value => choices.some(([id]) => id === value);
   const normalize = value => valid(value) ? value : 'none';
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const render = (name, style) => normalize(style) === 'none' ? `<strong>${escape(name)}</strong>` : `<strong class="styled-name" data-name-style="${normalize(style)}">${escape(name)}</strong>`;
+  const render = (name, style) => normalize(style) === 'none' ? `<strong>${escape(name)}</strong>` : `<span class="styled-name-wrap"><strong class="styled-name" data-name-style="${normalize(style)}">${escape(name)}</strong></span>`;
   function open({selected, name, avatar = '', role = '', save, onSave}) {
     document.querySelector('.name-style-dialog')?.remove();
     let draft = normalize(selected), saving = false;

@@ -45,6 +45,12 @@
     editor.className = 'custom-banner-editor';
     editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Half image (fade on the left)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><button type="button" class="outline-btn" id="removeCustomBanner">Remove banner</button>`;
     dialog.querySelector('#profileBannerPreview').after(editor);
+    const imageActions = document.createElement('div');
+    imageActions.className = 'custom-banner-actions';
+    const previewImageButton = editor.querySelector('#useCustomBanner');
+    previewImageButton.textContent = 'Preview my image';
+    imageActions.append(previewImageButton, editor.querySelector('#removeCustomBanner'));
+    editor.append(imageActions);
     const quality = editor.querySelector('#customBannerQuality');
     const encodeSource = image => {
       const canvas = document.createElement('canvas');
