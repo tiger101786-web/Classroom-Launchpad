@@ -10681,7 +10681,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .forum-profile-editor {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 16px;
   align-items: center;
   margin-top: 24px;
@@ -10788,7 +10788,7 @@ body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body
 }
 
 .forum-profile-editor.is-compact {
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
 .forum-profile-preview {
@@ -10801,6 +10801,7 @@ body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body
   display: grid;
   gap: 4px;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .forum-profile-copy h3,
@@ -10815,10 +10816,12 @@ body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body
 }
 
 .forum-profile-actions {
+  grid-column: 1 / -1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .forum-profile-choose {

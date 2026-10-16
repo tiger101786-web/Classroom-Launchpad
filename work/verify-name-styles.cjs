@@ -19,6 +19,11 @@ const root=path.resolve(__dirname,'..');
       await page.evaluate(()=>ProfileNameStyles.open({selected:'comic',name:'Alex Rivera',avatar:'<div class="forum-avatar forum-avatar-initials">AR</div>',role:'6th Grade',save:async id=>{if(window.fail)throw Error('Try again');window.saved=id;return {};},onSave:()=>{}}));
       for(const [id] of styles.choices){await page.locator(`[data-name-choice="${id}"]`).click();assert.equal(await page.locator(`[data-name-choice="${id}"]`).getAttribute('aria-pressed'),'true');assert(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth+1));}
       await page.locator('[data-name-choice="fantasy"]').click();
+      const cardLayout=await page.locator('.name-style-choice').evaluateAll(cards=>cards.map(card=>{
+        const box=card.getBoundingClientRect(),title=card.querySelector('b').getBoundingClientRect(),description=card.querySelector('small').getBoundingClientRect();
+        return {title:title.top-box.top,description:description.top-box.top,gap:description.top-title.bottom,height:box.height};
+      }));
+      for(const card of cardLayout){assert(Math.abs(card.title-cardLayout[0].title)<1);assert(Math.abs(card.description-cardLayout[0].description)<1);assert(card.gap>=9);assert(Math.abs(card.height-cardLayout[0].height)<1);}
       await page.locator('dialog').evaluate(el=>el.scrollTop=0);
       await page.screenshot({path:path.join(os.tmpdir(),`name-picker-${theme}-${width}.png`)});
       await page.evaluate(()=>window.fail=true);
