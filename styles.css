@@ -10725,6 +10725,14 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 
 .profile-banner-cover { position: relative; overflow: hidden; border-radius: 12px; background: #241424; min-width: 0; }
 .profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.profile-banner-cover.profile-banner-custom { background: #202124; }
+.profile-banner-cover.profile-banner-custom img { object-fit: contain; }
+.custom-banner-editor { padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; }
+.custom-banner-editor label { display: block; margin: 12px 0 6px; font-weight: 600; }
+.custom-banner-editor input, .custom-banner-editor select { max-width: 100%; width: 100%; }
+.custom-banner-editor button { margin-top: 12px; }
+.custom-banner-editor p { overflow-wrap: anywhere; }
+.custom-banner-editor [hidden] { display: none; }
 .profile-banner-cover[data-banner="colt"] img { object-position: right center; }
 /* Original wide artwork stays at its native proportions in every banner context. */
 .profile-banner-cover.profile-banner-panorama.profile-banner-panorama { height:auto; aspect-ratio:3 / 1; }
@@ -10734,6 +10742,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .forum-profile-editor:has(> .profile-banner-cover) > #profileFramePreview { margin-top: -45px; position: relative; z-index: 1; }
 .profile-banner-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--paper); margin: 18px 0; }
 .profile-banner-card > .profile-banner-cover { border-radius: 0; height: 150px; }
+.profile-banner-card > .profile-banner-custom, .forum-profile-editor > .profile-banner-custom { height: auto; aspect-ratio: 3 / 1; }
 .profile-banner-card > .profile-banner-cover[data-banner="colt"] { height: auto; aspect-ratio: 3 / 1; }
 .profile-banner-identity { display: flex; align-items: center; gap: 20px; padding: 20px; }
 .profile-banner-card:has(.profile-banner-cover) .profile-banner-identity > .profile-frame { margin-top: -42px; }

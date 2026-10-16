@@ -79,7 +79,23 @@ const profileBannerIds = new Set(["none", "colt", "neon", "cosmic", "horizon", "
 ["capybara-springs","lavender-cottage","sunflower-meadow","ninja-dojo","enchanted-mushrooms","polar-penguins","royal-peacock","dragon-treasure"].forEach(id => profileBannerIds.add(id));
 ['disney-twilight-boulevard', 'disney-agrabah', 'disney-pride-rock', 'anime-hidden-leaf', 'anime-kame-island', 'anime-cherry-village'].forEach(id => profileBannerIds.add(id));
 profileBannerIds.add('anime-walled-city');
-function cleanProfileBanner(value) { return profileBannerIds.has(value) ? value : "none"; }
+function cleanProfileBanner(value) { return profileBannerIds.has(value) || (typeof value === 'string' && /^custom-[a-f0-9]{64}-[0-9]{13}$/.test(value)) ? value : "none"; }
+// Check the JPEG header before decoding to avoid huge decompression allocations.
+function isPreparedBannerJpeg(bytes) {
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return false;
+  let offset = 2;
+  while (offset + 4 <= bytes.length) {
+    if (bytes[offset++] !== 0xff) return false;
+    while (bytes[offset] === 0xff) offset++;
+    const marker = bytes[offset++];
+    if (marker === 0xda || marker === 0xd9 || offset + 2 > bytes.length) return false;
+    const length = bytes.readUInt16BE(offset);
+    if (length < 2 || offset + length > bytes.length) return false;
+    if (marker === 0xc0 || marker === 0xc2) return length >= 8 && bytes.readUInt16BE(offset + 3) === 400 && bytes.readUInt16BE(offset + 5) === 1200;
+    offset += length;
+  }
+  return false;
+}
 ['blue-fire', 'rainbow-fire', 'nugget-party'].forEach(id => profileBannerIds.add(id));
 function profileBannerForSession(session, db) {
   return cleanProfileBanner(session.role === "teacher" ? db.teacherProfileBanner
@@ -3490,6 +3506,20 @@ async function handleApi(req, res, pathname) {
   if (await handleColtAssistantAiApi(req, res, pathname)) return true;
 
   const session = readSession(req);
+  const bannerImageRequest = pathname.match(/^\/api\/profile-banner-image\/(custom-([a-f0-9]{64})-[0-9]{13})$/);
+  if (req.method === 'GET' && bannerImageRequest) {
+    if (!requireRole(req, res, ['student', 'teacher'])) return true;
+    const db = readDb();
+    const id = bannerImageRequest[1];
+    const owner = bannerImageRequest[2];
+    const active = (owner === teacherAuthorKey && db.teacherProfileBanner === id) ||
+      normalizeApprovedStudents(db.approvedStudents).some(s => s.profileBanner === id && studentAuthorKey(s) === owner);
+    const filename = path.join(profileAvatarDir, `banner-${owner}.jpg`);
+    if (!active || !fs.existsSync(filename)) { sendJson(res, 404, {error:'That banner is not available.'}); return true; }
+    res.writeHead(200, {'Content-Type':'image/jpeg', 'Cache-Control':'private, no-cache', 'X-Content-Type-Options':'nosniff'});
+    fs.createReadStream(filename).pipe(res);
+    return true;
+  }
   const avatarRequest = pathname.match(/^\/api\/profile-avatar\/([a-f0-9]{64})$/);
   if (req.method === "GET" && avatarRequest) {
     const allowed = requireRole(req, res, ["student", "teacher"]);
@@ -3571,9 +3601,25 @@ async function handleApi(req, res, pathname) {
     if (!allowed) return true;
     try {
       const body = await readBody(req);
-      if (!profileBannerIds.has(body.profileBanner)) throw new Error("Choose one of the available banners.");
       const db = readDb();
-      const profileBanner = body.profileBanner;
+      const owner = allowed.role === 'teacher' ? teacherAuthorKey : studentAuthorKey(allowed);
+      let profileBanner = body.profileBanner;
+      let bannerFile = null;
+      if (profileBanner && typeof profileBanner === 'object') {
+        const data = profileBanner.image;
+        if (typeof data !== 'string' || data.length > 960000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(data)) throw new Error('Choose a valid banner image under 700 KB.');
+        const bytes = Buffer.from(data.split(',')[1], 'base64');
+        if (bytes.length > maxProfileAvatarBytes || !isPreparedBannerJpeg(bytes)) throw new Error('That banner image could not be verified. Please use the banner preview.');
+        const {loadImage, createCanvas} = require('@napi-rs/canvas');
+        const image = await loadImage(bytes);
+        if (image.width !== 1200 || image.height !== 400) throw new Error('Please prepare your banner using the banner preview.');
+        const canvas = createCanvas(1200, 400);
+        canvas.getContext('2d').drawImage(image, 0, 0);
+        bannerFile = await canvas.encode('jpeg', 85);
+        profileBanner = `custom-${owner}-${Date.now()}`;
+      } else if (!profileBannerIds.has(profileBanner) && !(cleanProfileBanner(profileBanner) !== 'none' && profileBanner.startsWith(`custom-${owner}-`) && profileBanner === profileBannerForSession(allowed, db))) {
+        throw new Error('Choose one of the available banners or upload your own image.');
+      }
       if (allowed.role === "teacher") db.teacherProfileBanner = profileBanner;
       else {
         const students = normalizeApprovedStudents(db.approvedStudents);
@@ -3583,6 +3629,12 @@ async function handleApi(req, res, pathname) {
         db.approvedStudents = students;
       }
       const authorKey = allowed.role === "teacher" ? "teacher" : studentAuthorKey(allowed);
+      if (bannerFile) {
+        const filename = path.join(profileAvatarDir, `banner-${owner}.jpg`);
+        const temp = `${filename}.${crypto.randomBytes(8).toString('hex')}.tmp`;
+        fs.writeFileSync(temp, bannerFile, {flag:'wx'});
+        fs.renameSync(temp, filename);
+      }
       db.threads = normalizeModeratedThreads(db.threads).map(thread => ({
         ...thread, ...(thread.authorKey === authorKey ? { profileBanner } : {}),
         replies: thread.replies.map(reply => reply.authorKey === authorKey ? { ...reply, profileBanner } : reply)
