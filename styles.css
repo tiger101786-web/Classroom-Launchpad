@@ -10729,7 +10729,12 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-banner-cover.profile-banner-custom img { object-fit: cover; }
 .profile-banner-custom[data-custom-layout="half"], .profile-banner-custom[data-custom-layout="full"] { background: #000; }
 body[data-theme="light"] .profile-banner-custom[data-custom-layout="half"], body[data-theme="light"] .profile-banner-custom[data-custom-layout="full"] { background: #fff; }
-.profile-banner-custom[data-custom-layout="half"] img { mask-image: linear-gradient(to right, transparent 40%, #000 65%); }
+/* Keep the baked image boundary aligned with the mask even in narrow post cards.
+   Hold it fully hidden past 40%, then ease into the photo instead of a hard ramp. */
+.profile-banner-custom[data-custom-layout="half"] img {
+  object-fit: fill;
+  mask-image: linear-gradient(to right, transparent 42%, rgba(0,0,0,.02) 46%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.28) 55%, rgba(0,0,0,.55) 61%, rgba(0,0,0,.80) 68%, rgba(0,0,0,.97) 76%, #000 82%);
+}
 .profile-banner-custom[data-custom-layout="full"] img { mask-image: linear-gradient(to right, rgba(0,0,0,.22), #000 70%); }
 .custom-banner-editor { padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; }
 .custom-banner-editor label { display: block; margin: 12px 0 6px; font-weight: 600; }
