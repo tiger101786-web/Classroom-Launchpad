@@ -10726,7 +10726,7 @@ body[data-theme="night"] .colt-assistant-heading .feature-kicker {
 .profile-banner-cover { position: relative; overflow: hidden; border-radius: 12px; background: #241424; min-width: 0; }
 .profile-banner-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-banner-cover.profile-banner-custom { background: #202124; }
-.profile-banner-cover.profile-banner-custom img { object-fit: contain; }
+.profile-banner-cover.profile-banner-custom img { object-fit: cover; }
 .custom-banner-editor { padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; }
 .custom-banner-editor label { display: block; margin: 12px 0 6px; font-weight: 600; }
 .custom-banner-editor input, .custom-banner-editor select { max-width: 100%; width: 100%; }

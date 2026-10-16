@@ -37,6 +37,14 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
       await page.locator('#customBannerZoom').dispatchEvent('input');
       assert.match(await page.locator('#customBannerQuality').textContent(),/blurry/);
       await page.locator('#customBannerLayout').selectOption('framed');
+      const pixels = await page.locator('#profileBannerPreview img').evaluate(async img => {
+        await img.decode();
+        const c = document.createElement('canvas'); c.width=1200; c.height=400;
+        const x=c.getContext('2d'); x.drawImage(img,0,0);
+        return [Array.from(x.getImageData(0,200,1,1).data),Array.from(x.getImageData(1100,0,1,1).data),Array.from(x.getImageData(1100,399,1,1).data)];
+      });
+      assert(pixels[0].slice(0,3).every(v=>v<10),'blended left side fades to black');
+      assert(pixels[1][1]>60 && pixels[2][1]>60,'image reaches top and bottom without empty margins');
       await page.screenshot({path:path.join(os.tmpdir(),`custom-banner-${width}.png`),fullPage:true});
       await page.evaluate(()=>window.failSave=true);
       await page.locator('#saveProfileBanner').click();
@@ -47,8 +55,9 @@ const fixture = (w,h) => { const c=createCanvas(w,h), x=c.getContext('2d'); x.fi
       payload=await page.evaluate(()=>window.saved);
       assert.match(payload.image,/^data:image\/jpeg;base64,/);
       await open();
-      while (await page.locator('[data-banner-page="-1"]').isEnabled()) await page.locator('[data-banner-page="-1"]').click();
-      await page.locator('[data-banner-choice="none"]').click();
+      await page.locator('#removeCustomBanner').click();
+      assert.equal(await page.locator('#profileBannerPreview img').count(),0);
+      assert(!await page.locator('.custom-banner-editor').textContent().then(t=>t.includes('Choose “No banner”')));
       await page.locator('#saveProfileBanner').click();
       assert.equal(await page.evaluate(()=>window.saved),'none');
       await open();

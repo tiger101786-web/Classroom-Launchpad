@@ -42,7 +42,7 @@
     document.body.append(dialog);
     const editor = document.createElement('section');
     editor.className = 'custom-banner-editor';
-    editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Framed image (best for smaller pictures)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><p>Choose “No banner” below to remove your banner. Upload again to change a saved image’s crop.</p>`;
+    editor.innerHTML = `<h3>Your own image</h3><p>Choose a school-appropriate JPG, PNG, or WebP (up to 10 MB). Premade banners below are always available.</p><label for="customBannerFile">Upload an image</label><input id="customBannerFile" type="file" accept="image/jpeg,image/png,image/webp"><div id="customBannerControls" hidden><label for="customBannerLayout">Layout</label><select id="customBannerLayout"><option value="full">Full banner</option><option value="framed">Blended image (black fade)</option></select><div id="customBannerCrop"><label for="customBannerX">Horizontal position</label><input id="customBannerX" type="range" min="0" max="100" value="50"><label for="customBannerY">Vertical position</label><input id="customBannerY" type="range" min="0" max="100" value="50"><label for="customBannerZoom">Zoom</label><input id="customBannerZoom" type="range" min="1" max="3" step="0.05" value="1"></div><button type="button" class="outline-btn" id="useCustomBanner">Use this image</button></div><p id="customBannerQuality" role="status" aria-live="polite"></p><button type="button" class="outline-btn" id="removeCustomBanner">Remove banner</button>`;
     dialog.querySelector('#profileBannerPreview').after(editor);
     const quality = editor.querySelector('#customBannerQuality');
     const drawUpload = () => {
@@ -51,32 +51,36 @@
       canvas.width = 1200; canvas.height = 400;
       const ctx = canvas.getContext('2d');
       const framed = editor.querySelector('#customBannerLayout').value === 'framed';
-      editor.querySelector('#customBannerCrop').hidden = framed;
+      editor.querySelector('#customBannerCrop').hidden = false;
       ctx.fillStyle = '#202124'; ctx.fillRect(0, 0, 1200, 400);
       let scale;
-      if (framed) {
-        // Never enlarge a small photo in the framed layout.
-        scale = Math.min(1, 650 / uploaded.width, 352 / uploaded.height);
-        const w = uploaded.width * scale, h = uploaded.height * scale;
-        ctx.fillStyle = '#d9d9d9'; ctx.fillRect(1168-w-4, (400-h)/2-4, w+8, h+8);
-        ctx.drawImage(uploaded, 1168-w, (400-h)/2, w, h);
-      } else {
-        scale = Math.max(1200 / uploaded.width, 400 / uploaded.height) * Number(editor.querySelector('#customBannerZoom').value);
-        const w = uploaded.width * scale, h = uploaded.height * scale;
-        ctx.drawImage(uploaded, (1200-w)*Number(editor.querySelector('#customBannerX').value)/100, (400-h)*Number(editor.querySelector('#customBannerY').value)/100, w, h);
-        const fade = ctx.createLinearGradient(0,0,800,0);
-        fade.addColorStop(0, 'rgba(0,0,0,.78)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = fade; ctx.fillRect(0,0,1200,400);
-      }
+      scale = Math.max(1200 / uploaded.width, 400 / uploaded.height) * Number(editor.querySelector('#customBannerZoom').value);
+      const w = uploaded.width * scale, h = uploaded.height * scale;
+      ctx.drawImage(uploaded, (1200-w)*Number(editor.querySelector('#customBannerX').value)/100, (400-h)*Number(editor.querySelector('#customBannerY').value)/100, w, h);
+      const fade = ctx.createLinearGradient(0,0,framed ? 1000 : 800,0);
+      fade.addColorStop(0, framed ? '#000' : 'rgba(0,0,0,.78)');
+      if (framed) fade.addColorStop(.25, 'rgba(0,0,0,.94)');
+      fade.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = fade; ctx.fillRect(0,0,1200,400);
       let image = canvas.toDataURL('image/jpeg', .85);
       if (image.length > 950000) image = canvas.toDataURL('image/jpeg', .65);
       customDraft = {image}; useUpload = true;
-      quality.textContent = framed ? 'Framed image: the whole picture is kept visible without enlarging it.' : scale > 1.15 ? 'This crop may look blurry. Try Framed image, reduce the zoom, or choose a larger picture (1200 × 400 or larger recommended).' : 'This image has enough detail for the current crop.';
+      quality.textContent = scale > 1.15 ? 'This crop may look blurry. Reduce the zoom or choose a larger picture (1200 × 400 or larger recommended).' : 'This image has enough detail for the current crop.';
       dialog.querySelectorAll('[data-banner-choice]').forEach(b => b.setAttribute('aria-pressed','false'));
       dialog.querySelector('#profileBannerPreview').innerHTML = preview();
     };
     editor.querySelectorAll('select, input[type="range"]').forEach(el => el.addEventListener('input', drawUpload));
     editor.querySelector('#useCustomBanner').addEventListener('click', drawUpload);
+    editor.querySelector('#removeCustomBanner').addEventListener('click', () => {
+      if (saving || preparing) return;
+      useUpload = false; customDraft = null; uploaded = null; draft = 'none';
+      editor.querySelector('#customBannerControls').hidden = true;
+      editor.querySelector('#customBannerFile').value = '';
+      quality.textContent = '';
+      dialog.querySelectorAll('[data-banner-choice]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bannerChoice === 'none')));
+      dialog.querySelector('#profileBannerPreview').innerHTML = preview();
+      dialog.querySelector('#profileBannerStatus').textContent = 'Banner removed from preview. Select Save banner to keep this change.';
+    });
     editor.querySelector('#customBannerFile').addEventListener('change', async event => {
       const file = event.target.files[0];
       if (!file || saving) return;
