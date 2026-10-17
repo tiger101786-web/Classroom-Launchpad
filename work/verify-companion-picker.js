@@ -71,8 +71,14 @@ async function request(route, cookie='', body, method) {
     const moved=await pet.boundingBox();
     assert(moved.x<before.x-250 && moved.y>before.y+60,'Pet must move with pointer');
     assert.equal(await panel.isVisible(),false,'Drag must not open controls');
+    const bubble=page.locator('.dumpling-speech');
+    assert.equal(await bubble.isVisible(),true,'Move reaction shows speech');
+    assert.match(await bubble.innerText(),/New spot, same squish/);
+    const bubbleBox=await bubble.boundingBox();assert(bubbleBox.x>=0&&bubbleBox.x+bubbleBox.width<=1280&&bubbleBox.y>=0&&bubbleBox.y+bubbleBox.height<=900);
+    await page.screenshot({path:path.join(repo,'work',`companion-move-speech-${role}.png`)});
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
+    assert.equal(await bubble.isVisible(),false,'Speech hides while customizing');
     const scrollBody=panel.locator('.dumpling-panel-body');
     assert.equal(await scrollBody.evaluate(e=>getComputedStyle(e).overflowY),'scroll');
     assert(await scrollBody.evaluate(e=>e.scrollHeight>e.clientHeight),'Options must scroll within the panel');
@@ -175,6 +181,9 @@ async function request(route, cookie='', body, method) {
     const box=await panel.boundingBox();assert(box.x>=0 && box.x+box.width<=390 && box.y>=0 && box.y+box.height<=844);
     await panel.getByRole('button',{name:'Close dumpling controls',exact:true}).click();
     await page.clock.install();
+    await pet.press('ArrowLeft');await page.clock.runFor(300);
+    assert.equal(await bubble.isVisible(),true,'Keyboard moving gets a reaction');
+    const mobileBubble=await bubble.boundingBox();assert(mobileBubble.x>=0&&mobileBubble.x+mobileBubble.width<=390&&mobileBubble.y>=0&&mobileBubble.y+mobileBubble.height<=844);
     await page.evaluate(()=>document.dispatchEvent(new Event('pointerdown')));
     await page.clock.runFor(60050);
     assert.equal(await pet.evaluate(e=>e.classList.contains('asleep')),true,'Auto nap after one quiet minute');

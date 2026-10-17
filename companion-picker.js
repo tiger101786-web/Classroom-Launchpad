@@ -12,6 +12,31 @@
   document.body.append(picker,host);
   const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
   const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
+  const speech=document.createElement('div');speech.className='dumpling-speech';speech.hidden=true;
+  speech.setAttribute('role','status');speech.setAttribute('aria-live','polite');speech.setAttribute('aria-atomic','true');
+  speech.innerHTML='<span class="dumpling-speech-label">✦ SQUISHY DUMPLING</span><span class="dumpling-speech-message"></span>';host.append(speech);
+  let speechTimer,moveTimer,moveMessage=0;
+  function hideSpeech(){clearTimeout(speechTimer);speech.hidden=true;}
+  function placeSpeech(){
+    if(speech.hidden||host.hidden)return;
+    const box=pet.getBoundingClientRect(),width=Math.min(238,innerWidth-24);
+    speech.style.width=`${width}px`;
+    const left=Math.max(12,Math.min(box.left+box.width/2-width/2,innerWidth-width-12));
+    const below=box.top<speech.offsetHeight+26;
+    speech.dataset.side=below?'below':'above';speech.style.left=`${left}px`;
+    speech.style.top=`${Math.max(12,Math.min(below?box.bottom+14:box.top-speech.offsetHeight-14,innerHeight-speech.offsetHeight-12))}px`;
+    speech.style.setProperty('--speech-tail',`${Math.max(22,Math.min(width-22,box.left+box.width/2-left))}px`);
+  }
+  function say(message){
+    if(host.hidden||!panel.hidden||pet.classList.contains('asleep'))return;
+    clearTimeout(speechTimer);speech.querySelector('.dumpling-speech-message').textContent=message;speech.hidden=false;placeSpeech();
+    speechTimer=setTimeout(hideSpeech,4200);
+  }
+  function movedReaction(){
+    if(host.hidden||preferences.asleep||autoAsleep||pet.classList.contains('waking'))return;
+    resetNap();petApi.excite();
+    const messages=['New spot, same squish!','Ooh, a cozy new perch!','Boing! I like it here!'];say(messages[moveMessage++%messages.length]);
+  }
   pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');pet.setAttribute('aria-expanded','false');pet.title='Click for controls · drag to move · arrow keys move';
   pet.querySelector('svg').setAttribute('viewBox','0 30 1254 1140');
   const heading=document.createElement('header');heading.className='dumpling-panel-heading';
@@ -39,7 +64,7 @@
     napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying){autoAsleep=true;sync();}},60000);
   }
   sleepButton.onclick=()=>{wakeRequested=Boolean(preferences.asleep||autoAsleep);preferences.asleep=!wakeRequested;autoAsleep=false;closePanel();resetNap();save();};
-  host.addEventListener('dumpling-wake-finished',()=>sync());
+  host.addEventListener('dumpling-wake-finished',()=>{sync();say('All rested and ready to squish!');});
   document.addEventListener('pointerdown',event=>{if(loaded&&!pet.contains(event.target))resetNap();});
   document.addEventListener('keydown',event=>{if(loaded&&!pet.contains(event.target))resetNap();});
   const sizeChoices=document.createElement('div');sizeChoices.className='controls dumpling-sizes';
@@ -70,6 +95,7 @@
     host.style.left=`${next.x}px`;host.style.top=`${next.y}px`;
     if(position)position=next;
     placePanel();
+    placeSpeech();
   }
   function placePanel(){
     if(panel.hidden)return;
@@ -80,7 +106,7 @@
     panel.style.top=`${Math.max(12,Math.min(box.top,innerHeight-panel.offsetHeight-12))}px`;
   }
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
-  function openPanel(){if(host.hidden)return;panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
+  function openPanel(){if(host.hidden)return;hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
@@ -91,6 +117,7 @@
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=preferences.pet!=='dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
+    if(host.hidden||asleep)hideSpeech();
     const animateWake=wakeRequested;wakeRequested=false;
     petApi.setSleep(asleep,animateWake);
     pet.setAttribute('aria-label',asleep?'Wake Squishy. Drag to move.':'Open Squishy Dumpling controls. Drag to move.');
@@ -164,30 +191,41 @@
     if(!drag||event.pointerId!==drag.id)return;
     const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
     if(!drag.moved&&Math.hypot(dx,dy)<6)return;
-    drag.moved=true;closePanel();position=clamp(drag.left+dx,drag.top+dy);place();
+    drag.moved=true;hideSpeech();closePanel();position=clamp(drag.left+dx,drag.top+dy);place();
   });
-  function endDrag(event){if(!drag||event.pointerId!==drag.id)return;suppressClick=drag.moved;if(drag.moved)persistPosition();drag=null;}
+  function endDrag(event){
+    if(!drag||event.pointerId!==drag.id)return;
+    const changed=drag.moved&&position&&Math.hypot(position.x-drag.left,position.y-drag.top)>4;
+    suppressClick=drag.moved;if(drag.moved)persistPosition();drag=null;
+    if(changed&&event.type==='pointerup')movedReaction();
+  }
   pet.addEventListener('pointerup',endDrag);pet.addEventListener('pointercancel',endDrag);
   pet.addEventListener('keydown',event=>{
     const moves={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]};
     if(!moves[event.key])return;event.preventDefault();const b=pet.getBoundingClientRect(),[x,y]=moves[event.key];position=clamp(b.left+x,b.top+y);place();persistPosition();
+    if(position.x!==b.left||position.y!==b.top){clearTimeout(moveTimer);moveTimer=setTimeout(movedReaction,250);}
   });
   async function updateAccount(nextAuth,force=false){
     auth=nextAuth||{};const next=auth.authenticated?`${auth.role}:${auth.email||''}`:'';
     if(next===account&&!force){sync();return;}
     account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
-    clearTimeout(napTimer);autoAsleep=false;
+    clearTimeout(napTimer);clearTimeout(moveTimer);hideSpeech();autoAsleep=false;
     preferences=defaults();loaded=false;loadError=false;petHidden=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
     try{const stored=JSON.parse(localStorage.getItem(positionKey())||'null');if(stored&&Number.isFinite(stored.x)&&Number.isFinite(stored.y))position=stored;}catch{}
     if(!next)return;
     try{
       const response=await fetch('/api/companion-preferences',{signal:controller.signal});if(!response.ok)throw Error('Load failed');
       const data=await response.json();if(generation!==epoch)return;
-      preferences=data.preferences;loaded=true;applyAppearance();selectPet();resetNap();
+      preferences=data.preferences;loaded=true;applyAppearance();selectPet();resetNap();say('Welcome back, squish buddy!');
     }catch(error){if(generation!==epoch||error.name==='AbortError')return;loaded=true;loadError=true;announce('Could not load pet choices. Retry before making changes.',true);sync();}
   }
   window.addEventListener('resize',place);
-  window.addEventListener('colt-radio-playback',event=>{radioPlaying=event.detail?.playing===true;resetNap();});
+  window.addEventListener('colt-radio-playback',event=>{const wasPlaying=radioPlaying;radioPlaying=event.detail?.playing===true;resetNap();if(radioPlaying&&!wasPlaying)say('Turn up the squish! Let’s dance!');});
+  document.addEventListener('click',event=>{
+    const target=event.target.closest('[data-action]');if(!target)return;
+    const messages={openMessages:'A little message, a little joy!',openColtCorner:'Let’s roll into Colt Corner!',randomActivity:'A fresh adventure? Squish yes!',category:'Let’s find something fun to learn!'};
+    if(messages[target.dataset.action])say(messages[target.dataset.action]);
+  });
   window.addEventListener('classroom-launchpad-rendered',event=>{screen=event.detail?.screen||document.body.dataset.screen||screen;updateAccount(event.detail?.auth||auth);});
   window.addEventListener('launchpad-companion-availability',event=>{enabled=event.detail.enabled;sync();});
   const panelObserver=new MutationObserver(sync);

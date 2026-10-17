@@ -169,15 +169,18 @@ window.createDumplingPet = function(root) {
     animation?.cancel();
     radioAnimation?.cancel();radioAnimation=null;
     blink(); smile();
-    const frames = type === 'bounce'
+    const frames = type === 'excited'
+      ? ['scale(1)','scale(1.04,.9)','translateY(-24px) scale(.98,1.03)','scale(1.03,.93)','translateY(-13px) scale(.99,1.02)','scale(1)']
+      : type === 'bounce'
       ? ['scale(1)', 'scale(1.035,.90)', 'translateY(-22px) scale(.985,1.025)', 'scale(1.04,.88)', 'scale(.99,1.015)', 'scale(1)']
       : ['scale(1)', 'scale(1.04,.78)', 'scale(.985,1.035)', 'scale(1.015,.96)', 'scale(1)'];
-    animation = puppet.querySelector('.moving-bun').animate(frames.map(transform => ({transform})), {duration: reduced.matches ? 250 : type === 'bounce' ? 1100 : 1450, easing: 'ease-in-out'});
+    animation = puppet.querySelector('.moving-bun').animate(frames.map(transform => ({transform})), {duration: reduced.matches ? 250 : type === 'bounce'||type === 'excited' ? 1100 : 1450, easing: 'ease-in-out'});
     if(!automatic)section.querySelector('.motion-status').textContent = type === 'bounce' ? 'Boing!' : 'Squish… and slowly spring back.';
     animation.onfinish = () => { if(!automatic)section.querySelector('.motion-status').textContent = 'Ready for another squeeze.';syncRadio(); };
   }
   puppet.onclick = () => play('squish');
   section.querySelectorAll('[data-motion]').forEach(b => b.onclick = () => play(b.dataset.motion));
   panel.querySelector('.note').innerHTML = '<p><strong>Interactive 2D preview.</strong> The face blinks and smiles, following the squishy during movement. Idle controls automatic movement; try Blink or Happy smile anytime. The basket stays rigid. This is not a 3D model.</p><p>Your existing Colt and classroom site are unchanged.</p>';
-  return {setIdle,setRadio,setSleep};
+  function excite(){if(canAnimate())play('excited',true);else if(!puppet.classList.contains('asleep'))smile();}
+  return {setIdle,setRadio,setSleep,excite};
 };

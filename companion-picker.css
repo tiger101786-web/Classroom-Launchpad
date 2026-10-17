@@ -5,6 +5,11 @@
 .dumpling-companion{position:fixed;left:calc(100vw - 254px);top:40%;z-index:17;width:220px;background:none;border:0;box-shadow:none;pointer-events:none}
 .dumpling-companion[hidden],.dumpling-companion [hidden],.companion-picker [hidden]{display:none!important}
 .dumpling-companion .stage{margin:0;padding:0;background:none;border:0;display:block}
+.dumpling-companion .dumpling-speech{position:fixed;box-sizing:border-box;z-index:22;pointer-events:none;padding:13px 17px 15px;border:2px solid #d8a453;border-radius:24px 27px 23px 26px;background:radial-gradient(ellipse at 15% 0%,#fff 0,transparent 60%),linear-gradient(145deg,#fff7df,#ffe3d2);color:#613821;box-shadow:0 5px 0 #bd884644,0 9px 22px #0003;font:13px/1.45 Arial,sans-serif;overflow-wrap:anywhere}
+.dumpling-companion .dumpling-speech:after{content:'';position:absolute;left:var(--speech-tail,50%);bottom:-8px;width:13px;height:13px;background:#ffe3d2;border-right:2px solid #d8a453;border-bottom:2px solid #d8a453;transform:translateX(-50%) rotate(45deg)}
+.dumpling-companion .dumpling-speech[data-side=below]:after{top:-8px;bottom:auto;transform:translateX(-50%) rotate(225deg);background:#fff7df}
+.dumpling-companion .dumpling-speech-label{display:block;font-size:9px;letter-spacing:1px;font-weight:800;color:#9b5a32;margin-bottom:4px}
+.dumpling-companion .dumpling-speech-message{display:block;font-weight:600}
 .dumpling-companion .pet-button{display:block;width:100%;margin:0;padding:0;border:0;border-radius:0;background:none!important;box-shadow:none;cursor:grab;touch-action:none;user-select:none;pointer-events:auto}
 .dumpling-companion .pet-button:active{cursor:grabbing}.dumpling-companion .pet-button svg{display:block;width:100%;overflow:visible}
 .dumpling-companion .panel{pointer-events:auto;position:fixed;z-index:20;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;padding:18px;border-radius:16px;border:1px solid var(--border,#ccc);background:var(--paper,#fff);color:var(--ink,#222);box-shadow:0 12px 35px #0004;font:14px Arial,sans-serif}
