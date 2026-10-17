@@ -15,6 +15,11 @@
 .dumpling-companion .breathing{animation:none!important}
 .dumpling-companion{z-index:21}
 .dumpling-companion .music-eyes{display:none}
+.dumpling-companion .music-notes{display:none;pointer-events:none}
+.dumpling-companion .radio-dancing .music-notes{display:block}
+.dumpling-companion .radio-dancing .music-note{animation:dumpling-music-float 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes dumpling-music-float{0%{opacity:0;transform:translateY(25px) rotate(-12deg) scale(.8)}20%{opacity:1}75%{opacity:.9}100%{opacity:0;transform:translateY(-110px) rotate(14deg) scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.dumpling-companion .radio-dancing .music-note{animation:none}}
 .dumpling-companion .radio-dancing .eye{visibility:hidden}
 .dumpling-companion .radio-dancing .music-eyes{display:block}
 .dumpling-companion .radio-dancing .mouth{opacity:0}

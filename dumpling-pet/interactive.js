@@ -30,6 +30,12 @@ window.createDumplingPet = function(root) {
       <g class="mouth-open"><path d="M592 636 Q637 649 681 636 C680 712 597 712 592 636Z" fill="#191211"/><path d="M612 685 Q637 669 662 685 Q637 708 612 685" fill="#e98d91"/></g>
     </g></g></g>
     <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
+    <g class="music-notes" pointer-events="none" font-family="Arial, sans-serif" font-size="140" font-weight="bold" text-anchor="middle" fill="#a81747" stroke="#fff1cf" stroke-width="7" paint-order="stroke">
+      <text class="music-note" x="105" y="410">♪</text>
+      <text class="music-note" x="1140" y="370" style="animation-delay:-.6s">♫</text>
+      <text class="music-note" x="260" y="200" style="animation-delay:-1.2s">♫</text>
+      <text class="music-note" x="990" y="190" style="animation-delay:-1.8s">♪</text>
+    </g>
     </svg>`;
   img.replaceWith(puppet);
   root.querySelector('h1').textContent = 'Your squishy, your color.';

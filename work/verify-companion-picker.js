@@ -83,6 +83,9 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.getAttribute('data-accessory'),'headphones');
     assert.equal(await pet.locator('.eye-left').evaluate(e=>getComputedStyle(e).visibility),'hidden');
     assert.equal(await pet.locator('.music-eyes').evaluate(e=>getComputedStyle(e).display),'block');
+    assert.equal(await pet.locator('.music-notes').evaluate(e=>getComputedStyle(e).display),'block');
+    assert.equal(await pet.locator('.music-note').count(),4);
+    assert.equal(await pet.locator('.music-note').first().evaluate(e=>getComputedStyle(e).animationName),'dumpling-music-float');
     await page.waitForTimeout(250);
     assert.equal(await pet.locator('.mouth-open').evaluate(e=>getComputedStyle(e).opacity),'1');
     await pet.screenshot({path:path.join(repo,'work',`companion-dancing-${role}.png`)});
@@ -90,11 +93,13 @@ async function request(route, cookie='', body, method) {
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.accessory,'bow','Radio must not save temporary headphones');
     await panel.locator('#idle').click();
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().length),0);
+    assert.equal(await pet.locator('.music-notes').evaluate(e=>getComputedStyle(e).display),'none');
     await panel.locator('#idle').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
     assert.equal(await pet.getAttribute('data-accessory'),'bow');
     assert.equal(await pet.locator('.eye-left').evaluate(e=>getComputedStyle(e).visibility),'visible');
     assert.equal(await pet.locator('.music-eyes').evaluate(e=>getComputedStyle(e).display),'none');
+    assert.equal(await pet.locator('.music-notes').evaluate(e=>getComputedStyle(e).display),'none');
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),0);
     await panel.getByRole('button',{name:'Headphones',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
