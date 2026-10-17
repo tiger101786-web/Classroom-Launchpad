@@ -54,6 +54,9 @@
   panel.append(tools);
   const status=document.createElement('p');status.className='pet-status';status.setAttribute('role','status');panel.append(status);
   const retry=document.createElement('button');retry.hidden=true;retry.textContent='Retry save';panel.append(retry);
+  const panelBody=document.createElement('div');panelBody.className='dumpling-panel-body';
+  panelBody.setAttribute('role','region');panelBody.setAttribute('aria-label','Squishy customization options');panelBody.tabIndex=0;
+  [...panel.children].filter(child=>child!==heading).forEach(child=>panelBody.append(child));panel.append(panelBody);
   const select=picker.querySelector('select'),pickerStatus=picker.querySelector('.pet-status'),pickerRetry=picker.querySelector('.pet-retry');
   const allowed=()=>loaded&&auth.authenticated&&enabled&&!hiddenScreens.has(screen);
   const positionKey=()=>`dumpling-position:${account}`;
@@ -69,7 +72,7 @@
   }
   function placePanel(){
     if(panel.hidden)return;
-    const box=pet.getBoundingClientRect(),width=Math.min(360,innerWidth-24);
+    const box=pet.getBoundingClientRect(),width=Math.min(640,innerWidth-24);
     panel.style.width=`${width}px`;
     const left=box.left>width+20?box.left-width-12:Math.min(box.right+12,innerWidth-width-12);
     panel.style.left=`${Math.max(12,left)}px`;

@@ -67,3 +67,14 @@
 .dumpling-companion .dumpling-utilities{margin:13px 14px 0;display:flex;flex-wrap:wrap;border-top:1px solid var(--border,#ccc);padding-top:12px;gap:6px}
 .dumpling-companion .dumpling-utilities button{font-size:11px;padding:7px 9px}.dumpling-companion .panel>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}.dumpling-companion .panel>button{margin:0 20px 14px}
 body[data-theme="night"] .dumpling-companion .dumpling-group button:not([aria-pressed="true"]){background:#272328;color:#f4e8ee;border-color:#51454d}
+/* Fixed landscape shell: only the options region grows and scrolls. */
+.dumpling-companion .panel{box-sizing:border-box;height:min(440px,calc(100dvh - 24px));display:flex;flex-direction:column;overflow:hidden}
+.dumpling-companion .dumpling-panel-heading{flex:none;padding:16px 20px}
+.dumpling-companion .dumpling-panel-body{flex:1;min-height:0;overflow-y:scroll;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:auto;scrollbar-color:#aa4265 #8882;padding-bottom:4px}
+.dumpling-companion .dumpling-panel-body::-webkit-scrollbar{width:10px}
+.dumpling-companion .dumpling-panel-body::-webkit-scrollbar-track{background:#8882}
+.dumpling-companion .dumpling-panel-body::-webkit-scrollbar-thumb{background:#aa4265;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+.dumpling-companion .dumpling-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.dumpling-companion .dumpling-panel-body>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}
+.dumpling-companion .dumpling-panel-body>button{margin:0 20px 14px}
+@media(max-width:560px){.dumpling-companion .panel{height:min(500px,calc(100dvh - 24px))}.dumpling-companion .dumpling-sections{grid-template-columns:1fr}}

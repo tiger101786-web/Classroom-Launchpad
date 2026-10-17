@@ -72,6 +72,14 @@ async function request(route, cookie='', body, method) {
     assert(moved.x<before.x-250 && moved.y>before.y+60,'Pet must move with pointer');
     assert.equal(await panel.isVisible(),false,'Drag must not open controls');
     await pet.click();await panel.waitFor({state:'visible'});
+    const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
+    const scrollBody=panel.locator('.dumpling-panel-body');
+    assert.equal(await scrollBody.evaluate(e=>getComputedStyle(e).overflowY),'scroll');
+    assert(await scrollBody.evaluate(e=>e.scrollHeight>e.clientHeight),'Options must scroll within the panel');
+    const headingY=(await panel.locator('.dumpling-panel-heading').boundingBox()).y;
+    await scrollBody.evaluate(e=>{e.scrollTop=e.scrollHeight;});
+    assert.equal((await panel.locator('.dumpling-panel-heading').boundingBox()).y,headingY,'Close control stays fixed');
+    await scrollBody.evaluate(e=>{e.scrollTop=0;});
     for(const [size,width,height] of [['small',124,122],['medium',144,142],['large',168,166],['extra-large',210,208]]){
       await panel.locator(`[data-pet-size="${size}"]`).click();
       const dimensions=await pet.boundingBox();assert.equal(dimensions.width,width);assert.equal(dimensions.height,height);
