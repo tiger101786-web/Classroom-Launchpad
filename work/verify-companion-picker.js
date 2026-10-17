@@ -51,6 +51,10 @@ async function request(route, cookie='', body, method) {
     };
     await openPicker();
     await page.getByLabel('Choose pet',{exact:true}).selectOption('dumpling');
+    await page.locator('.companion-picker').screenshot({path:path.join(repo,'work',`pet-chooser-light-${role}.png`)});
+    await page.evaluate(()=>{document.body.dataset.theme='night';});await page.waitForTimeout(250);
+    await page.locator('.companion-picker').screenshot({path:path.join(repo,'work',`pet-chooser-night-${role}.png`)});
+    await page.evaluate(()=>{document.body.dataset.theme='light';});
     await page.getByRole('button',{name:'Close pet selection',exact:true}).click();
     const pet=page.locator('.dumpling-companion .pet-button'),panel=page.locator('.dumpling-companion .panel');
     await pet.waitFor({state:'visible'});
