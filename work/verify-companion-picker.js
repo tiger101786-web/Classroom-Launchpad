@@ -110,6 +110,9 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.evaluate(e=>e.classList.contains('asleep')),true);
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),false,'Sleep overrides music');
     assert.equal(await pet.locator('.sleep-zs').evaluate(e=>getComputedStyle(e).display),'block');
+    assert.equal(await pet.locator('.moving-bun').evaluate(e=>e.getAnimations().length),0,'Sleeping body must stay still');
+    assert.equal(await pet.locator('.moving-bun').evaluate(e=>getComputedStyle(e).transform),'none');
+    assert.equal(await pet.locator('.sleep-zs text').first().evaluate(e=>getComputedStyle(e).animationName),'dumpling-sleep-z','Only the sleep Zs float');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.asleep,true);
     await pet.screenshot({path:path.join(repo,'work',`companion-sleeping-${role}.png`)});

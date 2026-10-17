@@ -19,11 +19,10 @@
 .dumpling-companion .asleep .eye{visibility:hidden}
 .dumpling-companion .asleep .sleep-eyes,.dumpling-companion .asleep .sleep-zs{display:block}
 .dumpling-companion .asleep.idle .sleep-zs text{animation:dumpling-sleep-z 3s ease-out infinite}
-.dumpling-companion .asleep.idle .moving-bun{animation:dumpling-sleep-breathe 3.6s ease-in-out infinite}
+.dumpling-companion .asleep .moving-bun{animation:none;transform:none}
 .dumpling-companion .panel button:disabled{opacity:.45;cursor:not-allowed}
 .dumpling-companion [data-dumpling-sleep]{grid-column:1/-1}
 @keyframes dumpling-sleep-z{0%{opacity:0;transform:translate(-20px,45px)}25%{opacity:1}100%{opacity:0;transform:translate(25px,-65px)}}
-@keyframes dumpling-sleep-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.008,.975)}}
 @media(prefers-reduced-motion:reduce){.dumpling-companion .asleep.idle .sleep-zs text,.dumpling-companion .asleep.idle .moving-bun{animation:none}}
 .dumpling-companion .music-notes{display:none;pointer-events:none}
 .dumpling-companion .radio-dancing .music-notes{display:block}
