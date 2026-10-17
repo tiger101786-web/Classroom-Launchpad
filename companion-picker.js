@@ -51,7 +51,8 @@
     const legend=document.createElement('legend');legend.textContent=title;field.append(legend);
     items.forEach(item=>field.append(item));content.append(field);return field;
   }
-  const colors=host.querySelector('.colors');colors.previousElementSibling.remove();group('01 · Choose your sparkle',[colors]);
+  function groupHint(text){const hint=document.createElement('p');hint.className='dumpling-group-hint';hint.textContent=text;return hint;}
+  const colors=host.querySelector('.colors');colors.previousElementSibling.remove();group('01 · Choose your sparkle',[colors,groupHint('Pick your favorite glitter color.')]);
   const accessories=host.querySelector('.accessory-controls');accessories.querySelector('.label').remove();group('02 · Dress it up',[accessories]);
   const motionLabel=[...content.children].find(e=>e.textContent==='Try an animation');
   const actions=motionLabel.nextElementSibling;motionLabel.remove();
@@ -72,7 +73,10 @@
     const button=document.createElement('button');button.type='button';button.dataset.petSize=size;button.textContent=label;
     button.onclick=()=>{preferences.size=size;sync();save();};sizeChoices.append(button);
   });
-  group('04 · Choose your size',[sizeChoices]);
+  group('04 · Choose your size',[sizeChoices,groupHint('Matching sizes for Colt and Squishy.')]);
+  const restControls=document.createElement('div');restControls.className='controls dumpling-rest-controls';
+  restControls.append(host.querySelector('#idle'),sleepButton);
+  group('05 · Rest & motion',[restControls]).classList.add('dumpling-rest-group');
   const radioBadge=document.createElement('div');radioBadge.className='dumpling-radio-status';radioBadge.setAttribute('role','status');
   panel.append(radioBadge);
   const tools=document.createElement('div');tools.className='controls dumpling-utilities';

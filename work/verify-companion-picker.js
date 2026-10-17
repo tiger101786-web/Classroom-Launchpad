@@ -82,6 +82,10 @@ async function request(route, cookie='', body, method) {
     await page.screenshot({path:path.join(repo,'work',`companion-move-speech-${role}.png`)});
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
+    const cards=await panel.locator('.dumpling-group').evaluateAll(items=>items.slice(0,4).map(e=>{const box=e.getBoundingClientRect();const button=e.querySelector('button').getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height,inset:button.y-box.y};}));
+    cards.forEach(card=>{assert(Math.abs(card.height-cards[0].height)<1,'All four option cards match heights');assert(Math.abs(card.width-cards[0].width)<1);assert(Math.abs(card.inset-cards[0].inset)<1,'Button rows align within every card');});
+    assert.equal(cards[0].y,cards[1].y);assert.equal(cards[2].y,cards[3].y);
+    assert(Math.abs(cards[1].x-cards[0].x-cards[0].width-(cards[2].y-cards[0].y-cards[0].height))<1,'Row and column gaps match');
     const colorPositions=await panel.locator('.color-choice').evaluateAll(buttons=>buttons.map(button=>{
       const range=document.createRange();range.selectNodeContents(button);
       return {label:range.getBoundingClientRect().left-button.getBoundingClientRect().left,layout:getComputedStyle(button).display,dot:getComputedStyle(button,'::before').width};

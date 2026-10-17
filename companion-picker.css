@@ -102,7 +102,12 @@ body[data-theme="night"] .dumpling-companion .dumpling-group button:not([aria-pr
 .dumpling-companion .dumpling-panel-body::-webkit-scrollbar{width:10px}
 .dumpling-companion .dumpling-panel-body::-webkit-scrollbar-track{background:#8882}
 .dumpling-companion .dumpling-panel-body::-webkit-scrollbar-thumb{background:#aa4265;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
-.dumpling-companion .dumpling-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.dumpling-companion .dumpling-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+.dumpling-companion .dumpling-group .controls{grid-auto-rows:37px;align-content:start}
+.dumpling-companion .dumpling-group .controls button{height:100%;box-sizing:border-box}
+.dumpling-companion .dumpling-group-hint,.dumpling-companion .dumpling-group .accessory-hint,.dumpling-companion .dumpling-group .motion-status{margin:8px 0 0;min-height:32px;font-size:11px!important;line-height:16px;opacity:.75}
+.dumpling-companion .dumpling-rest-group{grid-column:1/-1}
+.dumpling-companion .dumpling-rest-controls #idle,.dumpling-companion .dumpling-rest-controls [data-dumpling-sleep]{grid-column:auto}
 .dumpling-companion .dumpling-panel-body>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}
 .dumpling-companion .dumpling-panel-body>button{margin:0 20px 14px}
 @media(max-width:560px){.dumpling-companion .panel{height:min(500px,calc(100dvh - 24px))}.dumpling-companion .dumpling-sections{grid-template-columns:1fr}}
