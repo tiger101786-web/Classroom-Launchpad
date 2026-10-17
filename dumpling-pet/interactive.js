@@ -75,6 +75,14 @@ window.createDumplingPet = function(root) {
   let blinkTimer, smileTimer, bounceTimer, smileEnd, animation, radioAnimation;
   let radioPlaying = false;
   let wakeAnimations=[];
+  let breathAnimation;
+  function syncBreathing(){
+    const run=puppet.classList.contains('idle')&&!puppet.classList.contains('waking')&&!puppet.classList.contains('radio-dancing')&&animation?.playState!=='running'&&!reduced.matches&&!document.hidden;
+    if(!run){breathAnimation?.cancel();breathAnimation=null;return;}
+    if(!breathAnimation)breathAnimation=puppet.querySelector('.breathing').animate([
+      {transform:'scale(1)'},{transform:'scale(1.006,1.01)'},{transform:'scale(1)'}
+    ],{duration:4000,iterations:Infinity,easing:'ease-in-out'});
+  }
   const canAnimate = () => puppet.classList.contains('idle') && !puppet.classList.contains('asleep') && !puppet.classList.contains('waking') && !reduced.matches && !document.hidden;
   const eyes = [...puppet.querySelectorAll('.eye')];
   function blink() {
@@ -101,6 +109,7 @@ window.createDumplingPet = function(root) {
   function syncRadio() {
     const run = radioPlaying && canAnimate();
     puppet.classList.toggle('radio-dancing',run);
+    syncBreathing();
     if (!run) {radioAnimation?.cancel();radioAnimation=null;return;}
     if(radioAnimation) return;
     animation?.cancel();
@@ -173,6 +182,7 @@ window.createDumplingPet = function(root) {
       ? ['scale(1)', 'scale(1.035,.90)', 'translateY(-22px) scale(.985,1.025)', 'scale(1.04,.88)', 'scale(.99,1.015)', 'scale(1)']
       : ['scale(1)', 'scale(1.04,.78)', 'scale(.985,1.035)', 'scale(1.015,.96)', 'scale(1)'];
     animation = puppet.querySelector('.moving-bun').animate(frames.map(transform => ({transform})), {duration: reduced.matches ? 250 : type === 'bounce' ? 1100 : 1450, easing: 'ease-in-out'});
+    syncBreathing();
     if(!automatic)section.querySelector('.motion-status').textContent = type === 'bounce' ? 'Boing!' : 'Squish… and slowly spring back.';
     animation.onfinish = () => { if(!automatic)section.querySelector('.motion-status').textContent = 'Ready for another squeeze.';syncRadio(); };
   }

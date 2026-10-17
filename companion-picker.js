@@ -34,14 +34,14 @@
   const sleepButton=document.createElement('button');sleepButton.type='button';sleepButton.dataset.dumplingSleep='';actions.append(sleepButton);
   let napTimer,autoAsleep=false,wakeRequested=false;
   function resetNap(){
-    clearTimeout(napTimer);autoAsleep=false;sync();
+    clearTimeout(napTimer);if(autoAsleep)wakeRequested=true;autoAsleep=false;sync();
     if(host.hidden||preferences.asleep||radioPlaying)return;
     napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying){autoAsleep=true;sync();}},60000);
   }
   sleepButton.onclick=()=>{wakeRequested=Boolean(preferences.asleep||autoAsleep);preferences.asleep=!wakeRequested;autoAsleep=false;closePanel();resetNap();save();};
   host.addEventListener('dumpling-wake-finished',()=>sync());
-  document.addEventListener('pointerdown',()=>{if(loaded)resetNap();});
-  document.addEventListener('keydown',()=>{if(loaded)resetNap();});
+  document.addEventListener('pointerdown',event=>{if(loaded&&!pet.contains(event.target))resetNap();});
+  document.addEventListener('keydown',event=>{if(loaded&&!pet.contains(event.target))resetNap();});
   const sizeChoices=document.createElement('div');sizeChoices.className='controls dumpling-sizes';
   [['small','Small'],['medium','Medium'],['large','Large'],['extra-large','Extra Large']].forEach(([size,label])=>{
     const button=document.createElement('button');button.type='button';button.dataset.petSize=size;button.textContent=label;
@@ -93,6 +93,8 @@
     const asleep=Boolean(preferences.asleep||autoAsleep);
     const animateWake=wakeRequested;wakeRequested=false;
     petApi.setSleep(asleep,animateWake);
+    pet.setAttribute('aria-label',asleep?'Wake Squishy. Drag to move.':'Open Squishy Dumpling controls. Drag to move.');
+    pet.title=asleep?'Click to wake · drag to move':'Click for controls · drag to move · arrow keys move';
     sleepButton.textContent=asleep?'Wake Squishy':'Sleep Squishy';sleepButton.setAttribute('aria-pressed',String(asleep));
     const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
@@ -148,7 +150,11 @@
   document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!host.contains(event.target))closePanel();});
   let drag=null,suppressClick=false;
   function persistPosition(){try{localStorage.setItem(positionKey(),JSON.stringify(position));}catch{}}
-  pet.onclick=()=>{if(suppressClick){suppressClick=false;return;}panel.hidden?openPanel():closePanel();};
+  pet.onclick=()=>{
+    if(suppressClick){suppressClick=false;return;}
+    if(preferences.asleep||autoAsleep){wakeRequested=true;preferences.asleep=false;autoAsleep=false;closePanel();resetNap();save();return;}
+    resetNap();panel.hidden?openPanel():closePanel();
+  };
   pet.addEventListener('pointerdown',event=>{
     if(event.button!==0)return;
     const box=pet.getBoundingClientRect();drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:box.left,top:box.top,moved:false};suppressClick=false;
