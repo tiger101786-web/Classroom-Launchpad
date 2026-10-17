@@ -25,6 +25,7 @@ window.createDumplingPet = function(root) {
       <!-- Clean independent eyes: no clipped photo edges or fixed printed-eye outline. -->
       <g class="eye eye-left"><ellipse cx="483" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="481" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="eye eye-right"><ellipse cx="795" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="793" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
+      <g class="music-eyes" fill="none" stroke="#171413" stroke-width="14" stroke-linecap="round"><path d="M449 605 Q483 571 517 605"/><path d="M761 605 Q795 571 829 605"/></g>
       <g class="mouth"><path d="M594 632 Q608 694 637 685 Q664 684 681 632" fill="none" stroke="#16110f" stroke-width="22" stroke-linecap="round"/></g>
       <g class="mouth-open"><path d="M592 636 Q637 649 681 636 C680 712 597 712 592 636Z" fill="#191211"/><path d="M612 685 Q637 669 662 685 Q637 708 612 685" fill="#e98d91"/></g>
     </g></g></g>
@@ -68,6 +69,7 @@ window.createDumplingPet = function(root) {
   const canAnimate = () => puppet.classList.contains('idle') && !reduced.matches && !document.hidden;
   const eyes = [...puppet.querySelectorAll('.eye')];
   function blink() {
+    if(puppet.classList.contains('radio-dancing'))return;
     eyes.forEach(eye => {
       eye.getAnimations().forEach(a => a.cancel());
       eye.animate([{transform:'scaleY(1)'},{transform:'scaleY(.06)',offset:.45},{transform:'scaleY(.06)',offset:.6},{transform:'scaleY(1)'}], {duration:260,easing:'ease-in-out'});
@@ -88,12 +90,13 @@ window.createDumplingPet = function(root) {
   }
   function syncRadio() {
     const run = radioPlaying && canAnimate();
+    puppet.classList.toggle('radio-dancing',run);
     if (!run) {radioAnimation?.cancel();radioAnimation=null;return;}
     if(radioAnimation) return;
     animation?.cancel();
     radioAnimation=puppet.querySelector('.moving-bun').animate([
-      {transform:'scale(1)'},{transform:'scale(1.025,.89)'},{transform:'scale(1)'}
-    ],{duration:1550,iterations:Infinity,easing:'ease-in-out'});
+      {transform:'scale(1)'},{transform:'scale(1.035,.87)'},{transform:'scale(.99,1.02)'},{transform:'scale(1)'}
+    ],{duration:600,iterations:Infinity,easing:'ease-in-out'});
   }
   function setRadio(playing) {
     if(radioPlaying===playing)return;

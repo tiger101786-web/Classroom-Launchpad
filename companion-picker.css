@@ -13,6 +13,12 @@
 .dumpling-companion .moving-bun,.dumpling-companion .breathing{transform-origin:627px 824px}
 /* The animation controller schedules occasional movement or a radio loop; no CSS bobbing. */
 .dumpling-companion .breathing{animation:none!important}
+.dumpling-companion{z-index:21}
+.dumpling-companion .music-eyes{display:none}
+.dumpling-companion .radio-dancing .eye{visibility:hidden}
+.dumpling-companion .radio-dancing .music-eyes{display:block}
+.dumpling-companion .radio-dancing .mouth{opacity:0}
+.dumpling-companion .radio-dancing .mouth-open{opacity:1;transform:scaleY(1)}
 .dumpling-companion .eye-left{transform-origin:483px 605px}.dumpling-companion .eye-right{transform-origin:795px 605px}
 .dumpling-companion .mouth,.dumpling-companion .mouth-open{transform-origin:637px 660px;transition:opacity .16s ease,transform .2s ease}.dumpling-companion .mouth-open{opacity:0;transform:scaleY(.65)}.dumpling-companion .smiling .mouth{opacity:0;transform:scaleY(.75)}.dumpling-companion .smiling .mouth-open{opacity:1;transform:scaleY(1)}
 .dumpling-companion .color-choice:before{content:'';display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--swatch);margin-right:7px;border:1px solid #0002;vertical-align:-2px}.dumpling-companion .accessory-layer{isolation:isolate}

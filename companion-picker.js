@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true});
-  const hiddenScreens=new Set(['pin','login','coltRun','dashboard','edit','changePin']);
+  const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
   const picker=document.createElement('dialog');
@@ -62,8 +62,7 @@
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
   function openPanel(){if(host.hidden)return;panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
-    const blocked=[...document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel')].some(p=>!p.hidden && (!p.classList.contains('colt-radio-panel') || !radioPlaying));
-    host.hidden=!allowed()||blocked||preferences.pet!=='dumpling'||petHidden;
+    host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     if(host.hidden)closePanel();
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;

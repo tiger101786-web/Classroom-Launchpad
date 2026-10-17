@@ -53,6 +53,13 @@ async function request(route, cookie='', body, method) {
     await page.getByRole('button',{name:'Close pet selection',exact:true}).click();
     const pet=page.locator('.dumpling-companion .pet-button'),panel=page.locator('.dumpling-companion .panel');
     await pet.waitFor({state:'visible'});
+    for(const selector of ['.colt-radio-panel','.colt-assistant-panel']) {
+      await page.locator(selector).evaluate(e=>{e.hidden=false;});
+      await page.waitForTimeout(100);
+      assert.equal(await pet.isVisible(),true,'Opening '+selector+' must not hide the dumpling');
+      assert(await page.locator('.dumpling-companion').evaluate((e,selector)=>Number(getComputedStyle(e).zIndex)>Number(getComputedStyle(document.querySelector(selector)).zIndex),selector));
+      await page.locator(selector).evaluate(e=>{e.hidden=true;});
+    }
     assert.equal(await page.locator('.companion-picker').isVisible(),false);
     assert.equal(await page.locator('.dumpling-companion iframe').count(),0);
     assert.equal(await panel.isVisible(),false);
@@ -74,6 +81,11 @@ async function request(route, cookie='', body, method) {
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
     assert.equal(await pet.getAttribute('data-accessory'),'headphones');
+    assert.equal(await pet.locator('.eye-left').evaluate(e=>getComputedStyle(e).visibility),'hidden');
+    assert.equal(await pet.locator('.music-eyes').evaluate(e=>getComputedStyle(e).display),'block');
+    await page.waitForTimeout(250);
+    assert.equal(await pet.locator('.mouth-open').evaluate(e=>getComputedStyle(e).opacity),'1');
+    await pet.screenshot({path:path.join(repo,'work',`companion-dancing-${role}.png`)});
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),1);
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.accessory,'bow','Radio must not save temporary headphones');
     await panel.locator('#idle').click();
@@ -81,6 +93,8 @@ async function request(route, cookie='', body, method) {
     await panel.locator('#idle').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
     assert.equal(await pet.getAttribute('data-accessory'),'bow');
+    assert.equal(await pet.locator('.eye-left').evaluate(e=>getComputedStyle(e).visibility),'visible');
+    assert.equal(await pet.locator('.music-eyes').evaluate(e=>getComputedStyle(e).display),'none');
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),0);
     await panel.getByRole('button',{name:'Headphones',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
