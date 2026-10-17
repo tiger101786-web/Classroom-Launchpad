@@ -26,7 +26,16 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('.pet-button').evaluate(e=>e.classList.contains('radio-dancing')),false);
   await page.clock.runFor(45000);assert.equal(await moving(),0,'Motion off stops all automatic movement');
   await page.evaluate(()=>{window.petApi.setIdle(true);window.petApi.setRadio(false);});assert.equal(await moving(),0);
+  await page.evaluate(()=>{window.petApi.setSleep(true);window.petApi.setSleep(false,true);});
+  assert.equal(await moving(),1,'Wake stretch runs once');
+  await page.evaluate(()=>window.petApi.setSleep(true));
+  assert.equal(await moving(),0,'Returning to sleep cancels wake movement');
+  assert.equal(await page.locator('.pet-button').evaluate(e=>e.classList.contains('waking')),false);
+  await page.evaluate(()=>{window.petApi.setIdle(false);window.petApi.setSleep(false,true);});
+  assert.equal(await moving(),0,'Motion off skips wake movement');
+  assert.equal(await page.locator('.pet-button').evaluate(e=>e.classList.contains('waking')),false);
   await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>window.petApi.setRadio(true));assert.equal(await moving(),0);
+  await page.evaluate(()=>{window.petApi.setSleep(true);window.petApi.setSleep(false,true);});assert.equal(await moving(),0,'Reduced motion skips waking');
   console.log('Dumpling timing passed: occasional smiles/bounces, radio loop, settled body, motion off and reduced motion.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

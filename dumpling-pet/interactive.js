@@ -74,17 +74,18 @@ window.createDumplingPet = function(root) {
   const idle = section.querySelector('#idle');
   let blinkTimer, smileTimer, bounceTimer, smileEnd, animation, radioAnimation;
   let radioPlaying = false;
-  const canAnimate = () => puppet.classList.contains('idle') && !puppet.classList.contains('asleep') && !reduced.matches && !document.hidden;
+  let wakeAnimations=[];
+  const canAnimate = () => puppet.classList.contains('idle') && !puppet.classList.contains('asleep') && !puppet.classList.contains('waking') && !reduced.matches && !document.hidden;
   const eyes = [...puppet.querySelectorAll('.eye')];
   function blink() {
-    if(puppet.classList.contains('radio-dancing')||puppet.classList.contains('asleep'))return;
+    if(puppet.classList.contains('radio-dancing')||puppet.classList.contains('asleep')||puppet.classList.contains('waking'))return;
     eyes.forEach(eye => {
       eye.getAnimations().forEach(a => a.cancel());
       eye.animate([{transform:'scaleY(1)'},{transform:'scaleY(.06)',offset:.45},{transform:'scaleY(.06)',offset:.6},{transform:'scaleY(1)'}], {duration:260,easing:'ease-in-out'});
     });
   }
   function smile() {
-    if(puppet.classList.contains('asleep'))return;
+    if(puppet.classList.contains('asleep')||puppet.classList.contains('waking'))return;
     clearTimeout(smileEnd);
     puppet.classList.add('smiling');
     smileEnd = setTimeout(() => puppet.classList.remove('smiling'), 1200);
@@ -112,6 +113,7 @@ window.createDumplingPet = function(root) {
     radioPlaying=playing;syncRadio();scheduleFace();
   }
   function setIdle(on) {
+    if(!on)finishWake();
     puppet.classList.toggle('idle', on);
     idle.setAttribute('aria-pressed', String(on));
     idle.textContent = `Motion: ${on ? 'on' : 'off'}`;
@@ -119,23 +121,51 @@ window.createDumplingPet = function(root) {
     syncRadio();
     if (!on) { animation?.cancel();clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
   }
-  function setSleep(on) {
+  function finishWake() {
+    if(!puppet.classList.contains('waking'))return;
+    puppet.classList.remove('waking');
+    wakeAnimations.forEach(a=>{a.onfinish=null;a.cancel();});wakeAnimations=[];
+    section.querySelector('.motion-status').textContent='Awake and ready to play.';
+    scheduleFace();syncRadio();root.dispatchEvent(new Event('dumpling-wake-finished'));
+  }
+  function startWake() {
+    puppet.classList.add('waking');scheduleFace();syncRadio();
+    section.querySelector('.motion-status').textContent='Waking up…';
+    const animate=(element,frames,options)=>{const a=element.animate(frames,options);wakeAnimations.push(a);return a;};
+    animate(puppet.querySelector('.sleep-zs'),[{opacity:1},{opacity:0}],{duration:450,fill:'forwards'});
+    eyes.forEach(eye=>animate(eye,[
+      {transform:'scaleY(.06)',offset:0},{transform:'scaleY(1)',offset:.3},
+      {transform:'scaleY(.06)',offset:.4},{transform:'scaleY(1)',offset:.5},
+      {transform:'scaleY(.06)',offset:.6},{transform:'scaleY(1)',offset:.72},{transform:'scaleY(1)'}
+    ],{duration:1300,easing:'ease-in-out'}));
+    animate(puppet.querySelector('.mouth'),[{opacity:1,offset:0},{opacity:1,offset:.45},{opacity:0,offset:.6},{opacity:0}],{duration:2000});
+    animate(puppet.querySelector('.mouth-open'),[{opacity:0,transform:'scaleY(1)',offset:0},{opacity:0,transform:'scaleY(1)',offset:.45},{opacity:1,transform:'scaleY(1)',offset:.6},{opacity:1,transform:'scaleY(1)'}],{duration:2000});
+    const body=animate(puppet.querySelector('.moving-bun'),[
+      {transform:'scale(1)',offset:0},{transform:'scale(1)',offset:.35},
+      {transform:'scale(.97,1.055)',offset:.57},{transform:'scale(1.025,.94)',offset:.7},
+      {transform:'translateY(-18px) scale(.99,1.02)',offset:.8},{transform:'scale(1.02,.96)',offset:.9},{transform:'scale(1)'}
+    ],{duration:2000,easing:'ease-in-out'});
+    body.onfinish=finishWake;
+  }
+  function setSleep(on,animateWake=false) {
     if(puppet.classList.contains('asleep')===on)return;
+    finishWake();
     puppet.classList.toggle('asleep',on);
     animation?.cancel();clearTimeout(smileEnd);puppet.classList.remove('smiling');
     eyes.forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
     section.querySelectorAll('[data-motion],#blink,#smile').forEach(b=>{b.disabled=on;b.title=on?'Wake the squishy first':'';});
     section.querySelector('.motion-status').textContent=on?'Shh… sleeping.':'Awake and ready to play.';
-    scheduleFace();syncRadio();
+    if(!on&&animateWake&&canAnimate())startWake();
+    else {scheduleFace();syncRadio();}
   }
   setIdle(!reduced.matches);
   idle.onclick = () => setIdle(!puppet.classList.contains('idle'));
   reduced.addEventListener('change', () => { if (reduced.matches) setIdle(false); });
-  document.addEventListener('visibilitychange', () => {scheduleFace();syncRadio();if(document.hidden)animation?.cancel();});
+  document.addEventListener('visibilitychange', () => {if(document.hidden)finishWake();scheduleFace();syncRadio();if(document.hidden)animation?.cancel();});
   section.querySelector('#blink').onclick = blink;
   section.querySelector('#smile').onclick = smile;
   function play(type, automatic=false) {
-    if(puppet.classList.contains('asleep'))return;
+    if(puppet.classList.contains('asleep')||puppet.classList.contains('waking'))return;
     animation?.cancel();
     radioAnimation?.cancel();radioAnimation=null;
     blink(); smile();

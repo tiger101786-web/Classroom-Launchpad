@@ -32,13 +32,14 @@
   const actions=motionLabel.nextElementSibling;motionLabel.remove();
   group('03 · Play together',[actions,host.querySelector('.motion-status')]);
   const sleepButton=document.createElement('button');sleepButton.type='button';sleepButton.dataset.dumplingSleep='';actions.append(sleepButton);
-  let napTimer,autoAsleep=false;
+  let napTimer,autoAsleep=false,wakeRequested=false;
   function resetNap(){
     clearTimeout(napTimer);autoAsleep=false;sync();
     if(host.hidden||preferences.asleep||radioPlaying)return;
     napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying){autoAsleep=true;sync();}},60000);
   }
-  sleepButton.onclick=()=>{preferences.asleep=!(preferences.asleep||autoAsleep);autoAsleep=false;closePanel();resetNap();save();};
+  sleepButton.onclick=()=>{wakeRequested=Boolean(preferences.asleep||autoAsleep);preferences.asleep=!wakeRequested;autoAsleep=false;closePanel();resetNap();save();};
+  host.addEventListener('dumpling-wake-finished',()=>sync());
   document.addEventListener('pointerdown',()=>{if(loaded)resetNap();});
   document.addEventListener('keydown',()=>{if(loaded)resetNap();});
   const sizeChoices=document.createElement('div');sizeChoices.className='controls dumpling-sizes';
@@ -90,12 +91,13 @@
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=preferences.pet!=='dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
-    petApi.setSleep(asleep);
+    const animateWake=wakeRequested;wakeRequested=false;
+    petApi.setSleep(asleep,animateWake);
     sleepButton.textContent=asleep?'Wake Squishy':'Sleep Squishy';sleepButton.setAttribute('aria-pressed',String(asleep));
     const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
     petApi.setRadio(radioPlaying);
-    const accessory=radioPlaying&&!asleep?'headphones':preferences.accessory;
+    const accessory=radioPlaying&&!asleep&&!pet.classList.contains('waking')?'headphones':preferences.accessory;
     if(pet.dataset.accessory!==accessory)accessoryApi.setAccessory(accessory);
     host.classList.toggle('is-listening',radioPlaying);
     radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';

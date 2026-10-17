@@ -123,6 +123,12 @@ async function request(route, cookie='', body, method) {
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),false);
     await panel.getByRole('button',{name:'Wake Squishy',exact:true}).click();
+    assert.equal(await pet.evaluate(e=>e.classList.contains('waking')),true);
+    assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),false,'Finish waking before dancing');
+    assert.equal(await pet.getAttribute('data-accessory'),'bow','Headphones wait for wake sequence');
+    await page.waitForTimeout(1100);
+    await pet.screenshot({path:path.join(repo,'work',`companion-waking-${role}.png`)});
+    await page.waitForFunction(()=>!document.querySelector('.dumpling-companion .pet-button').classList.contains('waking'));
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),true,'Waking resumes music');
     await pet.click();await panel.waitFor({state:'visible'});
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),1);

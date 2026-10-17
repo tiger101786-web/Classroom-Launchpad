@@ -18,6 +18,7 @@
 .dumpling-companion .sleep-eyes,.dumpling-companion .sleep-zs{display:none;pointer-events:none}
 .dumpling-companion .asleep .eye{visibility:hidden}
 .dumpling-companion .asleep .sleep-eyes,.dumpling-companion .asleep .sleep-zs{display:block}
+.dumpling-companion .waking .sleep-zs{display:block}
 .dumpling-companion .asleep.idle .sleep-zs text{animation:dumpling-sleep-z 3s ease-out infinite}
 .dumpling-companion .asleep .moving-bun{animation:none;transform:none}
 .dumpling-companion .panel button:disabled{opacity:.45;cursor:not-allowed}
