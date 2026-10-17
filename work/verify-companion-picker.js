@@ -82,6 +82,11 @@ async function request(route, cookie='', body, method) {
     await page.screenshot({path:path.join(repo,'work',`companion-move-speech-${role}.png`)});
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
+    const colorPositions=await panel.locator('.color-choice').evaluateAll(buttons=>buttons.map(button=>{
+      const range=document.createRange();range.selectNodeContents(button);
+      return {label:range.getBoundingClientRect().left-button.getBoundingClientRect().left,layout:getComputedStyle(button).display,dot:getComputedStyle(button,'::before').width};
+    }));
+    colorPositions.forEach(item=>{assert.equal(item.layout,'grid');assert.equal(item.dot,'13px');assert(Math.abs(item.label-colorPositions[0].label)<1,'Color labels must share the same inset');});
     assert.equal(await bubble.isVisible(),false,'Speech hides while customizing');
     const scrollBody=panel.locator('.dumpling-panel-body');
     assert.equal(await scrollBody.evaluate(e=>getComputedStyle(e).overflowY),'scroll');
