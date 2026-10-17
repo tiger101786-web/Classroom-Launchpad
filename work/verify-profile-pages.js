@@ -13,7 +13,7 @@ await page.addScriptTag({content:'function forumRoleLabel(value) { return value 
 await page.addScriptTag({content:`const authSession={name:'Test',profileFrame:'faith-glass'};const isSignedIn=()=>true;const normalizeProfileAvatarUrl=()=>'';const escapeHtml=x=>x;const forumInitials=()=> 'CC';let profileAvatarMessage='';const sharedBackend={request:async(url,opts)=>{window.savedFrame=JSON.parse(opts.body).profileFrame;throw Error('Test retry');}};`+src.slice(src.indexOf('const PROFILE_FRAMES ='),src.indexOf('function renderForumAuthor('))+src.slice(src.indexOf('function renderForumProfileEditor('),src.indexOf('function hasSharedData('))+src.slice(src.indexOf('function attachForumProfileEditor('),src.indexOf('function validateThreadTopic('))+'document.body.innerHTML=renderForumProfileEditor(false);attachForumProfileEditor();'});
 assert.equal(await page.locator('[data-profile-frame]:visible').count(),8);
 await page.locator('#changeNameStyle').click();
-assert.equal(await page.locator('[data-name-choice]').count(),31);
+assert.equal(await page.locator('[data-name-choice]').count(),43);
 await page.locator('[data-name-close]').first().click();
 assert(await page.locator('[data-profile-frame="faith-glass"]').isVisible());
 const frameNames=await page.locator('[data-profile-frame] strong').allTextContents();

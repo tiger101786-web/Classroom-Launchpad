@@ -15,7 +15,13 @@
     ['film','Film strip','Cinema lettering · sprocket edges'],['stamp','Postage stamp','Postal lettering · scalloped edges'],
     ['storybook','Storybook','Bookish lettering · gilded corners'],['frost','Frosted glass','Icy lettering · frosted panel'],
     ['racing','Racing stripe','Speed lettering · checkered edge'],['woven','Woven label','Textile weave · stitched border'],
-    ['marquee','Marquee lights','Theater lettering · dotted lights'],['embossed','Embossed leather','Pressed lettering · leather tag']
+    ['marquee','Marquee lights','Theater lettering · dotted lights'],['embossed','Embossed leather','Pressed lettering · leather tag'],
+    ['origami','Origami fold','Folded paper · angular edges'],['terminal','Terminal','Monospace text · command prompt'],
+    ['denim','Denim patch','Indigo fabric · golden seams'],['porcelain','Porcelain','Blue lettering · ceramic trim'],
+    ['honeycomb','Honeycomb','Honey-gold cells · amber border'],['vinyl','Vinyl label','Record grooves · cream lettering'],
+    ['watercolor','Watercolor','Soft pigment · painted paper'],['scoreboard','Scoreboard','Digital numbers · stadium panel'],
+    ['woodcut','Woodcut','Carved lettering · wood grain'],['bluewave','Wave crest','Ocean curves · foamy trim'],
+    ['quilt','Quilt square','Patchwork fabric · stitched edge'],['starlight','Star chart','Constellation dots · navy plate']
   ];
   choices.sort(([a,titleA],[b,titleB])=>a==='none'?-1:b==='none'?1:titleA.localeCompare(titleB,'en',{sensitivity:'base'}));
   const valid = value => choices.some(([id]) => id === value);

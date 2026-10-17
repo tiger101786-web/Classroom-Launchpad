@@ -4,7 +4,7 @@ const {chromium}=require('playwright');
 const styles=require('../profile-name-styles');
 const root=path.resolve(__dirname,'..');
 (async()=>{
-  assert.equal(styles.choices.length,31);
+  assert.equal(styles.choices.length,43);
   assert.equal(styles.choices[0][0],'none');
   const titles=styles.choices.slice(1).map(x=>x[1]);
   assert.deepEqual(titles,[...titles].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'})));
@@ -82,6 +82,6 @@ const root=path.resolve(__dirname,'..');
     assert.equal(disk.teacherNameStyle,'comic');assert.equal(disk.approvedStudents.find(s=>s.email===email).nameStyle,'patch');
     await request('/api/profile-name-style',student,{nameStyle:'none'});
     assert.equal((await request('/api/auth/session',student,undefined,'GET')).data.session.nameStyle,'none');
-    console.log('PASS: 30 styles plus Original, alphabetical order, six-card pages, saved-selection page, draft retention, desktop/mobile, both themes, long names, retry/cancel and student/teacher persistence.');
+    console.log('PASS: 42 styles plus Original, alphabetical order, six-card pages, saved-selection page, draft retention, desktop/mobile, both themes, long names, retry/cancel and student/teacher persistence.');
   } finally {server.kill();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
