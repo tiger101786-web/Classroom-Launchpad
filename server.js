@@ -596,7 +596,8 @@ function normalizeCompanionPreference(value) {
     pet: source.pet === "dumpling" ? "dumpling" : "colt",
     color: ["Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver"].includes(source.color) ? source.color : "Gold",
     accessory: ["none", "bow", "headphones", "hat"].includes(source.accessory) ? source.accessory : "none",
-    motion: source.motion !== false
+    motion: source.motion !== false,
+    size: ['small', 'medium', 'large', 'extra-large'].includes(source.size) ? source.size : 'medium'
   };
 }
 
@@ -3885,7 +3886,8 @@ async function handleApi(req, res, pathname) {
       if (input && (!['colt', 'dumpling'].includes(input.pet)
         || !['Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat'].includes(input.accessory)
-        || typeof input.motion !== 'boolean')) throw new Error("Choose a valid pet, color, accessory, and motion setting.");
+        || (input.size !== undefined && !['small', 'medium', 'large', 'extra-large'].includes(input.size))
+        || typeof input.motion !== 'boolean')) throw new Error("Choose a valid pet, color, accessory, size, and motion setting.");
       const db = readDb();
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);

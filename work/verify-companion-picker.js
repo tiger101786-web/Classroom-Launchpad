@@ -19,10 +19,11 @@ async function request(route, cookie='', body, method) {
   assert.equal((await request('/api/companion-preferences')).status,401);
   const teacher=await request('/api/auth/teacher','',{pin:'654321'},'POST');
   assert.equal(teacher.status,200);
-  const baseline={pet:'colt',color:'Gold',accessory:'none',motion:true};
+  const baseline={pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium'};
   assert.deepEqual((await request('/api/companion-preferences',teacher.cookie)).data.preferences,baseline);
   await request('/api/launchpad-colt/customization',teacher.cookie,{name:'Blaze',nameplateVisible:false,platformVisible:false});
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,accessory:'<script>'})).status,400);
+  assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,size:'huge'})).status,400);
   const email='tiger101786@gmail.com';
   const reset=await request('/api/approved-students/'+encodeURIComponent(email)+'/reset-code',teacher.cookie,{},'POST');
   const student=await request('/api/auth/register','',{email,activationCode:reset.data.activationCode,name:'Test',grade:'4',password:'StudentTest123!'},'POST');
@@ -71,6 +72,14 @@ async function request(route, cookie='', body, method) {
     assert(moved.x<before.x-250 && moved.y>before.y+60,'Pet must move with pointer');
     assert.equal(await panel.isVisible(),false,'Drag must not open controls');
     await pet.click();await panel.waitFor({state:'visible'});
+    for(const [size,width,height] of [['small',124,122],['medium',144,142],['large',168,166],['extra-large',210,208]]){
+      await panel.locator(`[data-pet-size="${size}"]`).click();
+      const dimensions=await pet.boundingBox();assert.equal(dimensions.width,width);assert.equal(dimensions.height,height);
+      assert.equal(await panel.locator(`[data-pet-size="${size}"]`).getAttribute('aria-pressed'),'true');
+      await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+      assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.size,size);
+    }
+    await panel.locator('[data-pet-size="medium"]').click();
     await panel.getByRole('button',{name:'Blue',exact:true}).click();
     await panel.getByRole('button',{name:'Headphones',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
@@ -120,6 +129,7 @@ async function request(route, cookie='', body, method) {
     await openPicker();await page.getByLabel('Choose pet',{exact:true}).selectOption('dumpling');
     await page.waitForFunction(()=>document.querySelector('.companion-picker .pet-status').textContent==='Saved');
     await page.reload({waitUntil:'domcontentloaded'});await showHome();await pet.waitFor({state:'visible'});
+    assert.equal(await page.locator('.dumpling-companion').getAttribute('data-size'),'medium');
     assert.equal(await page.locator('.companion-picker').isVisible(),false);
     const restored=await pet.boundingBox();assert(Math.abs(restored.x-moved.x)<2 && Math.abs(restored.y-moved.y)<2);
     await pet.click();await panel.waitFor({state:'visible'});
@@ -127,6 +137,7 @@ async function request(route, cookie='', body, method) {
     await panel.getByRole('button',{name:'Blue',exact:true}).press('Escape');
     assert.equal(await panel.isVisible(),false);
     await page.setViewportSize({width:390,height:844});await pet.click();
+    assert.equal((await pet.boundingBox()).width,62,'Match compact Colt size');
     const box=await panel.boundingBox();assert(box.x>=0 && box.x+box.width<=390 && box.y>=0 && box.y+box.height<=844);
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'login',auth:{authenticated:false,role:'guest',email:''}}})));
     assert.equal(await page.locator('.dumpling-companion').isVisible(),false);

@@ -27,7 +27,17 @@
 .dumpling-companion .eye-left{transform-origin:483px 605px}.dumpling-companion .eye-right{transform-origin:795px 605px}
 .dumpling-companion .mouth,.dumpling-companion .mouth-open{transform-origin:637px 660px;transition:opacity .16s ease,transform .2s ease}.dumpling-companion .mouth-open{opacity:0;transform:scaleY(.65)}.dumpling-companion .smiling .mouth{opacity:0;transform:scaleY(.75)}.dumpling-companion .smiling .mouth-open{opacity:1;transform:scaleY(1)}
 .dumpling-companion .color-choice:before{content:'';display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--swatch);margin-right:7px;border:1px solid #0002;vertical-align:-2px}.dumpling-companion .accessory-layer{isolation:isolate}
-@media(max-width:600px){.dumpling-companion{width:165px}}
+/* Match Colt's root and character dimensions without stretching the artwork. */
+.dumpling-companion{width:154px}
+.dumpling-companion .pet-button{width:144px;height:142px}
+.dumpling-companion .pet-button svg{height:100%}
+.dumpling-companion[data-size="small"]{width:132px}
+.dumpling-companion[data-size="small"] .pet-button{width:124px;height:122px}
+.dumpling-companion[data-size="large"]{width:178px}
+.dumpling-companion[data-size="large"] .pet-button{width:168px;height:166px}
+.dumpling-companion[data-size="extra-large"]{width:220px}
+.dumpling-companion[data-size="extra-large"] .pet-button{width:210px;height:208px}
+@media(max-width:1119px){.dumpling-companion[data-size]{width:66px}.dumpling-companion[data-size] .pet-button{width:62px;height:62px}}
 @media(prefers-reduced-motion:reduce){.dumpling-companion .mouth,.dumpling-companion .mouth-open{transition:none}}
 .dumpling-companion .panel{padding:0;border-radius:20px;background:var(--paper,#fff);box-shadow:0 18px 55px #0006}
 .dumpling-companion .dumpling-panel-heading{margin:0;padding:20px;background:radial-gradient(circle at 15% 0%,#c45c7d66,transparent 65%),linear-gradient(120deg,#560720,#2b1020);color:#fff;border-bottom:3px solid #b9b9c0}

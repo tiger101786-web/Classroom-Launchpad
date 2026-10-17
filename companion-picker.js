@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true});
+  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium'});
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
@@ -31,6 +31,12 @@
   const motionLabel=[...content.children].find(e=>e.textContent==='Try an animation');
   const actions=motionLabel.nextElementSibling;motionLabel.remove();
   group('03 · Play together',[actions,host.querySelector('.motion-status')]);
+  const sizeChoices=document.createElement('div');sizeChoices.className='controls dumpling-sizes';
+  [['small','Small'],['medium','Medium'],['large','Large'],['extra-large','Extra Large']].forEach(([size,label])=>{
+    const button=document.createElement('button');button.type='button';button.dataset.petSize=size;button.textContent=label;
+    button.onclick=()=>{preferences.size=size;sync();save();};sizeChoices.append(button);
+  });
+  group('04 · Choose your size',[sizeChoices]);
   const radioBadge=document.createElement('div');radioBadge.className='dumpling-radio-status';radioBadge.setAttribute('role','status');
   panel.append(radioBadge);
   const tools=document.createElement('div');tools.className='controls dumpling-utilities';
@@ -63,6 +69,8 @@
   function openPanel(){if(host.hidden)return;panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
+    host.dataset.size=preferences.size||'medium';
+    sizeChoices.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.petSize===host.dataset.size)));
     if(host.hidden)closePanel();
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
