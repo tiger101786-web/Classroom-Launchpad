@@ -221,6 +221,7 @@ const defaultDb = {
   directMessages: [],
   radioFavorites: {},
   coltCustomizations: {},
+  companionPreferences: {},
   mutedStudents: [],
   websiteRequests: [],
   assignments: [],
@@ -587,6 +588,22 @@ function coltCustomizationAccountKey(session) {
   return session && session.role === "teacher"
     ? "teacher"
     : `student:${normalizeEmail(session && session.email)}`;
+}
+
+function normalizeCompanionPreference(value) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    pet: source.pet === "dumpling" ? "dumpling" : "colt",
+    color: ["Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver"].includes(source.color) ? source.color : "Gold",
+    accessory: ["none", "bow", "headphones", "hat"].includes(source.accessory) ? source.accessory : "none",
+    motion: source.motion !== false
+  };
+}
+
+function normalizeCompanionPreferences(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).filter(([key]) => /^(teacher|student:.+)$/.test(key))
+    .map(([key, preference]) => [key, normalizeCompanionPreference(preference)]));
 }
 
 function isAllowedStudentEmail(email) {
@@ -1326,6 +1343,7 @@ function writeDb(db) {
     directMessages: normalizeDirectMessages(db.directMessages),
     radioFavorites: normalizeRadioFavorites(db.radioFavorites),
     coltCustomizations: normalizeColtCustomizations(db.coltCustomizations),
+    companionPreferences: normalizeCompanionPreferences(db.companionPreferences),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
     websiteRequests: Array.isArray(db.websiteRequests) ? db.websiteRequests : [],
     assignments: normalizeAssignments(db.assignments),
@@ -3855,6 +3873,29 @@ async function handleApi(req, res, pathname) {
     sendJson(res, 200, {
       customization: customizations[coltCustomizationAccountKey(allowed)] || { ...defaultColtCustomization }
     });
+    return true;
+  }
+
+  if (["GET", "PUT"].includes(req.method) && pathname === "/api/companion-preferences") {
+    if (req.method === "PUT" && !requireSameOrigin(req, res)) return true;
+    const allowed = requireRole(req, res, ["student", "teacher"]);
+    if (!allowed) return true;
+    try {
+      const input = req.method === "PUT" ? await readBody(req) : null;
+      if (input && (!['colt', 'dumpling'].includes(input.pet)
+        || !['Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver'].includes(input.color)
+        || !['none', 'bow', 'headphones', 'hat'].includes(input.accessory)
+        || typeof input.motion !== 'boolean')) throw new Error("Choose a valid pet, color, accessory, and motion setting.");
+      const db = readDb();
+      const preferences = normalizeCompanionPreferences(db.companionPreferences);
+      const key = coltCustomizationAccountKey(allowed);
+      if (input) {
+        preferences[key] = normalizeCompanionPreference(input);
+        db.companionPreferences = preferences;
+        writeDb(db);
+      }
+      sendJson(res, 200, { preferences: preferences[key] || normalizeCompanionPreference(null) });
+    } catch (error) { sendJson(res, 400, { error: error.message }); }
     return true;
   }
 

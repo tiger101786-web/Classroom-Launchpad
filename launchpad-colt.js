@@ -53,6 +53,7 @@
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
   let globallyEnabled = true;
+  let selectedCompanion = "colt";
   let reactionTimer = 0;
   let speechTimer = 0;
   let sleepTimer = 0;
@@ -202,7 +203,7 @@
     poseVideos.forEach(video => {
       const selected = video.dataset.pose === activePose;
       video.dataset.active = String(selected);
-      if (!selected || !prefs.motion) {
+      if (!selected || !prefs.motion || selectedCompanion !== "colt") {
         video.pause();
         return;
       }
@@ -544,10 +545,18 @@
   }
 
   function shouldShow() {
-    return globallyEnabled && session.authenticated && !HIDDEN_SCREENS.has(screen);
+    return selectedCompanion === "colt" && globallyEnabled && session.authenticated && !HIDDEN_SCREENS.has(screen);
   }
 
+  // Pet switching only suspends Colt; his controls and saved preferences stay intact.
+  globalObject.addEventListener("launchpad-companion-selected", event => {
+    selectedCompanion = event.detail?.pet === "dumpling" ? "dumpling" : "colt";
+    syncVisibility();
+    syncPoseVideos(currentState);
+  });
+
   function syncVisibility() {
+    globalObject.dispatchEvent(new CustomEvent("launchpad-companion-availability", { detail: { enabled: globallyEnabled } }));
     root.hidden = !shouldShow();
     if (root.hidden) {
       closeControls();
