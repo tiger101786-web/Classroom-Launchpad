@@ -26,6 +26,7 @@ window.createDumplingPet = function(root) {
       <g class="eye eye-left"><ellipse cx="483" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="481" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="eye eye-right"><ellipse cx="795" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="793" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="music-eyes" fill="none" stroke="#171413" stroke-width="14" stroke-linecap="round"><path d="M449 605 Q483 571 517 605"/><path d="M761 605 Q795 571 829 605"/></g>
+      <g class="sleep-eyes" fill="none" stroke="#171413" stroke-width="14" stroke-linecap="round"><path d="M449 595 Q483 627 517 595"/><path d="M761 595 Q795 627 829 595"/></g>
       <g class="mouth"><path d="M594 632 Q608 694 637 685 Q664 684 681 632" fill="none" stroke="#16110f" stroke-width="22" stroke-linecap="round"/></g>
       <g class="mouth-open"><path d="M592 636 Q637 649 681 636 C680 712 597 712 592 636Z" fill="#191211"/><path d="M612 685 Q637 669 662 685 Q637 708 612 685" fill="#e98d91"/></g>
     </g></g></g>
@@ -36,6 +37,7 @@ window.createDumplingPet = function(root) {
       <text class="music-note" x="260" y="200" style="animation-delay:-1.2s">♫</text>
       <text class="music-note" x="990" y="190" style="animation-delay:-1.8s">♪</text>
     </g>
+    <g class="sleep-zs" pointer-events="none" fill="#b7c6ec" stroke="#292036" stroke-width="6" paint-order="stroke" font-family="Arial, sans-serif" font-weight="bold" font-size="125"><text x="950" y="330">Z</text><text x="1040" y="225" style="animation-delay:-1s">Z</text><text x="1120" y="120" style="animation-delay:-2s">Z</text></g>
     </svg>`;
   img.replaceWith(puppet);
   root.querySelector('h1').textContent = 'Your squishy, your color.';
@@ -72,16 +74,17 @@ window.createDumplingPet = function(root) {
   const idle = section.querySelector('#idle');
   let blinkTimer, smileTimer, bounceTimer, smileEnd, animation, radioAnimation;
   let radioPlaying = false;
-  const canAnimate = () => puppet.classList.contains('idle') && !reduced.matches && !document.hidden;
+  const canAnimate = () => puppet.classList.contains('idle') && !puppet.classList.contains('asleep') && !reduced.matches && !document.hidden;
   const eyes = [...puppet.querySelectorAll('.eye')];
   function blink() {
-    if(puppet.classList.contains('radio-dancing'))return;
+    if(puppet.classList.contains('radio-dancing')||puppet.classList.contains('asleep'))return;
     eyes.forEach(eye => {
       eye.getAnimations().forEach(a => a.cancel());
       eye.animate([{transform:'scaleY(1)'},{transform:'scaleY(.06)',offset:.45},{transform:'scaleY(.06)',offset:.6},{transform:'scaleY(1)'}], {duration:260,easing:'ease-in-out'});
     });
   }
   function smile() {
+    if(puppet.classList.contains('asleep'))return;
     clearTimeout(smileEnd);
     puppet.classList.add('smiling');
     smileEnd = setTimeout(() => puppet.classList.remove('smiling'), 1200);
@@ -116,6 +119,15 @@ window.createDumplingPet = function(root) {
     syncRadio();
     if (!on) { animation?.cancel();clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
   }
+  function setSleep(on) {
+    if(puppet.classList.contains('asleep')===on)return;
+    puppet.classList.toggle('asleep',on);
+    animation?.cancel();clearTimeout(smileEnd);puppet.classList.remove('smiling');
+    eyes.forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
+    section.querySelectorAll('[data-motion],#blink,#smile').forEach(b=>{b.disabled=on;b.title=on?'Wake the squishy first':'';});
+    section.querySelector('.motion-status').textContent=on?'Shh… sleeping.':'Awake and ready to play.';
+    scheduleFace();syncRadio();
+  }
   setIdle(!reduced.matches);
   idle.onclick = () => setIdle(!puppet.classList.contains('idle'));
   reduced.addEventListener('change', () => { if (reduced.matches) setIdle(false); });
@@ -123,6 +135,7 @@ window.createDumplingPet = function(root) {
   section.querySelector('#blink').onclick = blink;
   section.querySelector('#smile').onclick = smile;
   function play(type, automatic=false) {
+    if(puppet.classList.contains('asleep'))return;
     animation?.cancel();
     radioAnimation?.cancel();radioAnimation=null;
     blink(); smile();
@@ -136,5 +149,5 @@ window.createDumplingPet = function(root) {
   puppet.onclick = () => play('squish');
   section.querySelectorAll('[data-motion]').forEach(b => b.onclick = () => play(b.dataset.motion));
   panel.querySelector('.note').innerHTML = '<p><strong>Interactive 2D preview.</strong> The face blinks and smiles, following the squishy during movement. Idle controls automatic movement; try Blink or Happy smile anytime. The basket stays rigid. This is not a 3D model.</p><p>Your existing Colt and classroom site are unchanged.</p>';
-  return {setIdle,setRadio};
+  return {setIdle,setRadio,setSleep};
 };

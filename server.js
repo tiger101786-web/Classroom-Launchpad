@@ -597,6 +597,7 @@ function normalizeCompanionPreference(value) {
     color: ["Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver"].includes(source.color) ? source.color : "Gold",
     accessory: ["none", "bow", "headphones", "hat"].includes(source.accessory) ? source.accessory : "none",
     motion: source.motion !== false,
+    asleep: source.asleep === true,
     size: ['small', 'medium', 'large', 'extra-large'].includes(source.size) ? source.size : 'medium'
   };
 }
@@ -3887,6 +3888,7 @@ async function handleApi(req, res, pathname) {
         || !['Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat'].includes(input.accessory)
         || (input.size !== undefined && !['small', 'medium', 'large', 'extra-large'].includes(input.size))
+        || (input.asleep !== undefined && typeof input.asleep !== 'boolean')
         || typeof input.motion !== 'boolean')) throw new Error("Choose a valid pet, color, accessory, size, and motion setting.");
       const db = readDb();
       const preferences = normalizeCompanionPreferences(db.companionPreferences);

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium'});
+  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium',asleep:false});
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
@@ -31,6 +31,16 @@
   const motionLabel=[...content.children].find(e=>e.textContent==='Try an animation');
   const actions=motionLabel.nextElementSibling;motionLabel.remove();
   group('03 · Play together',[actions,host.querySelector('.motion-status')]);
+  const sleepButton=document.createElement('button');sleepButton.type='button';sleepButton.dataset.dumplingSleep='';actions.append(sleepButton);
+  let napTimer,autoAsleep=false;
+  function resetNap(){
+    clearTimeout(napTimer);autoAsleep=false;sync();
+    if(host.hidden||preferences.asleep||radioPlaying)return;
+    napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying){autoAsleep=true;sync();}},60000);
+  }
+  sleepButton.onclick=()=>{preferences.asleep=!(preferences.asleep||autoAsleep);autoAsleep=false;closePanel();resetNap();save();};
+  document.addEventListener('pointerdown',()=>{if(loaded)resetNap();});
+  document.addEventListener('keydown',()=>{if(loaded)resetNap();});
   const sizeChoices=document.createElement('div');sizeChoices.className='controls dumpling-sizes';
   [['small','Small'],['medium','Medium'],['large','Large'],['extra-large','Extra Large']].forEach(([size,label])=>{
     const button=document.createElement('button');button.type='button';button.dataset.petSize=size;button.textContent=label;
@@ -76,14 +86,17 @@
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=preferences.pet!=='dumpling';
     applying=true;
+    const asleep=Boolean(preferences.asleep||autoAsleep);
+    petApi.setSleep(asleep);
+    sleepButton.textContent=asleep?'Wake Squishy':'Sleep Squishy';sleepButton.setAttribute('aria-pressed',String(asleep));
     const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
     petApi.setRadio(radioPlaying);
-    const accessory=radioPlaying?'headphones':preferences.accessory;
+    const accessory=radioPlaying&&!asleep?'headphones':preferences.accessory;
     if(pet.dataset.accessory!==accessory)accessoryApi.setAccessory(accessory);
     host.classList.toggle('is-listening',radioPlaying);
-    radioBadge.textContent=radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
-    host.querySelector('.accessory-hint').textContent=radioPlaying?'Your choice is saved for when the music stops.':'One accessory at a time. Make it yours.';
+    radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
+    host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your choice is saved for when the music stops.':'One accessory at a time. Make it yours.';
     applying=false;place();
   }
   function applyAppearance(){
@@ -104,7 +117,7 @@
     }).catch(error=>{if(generation===epoch&&error.name!=='AbortError')announce('Not saved. Please retry.',true);});
   }
   retry.onclick=pickerRetry.onclick=()=>loadError?updateAccount(auth,true):save();
-  select.onchange=()=>{preferences.pet=select.value;petHidden=false;closePanel();selectPet();save();};
+  select.onchange=()=>{preferences.pet=select.value;petHidden=false;closePanel();selectPet();resetNap();save();};
   picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
   picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
   picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;sync();openPanel();};
@@ -152,17 +165,18 @@
     auth=nextAuth||{};const next=auth.authenticated?`${auth.role}:${auth.email||''}`:'';
     if(next===account&&!force){sync();return;}
     account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
+    clearTimeout(napTimer);autoAsleep=false;
     preferences=defaults();loaded=false;loadError=false;petHidden=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
     try{const stored=JSON.parse(localStorage.getItem(positionKey())||'null');if(stored&&Number.isFinite(stored.x)&&Number.isFinite(stored.y))position=stored;}catch{}
     if(!next)return;
     try{
       const response=await fetch('/api/companion-preferences',{signal:controller.signal});if(!response.ok)throw Error('Load failed');
       const data=await response.json();if(generation!==epoch)return;
-      preferences=data.preferences;loaded=true;applyAppearance();selectPet();
+      preferences=data.preferences;loaded=true;applyAppearance();selectPet();resetNap();
     }catch(error){if(generation!==epoch||error.name==='AbortError')return;loaded=true;loadError=true;announce('Could not load pet choices. Retry before making changes.',true);sync();}
   }
   window.addEventListener('resize',place);
-  window.addEventListener('colt-radio-playback',event=>{radioPlaying=event.detail?.playing===true;sync();});
+  window.addEventListener('colt-radio-playback',event=>{radioPlaying=event.detail?.playing===true;resetNap();});
   window.addEventListener('classroom-launchpad-rendered',event=>{screen=event.detail?.screen||document.body.dataset.screen||screen;updateAccount(event.detail?.auth||auth);});
   window.addEventListener('launchpad-companion-availability',event=>{enabled=event.detail.enabled;sync();});
   const panelObserver=new MutationObserver(sync);
