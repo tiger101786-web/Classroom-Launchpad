@@ -1,100 +1,142 @@
 (() => {
   'use strict';
-  const defaults = () => ({pet:'colt', color:'Gold', accessory:'none', motion:true});
-  const hiddenScreens = new Set(['pin','login','coltRun','dashboard','edit','changePin']);
-  let auth = {}, account = '', epoch = 0, enabled = true, preferences = defaults(), expanded = false;
-  let screen = document.body.dataset.screen || 'home', loaded = false, loadError = false, pending = Promise.resolve(), controller;
-  const root = document.createElement('section');
-  root.className = 'companion-picker'; root.hidden = true; root.setAttribute('aria-label','Pet selection');
-  root.innerHTML = '<label>Choose pet <select aria-label="Choose pet"><option value="colt">Colt</option><option value="dumpling">Squishy Dumpling</option></select></label><div class="pet-display"></div><div class="pet-tools"><button class="pet-customize" hidden>Customize dumpling</button><button class="pet-hide" hidden>Hide pet</button></div><p class="pet-status" role="status"></p><button class="pet-retry" hidden>Retry save</button>';
-  document.body.append(root);
-  const select=root.querySelector('select'), display=root.querySelector('.pet-display'), customize=root.querySelector('.pet-customize'), hide=root.querySelector('.pet-hide'), status=root.querySelector('.pet-status'), retry=root.querySelector('.pet-retry');
-  let frame, petHidden = false;
-  function sendToFrame() {
-    frame?.contentWindow?.postMessage({type:'dumpling-host',preferences,expanded,dark:document.body.dataset.theme==='night'},location.origin);
+  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true});
+  const hiddenScreens=new Set(['pin','login','coltRun','dashboard','edit','changePin']);
+  let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false;
+  let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
+  const picker=document.createElement('dialog');
+  picker.className='companion-picker';picker.setAttribute('aria-labelledby','companion-picker-title');
+  picker.innerHTML='<header><h2 id="companion-picker-title">My Pet</h2><button type="button" data-pet-close aria-label="Close pet selection">✕</button></header><label>Choose pet <select aria-label="Choose pet"><option value="colt">Colt</option><option value="dumpling">Squishy Dumpling</option></select></label><p>Colt keeps his own controls and settings. Click the dumpling for customization; drag it to move.</p><div class="pet-tools"><button type="button" data-pet-customize>Customize dumpling</button><button type="button" data-pet-show>Show dumpling</button></div><p class="pet-status" role="status"></p><button class="pet-retry" hidden>Retry save</button>';
+  const host=document.createElement('div');host.className='dumpling-companion';host.hidden=true;
+  host.innerHTML='<h1 hidden></h1><div class="eyebrow" hidden></div><section class="stage"><span hidden></span><img class="toy" alt="Squishy dumpling"></section><aside class="panel" hidden aria-label="Squishy Dumpling controls"><div><h2></h2><p></p></div><div class="note"></div></aside>';
+  document.body.append(picker,host);
+  const petApi=window.createDumplingPet(host);window.addDumplingAccessories(host);
+  const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
+  pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');pet.setAttribute('aria-expanded','false');pet.title='Click for controls · drag to move · arrow keys move';
+  pet.querySelector('svg').setAttribute('viewBox','0 30 1254 1140');
+  const heading=document.createElement('header');heading.className='dumpling-panel-heading';
+  heading.innerHTML='<strong>Squishy Dumpling</strong><button type="button" data-dumpling-close aria-label="Close dumpling controls">✕</button>';
+  panel.prepend(heading);
+  const tools=document.createElement('div');tools.className='controls';
+  tools.innerHTML='<button type="button" data-dumpling-reset>Reset spot</button><button type="button" data-dumpling-hide>Hide dumpling</button><button type="button" data-companion-open>Choose pet</button>';
+  panel.append(tools);
+  const status=document.createElement('p');status.className='pet-status';status.setAttribute('role','status');panel.append(status);
+  const retry=document.createElement('button');retry.hidden=true;retry.textContent='Retry save';panel.append(retry);
+  const select=picker.querySelector('select'),pickerStatus=picker.querySelector('.pet-status'),pickerRetry=picker.querySelector('.pet-retry');
+  const allowed=()=>loaded&&auth.authenticated&&enabled&&!hiddenScreens.has(screen);
+  const positionKey=()=>`dumpling-position:${account}`;
+  function announce(message,error=false){status.textContent=pickerStatus.textContent=message;retry.hidden=pickerRetry.hidden=!error;}
+  function clamp(x,y){const box=pet.getBoundingClientRect();return {x:Math.max(8,Math.min(x,innerWidth-box.width-8)),y:Math.max(8,Math.min(y,innerHeight-box.height-8))};}
+  function place(){
+    if(host.hidden)return;
+    const width=pet.getBoundingClientRect().width;
+    const next=clamp(position?.x??innerWidth-width-34,position?.y??innerHeight*.48-90);
+    host.style.left=`${next.x}px`;host.style.top=`${next.y}px`;
+    if(position)position=next;
+    placePanel();
   }
-  function sync() {
-    const blocked = [...document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel')].some(p=>!p.hidden);
-    root.hidden = !loaded || !auth.authenticated || !enabled || hiddenScreens.has(screen) || blocked;
-    select.value=preferences.pet;
-    select.disabled=loadError;
-    const showDumpling=preferences.pet==='dumpling';
-    customize.hidden=hide.hidden=!showDumpling;
-    customize.textContent=expanded?'Close customization':'Customize dumpling';
-    hide.textContent=petHidden?'Show pet':'Hide pet';
-    root.classList.toggle('is-expanded',expanded && showDumpling && !petHidden);
-    if (!showDumpling || root.hidden || petHidden) {
-      frame?.remove(); frame=null;
-    } else if (!frame) {
-      frame=document.createElement('iframe');
-      frame.title='Squishy Dumpling and customization controls';
-      frame.src='dumpling-pet/index.html';
-      display.append(frame);
-    }
-    sendToFrame();
+  function placePanel(){
+    if(panel.hidden)return;
+    const box=pet.getBoundingClientRect(),width=Math.min(360,innerWidth-24);
+    panel.style.width=`${width}px`;
+    const left=box.left>width+20?box.left-width-12:Math.min(box.right+12,innerWidth-width-12);
+    panel.style.left=`${Math.max(12,left)}px`;
+    panel.style.top=`${Math.max(12,Math.min(box.top,innerHeight-panel.offsetHeight-12))}px`;
   }
-  function selectPet() {
-    window.dispatchEvent(new CustomEvent('launchpad-companion-selected',{detail:{pet:preferences.pet}}));
-    sync();
+  function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
+  function openPanel(){if(host.hidden)return;panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
+  function sync(){
+    const blocked=[...document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel')].some(p=>!p.hidden);
+    host.hidden=!allowed()||blocked||preferences.pet!=='dumpling'||petHidden;
+    if(host.hidden)closePanel();
+    if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
+    select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
+    picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=preferences.pet!=='dumpling';
+    applying=true;
+    const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
+    applying=false;place();
   }
-  function save() {
-    const snapshot={...preferences}, generation=epoch;
-    status.textContent='Saving…'; retry.hidden=true;
+  function applyAppearance(){
+    applying=true;
+    [...host.querySelectorAll('.color-choice')].find(b=>b.textContent===preferences.color)?.click();
+    [...host.querySelectorAll('.accessory-controls button')].find(b=>b.dataset.accessory===preferences.accessory)?.click();
+    pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');
+    applying=false;sync();
+  }
+  function selectPet(){window.dispatchEvent(new CustomEvent('launchpad-companion-selected',{detail:{pet:preferences.pet}}));sync();}
+  function save(){
+    const snapshot={...preferences},generation=epoch;announce('Saving…');
     pending=pending.catch(()=>{}).then(async()=>{
-      if (generation!==epoch) return;
+      if(generation!==epoch)return;
       const response=await fetch('/api/companion-preferences',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot),signal:controller.signal});
-      if (!response.ok) throw Error('Could not save your pet choices.');
-      if(generation===epoch && JSON.stringify(preferences)===JSON.stringify(snapshot)) status.textContent='Saved';
-    }).catch(error=>{
-      if(generation===epoch && error.name!=='AbortError'){status.textContent='Not saved. Please retry.';retry.hidden=false;}
-    });
+      if(!response.ok)throw Error('Save failed');
+      if(generation===epoch&&JSON.stringify(snapshot)===JSON.stringify(preferences))announce('Saved');
+    }).catch(error=>{if(generation===epoch&&error.name!=='AbortError')announce('Not saved. Please retry.',true);});
   }
-  retry.onclick=()=>loadError?updateAccount(auth,true):save();
-  select.onchange=()=>{preferences.pet=select.value;expanded=false;petHidden=false;selectPet();save();};
-  customize.onclick=()=>{expanded=!expanded;petHidden=false;sync();};
-  hide.onclick=()=>{petHidden=!petHidden;expanded=false;sync();};
-  root.addEventListener('keydown',event=>{if(event.key==='Escape' && expanded){expanded=false;sync();customize.focus();}});
-  window.addEventListener('message',event=>{
-    if(event.origin!==location.origin || event.source!==frame?.contentWindow || event.data?.type!=='dumpling-pet')return;
-    if(event.data.ready){sendToFrame();return;}
-    if(event.data.close){expanded=false;sync();customize.focus();return;}
-    const p=event.data.preferences;
-    if(!p || !['Gold','Rose','Blue','Lavender','Matcha','Silver'].includes(p.color) || !['none','bow','headphones','hat'].includes(p.accessory) || typeof p.motion!=='boolean')return;
-    preferences={...preferences,...p,pet:'dumpling'};save();
+  retry.onclick=pickerRetry.onclick=()=>loadError?updateAccount(auth,true):save();
+  select.onchange=()=>{preferences.pet=select.value;petHidden=false;closePanel();selectPet();save();};
+  picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
+  picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
+  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;sync();openPanel();};
+  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;picker.close();sync();};
+  panel.querySelector('[data-dumpling-close]').onclick=()=>closePanel(true);
+  panel.querySelector('[data-dumpling-hide]').onclick=()=>{petHidden=true;sync();};
+  panel.querySelector('[data-dumpling-reset]').onclick=()=>{position=null;try{localStorage.removeItem(positionKey());}catch{}place();};
+  function openPicker(event){
+    if(!auth.authenticated)return;
+    opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
+    document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
+    closePanel();sync();if(!picker.open)picker.showModal();
+  }
+  document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
+  host.addEventListener('click',event=>{
+    if(applying||!event.target.closest('.color-choice,.accessory-controls button,#idle'))return;
+    preferences.color=host.querySelector('.color-choice[aria-pressed=true]').textContent;
+    preferences.accessory=host.querySelector('.accessory-controls [aria-pressed=true]').dataset.accessory;
+    preferences.motion=pet.classList.contains('idle');
+    pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');save();
   });
-  async function updateAccount(nextAuth, force=false) {
-    auth=nextAuth||{};
-    const next=auth.authenticated?`${auth.role}:${auth.email||''}`:'';
-    if(next===account && !force){sync();return;}
-    account=next;const generation=++epoch;
-    controller?.abort();controller=new AbortController();
-    preferences=defaults();expanded=false;petHidden=false;loaded=false;loadError=false;status.textContent='';retry.hidden=true;retry.textContent='Retry save';
-    frame?.remove();frame=null;selectPet();
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)closePanel(true);});
+  document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!host.contains(event.target))closePanel();});
+  let drag=null,suppressClick=false;
+  function persistPosition(){try{localStorage.setItem(positionKey(),JSON.stringify(position));}catch{}}
+  pet.onclick=()=>{if(suppressClick){suppressClick=false;return;}panel.hidden?openPanel():closePanel();};
+  pet.addEventListener('pointerdown',event=>{
+    if(event.button!==0)return;
+    const box=pet.getBoundingClientRect();drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:box.left,top:box.top,moved:false};suppressClick=false;
+    pet.setPointerCapture(event.pointerId);
+  });
+  pet.addEventListener('pointermove',event=>{
+    if(!drag||event.pointerId!==drag.id)return;
+    const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+    if(!drag.moved&&Math.hypot(dx,dy)<6)return;
+    drag.moved=true;closePanel();position=clamp(drag.left+dx,drag.top+dy);place();
+  });
+  function endDrag(event){if(!drag||event.pointerId!==drag.id)return;suppressClick=drag.moved;if(drag.moved)persistPosition();drag=null;}
+  pet.addEventListener('pointerup',endDrag);pet.addEventListener('pointercancel',endDrag);
+  pet.addEventListener('keydown',event=>{
+    const moves={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]};
+    if(!moves[event.key])return;event.preventDefault();const b=pet.getBoundingClientRect(),[x,y]=moves[event.key];position=clamp(b.left+x,b.top+y);place();persistPosition();
+  });
+  async function updateAccount(nextAuth,force=false){
+    auth=nextAuth||{};const next=auth.authenticated?`${auth.role}:${auth.email||''}`:'';
+    if(next===account&&!force){sync();return;}
+    account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
+    preferences=defaults();loaded=false;loadError=false;petHidden=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
+    try{const stored=JSON.parse(localStorage.getItem(positionKey())||'null');if(stored&&Number.isFinite(stored.x)&&Number.isFinite(stored.y))position=stored;}catch{}
     if(!next)return;
-    try {
-      const response=await fetch('/api/companion-preferences',{signal:controller.signal});
-      if(!response.ok)throw Error('Pet choices unavailable');
+    try{
+      const response=await fetch('/api/companion-preferences',{signal:controller.signal});if(!response.ok)throw Error('Load failed');
       const data=await response.json();if(generation!==epoch)return;
-      preferences=data.preferences;loaded=true;selectPet();
-    } catch(error) {
-      if(generation!==epoch || error.name==='AbortError')return;
-      // Do not overwrite existing account settings after a failed load.
-      loaded=true;loadError=true;status.textContent='Could not load your pet choices.';retry.textContent='Retry loading';retry.hidden=false;sync();
-    }
+      preferences=data.preferences;loaded=true;applyAppearance();selectPet();
+    }catch(error){if(generation!==epoch||error.name==='AbortError')return;loaded=true;loadError=true;announce('Could not load pet choices. Retry before making changes.',true);sync();}
   }
-  window.addEventListener('classroom-launchpad-rendered',event=>{
-    screen=event.detail?.screen||document.body.dataset.screen||screen;
-    updateAccount(event.detail?.auth||auth);
-  });
-  // Existing Colt visibility supplies the teacher's companion enable/disable setting.
+  window.addEventListener('resize',place);
+  window.addEventListener('classroom-launchpad-rendered',event=>{screen=event.detail?.screen||document.body.dataset.screen||screen;updateAccount(event.detail?.auth||auth);});
   window.addEventListener('launchpad-companion-availability',event=>{enabled=event.detail.enabled;sync();});
-  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-theme']});
-  ['colt-radio-opened','colt-assistant-opened'].forEach(name=>window.addEventListener(name,sync));
   const panelObserver=new MutationObserver(sync);
-  document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel').forEach(panel=>panelObserver.observe(panel,{attributes:true,attributeFilter:['hidden']}));
+  document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel').forEach(p=>panelObserver.observe(p,{attributes:true,attributeFilter:['hidden']}));
   const initialEpoch=epoch;
-  fetch('/api/state').then(r=>r.ok?r.json():null).then(state=>{
-    if(!state || epoch!==initialEpoch)return;
-    enabled=state.launchpadColt?.enabled!==false;updateAccount(state.auth);
-  }).catch(()=>{});
+  fetch('/api/state').then(r=>r.ok?r.json():null).then(state=>{if(!state||epoch!==initialEpoch)return;enabled=state.launchpadColt?.enabled!==false;updateAccount(state.auth);}).catch(()=>{});
 })();

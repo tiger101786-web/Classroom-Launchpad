@@ -1,7 +1,7 @@
 // Approval-only 2D puppet. The original photo asset stays unchanged.
-(() => {
-  const stage = document.querySelector('.stage');
-  const asset = 'gold-squishy-front-v5.png';
+window.createDumplingPet = function(root) {
+  const stage = root.querySelector('.stage');
+  const asset = 'dumpling-pet/gold-squishy-front-v5.png';
   const img = stage.querySelector('.toy');
   const puppet = document.createElement('button');
   puppet.className = 'toy pet-button';
@@ -31,10 +31,10 @@
     <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
     </svg>`;
   img.replaceWith(puppet);
-  document.querySelector('h1').textContent = 'Your squishy, your color.';
-  document.querySelector('.eyebrow').textContent = 'INTERACTIVE APPROVAL PREVIEW';
+  root.querySelector('h1').textContent = 'Your squishy, your color.';
+  root.querySelector('.eyebrow').textContent = 'INTERACTIVE APPROVAL PREVIEW';
   stage.querySelector('span').textContent = 'TAP THE TOY TO SQUISH';
-  const panel = document.querySelector('.panel');
+  const panel = root.querySelector('.panel');
   panel.querySelector('h2').textContent = 'Gold glitter';
   panel.querySelector('p').textContent = 'Choose a glitter color, then try a squeeze or a bounce. The basket stays still.';
   const section = document.createElement('div');
@@ -80,7 +80,7 @@
     clearTimeout(blinkTimer); clearTimeout(smileTimer);
     if (!puppet.classList.contains('idle') || reduced.matches || document.hidden) return;
     blinkTimer = setTimeout(() => { blink(); scheduleFace(); }, 3200 + Math.random()*2600);
-    smileTimer = setTimeout(smile, 1800 + Math.random()*1100);
+    // Resting body stays still; facial reactions happen on deliberate interactions.
   }
   function setIdle(on) {
     puppet.classList.toggle('idle', on);
@@ -109,4 +109,5 @@
   puppet.onclick = () => play('squish');
   section.querySelectorAll('[data-motion]').forEach(b => b.onclick = () => play(b.dataset.motion));
   panel.querySelector('.note').innerHTML = '<p><strong>Interactive 2D preview.</strong> The face blinks and smiles, following the squishy during movement. Idle controls automatic movement; try Blink or Happy smile anytime. The basket stays rigid. This is not a 3D model.</p><p>Your existing Colt and classroom site are unchanged.</p>';
-})();
+  return {setIdle};
+};

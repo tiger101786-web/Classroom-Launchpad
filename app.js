@@ -2405,6 +2405,7 @@ function renderAuthButton() {
           </div>
           <div class="header-account-links">
             <button type="button" data-action="openMyProfile"><span aria-hidden="true">&#9673;</span>My Profile</button>
+            <button type="button" data-companion-open><span aria-hidden="true">&#9733;</span>My Pet</button>
             <button type="button" data-action="collectibleShelf" data-shelf-side="left"><span aria-hidden="true">&#9881;</span>Customize left shelf</button>
             <button type="button" data-action="collectibleShelf" data-shelf-side="right"><span aria-hidden="true">&#9881;</span>Customize right shelf</button>
             ${isTeacher()

@@ -1,6 +1,6 @@
 // Standalone approval preview: accessories share the bun's animation coordinates.
-(() => {
-  const puppet = document.querySelector('.pet-button');
+window.addDumplingAccessories = function(root) {
+  const puppet = root.querySelector('.pet-button');
   const ns = 'http://www.w3.org/2000/svg';
   const defs = puppet.querySelector('defs');
   defs.insertAdjacentHTML('beforeend', `
@@ -41,7 +41,7 @@
   const control = document.createElement('div');
   control.className = 'accessory-controls';
   control.innerHTML = '<div class="label motion-label">Accessory</div><div class="controls" role="group" aria-label="Choose an accessory"></div><p class="accessory-hint">One at a time · follows the squishy</p>';
-  const colors = document.querySelector('.colors');
+  const colors = root.querySelector('.colors');
   colors.after(control);
   Object.entries({none:'None',bow:'Bow',headphones:'Headphones',hat:'Small hat'}).forEach(([id, label]) => {
     const button = document.createElement('button');
@@ -55,5 +55,5 @@
     };
     control.querySelector('.controls').append(button);
   });
-  document.querySelector('.panel > div > p').textContent = 'Pick a color and accessory, then try a squeeze or bounce. Accessories follow the squishy; the basket stays still.';
-})();
+  root.querySelector('.panel > div > p').textContent = 'Pick a color and accessory, then try a squeeze or bounce. Accessories follow the squishy; the basket stays still.';
+};
