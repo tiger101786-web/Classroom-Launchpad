@@ -11,8 +11,8 @@
 .dumpling-companion .panel h2{font-size:18px;margin:0 0 8px}.dumpling-companion .panel p{font-size:13px;line-height:1.45}.dumpling-companion .controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.dumpling-companion .label{font-weight:bold}.dumpling-companion .motion-label{margin-top:18px}.dumpling-companion .note{display:none}
 .dumpling-companion .panel button[aria-pressed=true]{background:#7b0b31;color:#fff;border-color:#7b0b31}.dumpling-companion .pet-status,.companion-picker .pet-status{font-size:12px;line-height:1.4}
 .dumpling-companion .moving-bun,.dumpling-companion .breathing{transform-origin:627px 824px}
-/* Breathing uses its own layer anchored at the basket rim, with no translation. */
-.dumpling-companion .breathing{animation:none}
+/* Keep the outer body layer still; deliberate animations use moving-bun. */
+.dumpling-companion .breathing{animation:none;transform:none}
 .dumpling-companion{z-index:21}
 .dumpling-companion .music-eyes{display:none}
 .dumpling-companion .sleep-eyes,.dumpling-companion .sleep-zs{display:none;pointer-events:none}

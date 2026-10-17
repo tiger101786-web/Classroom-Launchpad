@@ -145,9 +145,8 @@ async function request(route, cookie='', body, method) {
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),0);
     await panel.getByRole('button',{name:'Headphones',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
-    assert.equal(await pet.locator('.breathing').evaluate(e=>e.getAnimations().length),1,'Gentle breathing resumes when music stops');
-    const breath=await pet.locator('.breathing').evaluate(e=>e.getAnimations()[0].effect.getKeyframes().map(f=>f.transform));
-    assert.deepEqual(breath,['scale(1)','scale(1.006, 1.01)','scale(1)']);
+    assert.equal(await pet.locator('.breathing').evaluate(e=>e.getAnimations().length),0,'No breathing when music stops');
+    assert.equal(await pet.locator('.breathing').evaluate(e=>getComputedStyle(e).transform),'none');
     assert.equal(await pet.locator('.fixed-basket').evaluate(e=>getComputedStyle(e).transform),'none','Basket does not breathe');
     await page.screenshot({path:path.join(repo,'work',`companion-freeform-${role}.png`)});
     await page.evaluate(()=>{document.body.dataset.theme='night';});
