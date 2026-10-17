@@ -2,7 +2,7 @@
   'use strict';
   const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true});
   const hiddenScreens=new Set(['pin','login','coltRun','dashboard','edit','changePin']);
-  let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false;
+  let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
   const picker=document.createElement('dialog');
   picker.className='companion-picker';picker.setAttribute('aria-labelledby','companion-picker-title');
@@ -10,14 +10,30 @@
   const host=document.createElement('div');host.className='dumpling-companion';host.hidden=true;
   host.innerHTML='<h1 hidden></h1><div class="eyebrow" hidden></div><section class="stage"><span hidden></span><img class="toy" alt="Squishy dumpling"></section><aside class="panel" hidden aria-label="Squishy Dumpling controls"><div><h2></h2><p></p></div><div class="note"></div></aside>';
   document.body.append(picker,host);
-  const petApi=window.createDumplingPet(host);window.addDumplingAccessories(host);
+  const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
   const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
   pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');pet.setAttribute('aria-expanded','false');pet.title='Click for controls · drag to move · arrow keys move';
   pet.querySelector('svg').setAttribute('viewBox','0 30 1254 1140');
   const heading=document.createElement('header');heading.className='dumpling-panel-heading';
-  heading.innerHTML='<strong>Squishy Dumpling</strong><button type="button" data-dumpling-close aria-label="Close dumpling controls">✕</button>';
+  heading.innerHTML='<div><span class="pet-kicker">YOUR LITTLE COMPANION</span><strong>Squishy Dumpling</strong></div><button type="button" data-dumpling-close aria-label="Close dumpling controls">✕</button>';
   panel.prepend(heading);
-  const tools=document.createElement('div');tools.className='controls';
+  const intro=panel.querySelector('h2').parentElement;
+  intro.className='dumpling-look';intro.querySelector('p').textContent='A little sparkle. A lot of personality.';
+  const content=host.querySelector('.colors').parentElement;
+  content.classList.add('dumpling-sections');
+  function group(title,items) {
+    const field=document.createElement('fieldset');field.className='dumpling-group';
+    const legend=document.createElement('legend');legend.textContent=title;field.append(legend);
+    items.forEach(item=>field.append(item));content.append(field);return field;
+  }
+  const colors=host.querySelector('.colors');colors.previousElementSibling.remove();group('01 · Choose your sparkle',[colors]);
+  const accessories=host.querySelector('.accessory-controls');accessories.querySelector('.label').remove();group('02 · Dress it up',[accessories]);
+  const motionLabel=[...content.children].find(e=>e.textContent==='Try an animation');
+  const actions=motionLabel.nextElementSibling;motionLabel.remove();
+  group('03 · Play together',[actions,host.querySelector('.motion-status')]);
+  const radioBadge=document.createElement('div');radioBadge.className='dumpling-radio-status';radioBadge.setAttribute('role','status');
+  panel.append(radioBadge);
+  const tools=document.createElement('div');tools.className='controls dumpling-utilities';
   tools.innerHTML='<button type="button" data-dumpling-reset>Reset spot</button><button type="button" data-dumpling-hide>Hide dumpling</button><button type="button" data-companion-open>Choose pet</button>';
   panel.append(tools);
   const status=document.createElement('p');status.className='pet-status';status.setAttribute('role','status');panel.append(status);
@@ -46,7 +62,7 @@
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
   function openPanel(){if(host.hidden)return;panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
-    const blocked=[...document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel')].some(p=>!p.hidden);
+    const blocked=[...document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel')].some(p=>!p.hidden && (!p.classList.contains('colt-radio-panel') || !radioPlaying));
     host.hidden=!allowed()||blocked||preferences.pet!=='dumpling'||petHidden;
     if(host.hidden)closePanel();
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
@@ -55,6 +71,12 @@
     applying=true;
     const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
+    petApi.setRadio(radioPlaying);
+    const accessory=radioPlaying?'headphones':preferences.accessory;
+    if(pet.dataset.accessory!==accessory)accessoryApi.setAccessory(accessory);
+    host.classList.toggle('is-listening',radioPlaying);
+    radioBadge.textContent=radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
+    host.querySelector('.accessory-hint').textContent=radioPlaying?'Your choice is saved for when the music stops.':'One accessory at a time. Make it yours.';
     applying=false;place();
   }
   function applyAppearance(){
@@ -95,7 +117,7 @@
     preferences.color=host.querySelector('.color-choice[aria-pressed=true]').textContent;
     preferences.accessory=host.querySelector('.accessory-controls [aria-pressed=true]').dataset.accessory;
     preferences.motion=pet.classList.contains('idle');
-    pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');save();
+    pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');sync();save();
   });
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)closePanel(true);});
   document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!host.contains(event.target))closePanel();});
@@ -133,6 +155,7 @@
     }catch(error){if(generation!==epoch||error.name==='AbortError')return;loaded=true;loadError=true;announce('Could not load pet choices. Retry before making changes.',true);sync();}
   }
   window.addEventListener('resize',place);
+  window.addEventListener('colt-radio-playback',event=>{radioPlaying=event.detail?.playing===true;sync();});
   window.addEventListener('classroom-launchpad-rendered',event=>{screen=event.detail?.screen||document.body.dataset.screen||screen;updateAccount(event.detail?.auth||auth);});
   window.addEventListener('launchpad-companion-availability',event=>{enabled=event.detail.enabled;sync();});
   const panelObserver=new MutationObserver(sync);

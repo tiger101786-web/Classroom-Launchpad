@@ -4,7 +4,7 @@
   "private": true,
   "description": "Classroom Launchpad and Colt Run",
   "scripts": {
-    "test:companion": "node work/verify-companion-picker.js && node work/verify-launchpad-colt-customization.js && node work/verify-launchpad-colt-ui.js",
+    "test:companion": "node work/verify-dumpling-animation.js && node work/verify-companion-picker.js && node work/verify-launchpad-colt-customization.js && node work/verify-launchpad-colt-ui.js",
     "test:corner": "node work/verify-corner-coach-unit.js && node work/verify-colt-corner-moderation.js && node work/verify-colt-corner-moderation-ui.js && node work/verify-nintendo-shelf.js",
     "start": "node server.js",
     "check": "node --check app.js && node --check server.js && node --check colt-assistant-knowledge.js && node --check colt-assistant.js && node --check colt-radio.js && node --check launchpad-colt.js && node --check companion-picker.js && node --check dumpling-pet/interactive.js && node --check dumpling-pet/accessories.js && node --check colt-corner-moderation-config.js && node --check colt-corner-moderation.js",

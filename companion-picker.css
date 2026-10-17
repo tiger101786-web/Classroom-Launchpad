@@ -11,10 +11,28 @@
 .dumpling-companion .panel h2{font-size:18px;margin:0 0 8px}.dumpling-companion .panel p{font-size:13px;line-height:1.45}.dumpling-companion .controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.dumpling-companion .label{font-weight:bold}.dumpling-companion .motion-label{margin-top:18px}.dumpling-companion .note{display:none}
 .dumpling-companion .panel button[aria-pressed=true]{background:#7b0b31;color:#fff;border-color:#7b0b31}.dumpling-companion .pet-status,.companion-picker .pet-status{font-size:12px;line-height:1.4}
 .dumpling-companion .moving-bun,.dumpling-companion .breathing{transform-origin:627px 824px}
-/* At rest only the face moves; body movement requires Squish or Bounce. */
+/* The animation controller schedules occasional movement or a radio loop; no CSS bobbing. */
 .dumpling-companion .breathing{animation:none!important}
 .dumpling-companion .eye-left{transform-origin:483px 605px}.dumpling-companion .eye-right{transform-origin:795px 605px}
 .dumpling-companion .mouth,.dumpling-companion .mouth-open{transform-origin:637px 660px;transition:opacity .16s ease,transform .2s ease}.dumpling-companion .mouth-open{opacity:0;transform:scaleY(.65)}.dumpling-companion .smiling .mouth{opacity:0;transform:scaleY(.75)}.dumpling-companion .smiling .mouth-open{opacity:1;transform:scaleY(1)}
 .dumpling-companion .color-choice:before{content:'';display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--swatch);margin-right:7px;border:1px solid #0002;vertical-align:-2px}.dumpling-companion .accessory-layer{isolation:isolate}
 @media(max-width:600px){.dumpling-companion{width:165px}}
 @media(prefers-reduced-motion:reduce){.dumpling-companion .mouth,.dumpling-companion .mouth-open{transition:none}}
+.dumpling-companion .panel{padding:0;border-radius:20px;background:var(--paper,#fff);box-shadow:0 18px 55px #0006}
+.dumpling-companion .dumpling-panel-heading{margin:0;padding:20px;background:radial-gradient(circle at 15% 0%,#c45c7d66,transparent 65%),linear-gradient(120deg,#560720,#2b1020);color:#fff;border-bottom:3px solid #b9b9c0}
+.dumpling-panel-heading strong{display:block;font-size:19px;margin-top:5px}.dumpling-companion .pet-kicker{display:block;font-size:9px;letter-spacing:1.7px;color:#f1cbd8;font-weight:bold}
+.dumpling-companion .dumpling-panel-heading button{background:#ffffff12;color:white;border-color:#ffffff40;width:34px;height:34px;padding:0}
+.dumpling-companion .dumpling-look{padding:16px 20px 10px}.dumpling-companion .dumpling-look h2{font-size:20px}.dumpling-companion .dumpling-look p{margin:0;opacity:.7;font-size:12px}
+.dumpling-companion .dumpling-sections{padding:0 14px;display:grid;gap:13px}
+.dumpling-companion .dumpling-group{min-width:0;margin:0;padding:10px 12px 12px;border:1px solid var(--border,#ccc);border-radius:13px;background:color-mix(in srgb,var(--ink,#222) 3%,transparent)}
+.dumpling-companion .dumpling-group legend{font-size:11px;font-weight:bold;letter-spacing:.4px;padding:0 7px;color:var(--ink,#222)}
+.dumpling-companion .dumpling-group .controls{margin-top:2px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.dumpling-companion .dumpling-group .colors{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dumpling-companion .dumpling-group button{font-size:12px;min-height:37px;padding:7px 4px;transition:background .15s,border-color .15s;box-shadow:0 2px 4px #0001}
+.dumpling-companion .dumpling-group button:hover{border-color:#bd637f}.dumpling-companion .dumpling-group button[aria-pressed=true]{background:linear-gradient(135deg,#a81747,#660b2b);border-color:#c86888;box-shadow:0 2px 7px #7b0b3130}
+.dumpling-companion .accessory-hint,.dumpling-companion .motion-status{margin:8px 0 0;font-size:11px!important;opacity:.75}
+.dumpling-companion #idle{grid-column:1/-1}.dumpling-companion .dumpling-radio-status{margin:13px 14px 0;padding:11px 12px;font-size:11px;line-height:1.5;border:1px dashed var(--border,#bbb);border-radius:11px;opacity:.8}
+.dumpling-companion.is-listening .dumpling-radio-status{background:#7b0b3120;border-color:#b64c70;opacity:1}
+.dumpling-companion .dumpling-utilities{margin:13px 14px 0;display:flex;flex-wrap:wrap;border-top:1px solid var(--border,#ccc);padding-top:12px;gap:6px}
+.dumpling-companion .dumpling-utilities button{font-size:11px;padding:7px 9px}.dumpling-companion .panel>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}.dumpling-companion .panel>button{margin:0 20px 14px}
+body[data-theme="night"] .dumpling-companion .dumpling-group button:not([aria-pressed="true"]){background:#272328;color:#f4e8ee;border-color:#51454d}

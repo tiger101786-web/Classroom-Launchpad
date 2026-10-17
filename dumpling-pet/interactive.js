@@ -63,7 +63,9 @@ window.createDumplingPet = function(root) {
   });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const idle = section.querySelector('#idle');
-  let blinkTimer, smileTimer, smileEnd;
+  let blinkTimer, smileTimer, bounceTimer, smileEnd, animation, radioAnimation;
+  let radioPlaying = false;
+  const canAnimate = () => puppet.classList.contains('idle') && !reduced.matches && !document.hidden;
   const eyes = [...puppet.querySelectorAll('.eye')];
   function blink() {
     eyes.forEach(eye => {
@@ -77,37 +79,53 @@ window.createDumplingPet = function(root) {
     smileEnd = setTimeout(() => puppet.classList.remove('smiling'), 1200);
   }
   function scheduleFace() {
-    clearTimeout(blinkTimer); clearTimeout(smileTimer);
-    if (!puppet.classList.contains('idle') || reduced.matches || document.hidden) return;
-    blinkTimer = setTimeout(() => { blink(); scheduleFace(); }, 3200 + Math.random()*2600);
-    // Resting body stays still; facial reactions happen on deliberate interactions.
+    clearTimeout(blinkTimer); clearTimeout(smileTimer); clearTimeout(bounceTimer);
+    if (!canAnimate()) return;
+    const nextBlink = () => { blinkTimer = setTimeout(() => {if(canAnimate()){blink();nextBlink();}}, 3200 + Math.random()*2600); };
+    const nextSmile = () => { smileTimer = setTimeout(() => {if(canAnimate()){smile();nextSmile();}}, 12000 + Math.random()*10000); };
+    const nextBounce = () => { bounceTimer = setTimeout(() => {if(canAnimate()){if(!radioPlaying && animation?.playState!=='running')play('bounce',true);nextBounce();}}, 22000 + Math.random()*16000); };
+    nextBlink(); nextSmile(); nextBounce();
+  }
+  function syncRadio() {
+    const run = radioPlaying && canAnimate();
+    if (!run) {radioAnimation?.cancel();radioAnimation=null;return;}
+    if(radioAnimation) return;
+    animation?.cancel();
+    radioAnimation=puppet.querySelector('.moving-bun').animate([
+      {transform:'scale(1)'},{transform:'scale(1.025,.89)'},{transform:'scale(1)'}
+    ],{duration:1550,iterations:Infinity,easing:'ease-in-out'});
+  }
+  function setRadio(playing) {
+    if(radioPlaying===playing)return;
+    radioPlaying=playing;syncRadio();scheduleFace();
   }
   function setIdle(on) {
     puppet.classList.toggle('idle', on);
     idle.setAttribute('aria-pressed', String(on));
-    idle.textContent = `Idle: ${on ? 'on' : 'off'}`;
+    idle.textContent = `Motion: ${on ? 'on' : 'off'}`;
     scheduleFace();
-    if (!on) { clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
+    syncRadio();
+    if (!on) { animation?.cancel();clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
   }
   setIdle(!reduced.matches);
   idle.onclick = () => setIdle(!puppet.classList.contains('idle'));
   reduced.addEventListener('change', () => { if (reduced.matches) setIdle(false); });
-  document.addEventListener('visibilitychange', scheduleFace);
+  document.addEventListener('visibilitychange', () => {scheduleFace();syncRadio();if(document.hidden)animation?.cancel();});
   section.querySelector('#blink').onclick = blink;
   section.querySelector('#smile').onclick = smile;
-  let animation;
-  function play(type) {
+  function play(type, automatic=false) {
     animation?.cancel();
+    radioAnimation?.cancel();radioAnimation=null;
     blink(); smile();
     const frames = type === 'bounce'
       ? ['scale(1)', 'scale(1.035,.90)', 'translateY(-22px) scale(.985,1.025)', 'scale(1.04,.88)', 'scale(.99,1.015)', 'scale(1)']
       : ['scale(1)', 'scale(1.04,.78)', 'scale(.985,1.035)', 'scale(1.015,.96)', 'scale(1)'];
     animation = puppet.querySelector('.moving-bun').animate(frames.map(transform => ({transform})), {duration: reduced.matches ? 250 : type === 'bounce' ? 1100 : 1450, easing: 'ease-in-out'});
-    section.querySelector('.motion-status').textContent = type === 'bounce' ? 'Boing!' : 'Squish… and slowly spring back.';
-    animation.onfinish = () => { section.querySelector('.motion-status').textContent = 'Ready for another squeeze.'; };
+    if(!automatic)section.querySelector('.motion-status').textContent = type === 'bounce' ? 'Boing!' : 'Squish… and slowly spring back.';
+    animation.onfinish = () => { if(!automatic)section.querySelector('.motion-status').textContent = 'Ready for another squeeze.';syncRadio(); };
   }
   puppet.onclick = () => play('squish');
   section.querySelectorAll('[data-motion]').forEach(b => b.onclick = () => play(b.dataset.motion));
   panel.querySelector('.note').innerHTML = '<p><strong>Interactive 2D preview.</strong> The face blinks and smiles, following the squishy during movement. Idle controls automatic movement; try Blink or Happy smile anytime. The basket stays rigid. This is not a 3D model.</p><p>Your existing Colt and classroom site are unchanged.</p>';
-  return {setIdle};
+  return {setIdle,setRadio};
 };

@@ -43,17 +43,21 @@ window.addDumplingAccessories = function(root) {
   control.innerHTML = '<div class="label motion-label">Accessory</div><div class="controls" role="group" aria-label="Choose an accessory"></div><p class="accessory-hint">One at a time · follows the squishy</p>';
   const colors = root.querySelector('.colors');
   colors.after(control);
+  function setAccessory(id) {
+    layer.innerHTML = artwork[id] || '';
+    puppet.dataset.accessory = id;
+  }
   Object.entries({none:'None',bow:'Bow',headphones:'Headphones',hat:'Small hat'}).forEach(([id, label]) => {
     const button = document.createElement('button');
     button.type = 'button'; button.textContent = label; button.dataset.accessory = id;
     button.setAttribute('aria-pressed', String(id === 'none'));
     button.onclick = () => {
-      layer.innerHTML = artwork[id];
-      puppet.dataset.accessory = id;
+      setAccessory(id);
       control.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
       puppet.setAttribute('aria-label', `Squish your dumpling${id === 'none' ? '' : ' wearing ' + label.toLowerCase()}`);
     };
     control.querySelector('.controls').append(button);
   });
   root.querySelector('.panel > div > p').textContent = 'Pick a color and accessory, then try a squeeze or bounce. Accessories follow the squishy; the basket stays still.';
+  return {setAccessory};
 };
