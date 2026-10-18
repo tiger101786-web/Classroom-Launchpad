@@ -129,6 +129,9 @@ async function request(route, cookie='', body, method) {
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'Rainbow');
     assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline');
+    assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'none','Rainbow never shows the old glitter underneath');
+    assert.equal(await pet.locator('.rainbow-cheeks').evaluate(e=>getComputedStyle(e).display),'inline','Rainbow keeps sharp untinted cheek marks');
+    assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/rainbow-smooth-front-v1.png');
     await pet.screenshot({path:path.join(repo,'work',`rainbow-${role}.png`)});
     await panel.getByRole('button',{name:'Round glasses',exact:true}).click();
     for(const accessory of ['cap','crown','sleepcap']){
@@ -155,6 +158,8 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     await panel.getByRole('button',{name:'No glasses',exact:true}).click();
     await panel.getByRole('button',{name:'Blue',exact:true}).click();
+    assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'inline','Other colors keep their original texture');
+    assert.equal(await pet.locator('.rainbow-cheeks').evaluate(e=>getComputedStyle(e).display),'none');
     await chooseAccessory('headphones');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.accessory,'headphones');

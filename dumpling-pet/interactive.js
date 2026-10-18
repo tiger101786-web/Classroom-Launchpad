@@ -15,15 +15,14 @@ window.createDumplingPet = function(root) {
     <mask id="eye-cover"><g fill="white" filter="url(#patch-soft)"><ellipse cx="483" cy="605" rx="72" ry="85"/><ellipse cx="795" cy="605" rx="72" ry="85"/></g></mask>
     <mask id="mouth-cover"><ellipse cx="637" cy="661" rx="83" ry="65" fill="white" filter="url(#patch-soft)"/></mask>
     <mask id="basket-mask"><rect width="1254" height="1254" fill="white"/><path d="${edge}" fill="black"/></mask>
-    <linearGradient id="rainbow-bun" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ff663b"/><stop offset=".22" stop-color="#ffe52c"/><stop offset=".43" stop-color="#7af044"/><stop offset=".62" stop-color="#28dfbd"/><stop offset=".8" stop-color="#299cfa"/><stop offset="1" stop-color="#bd49de"/></linearGradient>
-    <mask id="rainbow-bun-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1254" height="1254" style="mask-type:alpha"><image href="${asset}" width="1254" height="1254" clip-path="url(#bun-clip)"/></mask>
     </defs><ellipse cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>
     <g class="breathing"><g class="moving-bun"><g class="tinted-bun" style="isolation:isolate"><g class="bun-texture">
       <image href="${asset}" width="1254" height="1254" clip-path="url(#bun-clip)"/>
       <!-- Nearby glitter texture conceals the printed features; separate face layers can move. -->
       <g mask="url(#eye-cover)"><image href="${asset}" y="160" width="1254" height="1254"/></g>
       <g mask="url(#mouth-cover)"><image href="${asset}" y="200" width="1254" height="1254"/></g>
-    </g><rect class="rainbow-color" x="0" y="0" width="1254" height="1254" fill="url(#rainbow-bun)" mask="url(#rainbow-bun-mask)" style="display:none;mix-blend-mode:color"/></g><g class="face">
+    </g><image class="rainbow-color" href="dumpling-pet/rainbow-smooth-front-v1.png" width="1254" height="1254" clip-path="url(#bun-clip)" style="display:none"/></g><g class="face">
+      <g class="rainbow-cheeks" style="display:none" fill="none" stroke="#d84655" stroke-width="19" stroke-linecap="round"><path d="M418 685l13 25M443 680l13 25M468 685l13 25M793 710l13-25M818 705l13-25M843 710l13-25"/></g>
       <!-- Clean independent eyes: no clipped photo edges or fixed printed-eye outline. -->
       <g class="eye eye-left"><ellipse cx="483" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="481" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="eye eye-right"><ellipse cx="795" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="793" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
@@ -69,9 +68,10 @@ window.createDumplingPet = function(root) {
     b.setAttribute('aria-pressed', String(i === 0));
     b.onclick = () => {
       puppet.querySelector('.tinted-bun').style.filter = filter;
-      // Smooth only Rainbow's fine glitter texture; keep the face and basket sharp.
-      puppet.querySelector('.bun-texture').style.filter=name==='Rainbow'?'grayscale(1) blur(9px)':'none';
+      // Rainbow replaces the glitter completely; cheeks stay above the untinted body.
+      puppet.querySelector('.bun-texture').style.display=name==='Rainbow'?'none':'inline';
       puppet.querySelector('.rainbow-color').style.display=name==='Rainbow'?'inline':'none';
+      puppet.querySelector('.rainbow-cheeks').style.display=name==='Rainbow'?'inline':'none';
       panel.querySelector('h2').textContent = name==='Rainbow'?'Rainbow squishy':`${name} glitter`;
       section.querySelectorAll('.color-choice').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     };
