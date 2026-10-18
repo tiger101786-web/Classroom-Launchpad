@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium',asleep:false});
+  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false});
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
@@ -77,6 +77,7 @@
   const restControls=document.createElement('div');restControls.className='controls dumpling-rest-controls';
   restControls.append(host.querySelector('#idle'),sleepButton);
   group('05 · Rest & motion',[restControls]).classList.add('dumpling-rest-group');
+  group('06 · Add glasses',[host.querySelector('.eyewear-controls'),groupHint('Mix glasses with any headwear.')]).classList.add('dumpling-rest-group');
   const radioBadge=document.createElement('div');radioBadge.className='dumpling-radio-status';radioBadge.setAttribute('role','status');
   panel.append(radioBadge);
   const tools=document.createElement('div');tools.className='controls dumpling-utilities';
@@ -132,9 +133,10 @@
     petApi.setRadio(radioPlaying);
     const accessory=radioPlaying&&!asleep&&!pet.classList.contains('waking')?'headphones':preferences.accessory;
     if(pet.dataset.accessory!==accessory)accessoryApi.setAccessory(accessory);
+    accessoryApi.setEyewear(preferences.eyewear||'none');
     host.classList.toggle('is-listening',radioPlaying);
     radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
-    host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your choice is saved for when the music stops.':'One accessory at a time. Make it yours.';
+    host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your hat returns when music stops.':'Scroll for more hats. Add glasses below.';
     applying=false;place();
   }
   function applyAppearance(){
@@ -171,9 +173,10 @@
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
-    if(applying||!event.target.closest('.color-choice,.accessory-controls button,#idle'))return;
+    if(applying||!event.target.closest('.color-choice,.accessory-controls button,.eyewear-controls button,#idle'))return;
     preferences.color=host.querySelector('.color-choice[aria-pressed=true]').textContent;
     preferences.accessory=host.querySelector('.accessory-controls [aria-pressed=true]').dataset.accessory;
+    preferences.eyewear=host.querySelector('.eyewear-controls [aria-pressed=true]').dataset.eyewear;
     preferences.motion=pet.classList.contains('idle');
     pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');sync();save();
   });

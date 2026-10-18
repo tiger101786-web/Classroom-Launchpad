@@ -19,10 +19,11 @@ async function request(route, cookie='', body, method) {
   assert.equal((await request('/api/companion-preferences')).status,401);
   const teacher=await request('/api/auth/teacher','',{pin:'654321'},'POST');
   assert.equal(teacher.status,200);
-  const baseline={pet:'colt',color:'Gold',accessory:'none',motion:true,size:'medium',asleep:false};
+  const baseline={pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false};
   assert.deepEqual((await request('/api/companion-preferences',teacher.cookie)).data.preferences,baseline);
   await request('/api/launchpad-colt/customization',teacher.cookie,{name:'Blaze',nameplateVisible:false,platformVisible:false});
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,accessory:'<script>'})).status,400);
+  assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,eyewear:'invalid'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,size:'huge'})).status,400);
   const email='tiger101786@gmail.com';
   const reset=await request('/api/approved-students/'+encodeURIComponent(email)+'/reset-code',teacher.cookie,{},'POST');
@@ -107,6 +108,29 @@ async function request(route, cookie='', body, method) {
       assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.size,size);
     }
     await panel.locator('[data-pet-size="medium"]').click();
+    await panel.getByRole('button',{name:'Round glasses',exact:true}).click();
+    for(const accessory of ['cap','crown','sleepcap']){
+      await panel.locator(`[data-accessory="${accessory}"]`).click();
+      await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+      const saved=(await request('/api/companion-preferences',cookie)).data.preferences;
+      assert.equal(saved.accessory,accessory);assert.equal(saved.eyewear,'round');
+      assert.equal(await pet.getAttribute('data-eyewear'),'round');
+      assert(await pet.locator('.eyewear-layer circle').count()>0);
+      await pet.screenshot({path:path.join(repo,'work',`accessory-${accessory}-${role}.png`)});
+    }
+    await panel.getByRole('button',{name:'Sunglasses',exact:true}).click();
+    assert.equal(await pet.getAttribute('data-eyewear'),'sunglasses');
+    await pet.screenshot({path:path.join(repo,'work',`accessory-sunglasses-${role}.png`)});
+    await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+    await page.reload({waitUntil:'domcontentloaded'});await showHome();
+    await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-button')?.dataset.eyewear==='sunglasses');
+    assert.equal(await pet.getAttribute('data-accessory'),'sleepcap','Hat and glasses survive reload together');
+    await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
+    assert.equal(await pet.getAttribute('data-accessory'),'headphones');assert.equal(await pet.getAttribute('data-eyewear'),'sunglasses');
+    await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
+    assert.equal(await pet.getAttribute('data-accessory'),'sleepcap');
+    await pet.click();await panel.waitFor({state:'visible'});
+    await panel.getByRole('button',{name:'No glasses',exact:true}).click();
     await panel.getByRole('button',{name:'Blue',exact:true}).click();
     await panel.getByRole('button',{name:'Headphones',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');

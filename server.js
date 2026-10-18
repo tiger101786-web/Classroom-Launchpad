@@ -595,7 +595,8 @@ function normalizeCompanionPreference(value) {
   return {
     pet: source.pet === "dumpling" ? "dumpling" : "colt",
     color: ["Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver"].includes(source.color) ? source.color : "Gold",
-    accessory: ["none", "bow", "headphones", "hat"].includes(source.accessory) ? source.accessory : "none",
+    accessory: ["none", "bow", "headphones", "hat", "cap", "crown", "sleepcap"].includes(source.accessory) ? source.accessory : "none",
+    eyewear: ['none', 'round', 'sunglasses'].includes(source.eyewear) ? source.eyewear : 'none',
     motion: source.motion !== false,
     asleep: source.asleep === true,
     size: ['small', 'medium', 'large', 'extra-large'].includes(source.size) ? source.size : 'medium'
@@ -3886,7 +3887,8 @@ async function handleApi(req, res, pathname) {
       const input = req.method === "PUT" ? await readBody(req) : null;
       if (input && (!['colt', 'dumpling'].includes(input.pet)
         || !['Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver'].includes(input.color)
-        || !['none', 'bow', 'headphones', 'hat'].includes(input.accessory)
+        || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
+        || (input.eyewear !== undefined && !['none', 'round', 'sunglasses'].includes(input.eyewear))
         || (input.size !== undefined && !['small', 'medium', 'large', 'extra-large'].includes(input.size))
         || (input.asleep !== undefined && typeof input.asleep !== 'boolean')
         || typeof input.motion !== 'boolean')) throw new Error("Choose a valid pet, color, accessory, size, and motion setting.");

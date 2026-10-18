@@ -14,8 +14,35 @@ window.addDumplingAccessories = function(root) {
   layer.setAttribute('pointer-events', 'none');
   // Inside moving-bun, outside tinted-bun: follows the pet without changing accessory colors.
   puppet.querySelector('.moving-bun').append(layer);
+  const eyewearLayer=document.createElementNS(ns,'g');
+  eyewearLayer.classList.add('eyewear-layer');eyewearLayer.setAttribute('pointer-events','none');
+  eyewearLayer.setAttribute('transform','translate(-59.66 23) scale(1.114286 1)');
+  puppet.querySelector('.moving-bun').append(eyewearLayer);
   const artwork = {
     none: '',
+    cap: `<g filter="url(#accessory-shadow)">
+      <path d="M350 240Q365 72 627 65Q889 72 904 240Q627 300 350 240Z" fill="url(#headset)" stroke="#45091f" stroke-width="7"/>
+      <path d="M627 69Q555 144 555 253M627 69Q699 144 699 253" fill="none" stroke="#d47d99" stroke-width="4" opacity=".65"/>
+      <ellipse cx="627" cy="68" rx="24" ry="12" fill="#710d30"/>
+      <path d="M353 236Q627 194 901 236L959 279Q627 359 295 279Z" fill="#690d2c" stroke="#3b091b" stroke-width="7"/>
+      <path d="M325 280Q627 345 929 280" fill="none" stroke="#e8dce1" stroke-width="6"/>
+      <image href="assets/st-cletus-crest.png" x="576" y="116" width="102" height="104" preserveAspectRatio="xMidYMid meet"/>
+    </g>`,
+    crown: `<g transform="translate(627 180)" filter="url(#accessory-shadow)">
+      <path d="M-190 27-220-101-107-34 0-139 107-34 220-101 190 27Z" fill="#f7cd55" stroke="#996017" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M-185 9Q0 46 185 9L181 55Q0 93-181 55Z" fill="#d69b29" stroke="#996017" stroke-width="6"/>
+      <path d="M-173 20Q0 55 173 20" fill="none" stroke="#fff3a5" stroke-width="7"/>
+      <path d="m0-72 29 30-29 32-29-32Z" fill="#9f1746" stroke="#fff0a1" stroke-width="5"/>
+      <circle cx="-125" cy="-13" r="15" fill="#65c7de"/><circle cx="125" cy="-13" r="15" fill="#65c7de"/>
+      <g fill="#fff0a1"><circle cx="-220" cy="-101" r="13"/><circle cy="-139" r="13"/><circle cx="220" cy="-101" r="13"/></g>
+    </g>`,
+    sleepcap: `<g filter="url(#accessory-shadow)">
+      <path d="M390 232Q465 47 668 57Q858 43 936 219Q838 164 753 167Q706 223 727 258Z" fill="url(#hat-fabric)" stroke="#293c62" stroke-width="6"/>
+      <path d="M414 196Q568 158 743 212L743 264Q570 224 389 254Z" fill="#f4e9d5" stroke="#d0c0a9" stroke-width="6"/>
+      <circle cx="936" cy="219" r="39" fill="#fff4df" stroke="#d0c0a9" stroke-width="5"/>
+      <path d="m590 96 9 20 23 3-17 15 4 23-19-11-20 11 4-23-16-15 22-3Z" fill="#ffe09a"/>
+      <path d="M750 90a27 27 0 1 0 28 37A29 29 0 0 1 750 90" fill="#ffe09a"/>
+    </g>`,
     bow: `<g transform="translate(350 245) rotate(-17)" filter="url(#accessory-shadow)">
       <path d="M-12 17 -63 118 -14 100 12 116 32 24M15 20 62 119 83 94 126 101 49 8" fill="url(#ribbon)" stroke="#932950" stroke-width="3"/>
       <path d="M0 0C-115-98-151-92-135-13C-152 68-101 72 0 24C102 77 144 69 130-10C144-89 100-94 0 0Z" fill="url(#ribbon)" stroke="#922c55" stroke-width="4"/>
@@ -40,14 +67,14 @@ window.addDumplingAccessories = function(root) {
   };
   const control = document.createElement('div');
   control.className = 'accessory-controls';
-  control.innerHTML = '<div class="label motion-label">Accessory</div><div class="controls" role="group" aria-label="Choose an accessory"></div><p class="accessory-hint">One at a time · follows the squishy</p>';
+  control.innerHTML = '<div class="label motion-label">Headwear</div><div class="controls headwear-options" role="group" aria-label="Choose headwear" tabindex="0"></div><p class="accessory-hint">Scroll for more hats. Add glasses below.</p>';
   const colors = root.querySelector('.colors');
   colors.after(control);
   function setAccessory(id) {
     layer.innerHTML = artwork[id] || '';
     puppet.dataset.accessory = id;
   }
-  Object.entries({none:'None',bow:'Bow',headphones:'Headphones',hat:'Small hat'}).forEach(([id, label]) => {
+  Object.entries({none:'None',bow:'Bow',headphones:'Headphones',hat:'Small hat',cap:'School cap',crown:'Crown',sleepcap:'Sleep cap'}).forEach(([id, label]) => {
     const button = document.createElement('button');
     button.type = 'button'; button.textContent = label; button.dataset.accessory = id;
     button.setAttribute('aria-pressed', String(id === 'none'));
@@ -59,5 +86,17 @@ window.addDumplingAccessories = function(root) {
     control.querySelector('.controls').append(button);
   });
   root.querySelector('.panel > div > p').textContent = 'Pick a color and accessory, then try a squeeze or bounce. Accessories follow the squishy; the basket stays still.';
-  return {setAccessory};
+  const eyewear=document.createElement('div');eyewear.className='controls eyewear-controls';
+  eyewear.setAttribute('role','group');eyewear.setAttribute('aria-label','Choose eyewear');control.after(eyewear);
+  const frames={
+    none:'',
+    round:`<g fill="none" stroke="#492333" stroke-width="12"><circle cx="487" cy="582" r="74"/><circle cx="767" cy="582" r="74"/><path d="M561 577Q627 548 693 577M413 561 368 540M841 561 886 540"/></g><g fill="none" stroke="#fff4df" stroke-width="5" opacity=".8"><path d="M438 563Q445 531 474 527M718 563Q725 531 754 527"/></g>`,
+    sunglasses:`<g stroke="#221924" stroke-width="12" stroke-linejoin="round"><path d="M400 533H568L552 615Q487 656 420 613Z" fill="#302d43"/><path d="M686 533H854L834 613Q767 656 702 615Z" fill="#302d43"/><path d="M568 551Q627 530 686 551M400 548 363 529M854 548 891 529" fill="none"/></g><path d="m431 551 67 0-52 53M719 551h67l-52 53" fill="#b3c7de" opacity=".35"/>`
+  };
+  function setEyewear(id){eyewearLayer.innerHTML=frames[id]||'';puppet.dataset.eyewear=id;eyewear.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.eyewear===id)));}
+  Object.entries({none:'No glasses',round:'Round glasses',sunglasses:'Sunglasses'}).forEach(([id,label])=>{
+    const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.eyewear=id;
+    button.onclick=()=>setEyewear(id);eyewear.append(button);
+  });setEyewear('none');
+  return {setAccessory,setEyewear};
 };
