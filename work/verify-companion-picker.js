@@ -58,6 +58,15 @@ async function request(route, cookie='', body, method) {
     await page.evaluate(()=>{document.body.dataset.theme='light';});
     await page.getByRole('button',{name:'Close pet selection',exact:true}).click();
     const pet=page.locator('.dumpling-companion .pet-button'),panel=page.locator('.dumpling-companion .panel');
+    const chooseAccessory=async id=>{
+      const options=panel.locator('.accessory-controls'),button=options.locator(`[data-accessory="${id}"]`);
+      if(!await button.isVisible()){
+        const previous=options.getByRole('button',{name:'Previous',exact:true});
+        while(await previous.isEnabled())await previous.click();
+        while(!await button.isVisible())await options.getByRole('button',{name:'Next',exact:true}).click();
+      }
+      await button.click();
+    };
     await pet.waitFor({state:'visible'});
     for(const selector of ['.colt-radio-panel','.colt-assistant-panel']) {
       await page.locator(selector).evaluate(e=>{e.hidden=false;});
@@ -83,6 +92,14 @@ async function request(route, cookie='', body, method) {
     await page.screenshot({path:path.join(repo,'work',`companion-move-speech-${role}.png`)});
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
+    assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['Bow','Crown','Headphones','None']);
+    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rose','Silver']);
+    assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),1,'Only overflowing choices have pages');
+    const headPages=panel.locator('.accessory-controls .dumpling-option-pages');
+    await headPages.getByRole('button',{name:'Next'}).click();
+    assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['School cap','Sleep cap','Small hat']);
+    assert.equal(await headPages.getByRole('button',{name:'Next'}).isDisabled(),true);
+    await headPages.getByRole('button',{name:'Previous'}).click();
     const cards=await panel.locator('.dumpling-group').evaluateAll(items=>items.slice(0,4).map(e=>{const box=e.getBoundingClientRect();const button=e.querySelector('button').getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height,inset:button.y-box.y};}));
     cards.forEach(card=>{assert(Math.abs(card.height-cards[0].height)<1,'All four option cards match heights');assert(Math.abs(card.width-cards[0].width)<1);assert(Math.abs(card.inset-cards[0].inset)<1,'Button rows align within every card');});
     assert.equal(cards[0].y,cards[1].y);assert.equal(cards[2].y,cards[3].y);
@@ -110,7 +127,7 @@ async function request(route, cookie='', body, method) {
     await panel.locator('[data-pet-size="medium"]').click();
     await panel.getByRole('button',{name:'Round glasses',exact:true}).click();
     for(const accessory of ['cap','crown','sleepcap']){
-      await panel.locator(`[data-accessory="${accessory}"]`).click();
+      await chooseAccessory(accessory);
       await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
       const saved=(await request('/api/companion-preferences',cookie)).data.preferences;
       assert.equal(saved.accessory,accessory);assert.equal(saved.eyewear,'round');
@@ -132,11 +149,11 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     await panel.getByRole('button',{name:'No glasses',exact:true}).click();
     await panel.getByRole('button',{name:'Blue',exact:true}).click();
-    await panel.getByRole('button',{name:'Headphones',exact:true}).click();
+    await chooseAccessory('headphones');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.accessory,'headphones');
     await panel.getByRole('button',{name:'Bounce',exact:true}).click();await page.waitForTimeout(1200);
-    await panel.getByRole('button',{name:'Bow',exact:true}).click();
+    await chooseAccessory('bow');
     if(await panel.locator('#idle').getAttribute('aria-pressed')==='false')await panel.locator('#idle').click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
@@ -186,7 +203,7 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.locator('.music-eyes').evaluate(e=>getComputedStyle(e).display),'none');
     assert.equal(await pet.locator('.music-notes').evaluate(e=>getComputedStyle(e).display),'none');
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),0);
-    await panel.getByRole('button',{name:'Headphones',exact:true}).click();
+    await chooseAccessory('headphones');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal(await pet.locator('.breathing').evaluate(e=>e.getAnimations().length),0,'No breathing when music stops');
     assert.equal(await pet.locator('.breathing').evaluate(e=>getComputedStyle(e).transform),'none');

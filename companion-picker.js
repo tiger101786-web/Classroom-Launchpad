@@ -78,6 +78,32 @@
   restControls.append(host.querySelector('#idle'),sleepButton);
   group('05 · Rest & motion',[restControls]).classList.add('dumpling-rest-group');
   group('06 · Add glasses',[host.querySelector('.eyewear-controls'),groupHint('Mix glasses with any headwear.')]).classList.add('dumpling-rest-group');
+  // Reuse the same two-row paging rules as each collection grows.
+  const optionPages=[];
+  function paginateOptions(grid,pageSize,hint){
+    const buttons=[...grid.children].filter(el=>el.matches('button'))
+      .sort((a,b)=>a.textContent.localeCompare(b.textContent,'en',{sensitivity:'base'}));
+    buttons.forEach(button=>grid.append(button));
+    let page=0;const count=Math.ceil(buttons.length/pageSize);
+    const nav=document.createElement('nav');nav.className='dumpling-option-pages';
+    nav.setAttribute('aria-label',grid.closest('fieldset').querySelector('legend').textContent+' pages');
+    const previous=document.createElement('button'),next=document.createElement('button'),label=document.createElement('span');
+    previous.type=next.type='button';previous.textContent='Previous';next.textContent='Next';
+    label.setAttribute('aria-live','polite');nav.append(previous,label,next);grid.after(nav);
+    function render(){
+      buttons.forEach((button,i)=>{button.hidden=Math.floor(i/pageSize)!==page;});
+      nav.hidden=count<=1;if(hint)hint.hidden=count>1;
+      label.textContent=`${page+1} / ${count}`;previous.disabled=page===0;next.disabled=page===count-1;
+    }
+    previous.onclick=()=>{page=Math.max(0,page-1);render();};
+    next.onclick=()=>{page=Math.min(count-1,page+1);render();};
+    optionPages.push(()=>{const selected=buttons.findIndex(button=>button.getAttribute('aria-pressed')==='true');if(selected>=0)page=Math.floor(selected/pageSize);render();});
+    render();
+  }
+  paginateOptions(colors,6,colors.parentElement.querySelector('.dumpling-group-hint'));
+  paginateOptions(accessories.querySelector('.headwear-options'),4,accessories.querySelector('.accessory-hint'));
+  paginateOptions(actions,4,host.querySelector('.motion-status'));
+  paginateOptions(host.querySelector('.eyewear-controls'),6,host.querySelector('.eyewear-controls').parentElement.querySelector('.dumpling-group-hint'));
   const radioBadge=document.createElement('div');radioBadge.className='dumpling-radio-status';radioBadge.setAttribute('role','status');
   panel.append(radioBadge);
   const tools=document.createElement('div');tools.className='controls dumpling-utilities';
@@ -111,7 +137,7 @@
     panel.style.top=`${Math.max(12,Math.min(box.top,innerHeight-panel.offsetHeight-12))}px`;
   }
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
-  function openPanel(){if(host.hidden)return;hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
+  function openPanel(){if(host.hidden)return;optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
@@ -136,7 +162,7 @@
     accessoryApi.setEyewear(preferences.eyewear||'none');
     host.classList.toggle('is-listening',radioPlaying);
     radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
-    host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your hat returns when music stops.':'Scroll for more hats. Add glasses below.';
+    host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your hat returns when music stops.':'Choose headwear. Add glasses below.';
     applying=false;place();
   }
   function applyAppearance(){
@@ -173,7 +199,7 @@
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
-    if(applying||!event.target.closest('.color-choice,.accessory-controls button,.eyewear-controls button,#idle'))return;
+    if(applying||!event.target.closest('.color-choice,.accessory-controls button[data-accessory],.eyewear-controls button,#idle'))return;
     preferences.color=host.querySelector('.color-choice[aria-pressed=true]').textContent;
     preferences.accessory=host.querySelector('.accessory-controls [aria-pressed=true]').dataset.accessory;
     preferences.eyewear=host.querySelector('.eyewear-controls [aria-pressed=true]').dataset.eyewear;
