@@ -43,6 +43,8 @@ body[data-theme="night"] .companion-picker select,body[data-theme="night"] .comp
 .dumpling-companion .music-eyes{display:none}
 .dumpling-companion .sleep-eyes,.dumpling-companion .sleep-zs{display:none;pointer-events:none}
 .dumpling-companion .asleep .eye{visibility:hidden}
+.dumpling-companion .asleep .mouth,.dumpling-companion .asleep .mouth-open{visibility:hidden}
+.dumpling-companion .asleep .mouth-sleep{opacity:1}
 .dumpling-companion .asleep .sleep-eyes,.dumpling-companion .asleep .sleep-zs{display:block}
 .dumpling-companion .waking .sleep-zs{display:block}
 .dumpling-companion .asleep.idle .sleep-zs text{animation:dumpling-sleep-z 3s ease-out infinite}

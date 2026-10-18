@@ -171,6 +171,10 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),false,'Sleep overrides music');
     assert.equal(await pet.locator('.sleep-zs').evaluate(e=>getComputedStyle(e).display),'block');
     assert.equal(await pet.locator('.moving-bun').evaluate(e=>e.getAnimations().length),0,'Sleeping body must stay still');
+    assert.equal(await pet.locator('.mouth-sleep').evaluate(e=>getComputedStyle(e).opacity),'1','Sleep uses the small o mouth');
+    assert.equal(await pet.locator('.mouth').evaluate(e=>getComputedStyle(e).visibility),'hidden');
+    assert.equal(await pet.locator('.mouth-open').evaluate(e=>getComputedStyle(e).visibility),'hidden');
+    assert.equal(await pet.locator('.mouth-sleep').evaluate(e=>e.getAnimations().length),0,'Sleeping mouth stays still');
     assert.equal(await pet.locator('.moving-bun').evaluate(e=>getComputedStyle(e).transform),'none');
     assert.equal(await pet.locator('.sleep-zs text').first().evaluate(e=>getComputedStyle(e).animationName),'dumpling-sleep-z','Only the sleep Zs float');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
@@ -190,6 +194,7 @@ async function request(route, cookie='', body, method) {
     await pet.screenshot({path:path.join(repo,'work',`companion-waking-${role}.png`)});
     await page.waitForFunction(()=>!document.querySelector('.dumpling-companion .pet-button').classList.contains('waking'));
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),true,'Waking resumes music');
+    assert.equal(await pet.locator('.mouth-sleep').evaluate(e=>getComputedStyle(e).opacity),'0','Sleep mouth clears after waking');
     await pet.click();await panel.waitFor({state:'visible'});
     assert.equal(await page.locator('.dumpling-companion .moving-bun').evaluate(e=>e.getAnimations().filter(a=>a.effect.getTiming().iterations===Infinity).length),1);
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.accessory,'bow','Radio must not save temporary headphones');

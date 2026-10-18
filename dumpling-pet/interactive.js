@@ -29,6 +29,7 @@ window.createDumplingPet = function(root) {
       <g class="sleep-eyes" fill="none" stroke="#171413" stroke-width="14" stroke-linecap="round"><path d="M449 595 Q483 627 517 595"/><path d="M761 595 Q795 627 829 595"/></g>
       <g class="mouth"><path d="M594 632 Q608 694 637 685 Q664 684 681 632" fill="none" stroke="#16110f" stroke-width="22" stroke-linecap="round"/></g>
       <g class="mouth-open"><path d="M592 636 Q637 649 681 636 C680 712 597 712 592 636Z" fill="#191211"/><path d="M612 685 Q637 669 662 685 Q637 708 612 685" fill="#e98d91"/></g>
+      <g class="mouth-sleep" opacity="0"><ellipse cx="637" cy="662" rx="23" ry="29" fill="#191211"/></g>
     </g></g></g>
     <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
     <g class="music-notes" pointer-events="none" font-family="Arial, sans-serif" font-size="140" font-weight="bold" text-anchor="middle" fill="#a81747" stroke="#fff1cf" stroke-width="7" paint-order="stroke">
@@ -138,7 +139,8 @@ window.createDumplingPet = function(root) {
       {transform:'scaleY(.06)',offset:.4},{transform:'scaleY(1)',offset:.5},
       {transform:'scaleY(.06)',offset:.6},{transform:'scaleY(1)',offset:.72},{transform:'scaleY(1)'}
     ],{duration:1300,easing:'ease-in-out'}));
-    animate(puppet.querySelector('.mouth'),[{opacity:1,offset:0},{opacity:1,offset:.45},{opacity:0,offset:.6},{opacity:0}],{duration:2000});
+    animate(puppet.querySelector('.mouth'),[{opacity:0},{opacity:0}],{duration:2000});
+    animate(puppet.querySelector('.mouth-sleep'),[{opacity:1,offset:0},{opacity:1,offset:.45},{opacity:0,offset:.6},{opacity:0}],{duration:2000});
     animate(puppet.querySelector('.mouth-open'),[{opacity:0,transform:'scaleY(1)',offset:0},{opacity:0,transform:'scaleY(1)',offset:.45},{opacity:1,transform:'scaleY(1)',offset:.6},{opacity:1,transform:'scaleY(1)'}],{duration:2000});
     const body=animate(puppet.querySelector('.moving-bun'),[
       {transform:'scale(1)',offset:0},{transform:'scale(1)',offset:.35},
