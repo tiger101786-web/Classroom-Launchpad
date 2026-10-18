@@ -8,16 +8,18 @@ window.createDumplingPet = function(root) {
   puppet.type = 'button';
   puppet.setAttribute('aria-label', 'Squish your dumpling');
   // Complementary masks split the bun from the rigid basket at the rim.
-  const edge = 'M0 0H1254V590C1254 730 1100 832 627 844C154 832 0 730 0 590Z';
+  const edge = 'M0 0H1254V500C1254 650 1100 832 627 844C154 832 0 650 0 500Z';
+  const basketOpening = 'M0 0H1254V590H1182C1194 692 1100 832 627 844C154 832 60 692 72 590H0Z';
   puppet.innerHTML = `<svg viewBox="0 0 1254 1254" aria-hidden="true"><defs>
     <clipPath id="bun-clip"><path d="${edge}"/></clipPath>
     <filter id="patch-soft"><feGaussianBlur stdDeviation="4"/></filter>
     <mask id="eye-cover"><g fill="white" filter="url(#patch-soft)"><ellipse cx="483" cy="605" rx="72" ry="85"/><ellipse cx="795" cy="605" rx="72" ry="85"/></g></mask>
-    <mask id="mouth-cover"><ellipse cx="637" cy="661" rx="83" ry="65" fill="white" filter="url(#patch-soft)"/></mask>
-    <mask id="basket-mask"><rect width="1254" height="1254" fill="white"/><path d="${edge}" fill="black"/></mask>
+    <mask id="mouth-cover"><ellipse cx="637" cy="680" rx="95" ry="85" fill="white" filter="url(#patch-soft)"/></mask>
+    <mask id="basket-mask"><rect width="1254" height="1254" fill="white"/><path d="${basketOpening}" fill="black"/></mask>
     </defs><ellipse cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>
     <g class="breathing"><g class="moving-bun"><g class="tinted-bun" style="isolation:isolate"><g class="bun-texture">
-      <image href="${asset}" width="1254" height="1254" clip-path="url(#bun-clip)"/>
+      <!-- Extend the glitter body under the fixed lip, keeping the source basket out of its tint. -->
+      <image class="glitter-body" href="${asset}" width="1254" height="1290" preserveAspectRatio="none" clip-path="url(#bun-clip)"/>
       <!-- Nearby glitter texture conceals the printed features; separate face layers can move. -->
       <g mask="url(#eye-cover)"><image href="${asset}" y="160" width="1254" height="1254"/></g>
       <g mask="url(#mouth-cover)"><image href="${asset}" y="200" width="1254" height="1254"/></g>
@@ -34,7 +36,7 @@ window.createDumplingPet = function(root) {
     </g></g></g>
     <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
     <!-- A clean basket-colored inner lip covers source-photo color fringes at the cut. -->
-    <path class="basket-inner-lip" d="M44 659C70 749 230 834 627 844C1024 834 1184 749 1210 659" fill="none" stroke="#e4aa6b" stroke-width="8" stroke-linecap="round"/>
+    <path class="basket-inner-lip" d="M77 650C110 755 230 834 627 844C1024 834 1144 755 1177 650" fill="none" stroke="#e4aa6b" stroke-width="8" stroke-linecap="round"/>
     <g class="music-notes" pointer-events="none" font-family="Arial, sans-serif" font-size="140" font-weight="bold" text-anchor="middle" fill="#a81747" stroke="#fff1cf" stroke-width="7" paint-order="stroke">
       <text class="music-note" x="105" y="410">♪</text>
       <text class="music-note" x="1140" y="370" style="animation-delay:-.6s">♫</text>
@@ -85,6 +87,7 @@ window.createDumplingPet = function(root) {
       const texture=puppet.querySelector('.rainbow-color');
       texture.setAttribute('href',metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
       texture.setAttribute('y',metallic?'-10':'0');texture.setAttribute('height',metallic?'1190':'1254');texture.setAttribute('preserveAspectRatio','none');
+      texture.setAttribute('x',metallic?'27':'0');texture.setAttribute('width',metallic?'1200':'1254');
       texture.style.display=smooth?'inline':'none';
       const cheeks=puppet.querySelector('.rainbow-cheeks');
       cheeks.style.display=smooth?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');
