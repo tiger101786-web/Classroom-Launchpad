@@ -60,7 +60,13 @@ window.createDumplingPet = function(root) {
     ['Matcha', '#a7bd6a', 'hue-rotate(45deg) saturate(.5)'],
     ['Silver', '#cbd2da', 'grayscale(1) brightness(1.14)'],
     ['Rainbow', 'linear-gradient(90deg,#ff663b,#ffe52c,#7af044,#28dfbd,#299cfa,#bd49de)', 'none'],
-    ['USA', 'linear-gradient(135deg,#163b77 33%,#fff 33%,#fff 66%,#dc3042 66%)', 'none']
+    ['USA', 'linear-gradient(135deg,#163b77 33%,#fff 33%,#fff 66%,#dc3042 66%)', 'none'],
+    ['Metallic Gold', 'linear-gradient(135deg,#a56710,#fff1a5,#d99c25)', 'none'],
+    ['Metallic Blue', 'linear-gradient(135deg,#236e9c,#c6f3ff,#389bd3)', 'hue-rotate(155deg) saturate(.8)'],
+    ['Metallic Green', 'linear-gradient(135deg,#38724b,#daf9c7,#79b378)', 'hue-rotate(65deg) saturate(.45)'],
+    ['Metallic Pink', 'linear-gradient(135deg,#ac477d,#ffe0ef,#dc8ab5)', 'hue-rotate(285deg) saturate(.55)'],
+    ['Metallic Purple', 'linear-gradient(135deg,#6939a9,#e3c8ff,#9b63d4)', 'hue-rotate(215deg) saturate(.7)'],
+    ['Metallic Red', 'linear-gradient(135deg,#8f1223,#ffb7b7,#d82537)', 'hue-rotate(320deg) saturate(1.3)']
   ];
   colors.forEach(([name, swatch, filter], i) => {
     const b = document.createElement('button');
@@ -70,10 +76,12 @@ window.createDumplingPet = function(root) {
     b.onclick = () => {
       puppet.querySelector('.tinted-bun').style.filter = filter;
       // Smooth designs replace glitter completely; cheeks remain untinted above them.
-      const smooth=name==='Rainbow'||name==='USA';
+      const metallic=name.startsWith('Metallic ');
+      const smooth=name==='Rainbow'||name==='USA'||metallic;
       puppet.querySelector('.bun-texture').style.display=smooth?'none':'inline';
       const texture=puppet.querySelector('.rainbow-color');
-      texture.setAttribute('href',name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
+      texture.setAttribute('href',metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
+      texture.setAttribute('y',metallic?'-10':'0');texture.setAttribute('height',metallic?'1166':'1254');texture.setAttribute('preserveAspectRatio','none');
       texture.style.display=smooth?'inline':'none';
       const cheeks=puppet.querySelector('.rainbow-cheeks');
       cheeks.style.display=smooth?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');

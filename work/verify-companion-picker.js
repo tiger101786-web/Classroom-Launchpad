@@ -58,6 +58,13 @@ async function request(route, cookie='', body, method) {
     await page.evaluate(()=>{document.body.dataset.theme='light';});
     await page.getByRole('button',{name:'Close pet selection',exact:true}).click();
     const pet=page.locator('.dumpling-companion .pet-button'),panel=page.locator('.dumpling-companion .panel');
+    const chooseColor=async name=>{
+      const pages=panel.locator('.colors').locator('..').locator('.dumpling-option-pages');
+      while(await pages.getByRole('button',{name:'Previous'}).isEnabled())await pages.getByRole('button',{name:'Previous'}).click();
+      const button=panel.getByRole('button',{name,exact:true});
+      for(let i=0;i<3&&!await button.isVisible();i++)await pages.getByRole('button',{name:'Next'}).click();
+      await button.click();
+    };
     const chooseAccessory=async id=>{
       const options=panel.locator('.accessory-controls'),button=options.locator(`[data-accessory="${id}"]`);
       if(!await button.isVisible()){
@@ -93,7 +100,8 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
     assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['Bow','Crown','Headphones','None']);
-    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rainbow','Rose','Silver','USA']);
+    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Metallic Blue','Metallic Gold','Metallic Green','Metallic Pink','Metallic Purple','Metallic Red','Rainbow','Rose','Silver','USA']);
+    await chooseColor('Gold');
     assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),2,'Only overflowing choices have pages');
     const headPages=panel.locator('.accessory-controls .dumpling-option-pages');
     await headPages.getByRole('button',{name:'Next'}).click();
@@ -125,7 +133,16 @@ async function request(route, cookie='', body, method) {
       assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.size,size);
     }
     await panel.locator('[data-pet-size="medium"]').click();
-    await panel.getByRole('button',{name:'Rainbow',exact:true}).click();
+    for(const name of ['Metallic Gold','Metallic Blue','Metallic Green','Metallic Pink','Metallic Purple','Metallic Red']){
+      await chooseColor(name);
+      await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+      assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,name);
+      assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/metallic-gold-front-v1.png');
+      assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'none');
+      await pet.screenshot({path:path.join(repo,'work',`${name.toLowerCase().replaceAll(' ','-')}-${role}.png`)});
+    }
+    await panel.screenshot({path:path.join(repo,'work',`metallic-panel-${role}.png`)});
+    await chooseColor('Rainbow');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'Rainbow');
     assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline');
@@ -167,8 +184,7 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.getAttribute('data-accessory'),'sleepcap');
     await pet.click();await panel.waitFor({state:'visible'});
     await panel.getByRole('button',{name:'No glasses',exact:true}).click();
-    await colorPages.getByRole('button',{name:'Previous'}).click();
-    await panel.getByRole('button',{name:'Blue',exact:true}).click();
+    await chooseColor('Blue');
     assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'inline','Other colors keep their original texture');
     assert.equal(await pet.locator('.rainbow-cheeks').evaluate(e=>getComputedStyle(e).display),'none');
     await chooseAccessory('headphones');
