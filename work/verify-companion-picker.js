@@ -93,8 +93,8 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
     assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['Bow','Crown','Headphones','None']);
-    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rose','Silver']);
-    assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),1,'Only overflowing choices have pages');
+    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rainbow','Rose','Silver']);
+    assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),2,'Only overflowing choices have pages');
     const headPages=panel.locator('.accessory-controls .dumpling-option-pages');
     await headPages.getByRole('button',{name:'Next'}).click();
     assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['School cap','Sleep cap','Small hat']);
@@ -104,7 +104,7 @@ async function request(route, cookie='', body, method) {
     cards.forEach(card=>{assert(Math.abs(card.height-cards[0].height)<1,'All four option cards match heights');assert(Math.abs(card.width-cards[0].width)<1);assert(Math.abs(card.inset-cards[0].inset)<1,'Button rows align within every card');});
     assert.equal(cards[0].y,cards[1].y);assert.equal(cards[2].y,cards[3].y);
     assert(Math.abs(cards[1].x-cards[0].x-cards[0].width-(cards[2].y-cards[0].y-cards[0].height))<1,'Row and column gaps match');
-    const colorPositions=await panel.locator('.color-choice').evaluateAll(buttons=>buttons.map(button=>{
+    const colorPositions=await panel.locator('.color-choice:not([hidden])').evaluateAll(buttons=>buttons.map(button=>{
       const range=document.createRange();range.selectNodeContents(button);
       return {label:range.getBoundingClientRect().left-button.getBoundingClientRect().left,layout:getComputedStyle(button).display,dot:getComputedStyle(button,'::before').width};
     }));
@@ -125,6 +125,11 @@ async function request(route, cookie='', body, method) {
       assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.size,size);
     }
     await panel.locator('[data-pet-size="medium"]').click();
+    await panel.getByRole('button',{name:'Rainbow',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+    assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'Rainbow');
+    assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline');
+    await pet.screenshot({path:path.join(repo,'work',`rainbow-${role}.png`)});
     await panel.getByRole('button',{name:'Round glasses',exact:true}).click();
     for(const accessory of ['cap','crown','sleepcap']){
       await chooseAccessory(accessory);
@@ -142,6 +147,7 @@ async function request(route, cookie='', body, method) {
     await page.reload({waitUntil:'domcontentloaded'});await showHome();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-button')?.dataset.eyewear==='sunglasses');
     assert.equal(await pet.getAttribute('data-accessory'),'sleepcap','Hat and glasses survive reload together');
+    assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline','Rainbow survives reload');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
     assert.equal(await pet.getAttribute('data-accessory'),'headphones');assert.equal(await pet.getAttribute('data-eyewear'),'sunglasses');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
