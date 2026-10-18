@@ -93,7 +93,7 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
     assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['Bow','Crown','Headphones','None']);
-    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rainbow','Rose','Silver']);
+    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Rainbow','Rose','Silver','USA']);
     assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),2,'Only overflowing choices have pages');
     const headPages=panel.locator('.accessory-controls .dumpling-option-pages');
     await headPages.getByRole('button',{name:'Next'}).click();
@@ -133,6 +133,15 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.locator('.rainbow-cheeks').evaluate(e=>getComputedStyle(e).display),'inline','Rainbow keeps sharp untinted cheek marks');
     assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/rainbow-smooth-front-v1.png');
     await pet.screenshot({path:path.join(repo,'work',`rainbow-${role}.png`)});
+    const colorPages=panel.locator('.colors').locator('..').locator('.dumpling-option-pages');
+    await colorPages.getByRole('button',{name:'Next'}).click();
+    assert.deepEqual(await panel.locator('.colors button:not([hidden])').allTextContents(),['Silver','USA']);
+    await panel.getByRole('button',{name:'USA',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+    assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'USA');
+    assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/usa-smooth-front-v1.png');
+    assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'none');
+    await pet.screenshot({path:path.join(repo,'work',`usa-${role}.png`)});
     await panel.getByRole('button',{name:'Round glasses',exact:true}).click();
     for(const accessory of ['cap','crown','sleepcap']){
       await chooseAccessory(accessory);
@@ -150,13 +159,15 @@ async function request(route, cookie='', body, method) {
     await page.reload({waitUntil:'domcontentloaded'});await showHome();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-button')?.dataset.eyewear==='sunglasses');
     assert.equal(await pet.getAttribute('data-accessory'),'sleepcap','Hat and glasses survive reload together');
-    assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline','Rainbow survives reload');
+    assert.equal(await pet.locator('.rainbow-color').evaluate(e=>getComputedStyle(e).display),'inline','USA survives reload');
+    assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/usa-smooth-front-v1.png');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
     assert.equal(await pet.getAttribute('data-accessory'),'headphones');assert.equal(await pet.getAttribute('data-eyewear'),'sunglasses');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
     assert.equal(await pet.getAttribute('data-accessory'),'sleepcap');
     await pet.click();await panel.waitFor({state:'visible'});
     await panel.getByRole('button',{name:'No glasses',exact:true}).click();
+    await colorPages.getByRole('button',{name:'Previous'}).click();
     await panel.getByRole('button',{name:'Blue',exact:true}).click();
     assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'inline','Other colors keep their original texture');
     assert.equal(await pet.locator('.rainbow-cheeks').evaluate(e=>getComputedStyle(e).display),'none');

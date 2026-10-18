@@ -59,7 +59,8 @@ window.createDumplingPet = function(root) {
     ['Lavender', '#b998df', 'hue-rotate(220deg) saturate(.45)'],
     ['Matcha', '#a7bd6a', 'hue-rotate(45deg) saturate(.5)'],
     ['Silver', '#cbd2da', 'grayscale(1) brightness(1.14)'],
-    ['Rainbow', 'linear-gradient(90deg,#ff663b,#ffe52c,#7af044,#28dfbd,#299cfa,#bd49de)', 'none']
+    ['Rainbow', 'linear-gradient(90deg,#ff663b,#ffe52c,#7af044,#28dfbd,#299cfa,#bd49de)', 'none'],
+    ['USA', 'linear-gradient(135deg,#163b77 33%,#fff 33%,#fff 66%,#dc3042 66%)', 'none']
   ];
   colors.forEach(([name, swatch, filter], i) => {
     const b = document.createElement('button');
@@ -68,11 +69,15 @@ window.createDumplingPet = function(root) {
     b.setAttribute('aria-pressed', String(i === 0));
     b.onclick = () => {
       puppet.querySelector('.tinted-bun').style.filter = filter;
-      // Rainbow replaces the glitter completely; cheeks stay above the untinted body.
-      puppet.querySelector('.bun-texture').style.display=name==='Rainbow'?'none':'inline';
-      puppet.querySelector('.rainbow-color').style.display=name==='Rainbow'?'inline':'none';
-      puppet.querySelector('.rainbow-cheeks').style.display=name==='Rainbow'?'inline':'none';
-      panel.querySelector('h2').textContent = name==='Rainbow'?'Rainbow squishy':`${name} glitter`;
+      // Smooth designs replace glitter completely; cheeks remain untinted above them.
+      const smooth=name==='Rainbow'||name==='USA';
+      puppet.querySelector('.bun-texture').style.display=smooth?'none':'inline';
+      const texture=puppet.querySelector('.rainbow-color');
+      texture.setAttribute('href',name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
+      texture.style.display=smooth?'inline':'none';
+      const cheeks=puppet.querySelector('.rainbow-cheeks');
+      cheeks.style.display=smooth?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');
+      panel.querySelector('h2').textContent = smooth?`${name} squishy`:`${name} glitter`;
       section.querySelectorAll('.color-choice').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     };
     section.querySelector('.colors').append(b);
