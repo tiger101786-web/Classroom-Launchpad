@@ -25,7 +25,7 @@ window.createDumplingPet = function(root) {
       <g mask="url(#mouth-cover)"><image href="${asset}" y="200" width="1254" height="1254"/></g>
     </g><image class="rainbow-color" href="dumpling-pet/rainbow-smooth-front-v1.png" width="1254" height="1254" clip-path="url(#bun-clip)" style="display:none"/></g><g class="face">
       <g class="rainbow-cheeks" style="display:none" fill="none" stroke="#d84655" stroke-width="19" stroke-linecap="round"><path d="M418 685l13 25M443 680l13 25M468 685l13 25M793 710l13-25M818 705l13-25M843 710l13-25"/></g>
-      <g class="galaxy-cheeks" fill="#f0444e"><ellipse cx="445" cy="699" rx="43" ry="30"/><ellipse cx="829" cy="699" rx="43" ry="30"/></g>
+      <g class="galaxy-cheeks" fill="#e98d91"><ellipse cx="445" cy="699" rx="43" ry="30"/><ellipse cx="829" cy="699" rx="43" ry="30"/></g>
       <!-- Clean independent eyes: no clipped photo edges or fixed printed-eye outline. -->
       <g class="eye eye-left"><ellipse cx="483" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="481" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="eye eye-right"><ellipse cx="795" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="793" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
