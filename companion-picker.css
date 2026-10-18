@@ -43,6 +43,9 @@ body[data-theme="night"] .companion-picker select,body[data-theme="night"] .comp
 .dumpling-companion .music-eyes{display:none}
 .dumpling-companion .sleep-eyes,.dumpling-companion .sleep-zs{display:none;pointer-events:none}
 .dumpling-companion .asleep .eye{visibility:hidden}
+.dumpling-companion .galaxy-star-eye,.dumpling-companion .galaxy-cheeks{display:none}
+.dumpling-companion .galaxy .galaxy-star-eye,.dumpling-companion .galaxy .galaxy-cheeks{display:inline}
+.dumpling-companion .galaxy .eye>ellipse{display:none}
 .dumpling-companion .asleep .mouth,.dumpling-companion .asleep .mouth-open{visibility:hidden}
 .dumpling-companion .asleep .mouth-sleep{opacity:1}
 .dumpling-companion .mouth-sleep{transform-origin:637px 662px}

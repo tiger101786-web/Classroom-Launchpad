@@ -594,7 +594,7 @@ function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
     pet: source.pet === "dumpling" ? "dumpling" : "colt",
-    color: ["Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver", "Rainbow", "USA", "Metallic Gold", "Metallic Blue", "Metallic Green", "Metallic Pink", "Metallic Purple", "Metallic Red"].includes(source.color) ? source.color : "Gold",
+    color: ["Galaxy", "Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver", "Rainbow", "USA", "Metallic Gold", "Metallic Blue", "Metallic Green", "Metallic Pink", "Metallic Purple", "Metallic Red"].includes(source.color) ? source.color : "Gold",
     accessory: ["none", "bow", "headphones", "hat", "cap", "crown", "sleepcap"].includes(source.accessory) ? source.accessory : "none",
     eyewear: ['none', 'round', 'sunglasses'].includes(source.eyewear) ? source.eyewear : 'none',
     motion: source.motion !== false,
@@ -3886,7 +3886,7 @@ async function handleApi(req, res, pathname) {
     try {
       const input = req.method === "PUT" ? await readBody(req) : null;
       if (input && (!['colt', 'dumpling'].includes(input.pet)
-        || !['Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
+        || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
         || (input.eyewear !== undefined && !['none', 'round', 'sunglasses'].includes(input.eyewear))
         || (input.size !== undefined && !['small', 'medium', 'large', 'extra-large'].includes(input.size))

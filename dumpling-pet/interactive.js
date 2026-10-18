@@ -16,7 +16,7 @@ window.createDumplingPet = function(root) {
     <mask id="eye-cover"><g fill="white" filter="url(#patch-soft)"><ellipse cx="483" cy="605" rx="72" ry="85"/><ellipse cx="795" cy="605" rx="72" ry="85"/></g></mask>
     <mask id="mouth-cover"><ellipse cx="637" cy="680" rx="95" ry="85" fill="white" filter="url(#patch-soft)"/></mask>
     <mask id="basket-mask"><rect width="1254" height="1254" fill="white"/><path d="${basketOpening}" fill="black"/></mask>
-    </defs><ellipse cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>
+    </defs><ellipse class="basket-interior" cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>
     <g class="breathing"><g class="moving-bun"><g class="tinted-bun" style="isolation:isolate"><g class="bun-texture">
       <!-- Extend the glitter body under the fixed lip, keeping the source basket out of its tint. -->
       <image class="glitter-body" href="${asset}" width="1254" height="1290" preserveAspectRatio="none" clip-path="url(#bun-clip)"/>
@@ -25,6 +25,7 @@ window.createDumplingPet = function(root) {
       <g mask="url(#mouth-cover)"><image href="${asset}" y="200" width="1254" height="1254"/></g>
     </g><image class="rainbow-color" href="dumpling-pet/rainbow-smooth-front-v1.png" width="1254" height="1254" clip-path="url(#bun-clip)" style="display:none"/></g><g class="face">
       <g class="rainbow-cheeks" style="display:none" fill="none" stroke="#d84655" stroke-width="19" stroke-linecap="round"><path d="M418 685l13 25M443 680l13 25M468 685l13 25M793 710l13-25M818 705l13-25M843 710l13-25"/></g>
+      <g class="galaxy-cheeks" fill="#f0444e"><ellipse cx="445" cy="699" rx="43" ry="30"/><ellipse cx="829" cy="699" rx="43" ry="30"/></g>
       <!-- Clean independent eyes: no clipped photo edges or fixed printed-eye outline. -->
       <g class="eye eye-left"><ellipse cx="483" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="481" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
       <g class="eye eye-right"><ellipse cx="795" cy="605" rx="44" ry="60" fill="#171413"/><ellipse cx="793" cy="588" rx="13" ry="19" fill="#f5f6f3"/></g>
@@ -46,6 +47,10 @@ window.createDumplingPet = function(root) {
     <g class="sleep-zs" pointer-events="none" fill="#b7c6ec" stroke="#292036" stroke-width="6" paint-order="stroke" font-family="Arial, sans-serif" font-weight="bold" font-size="125"><text x="950" y="330">Z</text><text x="1040" y="225" style="animation-delay:-1s">Z</text><text x="1120" y="120" style="animation-delay:-2s">Z</text></g>
     </svg>`;
   img.replaceWith(puppet);
+  // Star highlights live inside the existing eye groups, so blinking/sleep still work.
+  puppet.querySelectorAll('.eye').forEach((eye,i)=>{
+    eye.insertAdjacentHTML('beforeend',`<g class="galaxy-star-eye" transform="translate(${i?795:483} 605)"><circle r="55" fill="#15111e"/><path d="m-8-28 9 19 21 3-15 14 4 21-19-10-19 10 4-21-15-14 21-3Z" fill="#fff"/><circle cx="23" cy="-27" r="11" fill="#fff"/></g>`);
+  });
   root.querySelector('h1').textContent = 'Your squishy, your color.';
   root.querySelector('.eyebrow').textContent = 'INTERACTIVE APPROVAL PREVIEW';
   stage.querySelector('span').textContent = 'TAP THE TOY TO SQUISH';
@@ -70,7 +75,8 @@ window.createDumplingPet = function(root) {
     ['Metallic Green', 'linear-gradient(135deg,#38724b,#daf9c7,#79b378)', 'hue-rotate(65deg) saturate(.45)'],
     ['Metallic Pink', 'linear-gradient(135deg,#ac477d,#ffe0ef,#dc8ab5)', 'hue-rotate(285deg) saturate(.55)'],
     ['Metallic Purple', 'linear-gradient(135deg,#6939a9,#e3c8ff,#9b63d4)', 'hue-rotate(215deg) saturate(.7)'],
-    ['Metallic Red', 'linear-gradient(135deg,#8f1223,#ffb7b7,#d82537)', 'hue-rotate(320deg) saturate(1.3)']
+    ['Metallic Red', 'linear-gradient(135deg,#8f1223,#ffb7b7,#d82537)', 'hue-rotate(320deg) saturate(1.3)'],
+    ['Galaxy', 'radial-gradient(circle at 35% 30%,#fff 0 5%,#b16df0 8%,#572680 42%,#1c123e 80%)', 'none']
   ];
   colors.forEach(([name, swatch, filter], i) => {
     const b = document.createElement('button');
@@ -82,15 +88,19 @@ window.createDumplingPet = function(root) {
       puppet.querySelector('.tinted-bun').style.filter = filter;
       // Smooth designs replace glitter completely; cheeks remain untinted above them.
       const metallic=name.startsWith('Metallic ');
-      const smooth=name==='Rainbow'||name==='USA'||metallic;
+      const galaxy=name==='Galaxy';puppet.classList.toggle('galaxy',galaxy);
+      const smooth=name==='Rainbow'||name==='USA'||metallic||galaxy;
       puppet.querySelector('.bun-texture').style.display=smooth?'none':'inline';
       const texture=puppet.querySelector('.rainbow-color');
-      texture.setAttribute('href',metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
-      texture.setAttribute('y',metallic?'-10':'0');texture.setAttribute('height',metallic?'1190':'1254');texture.setAttribute('preserveAspectRatio','none');
-      texture.setAttribute('x',metallic?'27':'0');texture.setAttribute('width',metallic?'1200':'1254');
+      texture.setAttribute('href',galaxy?'dumpling-pet/galaxy-front-v1.png':metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
+      texture.setAttribute('y',metallic||galaxy?'-10':'0');texture.setAttribute('height',galaxy?'1166':metallic?'1190':'1254');texture.setAttribute('preserveAspectRatio','none');
+      texture.setAttribute('x',metallic||galaxy?'27':'0');texture.setAttribute('width',metallic||galaxy?'1200':'1254');
       texture.style.display=smooth?'inline':'none';
       const cheeks=puppet.querySelector('.rainbow-cheeks');
-      cheeks.style.display=smooth?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');
+      cheeks.style.display=smooth&&!galaxy?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');
+      puppet.querySelector('.fixed-basket').style.filter=galaxy?'hue-rotate(225deg) saturate(.8) brightness(.65)':'none';
+      puppet.querySelector('.basket-inner-lip').setAttribute('stroke',galaxy?'#8f67b6':'#e4aa6b');
+      puppet.querySelector('.basket-interior').setAttribute('fill',galaxy?'#4b2869':'#b47a40');
       panel.querySelector('h2').textContent = smooth?`${name} squishy`:`${name} glitter`;
       section.querySelectorAll('.color-choice').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     };
