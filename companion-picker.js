@@ -10,6 +10,9 @@
   const host=document.createElement('div');host.className='dumpling-companion';host.hidden=true;
   host.innerHTML='<h1 hidden></h1><div class="eyebrow" hidden></div><section class="stage"><span hidden></span><img class="toy" alt="Squishy dumpling"></section><aside class="panel" hidden aria-label="Squishy Dumpling controls"><div><h2></h2><p></p></div><div class="note"></div></aside>';
   document.body.append(picker,host);
+  const robo=window.createRoboColt(value=>{preferences.robo=value;sync();save();});
+  picker.querySelector('option[value="colt"]').textContent='Robo-Colt';
+  picker.querySelector('.pet-picker-note').textContent='Each pet keeps its own appearance and controls.';
   const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
   const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
   const speech=document.createElement('div');speech.className='dumpling-speech';speech.hidden=true;
@@ -117,7 +120,7 @@
   const select=picker.querySelector('select'),pickerStatus=picker.querySelector('.pet-status'),pickerRetry=picker.querySelector('.pet-retry');
   const allowed=()=>loaded&&auth.authenticated&&enabled&&!hiddenScreens.has(screen);
   const positionKey=()=>`dumpling-position:${account}`;
-  function announce(message,error=false){status.textContent=pickerStatus.textContent=message;retry.hidden=pickerRetry.hidden=!error;}
+  function announce(message,error=false){status.textContent=pickerStatus.textContent=message;retry.hidden=pickerRetry.hidden=!error;robo.announce(message,error,()=>loadError?updateAccount(auth,true):save());}
   function clamp(x,y){const box=pet.getBoundingClientRect();return {x:Math.max(8,Math.min(x,innerWidth-box.width-8)),y:Math.max(8,Math.min(y,innerHeight-box.height-8))};}
   function place(){
     if(host.hidden)return;
@@ -139,13 +142,16 @@
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
   function openPanel(){if(host.hidden)return;optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
+    robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying,preferences:preferences.robo});
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
     sizeChoices.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.petSize===host.dataset.size)));
     if(host.hidden)closePanel();
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
-    picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=preferences.pet!=='dumpling';
+    picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=false;
+    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
+    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='colt'?'Show Colt':'Show dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
     if(host.hidden||asleep)hideSpeech();
@@ -186,8 +192,8 @@
   select.onchange=()=>{preferences.pet=select.value;petHidden=false;closePanel();selectPet();resetNap();save();};
   picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
   picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
-  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;sync();openPanel();};
-  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;picker.close();sync();};
+  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;sync();if(preferences.pet==='colt')robo.customize();else openPanel();};
+  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;picker.close();sync();if(preferences.pet==='colt')robo.show();};
   panel.querySelector('[data-dumpling-close]').onclick=()=>closePanel(true);
   panel.querySelector('[data-dumpling-hide]').onclick=()=>{petHidden=true;sync();};
   panel.querySelector('[data-dumpling-reset]').onclick=()=>{position=null;try{localStorage.removeItem(positionKey());}catch{}place();};
@@ -195,7 +201,7 @@
     if(!auth.authenticated)return;
     opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
     document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
-    closePanel();sync();if(!picker.open)picker.showModal();
+    closePanel();robo.close();sync();if(!picker.open)picker.showModal();
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{

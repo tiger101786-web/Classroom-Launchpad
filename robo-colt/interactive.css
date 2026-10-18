@@ -1,0 +1,162 @@
+.companion-picker{width:min(430px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:22px;border:1px solid var(--border,#ccc);border-radius:16px;background:var(--paper,#fff);color:var(--ink,#222);font:14px Arial,sans-serif;box-shadow:0 14px 50px #0005}
+.companion-picker::backdrop{background:#0007}.companion-picker header,.dumpling-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.companion-picker h2{margin:0}.companion-picker label{display:grid;gap:8px;font-weight:bold}.companion-picker p{line-height:1.5}.companion-picker .pet-tools{display:flex;flex-wrap:wrap;gap:8px}
+.companion-picker button,.companion-picker select,.robo-companion .panel button{font:inherit;padding:9px;border-radius:8px;background:var(--paper,#fff);color:var(--ink,#222);border:1px solid var(--border,#aaa);cursor:pointer}
+.companion-picker :focus-visible,.robo-companion :focus-visible{outline:3px solid #a81747;outline-offset:3px}
+.companion-picker{box-sizing:border-box;width:min(520px,calc(100vw - 24px));padding:0;border-radius:20px;overflow:hidden;box-shadow:0 18px 55px #0006}
+.companion-picker[open]{display:flex;flex-direction:column}
+.companion-picker .pet-picker-heading{flex:none;margin:0;padding:20px 22px;background:radial-gradient(circle at 15% 0%,#c45c7d66,transparent 65%),linear-gradient(120deg,#560720,#2b1020);color:#fff;border-bottom:3px solid #b9b9c0}
+.companion-picker .pet-picker-kicker{display:block;font-size:9px;letter-spacing:1.7px;color:#f1cbd8;font-weight:bold;margin-bottom:6px}
+.companion-picker .pet-picker-heading h2{font-size:25px;line-height:1.2;color:#fff}
+.companion-picker .pet-picker-heading button{background:#ffffff12;color:#fff;border-color:#ffffff40;width:34px;height:34px;padding:0;flex:none}
+.companion-picker .pet-picker-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 18px 14px;scrollbar-color:#aa4265 #8882}
+.companion-picker .pet-picker-intro{font-size:13px;margin:17px 4px;color:var(--muted,var(--ink,#555))}
+.companion-picker .pet-picker-group{min-width:0;margin:0 0 15px;padding:13px 14px 14px;border:1px solid var(--border,#ccc);border-radius:13px;background:color-mix(in srgb,var(--ink,#222) 3%,transparent)}
+.companion-picker .pet-picker-group legend{padding:0 7px;font-size:11px;font-weight:bold;letter-spacing:.4px;color:var(--ink,#222)}
+.companion-picker label{font-size:12px;gap:9px}.companion-picker select{width:100%;min-width:0;min-height:42px;font-size:14px;padding:10px 12px}
+.companion-picker .pet-picker-hint,.companion-picker .pet-picker-note{font-size:11px;opacity:.75;margin:9px 0 0}
+.companion-picker .pet-picker-help{font-size:13px;margin:0 0 12px}
+.companion-picker .pet-tools{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.companion-picker .pet-tools button{font-size:12px;min-height:40px;padding:9px 7px;box-shadow:0 2px 4px #0001}
+.companion-picker [data-pet-customize]{background:linear-gradient(135deg,#a81747,#660b2b);color:#fff;border-color:#c86888}
+.companion-picker .pet-tools button:hover{border-color:#bd637f}
+.companion-picker .pet-picker-footer{border-top:1px solid var(--border,#ccc);padding:10px 4px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.companion-picker .pet-picker-footer .pet-status{margin:0;min-height:17px;opacity:.8}
+body[data-theme="night"] .companion-picker select,body[data-theme="night"] .companion-picker [data-pet-show],body[data-theme="night"] .companion-picker .pet-retry{background:#272328;color:#f4e8ee;border-color:#51454d}
+@media(max-width:380px){.companion-picker .pet-tools{grid-template-columns:1fr}.companion-picker .pet-picker-heading{padding:17px}}
+.robo-companion{position:fixed;left:calc(100vw - 254px);top:40%;z-index:17;width:220px;background:none;border:0;box-shadow:none;pointer-events:none}
+.robo-companion[hidden],.robo-companion [hidden],.companion-picker [hidden]{display:none!important}
+.robo-companion .stage{margin:0;padding:0;background:none;border:0;display:block}
+.robo-companion .dumpling-speech{position:fixed;box-sizing:border-box;z-index:22;pointer-events:none;padding:13px 17px 15px;border:2px solid #d8a453;border-radius:24px 27px 23px 26px;background:radial-gradient(ellipse at 15% 0%,#fff 0,transparent 60%),linear-gradient(145deg,#fff7df,#ffe3d2);color:#613821;box-shadow:0 5px 0 #bd884644,0 9px 22px #0003;font:13px/1.45 Arial,sans-serif;overflow-wrap:anywhere}
+.robo-companion .dumpling-speech:after{content:'';position:absolute;left:var(--speech-tail,50%);bottom:-8px;width:13px;height:13px;background:#ffe3d2;border-right:2px solid #d8a453;border-bottom:2px solid #d8a453;transform:translateX(-50%) rotate(45deg)}
+.robo-companion .dumpling-speech[data-side=below]:after{top:-8px;bottom:auto;transform:translateX(-50%) rotate(225deg);background:#fff7df}
+.robo-companion .dumpling-speech-label{display:block;font-size:9px;letter-spacing:1px;font-weight:800;color:#9b5a32;margin-bottom:4px}
+.robo-companion .dumpling-speech-message{display:block;font-weight:600}
+.robo-companion .pet-button{display:block;width:100%;margin:0;padding:0;border:0;border-radius:0;background:none!important;box-shadow:none;cursor:grab;touch-action:none;user-select:none;pointer-events:auto}
+.robo-companion .pet-button:active{cursor:grabbing}.robo-companion .pet-button svg{display:block;width:100%;overflow:visible}
+.robo-companion .panel{pointer-events:auto;position:fixed;z-index:20;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;padding:18px;border-radius:16px;border:1px solid var(--border,#ccc);background:var(--paper,#fff);color:var(--ink,#222);box-shadow:0 12px 35px #0004;font:14px Arial,sans-serif}
+.robo-companion .panel h2{font-size:18px;margin:0 0 8px}.robo-companion .panel p{font-size:13px;line-height:1.45}.robo-companion .controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.robo-companion .label{font-weight:bold}.robo-companion .motion-label{margin-top:18px}.robo-companion .note{display:none}
+.robo-companion .panel button[aria-pressed=true]{background:#7b0b31;color:#fff;border-color:#7b0b31}.robo-companion .pet-status,.companion-picker .pet-status{font-size:12px;line-height:1.4}
+.robo-companion .moving-bun,.robo-companion .breathing{transform-origin:627px 824px}
+/* Keep the outer body layer still; deliberate animations use moving-bun. */
+.robo-companion .breathing{animation:none;transform:none}
+.robo-companion{z-index:21}
+.robo-companion .music-eyes{display:none}
+.robo-companion .sleep-eyes,.robo-companion .sleep-zs{display:none;pointer-events:none}
+.robo-companion .asleep .eye{visibility:hidden}
+.robo-companion .galaxy-star-eye,.robo-companion .galaxy-cheeks{display:none}
+.robo-companion .galaxy .galaxy-star-eye,.robo-companion .galaxy .galaxy-cheeks{display:inline}
+.robo-companion .galaxy .eye>ellipse{display:none}
+.robo-companion .asleep .mouth,.robo-companion .asleep .mouth-open{visibility:hidden}
+.robo-companion .asleep .mouth-sleep{opacity:1}
+.robo-companion .mouth-sleep{transform-origin:637px 662px}
+.robo-companion .asleep.idle .mouth-sleep{animation:dumpling-soft-snore 2.8s cubic-bezier(.37,0,.63,1) infinite}
+@keyframes dumpling-soft-snore{0%,100%{transform:scale(1,.8)}50%{transform:scale(1,1.15)}}
+@media(prefers-reduced-motion:reduce){.robo-companion .asleep.idle .mouth-sleep{animation:none}}
+.robo-companion .asleep .sleep-eyes,.robo-companion .asleep .sleep-zs{display:block}
+.robo-companion .waking .sleep-zs{display:block}
+.robo-companion .asleep.idle .sleep-zs text{animation:dumpling-sleep-z 3s ease-out infinite}
+.robo-companion .asleep .moving-bun{animation:none;transform:none}
+.robo-companion .panel button:disabled{opacity:.45;cursor:not-allowed}
+.robo-companion [data-dumpling-sleep]{grid-column:1/-1}
+@keyframes dumpling-sleep-z{0%{opacity:0;transform:translate(-20px,45px)}25%{opacity:1}100%{opacity:0;transform:translate(25px,-65px)}}
+@media(prefers-reduced-motion:reduce){.robo-companion .asleep.idle .sleep-zs text,.robo-companion .asleep.idle .moving-bun{animation:none}}
+.robo-companion .music-notes{display:none;pointer-events:none}
+.robo-companion .radio-dancing .music-notes{display:block}
+.robo-companion .radio-dancing .music-note{animation:dumpling-music-float 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes dumpling-music-float{0%{opacity:0;transform:translateY(25px) rotate(-12deg) scale(.8)}20%{opacity:1}75%{opacity:.9}100%{opacity:0;transform:translateY(-110px) rotate(14deg) scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.robo-companion .radio-dancing .music-note{animation:none}}
+.robo-companion .radio-dancing .eye{visibility:hidden}
+.robo-companion .radio-dancing .music-eyes{display:block}
+.robo-companion .radio-dancing .mouth{opacity:0}
+.robo-companion .radio-dancing .mouth-open{opacity:1;transform:scaleY(1)}
+.robo-companion .eye-left{transform-origin:483px 605px}.robo-companion .eye-right{transform-origin:795px 605px}
+.robo-companion .mouth,.robo-companion .mouth-open{transform-origin:637px 660px;transition:opacity .16s ease,transform .2s ease}.robo-companion .mouth-open{opacity:0;transform:scaleY(.65)}.robo-companion .smiling .mouth{opacity:0;transform:scaleY(.75)}.robo-companion .smiling .mouth-open{opacity:1;transform:scaleY(1)}
+.robo-companion .color-choice:before{content:'';display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--swatch);margin-right:7px;border:1px solid #0002;vertical-align:-2px}.robo-companion .accessory-layer{isolation:isolate}
+/* Match Colt's root and character dimensions without stretching the artwork. */
+.robo-companion{width:154px}
+.robo-companion .pet-button{width:144px;height:142px}
+.robo-companion .pet-button svg{height:100%}
+.robo-companion[data-size="small"]{width:132px}
+.robo-companion[data-size="small"] .pet-button{width:124px;height:122px}
+.robo-companion[data-size="large"]{width:178px}
+.robo-companion[data-size="large"] .pet-button{width:168px;height:166px}
+.robo-companion[data-size="extra-large"]{width:220px}
+.robo-companion[data-size="extra-large"] .pet-button{width:210px;height:208px}
+@media(max-width:1119px){.robo-companion[data-size]{width:66px}.robo-companion[data-size] .pet-button{width:62px;height:62px}}
+@media(prefers-reduced-motion:reduce){.robo-companion .mouth,.robo-companion .mouth-open{transition:none}}
+.robo-companion .panel{padding:0;border-radius:20px;background:var(--paper,#fff);box-shadow:0 18px 55px #0006}
+.robo-companion .dumpling-panel-heading{margin:0;padding:20px;background:radial-gradient(circle at 15% 0%,#c45c7d66,transparent 65%),linear-gradient(120deg,#560720,#2b1020);color:#fff;border-bottom:3px solid #b9b9c0}
+.dumpling-panel-heading strong{display:block;font-size:19px;margin-top:5px}.robo-companion .pet-kicker{display:block;font-size:9px;letter-spacing:1.7px;color:#f1cbd8;font-weight:bold}
+.robo-companion .dumpling-panel-heading button{background:#ffffff12;color:white;border-color:#ffffff40;width:34px;height:34px;padding:0}
+.robo-companion .dumpling-look{padding:16px 20px 10px}.robo-companion .dumpling-look h2{font-size:20px}.robo-companion .dumpling-look p{margin:0;opacity:.7;font-size:12px}
+.robo-companion .dumpling-sections{padding:0 14px;display:grid;gap:13px}
+.robo-companion .dumpling-group{min-width:0;margin:0;padding:10px 12px 12px;border:1px solid var(--border,#ccc);border-radius:13px;background:color-mix(in srgb,var(--ink,#222) 3%,transparent)}
+.robo-companion .dumpling-group legend{font-size:11px;font-weight:bold;letter-spacing:.4px;padding:0 7px;color:var(--ink,#222)}
+.robo-companion .dumpling-group .controls{margin-top:2px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.robo-companion .dumpling-group .colors{grid-template-columns:repeat(3,minmax(0,1fr))}
+.robo-companion .dumpling-group .colors{min-height:103px}
+.robo-companion .dumpling-group .color-choice{display:grid;grid-template-columns:13px minmax(0,1fr);align-items:center;gap:6px;text-align:left;padding:7px 6px}
+.robo-companion .dumpling-group .color-choice:before{display:block;box-sizing:border-box;margin:0;vertical-align:baseline}
+.robo-companion .dumpling-group button{font-size:12px;min-height:37px;padding:7px 4px;transition:background .15s,border-color .15s;box-shadow:0 2px 4px #0001}
+.robo-companion .dumpling-group button:hover{border-color:#bd637f}.robo-companion .dumpling-group button[aria-pressed=true]{background:linear-gradient(135deg,#a81747,#660b2b);border-color:#c86888;box-shadow:0 2px 7px #7b0b3130}
+.robo-companion .accessory-hint,.robo-companion .motion-status{margin:8px 0 0;font-size:11px!important;opacity:.75}
+.robo-companion #idle{grid-column:1/-1}.robo-companion .dumpling-radio-status{margin:13px 14px 0;padding:11px 12px;font-size:11px;line-height:1.5;border:1px dashed var(--border,#bbb);border-radius:11px;opacity:.8}
+.robo-companion.is-listening .dumpling-radio-status{background:#7b0b3120;border-color:#b64c70;opacity:1}
+.robo-companion .dumpling-utilities{margin:13px 14px 0;display:flex;flex-wrap:wrap;border-top:1px solid var(--border,#ccc);padding-top:12px;gap:6px}
+.robo-companion .dumpling-utilities button{font-size:11px;padding:7px 9px}.robo-companion .panel>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}.robo-companion .panel>button{margin:0 20px 14px}
+body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-pressed="true"]){background:#272328;color:#f4e8ee;border-color:#51454d}
+/* Fixed landscape shell: only the options region grows and scrolls. */
+.robo-companion .panel{box-sizing:border-box;height:min(440px,calc(100dvh - 24px));display:flex;flex-direction:column;overflow:hidden}
+.robo-companion .dumpling-panel-heading{flex:none;padding:16px 20px}
+.robo-companion .dumpling-panel-body{flex:1;min-height:0;overflow-y:scroll;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:auto;scrollbar-color:#aa4265 #8882;padding-bottom:4px}
+.robo-companion .dumpling-panel-body::-webkit-scrollbar{width:10px}
+.robo-companion .dumpling-panel-body::-webkit-scrollbar-track{background:#8882}
+.robo-companion .dumpling-panel-body::-webkit-scrollbar-thumb{background:#aa4265;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+.robo-companion .dumpling-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+.robo-companion .dumpling-group .controls{grid-auto-rows:48px;align-content:start}
+.robo-companion .dumpling-group .color-choice{line-height:15px;padding:8px 6px}
+.robo-companion .dumpling-group .controls button{height:100%;box-sizing:border-box}
+.robo-companion .dumpling-group-hint,.robo-companion .dumpling-group .accessory-hint,.robo-companion .dumpling-group .motion-status{margin:8px 0 0;min-height:16px;font-size:11px!important;line-height:16px;opacity:.75}
+.robo-companion .dumpling-rest-group{grid-column:1/-1}
+.robo-companion .dumpling-group .headwear-options{height:103px;align-content:start}
+.robo-companion .dumpling-group [hidden]{display:none!important}
+.robo-companion .dumpling-option-pages{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 0;height:24px}
+.robo-companion .dumpling-option-pages button{height:24px;min-height:24px;padding:2px 8px;font-size:11px;box-shadow:none}
+.robo-companion .dumpling-option-pages span{font-size:11px;white-space:nowrap}
+.robo-companion .dumpling-group-hint,.robo-companion .dumpling-group .accessory-hint,.robo-companion .dumpling-group .motion-status{min-height:24px;line-height:24px}
+.robo-companion .dumpling-group .eyewear-controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+.robo-companion .dumpling-rest-controls #idle,.robo-companion .dumpling-rest-controls [data-dumpling-sleep]{grid-column:auto}
+.robo-companion .dumpling-panel-body>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}
+.robo-companion .dumpling-panel-body>button{margin:0 20px 14px}
+@media(max-width:560px){.robo-companion .panel{height:min(500px,calc(100dvh - 24px))}.robo-companion .dumpling-sections{grid-template-columns:1fr}}
+
+
+/* Character-only rules override the dumpling face rules without touching Squishy. */
+.robo-companion .pet-button svg svg{overflow:hidden}
+.robo-companion #rc-puppet{transform-origin:365px 720px}
+.robo-companion #rc-tail{transform-origin:510px 547px}
+.robo-companion #rc-ear-left{transform-origin:257px 162px}
+.robo-companion #rc-ear-right{transform-origin:486px 166px}
+.robo-companion #rc-lower-leg{transform-origin:280px 563px}
+.robo-companion #rc-lower-leg-right{transform-origin:484px 563px}
+.robo-companion #rc-rear-left{transform-origin:257px 542px}
+.robo-companion #rc-rear-right{transform-origin:483px 542px}
+.robo-companion .eyes-happy,.robo-companion .eyes-sleep,.robo-companion .zs,.robo-companion .notes,.robo-companion #rc-headphones,.robo-companion .mouth-open,.robo-companion .mouth-sleep{display:none}
+.robo-companion .happy .eyes-open,.robo-companion .sleeping .eyes-open{visibility:hidden}
+.robo-companion .happy .eyes-happy,.robo-companion .sleeping .eyes-sleep,.robo-companion .sleeping .zs,.robo-companion .dancing .notes,.robo-companion .wear-phones #rc-headphones{display:inline}
+.robo-companion .sleeping .eyes-happy{display:none}
+.robo-companion .mouth-open{transform-origin:0px 0px;opacity:1;visibility:visible;transform:none;transition:none}
+.robo-companion .asleep.idle .mouth-sleep{animation:none;transform:none}
+.robo-companion .happy .mouth-open,.robo-companion .talking .mouth-open{display:inline}
+.robo-companion .happy .mouth-rest,.robo-companion .talking .mouth-rest,.robo-companion .sleeping .mouth-rest,.robo-companion .sleeping .mouth-open{display:none}
+.robo-companion .sleeping .mouth-sleep{display:inline;opacity:1}
+.robo-companion .zs text,.robo-companion .notes text{animation:robo-float 3s ease-out infinite;opacity:0}
+.robo-companion .zs text:nth-child(2){animation-delay:-1s}.robo-companion .zs text:nth-child(3){animation-delay:-2s}
+.robo-companion .notes text:nth-child(2){animation-delay:-1.5s}
+.robo-companion.motion-off .zs text,.robo-companion.motion-off .notes text{animation:none;opacity:1}
+@keyframes robo-float{0%{opacity:0;transform:translateY(12px)}20%,65%{opacity:1}100%{opacity:0;transform:translateY(-28px)}}
+.robo-companion .dumpling-speech{background:linear-gradient(135deg,#28252c,#140f17);border-color:#b9274e;color:#fff;border-radius:16px}
+.robo-companion .dumpling-speech-label{color:#ff9eb8}.robo-companion .dumpling-speech:after{background:#211723;border-color:#b9274e}
+.robo-companion .panel .controls button{white-space:normal}
+@media(prefers-reduced-motion:reduce){.robo-companion .zs text,.robo-companion .notes text{animation:none;opacity:1}}
+

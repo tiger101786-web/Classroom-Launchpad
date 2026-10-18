@@ -13,7 +13,8 @@ window.createDumplingPet = function(root) {
   puppet.innerHTML = `<svg viewBox="0 0 1254 1254" aria-hidden="true"><defs>
     <clipPath id="bun-clip"><path d="${edge}"/></clipPath>
     <filter id="patch-soft"><feGaussianBlur stdDeviation="4"/></filter>
-    <mask id="eye-cover"><g fill="white" filter="url(#patch-soft)"><ellipse cx="483" cy="605" rx="72" ry="85"/><ellipse cx="795" cy="605" rx="72" ry="85"/></g></mask>
+    <!-- The glitter photo is vertically fitted to 1290px: cover its printed eyes at their fitted centers, not the animated eye centers. -->
+    <mask id="eye-cover"><g fill="white" filter="url(#patch-soft)"><ellipse cx="483" cy="623" rx="72" ry="84"/><ellipse cx="795" cy="623" rx="72" ry="84"/></g></mask>
     <mask id="mouth-cover"><ellipse cx="637" cy="680" rx="95" ry="85" fill="white" filter="url(#patch-soft)"/></mask>
     <mask id="basket-mask"><rect width="1254" height="1254" fill="white"/><path d="${basketOpening}" fill="black"/></mask>
     </defs><ellipse class="basket-interior" cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>

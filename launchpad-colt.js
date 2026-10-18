@@ -53,7 +53,7 @@
   let session = { authenticated: false, role: "guest", email: "" };
   let screen = documentObject.body.dataset.screen || "home";
   let globallyEnabled = true;
-  let selectedCompanion = "colt";
+  let selectedCompanion = "robo-colt";
   let reactionTimer = 0;
   let speechTimer = 0;
   let sleepTimer = 0;
@@ -550,7 +550,7 @@
 
   // Pet switching only suspends Colt; his controls and saved preferences stay intact.
   globalObject.addEventListener("launchpad-companion-selected", event => {
-    selectedCompanion = event.detail?.pet === "dumpling" ? "dumpling" : "colt";
+    selectedCompanion = event.detail?.pet === "dumpling" ? "dumpling" : "robo-colt";
     syncVisibility();
     syncPoseVideos(currentState);
   });

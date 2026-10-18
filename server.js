@@ -590,10 +590,15 @@ function coltCustomizationAccountKey(session) {
     : `student:${normalizeEmail(session && session.email)}`;
 }
 
+function normalizeRoboColtPreference(value) {
+  const s=value&&typeof value==='object'?value:{};
+  return {eye:['Red','Blue','Gold'].includes(s.eye)?s.eye:'Red',headwear:s.headwear==='headphones'?'headphones':'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
+}
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
     pet: source.pet === "dumpling" ? "dumpling" : "colt",
+    ...(source.robo ? {robo:normalizeRoboColtPreference(source.robo)} : {}),
     color: ["Galaxy", "Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver", "Rainbow", "USA", "Metallic Gold", "Metallic Blue", "Metallic Green", "Metallic Pink", "Metallic Purple", "Metallic Red"].includes(source.color) ? source.color : "Gold",
     accessory: ["none", "bow", "headphones", "hat", "cap", "crown", "sleepcap"].includes(source.accessory) ? source.accessory : "none",
     eyewear: ['none', 'round', 'sunglasses'].includes(source.eyewear) ? source.eyewear : 'none',
@@ -3885,6 +3890,10 @@ async function handleApi(req, res, pathname) {
     if (!allowed) return true;
     try {
       const input = req.method === "PUT" ? await readBody(req) : null;
+      if(input?.robo!==undefined){
+        const r=input.robo;
+        if(!r||typeof r!=='object'||Array.isArray(r)||!['Red','Blue','Gold'].includes(r.eye)||!['none','headphones'].includes(r.headwear)||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
+      }
       if (input && (!['colt', 'dumpling'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
@@ -3896,7 +3905,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference(input);
+        preferences[key] = normalizeCompanionPreference({...input,robo:input.robo??preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }
