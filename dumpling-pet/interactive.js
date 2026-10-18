@@ -69,9 +69,10 @@ window.createDumplingPet = function(root) {
     b.setAttribute('aria-pressed', String(i === 0));
     b.onclick = () => {
       puppet.querySelector('.tinted-bun').style.filter = filter;
-      puppet.querySelector('.bun-texture').style.filter=name==='Rainbow'?'grayscale(1)':'none';
+      // Smooth only Rainbow's fine glitter texture; keep the face and basket sharp.
+      puppet.querySelector('.bun-texture').style.filter=name==='Rainbow'?'grayscale(1) blur(9px)':'none';
       puppet.querySelector('.rainbow-color').style.display=name==='Rainbow'?'inline':'none';
-      panel.querySelector('h2').textContent = `${name} glitter`;
+      panel.querySelector('h2').textContent = name==='Rainbow'?'Rainbow squishy':`${name} glitter`;
       section.querySelectorAll('.color-choice').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     };
     section.querySelector('.colors').append(b);
