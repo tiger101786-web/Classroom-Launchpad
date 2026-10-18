@@ -61,9 +61,11 @@ async function request(route, cookie='', body, method) {
     const chooseColor=async name=>{
       const pages=panel.locator('.colors').locator('..').locator('.dumpling-option-pages');
       while(await pages.getByRole('button',{name:'Previous'}).isEnabled())await pages.getByRole('button',{name:'Previous'}).click();
-      const button=panel.getByRole('button',{name,exact:true});
+      const button=panel.locator(`.color-choice[data-color="${name}"]`);
       for(let i=0;i<3&&!await button.isVisible();i++)await pages.getByRole('button',{name:'Next'}).click();
       await button.click();
+      const labelFits=await button.evaluate(e=>{const range=document.createRange();range.selectNodeContents(e);const text=range.getBoundingClientRect(),box=e.getBoundingClientRect();return text.top>=box.top+6&&text.bottom<=box.bottom-6&&text.right<=box.right-4;});
+      assert(labelFits,`${name} label needs breathing room within its button`);
     };
     const chooseAccessory=async id=>{
       const options=panel.locator('.accessory-controls'),button=options.locator(`[data-accessory="${id}"]`);
@@ -100,7 +102,7 @@ async function request(route, cookie='', body, method) {
     await pet.click();await panel.waitFor({state:'visible'});
     const landscape=await panel.boundingBox();assert.equal(landscape.width,640);assert.equal(landscape.height,440);
     assert.deepEqual(await panel.locator('.headwear-options button:not([hidden])').allTextContents(),['Bow','Crown','Headphones','None']);
-    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Blue','Gold','Lavender','Matcha','Metallic Blue','Metallic Gold','Metallic Green','Metallic Pink','Metallic Purple','Metallic Red','Rainbow','Rose','Silver','USA']);
+    assert.deepEqual(await panel.locator('.colors button').allTextContents(),['Glitter Blue','Glitter Gold','Glitter Lavender','Glitter Matcha','Glitter Rose','Glitter Silver','Metallic Blue','Metallic Gold','Metallic Green','Metallic Pink','Metallic Purple','Metallic Red','Rainbow','USA']);
     await chooseColor('Gold');
     assert.equal(await panel.locator('.dumpling-option-pages:visible').count(),2,'Only overflowing choices have pages');
     const headPages=panel.locator('.accessory-controls .dumpling-option-pages');
@@ -140,8 +142,17 @@ async function request(route, cookie='', body, method) {
       assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/metallic-gold-front-v1.png');
       assert.equal(await pet.locator('.bun-texture').evaluate(e=>getComputedStyle(e).display),'none');
       await pet.screenshot({path:path.join(repo,'work',`${name.toLowerCase().replaceAll(' ','-')}-${role}.png`)});
+      if(name==='Metallic Purple'){
+        await pet.evaluate(e=>{e.style.width='480px';e.style.height='474px';});
+        await pet.screenshot({path:path.join(repo,'work',`metallic-fit-large-${role}.png`)});
+        await pet.evaluate(e=>{e.style.removeProperty('width');e.style.removeProperty('height');});
+      }
     }
     await panel.screenshot({path:path.join(repo,'work',`metallic-panel-${role}.png`)});
+    await chooseColor('Silver');
+    await pet.evaluate(e=>{e.style.width='480px';e.style.height='474px';});
+    await pet.screenshot({path:path.join(repo,'work',`silver-rim-large-${role}.png`)});
+    await pet.evaluate(e=>{e.style.removeProperty('width');e.style.removeProperty('height');});
     await chooseColor('Rainbow');
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'Rainbow');
@@ -151,8 +162,7 @@ async function request(route, cookie='', body, method) {
     assert.equal(await pet.locator('.rainbow-color').getAttribute('href'),'dumpling-pet/rainbow-smooth-front-v1.png');
     await pet.screenshot({path:path.join(repo,'work',`rainbow-${role}.png`)});
     const colorPages=panel.locator('.colors').locator('..').locator('.dumpling-option-pages');
-    await colorPages.getByRole('button',{name:'Next'}).click();
-    assert.deepEqual(await panel.locator('.colors button:not([hidden])').allTextContents(),['Silver','USA']);
+    assert.deepEqual(await panel.locator('.colors button:not([hidden])').allTextContents(),['Rainbow','USA']);
     await panel.getByRole('button',{name:'USA',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.color,'USA');
@@ -262,7 +272,7 @@ async function request(route, cookie='', body, method) {
     await page.screenshot({path:path.join(repo,'work',`companion-freeform-${role}.png`)});
     await page.evaluate(()=>{document.body.dataset.theme='night';});
     await page.waitForTimeout(300);
-    assert.equal(await panel.getByRole('button',{name:'Gold',exact:true}).evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(39, 35, 40)');
+    assert.equal(await panel.getByRole('button',{name:'Glitter Gold',exact:true}).evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(39, 35, 40)');
     await page.screenshot({path:path.join(repo,'work',`companion-radio-night-${role}.png`)});
     await panel.getByRole('button',{name:'Close dumpling controls',exact:true}).click();
     await openPicker();await page.getByLabel('Choose pet',{exact:true}).selectOption('colt');
@@ -278,8 +288,8 @@ async function request(route, cookie='', body, method) {
     assert.equal(await page.locator('.companion-picker').isVisible(),false);
     const restored=await pet.boundingBox();assert(Math.abs(restored.x-moved.x)<2 && Math.abs(restored.y-moved.y)<2);
     await pet.click();await panel.waitFor({state:'visible'});
-    assert.equal(await panel.getByRole('button',{name:'Blue',exact:true}).getAttribute('aria-pressed'),'true');
-    await panel.getByRole('button',{name:'Blue',exact:true}).press('Escape');
+    assert.equal(await panel.getByRole('button',{name:'Glitter Blue',exact:true}).getAttribute('aria-pressed'),'true');
+    await panel.getByRole('button',{name:'Glitter Blue',exact:true}).press('Escape');
     assert.equal(await panel.isVisible(),false);
     await page.setViewportSize({width:390,height:844});await pet.click();
     assert.equal((await pet.boundingBox()).width,62,'Match compact Colt size');

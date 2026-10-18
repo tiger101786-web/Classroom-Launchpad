@@ -8,7 +8,7 @@ window.createDumplingPet = function(root) {
   puppet.type = 'button';
   puppet.setAttribute('aria-label', 'Squish your dumpling');
   // Complementary masks split the bun from the rigid basket at the rim.
-  const edge = 'M0 0H1254V590H1182C1194 692 1100 812 627 824C154 812 60 692 72 590H0Z';
+  const edge = 'M0 0H1254V590C1254 730 1100 832 627 844C154 832 0 730 0 590Z';
   puppet.innerHTML = `<svg viewBox="0 0 1254 1254" aria-hidden="true"><defs>
     <clipPath id="bun-clip"><path d="${edge}"/></clipPath>
     <filter id="patch-soft"><feGaussianBlur stdDeviation="4"/></filter>
@@ -33,6 +33,8 @@ window.createDumplingPet = function(root) {
       <g class="mouth-sleep" opacity="0"><ellipse cx="637" cy="662" rx="23" ry="29" fill="#191211"/></g>
     </g></g></g>
     <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
+    <!-- A clean basket-colored inner lip covers source-photo color fringes at the cut. -->
+    <path class="basket-inner-lip" d="M44 659C70 749 230 834 627 844C1024 834 1184 749 1210 659" fill="none" stroke="#e4aa6b" stroke-width="8" stroke-linecap="round"/>
     <g class="music-notes" pointer-events="none" font-family="Arial, sans-serif" font-size="140" font-weight="bold" text-anchor="middle" fill="#a81747" stroke="#fff1cf" stroke-width="7" paint-order="stroke">
       <text class="music-note" x="105" y="410">♪</text>
       <text class="music-note" x="1140" y="370" style="animation-delay:-.6s">♫</text>
@@ -70,7 +72,8 @@ window.createDumplingPet = function(root) {
   ];
   colors.forEach(([name, swatch, filter], i) => {
     const b = document.createElement('button');
-    b.className = 'color-choice'; b.textContent = name;
+    b.className = 'color-choice';b.dataset.color=name;
+    b.textContent = ['Gold','Blue','Lavender','Matcha','Rose','Silver'].includes(name)?`Glitter ${name}`:name;
     b.style.setProperty('--swatch', swatch);
     b.setAttribute('aria-pressed', String(i === 0));
     b.onclick = () => {
@@ -81,7 +84,7 @@ window.createDumplingPet = function(root) {
       puppet.querySelector('.bun-texture').style.display=smooth?'none':'inline';
       const texture=puppet.querySelector('.rainbow-color');
       texture.setAttribute('href',metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
-      texture.setAttribute('y',metallic?'-10':'0');texture.setAttribute('height',metallic?'1166':'1254');texture.setAttribute('preserveAspectRatio','none');
+      texture.setAttribute('y',metallic?'-10':'0');texture.setAttribute('height',metallic?'1190':'1254');texture.setAttribute('preserveAspectRatio','none');
       texture.style.display=smooth?'inline':'none';
       const cheeks=puppet.querySelector('.rainbow-cheeks');
       cheeks.style.display=smooth?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');

@@ -167,7 +167,7 @@
   }
   function applyAppearance(){
     applying=true;
-    [...host.querySelectorAll('.color-choice')].find(b=>b.textContent===preferences.color)?.click();
+    [...host.querySelectorAll('.color-choice')].find(b=>b.dataset.color===preferences.color)?.click();
     [...host.querySelectorAll('.accessory-controls button')].find(b=>b.dataset.accessory===preferences.accessory)?.click();
     pet.setAttribute('aria-label','Open Squishy Dumpling controls. Drag to move.');
     applying=false;sync();
@@ -200,7 +200,7 @@
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
     if(applying||!event.target.closest('.color-choice,.accessory-controls button[data-accessory],.eyewear-controls button,#idle'))return;
-    preferences.color=host.querySelector('.color-choice[aria-pressed=true]').textContent;
+    preferences.color=host.querySelector('.color-choice[aria-pressed=true]').dataset.color;
     preferences.accessory=host.querySelector('.accessory-controls [aria-pressed=true]').dataset.accessory;
     preferences.eyewear=host.querySelector('.eyewear-controls [aria-pressed=true]').dataset.eyewear;
     preferences.motion=pet.classList.contains('idle');

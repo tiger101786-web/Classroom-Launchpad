@@ -91,7 +91,7 @@ body[data-theme="night"] .companion-picker select,body[data-theme="night"] .comp
 .dumpling-companion .dumpling-group legend{font-size:11px;font-weight:bold;letter-spacing:.4px;padding:0 7px;color:var(--ink,#222)}
 .dumpling-companion .dumpling-group .controls{margin-top:2px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .dumpling-companion .dumpling-group .colors{grid-template-columns:repeat(3,minmax(0,1fr))}
-.dumpling-companion .dumpling-group .colors{min-height:81px}
+.dumpling-companion .dumpling-group .colors{min-height:103px}
 .dumpling-companion .dumpling-group .color-choice{display:grid;grid-template-columns:13px minmax(0,1fr);align-items:center;gap:6px;text-align:left;padding:7px 6px}
 .dumpling-companion .dumpling-group .color-choice:before{display:block;box-sizing:border-box;margin:0;vertical-align:baseline}
 .dumpling-companion .dumpling-group button{font-size:12px;min-height:37px;padding:7px 4px;transition:background .15s,border-color .15s;box-shadow:0 2px 4px #0001}
@@ -110,11 +110,12 @@ body[data-theme="night"] .dumpling-companion .dumpling-group button:not([aria-pr
 .dumpling-companion .dumpling-panel-body::-webkit-scrollbar-track{background:#8882}
 .dumpling-companion .dumpling-panel-body::-webkit-scrollbar-thumb{background:#aa4265;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
 .dumpling-companion .dumpling-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
-.dumpling-companion .dumpling-group .controls{grid-auto-rows:37px;align-content:start}
+.dumpling-companion .dumpling-group .controls{grid-auto-rows:48px;align-content:start}
+.dumpling-companion .dumpling-group .color-choice{line-height:15px;padding:8px 6px}
 .dumpling-companion .dumpling-group .controls button{height:100%;box-sizing:border-box}
 .dumpling-companion .dumpling-group-hint,.dumpling-companion .dumpling-group .accessory-hint,.dumpling-companion .dumpling-group .motion-status{margin:8px 0 0;min-height:16px;font-size:11px!important;line-height:16px;opacity:.75}
 .dumpling-companion .dumpling-rest-group{grid-column:1/-1}
-.dumpling-companion .dumpling-group .headwear-options{height:81px;align-content:start}
+.dumpling-companion .dumpling-group .headwear-options{height:103px;align-content:start}
 .dumpling-companion .dumpling-group [hidden]{display:none!important}
 .dumpling-companion .dumpling-option-pages{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 0;height:24px}
 .dumpling-companion .dumpling-option-pages button{height:24px;min-height:24px;padding:2px 8px;font-size:11px;box-shadow:none}
