@@ -21,12 +21,13 @@ window.addDumplingAccessories = function(root) {
   const artwork = {
     none: '',
     cap: `<g filter="url(#accessory-shadow)">
-      <path d="M350 240Q365 72 627 65Q889 72 904 240Q627 300 350 240Z" fill="url(#headset)" stroke="#45091f" stroke-width="7"/>
-      <path d="M627 69Q555 144 555 253M627 69Q699 144 699 253" fill="none" stroke="#d47d99" stroke-width="4" opacity=".65"/>
+      <path d="M350 300Q365 72 627 65Q889 72 904 300Q627 360 350 300Z" fill="url(#headset)" stroke="#45091f" stroke-width="7"/>
+      <path d="M520 90Q627 55 734 90Q759 144 759 300Q627 322 495 300Q495 144 520 90Z" fill="#fffaf3"/>
+      <path d="M520 90Q495 144 495 300M734 90Q759 144 759 300" fill="none" stroke="#d47d99" stroke-width="4" opacity=".65"/>
       <ellipse cx="627" cy="68" rx="24" ry="12" fill="#710d30"/>
-      <path d="M353 236Q627 194 901 236L959 279Q627 359 295 279Z" fill="#690d2c" stroke="#3b091b" stroke-width="7"/>
-      <path d="M325 280Q627 345 929 280" fill="none" stroke="#e8dce1" stroke-width="6"/>
-      <image href="assets/st-cletus-crest.png" x="576" y="116" width="102" height="104" preserveAspectRatio="xMidYMid meet"/>
+      <path d="M353 296Q627 254 901 296L959 339Q627 419 295 339Z" fill="#690d2c" stroke="#3b091b" stroke-width="7"/>
+      <path d="M325 340Q627 405 929 340" fill="none" stroke="#e8dce1" stroke-width="6"/>
+      <image href="assets/st-cletus-crest.png" x="527" y="87" width="200" height="204" preserveAspectRatio="xMidYMid meet"/>
     </g>`,
     crown: `<g transform="translate(627 180)" filter="url(#accessory-shadow)">
       <path d="M-190 27-220-101-107-34 0-139 107-34 220-101 190 27Z" fill="#f7cd55" stroke="#996017" stroke-width="7" stroke-linejoin="round"/>
@@ -90,8 +91,8 @@ window.addDumplingAccessories = function(root) {
   eyewear.setAttribute('role','group');eyewear.setAttribute('aria-label','Choose eyewear');control.after(eyewear);
   const frames={
     none:'',
-    round:`<g fill="none" stroke="#492333" stroke-width="12"><circle cx="487" cy="582" r="74"/><circle cx="767" cy="582" r="74"/><path d="M561 577Q627 548 693 577M413 561 368 540M841 561 886 540"/></g><g fill="none" stroke="#fff4df" stroke-width="5" opacity=".8"><path d="M438 563Q445 531 474 527M718 563Q725 531 754 527"/></g>`,
-    sunglasses:`<g stroke="#221924" stroke-width="12" stroke-linejoin="round"><path d="M400 533H568L552 615Q487 656 420 613Z" fill="#302d43"/><path d="M686 533H854L834 613Q767 656 702 615Z" fill="#302d43"/><path d="M568 551Q627 530 686 551M400 548 363 529M854 548 891 529" fill="none"/></g><path d="m431 551 67 0-52 53M719 551h67l-52 53" fill="#b3c7de" opacity=".35"/>`
+    round:`<g fill="none" stroke="#492333" stroke-width="12" stroke-linecap="round"><path class="glasses-arms" d="M413 561Q300 505 180 480Q166 483 170 509M841 561Q954 505 1074 480Q1088 483 1084 509"/><circle cx="487" cy="582" r="74"/><circle cx="767" cy="582" r="74"/><path d="M561 577Q627 548 693 577"/></g><g fill="none" stroke="#fff4df" stroke-width="5" opacity=".8"><path d="M438 563Q445 531 474 527M718 563Q725 531 754 527"/></g>`,
+    sunglasses:`<g stroke="#221924" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"><path class="glasses-arms" d="M400 548Q290 502 180 480Q166 483 170 509M854 548Q964 502 1074 480Q1088 483 1084 509" fill="none" stroke-width="18"/><path d="M400 533H568L552 615Q487 656 420 613Z" fill="#302d43"/><path d="M686 533H854L834 613Q767 656 702 615Z" fill="#302d43"/><path d="M568 551Q627 530 686 551" fill="none"/></g><path d="m431 551 67 0-52 53M719 551h67l-52 53" fill="#b3c7de" opacity=".35"/>`
   };
   function setEyewear(id){eyewearLayer.innerHTML=frames[id]||'';puppet.dataset.eyewear=id;eyewear.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.eyewear===id)));}
   Object.entries({none:'No glasses',round:'Round glasses',sunglasses:'Sunglasses'}).forEach(([id,label])=>{
