@@ -11,6 +11,10 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
  for(const skin of await page.evaluate(()=>Object.keys(roboColtSkins))){
   await page.evaluate(s=>showSkin(s),skin);await page.waitForTimeout(150);
   assert.equal(await pet.getAttribute('data-skin'),skin);
+  const art=await page.evaluate(s=>roboColtSkins[s].artwork,skin);
+  const partImages=pet.locator('#rc-puppet image');
+  assert((await partImages.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===(art||'robo-colt/parts-v1.png')));
+  if(art)assert.equal(await partImages.evaluateAll(es=>es.some(e=>e.hasAttribute('filter'))),false,'Approved artwork must not be recolored');
   assert.deepEqual(await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')])),original);
   assert.equal(await pet.locator('#rc-headphones [filter]').count(),0);
   assert.equal(await pet.locator('#rc-ear-left #rc-earphone-left').count(),1);
@@ -24,5 +28,7 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
   else assert.notDeepEqual(pixels,armorPixels,skin+' has its own armor finish');
   if(['Emerald','Galaxy'].includes(skin))assert.equal(await page.evaluate(s=>Boolean(roboColtSkins[s].glitter),skin),false);
  }
- console.log('PASS: all skins render with unchanged geometry and independent accessories.');
+ await page.evaluate(()=>showSkin('Original'));
+ assert((await pet.locator('#rc-puppet image').evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h==='robo-colt/parts-v1.png'));
+ console.log('PASS: all skins render with unchanged geometry, approved artwork switching, and independent accessories.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

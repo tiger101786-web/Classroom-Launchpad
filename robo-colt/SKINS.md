@@ -10,9 +10,12 @@ Frostfire uses side-specific filters for separate limbs so its split colors
 do not depend on where those limbs were packed in the original image atlas.
 
 Refined finishes: Candy Chrome uses clean raspberry enamel without aqua stripes;
-Copper Circuit uses sparse traces; Obsidian Ember uses larger volcanic plates
-and layered orange/yellow lava seams; Porcelain uses a compressed cream-white
-shading range and larger cobalt scallop motifs inspired by the supplied vase.
+Copper Circuit uses sparse traces. Porcelain and Obsidian Ember now use the
+user-approved custom parts atlases (`parts-porcelain-v1.png` and
+`parts-obsidian-v1.png`). These are rendered without recoloring or pattern filters;
+their platforms retain the clean complementary finishes from the approved preview.
+Switching to another skin restores the original atlas. Existing animation crops,
+eye/mouth layers, and accessory attachment points are unchanged.
 
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.

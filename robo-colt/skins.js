@@ -14,8 +14,8 @@ window.roboColtSkins = {
  'Desert Relic':{accent:'#62d6cf',light:'#e1fff4',dark:'#267b7b',tint:[.13,.63,.58],armor:[1.65,1.35,.88],armorLift:[.16,.12,.065],texture:'sand',pattern:'runes',description:'Warm sandstone armor, carved markings, and turquoise accents.'},
  Frostfire:{accent:'#8cecff',light:'#efffff',dark:'#267c9e',tint:[.15,.7,1],armor:[.88,.98,1.12],pattern:'frostfire',description:'Dark steel with icy-blue and ember-orange split accents.'},
  Moonstone:{accent:'#b6d5ff',light:'#fff5ec',dark:'#686c9c',tint:[.63,.73,.95],armor:[1.35,1.42,1.58],armorLift:[.04,.04,.06],pattern:'moonstone',description:'Smoky silver and milky blue-peach opalescent accents.'},
- 'Obsidian Ember':{accent:'#ff9a45',light:'#fff0c1',dark:'#a23113',tint:[.85,.24,.025],armor:[.53,.49,.49],texture:'stone',pattern:'cracks',description:'Dark volcanic rock with sparse, glowing molten lava seams.'},
- Porcelain:{accent:'#5997f0',light:'#eef7ff',dark:'#193d8c',tint:[.06,.19,.55],armor:[.92,.92,.9],armorLift:[.55,.55,.5],pattern:'porcelain',description:'Cream-white glazed porcelain with spacious cobalt scallop motifs.'},
+ 'Obsidian Ember':{accent:'#ff9a45',light:'#fff0c1',dark:'#a23113',tint:[.85,.24,.025],armor:[.53,.49,.49],artwork:'robo-colt/parts-obsidian-v1.png',description:'Custom volcanic-stone artwork with glowing ember fissures.'},
+ Porcelain:{accent:'#5997f0',light:'#eef7ff',dark:'#193d8c',tint:[.06,.19,.55],armor:[.92,.92,.9],armorLift:[.55,.55,.5],artwork:'robo-colt/parts-porcelain-v1.png',description:'Custom glazed porcelain artwork with hand-painted cobalt florals.'},
  'Rose Quartz':{accent:'#f0a5c4',light:'#fff0f8',dark:'#a45e82',tint:[.95,.48,.68],armor:[1.5,1.44,1.5],armorLift:[.08,.07,.085],pattern:'quartz',description:'Pearl-gray plates with rose-pink crystal veins.'},
  'Woodland Guardian':{accent:'#b5ca79',light:'#f2ffcf',dark:'#4e682e',tint:[.38,.54,.16],armor:[1.22,.78,.43],armorLift:[.035,.015,0],texture:'wood',pattern:'wood',description:'Walnut-grain armor with moss-green and bronze details.'}
 };
@@ -76,6 +76,10 @@ window.createRoboColtSkinPainter = function(pet){
   const skin=window.roboColtSkins[name]||window.roboColtSkins.Original;
   if(last===skin)return skin;last=skin;
   layers.forEach(e=>{
+   if(!e.closest('#rc-platform')){
+    e.setAttribute('href',skin.artwork||'robo-colt/parts-v1.png');
+    if(skin.artwork){e.removeAttribute('filter');return;}
+   }
    let filterId=skin.filterId;
    if(name==='Frostfire'){
     if(e.closest('#rc-leg-left,#rc-rear-left,#rc-ear-left'))filterId+='-ice';
