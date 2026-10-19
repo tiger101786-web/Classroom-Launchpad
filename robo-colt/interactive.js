@@ -104,7 +104,7 @@ function group(title,choices,key,pageSize=4){
  pages.push(()=>{const at=buttons.findIndex(b=>b.dataset.option===String(prefs[key]));if(at>=0)page=Math.floor(at/pageSize);render()});render();
  panel.querySelector('.dumpling-sections').append(field);return field;
 }
-group('01 · Choose your skin',Object.keys(window.roboColtSkins).map(name=>[name,name]),'skin');
+group('01 · Choose your skin',['Original',...Object.keys(window.roboColtSkins).filter(name=>name!=='Original').sort((a,b)=>a.localeCompare(b))].map(name=>[name,name]),'skin');
 group('02 · Dress it up',[['none','None'],['headphones','Headphones']],'headwear');
 const play=group('03 · Play together',[['blink','Blink'],['bounce','Bounce'],['ears','Ear twitch'],['greet','Excited greeting'],['happy','Happy smile'],['hoof','Hoof lift'],['mouth','Mouth movement'],['tail','Tail wag']],'action');
 const motionStatus=document.createElement('p');motionStatus.className='motion-status';motionStatus.textContent='Try a move together.';play.append(motionStatus);

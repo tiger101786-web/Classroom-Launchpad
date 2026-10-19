@@ -7,7 +7,7 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
  const pet=page.locator('.robo-companion .pet-button');
  const original=await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')]));
  let armorPixels;
- for(const skin of ['Original','Arctic','Emerald','Galaxy','Royal','School Spirit']){
+ for(const skin of await page.evaluate(()=>Object.keys(roboColtSkins))){
   await page.evaluate(s=>showSkin(s),skin);await page.waitForTimeout(150);
   assert.equal(await pet.getAttribute('data-skin'),skin);
   assert.deepEqual(await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')])),original);
@@ -23,5 +23,5 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
   else assert.notDeepEqual(pixels,armorPixels,skin+' has its own armor finish');
   if(['Emerald','Galaxy'].includes(skin))assert.equal(await page.evaluate(s=>Boolean(roboColtSkins[s].glitter),skin),false);
  }
- console.log('PASS: all six skins render with unchanged geometry and independent accessories.');
+ console.log('PASS: all skins render with unchanged geometry and independent accessories.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

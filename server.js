@@ -590,9 +590,10 @@ function coltCustomizationAccountKey(session) {
     : `student:${normalizeEmail(session && session.email)}`;
 }
 
+const ROBO_COLT_SKINS=['Original','Arctic','Emerald','Galaxy','Royal','School Spirit','Ancient Bronze','Candy Chrome','Carbon Racer','Copper Circuit','Deep Sea','Desert Relic','Frostfire','Moonstone','Obsidian Ember','Porcelain','Rose Quartz','Woodland Guardian'];
 function normalizeRoboColtPreference(value) {
   const s=value&&typeof value==='object'?value:{};
-  return {skin:['Original','Arctic','Emerald','Galaxy','Royal','School Spirit'].includes(s.skin)?s.skin:'Original',headwear:s.headwear==='headphones'?'headphones':'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
+  return {skin:ROBO_COLT_SKINS.includes(s.skin)?s.skin:'Original',headwear:s.headwear==='headphones'?'headphones':'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
 }
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
@@ -3892,7 +3893,7 @@ async function handleApi(req, res, pathname) {
       const input = req.method === "PUT" ? await readBody(req) : null;
       if(input?.robo!==undefined){
         const r=input.robo;
-        if(!r||typeof r!=='object'||Array.isArray(r)||(r.skin!==undefined?!['Original','Arctic','Emerald','Galaxy','Royal','School Spirit'].includes(r.skin):!['Red','Blue','Gold'].includes(r.eye))||!['none','headphones'].includes(r.headwear)||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
+        if(!r||typeof r!=='object'||Array.isArray(r)||(r.skin!==undefined?!ROBO_COLT_SKINS.includes(r.skin):!['Red','Blue','Gold'].includes(r.eye))||!['none','headphones'].includes(r.headwear)||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
       }
       if (input && (!['colt', 'dumpling'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)

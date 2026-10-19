@@ -1,8 +1,13 @@
 # Colt skins
 
-The customization panel replaces the independent eye-glow selector with Original,
-Arctic, Emerald, Galaxy, Royal, and School Spirit. Four choices per page keep the
+The customization panel includes 18 skins. Four choices per page keep the
 existing panel dimensions. Original comes first, followed by alphabetical names.
+The expanded collection adds Ancient Bronze, Candy Chrome, Carbon Racer,
+Copper Circuit, Deep Sea, Desert Relic, Frostfire, Moonstone, Obsidian Ember,
+Porcelain, Rose Quartz, and Woodland Guardian. Each includes its own eye glow.
+Code-native SVG patterns and procedural textures are clipped to source alpha.
+Frostfire uses side-specific filters for separate limbs so its split colors
+do not depend on where those limbs were packed in the original image atlas.
 
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.
