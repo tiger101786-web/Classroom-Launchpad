@@ -21,23 +21,28 @@ function status(s){const label=panel.querySelector('.motion-status');if(label)la
 const animations=new Set();
 function animate(el,frames,opts={}){const a=el.animate(frames,{duration:650,easing:'ease-in-out',...opts});animations.add(a);a.finished.catch(()=>{}).finally(()=>animations.delete(a));return a}
 function stop(){sequence++;for(const a of animations)a.cancel();animations.clear();pet.classList.remove('happy','talking');busy=false}
-function blink(){if(sleeping)return;pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:240}))}
-function cancelWake(){clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking','wake-smile')}
+function blink(){if(sleeping||waking)return;pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:600}))}
+function cancelWake(){clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking','wake-smile');pet.querySelectorAll('.eye').forEach(e=>e.style.removeProperty('transform'))}
 function wakeUp(){
  stop();dancing=false;pet.classList.remove('dancing');cancelWake();
  if(!idle)return;
  waking=true;pet.classList.add('waking');
  // Open gradually, pause to focus, then blink before the final smile.
- pet.querySelectorAll('.eye').forEach(e=>animate(e,[
+ pet.querySelectorAll('.eye').forEach(e=>{
+  // Hold closed immediately, including the frame before the animation starts.
+  e.style.transform='scaleY(.04)';
+  const opening=animate(e,[
   {transform:'scaleY(.04)',offset:0,easing:'ease-in-out'},
   {transform:'scaleY(1)',offset:.5},{transform:'scaleY(1)',offset:.65,easing:'ease-in-out'},
   {transform:'scaleY(.04)',offset:.77,easing:'ease-in-out'},{transform:'scaleY(1)',offset:.9},
   {transform:'scaleY(1)',offset:1}
- ],{duration:3000,easing:'linear'}));
+ ],{duration:4000,easing:'linear',fill:'backwards'});
+  opening.finished.then(()=>e.style.removeProperty('transform')).catch(()=>{});
+ });
  wakeTimer=setTimeout(()=>{
   pet.classList.add('wake-smile');
   wakeTimer=setTimeout(()=>{cancelWake();sync();say('Recharged and ready!')},1000);
- },3000);
+ },4000);
 }
 function tail(){animate($('#tail'),[{transform:'rotate(0deg) skewY(0deg)',offset:0},{transform:'rotate(-18deg) skewY(-5deg)',offset:.17},{transform:'rotate(17deg) skewY(4deg)',offset:.38},{transform:'rotate(-12deg) skewY(-3deg)',offset:.59},{transform:'rotate(8deg) skewY(2deg)',offset:.78},{transform:'rotate(-3deg)',offset:.91},{transform:'rotate(0deg) skewY(0deg)',offset:1}],{duration:1700})}
 function hoof(){
@@ -122,6 +127,8 @@ function sync(){
  const wasSleeping=sleeping;
  host.hidden=!visible||hiddenByUser;host.dataset.size=prefs.size;idle=!host.hidden&&prefs.motion&&!reduced.matches&&!document.hidden;
  sleeping=prefs.asleep||autoAsleep;phones=prefs.headwear==='headphones';
+ // Start waking before radio/visibility updates can expose fully open eyes.
+ if(wasSleeping&&!sleeping&&!host.hidden)wakeUp();
  if(sleeping)speech.hidden=true;
  const shouldDance=radio&&!sleeping&&!waking&&!host.hidden;
  if(sleeping||host.hidden||!idle){cancelWake();stop();dancing=false;}
@@ -138,7 +145,6 @@ function sync(){
  panel.querySelectorAll('[data-setting]').forEach(b=>{if(b.dataset.setting!=='action')b.setAttribute('aria-pressed',String(String(prefs[b.dataset.setting])===b.dataset.option))});
  panel.querySelector('.dumpling-radio-status').textContent=sleeping?'☾ Sleeping · Click Colt to wake':radio?'♫ Colt Radio · Headphones on · '+(idle?'Let’s dance!':'Motion paused'):'♫ Radio ready · Headphones appear when music plays';
  if(host.hidden){close();speech.hidden=true;clearTimeout(napTimer);clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking')}
- if(wasSleeping&&!sleeping&&!host.hidden)wakeUp();
  place();
 }
 function touch(){clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;sync()}if(!host.hidden&&!prefs.asleep&&!radio)napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!radio){autoAsleep=true;sync()}else touch()},60000)}
