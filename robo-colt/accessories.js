@@ -1,8 +1,8 @@
 // Production artwork is used directly, without skin filters or vector redraws.
 window.createRoboColtAccessories=function(pet){
  const ns='http://www.w3.org/2000/svg',head=pet.querySelector('#rc-head');
- const fit={horn:[271,-40,192,222],sleepcap:[194,10,440,263],sunglasses:[198,186,338,169],scarf:[230,405,336,156],bowtie:[280,423,174,94]};
- function image(name,box){const art=document.createElementNS(ns,'image');art.setAttribute('href','robo-colt/accessory-'+name+(['sleepcap','scarf'].includes(name)?'-v3.png':'-v2.png'));art.setAttribute('preserveAspectRatio','none');for(const [i,k] of ['x','y','width','height'].entries())art.setAttribute(k,box[i]);return art;}
+ const fit={horn:[297,-65,140,242],sleepcap:[194,10,440,263],sunglasses:[198,186,338,169],scarf:[230,405,336,156],bowtie:[280,423,174,94]};
+ function image(name,box){const art=document.createElementNS(ns,'image');art.setAttribute('href','robo-colt/accessory-'+name+(['horn','sleepcap','scarf'].includes(name)?'-v3.png':'-v2.png'));art.setAttribute('preserveAspectRatio','none');for(const [i,k] of ['x','y','width','height'].entries())art.setAttribute(k,box[i]);return art;}
  const nodes={};
  // Neckwear, including its hanging end, sits in front of the forelegs.
  const puppet=pet.querySelector('#rc-puppet');

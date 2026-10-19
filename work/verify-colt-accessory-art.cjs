@@ -13,7 +13,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
    const bounds=await page.locator('.pet-button').boundingBox();
    await page.screenshot({path:path.join(out,name+'.png'),clip:{x:bounds.x,y:bounds.y-32,width:bounds.width,height:bounds.height+32}});
    const id=name==='headphones'?'#rc-headphones':'#rc-accessory-'+name;
-   assert.equal(await page.locator(id+' image').first().getAttribute('href'),'robo-colt/accessory-'+name+(['scarf','sleepcap'].includes(name)?'-v3.png':'-v2.png'));
+   assert.equal(await page.locator(id+' image').first().getAttribute('href'),'robo-colt/accessory-'+name+(['horn','scarf','sleepcap'].includes(name)?'-v3.png':'-v2.png'));
    if(name==='scarf')assert.equal(await page.locator(id).getAttribute('clip-path'),null,'Full scarf must remain visible');
    assert.equal(await page.locator('#rc-audio-rear-band').evaluate(e=>getComputedStyle(e).display),name==='headphones'?'inline':'none');
    assert.equal(await page.locator('#rc-audio-forelock').getAttribute('mask'),null,'Forelock must not inherit ear-removal mask');

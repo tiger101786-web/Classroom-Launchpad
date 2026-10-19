@@ -1,18 +1,18 @@
 # Colt accessories
 
-Headwear: headphones, a spiral metallic unicorn horn, or a burgundy star sleep cap.
+Headwear: headphones, an upright pastel-rainbow spiral unicorn horn, or a burgundy star sleep cap.
 Eyewear: fitted burgundy/silver sunglasses with lenses, reflections, and side arms.
 Neckwear: a striped school-color scarf with fringe, or a layered jeweled bow tie.
 
 Categories save independently under `robo.headwear`, `robo.eyewear`, and
 `robo.neckwear`. Older preferences default the new categories to none; old-client
 saves preserve existing eyewear/neckwear. All six accessories use the production
-transparent PNG artwork in `accessory-*-v2.png` (cap/scarf: `v3`) directly, placed by SVG image layers
+transparent PNG artwork in `accessory-*-v2.png` (horn/cap/scarf: `v3`) directly, placed by SVG image layers
 attached to the head rig, outside all skin filters. The final headband is a continuous
 shaded SVG arch; the detailed cups and other accessories retain their raster artwork.
 The headset follows the head rather than separating when ears twitch. Its original
-cup artwork is independently positioned and angled to fit the ears. The larger horn
-exposes its crystal and jeweled base. The cap has no ear holes. The larger front-view
+cup artwork is independently positioned and angled to fit the ears. The upright horn
+uses softly shaded rainbow spiral artwork without a jeweled base. The cap has no ear holes. The larger front-view
 scarf has no clipping mask, preserving its full striped wrap, tail, and fringe.
 V4 fits the cups lower and outside the ears against the supplied front-fit reference;
 the band is a separate layer in front of the ears. The horn base sits 40 atlas
@@ -58,3 +58,15 @@ V3 built-in image edit prompts: close both cap ear holes with continuous matchin
 velvet, preserving cuff/embroidery/pompom; change scarf to straight front neck-level
 view without a hollow rear ring, preserving both stripes, knot, tail and all fringe.
 Both edited files retain transparency and are used directly in the renderer.
+
+V11 rainbow horn: `accessory-horn-v3.png` replaces the crystal horn directly,
+with placement `[297,-65,140,242]`. Generated using the built-in image tool from
+`noFilter.webp`; no approximation or recoloring is applied in the renderer.
+Generation prompt: Create the actual transparent PNG accessory sprite for a pet game.
+Use the reference's soft pastel rainbow spiral unicorn horn style and rounded raised
+bands, but stand perfectly vertically upright, tip centered above base. Single horn,
+no horse, head, jewelry, or mount. Smooth softly shaded 3D satin finish, chunky bands
+from golden-yellow tip through peach, pink, lavender/purple, blue, turquoise, green,
+yellow and coral-pink base. Portrait framing, full horn with small transparent margins,
+about 2.8 times as tall as its base width. Front view, horizontal rounded base.
+Genuine transparency; no shadow plane, checkerboard, text, crystal, or metal.
