@@ -1,17 +1,29 @@
-// Vector accessories sit outside the skin filters and follow the head rig.
+// Production artwork is used directly, without skin filters or vector redraws.
 window.createRoboColtAccessories=function(pet){
- const ns='http://www.w3.org/2000/svg',defs=pet.querySelector('defs'),head=pet.querySelector('#rc-head');
- const materials=document.createElementNS(ns,'g');
- materials.innerHTML='<linearGradient id="rc-acc-satin" x2=".7" y2="1"><stop stop-color="#ee799f"/><stop offset=".35" stop-color="#9c1647"/><stop offset="1" stop-color="#480d28"/></linearGradient><linearGradient id="rc-acc-silver" x2=".8" y2="1"><stop stop-color="#fffbea"/><stop offset=".4" stop-color="#aaa9bf"/><stop offset=".65" stop-color="#fff"/><stop offset="1" stop-color="#65667d"/></linearGradient><linearGradient id="rc-acc-glass" x2=".5" y2="1"><stop stop-color="#1e1233"/><stop offset=".5" stop-color="#54335e"/><stop offset="1" stop-color="#09121e"/></linearGradient><linearGradient id="rc-acc-horn" x2="1" y2="0"><stop stop-color="#7b5e97"/><stop offset=".35" stop-color="#fff1c7"/><stop offset=".55" stop-color="#fffdf4"/><stop offset="1" stop-color="#a27aa8"/></linearGradient>';
- defs.append(materials);
- const designs={
- sunglasses:'<path d="M246 265L185 233L176 256M486 265L547 233L557 256" fill="none" stroke="#181522" stroke-width="12" stroke-linecap="round"/><path d="M245 263L185 233M487 263L547 233" fill="none" stroke="#c5b6cc" stroke-width="3"/><path d="M319 271Q367 247 415 271" fill="none" stroke="#211725" stroke-width="10"/><path d="M230 250Q271 235 323 252L315 294Q276 326 241 299Z M411 252Q460 235 501 250L490 299Q456 326 419 294Z" fill="url(#rc-acc-glass)" stroke="url(#rc-acc-silver)" stroke-width="7"/><path d="M246 257L266 252L301 290L280 299Z M426 256L441 251L475 291L460 301Z" fill="#e0d4f5" opacity=".22"/><path d="M236 250Q277 237 323 252M411 252Q454 237 496 250" fill="none" stroke="#aa2554" stroke-width="8"/><circle cx="237" cy="259" r="4" fill="#f5db98"/><circle cx="494" cy="259" r="4" fill="#f5db98"/>',
- horn:'<ellipse cx="367" cy="118" rx="38" ry="13" fill="#211624" opacity=".4"/><path d="M337 112Q348 35 367-42Q387 35 397 112Q370 130 337 112Z" fill="url(#rc-acc-horn)" stroke="#65516f" stroke-width="3"/><path d="M344 79Q373 98 392 85M350 49Q369 66 385 60M357 20Q371 34 379 30M362-5L373 6" fill="none" stroke="#a67d53" stroke-width="5"/><ellipse cx="367" cy="115" rx="32" ry="10" fill="url(#rc-acc-silver)" stroke="#725870" stroke-width="3"/><path d="M367 103L376 115L367 127L358 115Z" fill="#a81747" stroke="#f1cf86" stroke-width="2"/>',
- sleepcap:'<path d="M264 78Q302-15 407 14Q493 20 523 68Q551 112 568 124Q531 148 510 118Q487 74 427 83L420 121Z" fill="url(#rc-acc-satin)" stroke="#4a1731" stroke-width="4"/><path d="M293 62Q330 12 414 32M439 43Q493 48 517 83" fill="none" stroke="#f58db0" stroke-width="4" opacity=".4"/><g fill="#f6e3b3"><path d="M345 26L350 38L363 39L353 47L357 60L345 53L334 60L338 47L328 39L341 38Z"/><path d="M408 48L412 57L422 58L414 65L417 75L408 70L399 75L402 65L394 58L404 57Z"/><path d="M478 56L481 63L490 65L483 70L485 78L478 74L471 78L473 70L467 65L475 63Z"/></g><path d="M263 77Q338 65 427 91L420 120Q338 96 260 109Z" fill="url(#rc-acc-silver)" stroke="#777184" stroke-width="3"/><path d="M272 98Q337 87 414 109" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/><circle cx="565" cy="130" r="24" fill="url(#rc-acc-silver)" stroke="#85798e" stroke-width="3"/><path d="M550 121L557 113M574 142L580 135" stroke="#fff" stroke-width="3"/>',
- scarf:'<path d="M300 425Q367 449 438 425L444 453Q369 482 294 451Z" fill="url(#rc-acc-satin)" stroke="#4c1730" stroke-width="4"/><path d="M404 451L447 452L468 549L447 565L422 551Z" fill="url(#rc-acc-satin)" stroke="#4c1730" stroke-width="4"/><path d="M426 490L456 484M431 514L461 508M304 441Q362 462 428 442" stroke="url(#rc-acc-silver)" stroke-width="9" fill="none"/><path d="M429 548L433 562M439 553L443 569M450 554L454 566M460 547L464 559" stroke="#d9c9d9" stroke-width="4"/><path d="M407 442Q428 432 445 447L436 472Q416 475 402 460Z" fill="url(#rc-acc-satin)" stroke="#6a1638" stroke-width="3"/><path d="M417 447L434 452" stroke="#f295b1" stroke-width="3"/>',
- bowtie:'<path d="M360 447Q319 417 296 426L299 482Q328 487 361 459M374 447Q415 417 438 426L435 482Q406 487 373 459" fill="url(#rc-acc-satin)" stroke="#4a142c" stroke-width="4"/><path d="M306 434L350 450L308 473M428 434L384 450L426 473" fill="none" stroke="#ed89ab" stroke-width="3" opacity=".6"/><path d="M358 460L344 495L362 490L373 497L378 460" fill="#741137"/><rect x="354" y="438" width="27" height="32" rx="8" fill="url(#rc-acc-satin)" stroke="#d1b9c9" stroke-width="3"/><path d="M367 444L374 453L367 462L360 453Z" fill="#f1d494"/>'
- };
- const nodes={};for(const [name,art] of Object.entries(designs)){const g=document.createElementNS(ns,'g');g.id='rc-accessory-'+name;g.setAttribute('pointer-events','none');g.innerHTML=art;g.style.display='none';head.append(g);nodes[name]=g;}
- nodes.horn.setAttribute('transform','translate(0 40) scale(1 .65)');
- return prefs=>{const phones=pet.classList.contains('wear-phones');for(const [name,g] of Object.entries(nodes))g.style.display=(name==='sunglasses'?prefs.eyewear===name:['scarf','bowtie'].includes(name)?prefs.neckwear===name:prefs.headwear===name&&!phones)?'inline':'none';};
+ const ns='http://www.w3.org/2000/svg',head=pet.querySelector('#rc-head');
+ const fit={horn:[271,-40,192,222],sleepcap:[194,10,440,263],sunglasses:[198,186,338,169],scarf:[230,388,336,156],bowtie:[280,423,174,94]};
+ function image(name,box){const art=document.createElementNS(ns,'image');art.setAttribute('href','robo-colt/accessory-'+name+(['sleepcap','scarf'].includes(name)?'-v3.png':'-v2.png'));art.setAttribute('preserveAspectRatio','none');for(const [i,k] of ['x','y','width','height'].entries())art.setAttribute(k,box[i]);return art;}
+ const nodes={};
+ // Neckwear, including its hanging end, sits in front of the forelegs.
+ const puppet=pet.querySelector('#rc-puppet');
+ puppet.insertBefore(pet.querySelector('#rc-leg-left'),head);puppet.insertBefore(pet.querySelector('#rc-leg-right'),head);
+ for(const [name,box] of Object.entries(fit)){
+  const g=document.createElementNS(ns,'g');g.id='rc-accessory-'+name;g.setAttribute('pointer-events','none');g.append(image(name,box));g.style.display='none';head.append(g);nodes[name]=g;
+ }
+ // A complete headset follows the head rather than individual ear twitches.
+ pet.querySelectorAll('.colt-earphone').forEach(e=>e.remove());
+ const headset=pet.querySelector('#rc-headphones');headset.replaceChildren();
+ const rearBand=document.createElementNS(ns,'g');rearBand.id='rc-audio-rear-band';rearBand.setAttribute('pointer-events','none');head.prepend(rearBand);
+ // Reposition the original artwork's cups, without repainting their details.
+ for(const [part,rect,transform] of [
+  ['band',[85,10,564,99],''],
+  ['left',[85,104,204,180],'translate(0 14) rotate(10 194 188) translate(42 0) scale(.75 1)'],
+  ['right',[445,104,204,180],'translate(0 14) rotate(-10 540 188) translate(141.5 0) scale(.75 1)']
+ ]){
+  const clip=document.createElementNS(ns,'clipPath');clip.id='rc-audio-'+part+'-clip';
+  const r=document.createElementNS(ns,'rect');for(const [i,k] of ['x','y','width','height'].entries())r.setAttribute(k,rect[i]);clip.append(r);pet.querySelector('defs').append(clip);
+  const piece=document.createElementNS(ns,'g');if(transform)piece.setAttribute('transform',transform);
+  const art=image('headphones',[85,10,564,270]);art.setAttribute('clip-path','url(#'+clip.id+')');piece.append(art);(part==='band'?rearBand:headset).append(piece);
+ }
+ return prefs=>{const phones=pet.classList.contains('wear-phones');rearBand.style.display=phones?'inline':'none';pet.querySelector('#rc-audio-forelock').style.display=phones?'inline':'none';for(const [name,g] of Object.entries(nodes))g.style.display=(name==='sunglasses'?prefs.eyewear===name:['scarf','bowtie'].includes(name)?prefs.neckwear===name:prefs.headwear===name&&!phones)?'inline':'none';};
 };

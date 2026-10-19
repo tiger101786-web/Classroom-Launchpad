@@ -44,6 +44,11 @@ puppet.append(neck);
 const head=document.createElementNS(svgNS,'g');head.id='rc-head';head.style.transformOrigin='367px 437px';
 head.append($('#ear-left'),$('#ear-right'),headArt);
 for(const selector of ['.eyes-open','.eyes-happy','.eyes-sleep','#mouth','#headphones'])head.append($(selector));
+// Reuse the skin-painted forelock above the headset, keeping its original pixels.
+const forelockClip=document.createElementNS(svgNS,'clipPath');forelockClip.id='rc-audio-forelock-clip';
+forelockClip.innerHTML='<path d="M155 150Q213 193 235 128Q320 65 450 85L445 158Q423 232 315 263L331 222Q263 246 192 220Q164 200 155 150Z"/>';
+pet.querySelector('defs').append(forelockClip);
+const forelock=headArt.cloneNode(true);forelock.id='rc-audio-forelock';forelock.setAttribute('clip-path','url(#rc-audio-forelock-clip)');forelock.style.display='none';head.append(forelock);
 puppet.append(head);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let sleeping=false,dancing=false,idle=false,phones=false,busy=false,sequence=0,drag=null;
