@@ -1,5 +1,10 @@
 # Colt skins
 
+Custom-art alignment: body, both front-leg sprites, and tail are independently
+fitted to the original atlas component bounds. The platform, crop windows, and
+animation pivots do not move. Facial anchors are mapped through the body fit;
+both custom skins have their own mouth placement and scale for all expressions.
+
 The customization panel includes 18 skins. Four choices per page keep the
 existing panel dimensions. Original comes first, followed by alphabetical names.
 The expanded collection adds Ancient Bronze, Candy Chrome, Carbon Racer,

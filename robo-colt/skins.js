@@ -23,7 +23,12 @@ window.createRoboColtSkinPainter = function(pet){
  const ns='http://www.w3.org/2000/svg',defs=pet.querySelector('defs');
  // Position wrappers stay outside the blinking/scaling groups so animation
  // transforms cannot overwrite each artwork's facial alignment.
- const facePositions={Porcelain:{eyes:[[9,3],[16,2]],mouth:'translate(378 405) scale(.8)'},'Obsidian Ember':{eyes:[[13,-3],[15,-1]]}};
+ // Register each painted atlas component to the original component bounds.
+ // Keep the crop windows, limb pivots and platform fixed while fitting the art inside them.
+ const originalBounds=[[127,17,607,671],[851,167,1056,649],[210,700,433,1192],[765,737,1178,1168]];
+ const paintedBounds={Porcelain:[[129,21,625,672],[863,171,1076,655],[208,706,439,1203],[769,732,1206,1184]],'Obsidian Ember':[[138,17,624,672],[861,162,1077,651],[209,696,442,1195],[756,732,1192,1173]]};
+ function fit(name,part){const a=originalBounds[part],b=paintedBounds[name]?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
+ const facePositions={Porcelain:{eyes:[[283,279],[474,278]],mouth:[378,405,.8]},'Obsidian Ember':{eyes:[[287,273],[473,275]],mouth:[381,397,.85]}};
  const eyeAnchors=[];
  function anchor(element,index){const g=document.createElementNS(ns,'g');g.dataset.eyeAnchor=index;element.before(g);g.append(element);eyeAnchors.push([g,index]);}
  pet.querySelectorAll('.eyes-open .eye').forEach((e,i)=>anchor(e,i));
@@ -87,10 +92,17 @@ window.createRoboColtSkinPainter = function(pet){
   const skin=window.roboColtSkins[name]||window.roboColtSkins.Original;
   if(last===skin)return skin;last=skin;
   const face=facePositions[name];
-  eyeAnchors.forEach(([g,i])=>g.setAttribute('transform','translate('+(face?.eyes[i]||[0,0]).join(' ')+')'));
-  pet.querySelector('#rc-mouth').setAttribute('transform',face?.mouth||'translate(367 400)');
+  const bodyFit=fit(name,0);
+  eyeAnchors.forEach(([g,i])=>{const point=face?.eyes[i];const dx=point?bodyFit.x+point[0]*bodyFit.sx-[274,458][i]:0,dy=point?bodyFit.y+point[1]*bodyFit.sy-276:0;g.setAttribute('transform','translate('+dx+' '+dy+')')});
+  const mouth=face?.mouth;
+  pet.querySelector('#rc-mouth').setAttribute('transform',mouth?'translate('+(bodyFit.x+mouth[0]*bodyFit.sx)+' '+(bodyFit.y+mouth[1]*bodyFit.sy)+') scale('+(mouth[2]*bodyFit.sx)+' '+(mouth[2]*bodyFit.sy)+')':'translate(367 400)');
   layers.forEach(e=>{
    if(!e.closest('#rc-platform')){
+    const part=e.closest('#rc-tail')?3:e.closest('#rc-leg-left')?1:e.closest('#rc-leg-right')?2:0;
+    const placement=fit(name,part);
+    e.setAttribute('x',placement.x);e.setAttribute('y',placement.y);
+    e.setAttribute('width',1254*placement.sx);e.setAttribute('height',1254*placement.sy);
+    e.setAttribute('preserveAspectRatio','none');
     e.setAttribute('href',skin.artwork||'robo-colt/parts-v1.png');
     if(skin.artwork){e.removeAttribute('filter');return;}
    }

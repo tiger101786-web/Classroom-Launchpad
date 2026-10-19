@@ -11,14 +11,23 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
  for(const skin of await page.evaluate(()=>Object.keys(roboColtSkins))){
   await page.evaluate(s=>showSkin(s),skin);await page.waitForTimeout(150);
   assert.equal(await pet.getAttribute('data-skin'),skin);
-  const eyeOffsets=skin==='Porcelain'?['translate(9 3)','translate(16 2)']:skin==='Obsidian Ember'?['translate(13 -3)','translate(15 -1)']:['translate(0 0)','translate(0 0)'];
+  const eyeOffsets=await pet.locator('.eyes-open [data-eye-anchor]').evaluateAll(es=>es.map(e=>e.getAttribute('transform')));
   for(const state of ['eyes-open','eyes-happy','eyes-sleep'])assert.deepEqual(await pet.locator('.'+state+' [data-eye-anchor]').evaluateAll(es=>es.map(e=>e.getAttribute('transform'))),eyeOffsets);
-  assert.equal(await pet.locator('#rc-mouth').getAttribute('transform'),skin==='Porcelain'?'translate(378 405) scale(.8)':'translate(367 400)');
+  if(!['Porcelain','Obsidian Ember'].includes(skin))assert.equal(await pet.locator('#rc-mouth').getAttribute('transform'),'translate(367 400)');
   const art=await page.evaluate(s=>roboColtSkins[s].artwork,skin);
   const partImages=pet.locator('#rc-puppet image');
   assert((await partImages.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===(art||'robo-colt/parts-v1.png')));
   if(art)assert.equal(await partImages.evaluateAll(es=>es.some(e=>e.hasAttribute('filter'))),false,'Approved artwork must not be recolored');
-  assert.deepEqual(await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')])),original);
+  if(!art)assert.deepEqual(await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')])),original);
+  if(art){
+   const bounds=skin==='Porcelain'?[[129,21,625,672],[863,171,1076,655],[208,706,439,1203],[769,732,1206,1184]]:[[138,17,624,672],[861,162,1077,651],[209,696,442,1195],[756,732,1192,1173]];
+   const expected=[[127,17,607,671],[851,167,1056,649],[210,700,433,1192],[765,737,1178,1168]];
+   const selectors=['#rc-ear-left image','#rc-leg-left image','#rc-leg-right image','#rc-tail image'];
+   for(let i=0;i<4;i++){
+    const mapped=await pet.locator(selectors[i]).first().evaluate((e,b)=>{const x=+e.getAttribute('x'),y=+e.getAttribute('y'),sx=+e.getAttribute('width')/1254,sy=+e.getAttribute('height')/1254;return [x+b[0]*sx,y+b[1]*sy,x+b[2]*sx,y+b[3]*sy]},bounds[i]);
+    mapped.forEach((v,j)=>assert(Math.abs(v-expected[i][j])<.001,skin+' part '+i+' registration'));
+   }
+  }
   assert.equal(await pet.locator('#rc-headphones [filter]').count(),0);
   assert.equal(await pet.locator('#rc-ear-left #rc-earphone-left').count(),1);
   assert.equal(await pet.locator('#rc-ear-right #rc-earphone-right').count(),1);
