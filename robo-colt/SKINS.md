@@ -6,8 +6,10 @@ existing panel dimensions. Original comes first, followed by alphabetical names.
 
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.
-Only saturated red areas are recolored; the original black armor is retained.
-Galaxy and Emerald add procedural glitter inside that same red-area mask.
+Royal and School Spirit recolor saturated red areas and retain the black armor.
+Arctic restores the original pearl-silver full-body finish. Emerald combines
+brushed gunmetal with jade accents; Galaxy combines blue-gray armor with violet
+nebula accents. Both use continuous procedural texture, without glitter.
 Each palette also supplies its iris, glow, happy-eye, and sleeping-eye colors.
 Accessories remain outside these filters. Keep future accessories on separate
 layers, not baked into the character's parts atlas.

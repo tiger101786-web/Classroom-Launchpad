@@ -16,8 +16,12 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
   assert.equal(await pet.locator('#rc-ear-right #rc-earphone-right').count(),1);
   const capture=await pet.screenshot({path:path.join(__dirname,'skin-'+skin.replaceAll(' ','-')+'.png')});
   const canvas=createCanvas(440,440),ctx=canvas.getContext('2d');ctx.drawImage(await loadImage(capture),0,0);
+  assert.deepEqual([...ctx.getImageData(60,100,1,1).data],[41,37,45,255],'Texture must not spill outside the silhouette');
   const pixels=[[205,226],[247,270]].flatMap(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
-  if(skin==='Original')armorPixels=pixels;else assert.deepEqual(pixels,armorPixels,skin+' must preserve black armor pixels');
+  if(skin==='Original')armorPixels=pixels;
+  else if(['Royal','School Spirit'].includes(skin))assert.deepEqual(pixels,armorPixels,skin+' must preserve black armor pixels');
+  else assert.notDeepEqual(pixels,armorPixels,skin+' has its own armor finish');
+  if(['Emerald','Galaxy'].includes(skin))assert.equal(await page.evaluate(s=>Boolean(roboColtSkins[s].glitter),skin),false);
  }
  console.log('PASS: all six skins render with unchanged geometry and independent accessories.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
