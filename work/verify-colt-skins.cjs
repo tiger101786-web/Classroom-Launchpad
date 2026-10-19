@@ -11,6 +11,9 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
  for(const skin of await page.evaluate(()=>Object.keys(roboColtSkins))){
   await page.evaluate(s=>showSkin(s),skin);await page.waitForTimeout(150);
   assert.equal(await pet.getAttribute('data-skin'),skin);
+  const eyeOffsets=skin==='Porcelain'?['translate(9 3)','translate(16 2)']:skin==='Obsidian Ember'?['translate(13 -3)','translate(15 -1)']:['translate(0 0)','translate(0 0)'];
+  for(const state of ['eyes-open','eyes-happy','eyes-sleep'])assert.deepEqual(await pet.locator('.'+state+' [data-eye-anchor]').evaluateAll(es=>es.map(e=>e.getAttribute('transform'))),eyeOffsets);
+  assert.equal(await pet.locator('#rc-mouth').getAttribute('transform'),skin==='Porcelain'?'translate(378 405) scale(.8)':'translate(367 400)');
   const art=await page.evaluate(s=>roboColtSkins[s].artwork,skin);
   const partImages=pet.locator('#rc-puppet image');
   assert((await partImages.evaluateAll(es=>es.map(e=>e.getAttribute('href')))).every(h=>h===(art||'robo-colt/parts-v1.png')));

@@ -21,6 +21,17 @@ window.roboColtSkins = {
 };
 window.createRoboColtSkinPainter = function(pet){
  const ns='http://www.w3.org/2000/svg',defs=pet.querySelector('defs');
+ // Position wrappers stay outside the blinking/scaling groups so animation
+ // transforms cannot overwrite each artwork's facial alignment.
+ const facePositions={Porcelain:{eyes:[[9,3],[16,2]],mouth:'translate(378 405) scale(.8)'},'Obsidian Ember':{eyes:[[13,-3],[15,-1]]}};
+ const eyeAnchors=[];
+ function anchor(element,index){const g=document.createElementNS(ns,'g');g.dataset.eyeAnchor=index;element.before(g);g.append(element);eyeAnchors.push([g,index]);}
+ pet.querySelectorAll('.eyes-open .eye').forEach((e,i)=>anchor(e,i));
+ for(const selector of ['.eyes-happy','.eyes-sleep']){
+  const path=pet.querySelector(selector+' path');
+  const halves=path.getAttribute('d').match(/M[^M]+/g);
+  halves.forEach((d,i)=>{const copy=path.cloneNode(false);copy.setAttribute('d',d);path.before(copy);anchor(copy,i)});path.remove();
+ }
  const layers=[...pet.querySelectorAll('image')].filter(e=>/robo-colt\/(parts|platform)-v1\.png$/.test(e.getAttribute('href')||''));
  Object.entries(window.roboColtSkins).forEach(([name,skin],index)=>{
   if(!skin.tint)return;
@@ -75,6 +86,9 @@ window.createRoboColtSkinPainter = function(pet){
  return function(name){
   const skin=window.roboColtSkins[name]||window.roboColtSkins.Original;
   if(last===skin)return skin;last=skin;
+  const face=facePositions[name];
+  eyeAnchors.forEach(([g,i])=>g.setAttribute('transform','translate('+(face?.eyes[i]||[0,0]).join(' ')+')'));
+  pet.querySelector('#rc-mouth').setAttribute('transform',face?.mouth||'translate(367 400)');
   layers.forEach(e=>{
    if(!e.closest('#rc-platform')){
     e.setAttribute('href',skin.artwork||'robo-colt/parts-v1.png');

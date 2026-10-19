@@ -17,6 +17,11 @@ their platforms retain the clean complementary finishes from the approved previe
 Switching to another skin restores the original atlas. Existing animation crops,
 eye/mouth layers, and accessory attachment points are unchanged.
 
+The custom atlases have slightly shifted sockets: `facePositions` in skins.js
+aligns each eye independently, including happy and sleeping eyes, using wrappers
+outside the animated blink groups. Porcelain also has a centered, slightly smaller
+mouth fitted to its muzzle. Other skins reset to the original facial coordinates.
+
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.
 Royal and School Spirit recolor saturated red areas and retain the black armor.
