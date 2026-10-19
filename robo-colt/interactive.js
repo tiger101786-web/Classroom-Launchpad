@@ -6,6 +6,14 @@ host.innerHTML="<button type=\"button\" class=\"pet-button\" aria-label=\"Open C
 document.body.append(host);
 const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
 const $=s=>host.querySelector(s.startsWith('#')?'#rc-'+s.slice(1):s);
+// Colt's ear cups sit over his upper ears, not beside his cheeks.
+$('#headphones').innerHTML='<path d="M222 98C254 4 454 4 504 98" fill="none" stroke="#17131b" stroke-width="20"/><path d="M222 98C254 4 454 4 504 98" fill="none" stroke="#b8b6be" stroke-width="5"/>';
+for(const [side,x,angle] of [['left',204,-22],['right',470,22]]){
+ const cup=document.createElementNS('http://www.w3.org/2000/svg','g');
+ cup.classList.add('colt-earphone');cup.id='rc-earphone-'+side;
+ cup.innerHTML='<g transform="rotate('+angle+' '+(x+30)+' 105)"><rect x="'+x+'" y="53" width="60" height="108" rx="26" fill="#17131b" stroke="#aaa6b1" stroke-width="4"/><rect x="'+(x+8)+'" y="61" width="44" height="90" rx="20" fill="#801b36"/><path d="M'+(x+17)+' 78V127" stroke="#d26b86" stroke-width="4" stroke-linecap="round"/></g>';
+ $('#ear-'+side).append(cup);
+}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let sleeping=false,dancing=false,idle=false,phones=false,busy=false,sequence=0,drag=null;
 let prefs=window.roboColtDefaults(),visible=false,account='',radio=false,autoAsleep=false,hiddenByUser=false,position=null,napTimer,wakeTimer,waking=false;

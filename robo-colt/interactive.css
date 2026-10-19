@@ -145,6 +145,8 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .happy .eyes-open,.robo-companion .sleeping .eyes-open{visibility:hidden}
 .robo-companion .happy .eyes-happy,.robo-companion .sleeping .eyes-sleep,.robo-companion .sleeping .zs,.robo-companion .dancing .notes,.robo-companion .wear-phones #rc-headphones{display:inline}
 .robo-companion .sleeping .eyes-happy{display:none}
+.robo-companion .colt-earphone{display:none}
+.robo-companion .wear-phones .colt-earphone{display:inline}
 .robo-companion .mouth-open{transform-origin:0px 0px;opacity:1;visibility:visible;transform:none;transition:none}
 .robo-companion .asleep.idle .mouth-sleep{animation:none;transform:none}
 .robo-companion .happy .mouth-open,.robo-companion .talking .mouth-open{display:inline}

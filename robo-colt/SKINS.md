@@ -6,6 +6,8 @@ existing panel dimensions. Original comes first, followed by alphabetical names.
 
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.
+Only saturated red areas are recolored; the original black armor is retained.
+Galaxy and Emerald add procedural glitter inside that same red-area mask.
 Each palette also supplies its iris, glow, happy-eye, and sleeping-eye colors.
 Accessories remain outside these filters. Keep future accessories on separate
 layers, not baked into the character's parts atlas.
