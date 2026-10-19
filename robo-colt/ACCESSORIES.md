@@ -8,13 +8,14 @@ Categories save independently under `robo.headwear`, `robo.eyewear`, and
 `robo.neckwear`. Older preferences default the new categories to none; old-client
 saves preserve existing eyewear/neckwear. All six accessories use the production
 transparent PNG artwork in `accessory-*-v2.png` (cap/scarf: `v3`) directly, placed by SVG image layers
-attached to the head rig, outside all skin filters. No vector approximation is used.
+attached to the head rig, outside all skin filters. The final headband is a continuous
+shaded SVG arch; the detailed cups and other accessories retain their raster artwork.
 The headset follows the head rather than separating when ears twitch. Its original
 cup artwork is independently positioned and angled to fit the ears. The larger horn
 exposes its crystal and jeweled base. The cap has no ear holes. The larger front-view
 scarf has no clipping mask, preserving its full striped wrap, tail, and fringe.
 V4 fits the cups lower and outside the ears against the supplied front-fit reference;
-the band is a separate rear layer behind the ears/mane. The horn base sits 40 atlas
+the band is a separate layer in front of the ears. The horn base sits 40 atlas
 units farther back/up. The scarf fits directly under the chin. V5 restores its
 original hanging end in front of the foreleg, per the user's revised layering
 request. Cups sit another 14 atlas units lower with mirrored 10-degree tilts.
@@ -22,6 +23,17 @@ A copy of the original skin-painted forelock renders above the cups, using a
 generous contour that retains its tips. It is registered before the skin painter
 so the hair automatically matches every skin, including custom artwork.
 Preview captures include 32px top clearance to show the complete raised horn.
+
+Final V10: the headband is one continuous shaded SVG arch extending directly to the
+earcups. The two silver hinge fittings above the cups have been removed at the
+user's request. This replaces the split raster band whose joins left gaps.
+Ear cups retain their artwork and placement. Foreground hair is limited
+to the single swept strand, without the ear-removal mask or an ear-shaped overlay.
+`work/inspect-colt-headset.cjs <output-directory>` provides enlarged inspection views.
+`node work/verify-colt-headset-continuity.cjs` checks actual rendered pixel connectivity
+from the left cup through the band to the right cup. The scarf sits below the muzzle
+with its hanging end in front of the foreleg. The rejected silver mouth outline
+remains a local preview only and is not included in the website.
 Radio headphones temporarily
 replace headwear and restore the user's choice when playback stops.
 

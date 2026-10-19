@@ -8,7 +8,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await page.goto('file:///'+path.join(__dirname,'colt-skins-preview.html').replaceAll('\\','/'));
   for(const name of ['headphones','horn','sleepcap','sunglasses','scarf','bowtie']){
    const key=name==='sunglasses'?'eyewear':['scarf','bowtie'].includes(name)?'neckwear':'headwear';
-   await page.evaluate(({key,name})=>api.update({account:'preview',visible:true,radio:false,preferences:{...roboColtDefaults(),motion:false,[key]:name}}),{key,name});
+   await page.evaluate(({key,name,skin})=>api.update({account:'preview',visible:true,radio:false,preferences:{...roboColtDefaults(),skin,motion:false,[key]:name}}),{key,name,skin:process.argv[3]||'Original'});
    await page.waitForTimeout(200);
    const bounds=await page.locator('.pet-button').boundingBox();
    await page.screenshot({path:path.join(out,name+'.png'),clip:{x:bounds.x,y:bounds.y-32,width:bounds.width,height:bounds.height+32}});
@@ -16,8 +16,10 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
    assert.equal(await page.locator(id+' image').first().getAttribute('href'),'robo-colt/accessory-'+name+(['scarf','sleepcap'].includes(name)?'-v3.png':'-v2.png'));
    if(name==='scarf')assert.equal(await page.locator(id).getAttribute('clip-path'),null,'Full scarf must remain visible');
    assert.equal(await page.locator('#rc-audio-rear-band').evaluate(e=>getComputedStyle(e).display),name==='headphones'?'inline':'none');
+   assert.equal(await page.locator('#rc-audio-forelock').getAttribute('mask'),null,'Forelock must not inherit ear-removal mask');
+   assert.equal(await page.locator('#rc-audio-hinges').count(),0,'Use the original hinges, not added connector lines');
    assert(await page.locator('#rc-puppet').evaluate(e=>{const order=[...e.children];return ['rc-leg-left','rc-leg-right'].every(id=>order.indexOf(document.getElementById(id))<order.indexOf(document.getElementById('rc-head')))}),'Scarf must hang in front of forelegs');
-   assert(await page.locator('#rc-head').evaluate(e=>e.firstElementChild.id==='rc-audio-rear-band'),'Band must render behind ears');
+   assert(await page.locator('#rc-head').evaluate(e=>{const kids=[...e.children];return kids.indexOf(document.querySelector('#rc-audio-rear-band'))>kids.indexOf(document.querySelector('#rc-ear-left'))}),'Band must render in front of ears');
    assert.equal(await page.locator(id).evaluate(e=>getComputedStyle(e).display),'inline');
   }
   assert.deepEqual(errors,[]);
