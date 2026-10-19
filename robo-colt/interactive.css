@@ -155,13 +155,11 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .wake-smile .mouth-open{display:inline;animation:robo-wake-smile .3s ease-out both}
 .robo-companion .wake-smile .mouth-rest{display:none}
 @keyframes robo-wake-smile{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
-.robo-companion .zs text,.robo-companion .notes text{animation:robo-float 3s ease-out infinite;opacity:0}
+.robo-companion .zs text{animation:robo-float 3s ease-out infinite;opacity:0}
 .robo-companion .zs text{fill:#642046;stroke:#fff;stroke-width:2px;paint-order:stroke fill;stroke-linejoin:round}
 body[data-theme="night"] .robo-companion .zs text{fill:#e6d9ff;stroke:#24152f}
 .robo-companion .zs text:nth-child(2){animation-delay:-1s}.robo-companion .zs text:nth-child(3){animation-delay:-2s}
-.robo-companion .notes text:nth-child(2){animation-delay:-1.5s}
-.robo-companion .notes text{font-size:140px;font-weight:800;fill:#9b1748;stroke:#fff;stroke-width:5px;paint-order:stroke fill;stroke-linejoin:round}
-body[data-theme="night"] .robo-companion .notes text{fill:#ffaccb;stroke:#301323}
+.robo-companion .dancing .notes .music-note{animation:dumpling-music-float 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
 .robo-companion.motion-off .zs text,.robo-companion.motion-off .notes text{animation:none;opacity:1}
 @keyframes robo-float{0%{opacity:0;transform:translateY(12px)}20%,65%{opacity:1}100%{opacity:0;transform:translateY(-28px)}}
 .robo-companion .dumpling-speech{background:linear-gradient(135deg,#28252c,#140f17);border-color:#b9274e;color:#fff;border-radius:16px}

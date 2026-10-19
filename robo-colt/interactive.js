@@ -6,6 +6,19 @@ host.innerHTML="<button type=\"button\" class=\"pet-button\" aria-label=\"Open C
 document.body.append(host);
 const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
 const $=s=>host.querySelector(s.startsWith('#')?'#rc-'+s.slice(1):s);
+// Use the dumpling's four-note design and timing, normalized to Colt's viewBox.
+// Separate anchors keep the entire floating path outside his face.
+const musicNotes=pet.querySelector('.notes');
+musicNotes.setAttribute('font-family','Arial, sans-serif');
+musicNotes.setAttribute('font-size','140');
+musicNotes.setAttribute('font-weight','bold');
+musicNotes.setAttribute('text-anchor','middle');
+musicNotes.setAttribute('fill','#a81747');
+musicNotes.setAttribute('stroke','#fff1cf');
+musicNotes.setAttribute('stroke-width','7');
+musicNotes.setAttribute('paint-order','stroke');
+musicNotes.setAttribute('pointer-events','none');
+musicNotes.innerHTML=[[55,350,'♪',0],[715,330,'♫',-.6],[75,120,'♫',-1.2],[695,110,'♪',-1.8]].map(([x,y,note,delay])=>'<g transform="translate('+x+' '+y+') scale('+(920/1254)+')"><text class="music-note" x="0" y="0" style="animation-delay:'+delay+'s">'+note+'</text></g>').join('');
 // Colt's ear cups sit over his upper ears, not beside his cheeks.
 $('#headphones').innerHTML='<path d="M222 98C254 4 454 4 504 98" fill="none" stroke="#17131b" stroke-width="20"/><path d="M222 98C254 4 454 4 504 98" fill="none" stroke="#b8b6be" stroke-width="5"/>';
 for(const [side,x,angle] of [['left',204,-22],['right',470,22]]){
