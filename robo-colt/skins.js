@@ -7,15 +7,15 @@ window.roboColtSkins = {
  Royal:{accent:'#ffd05b',light:'#fff6cc',dark:'#99651c',tint:[1,.65,.12],description:'Original black armor with golden accents.'},
  'School Spirit':{accent:'#db3c72',light:'#ffe0ec',dark:'#790c30',tint:[.65,.02,.18],description:'Original black armor with school-burgundy accents.'},
  'Ancient Bronze':{accent:'#64cfbd',light:'#ddfff5',dark:'#286c63',tint:[.15,.65,.5],armor:[1.5,1.05,.61],armorLift:[.07,.035,.01],texture:'patina',description:'Weathered bronze plates with turquoise patina accents.'},
- 'Candy Chrome':{accent:'#fa77bb',light:'#ffe8f5',dark:'#97355f',tint:[.95,.16,.49],armor:[1.65,1.75,1.85],armorLift:[.07,.08,.09],pattern:'candy',description:'Satin silver, raspberry enamel, and aqua ribbons.'},
+ 'Candy Chrome':{accent:'#fa77bb',light:'#ffe8f5',dark:'#97355f',tint:[.95,.24,.52],armor:[1.6,1.7,1.8],armorLift:[.09,.09,.11],description:'Clean silver chrome with glossy raspberry-pink enamel.'},
  'Carbon Racer':{accent:'#ffe256',light:'#fffbdc',dark:'#9b7611',tint:[1,.8,.06],armor:[.82,.85,.9],pattern:'carbon',description:'Woven carbon-fiber armor and racing-yellow accents.'},
- 'Copper Circuit':{accent:'#ffaf75',light:'#ffebd8',dark:'#9c4b25',tint:[.9,.4,.16],armor:[.9,.94,1],pattern:'circuit',description:'Graphite armor, copper enamel, and etched circuit traces.'},
+ 'Copper Circuit':{accent:'#ffaf75',light:'#ffebd8',dark:'#9c4b25',tint:[.9,.4,.16],armor:[.9,.94,1],pattern:'circuit',description:'Graphite armor and copper enamel with sparse circuit details.'},
  'Deep Sea':{accent:'#4fe3d5',light:'#dcfff7',dark:'#106c76',tint:[.08,.7,.65],armor:[.56,.79,1.22],texture:'water',pattern:'water',description:'Midnight navy plates with rippled teal accents.'},
  'Desert Relic':{accent:'#62d6cf',light:'#e1fff4',dark:'#267b7b',tint:[.13,.63,.58],armor:[1.65,1.35,.88],armorLift:[.16,.12,.065],texture:'sand',pattern:'runes',description:'Warm sandstone armor, carved markings, and turquoise accents.'},
  Frostfire:{accent:'#8cecff',light:'#efffff',dark:'#267c9e',tint:[.15,.7,1],armor:[.88,.98,1.12],pattern:'frostfire',description:'Dark steel with icy-blue and ember-orange split accents.'},
  Moonstone:{accent:'#b6d5ff',light:'#fff5ec',dark:'#686c9c',tint:[.63,.73,.95],armor:[1.35,1.42,1.58],armorLift:[.04,.04,.06],pattern:'moonstone',description:'Smoky silver and milky blue-peach opalescent accents.'},
- 'Obsidian Ember':{accent:'#ff9a45',light:'#fff0c1',dark:'#a23113',tint:[1,.3,.035],armor:[.72,.73,.78],texture:'stone',pattern:'cracks',description:'Volcanic charcoal with ember-orange seams and fine cracks.'},
- Porcelain:{accent:'#5997f0',light:'#eef7ff',dark:'#193d8c',tint:[.07,.24,.67],armor:[1.8,1.79,1.65],armorLift:[.24,.235,.2],pattern:'porcelain',description:'Ivory ceramic with cobalt-blue ornamental patterns.'},
+ 'Obsidian Ember':{accent:'#ff9a45',light:'#fff0c1',dark:'#a23113',tint:[.85,.24,.025],armor:[.53,.49,.49],texture:'stone',pattern:'cracks',description:'Dark volcanic rock with sparse, glowing molten lava seams.'},
+ Porcelain:{accent:'#5997f0',light:'#eef7ff',dark:'#193d8c',tint:[.06,.19,.55],armor:[.92,.92,.9],armorLift:[.55,.55,.5],pattern:'porcelain',description:'Cream-white glazed porcelain with spacious cobalt scallop motifs.'},
  'Rose Quartz':{accent:'#f0a5c4',light:'#fff0f8',dark:'#a45e82',tint:[.95,.48,.68],armor:[1.5,1.44,1.5],armorLift:[.08,.07,.085],pattern:'quartz',description:'Pearl-gray plates with rose-pink crystal veins.'},
  'Woodland Guardian':{accent:'#b5ca79',light:'#f2ffcf',dark:'#4e682e',tint:[.38,.54,.16],armor:[1.22,.78,.43],armorLift:[.035,.015,0],texture:'wood',pattern:'wood',description:'Walnut-grain armor with moss-green and bronze details.'}
 };
@@ -46,14 +46,13 @@ window.createRoboColtSkinPainter = function(pet){
   if(skin.pattern){
    const designs={
     carbon:['armor',28,'<path d="M0 0H14V14H0ZM14 14H28V28H14Z" fill="#ccd4e2" opacity=".10"/><path d="M2 2L12 12M16 16L26 26" stroke="#05090e" stroke-width="3" opacity=".4"/>'],
-    circuit:['armor',120,'<path d="M0 24H40L58 42V100H120M12 120V70H32M70 0V22H108V58" fill="none" stroke="#cd9263" stroke-width="2.5" opacity=".48"/><g fill="#cd9263" opacity=".6"><circle cx="32" cy="70" r="4"/><circle cx="108" cy="58" r="4"/></g>'],
-    cracks:['armor',150,'<path d="M0 25L40 45L64 20L80 65L132 85L150 130M80 65L55 105L65 150M55 105L0 118" fill="none" stroke="#fc6c29" stroke-width="2" opacity=".5"/>'],
-    porcelain:['armor',125,'<g fill="none" stroke="#254b8a" stroke-width="3" opacity=".62"><path d="M0 62Q31 10 62 62T125 62M62 0Q10 31 62 62T62 125"/><circle cx="62" cy="62" r="15"/><path d="M45 45L79 79M79 45L45 79"/></g>'],
+    circuit:['armor',280,'<path d="M45 35V90L75 120H135V180" fill="none" stroke="#cd9263" stroke-width="2.5" opacity=".42"/><g fill="#cd9263" opacity=".55"><circle cx="45" cy="35" r="4"/><circle cx="135" cy="180" r="4"/></g>'],
+    cracks:['armor',360,'<defs><path id="lava" d="M0 85L34 96L48 88L70 108L100 113L118 140L143 135L167 158L195 148L210 166L239 151L257 124L281 120L298 96L330 101L360 85M167 158L153 188L161 206L143 229L148 252L123 272L129 303L113 329L120 360M120 0L110 28L125 44L118 69L100 113"/><filter id="heat" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter></defs><use href="#lava" fill="none" stroke="#ff3b08" stroke-width="15" opacity=".5" filter="url(#heat)"/><use href="#lava" fill="none" stroke="#e85b0a" stroke-width="5" stroke-linejoin="round"/><use href="#lava" fill="none" stroke="#ffc64f" stroke-width="1.8" stroke-linejoin="round"/>'],
+    porcelain:['armor',260,'<g fill="none" stroke="#234a8c" stroke-width="5" opacity=".88"><path d="M0 0Q0 48 65 52Q63 108 130 130Q197 108 195 52Q260 48 260 0M0 260Q0 212 65 208Q63 152 130 130Q197 152 195 208Q260 212 260 260"/></g><g fill="#214884" opacity=".85"><path d="M130 36Q111 49 130 56Q149 49 130 36M130 204Q111 217 130 224Q149 217 130 204"/><circle cx="130" cy="130" r="5"/></g><path d="M130 55V76M130 224V244" stroke="#3f6596" stroke-width="2" opacity=".7"/>'],
     quartz:['paint',170,'<path d="M0 40L55 60L90 15L110 95L170 130M55 60L70 150M110 95L45 110" fill="none" stroke="#ffedf7" stroke-width="3" opacity=".48"/>'],
     runes:['armor',150,'<path d="M25 20V60L45 40L25 20M85 70L110 95L85 120L60 95ZM20 125H40M110 25V45" fill="none" stroke="#644c31" stroke-width="4" opacity=".4"/>'],
     water:['paint',140,'<path d="M-20 35Q15 0 50 35T120 35T190 35M-20 95Q15 60 50 95T120 95T190 95" fill="none" stroke="#b0fff6" stroke-width="3" opacity=".22"/>'],
-    wood:['armor',150,'<path d="M15 0Q65 60 15 150M35 0Q85 60 35 150M80 0Q40 80 100 150M110 0Q70 80 130 150" fill="none" stroke="#d5a76f" stroke-width="3" opacity=".19"/>'],
-    candy:['paint',130,'<path d="M-30 80L80-30M10 140L140 10M100 160L160 100" stroke="#60e8e7" stroke-width="24" opacity=".72"/>']
+    wood:['armor',150,'<path d="M15 0Q65 60 15 150M35 0Q85 60 35 150M80 0Q40 80 100 150M110 0Q70 80 130 150" fill="none" stroke="#d5a76f" stroke-width="3" opacity=".19"/>']
    };
    const d=designs[skin.pattern];
    let svg,target;

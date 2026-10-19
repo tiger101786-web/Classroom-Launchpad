@@ -9,6 +9,11 @@ Code-native SVG patterns and procedural textures are clipped to source alpha.
 Frostfire uses side-specific filters for separate limbs so its split colors
 do not depend on where those limbs were packed in the original image atlas.
 
+Refined finishes: Candy Chrome uses clean raspberry enamel without aqua stripes;
+Copper Circuit uses sparse traces; Obsidian Ember uses larger volcanic plates
+and layered orange/yellow lava seams; Porcelain uses a compressed cream-white
+shading range and larger cobalt scallop motifs inspired by the supplied vase.
+
 `skins.js` recolors only the original parts/platform image layers using SVG
 filters; positions, masks, pivots, silhouettes, and motion remain unchanged.
 Royal and School Spirit recolor saturated red areas and retain the black armor.

@@ -5,6 +5,7 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
  const page=await browser.newPage({viewport:{width:1200,height:900}});
  await page.goto('file:///'+path.join(__dirname,'colt-skins-preview.html').replaceAll('\\','/'));
  const pet=page.locator('.robo-companion .pet-button');
+ assert.equal(await page.evaluate(()=>roboColtSkins['Candy Chrome'].pattern),undefined,'Candy Chrome must not restore blue stripes');
  const original=await pet.locator('image').evaluateAll(es=>es.map(e=>[e.getAttribute('x'),e.getAttribute('y'),e.getAttribute('width'),e.getAttribute('height')]));
  let armorPixels;
  for(const skin of await page.evaluate(()=>Object.keys(roboColtSkins))){
