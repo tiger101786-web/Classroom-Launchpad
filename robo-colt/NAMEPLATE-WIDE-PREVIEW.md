@@ -1,7 +1,9 @@
 # Approved wide nameplate
 
 Integrated into the Colt controls; not committed. Actual generated
-asset: `nameplate-wide-v1.png`, produced with built-in image generation.
+asset: `nameplate-bolts-v1.png`, produced with built-in image generation from the
+user's two-bolt reference. It replaces the earlier bolt-free frame. Long names
+fit within 440 atlas units to avoid overlapping either bolt.
 Editable lettering uses bundled Oxanium under SIL OFL (`Oxanium-OFL.txt`).
 Long names reduce font size proportionally instead of stretching glyphs.
 The badge stays below and behind the original diamond and shares the platform's

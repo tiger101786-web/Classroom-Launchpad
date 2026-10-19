@@ -74,6 +74,8 @@ window.createRoboColtSkinPainter = function(pet){
    let svg,target;
    if(d){target=d[0];svg='<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254"><defs><pattern id="p" width="'+d[1]+'" height="'+d[1]+'" patternUnits="userSpaceOnUse">'+d[2]+'</pattern></defs><rect width="1254" height="1254" fill="url(#p)"/></svg>'}
    else {target='paint';const frost=skin.pattern==='frostfire';svg='<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254"><defs><linearGradient id="p" x1="0" x2="1"><stop stop-color="'+(frost?'#55d8ff':'#9bc6ff')+'"/><stop offset=".48" stop-color="'+(frost?'#55d8ff':'#f5e4f4')+'"/><stop offset=".55" stop-color="'+(frost?'#ff792e':'#ffd3af')+'"/><stop offset="1" stop-color="'+(frost?'#ff792e':'#b8bdf4')+'"/></linearGradient></defs><rect width="1254" height="1254" fill="url(#p)" opacity="'+(frost?'.85':'.48')+'"/></svg>'}
+   // Keep circuit traces off the muzzle while preserving the armor's pattern elsewhere.
+   if(skin.pattern==='circuit')svg=svg.replace('</defs><rect','<mask id="clear-muzzle"><rect width="1254" height="1254" fill="white"/><ellipse cx="367" cy="355" rx="120" ry="110" fill="black"/></mask></defs><rect mask="url(#clear-muzzle)"');
    if(skin.pattern==='frostfire')svg=svg.replace('x1="0" x2="1"','x1="0" x2="730" gradientUnits="userSpaceOnUse"');
    const uri='data:image/svg+xml,'+encodeURIComponent(svg);
    filter.innerHTML+='<feImage href="'+uri+'" x="0" y="0" width="1254" height="1254" result="pattern"/><feBlend in="pattern" in2="'+target+'" mode="'+(d?'normal':'color')+'"/><feComposite in2="SourceAlpha" operator="in" result="'+target+'"/>';

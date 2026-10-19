@@ -15,12 +15,18 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
    await page.evaluate(skin=>namedColt.update({account:'test',visible:true,radio:false,preferences:{...roboColtDefaults(),skin,name:'EMBER',motion:false}}),skin);
    await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(80);
    assert.equal(await page.locator('#rc-nameplate').count(),1);
+   assert.equal(await page.locator('#rc-nameplate image').getAttribute('href'),'robo-colt/nameplate-bolts-v1.png');
+   if(skin==='Copper Circuit'){
+    const pattern=await page.evaluate(()=>{const id=roboColtSkins['Copper Circuit'].filterId;return decodeURIComponent(document.getElementById(id).querySelector('feImage').getAttribute('href'));});
+    assert(pattern.includes('mask="url(#clear-muzzle)"'),'Circuit pattern must exclude the muzzle');
+    assert(pattern.includes('cx="367" cy="355" rx="120" ry="110"'),'Keep the clear area aligned with the muzzle');
+   }
    const actual=await page.locator('#rc-nameplate image').getAttribute('filter'),expected=await page.locator('#rc-platform > image').getAttribute('filter');
    assert.equal(actual,expected||'url(#rc-name-enamel)');
    await page.locator('.pet-button').screenshot({path:path.join(out,skin+'.png')});
   }
   await page.evaluate(()=>namedColt.update({account:'test',visible:true,radio:true,preferences:{...roboColtDefaults(),name:'Thunderbolt Colt'}}));
-  assert(await page.locator('#rc-nameplate text').evaluate(e=>e.getBBox().width<=500));
+  assert(await page.locator('#rc-nameplate text').evaluate(e=>e.getBBox().width<=440),'Long names must fit between the bolts');
   assert.equal(await page.locator('#rc-platform').evaluate(e=>e.getAnimations({subtree:true}).length),0);
   assert.equal(await page.locator('#rc-platform').evaluate(e=>e.firstElementChild.id),'rc-nameplate');
   assert.deepEqual(errors,[]);console.log('PASS: all 18 skin finishes, bundled font, long names, diamond layering, static plate while dancing.');
