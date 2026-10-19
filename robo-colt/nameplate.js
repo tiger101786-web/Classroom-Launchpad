@@ -5,8 +5,15 @@ window.createColtNameplate=function(pet){
  plate.id='rc-nameplate';plate.setAttribute('pointer-events','none');
  plate.innerHTML='<defs><filter id="rc-name-enamel" color-interpolation-filters="sRGB"><feColorMatrix type="matrix"/></filter><linearGradient id="rc-letter-cut" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8ec"/><stop offset=".44" stop-color="#f5e9d8"/><stop offset=".49" stop-color="#e7d7be"/><stop offset=".55" stop-color="#f0e3cf"/><stop offset="1" stop-color="#ded0b8"/></linearGradient></defs><image href="robo-colt/nameplate-bolts-v1.png" x="25" y="890" width="680" height="245.1125" preserveAspectRatio="xMidYMid meet" filter="url(#rc-name-enamel)"/><text x="365" y="1033" text-anchor="middle" fill="url(#rc-letter-cut)" font-family="ColtOxanium,serif" font-weight="700" font-size="64" letter-spacing="3" stroke="#151218" stroke-width="1.8" paint-order="stroke"></text>';
  const platform=pet.querySelector('#rc-platform');platform.insertBefore(plate,platform.firstChild);
- function fit(){const text=plate.querySelector('text');text.setAttribute('font-size','64');const width=text.getBBox().width;if(width>440)text.setAttribute('font-size',String(Math.floor(64*430/width)));}
- document.fonts.load('700 64px ColtOxanium').then(fit).catch(()=>{});
+ function fit(){
+  const text=plate.querySelector('text');text.setAttribute('font-size','96');text.setAttribute('y','1033');
+  const box=text.getBBox(),scale=Math.min(1,430/Math.max(1,box.width),82/Math.max(1,box.height));
+  if(scale<1)text.setAttribute('font-size',String(Math.floor(96*scale)));
+  // Letter spacing stays fixed, so remeasure after scaling the glyphs.
+  while(text.getBBox().width>430&&Number(text.getAttribute('font-size'))>8)text.setAttribute('font-size',String(Number(text.getAttribute('font-size'))-1));
+  const fitted=text.getBBox();text.setAttribute('y',String(1033+1012-(fitted.y+fitted.height/2)));
+ }
+ document.fonts.load('700 96px ColtOxanium').then(fit).catch(()=>{});
  return {update(name,skin='Original',visible=true){
   const clean=Array.from(String(name).replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'COLT';
   plate.querySelector('text').textContent=clean;

@@ -15,6 +15,8 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
    await page.evaluate(skin=>namedColt.update({account:'test',visible:true,radio:false,preferences:{...roboColtDefaults(),skin,name:'EMBER',motion:false}}),skin);
    await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(80);
    assert.equal(await page.locator('#rc-nameplate').count(),1);
+   assert(Number(await page.locator('#rc-nameplate text').getAttribute('font-size'))>64,'Short names should use the larger lettering');
+   assert(await page.locator('#rc-nameplate text').evaluate(e=>{const b=e.getBBox();return Math.abs(b.y+b.height/2-1012)<1&&b.height<=82;}),'Lettering must stay vertically centered inside the plate');
    assert.equal(await page.locator('#rc-nameplate image').getAttribute('href'),'robo-colt/nameplate-bolts-v1.png');
    if(skin==='Copper Circuit'){
     const pattern=await page.evaluate(()=>{const id=roboColtSkins['Copper Circuit'].filterId;return decodeURIComponent(document.getElementById(id).querySelector('feImage').getAttribute('href'));});
