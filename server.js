@@ -593,7 +593,8 @@ function coltCustomizationAccountKey(session) {
 const ROBO_COLT_SKINS=['Original','Arctic','Emerald','Galaxy','Royal','School Spirit','Ancient Bronze','Candy Chrome','Carbon Racer','Copper Circuit','Deep Sea','Desert Relic','Frostfire','Moonstone','Obsidian Ember','Porcelain','Rose Quartz','Woodland Guardian'];
 function normalizeRoboColtPreference(value) {
   const s=value&&typeof value==='object'?value:{};
-  return {skin:ROBO_COLT_SKINS.includes(s.skin)?s.skin:'Original',headwear:['headphones','horn','sleepcap'].includes(s.headwear)?s.headwear:'none',eyewear:s.eyewear==='sunglasses'?'sunglasses':'none',neckwear:['scarf','bowtie'].includes(s.neckwear)?s.neckwear:'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
+  const name=Array.from((typeof s.name==='string'?s.name:'COLT').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'COLT';
+  return {skin:ROBO_COLT_SKINS.includes(s.skin)?s.skin:'Original',headwear:['headphones','horn','sleepcap'].includes(s.headwear)?s.headwear:'none',eyewear:s.eyewear==='sunglasses'?'sunglasses':'none',neckwear:['scarf','bowtie'].includes(s.neckwear)?s.neckwear:'none',name,nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
 }
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
@@ -3893,6 +3894,8 @@ async function handleApi(req, res, pathname) {
       const input = req.method === "PUT" ? await readBody(req) : null;
       if(input?.robo!==undefined){
         const r=input.robo;
+        if(r?.name!==undefined&&(typeof r.name!=='string'||Array.from(r.name).length>16||/[\u0000-\u001f\u007f]/.test(r.name)))throw new Error('Use a Colt name of up to 16 characters.');
+        if(r?.nameplate!==undefined&&typeof r.nameplate!=='boolean')throw new Error('Choose a valid nameplate setting.');
         if(!r||typeof r!=='object'||Array.isArray(r)||(r.skin!==undefined?!ROBO_COLT_SKINS.includes(r.skin):!['Red','Blue','Gold'].includes(r.eye))||!['none','headphones','horn','sleepcap'].includes(r.headwear)||(r.eyewear!==undefined&&!['none','sunglasses'].includes(r.eyewear))||(r.neckwear!==undefined&&!['none','scarf','bowtie'].includes(r.neckwear))||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
       }
       if (input && (!['colt', 'dumpling'].includes(input.pet)
