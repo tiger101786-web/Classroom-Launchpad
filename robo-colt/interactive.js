@@ -14,6 +14,23 @@ const animations=new Set();
 function animate(el,frames,opts={}){const a=el.animate(frames,{duration:650,easing:'ease-in-out',...opts});animations.add(a);a.finished.catch(()=>{}).finally(()=>animations.delete(a));return a}
 function stop(){sequence++;for(const a of animations)a.cancel();animations.clear();pet.classList.remove('happy','talking');busy=false}
 function blink(){if(sleeping)return;pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:240}))}
+function cancelWake(){clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking','wake-smile')}
+function wakeUp(){
+ stop();dancing=false;pet.classList.remove('dancing');cancelWake();
+ if(!idle)return;
+ waking=true;pet.classList.add('waking');
+ // Open gradually, pause to focus, then blink before the final smile.
+ pet.querySelectorAll('.eye').forEach(e=>animate(e,[
+  {transform:'scaleY(.04)',offset:0},{transform:'scaleY(.15)',offset:.18},
+  {transform:'scaleY(1)',offset:.62},{transform:'scaleY(1)',offset:.72},
+  {transform:'scaleY(.04)',offset:.79},{transform:'scaleY(1)',offset:.88},
+  {transform:'scaleY(1)',offset:1}
+ ],{duration:1800}));
+ wakeTimer=setTimeout(()=>{
+  pet.classList.add('wake-smile');
+  wakeTimer=setTimeout(()=>{cancelWake();sync();say('Recharged and ready!')},1000);
+ },1800);
+}
 function tail(){animate($('#tail'),[{transform:'rotate(0deg) skewY(0deg)',offset:0},{transform:'rotate(-18deg) skewY(-5deg)',offset:.17},{transform:'rotate(17deg) skewY(4deg)',offset:.38},{transform:'rotate(-12deg) skewY(-3deg)',offset:.59},{transform:'rotate(8deg) skewY(2deg)',offset:.78},{transform:'rotate(-3deg)',offset:.91},{transform:'rotate(0deg) skewY(0deg)',offset:1}],{duration:1700})}
 function hoof(){
   // Only the shin foreshortens. The rigid hoof translates without any scaling.
@@ -63,7 +80,7 @@ function group(title,choices,key,pageSize=4){
  const ordered=key==='size'||key==='skin'?choices.slice():choices.slice().sort((a,b)=>a[1].localeCompare(b[1]));
  const buttons=ordered.map(([value,label])=>{
   const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.option=value;b.dataset.setting=key;
-  b.onclick=()=>{if(key==='action'){if(!prefs.motion||reduced.matches){status('Turn motion on to try animations.');return}touch();action(value);return}
+  b.onclick=()=>{if(key==='action'){if(waking){status('Colt is waking up. One moment!');return}if(!prefs.motion||reduced.matches){status('Turn motion on to try animations.');return}touch();action(value);return}
    prefs[key]=value==='true'?true:value==='false'?false:value;touch();sync();onChange({...prefs});};
   grid.append(b);return b;
  });
@@ -99,7 +116,7 @@ function sync(){
  sleeping=prefs.asleep||autoAsleep;phones=prefs.headwear==='headphones';
  if(sleeping)speech.hidden=true;
  const shouldDance=radio&&!sleeping&&!waking&&!host.hidden;
- if(sleeping||host.hidden||!idle){stop();dancing=false;}
+ if(sleeping||host.hidden||!idle){cancelWake();stop();dancing=false;}
  if(shouldDance!==dancing){if(shouldDance&&idle)dance();else {stop();dancing=false;}}
  pet.classList.toggle('sleeping',sleeping);pet.classList.toggle('asleep',sleeping);
  pet.classList.toggle('idle',idle);pet.classList.toggle('dancing',dancing);
@@ -113,7 +130,7 @@ function sync(){
  panel.querySelectorAll('[data-setting]').forEach(b=>{if(b.dataset.setting!=='action')b.setAttribute('aria-pressed',String(String(prefs[b.dataset.setting])===b.dataset.option))});
  panel.querySelector('.dumpling-radio-status').textContent=sleeping?'☾ Sleeping · Click Colt to wake':radio?'♫ Colt Radio · Headphones on · '+(idle?'Let’s dance!':'Motion paused'):'♫ Radio ready · Headphones appear when music plays';
  if(host.hidden){close();speech.hidden=true;clearTimeout(napTimer);clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking')}
- if(wasSleeping&&!sleeping&&!host.hidden){waking=true;pet.classList.add('waking');stop();dancing=false;blink();if(idle){bounce();ears()}happy(1800);clearTimeout(wakeTimer);wakeTimer=setTimeout(()=>{waking=false;pet.classList.remove('waking');sync();say('Recharged and ready!')},1800)}
+ if(wasSleeping&&!sleeping&&!host.hidden)wakeUp();
  place();
 }
 function touch(){clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;sync()}if(!host.hidden&&!prefs.asleep&&!radio)napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!radio){autoAsleep=true;sync()}else touch()},60000)}
