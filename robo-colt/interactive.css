@@ -48,7 +48,7 @@ body[data-theme="night"] .companion-picker select,body[data-theme="night"] .comp
 .robo-companion .galaxy .eye>ellipse{display:none}
 .robo-companion .asleep .mouth,.robo-companion .asleep .mouth-open{visibility:hidden}
 .robo-companion .asleep .mouth-sleep{opacity:1}
-.robo-companion .mouth-sleep{transform-origin:637px 662px}
+.robo-companion .mouth-sleep{transform-origin:0px 3px}
 .robo-companion .asleep.idle .mouth-sleep{animation:dumpling-soft-snore 2.8s cubic-bezier(.37,0,.63,1) infinite}
 @keyframes dumpling-soft-snore{0%,100%{transform:scale(1,.8)}50%{transform:scale(1,1.15)}}
 @media(prefers-reduced-motion:reduce){.robo-companion .asleep.idle .mouth-sleep{animation:none}}
@@ -148,7 +148,9 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .colt-earphone{display:none}
 .robo-companion .wear-phones .colt-earphone{display:inline}
 .robo-companion .mouth-open{transform-origin:0px 0px;opacity:1;visibility:visible;transform:none;transition:none}
-.robo-companion .asleep.idle .mouth-sleep{animation:none;transform:none}
+.robo-companion .asleep.idle .mouth-sleep{animation:dumpling-soft-snore 2.8s cubic-bezier(.37,0,.63,1) infinite}
+.robo-companion.motion-off .asleep .mouth-sleep{animation:none;transform:none}
+@media(prefers-reduced-motion:reduce){.robo-companion .asleep.idle .mouth-sleep{animation:none;transform:none}}
 .robo-companion .happy .mouth-open,.robo-companion .talking .mouth-open{display:inline}
 .robo-companion .happy .mouth-rest,.robo-companion .talking .mouth-rest,.robo-companion .sleeping .mouth-rest,.robo-companion .sleeping .mouth-open{display:none}
 .robo-companion .sleeping .mouth-sleep{display:inline;opacity:1}

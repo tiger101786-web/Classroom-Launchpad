@@ -330,7 +330,8 @@ async function request(route, cookie='', body, method) {
     await roboPet.screenshot({path:path.join(repo,'work',`robo-dance-${role}.png`)});
     await roboPet.click();await roboPanel.locator('[data-sleep]').click();
     assert.equal(await roboPet.evaluate(e=>e.classList.contains('sleeping')),true);
-    assert.equal(await roboPet.locator('#rc-puppet').evaluate(e=>e.getAnimations({subtree:true}).length),0);
+    assert.equal(await roboPet.locator('#rc-puppet').evaluate(e=>e.getAnimations({subtree:true}).every(a=>a.effect.target.classList.contains('mouth-sleep'))),true);
+    assert.equal(await roboPet.locator('.mouth-sleep').evaluate(e=>e.getAnimations().length),1);
     await roboPet.click();assert.equal(await roboPet.evaluate(e=>e.classList.contains('waking')),true);
     await page.waitForTimeout(4100);assert.equal(await roboPet.evaluate(e=>e.classList.contains('wake-smile')),true);
     assert.equal(await roboPet.evaluate(e=>e.classList.contains('dancing')),false);
