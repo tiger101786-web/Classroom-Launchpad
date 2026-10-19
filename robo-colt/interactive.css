@@ -151,6 +151,8 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .happy .mouth-rest,.robo-companion .talking .mouth-rest,.robo-companion .sleeping .mouth-rest,.robo-companion .sleeping .mouth-open{display:none}
 .robo-companion .sleeping .mouth-sleep{display:inline;opacity:1}
 .robo-companion .zs text,.robo-companion .notes text{animation:robo-float 3s ease-out infinite;opacity:0}
+.robo-companion .zs text{fill:#642046;stroke:#fff;stroke-width:2px;paint-order:stroke fill;stroke-linejoin:round}
+body[data-theme="night"] .robo-companion .zs text{fill:#e6d9ff;stroke:#24152f}
 .robo-companion .zs text:nth-child(2){animation-delay:-1s}.robo-companion .zs text:nth-child(3){animation-delay:-2s}
 .robo-companion .notes text:nth-child(2){animation-delay:-1.5s}
 .robo-companion.motion-off .zs text,.robo-companion.motion-off .notes text{animation:none;opacity:1}
