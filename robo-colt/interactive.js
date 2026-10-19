@@ -27,6 +27,24 @@ for(const [side,x,angle] of [['left',204,-22],['right',470,22]]){
  cup.innerHTML='<g transform="rotate('+angle+' '+(x+30)+' 105)"><rect x="'+x+'" y="53" width="60" height="108" rx="26" fill="#17131b" stroke="#aaa6b1" stroke-width="4"/><rect x="'+(x+8)+'" y="61" width="44" height="90" rx="20" fill="#801b36"/><path d="M'+(x+17)+' 78V127" stroke="#d26b86" stroke-width="4" stroke-linecap="round"/></g>';
  $('#ear-'+side).append(cup);
 }
+// Separate the head at the curved neck seam without changing the atlas or limb pivots.
+const svgNS='http://www.w3.org/2000/svg',puppet=$('#puppet');
+const bodyArt=puppet.querySelector(':scope > svg');
+const headArt=bodyArt.cloneNode(true);
+const headClip=document.createElementNS(svgNS,'clipPath');headClip.id='rc-head-clip';
+headClip.innerHTML='<path d="M0 0H650V425H470Q367 480 264 425H0Z"/>';
+const torsoClip=document.createElementNS(svgNS,'clipPath');torsoClip.id='rc-torso-clip';
+torsoClip.innerHTML='<path d="M0 425H264Q367 480 470 425H650V685H0Z"/>';
+pet.querySelector('defs').append(headClip,torsoClip);
+bodyArt.setAttribute('clip-path','url(#rc-torso-clip)');
+headArt.setAttribute('clip-path','url(#rc-head-clip)');
+const neck=document.createElementNS(svgNS,'ellipse');neck.id='rc-neck-joint';
+for(const [key,value] of Object.entries({cx:367,cy:437,rx:66,ry:23,fill:'#17151a'}))neck.setAttribute(key,value);
+puppet.append(neck);
+const head=document.createElementNS(svgNS,'g');head.id='rc-head';head.style.transformOrigin='367px 437px';
+head.append($('#ear-left'),$('#ear-right'),headArt);
+for(const selector of ['.eyes-open','.eyes-happy','.eyes-sleep','#mouth','#headphones'])head.append($(selector));
+puppet.append(head);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let sleeping=false,dancing=false,idle=false,phones=false,busy=false,sequence=0,drag=null;
 let prefs=window.roboColtDefaults(),visible=false,account='',radio=false,autoAsleep=false,hiddenByUser=false,position=null,napTimer,wakeTimer,waking=false;
@@ -88,6 +106,8 @@ function dance(){
     animate($('#rear-right'),[0,.55,0,-1,0].map((v,i)=>({transform:`translateY(${-3*Math.abs(v)}px) rotate(${6*v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
     animate($('#puppet'),[0,1,0,-1,0].map((v,i)=>({transform:`translateY(${-5*Math.abs(v)}px) rotate(${v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
     animate($('#tail'),[0,1,0,-1,0].map((v,i)=>({transform:`rotate(${8*v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
+    // A relaxed left/right head groove over two step cycles; face and headphones follow.
+    animate($('#head'),[0,1,0,-1,0].map((v,i)=>({transform:`rotate(${3*v}deg)`,offset:i/4,easing:'ease-in-out'})),{...timing,duration:1280});
     // Share an exact start time so the steps cannot drift out of phase.
     const started=document.timeline.currentTime;
     for(const a of animations)a.startTime=started;
