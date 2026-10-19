@@ -26,6 +26,7 @@ async function request(route, cookie='', body, method) {
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,eyewear:'invalid'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,size:'huge'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,robo:{eye:'<script>'}})).status,400);
+  assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,robo:{skin:'Unknown',headwear:'none',platform:true,motion:true,size:'medium',asleep:false}})).status,400);
   const email='tiger101786@gmail.com';
   const reset=await request('/api/approved-students/'+encodeURIComponent(email)+'/reset-code',teacher.cookie,{},'POST');
   const student=await request('/api/auth/register','',{email,activationCode:reset.data.activationCode,name:'Test',grade:'4',password:'StudentTest123!'},'POST');
@@ -302,10 +303,12 @@ async function request(route, cookie='', body, method) {
     await roboPet.waitFor({state:'visible'});await roboPet.click();
     assert.equal(await roboPanel.isVisible(),true);
     assert.equal(Math.round((await roboPanel.boundingBox()).width),640);
-    await roboPanel.locator('[data-setting="eye"][data-option="Blue"]').click();
+    assert.equal(await roboPanel.locator('[data-setting="eye"]').count(),0);
+    assert.deepEqual(await roboPanel.locator('[data-setting="skin"]').allTextContents(),['Original','Arctic','Emerald','Galaxy','Royal','School Spirit']);
+    await roboPanel.locator('[data-setting="skin"][data-option="Arctic"]').click();
     await roboPanel.locator('[data-setting="size"][data-option="extra-large"]').click();
     await page.waitForFunction(()=>document.querySelector('.robo-companion .pet-status').textContent==='Saved');
-    assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.robo.eye,'Blue');
+    assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.robo.skin,'Arctic');
     await roboPanel.screenshot({path:path.join(repo,'work',`robo-panel-${role}.png`)});
     await roboPanel.locator('[data-close]').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
@@ -325,7 +328,7 @@ async function request(route, cookie='', body, method) {
     await page.waitForFunction(()=>document.querySelector('.robo-companion .pet-status').textContent==='Saved');
     await page.reload({waitUntil:'domcontentloaded'});await showHome();await roboPet.waitFor({state:'visible'});
     assert.equal(await robo.getAttribute('data-size'),'extra-large');
-    await roboPet.click();assert.equal(await roboPanel.locator('[data-option="Blue"]').getAttribute('aria-pressed'),'true');
+    await roboPet.click();assert.equal(await roboPanel.locator('[data-setting="skin"][data-option="Arctic"]').getAttribute('aria-pressed'),'true');
     await roboPanel.locator('[data-close]').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('launchpad-companion-availability',{detail:{enabled:false}})));
     assert.equal(await roboPet.isVisible(),false);

@@ -592,7 +592,7 @@ function coltCustomizationAccountKey(session) {
 
 function normalizeRoboColtPreference(value) {
   const s=value&&typeof value==='object'?value:{};
-  return {eye:['Red','Blue','Gold'].includes(s.eye)?s.eye:'Red',headwear:s.headwear==='headphones'?'headphones':'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
+  return {skin:['Original','Arctic','Emerald','Galaxy','Royal','School Spirit'].includes(s.skin)?s.skin:'Original',headwear:s.headwear==='headphones'?'headphones':'none',platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
 }
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
@@ -3892,7 +3892,7 @@ async function handleApi(req, res, pathname) {
       const input = req.method === "PUT" ? await readBody(req) : null;
       if(input?.robo!==undefined){
         const r=input.robo;
-        if(!r||typeof r!=='object'||Array.isArray(r)||!['Red','Blue','Gold'].includes(r.eye)||!['none','headphones'].includes(r.headwear)||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
+        if(!r||typeof r!=='object'||Array.isArray(r)||(r.skin!==undefined?!['Original','Arctic','Emerald','Galaxy','Royal','School Spirit'].includes(r.skin):!['Red','Blue','Gold'].includes(r.eye))||!['none','headphones'].includes(r.headwear)||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
       }
       if (input && (!['colt', 'dumpling'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
@@ -3905,7 +3905,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference({...input,robo:input.robo??preferences[key]?.robo});
+        preferences[key] = normalizeCompanionPreference({...input,robo:input.robo?{...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }
