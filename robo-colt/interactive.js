@@ -29,15 +29,15 @@ function wakeUp(){
  waking=true;pet.classList.add('waking');
  // Open gradually, pause to focus, then blink before the final smile.
  pet.querySelectorAll('.eye').forEach(e=>animate(e,[
-  {transform:'scaleY(.04)',offset:0},{transform:'scaleY(.15)',offset:.18},
-  {transform:'scaleY(1)',offset:.62},{transform:'scaleY(1)',offset:.72},
-  {transform:'scaleY(.04)',offset:.79},{transform:'scaleY(1)',offset:.88},
+  {transform:'scaleY(.04)',offset:0,easing:'ease-in-out'},
+  {transform:'scaleY(1)',offset:.5},{transform:'scaleY(1)',offset:.65,easing:'ease-in-out'},
+  {transform:'scaleY(.04)',offset:.77,easing:'ease-in-out'},{transform:'scaleY(1)',offset:.9},
   {transform:'scaleY(1)',offset:1}
- ],{duration:1800}));
+ ],{duration:3000,easing:'linear'}));
  wakeTimer=setTimeout(()=>{
   pet.classList.add('wake-smile');
   wakeTimer=setTimeout(()=>{cancelWake();sync();say('Recharged and ready!')},1000);
- },1800);
+ },3000);
 }
 function tail(){animate($('#tail'),[{transform:'rotate(0deg) skewY(0deg)',offset:0},{transform:'rotate(-18deg) skewY(-5deg)',offset:.17},{transform:'rotate(17deg) skewY(4deg)',offset:.38},{transform:'rotate(-12deg) skewY(-3deg)',offset:.59},{transform:'rotate(8deg) skewY(2deg)',offset:.78},{transform:'rotate(-3deg)',offset:.91},{transform:'rotate(0deg) skewY(0deg)',offset:1}],{duration:1700})}
 function hoof(){
