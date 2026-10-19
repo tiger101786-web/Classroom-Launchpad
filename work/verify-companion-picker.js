@@ -316,9 +316,14 @@ async function request(route, cookie='', body, method) {
     }
     for(let i=0;i<4;i++)await skinGroup.getByRole('button',{name:'Previous',exact:true}).click();
     await roboPanel.locator('[data-setting="skin"][data-option="Arctic"]').click();
+    await roboPanel.locator('[data-setting="headwear"][data-option="horn"]').click();
+    await roboPanel.locator('[data-setting="eyewear"][data-option="sunglasses"]').click();
+    await roboPanel.locator('[data-setting="neckwear"][data-option="bowtie"]').click();
     await roboPanel.locator('[data-setting="size"][data-option="extra-large"]').click();
     await page.waitForFunction(()=>document.querySelector('.robo-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.robo.skin,'Arctic');
+    const savedAccessories=(await request('/api/companion-preferences',cookie)).data.preferences.robo;
+    assert.equal(savedAccessories.headwear,'horn');assert.equal(savedAccessories.eyewear,'sunglasses');assert.equal(savedAccessories.neckwear,'bowtie');
     await roboPanel.screenshot({path:path.join(repo,'work',`robo-panel-${role}.png`)});
     await roboPanel.locator('[data-close]').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
@@ -341,6 +346,7 @@ async function request(route, cookie='', body, method) {
     await page.waitForFunction(()=>document.querySelector('.robo-companion .pet-status').textContent==='Saved');
     await page.reload({waitUntil:'domcontentloaded'});await showHome();await roboPet.waitFor({state:'visible'});
     assert.equal(await robo.getAttribute('data-size'),'extra-large');
+    for(const name of ['horn','sunglasses','bowtie'])assert.equal(await robo.locator('#rc-accessory-'+name).evaluate(e=>getComputedStyle(e).display),'inline');
     await roboPet.click();assert.equal(await roboPanel.locator('[data-setting="skin"][data-option="Arctic"]').getAttribute('aria-pressed'),'true');
     await roboPanel.locator('[data-close]').click();
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('launchpad-companion-availability',{detail:{enabled:false}})));
