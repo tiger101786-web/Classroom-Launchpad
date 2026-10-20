@@ -3,9 +3,9 @@
 Custom-art alignment: body, both front-leg sprites, and tail are independently
 fitted to the original atlas component bounds. The platform, crop windows, and
 animation pivots do not move. Facial anchors are mapped through the body fit;
-both custom skins have their own mouth placement and scale for all expressions.
+Custom skins share that registration across every expression.
 
-The customization panel includes 18 skins. Four choices per page keep the
+The customization panel includes 23 skins. Four choices per page keep the
 existing panel dimensions. Original comes first, followed by alphabetical names.
 The expanded collection adds Ancient Bronze, Candy Chrome, Carbon Racer,
 Copper Circuit, Deep Sea, Desert Relic, Frostfire, Moonstone, Obsidian Ember,
@@ -44,3 +44,12 @@ skin when saving an eye-only payload.
 Checks: `node work/verify-colt-skins.cjs` (six visual captures and geometry checks)
 and `npm run test:robo` (saved selection, radio, sleep/wake, and Squishy regression).
 The standalone preview is `work/colt-skins-preview.html`.
+
+The October 20 collection adds five painted atlases: Camo, Rainbow, Crocodile,
+Tiger, and Zebra. Their silhouettes are registered independently per component,
+using measured alpha bounds. Tiger has dedicated facial anchors. Tiger's amber
+round pupils and Crocodile's golden-green slit pupils reuse the original animated
+eye groups; other skins restore the original pupil geometry. Platforms and
+nameplates share complementary finishes. Generation prompts and implementation
+notes are in `PAINTED-SKINS-20261020.md`; the interactive production-art preview
+is `work/colt-painted-skins-preview.html`.

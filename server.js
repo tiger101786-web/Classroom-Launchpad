@@ -590,7 +590,7 @@ function coltCustomizationAccountKey(session) {
     : `student:${normalizeEmail(session && session.email)}`;
 }
 
-const ROBO_COLT_SKINS=['Original','Arctic','Emerald','Galaxy','Royal','School Spirit','Ancient Bronze','Candy Chrome','Carbon Racer','Copper Circuit','Deep Sea','Desert Relic','Frostfire','Moonstone','Obsidian Ember','Porcelain','Rose Quartz','Woodland Guardian'];
+const ROBO_COLT_SKINS=['Original','Arctic','Emerald','Galaxy','Royal','School Spirit','Ancient Bronze','Candy Chrome','Carbon Racer','Copper Circuit','Deep Sea','Desert Relic','Frostfire','Moonstone','Obsidian Ember','Porcelain','Rose Quartz','Woodland Guardian','Camo','Rainbow','Crocodile','Tiger','Zebra'];
 function normalizeRoboColtPreference(value) {
   const s=value&&typeof value==='object'?value:{};
   const name=Array.from((typeof s.name==='string'?s.name:'COLT').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'COLT';

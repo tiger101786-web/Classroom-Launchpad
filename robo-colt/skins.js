@@ -1,5 +1,10 @@
-/* Skins recolor only the original art: accessory geometry and colors are independent. */
+/* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
+ Zebra:{accent:'#d5dfed',light:'#ffffff',dark:'#586578',tint:[.82,.86,.92],armor:[1.2,1.2,1.24],artwork:'robo-colt/parts-zebra-v1.png',bounds:[[126,19,610,671],[852,165,1059,649],[210,699,434,1191],[762,734,1184,1169]],description:'Custom ivory enamel with flowing black zebra stripes and silver details.'},
+ Camo:{accent:'#c6bb68',light:'#fff5c7',dark:'#59632b',tint:[.58,.56,.24],armor:[.93,1,.8],artwork:'robo-colt/parts-camo-v1.png',bounds:[[127,17,608,672],[851,167,1059,648],[209,700,433,1192],[762,737,1182,1170]],description:'Custom woodland camouflage with satin olive armor and brass details.'},
+ Rainbow:{accent:'#65dcff',light:'#f2faff',dark:'#7548cb',tint:[.3,.65,.95],armor:[1.05,1.08,1.16],pattern:'rainbow',artwork:'robo-colt/parts-rainbow-v1.png',bounds:[[126,17,611,673],[850,165,1058,650],[209,698,436,1194],[760,731,1187,1171]],description:'Custom prismatic enamel, flowing rainbow mane, and polished dark trim.'},
+ Crocodile:{accent:'#e6be59',light:'#fff2bf',dark:'#86601c',tint:[.8,.57,.16],armor:[.65,.85,.55],artwork:'robo-colt/parts-crocodile-v1.png',bounds:[[128,18,608,672],[852,167,1058,649],[210,699,434,1192],[765,735,1183,1169]],description:'Custom embossed crocodile scales with forest-green armor and antique gold.'},
+ Tiger:{accent:'#ffb248',light:'#fff0c8',dark:'#ad510e',tint:[1,.46,.045],armor:[1.05,.95,.86],artwork:'robo-colt/parts-tiger-v1.png',bounds:[[131,13,633,676],[881,160,1095,653],[209,697,439,1192],[763,734,1186,1172]],face:{eyes:[[286,276],[478,276]],mouth:[383,401,1]},description:'Custom orange tiger enamel, tapered black stripes, and ivory accents.'},
  Original:{accent:'#ff3c25',light:'#ffb6a4',dark:'#970b15',description:'Classic graphite armor and crimson energy.'},
  Arctic:{accent:'#63dfff',light:'#efffff',dark:'#167ba6',tint:[.12,.23,.31],armor:[1.7,1.85,2],offset:.12,fullPaint:true,description:'Pearl-silver armor, icy blue details, and a frosty glow.'},
  Emerald:{accent:'#45ef9b',light:'#d9ffe9',dark:'#087d50',tint:[.12,.65,.38],armor:[1.12,1.17,1.2],texture:'brushed',description:'Brushed gunmetal armor with polished jade accents.'},
@@ -27,7 +32,7 @@ window.createRoboColtSkinPainter = function(pet){
  // Keep the crop windows, limb pivots and platform fixed while fitting the art inside them.
  const originalBounds=[[127,17,607,671],[851,167,1056,649],[210,700,433,1192],[765,737,1178,1168]];
  const paintedBounds={Porcelain:[[129,21,625,672],[863,171,1076,655],[208,706,439,1203],[769,732,1206,1184]],'Obsidian Ember':[[138,17,624,672],[861,162,1077,651],[209,696,442,1195],[756,732,1192,1173]]};
- function fit(name,part){const a=originalBounds[part],b=paintedBounds[name]?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
+ function fit(name,part){const a=originalBounds[part],b=(window.roboColtSkins[name]?.bounds||paintedBounds[name])?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
  const facePositions={Porcelain:{eyes:[[283,279],[474,278]],mouth:[378,405,.8]},'Obsidian Ember':{eyes:[[287,273],[473,275]],mouth:[381,397,.85]}};
  const eyeAnchors=[];
  function anchor(element,index){const g=document.createElementNS(ns,'g');g.dataset.eyeAnchor=index;element.before(g);g.append(element);eyeAnchors.push([g,index]);}
@@ -77,6 +82,7 @@ window.createRoboColtSkinPainter = function(pet){
    // Keep circuit traces off the muzzle while preserving the armor's pattern elsewhere.
    if(skin.pattern==='circuit')svg=svg.replace('</defs><rect','<mask id="clear-muzzle"><rect width="1254" height="1254" fill="white"/><ellipse cx="367" cy="355" rx="120" ry="110" fill="black"/></mask></defs><rect mask="url(#clear-muzzle)"');
    if(skin.pattern==='frostfire')svg=svg.replace('x1="0" x2="1"','x1="0" x2="730" gradientUnits="userSpaceOnUse"');
+   if(skin.pattern==='rainbow')svg='<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254"><defs><linearGradient id="p"><stop stop-color="#ff4545"/><stop offset=".18" stop-color="#ffab38"/><stop offset=".35" stop-color="#f7e64e"/><stop offset=".5" stop-color="#48dc8d"/><stop offset=".67" stop-color="#4ddcff"/><stop offset=".83" stop-color="#6867f2"/><stop offset="1" stop-color="#e067eb"/></linearGradient></defs><rect width="1254" height="1254" fill="url(#p)" opacity=".92"/></svg>';
    const uri='data:image/svg+xml,'+encodeURIComponent(svg);
    filter.innerHTML+='<feImage href="'+uri+'" x="0" y="0" width="1254" height="1254" result="pattern"/><feBlend in="pattern" in2="'+target+'" mode="'+(d?'normal':'color')+'"/><feComposite in2="SourceAlpha" operator="in" result="'+target+'"/>';
   }
@@ -93,7 +99,7 @@ window.createRoboColtSkinPainter = function(pet){
  return function(name){
   const skin=window.roboColtSkins[name]||window.roboColtSkins.Original;
   if(last===skin)return skin;last=skin;
-  const face=facePositions[name];
+  const face=skin.face||facePositions[name]||(skin.bounds?{eyes:[[274,276],[458,276]],mouth:[367,400,1]}:null);
   const bodyFit=fit(name,0);
   eyeAnchors.forEach(([g,i])=>{const point=face?.eyes[i];const dx=point?bodyFit.x+point[0]*bodyFit.sx-[274,458][i]:0,dy=point?bodyFit.y+point[1]*bodyFit.sy-276:0;g.setAttribute('transform','translate('+dx+' '+dy+')')});
   const mouth=face?.mouth;
@@ -116,6 +122,17 @@ window.createRoboColtSkinPainter = function(pet){
    if(filterId)e.setAttribute('filter','url(#'+filterId+')');else e.removeAttribute('filter');
   });
   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="'+skin.light+'"/><stop offset=".5" stop-color="'+skin.accent+'"/><stop offset="1" stop-color="'+skin.dark+'"/>';
+  // Retain the original eye groups, anchors, highlights and blink animation.
+  // Only the iris finish and pupil shape change for the animal skins.
+  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':null;
+  if(animalEye)pet.querySelector('#rc-iris').innerHTML=animalEye==='tiger'?'<stop stop-color="#fff1b1"/><stop offset=".42" stop-color="#e9b94c"/><stop offset=".76" stop-color="#bd7825"/><stop offset="1" stop-color="#513319"/>':'<stop stop-color="#faf0aa"/><stop offset=".42" stop-color="#c5c954"/><stop offset=".76" stop-color="#8f9b36"/><stop offset="1" stop-color="#385322"/>';
+  pet.querySelectorAll('.eyes-open .eye').forEach(eye=>{
+   const pupil=eye.querySelectorAll('ellipse')[2];
+   pupil.setAttribute('rx',animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
+   pupil.setAttribute('ry',animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
+   pupil.setAttribute('fill',animalEye?'#15180f':'#23060a');
+   pupil.dataset.pupil=animalEye||'original';
+  });
   pet.querySelectorAll('.eye ellipse[filter]').forEach(e=>e.setAttribute('fill',skin.accent));
   pet.querySelectorAll('.eyes-happy path').forEach(e=>e.setAttribute('stroke',skin.accent));
   pet.querySelectorAll('.eyes-sleep path').forEach(e=>e.setAttribute('stroke',skin.dark));

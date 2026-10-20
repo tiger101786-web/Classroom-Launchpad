@@ -319,9 +319,9 @@ async function request(route, cookie='', body, method) {
     assert.equal(await roboPanel.isVisible(),true);
     assert.equal(Math.round((await roboPanel.boundingBox()).width),640);
     assert.equal(await roboPanel.locator('[data-setting="eye"]').count(),0);
-    assert.deepEqual(await roboPanel.locator('[data-setting="skin"]').allTextContents(),['Original','Ancient Bronze','Arctic','Candy Chrome','Carbon Racer','Copper Circuit','Deep Sea','Desert Relic','Emerald','Frostfire','Galaxy','Moonstone','Obsidian Ember','Porcelain','Rose Quartz','Royal','School Spirit','Woodland Guardian']);
+    assert.deepEqual(await roboPanel.locator('[data-setting="skin"]').allTextContents(),['Original','Ancient Bronze','Arctic','Camo','Candy Chrome','Carbon Racer','Copper Circuit','Crocodile','Deep Sea','Desert Relic','Emerald','Frostfire','Galaxy','Moonstone','Obsidian Ember','Porcelain','Rainbow','Rose Quartz','Royal','School Spirit','Tiger','Woodland Guardian','Zebra']);
     const skinGroup=roboPanel.locator('fieldset').first();
-    for(let i=0;i<4;i++)await skinGroup.getByRole('button',{name:'Next',exact:true}).click();
+    while(await skinGroup.getByRole('button',{name:'Next',exact:true}).isEnabled())await skinGroup.getByRole('button',{name:'Next',exact:true}).click();
     await skinGroup.getByRole('button',{name:'Woodland Guardian',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('.robo-companion .pet-status').textContent==='Saved');
     assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.robo.skin,'Woodland Guardian');
@@ -329,7 +329,7 @@ async function request(route, cookie='', body, method) {
       const saved=await request('/api/companion-preferences',cookie,{...baseline,robo:{skin,headwear:'none',platform:true,motion:true,size:'medium',asleep:false}});
       assert.equal(saved.status,200);assert.equal(saved.data.preferences.robo.skin,skin);
     }
-    for(let i=0;i<4;i++)await skinGroup.getByRole('button',{name:'Previous',exact:true}).click();
+    while(await skinGroup.getByRole('button',{name:'Previous',exact:true}).isEnabled())await skinGroup.getByRole('button',{name:'Previous',exact:true}).click();
     await roboPanel.locator('[data-setting="skin"][data-option="Arctic"]').click();
     await roboPanel.locator('[data-setting="headwear"][data-option="horn"]').click();
     await roboPanel.locator('[data-setting="eyewear"][data-option="sunglasses"]').click();
