@@ -1,6 +1,7 @@
 /* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
- Panda:{accent:'#bba588',light:'#fff7e7',dark:'#51463a',tint:[.87,.89,.92],armor:[.9,.9,.92],artwork:'robo-colt/parts-panda-v3.png',bounds:[[115,19,629,683],[868,172,1098,665],[227,700,474,1198],[777,739,1215,1177]],face:{eyes:[[279,282],[465,282]],mouth:[374,421,.8]},description:'Panda robot armor with rounded black ears, bold eye patches, black limbs, and a white belly.'},
+ Panda:{accent:'#bba588',light:'#fff7e7',dark:'#51463a',tint:[.87,.89,.92],armor:[.9,.9,.92],artwork:'robo-colt/parts-panda-v4.png',bounds:[[123,22,638,683],[868,172,1105,665],[224,700,477,1197],[773,739,1218,1177]],face:{eyes:[[290,282],[475,282]],mouth:[384,421,.8]},description:'Panda robot armor with normal Colt ears, bold eye patches, black limbs, and a white belly.'},
+ Snake:{accent:'#e7bc62',light:'#fff1b5',dark:'#765021',tint:[.78,.52,.25],armor:[1.05,.9,.74],artwork:'robo-colt/parts-snake-v1.png',bounds:[[127,19,609,672],[851,165,1060,649],[208,699,434,1192],[763,734,1184,1172]],description:'Python-patterned robot enamel, bronze trim, amber snake eyes, and a flickering forked tongue.'},
  Zebra:{accent:'#d5dfed',light:'#ffffff',dark:'#586578',tint:[.82,.86,.92],armor:[1.2,1.2,1.24],artwork:'robo-colt/parts-zebra-v1.png',bounds:[[126,19,610,671],[852,165,1059,649],[210,699,434,1191],[762,734,1184,1169]],description:'Custom ivory enamel with flowing black zebra stripes and silver details.'},
  Camo:{accent:'#c6bb68',light:'#fff5c7',dark:'#59632b',tint:[.58,.56,.24],armor:[.93,1,.8],artwork:'robo-colt/parts-camo-v1.png',bounds:[[127,17,608,672],[851,167,1059,648],[209,700,433,1192],[762,737,1182,1170]],description:'Custom woodland camouflage with satin olive armor and brass details.'},
  Rainbow:{accent:'#65dcff',light:'#f2faff',dark:'#7548cb',tint:[.3,.65,.95],armor:[1.05,1.08,1.16],pattern:'rainbow',artwork:'robo-colt/parts-rainbow-v1.png',bounds:[[126,17,611,673],[850,165,1058,650],[209,698,436,1194],[760,731,1187,1171]],description:'Custom prismatic enamel, flowing rainbow mane, and polished dark trim.'},
@@ -36,7 +37,6 @@ window.createRoboColtSkinPainter = function(pet){
  function fit(name,part){const a=originalBounds[part],b=(window.roboColtSkins[name]?.bounds||paintedBounds[name])?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
  const facePositions={Porcelain:{eyes:[[283,279],[474,278]],mouth:[378,405,.8]},'Obsidian Ember':{eyes:[[287,273],[473,275]],mouth:[381,397,.85]}};
  const eyeAnchors=[];
- const earShapes=[...pet.querySelectorAll('#rc-ear-left-shape,#rc-ear-right-shape')].map(e=>[e,e.getAttribute('d')]);
  function anchor(element,index){const g=document.createElementNS(ns,'g');g.dataset.eyeAnchor=index;element.before(g);g.append(element);eyeAnchors.push([g,index]);}
  pet.querySelectorAll('.eyes-open .eye').forEach((e,i)=>anchor(e,i));
  for(const selector of ['.eyes-happy','.eyes-sleep']){
@@ -103,8 +103,6 @@ window.createRoboColtSkinPainter = function(pet){
   if(last===skin)return skin;last=skin;
   const face=skin.face||facePositions[name]||(skin.bounds?{eyes:[[274,276],[458,276]],mouth:[367,400,1]}:null);
   const bodyFit=fit(name,0);
-  // The round panda ears need their own cutouts; restore horse cutouts on switch.
-  earShapes.forEach(([e,original],i)=>e.setAttribute('d',name==='Panda'?(i===0?'M190 174V110C188 43 284 37 312 94L304 149L280 174Z':'M424 159L428 108C433 42 533 43 551 109L548 177Z'):original));
   eyeAnchors.forEach(([g,i])=>{const point=face?.eyes[i];const dx=point?bodyFit.x+point[0]*bodyFit.sx-[274,458][i]:0,dy=point?bodyFit.y+point[1]*bodyFit.sy-276:0;g.setAttribute('transform','translate('+dx+' '+dy+')')});
   const mouth=face?.mouth;
   pet.querySelector('#rc-mouth').setAttribute('transform',mouth?'translate('+(bodyFit.x+mouth[0]*bodyFit.sx)+' '+(bodyFit.y+mouth[1]*bodyFit.sy)+') scale('+(mouth[2]*bodyFit.sx)+' '+(mouth[2]*bodyFit.sy)+')':'translate(367 400)');
@@ -128,15 +126,16 @@ window.createRoboColtSkinPainter = function(pet){
   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="'+skin.light+'"/><stop offset=".5" stop-color="'+skin.accent+'"/><stop offset="1" stop-color="'+skin.dark+'"/>';
   // Retain the original eye groups, anchors, highlights and blink animation.
   // Only the iris finish and pupil shape change for the animal skins.
-  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':null;
+  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':name==='Snake'?'snake':null;
   if(animalEye)pet.querySelector('#rc-iris').innerHTML=animalEye==='tiger'?'<stop stop-color="#fff1b1"/><stop offset=".42" stop-color="#e9b94c"/><stop offset=".76" stop-color="#bd7825"/><stop offset="1" stop-color="#513319"/>':'<stop stop-color="#faf0aa"/><stop offset=".42" stop-color="#c5c954"/><stop offset=".76" stop-color="#8f9b36"/><stop offset="1" stop-color="#385322"/>';
   pet.querySelectorAll('.eyes-open .eye').forEach(eye=>{
    const pupil=eye.querySelectorAll('ellipse')[2];
-   pupil.setAttribute('rx',animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
-   pupil.setAttribute('ry',animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
+   pupil.setAttribute('rx',animalEye==='snake'?'4':animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
+   pupil.setAttribute('ry',animalEye==='snake'||animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
    pupil.setAttribute('fill',animalEye?'#15180f':'#23060a');
    pupil.dataset.pupil=animalEye||'original';
   });
+  if(animalEye==='snake')pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#fff4bc"/><stop offset=".42" stop-color="#e7bc62"/><stop offset=".78" stop-color="#b68432"/><stop offset="1" stop-color="#624018"/>';
   pet.querySelectorAll('.eye ellipse[filter]').forEach(e=>e.setAttribute('fill',skin.accent));
   pet.querySelectorAll('.eyes-happy path').forEach(e=>e.setAttribute('stroke',skin.accent));
   pet.querySelectorAll('.eyes-sleep path').forEach(e=>e.setAttribute('stroke',skin.dark));

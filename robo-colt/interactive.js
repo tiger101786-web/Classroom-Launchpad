@@ -55,8 +55,30 @@ let sleeping=false,dancing=false,idle=false,phones=false,busy=false,sequence=0,d
 let prefs=window.roboColtDefaults(),visible=false,account='',radio=false,autoAsleep=false,hiddenByUser=false,position=null,napTimer,wakeTimer,waking=false;
 function status(s){const label=panel.querySelector('.motion-status');if(label)label.textContent=s}
 const animations=new Set();
+// This small overlay follows the existing skin-specific mouth anchor.
+const snakeTongue=document.createElementNS(svgNS,'g');snakeTongue.id='rc-snake-tongue';snakeTongue.setAttribute('pointer-events','none');
+snakeTongue.innerHTML='<ellipse cx="0" cy="0" rx="9" ry="3" fill="#180f13"/><g class="snake-tongue-tip"><path d="M-3 0Q-4 18-2 32L-12 45L0 38L12 45L3 32Q5 18 3 0Z" fill="#b83a59" stroke="#5b2033" stroke-width="1.2" stroke-linejoin="round"/><path d="M0 3V30" stroke="#f7889e" stroke-width="1.5" stroke-linecap="round"/></g>';
+$('#mouth').append(snakeTongue);
+let snakeTimer,snakeAnimation;
+function cancelSnakeTongue(){const a=snakeAnimation;snakeAnimation=null;a?.cancel();pet.classList.remove('snake-flick');}
+function snakeEligible(){return prefs.skin==='Snake'&&idle&&!sleeping&&!waking&&!dancing&&!drag&&!document.hidden;}
+function scheduleSnakeTongue(){
+ if(!snakeEligible()){clearTimeout(snakeTimer);snakeTimer=null;cancelSnakeTongue();return;}
+ if(snakeTimer||snakeAnimation)return;
+ snakeTimer=setTimeout(()=>{
+  snakeTimer=null;
+  if(!snakeEligible())return;
+  if(animations.size||pet.classList.contains('happy')||pet.classList.contains('talking')||pet.classList.contains('wake-smile')){scheduleSnakeTongue();return;}
+  pet.classList.add('snake-flick');
+  const a=snakeTongue.querySelector('.snake-tongue-tip').animate([
+   {transform:'scaleY(0)',offset:0},{transform:'scaleY(1)',offset:.22},{transform:'scaleY(.65) rotate(-4deg)',offset:.38},{transform:'scaleY(1) rotate(3deg)',offset:.55},{transform:'scaleY(.72)',offset:.7},{transform:'scaleY(0)',offset:1}
+  ],{duration:560,easing:'ease-in-out'});
+  snakeAnimation=a;
+  a.finished.catch(()=>{}).finally(()=>{if(snakeAnimation===a){snakeAnimation=null;pet.classList.remove('snake-flick');}if(!snakeAnimation)scheduleSnakeTongue();});
+ },2200+Math.random()*2000);
+}
 function animate(el,frames,opts={}){const a=el.animate(frames,{duration:650,easing:'ease-in-out',...opts});animations.add(a);a.finished.catch(()=>{}).finally(()=>animations.delete(a));return a}
-function stop(){sequence++;for(const a of animations)a.cancel();animations.clear();pet.classList.remove('happy','talking');busy=false}
+function stop(){cancelSnakeTongue();sequence++;for(const a of animations)a.cancel();animations.clear();pet.classList.remove('happy','talking');busy=false}
 function blink(){if(sleeping||waking)return;pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:600}))}
 function cancelWake(){clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking','wake-smile');pet.querySelectorAll('.eye').forEach(e=>e.style.removeProperty('transform'))}
 function wakeUp(){
@@ -102,7 +124,7 @@ function hoof(){
 function ears(){animate($('#ear-left'),[{transform:'rotate(0deg)'},{transform:'rotate(-12deg)',offset:.18},{transform:'rotate(4deg)',offset:.34},{transform:'rotate(-7deg)',offset:.5},{transform:'rotate(0deg)',offset:.76},{transform:'rotate(0deg)'}],{duration:720});animate($('#ear-right'),[{transform:'rotate(0deg)'},{transform:'rotate(9deg)',offset:.25},{transform:'rotate(-3deg)',offset:.5},{transform:'rotate(0deg)'}],{duration:560,delay:160})}
 function mouth(){const id=sequence;pet.classList.add('talking');const a=animate($('.mouth-open'),[{transform:'scaleY(.15)'},{transform:'scaleY(1)',offset:.18},{transform:'scaleY(.3)',offset:.37},{transform:'scaleY(.85)',offset:.56},{transform:'scaleY(.25)',offset:.73},{transform:'scaleY(.7)',offset:.86},{transform:'scaleY(.15)'}],{duration:1300});a.finished.then(()=>{if(id===sequence)pet.classList.remove('talking')}).catch(()=>{})}
 function bounce(){return animate($('#puppet'),[{transform:'translateY(0)'},{transform:'translateY(3px) scale(1.008,.992)',offset:.2},{transform:'translateY(-17px)',offset:.48},{transform:'translateY(0)',offset:.8},{transform:'translateY(0)'}],{duration:680})}
-function happy(duration=1500){const id=sequence;pet.classList.add('happy');setTimeout(()=>{if(id===sequence&&!sleeping&&!dancing)pet.classList.remove('happy')},duration)}
+function happy(duration=1500){cancelSnakeTongue();const id=sequence;pet.classList.add('happy');setTimeout(()=>{if(id===sequence&&!sleeping&&!dancing)pet.classList.remove('happy')},duration)}
 function dance(){
   stop();sleeping=false;dancing=!dancing;sync();
   if(!dancing){status('Dance stopped.');return}
@@ -215,6 +237,7 @@ function sync(){
  panel.querySelectorAll('[data-setting]').forEach(b=>{if(b.dataset.setting!=='action')b.setAttribute('aria-pressed',String(String(prefs[b.dataset.setting])===b.dataset.option))});
  panel.querySelector('.dumpling-radio-status').textContent=sleeping?'☾ Sleeping · Click Colt to wake':radio?'♫ Colt Radio · Headphones on · '+(idle?'Let’s dance!':'Motion paused'):'♫ Radio ready · Headphones appear when music plays';
  if(host.hidden){close();speech.hidden=true;clearTimeout(napTimer);clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking')}
+ scheduleSnakeTongue();
  place();
 }
 function touch(){clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;sync()}if(!host.hidden&&!prefs.asleep&&!radio)napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!radio){autoAsleep=true;sync()}else touch()},60000)}
@@ -227,13 +250,15 @@ pet.onclick=()=>{if(suppress){suppress=false;return}if(sleeping){prefs.asleep=fa
 pet.addEventListener('pointerdown',e=>{if(e.button!==0)return;const b=pet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:b.left,top:b.top,moved:false};suppress=false;pet.setPointerCapture(e.pointerId)});
 pet.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)<6)return;drag.moved=true;position={x:drag.left+dx,y:drag.top+dy};close();speech.hidden=true;place()});
 function endDrag(e){if(!drag||drag.id!==e.pointerId)return;suppress=drag.moved;if(drag.moved){try{localStorage.setItem('robo-colt-position:'+account,JSON.stringify(position))}catch{}if(e.type==='pointerup'&&!sleeping&&!dancing){if(idle)action('greet');say('New spot. Same Colt energy!')}}drag=null;touch()}
+pet.addEventListener('pointerdown',cancelSnakeTongue);
 pet.addEventListener('pointerup',endDrag);pet.addEventListener('pointercancel',endDrag);
+pet.addEventListener('pointerup',scheduleSnakeTongue);pet.addEventListener('pointercancel',scheduleSnakeTongue);
 pet.addEventListener('keydown',e=>{const move={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!move)return;e.preventDefault();const b=pet.getBoundingClientRect();position={x:b.left+move[0],y:b.top+move[1]};place();try{localStorage.setItem('robo-colt-position:'+account,JSON.stringify(position))}catch{}touch()});
 document.addEventListener('pointerdown',e=>{if(!host.contains(e.target)){close();if(!host.hidden)touch()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){close()}if(!host.hidden)touch()});
 window.addEventListener('resize',place);
 reduced.addEventListener('change',sync);document.addEventListener('visibilitychange',sync);
-function canIdle(){return idle&&!sleeping&&!dancing&&!waking&&!drag&&animations.size===0&&!pet.classList.contains('happy')}
+function canIdle(){return idle&&!sleeping&&!dancing&&!waking&&!drag&&!snakeAnimation&&animations.size===0&&!pet.classList.contains('happy')}
 function schedule(kind,min,max){setTimeout(()=>{if(canIdle()){if(kind==='blink'){blink();if(Math.random()<.45)ears()}else if(kind==='smile')happy(1800);else {happy(1200);bounce()}}schedule(kind,min,max)},min+Math.random()*(max-min))}
 schedule('blink',3500,6500);schedule('smile',12000,22000);schedule('bounce',24000,38000);
 return {

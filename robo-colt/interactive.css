@@ -140,6 +140,12 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .colt-name-label input{box-sizing:border-box;width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border,#aaa);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#222);font:inherit}
 .robo-companion #rc-puppet{transform-origin:365px 720px}
 .robo-companion #rc-tail{transform-origin:510px 547px}
+.robo-companion #rc-snake-tongue{display:none}
+.robo-companion [data-skin="Snake"].snake-flick #rc-snake-tongue{display:inline}
+.robo-companion .snake-flick .mouth-rest{visibility:hidden}
+.robo-companion .snake-tongue-tip{transform-origin:0px 0px}
+.robo-companion .sleeping #rc-snake-tongue,.robo-companion .waking #rc-snake-tongue,.robo-companion .happy #rc-snake-tongue,.robo-companion .talking #rc-snake-tongue,.robo-companion.motion-off #rc-snake-tongue{display:none!important}
+@media(prefers-reduced-motion:reduce){.robo-companion #rc-snake-tongue{display:none!important}}
 .robo-companion #rc-ear-left{transform-origin:257px 162px}
 .robo-companion #rc-ear-right{transform-origin:486px 166px}
 .robo-companion #rc-lower-leg{transform-origin:280px 563px}

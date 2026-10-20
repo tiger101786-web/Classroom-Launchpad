@@ -38,7 +38,7 @@ const path=require('node:path');
   assert.equal(await page.locator('#rc-tail').evaluate(e=>e.getAnimations().length),0,'Reduced motion prevents wag');
   const round=await page.locator('#rc-ear-left-shape').getAttribute('d');
   await page.evaluate(()=>showPaintedSkin('Original'));
-  assert.notEqual(await page.locator('#rc-ear-left-shape').getAttribute('d'),round,'Horse ear cutout restored');
+  assert.equal(await page.locator('#rc-ear-left-shape').getAttribute('d'),round,'Panda uses normal Colt ear cutouts');
   assert.deepEqual(errors,[]);
   console.log('PASS: fluid tail, neutral settle, seamless dance loop, sleep/reduced motion, panda ear reset.');
  }finally{await browser.close()}
