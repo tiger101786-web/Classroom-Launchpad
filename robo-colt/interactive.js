@@ -80,7 +80,19 @@ function wakeUp(){
   wakeTimer=setTimeout(()=>{cancelWake();sync();say('Recharged and ready!')},1000);
  },4000);
 }
-function tail(){animate($('#tail'),[{transform:'rotate(0deg) skewY(0deg)',offset:0},{transform:'rotate(-18deg) skewY(-5deg)',offset:.17},{transform:'rotate(17deg) skewY(4deg)',offset:.38},{transform:'rotate(-12deg) skewY(-3deg)',offset:.59},{transform:'rotate(8deg) skewY(2deg)',offset:.78},{transform:'rotate(-3deg)',offset:.91},{transform:'rotate(0deg) skewY(0deg)',offset:1}],{duration:1700})}
+function tailFrames(loop=false){
+ // Sample continuous waves instead of stopping at a handful of eased poses.
+ // A small delayed flex follows the swing while the tail root stays attached.
+ const count=loop?40:100,cycles=loop?1:4;
+ return Array.from({length:count+1},(_,i)=>{
+  const t=i/count,phase=t*Math.PI*2*cycles;
+  const ramp=Math.min(1,t/.12,(1-t)/.24),envelope=loop?1:ramp*ramp*(3-2*ramp);
+  const swing=Math.sin(phase)*(loop?12:18)*envelope;
+  const flex=(Math.sin(phase-.55)+Math.sin(.55))*(loop?1.1:1.6)*envelope;
+  return {transform:`rotate(${swing}deg) skewY(${flex}deg)`,offset:t};
+ });
+}
+function tail(){return animate($('#tail'),tailFrames(),{duration:1200,easing:'linear'})}
 function hoof(){
   // Only the shin foreshortens. The rigid hoof translates without any scaling.
   const timing={duration:1450};
@@ -110,7 +122,7 @@ function dance(){
     animate($('#rear-left'),[0,1,0,-.55,0].map((v,i)=>({transform:`translateY(${-3*Math.abs(v)}px) rotate(${6*v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
     animate($('#rear-right'),[0,.55,0,-1,0].map((v,i)=>({transform:`translateY(${-3*Math.abs(v)}px) rotate(${6*v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
     animate($('#puppet'),[0,1,0,-1,0].map((v,i)=>({transform:`translateY(${-5*Math.abs(v)}px) rotate(${v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
-    animate($('#tail'),[0,1,0,-1,0].map((v,i)=>({transform:`rotate(${8*v}deg)`,offset:i/4,easing:'ease-in-out'})),timing);
+    animate($('#tail'),tailFrames(true),{...timing,duration:480});
     // A relaxed left/right head groove over two step cycles; face and headphones follow.
     animate($('#head'),[0,1,0,-1,0].map((v,i)=>({transform:`rotate(${3*v}deg)`,offset:i/4,easing:'ease-in-out'})),{...timing,duration:1280});
     // Share an exact start time so the steps cannot drift out of phase.
@@ -119,7 +131,7 @@ function dance(){
   }
   status(reduced.matches?'Dance pose only: reduced motion is enabled.':'Two-step dance: quick alternating front hooves and a little back-hoof shimmy.');
 }
-function action(name){if(sleeping){status('Wake him first, or click him to wake.');return}if(dancing){status('Stop the dance before trying another move.');return}stop();if(name==='blink')blink();if(name==='tail')tail();if(name==='hoof')hoof();if(name==='ears')ears();if(name==='mouth')mouth();if(name==='bounce')bounce();if(name==='happy')happy();if(name==='greet'){happy(1900);tail();hoof();ears();bounce()}status({blink:'A quick blink.',tail:'A broader swish, easing back to rest.',hoof:'The hoof lifts without shrinking or flattening.',ears:'A quick, staggered ear flick.',mouth:'A little silent chatter from his muzzle.',bounce:'One little bounce, then still again.',happy:'Happy eyes and an open smile.',greet:'Hello! A lifted hoof, wag, ear flick, and held-open smile.'}[name])}
+function action(name){if(sleeping){status('Wake him first, or click him to wake.');return}if(dancing){status('Stop the dance before trying another move.');return}stop();if(name==='blink')blink();if(name==='tail')tail();if(name==='hoof')hoof();if(name==='ears')ears();if(name==='mouth')mouth();if(name==='bounce')bounce();if(name==='happy')happy();if(name==='greet'){happy(1900);tail();hoof();ears();bounce()}status({blink:'A quick blink.',tail:'A quick, flowing wag with a soft settle.',hoof:'The hoof lifts without shrinking or flattening.',ears:'A quick, staggered ear flick.',mouth:'A little silent chatter from his muzzle.',bounce:'One little bounce, then still again.',happy:'Happy eyes and an open smile.',greet:'Hello! A lifted hoof, wag, ear flick, and held-open smile.'}[name])}
 
 panel.innerHTML='<header class="dumpling-panel-heading"><div><span class="pet-kicker">YOUR CLASSROOM COMPANION</span><strong>Robo-Colt</strong></div><button type="button" data-close aria-label="Close Colt controls">✕</button></header><div class="dumpling-panel-body" tabindex="0" role="region" aria-label="Colt customization options"><div class="dumpling-look"><h2>Robo-Colt</h2><p>Black armor. Big personality.</p></div><div class="dumpling-sections"></div><div class="dumpling-radio-status" role="status"></div><div class="controls dumpling-utilities"><button type="button" data-reset>Reset spot</button><button type="button" data-hide>Hide Colt</button><button type="button" data-companion-open>Choose pet</button></div><p class="pet-status" role="status"></p><button type="button" data-retry hidden>Retry save</button></div>';
 const paintSkin=window.createRoboColtSkinPainter(pet);

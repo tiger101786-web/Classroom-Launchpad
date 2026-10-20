@@ -5,7 +5,7 @@ fitted to the original atlas component bounds. The platform, crop windows, and
 animation pivots do not move. Facial anchors are mapped through the body fit;
 Custom skins share that registration across every expression.
 
-The customization panel includes 23 skins. Four choices per page keep the
+The customization panel includes 24 skins. Four choices per page keep the
 existing panel dimensions. Original comes first, followed by alphabetical names.
 The expanded collection adds Ancient Bronze, Candy Chrome, Carbon Racer,
 Copper Circuit, Deep Sea, Desert Relic, Frostfire, Moonstone, Obsidian Ember,
@@ -53,3 +53,8 @@ eye groups; other skins restore the original pupil geometry. Platforms and
 nameplates share complementary finishes. Generation prompts and implementation
 notes are in `PAINTED-SKINS-20261020.md`; the interactive production-art preview
 is `work/colt-painted-skins-preview.html`.
+
+Panda adds a smooth black/white robotic atlas with round black ears and natural
+panda markings (no fur). Its eye/mouth anchors and round-ear cutouts are fitted
+individually, restoring original horse cutouts on skin change. See
+`PANDA-AND-TAIL.md` for its final prompt and the faster fluid tail animation.
