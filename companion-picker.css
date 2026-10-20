@@ -83,6 +83,10 @@ body[data-theme="night"] .companion-picker select,body[data-theme="night"] .comp
 .dumpling-companion[data-size="extra-large"]{width:220px}
 .dumpling-companion[data-size="extra-large"] .pet-button{width:210px;height:208px}
 @media(max-width:1119px){.dumpling-companion[data-size]{width:66px}.dumpling-companion[data-size] .pet-button{width:62px;height:62px}}
+.dumpling-companion.has-nameplate[data-size] .pet-button{height:auto;aspect-ratio:1254/1590}
+.dumpling-companion.has-nameplate .pet-button>svg{width:100%;height:100%}
+.dumpling-companion .squishy-name-label{display:grid;gap:6px;margin:4px 0 10px;font-size:12px;font-weight:600}
+.dumpling-companion .squishy-name-label input{box-sizing:border-box;width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border,#aaa);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#222);font:inherit}
 @media(prefers-reduced-motion:reduce){.dumpling-companion .mouth,.dumpling-companion .mouth-open{transition:none}}
 .dumpling-companion .panel{padding:0;border-radius:20px;background:var(--paper,#fff);box-shadow:0 18px 55px #0006}
 .dumpling-companion .dumpling-panel-heading{margin:0;padding:20px;background:radial-gradient(circle at 15% 0%,#c45c7d66,transparent 65%),linear-gradient(120deg,#560720,#2b1020);color:#fff;border-bottom:3px solid #b9b9c0}

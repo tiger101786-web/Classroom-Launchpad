@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false});
+  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false,squishyName:'Mochi',squishyNameplate:true});
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
@@ -15,6 +15,7 @@
   picker.querySelector('.pet-picker-note').textContent='Each pet keeps its own appearance and controls.';
   const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
   const pet=host.querySelector('.pet-button'),panel=host.querySelector('.panel');
+  const nameplate=window.createSquishyNameplate(pet);
   const speech=document.createElement('div');speech.className='dumpling-speech';speech.hidden=true;
   speech.setAttribute('role','status');speech.setAttribute('aria-live','polite');speech.setAttribute('aria-atomic','true');
   speech.innerHTML='<span class="dumpling-speech-label">✦ SQUISHY DUMPLING</span><span class="dumpling-speech-message"></span>';host.append(speech);
@@ -81,6 +82,14 @@
   restControls.append(host.querySelector('#idle'),sleepButton);
   group('05 · Rest & motion',[restControls]).classList.add('dumpling-rest-group');
   group('06 · Add glasses',[host.querySelector('.eyewear-controls'),groupHint('Mix glasses with any headwear.')]).classList.add('dumpling-rest-group');
+  const nameLabel=document.createElement('label');nameLabel.className='squishy-name-label';nameLabel.textContent='Squishy’s name';
+  const nameInput=document.createElement('input');nameInput.type='text';nameInput.maxLength=32;nameInput.autocomplete='off';nameInput.dataset.squishyName='';nameInput.setAttribute('aria-label','Squishy’s name');nameLabel.append(nameInput);
+  const nameChoices=document.createElement('div');nameChoices.className='controls';
+  for(const [visible,label] of [[true,'Show nameplate'],[false,'Hide nameplate']]){const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.squishyNameplate=String(visible);b.onclick=()=>{preferences.squishyNameplate=visible;sync();save();};nameChoices.append(b);}
+  group('07 · Name & nameplate',[nameLabel,nameChoices,groupHint('Up to 16 characters. Your name saves when you finish editing.')]);
+  nameInput.addEventListener('input',()=>{nameInput.value=Array.from(nameInput.value.replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('');nameplate.update(nameInput.value,preferences.squishyNameplate!==false);});
+  nameInput.addEventListener('change',()=>{preferences.squishyName=nameInput.value.trim()||'Mochi';sync();save();});
+  nameInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nameInput.blur();}});
   // Reuse the same two-row paging rules as each collection grows.
   const optionPages=[];
   function paginateOptions(grid,pageSize,hint){
@@ -145,6 +154,12 @@
     robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying,preferences:preferences.robo});
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
+    const showNameplate=preferences.squishyNameplate!==false;
+    host.classList.toggle('has-nameplate',showNameplate);
+    pet.querySelector('svg').setAttribute('viewBox',showNameplate?'0 30 1254 1590':'0 30 1254 1140');
+    nameplate.update(preferences.squishyName||'Mochi',showNameplate);
+    if(document.activeElement!==nameInput)nameInput.value=preferences.squishyName||'Mochi';
+    nameChoices.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.squishyNameplate==='true')===showNameplate)));
     sizeChoices.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.petSize===host.dataset.size)));
     if(host.hidden)closePanel();
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}

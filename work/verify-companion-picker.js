@@ -19,12 +19,14 @@ async function request(route, cookie='', body, method) {
   assert.equal((await request('/api/companion-preferences')).status,401);
   const teacher=await request('/api/auth/teacher','',{pin:'654321'},'POST');
   assert.equal(teacher.status,200);
-  const baseline={pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false};
+  const baseline={pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false,squishyName:'Mochi',squishyNameplate:true};
   assert.deepEqual((await request('/api/companion-preferences',teacher.cookie)).data.preferences,baseline);
   await request('/api/launchpad-colt/customization',teacher.cookie,{name:'Blaze',nameplateVisible:false,platformVisible:false});
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,accessory:'<script>'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,eyewear:'invalid'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,size:'huge'})).status,400);
+  assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,squishyName:'x'.repeat(17)})).status,400);
+  assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,squishyNameplate:'yes'})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,robo:{eye:'<script>'}})).status,400);
   assert.equal((await request('/api/companion-preferences',teacher.cookie,{...baseline,robo:{skin:'Unknown',headwear:'none',platform:true,motion:true,size:'medium',asleep:false}})).status,400);
   const email='tiger101786@gmail.com';
@@ -128,10 +130,22 @@ async function request(route, cookie='', body, method) {
     const headingY=(await panel.locator('.dumpling-panel-heading').boundingBox()).y;
     await scrollBody.evaluate(e=>{e.scrollTop=e.scrollHeight;});
     assert.equal((await panel.locator('.dumpling-panel-heading').boundingBox()).y,headingY,'Close control stays fixed');
+    const squishyName=role==='teacher'?'Honey':'Pudding';
+    await panel.locator('[data-squishy-name]').fill(squishyName);
+    await panel.locator('[data-squishy-name]').press('Tab');
+    await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
+    assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.squishyName,squishyName);
+    assert.equal(await pet.locator('#squishy-nameplate text').textContent(),squishyName);
+    await panel.locator('[data-squishy-nameplate="false"]').click();
+    assert.equal(await pet.locator('#squishy-nameplate').isVisible(),false);
+    assert.equal(await pet.locator('svg').getAttribute('viewBox'),'0 30 1254 1140');
+    await panel.locator('[data-squishy-nameplate="true"]').click();
+    assert.equal(await pet.locator('svg').getAttribute('viewBox'),'0 30 1254 1590');
+    await page.screenshot({path:path.join(repo,'work',`squishy-nameplate-panel-${role}.png`)});
     await scrollBody.evaluate(e=>{e.scrollTop=0;});
     for(const [size,width,height] of [['small',124,122],['medium',144,142],['large',168,166],['extra-large',210,208]]){
       await panel.locator(`[data-pet-size="${size}"]`).click();
-      const dimensions=await pet.boundingBox();assert.equal(dimensions.width,width);assert.equal(dimensions.height,height);
+      const dimensions=await pet.boundingBox();assert.equal(dimensions.width,width);assert(Math.abs(dimensions.height-width*1590/1254)<1,'Nameplate extends the pet height without shrinking the basket');
       assert.equal(await panel.locator(`[data-pet-size="${size}"]`).getAttribute('aria-pressed'),'true');
       await page.waitForFunction(()=>document.querySelector('.dumpling-companion .pet-status').textContent==='Saved');
       assert.equal((await request('/api/companion-preferences',cookie)).data.preferences.size,size);
@@ -257,6 +271,7 @@ async function request(route, cookie='', body, method) {
     await pet.screenshot({path:path.join(repo,'work',`companion-sleeping-${role}.png`)});
     await page.reload({waitUntil:'domcontentloaded'});await showHome();await pet.waitFor({state:'visible'});
     assert.equal(await pet.evaluate(e=>e.classList.contains('asleep')),true,'Sleep survives reload');
+    assert.equal(await pet.locator('#squishy-nameplate text').textContent(),squishyName,'Squishy name survives reload independently per account');
     assert.equal(await panel.locator('[data-motion="bounce"]').isDisabled(),true);
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));
     assert.equal(await pet.evaluate(e=>e.classList.contains('radio-dancing')),false);

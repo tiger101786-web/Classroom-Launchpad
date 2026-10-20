@@ -600,6 +600,8 @@ function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
     pet: source.pet === "dumpling" ? "dumpling" : "colt",
+    squishyName: Array.from((typeof source.squishyName==='string'?source.squishyName:'Mochi').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Mochi',
+    squishyNameplate: source.squishyNameplate !== false,
     ...(source.robo ? {robo:normalizeRoboColtPreference(source.robo)} : {}),
     color: ["Galaxy", "Gold", "Rose", "Blue", "Lavender", "Matcha", "Silver", "Rainbow", "USA", "Metallic Gold", "Metallic Blue", "Metallic Green", "Metallic Pink", "Metallic Purple", "Metallic Red"].includes(source.color) ? source.color : "Gold",
     accessory: ["none", "bow", "headphones", "hat", "cap", "crown", "sleepcap"].includes(source.accessory) ? source.accessory : "none",
@@ -3892,6 +3894,8 @@ async function handleApi(req, res, pathname) {
     if (!allowed) return true;
     try {
       const input = req.method === "PUT" ? await readBody(req) : null;
+      if(input?.squishyName!==undefined&&(typeof input.squishyName!=='string'||Array.from(input.squishyName).length>16||/[\u0000-\u001f\u007f]/.test(input.squishyName)))throw new Error('Use a Squishy name of up to 16 characters.');
+      if(input?.squishyNameplate!==undefined&&typeof input.squishyNameplate!=='boolean')throw new Error('Choose a valid Squishy nameplate setting.');
       if(input?.robo!==undefined){
         const r=input.robo;
         if(r?.name!==undefined&&(typeof r.name!=='string'||Array.from(r.name).length>16||/[\u0000-\u001f\u007f]/.test(r.name)))throw new Error('Use a Colt name of up to 16 characters.');
@@ -3909,7 +3913,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference({...input,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
+        preferences[key] = normalizeCompanionPreference({...input,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }
