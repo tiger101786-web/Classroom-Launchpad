@@ -1,0 +1,41 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {spawn}=require('node:child_process'),{chromium}=require('playwright');
+const origin='http://127.0.0.1:8163';const dir=fs.mkdtempSync(path.join(os.tmpdir(),'pet-studio-test-'));
+const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'..'),env:{...process.env,PORT:'8163',DATA_DIR:dir,SESSION_SECRET:'studio-test',TEACHER_PIN:'654321',STUDENT_EMAIL_DOMAIN:'scscolts.org'},stdio:'pipe'});let browser;
+async function req(route,cookie='',body,method){const r=await fetch(origin+route,{method:method||(body?'PUT':'GET'),headers:{'Content-Type':'application/json',Origin:origin,Cookie:cookie},body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json(),cookie:(r.headers.get('set-cookie')||'').split(';')[0]}}
+(async()=>{try{
+for(let i=0;i<80;i++){try{if((await fetch(origin+'/api/health')).ok)break}catch{}await new Promise(r=>setTimeout(r,100))}
+const teacher=await req('/api/auth/teacher','',{pin:'654321'},'POST');assert.equal(teacher.status,200);
+const email='tiger101786@gmail.com';const reset=await req('/api/approved-students/'+encodeURIComponent(email)+'/reset-code',teacher.cookie,{},'POST');const student=await req('/api/auth/register','',{email,activationCode:reset.data.activationCode,name:'Studio Test',grade:'4',password:'StudentTest123!'},'POST');assert.equal(student.status,200);
+browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',headless:true});
+for(const [role,cookie,user] of [['teacher',teacher.cookie,''],['student',student.cookie,email]]){
+const context=await browser.newContext({viewport:{width:1440,height:1000}});const equal=cookie.indexOf('=');await context.addCookies([{name:cookie.slice(0,equal),value:cookie.slice(equal+1),url:origin}]);
+const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded'});
+const home=()=>page.evaluate(({role,email})=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'home',auth:{authenticated:true,role,email}}})),{role,email:user});await home();await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);
+const studio=page.locator('.pet-studio');const open=async()=>{await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();await studio.waitFor({state:'visible'})};
+await open();assert.equal(await studio.locator('.robo-companion').count(),1);assert.equal(await page.locator('.robo-companion').count(),1);
+assert.equal(await studio.locator('#pet-studio-title').evaluate(e=>getComputedStyle(e).color),'rgb(247, 242, 245)');
+await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.querySelector('.pet-studio #greet').disabled);await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForFunction(()=>!document.querySelector('.pet-studio #greet').disabled);
+await studio.locator('#skin-search').fill('glitter');await studio.locator('[data-skin-choice="Glitter"]').click();await page.getByRole('status').filter({hasText:/^Saved$/}).last().waitFor();
+await studio.locator('[data-tab="name"]').click();await studio.locator('#pet-name').fill('Studio '+role);await studio.locator('#size-select').selectOption('large');
+await studio.locator('[data-tab="appearance"]').click();await studio.locator('[data-subtab="accessories"]').click();await studio.locator('[data-choice="horn"]').click();
+await page.waitForTimeout(600);let prefs=(await req('/api/companion-preferences',cookie)).data.preferences;assert.equal(prefs.robo.skin,'Glitter');assert.equal(prefs.robo.name,'Studio '+role);assert.equal(prefs.robo.headwear,'horn');assert.equal(prefs.robo.size,'large');
+await studio.locator('#undo').click();await page.waitForTimeout(300);assert.equal((await req('/api/companion-preferences',cookie)).data.preferences.robo.headwear,'none');
+await studio.locator('#dance').click();assert(await studio.locator('.robo-companion .pet-button').evaluate(e=>e.classList.contains('dancing')));await studio.locator('#dance').click();
+await studio.locator('[data-subtab="skins"]').click();await studio.locator('#skin-search').fill('');await studio.screenshot({path:'work/studio-production-'+role+'.png'});
+await studio.locator('.studio-close').click();await page.waitForTimeout(100);assert.equal(await page.locator('body > .robo-companion').count(),1);assert.equal(await studio.isVisible(),false);
+await page.locator('body > .robo-companion .pet-button').click();await studio.waitFor({state:'visible'});
+await studio.locator('#pet-select').selectOption('squishy');assert(await studio.locator('.dumpling-companion').isVisible());
+await studio.locator('#skin-search').fill('Galaxy');await studio.locator('[data-skin-choice="Galaxy"]').click();await studio.locator('[data-tab="name"]').click();await studio.locator('#pet-name').fill('Mochi '+role);
+await studio.locator('[data-tab="appearance"]').click();await studio.locator('[data-subtab="accessories"]').click();await studio.locator('[data-choice="crown"]').click();await studio.locator('[data-choice="sunglasses"]').click();
+await page.waitForTimeout(600);prefs=(await req('/api/companion-preferences',cookie)).data.preferences;assert.equal(prefs.color,'Galaxy');assert.equal(prefs.accessory,'crown');assert.equal(prefs.eyewear,'sunglasses');assert.equal(prefs.squishyName,'Mochi '+role);assert.equal(prefs.robo.name,'Studio '+role);
+await studio.locator('[data-tab="play"]').click();await studio.locator('[data-toggle="asleep"]').check();assert(await studio.locator('.dumpling-companion .pet-button').evaluate(e=>e.classList.contains('asleep')));await studio.locator('[data-toggle="asleep"]').uncheck();
+await studio.locator('[data-tab="appearance"]').click();await studio.locator('[data-subtab="skins"]').click();await studio.locator('#skin-search').fill('');await page.setViewportSize({width:390,height:844});await studio.screenshot({path:'work/studio-production-mobile-'+role+'.png'});assert(await studio.evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+// A failed save must offer retry, not falsely report success.
+await page.route('**/api/companion-preferences',r=>r.request().method()==='PUT'?r.fulfill({status:500,contentType:'application/json',body:'{}'}):r.continue());await studio.locator('[data-skin-choice="Blue"]').click();await studio.locator('.studio-retry').waitFor({state:'visible'});assert.match(await studio.locator('#save-status').innerText(),/Not saved/);await page.unroute('**/api/companion-preferences');await studio.locator('.studio-retry').click();await page.waitForTimeout(400);assert.equal((await req('/api/companion-preferences',cookie)).data.preferences.color,'Blue');
+await page.keyboard.press('Escape');await page.waitForTimeout(100);assert.equal(await page.locator('body > .dumpling-companion').count(),1);
+await page.reload({waitUntil:'domcontentloaded'});await home();await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await open();assert.equal(await studio.locator('#pet-title').innerText(),'Mochi '+role);
+await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'login',auth:{authenticated:false}}})));await page.waitForTimeout(100);assert.equal(await studio.isVisible(),false);assert.equal(await page.locator('body > .dumpling-companion').count(),1);assert.deepEqual(errors,[]);await context.close();
+}
+assert.equal((await req('/api/companion-preferences',teacher.cookie)).data.preferences.squishyName,'Mochi teacher');console.log('PASS: Pet Studio teacher/student persistence and isolation, real pets, skins, accessories, naming, undo, dancing, sleep/wake, mobile, retry, reopen, reload and logout.');
+}finally{await browser?.close();server.kill()}})().catch(e=>{console.error(e);process.exitCode=1});

@@ -4,13 +4,14 @@
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
+  let studio=null,studioRadio=false;
   const picker=document.createElement('dialog');
   picker.className='companion-picker';picker.setAttribute('aria-labelledby','companion-picker-title');
   picker.innerHTML='<header class="pet-picker-heading"><div><span class="pet-picker-kicker">YOUR CLASSROOM COMPANION</span><h2 id="companion-picker-title">My Pet</h2></div><button type="button" data-pet-close aria-label="Close pet selection">✕</button></header><div class="pet-picker-body"><p class="pet-picker-intro">A little personality for your school day.</p><fieldset class="pet-picker-group"><legend>01 · Choose your companion</legend><label>Choose pet <select aria-label="Choose pet"><option value="colt">Colt</option><option value="dumpling">Squishy Dumpling</option></select></label><p class="pet-picker-hint">Your choice saves automatically.</p></fieldset><fieldset class="pet-picker-group"><legend>02 · Make yourself at home</legend><p class="pet-picker-help">Click your pet to open its controls. Drag it to find a cozy spot.</p><div class="pet-tools"><button type="button" data-pet-customize>Customize dumpling</button><button type="button" data-pet-show>Show dumpling</button></div><p class="pet-picker-note">Colt keeps his own controls and settings.</p></fieldset><footer class="pet-picker-footer"><p class="pet-status" role="status"></p><button class="pet-retry" hidden>Retry save</button></footer></div>';
   const host=document.createElement('div');host.className='dumpling-companion';host.hidden=true;
   host.innerHTML='<h1 hidden></h1><div class="eyebrow" hidden></div><section class="stage"><span hidden></span><img class="toy" alt="Squishy dumpling"></section><aside class="panel" hidden aria-label="Squishy Dumpling controls"><div><h2></h2><p></p></div><div class="note"></div></aside>';
   document.body.append(picker,host);
-  const robo=window.createRoboColt(value=>{preferences.robo=value;sync();save();});
+  const robo=window.createRoboColt(value=>{preferences.robo=value;sync();save();},window.createPetStudio?()=>studio?.open('colt'):undefined);
   picker.querySelector('option[value="colt"]').textContent='Robo-Colt';
   picker.querySelector('.pet-picker-note').textContent='Each pet keeps its own appearance and controls.';
   const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
@@ -65,8 +66,8 @@
   let napTimer,autoAsleep=false,wakeRequested=false;
   function resetNap(){
     clearTimeout(napTimer);if(autoAsleep)wakeRequested=true;autoAsleep=false;sync();
-    if(host.hidden||preferences.asleep||radioPlaying)return;
-    napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying){autoAsleep=true;sync();}},60000);
+    if(host.hidden||preferences.asleep||radioPlaying||studio?.isOpen())return;
+    napTimer=setTimeout(()=>{if(!host.hidden&&panel.hidden&&!preferences.asleep&&!radioPlaying&&!studio?.isOpen()){autoAsleep=true;sync();}},60000);
   }
   sleepButton.onclick=()=>{wakeRequested=Boolean(preferences.asleep||autoAsleep);preferences.asleep=!wakeRequested;autoAsleep=false;closePanel();resetNap();save();};
   host.addEventListener('dumpling-wake-finished',()=>{sync();say('All rested and ready to squish!');});
@@ -129,7 +130,7 @@
   const select=picker.querySelector('select'),pickerStatus=picker.querySelector('.pet-status'),pickerRetry=picker.querySelector('.pet-retry');
   const allowed=()=>loaded&&auth.authenticated&&enabled&&!hiddenScreens.has(screen);
   const positionKey=()=>`dumpling-position:${account}`;
-  function announce(message,error=false){status.textContent=pickerStatus.textContent=message;retry.hidden=pickerRetry.hidden=!error;robo.announce(message,error,()=>loadError?updateAccount(auth,true):save());}
+  function announce(message,error=false){status.textContent=pickerStatus.textContent=message;retry.hidden=pickerRetry.hidden=!error;robo.announce(message,error,()=>loadError?updateAccount(auth,true):save());studio?.announce(message,error);}
   function clamp(x,y){const box=pet.getBoundingClientRect();return {x:Math.max(8,Math.min(x,innerWidth-box.width-8)),y:Math.max(8,Math.min(y,innerHeight-box.height-8))};}
   function place(){
     if(host.hidden)return;
@@ -149,9 +150,9 @@
     panel.style.top=`${Math.max(12,Math.min(box.top,innerHeight-panel.offsetHeight-12))}px`;
   }
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
-  function openPanel(){if(host.hidden)return;optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
+  function openPanel(){if(host.hidden)return;if(studio){studio.open('squishy');return}optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
-    robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying,preferences:preferences.robo});
+    robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying||studioRadio,preferences:preferences.robo});
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
     const showNameplate=preferences.squishyNameplate!==false;
@@ -177,14 +178,14 @@
     sleepButton.textContent=asleep?'Wake Squishy':'Sleep Squishy';sleepButton.setAttribute('aria-pressed',String(asleep));
     const motion=!host.hidden&&preferences.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(pet.classList.contains('idle')!==motion)petApi.setIdle(motion);
-    petApi.setRadio(radioPlaying);
-    const accessory=radioPlaying&&!asleep&&!pet.classList.contains('waking')?'headphones':preferences.accessory;
+    petApi.setRadio(radioPlaying||studioRadio);
+    const accessory=(radioPlaying||studioRadio)&&!asleep&&!pet.classList.contains('waking')?'headphones':preferences.accessory;
     if(pet.dataset.accessory!==accessory)accessoryApi.setAccessory(accessory);
     accessoryApi.setEyewear(preferences.eyewear||'none');
     host.classList.toggle('is-listening',radioPlaying);
     radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
     host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your hat returns when music stops.':'Choose headwear. Add glasses below.';
-    applying=false;place();
+    applying=false;place();studio?.refresh();
   }
   function applyAppearance(){
     applying=true;
@@ -216,7 +217,7 @@
     if(!auth.authenticated)return;
     opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
     document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
-    closePanel();robo.close();sync();if(!picker.open)picker.showModal();
+    closePanel();robo.close();sync();if(studio&&allowed()){petHidden=false;robo.show();sync();studio.open(preferences.pet==='colt'?'colt':'squishy');return}if(!picker.open)picker.showModal();
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
@@ -262,7 +263,7 @@
   async function updateAccount(nextAuth,force=false){
     auth=nextAuth||{};const next=auth.authenticated?`${auth.role}:${auth.email||''}`:'';
     if(next===account&&!force){sync();return;}
-    account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
+    studio?.close();account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
     clearTimeout(napTimer);clearTimeout(moveTimer);hideSpeech();autoAsleep=false;
     preferences=defaults();loaded=false;loadError=false;petHidden=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
     try{const stored=JSON.parse(localStorage.getItem(positionKey())||'null');if(stored&&Number.isFinite(stored.x)&&Number.isFinite(stored.y))position=stored;}catch{}
@@ -284,6 +285,31 @@
   window.addEventListener('launchpad-companion-availability',event=>{enabled=event.detail.enabled;sync();});
   const panelObserver=new MutationObserver(sync);
   document.querySelectorAll('.colt-radio-panel,.colt-assistant-panel').forEach(p=>panelObserver.observe(p,{attributes:true,attributeFilter:['hidden']}));
+  // Studio presents the existing live pets; no duplicate SVGs, animation loops,
+  // storage keys or account-saving paths are introduced.
+  if(window.createPetStudio){
+    const readStudio=()=>({colt:{...roboColtDefaults(),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
+    const setStudio=(kind,key,value)=>{
+      if(!allowed()||loadError)return;
+      if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='colt'?'COLT':'Mochi');
+      if(kind==='colt')preferences.robo={...roboColtDefaults(),...preferences.robo,[key]:value};
+      else{if(key==='asleep'){wakeRequested=!value;autoAsleep=false;}preferences[{name:'squishyName',nameplate:'squishyNameplate'}[key]||key]=value;}
+      applyAppearance();save();
+    };
+    studio=createPetStudio({
+      coltHost:document.querySelector('.robo-companion'),squishyHost:host,
+      canOpen:()=>allowed(),canEdit:()=>allowed()&&!loadError,read:readStudio,
+      prepare(){closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
+      change:setStudio,
+      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='colt'?'colt':'dumpling';petHidden=false;robo.show();selectPet();applyAppearance();save();},
+      restore(value){if(!allowed()||loadError)return;preferences={...preferences,robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
+      play(kind,action){if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
+      dance(on){studioRadio=on;sync();},refresh(){resetNap();},
+      resetPosition(kind){if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
+      hide(kind){if(kind==='colt')document.querySelector('.robo-companion [data-hide]').click();else{petHidden=true;sync();}},
+      retry(){loadError?updateAccount(auth,true):save();}
+    });
+  }
   const initialEpoch=epoch;
   fetch('/api/state').then(r=>r.ok?r.json():null).then(state=>{if(!state||epoch!==initialEpoch)return;enabled=state.launchpadColt?.enabled!==false;updateAccount(state.auth);}).catch(()=>{});
 })();

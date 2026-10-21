@@ -41,6 +41,9 @@ async function request(route, cookie='', body, method) {
     const equal=cookie.indexOf('=');
     await context.addCookies([{name:cookie.slice(0,equal),value:cookie.slice(equal+1),url:origin}]);
     const page=await context.newPage();const errors=[];
+    // Keep this suite focused on the legacy controller/animation contracts.
+    // The replacement UI is exercised with real accounts in verify-pet-studio-production.cjs.
+    await page.route('**/pet-studio.js?*',route=>route.fulfill({contentType:'application/javascript',body:''}));
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto(origin,{waitUntil:'domcontentloaded'});
     const showHome=()=>page.evaluate(({role,email})=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'home',auth:{authenticated:true,role,email}}})),{role,email:emailAddress});
