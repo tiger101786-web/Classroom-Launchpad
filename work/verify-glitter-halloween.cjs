@@ -17,9 +17,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
   await pet.screenshot({path:'work/lantern-integrated-awake.png'});
   await page.locator('#sleep').click();await page.waitForTimeout(100);
   assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).animationName),'colt-lantern-sleep');
+  assert(await pet.locator('.lantern-shade').evaluate(e=>e.getAnimations().every(a=>a.effect.getKeyframes().every(f=>Number(f.opacity)<=.08))),'Sleep must retain at least 92% of the painted inner glow');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert(Number(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).opacity))<=.08,'Reduced-motion sleep must keep the light on');
+  await page.emulateMedia({reducedMotion:'no-preference'});
   await pet.screenshot({path:'work/lantern-integrated-sleep.png'});
   await page.locator('#sleep').click();await page.waitForTimeout(300);
   assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).animationName),'colt-lantern-wake');
+  assert(await pet.locator('.lantern-shade').evaluate(e=>e.getAnimations().every(a=>a.effect.getKeyframes().every(f=>Number(f.opacity)<=.08))),'Waking must not briefly extinguish the glow');
   await page.waitForTimeout(5000);
   await page.locator('#music').click();await page.waitForTimeout(300);
   assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).opacity),'0');
