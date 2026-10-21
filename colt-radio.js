@@ -48,6 +48,15 @@
       note: "Anime music and J-pop from LISTEN.moe's JPOP stream. Not an English-only or anime-only station; teacher review recommended."
     },
     {
+      id: "vocaloid-radio",
+      label: "Anime • Vocaloid",
+      type: "stream",
+      source: "https://vocaloid.radioca.st/stream",
+      provider: "Vocaloid Radio",
+      searchTerms: "Miku Hatsune vocaloid vocal synth Japanese",
+      note: "Vocaloid and voice-synth music from fan-run Vocaloid Radio. Not Miku-only; live programming and classroom suitability are not guaranteed. Teacher review recommended."
+    },
+    {
       id: "studying",
       label: "Lo-Fi • Study",
       type: "stream",
@@ -189,30 +198,6 @@
       metadataEndpoint: "https://stream.radioabf.com/status-json.xsl",
       metadataMount: "/abf-sd.mp3",
       note: "Modern house, techno, electronic music, and DJ mixes streamed by Radio ABF. Ad-free and no account required."
-    },
-    {
-      id: "drdio-night-drive",
-      label: "Electronic • Dr.DIO",
-      type: "playlist",
-      provider: "Dr.DIO Night Drive",
-      sources: [
-        "https://drdio.studio/s/audio/20260622_375a38/Glacier%20Pickaxe.mp3",
-        "https://drdio.studio/s/audio/20260827_be5787/Glass%20Kiln.mp3",
-        "https://drdio.studio/s/audio/20260818_c15fac/Wet%20Ferry%20Lights%20v2.mp3",
-        "https://drdio.studio/s/audio/20260818_616e73/Harbour%20Noir%20v2.mp3",
-        "https://drdio.studio/s/audio/20260818_d9c139/Cold%20Case%20File%20v2.mp3",
-        "https://drdio.studio/s/audio/20260818_2adc12/Neon%20Underpass.mp3",
-        "https://drdio.studio/s/audio/20260818_84e7f5/Sodium%20Straight%20v2.mp3",
-        "https://drdio.studio/s/audio/20260818_49cb28/Empty%20Concourse.mp3",
-        "https://drdio.studio/s/audio/20260818_5eccd4/Ramp%20Lights%20Ahead%20v2.mp3",
-        "https://drdio.studio/s/audio/20260813_261471/Filing%20Room%20Pulse.mp3",
-        "https://drdio.studio/s/audio/20260813_eb1ccb/Chrome%20Straightaway.mp3",
-        "https://drdio.studio/s/audio/20260812_847df4/Trench%20Headlights.mp3",
-        "https://drdio.studio/s/audio/20260812_d8a6d1/Faded%20Cinema.mp3",
-        "https://drdio.studio/s/audio/20260812_337572/Neon%20Arcade.mp3",
-        "https://drdio.studio/s/audio/20260812_8cc3f9/Distant%20Junction.mp3"
-      ],
-      note: "Instrumental-first nocturnal electronic music from Dr.DIO's Night Drive collection. Tracks change automatically, with no account required."
     },
     {
       id: "chill-house",
@@ -864,7 +849,6 @@
     "cotn-radio": '<path d="M5 13h14l2 7H3l2-7Z"/><path d="M8 13V7a3 3 0 0 1 6 0v6m1 0 2-7"/>',
     "ssr-electronica": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18m0-18a15 15 0 0 0 0 18"/>',
     "radio-abf": '<path d="m4 8 4 3 4-6 4 6 4-3-2 10H6L4 8Z"/><path d="M7 21h10"/>',
-    "drdio-night-drive": '<path d="M19 15.5A8 8 0 0 1 8.5 5 8.5 8.5 0 1 0 19 15.5Z"/><path d="M5 20 9 9m10 11L15 9m-5 5h4m-5 4h6"/>',
     "chill-house": '<path d="M4 20V10l8-6 8 6v10M8 20v-6h8v6"/><path d="M3 7c2-3 4-3 6-1M21 7c-2-3-4-3-6-1"/>',
     "icf-worship": '<path d="M5 21V9l7-6 7 6v12M9 21v-6h6v6M12 7v5m-2-3h4"/>',
     "god-radio": '<path d="M12 3v18M7 8h10"/><path d="M4 18c2-3 4-4 8-4s6 1 8 4"/>',

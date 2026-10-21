@@ -1,5 +1,7 @@
 /* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
+ 'Jack-o-Lantern':{accent:'#ffa42e',light:'#fff3a1',dark:'#a14a0f',tint:[1,.42,.035],armor:[.9,.76,1.05],artwork:'robo-colt/parts-jack-o-lantern-v4.png',bounds:[[127,15,642,677],[873,171,1084,653],[220,692,452,1195],[763,730,1187,1172]],description:'Hollow carved pumpkin armor with one warm inner glow, dimming for sleep and brightening on wake.'},
+ Glitter:{accent:'#ffd65c',light:'#fffbe1',dark:'#9c681c',tint:[1,.72,.16],armor:[1.1,1.06,.92],artwork:'robo-colt/parts-glitter-v1.png',bounds:[[127,17,609,672],[851,165,1059,648],[209,699,434,1191],[761,734,1185,1170]],description:'Reflective gold-flake enamel, champagne sparkles, and polished graphite joints.'},
  Panda:{accent:'#bba588',light:'#fff7e7',dark:'#51463a',tint:[.87,.89,.92],armor:[.9,.9,.92],artwork:'robo-colt/parts-panda-v4.png',bounds:[[123,22,638,683],[868,172,1105,665],[224,700,477,1197],[773,739,1218,1177]],face:{eyes:[[290,282],[475,282]],mouth:[384,421,.8]},description:'Panda robot armor with normal Colt ears, bold eye patches, black limbs, and a white belly.'},
  Snake:{accent:'#e7bc62',light:'#fff1b5',dark:'#765021',tint:[.78,.52,.25],armor:[1.05,.9,.74],artwork:'robo-colt/parts-snake-v1.png',bounds:[[127,19,609,672],[851,165,1060,649],[208,699,434,1192],[763,734,1184,1172]],description:'Python-patterned robot enamel, bronze trim, amber snake eyes, and a flickering forked tongue.'},
  Zebra:{accent:'#d5dfed',light:'#ffffff',dark:'#586578',tint:[.82,.86,.92],armor:[1.2,1.2,1.24],artwork:'robo-colt/parts-zebra-v1.png',bounds:[[126,19,610,671],[852,165,1059,649],[210,699,434,1191],[762,734,1184,1169]],description:'Custom ivory enamel with flowing black zebra stripes and silver details.'},
@@ -37,6 +39,11 @@ window.createRoboColtSkinPainter = function(pet){
  function fit(name,part){const a=originalBounds[part],b=(window.roboColtSkins[name]?.bounds||paintedBounds[name])?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
  const facePositions={Porcelain:{eyes:[[283,279],[474,278]],mouth:[378,405,.8]},'Obsidian Ember':{eyes:[[287,273],[473,275]],mouth:[381,397,.85]}};
  const eyeAnchors=[];
+ // Preserve the approved painted cavities. A single shade group dims their
+ // shared internal light; it never replaces the artwork with flat symbols.
+ const lantern=document.createElementNS(ns,'g');lantern.id='rc-lantern-light';lantern.setAttribute('pointer-events','none');
+ lantern.innerHTML='<g class="lantern-shade" fill="#241006"><path d="M258 252Q292 241 321 287L339 328Q299 319 280 319Q251 305 258 252Z"/><path d="M513 252Q479 241 449 287L433 328Q474 319 493 319Q520 305 513 252Z"/><path d="M388 330L369 353L389 347L405 354Z"/><path d="M308 353L326 372L344 365L362 380L379 370L396 380L414 367L431 378L461 353L449 382L429 396L412 385L397 400L379 399L364 386L348 396L331 382Z"/></g>';
+ const lanternFit=document.createElementNS(ns,'g');lanternFit.id='rc-lantern-fit';lanternFit.append(lantern);pet.querySelector('#rc-head').append(lanternFit);
  function anchor(element,index){const g=document.createElementNS(ns,'g');g.dataset.eyeAnchor=index;element.before(g);g.append(element);eyeAnchors.push([g,index]);}
  pet.querySelectorAll('.eyes-open .eye').forEach((e,i)=>anchor(e,i));
  for(const selector of ['.eyes-happy','.eyes-sleep']){
@@ -103,6 +110,7 @@ window.createRoboColtSkinPainter = function(pet){
   if(last===skin)return skin;last=skin;
   const face=skin.face||facePositions[name]||(skin.bounds?{eyes:[[274,276],[458,276]],mouth:[367,400,1]}:null);
   const bodyFit=fit(name,0);
+  lanternFit.setAttribute('transform','translate('+bodyFit.x+' '+bodyFit.y+') scale('+bodyFit.sx+' '+bodyFit.sy+')');
   eyeAnchors.forEach(([g,i])=>{const point=face?.eyes[i];const dx=point?bodyFit.x+point[0]*bodyFit.sx-[274,458][i]:0,dy=point?bodyFit.y+point[1]*bodyFit.sy-276:0;g.setAttribute('transform','translate('+dx+' '+dy+')')});
   const mouth=face?.mouth;
   pet.querySelector('#rc-mouth').setAttribute('transform',mouth?'translate('+(bodyFit.x+mouth[0]*bodyFit.sx)+' '+(bodyFit.y+mouth[1]*bodyFit.sy)+') scale('+(mouth[2]*bodyFit.sx)+' '+(mouth[2]*bodyFit.sy)+')':'translate(367 400)');

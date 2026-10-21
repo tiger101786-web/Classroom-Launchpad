@@ -169,6 +169,19 @@ body[data-theme="night"] .robo-companion .dumpling-group button:not([aria-presse
 .robo-companion .sleeping .mouth-sleep{display:inline;opacity:1}
 .robo-companion .wake-smile .mouth-open{display:inline;animation:robo-wake-smile .3s ease-out both}
 .robo-companion .wake-smile .mouth-rest{display:none}
+.robo-companion #rc-lantern-fit{display:none}
+.robo-companion [data-skin="Jack-o-Lantern"] #rc-lantern-fit{display:inline}
+.robo-companion [data-skin="Jack-o-Lantern"] .eyes-open,.robo-companion [data-skin="Jack-o-Lantern"] .eyes-happy,.robo-companion [data-skin="Jack-o-Lantern"] .eyes-sleep,.robo-companion [data-skin="Jack-o-Lantern"] #rc-mouth{display:none}
+.robo-companion .lantern-shade{opacity:0;filter:blur(1px)}
+.robo-companion .idle[data-skin="Jack-o-Lantern"] .lantern-shade{animation:colt-lantern-glow 4.6s ease-in-out infinite}
+.robo-companion .happy[data-skin="Jack-o-Lantern"] .lantern-shade,.robo-companion .dancing[data-skin="Jack-o-Lantern"] .lantern-shade,.robo-companion .wake-smile[data-skin="Jack-o-Lantern"] .lantern-shade{animation:none;opacity:0}
+.robo-companion .sleeping[data-skin="Jack-o-Lantern"] .lantern-shade{animation:colt-lantern-sleep 2.8s ease-in-out infinite;opacity:.82}
+.robo-companion .waking:not(.wake-smile)[data-skin="Jack-o-Lantern"] .lantern-shade{animation:colt-lantern-wake 4s ease-in-out both}
+@keyframes colt-lantern-glow{0%,100%{opacity:0}23%{opacity:.1}29%{opacity:.04}61%{opacity:.12}78%{opacity:.02}}
+@keyframes colt-lantern-sleep{0%,100%{opacity:.82}50%{opacity:.68}}
+@keyframes colt-lantern-wake{0%,12%{opacity:.82}60%{opacity:.25}73%{opacity:.5}86%,100%{opacity:0}}
+.robo-companion.motion-off [data-skin="Jack-o-Lantern"] .lantern-shade{animation:none}
+@media(prefers-reduced-motion:reduce){.robo-companion .lantern-shade{animation:none!important}}
 @keyframes robo-wake-smile{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 .robo-companion .zs text{animation:robo-float 3s ease-out infinite;opacity:0}
 .robo-companion .zs text{fill:#642046;stroke:#fff;stroke-width:2px;paint-order:stroke fill;stroke-linejoin:round}

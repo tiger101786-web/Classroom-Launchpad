@@ -79,7 +79,7 @@ function scheduleSnakeTongue(){
 }
 function animate(el,frames,opts={}){const a=el.animate(frames,{duration:650,easing:'ease-in-out',...opts});animations.add(a);a.finished.catch(()=>{}).finally(()=>animations.delete(a));return a}
 function stop(){cancelSnakeTongue();sequence++;for(const a of animations)a.cancel();animations.clear();pet.classList.remove('happy','talking');busy=false}
-function blink(){if(sleeping||waking)return;pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:600}))}
+function blink(){if(sleeping||waking)return;if(prefs.skin==='Jack-o-Lantern'){animate($('.lantern-shade'),[{opacity:0},{opacity:.65,offset:.45},{opacity:0}],{duration:600});return}pet.querySelectorAll('.eye').forEach(e=>animate(e,[{transform:'scaleY(1)'},{transform:'scaleY(.04)',offset:.45},{transform:'scaleY(1)'}],{duration:600}))}
 function cancelWake(){clearTimeout(wakeTimer);waking=false;pet.classList.remove('waking','wake-smile');pet.querySelectorAll('.eye').forEach(e=>e.style.removeProperty('transform'))}
 function wakeUp(){
  stop();dancing=false;pet.classList.remove('dancing');cancelWake();
@@ -122,7 +122,7 @@ function hoof(){
   return animate($('#hoof-left'),[{transform:'translateY(0)',offset:0},{transform:'translateY(-43.24px)',offset:.32},{transform:'translateY(-43.24px)',offset:.65},{transform:'translateY(0)',offset:1}],timing);
 }
 function ears(){animate($('#ear-left'),[{transform:'rotate(0deg)'},{transform:'rotate(-12deg)',offset:.18},{transform:'rotate(4deg)',offset:.34},{transform:'rotate(-7deg)',offset:.5},{transform:'rotate(0deg)',offset:.76},{transform:'rotate(0deg)'}],{duration:720});animate($('#ear-right'),[{transform:'rotate(0deg)'},{transform:'rotate(9deg)',offset:.25},{transform:'rotate(-3deg)',offset:.5},{transform:'rotate(0deg)'}],{duration:560,delay:160})}
-function mouth(){const id=sequence;pet.classList.add('talking');const a=animate($('.mouth-open'),[{transform:'scaleY(.15)'},{transform:'scaleY(1)',offset:.18},{transform:'scaleY(.3)',offset:.37},{transform:'scaleY(.85)',offset:.56},{transform:'scaleY(.25)',offset:.73},{transform:'scaleY(.7)',offset:.86},{transform:'scaleY(.15)'}],{duration:1300});a.finished.then(()=>{if(id===sequence)pet.classList.remove('talking')}).catch(()=>{})}
+function mouth(){const id=sequence;pet.classList.add('talking');const lantern=prefs.skin==='Jack-o-Lantern';const frames=lantern?[0,.4,0,.32,0,.24,0].map((opacity,i)=>({opacity,offset:i/6})):[{transform:'scaleY(.15)'},{transform:'scaleY(1)',offset:.18},{transform:'scaleY(.3)',offset:.37},{transform:'scaleY(.85)',offset:.56},{transform:'scaleY(.25)',offset:.73},{transform:'scaleY(.7)',offset:.86},{transform:'scaleY(.15)'}];const a=animate(lantern?$('.lantern-shade'):$('.mouth-open'),frames,{duration:1300});a.finished.then(()=>{if(id===sequence)pet.classList.remove('talking')}).catch(()=>{})}
 function bounce(){return animate($('#puppet'),[{transform:'translateY(0)'},{transform:'translateY(3px) scale(1.008,.992)',offset:.2},{transform:'translateY(-17px)',offset:.48},{transform:'translateY(0)',offset:.8},{transform:'translateY(0)'}],{duration:680})}
 function happy(duration=1500){cancelSnakeTongue();const id=sequence;pet.classList.add('happy');setTimeout(()=>{if(id===sequence&&!sleeping&&!dancing)pet.classList.remove('happy')},duration)}
 function dance(){

@@ -1,0 +1,52 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'});
+ try{
+  const page=await browser.newPage({viewport:{width:1000,height:1000}});
+  await page.goto('file:///'+path.join(__dirname,'colt-painted-skins-preview.html').replaceAll('\\','/'));
+  const pet=page.locator('.pet-button');
+  await page.evaluate(()=>showPaintedSkin('Glitter'));
+  assert(await pet.locator('.eyes-open .eye>ellipse').first().isVisible());
+  await pet.screenshot({path:'work/glitter-final.png'});
+  await page.evaluate(()=>showPaintedSkin('Jack-o-Lantern'));
+  assert.equal(await pet.locator('#rc-head image').first().getAttribute('href'),'robo-colt/parts-jack-o-lantern-v4.png');
+  assert.equal(await pet.locator('.eyes-open').evaluate(e=>getComputedStyle(e).display),'none');
+  assert.equal(await pet.locator('#rc-mouth').evaluate(e=>getComputedStyle(e).display),'none');
+  assert(await pet.locator('#rc-lantern-fit').isVisible());
+  await pet.screenshot({path:'work/lantern-integrated-awake.png'});
+  await page.locator('#sleep').click();await page.waitForTimeout(100);
+  assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).animationName),'colt-lantern-sleep');
+  await pet.screenshot({path:'work/lantern-integrated-sleep.png'});
+  await page.locator('#sleep').click();await page.waitForTimeout(300);
+  assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).animationName),'colt-lantern-wake');
+  await page.waitForTimeout(5000);
+  await page.locator('#music').click();await page.waitForTimeout(300);
+  assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).opacity),'0');
+  assert(await pet.locator('#rc-head').evaluate(e=>e.getAnimations().length>0));
+  await pet.screenshot({path:'work/lantern-integrated-dance.png'});
+  await page.locator('#music').click();
+  await page.locator('[data-setting="action"][data-option="mouth"]').evaluate(e=>e.click());
+  assert(await pet.locator('.lantern-shade').evaluate(e=>e.getAnimations().some(a=>a.effect.getTiming().duration===1300)));
+  await page.waitForTimeout(1400);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert.equal(await pet.locator('.lantern-shade').evaluate(e=>getComputedStyle(e).animationName),'none');
+  await page.evaluate(()=>showPaintedSkin('Original'));
+  assert.equal(await pet.locator('#rc-lantern-fit').evaluate(e=>getComputedStyle(e).display),'none');
+  assert(await pet.locator('.eyes-open .eye>ellipse').first().isVisible());
+  // Exercise the actual radio UI without contacting unrelated live stations.
+  await page.route('https://radio-test.local/',r=>r.fulfill({contentType:'text/html',body:'<div id="coltRadioRoot"></div>'}));
+  await page.goto('https://radio-test.local/');
+  await page.evaluate(()=>localStorage.setItem('classroomLaunchpadColtRadioStationV1','drdio-night-drive'));
+  await page.addScriptTag({content:fs.readFileSync('colt-radio.js','utf8')});
+  await page.locator('.colt-radio-launcher').click();
+  assert.equal(await page.locator('[data-station="drdio-night-drive"]').count(),0);
+  await page.locator('.colt-radio-search-input').fill('Miku');
+  assert(await page.locator('[data-station="vocaloid-radio"]').isVisible());
+  await page.locator('[data-station="vocaloid-radio"]').click();
+  assert.equal(await page.locator('audio').getAttribute('src'),'https://vocaloid.radioca.st/stream');
+  const playback=await page.locator('audio').evaluate(async a=>{a.muted=true;await Promise.race([a.play(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Stream timeout')),25000))]);const start=a.currentTime;await new Promise(r=>setTimeout(r,3000));const advanced=a.currentTime-start;a.pause();return {advanced,readyState:a.readyState,error:a.error?.message};});
+  assert(playback.advanced>1,JSON.stringify(playback));
+  console.log('PASS: Glitter and approved Halloween artwork, shared-light sleep/wake/dance/talk/reduced-motion, skin switching, Miku search, Dr.DIO removal and real radio playback.',playback);
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1});
