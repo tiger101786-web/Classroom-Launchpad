@@ -10,3 +10,34 @@
 @keyframes gb-soft-snore{0%,100%{transform:scale(1,.8)}50%{transform:scale(1,1.15)}}
 @keyframes gb-chatter{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 @keyframes gb-jelly-dance{0%,100%{transform:scale(1,1)}35%{transform:scale(1.1,.89)}65%{transform:scale(.96,1.04)}}
+.gummy-companion .gb-happy .gb-expression-backing,.gummy-companion .gb-happy .gb-mouth-open,.gummy-companion .gb-happy .gb-happy-eyes{display:inline}
+.gummy-companion .gb-happy .gb-eye,.gummy-companion .gb-happy .gb-closed{visibility:hidden}
+.gummy-companion .gb-happy .gb-mouth-open{transform-origin:0 0;animation:gb-happy-smile 2.2s ease-in-out both}
+@keyframes gb-happy-smile{0%,100%{transform:scale(.85,.7)}20%,75%{transform:scale(1,1)}}
+.gummy-companion .gb-headset{display:none}.gummy-companion .radio-active .gb-headset{display:inline}
+.gummy-companion .dancing .music-note{animation:gb-music-float 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes gb-music-float{0%{opacity:0;transform:translateY(25px) rotate(-12deg) scale(.8)}20%{opacity:1}75%{opacity:.9}100%{opacity:0;transform:translateY(-110px) rotate(14deg) scale(1.08)}}
+.gummy-companion .gb-nameplate{left:8%;width:84%;bottom:1.5%;min-height:40px;padding:9px 24px;border:3px solid color-mix(in srgb,var(--gummy-accent),white 45%);border-radius:24px 24px 29px 29px;background:radial-gradient(ellipse at 50% 0%,#ffffffdb,transparent 55%),linear-gradient(170deg,color-mix(in srgb,var(--gummy-accent),white 65%),var(--gummy-accent) 55%,color-mix(in srgb,var(--gummy-accent),#74243a 25%));box-shadow:inset 0 3px 2px #fff9,inset 0 -5px 3px #7c254049,0 3px 0 color-mix(in srgb,var(--gummy-accent),#58132b 35%),0 6px 9px #0004;color:#3d1729;font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:900;letter-spacing:.015em;text-shadow:0 1px 0 #fff9;box-sizing:border-box}
+.gummy-companion .gb-plate-label{position:relative;display:block;z-index:1;line-height:1.05;overflow-wrap:anywhere}
+.gummy-companion .gb-plate-bear{position:absolute;width:36px;height:39px;top:50%;transform:translateY(-50%) rotate(-10deg);color:var(--gummy-accent);filter:drop-shadow(0 2px 1px #5c1b3844);overflow:visible}
+.gummy-companion .gb-plate-left{left:-17px}.gummy-companion .gb-plate-right{right:-17px;transform:translateY(-50%) rotate(10deg)}
+.gummy-companion .gb-nameplate:before{content:'';position:absolute;left:12%;right:12%;top:3px;height:8px;border-radius:50%;background:#fff8}
+.gummy-companion .waking .gb-expression-backing,.gummy-companion .waking .gb-mouth-open,.gummy-companion .waking .gb-mouth-sleep,.gummy-companion .waking .gb-zs{display:inline}
+.gummy-companion .waking .gb-closed{opacity:0}
+.gummy-companion .waking .gb-eye{animation:gb-wake-eyes 1.3s ease-in-out both;transition:none}
+.gummy-companion .waking .gb-zs{animation:gb-wake-zs .45s linear both}
+.gummy-companion .waking .gb-mouth-sleep{animation:gb-wake-sleep-mouth 2s linear both}
+.gummy-companion .waking .gb-mouth-open{transform-origin:0 0;animation:gb-wake-smile 2s linear both}
+.gummy-companion .waking .gb-body{animation:gb-wake-stretch 2s ease-in-out both}
+@keyframes gb-wake-eyes{0%{transform:scaleY(.06)}30%{transform:scaleY(1)}40%{transform:scaleY(.06)}50%{transform:scaleY(1)}60%{transform:scaleY(.06)}72%,100%{transform:scaleY(1)}}
+@keyframes gb-wake-zs{from{opacity:1}to{opacity:0}}
+@keyframes gb-wake-sleep-mouth{0%,45%{opacity:1}60%,100%{opacity:0}}
+@keyframes gb-wake-smile{0%,45%{opacity:0;transform:scaleY(1)}60%,100%{opacity:1;transform:scaleY(1)}}
+@keyframes gb-wake-stretch{0%,35%{transform:scale(1)}57%{transform:scale(.97,1.055)}70%{transform:scale(1.025,.94)}80%{transform:translateY(-18px) scale(.99,1.02)}90%{transform:scale(1.02,.96)}100%{transform:scale(1)}}
+.gummy-companion .gb-idle-motion{transform-origin:512px 1290px}
+.gummy-companion .idle .gb-idle-motion{animation:gb-wobble 4s ease-in-out infinite}
+.gummy-companion .idle .gb-body,.gummy-companion .idle:not(.gb-action) .gb-body{animation:none}
+.gummy-companion .gb-nameplate{left:3%;width:94%;bottom:0;padding:0;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;text-shadow:none;line-height:0}
+.gummy-companion .gb-nameplate:before{display:none}
+.gummy-companion .gb-nameplate>svg{display:block;width:100%;height:auto;overflow:visible}
+.gummy-companion .gb-plate-label{font-family:'Trebuchet MS','Segoe UI',sans-serif;letter-spacing:.015em}
