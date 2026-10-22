@@ -12,6 +12,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   }
   await p.evaluate(()=>showGummy('Cherry'));
   await p.evaluate(()=>{window.ambientAnimation=document.querySelector('.gb-idle-motion').getAnimations()[0];window.ambientStart=ambientAnimation.currentTime});
+  assert.equal(await pet.locator('.gb-idle-motion').evaluate(e=>getComputedStyle(e).animationTimingFunction),'linear','Continuous flow must not ease to a stop at each intermediate pose');
+  assert.equal(await pet.locator('.gb-idle-motion').evaluate(e=>getComputedStyle(e).animationName),'gb-idle-flow');
   assert.equal(await pet.locator('.gb-body').evaluate(e=>getComputedStyle(e).animationName),'none','Only the ambient wrapper owns idle motion');
   await p.locator('#squish').click();await p.waitForTimeout(1100);
   assert(await p.evaluate(()=>document.querySelector('.gb-idle-motion').getAnimations()[0]===ambientAnimation&&ambientAnimation.currentTime>ambientStart+900),'Reaction must not restart the idle loop');

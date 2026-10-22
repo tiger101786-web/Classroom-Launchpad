@@ -2,6 +2,8 @@
 
 Idle continuity: ambient motion lives on its own SVG parent and continues through reactions without restarting its phase. The inner body owns bounce/stretch actions only. Regression tests confirm the same ambient animation survives an entire reaction.
 
+The idle loop uses phase-offset sine motion with linear interpolation, avoiding a simultaneous pause at the ends of the squash. Bounces use a smooth sine-squared envelope. Pet Studio reserves content-driven height plus bottom padding for the nameplate; desktop, tablet, and mobile checks require at least 16px clearance above the preview controls.
+
 The nameplate is a flat gummy plaque, distinct from the round dish, with a taller pale rounded inset and larger automatically fitted lettering. Two head-only crops of the approved bear decorate its ends, with light outlines for contrast. Rounded glossy candy bubbles frame the upper and lower edges, replacing the stretched, washed-out highlight. The whole frame and heads share the flavor tint.
 
 Wake-up now mirrors Squishy's two-second sequence: 450ms Z fade, 1.3-second eye-opening/blink sequence, sleepy-mouth to smile crossfade, and a gentle stretch/bounce. It runs on a sleep-to-awake transition from either the pet or Studio. Idle and manual actions wait, radio resumes afterward, and sleep/hide/account changes or reduced motion cancel cleanly.

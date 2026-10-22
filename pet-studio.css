@@ -19,5 +19,8 @@ dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-heigh
 .pet-studio #pet-stage .gummy-companion{position:relative!important;inset:auto!important;transform:none!important;width:245px!important;max-width:100%!important;height:auto!important;margin:0!important;z-index:1!important}
 .pet-studio #pet-stage .gummy-companion .pet-button{aspect-ratio:auto!important}
 .pet-studio #pet-stage .gummy-companion{pointer-events:none}
+.pet-studio #pet-stage:has(.gummy-companion:not([hidden])){height:auto;min-height:400px;padding:12px 0 24px}
+@media(max-width:850px){.pet-studio #pet-stage:has(.gummy-companion:not([hidden])){min-height:330px}}
+@media(max-width:620px){.pet-studio #pet-stage:has(.gummy-companion:not([hidden])){min-height:235px}}
 @media(max-width:850px){.pet-studio #pet-stage .gummy-companion{width:200px!important}}
 @media(max-width:620px){.pet-studio #pet-stage .gummy-companion{width:140px!important}}
