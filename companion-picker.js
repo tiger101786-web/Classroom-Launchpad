@@ -12,6 +12,8 @@
   host.innerHTML='<h1 hidden></h1><div class="eyebrow" hidden></div><section class="stage"><span hidden></span><img class="toy" alt="Squishy dumpling"></section><aside class="panel" hidden aria-label="Squishy Dumpling controls"><div><h2></h2><p></p></div><div class="note"></div></aside>';
   document.body.append(picker,host);
   const robo=window.createRoboColt(value=>{preferences.robo=value;sync();save();},window.createPetStudio?()=>studio?.open('colt'):undefined);
+  const gummy=window.createGummyBear(value=>{preferences.gummy=value;sync();save();},()=>studio?.open('gummy'));
+  picker.querySelector('select').add(new Option('Gummy Bear','gummy'));
   picker.querySelector('option[value="colt"]').textContent='Robo-Colt';
   picker.querySelector('.pet-picker-note').textContent='Each pet keeps its own appearance and controls.';
   const petApi=window.createDumplingPet(host),accessoryApi=window.addDumplingAccessories(host);
@@ -152,6 +154,7 @@
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
   function openPanel(){if(host.hidden)return;if(studio){studio.open('squishy');return}optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
+    gummy.update({account,visible:allowed()&&preferences.pet==='gummy',radio:radioPlaying||studioRadio,preferences:preferences.gummy});
     robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying||studioRadio,preferences:preferences.robo});
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
     host.dataset.size=preferences.size||'medium';
@@ -166,8 +169,8 @@
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=false;
-    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
-    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='colt'?'Show Colt':'Show dumpling';
+    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='gummy'?'Customize Gummy Bear':preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
+    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='gummy'?'Show Gummy Bear':preferences.pet==='colt'?'Show Colt':'Show dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
     if(host.hidden||asleep)hideSpeech();
@@ -205,11 +208,11 @@
     }).catch(error=>{if(generation===epoch&&error.name!=='AbortError')announce('Not saved. Please retry.',true);});
   }
   retry.onclick=pickerRetry.onclick=()=>loadError?updateAccount(auth,true):save();
-  select.onchange=()=>{preferences.pet=select.value;petHidden=false;closePanel();selectPet();resetNap();save();};
+  select.onchange=()=>{preferences.pet=select.value;petHidden=false;gummy.show();closePanel();selectPet();resetNap();save();};
   picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
   picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
-  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;sync();if(preferences.pet==='colt')robo.customize();else openPanel();};
-  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;picker.close();sync();if(preferences.pet==='colt')robo.show();};
+  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;gummy.show();sync();if(preferences.pet==='gummy')studio?.open('gummy');else if(preferences.pet==='colt')robo.customize();else openPanel();};
+  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;gummy.show();picker.close();sync();if(preferences.pet==='colt')robo.show();};
   panel.querySelector('[data-dumpling-close]').onclick=()=>closePanel(true);
   panel.querySelector('[data-dumpling-hide]').onclick=()=>{petHidden=true;sync();};
   panel.querySelector('[data-dumpling-reset]').onclick=()=>{position=null;try{localStorage.removeItem(positionKey());}catch{}place();};
@@ -217,7 +220,7 @@
     if(!auth.authenticated)return;
     opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
     document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
-    closePanel();robo.close();sync();if(studio&&allowed()){petHidden=false;robo.show();sync();studio.open(preferences.pet==='colt'?'colt':'squishy');return}if(!picker.open)picker.showModal();
+    closePanel();robo.close();sync();if(studio&&allowed()){petHidden=false;robo.show();gummy.show();sync();studio.open(preferences.pet==='dumpling'?'squishy':preferences.pet);return}if(!picker.open)picker.showModal();
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
@@ -288,25 +291,26 @@
   // Studio presents the existing live pets; no duplicate SVGs, animation loops,
   // storage keys or account-saving paths are introduced.
   if(window.createPetStudio){
-    const readStudio=()=>({colt:{...roboColtDefaults(),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
+    const readStudio=()=>({gummy:{...gummyBearDefaults(),...preferences.gummy},colt:{...roboColtDefaults(),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
     const setStudio=(kind,key,value)=>{
       if(!allowed()||loadError)return;
-      if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='colt'?'COLT':'Mochi');
+      if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='gummy'?'Gummy':kind==='colt'?'COLT':'Mochi');
       if(kind==='colt')preferences.robo={...roboColtDefaults(),...preferences.robo,[key]:value};
+      else if(kind==='gummy')preferences.gummy={...gummyBearDefaults(),...preferences.gummy,[key]:value};
       else{if(key==='asleep'){wakeRequested=!value;autoAsleep=false;}preferences[{name:'squishyName',nameplate:'squishyNameplate'}[key]||key]=value;}
       applyAppearance();save();
     };
     studio=createPetStudio({
-      coltHost:document.querySelector('.robo-companion'),squishyHost:host,
+      coltHost:document.querySelector('.robo-companion'),squishyHost:host,gummyHost:gummy.host,
       canOpen:()=>allowed(),canEdit:()=>allowed()&&!loadError,read:readStudio,
       prepare(){closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
       change:setStudio,
-      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='colt'?'colt':'dumpling';petHidden=false;robo.show();selectPet();applyAppearance();save();},
-      restore(value){if(!allowed()||loadError)return;preferences={...preferences,robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
-      play(kind,action){if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
+      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;petHidden=false;robo.show();gummy.show();selectPet();applyAppearance();save();},
+      restore(value){if(!allowed()||loadError)return;preferences={...preferences,gummy:{...value.gummy},robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
+      play(kind,action){if(kind==='gummy')gummy.play(action);else if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
       dance(on){studioRadio=on;sync();},refresh(){resetNap();},
-      resetPosition(kind){if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
-      hide(kind){if(kind==='colt')document.querySelector('.robo-companion [data-hide]').click();else{petHidden=true;sync();}},
+      resetPosition(kind){if(kind==='gummy')gummy.reset();else if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
+      hide(kind){if(kind==='gummy')gummy.hide();else if(kind==='colt')document.querySelector('.robo-companion [data-hide]').click();else{petHidden=true;sync();}},
       retry(){loadError?updateAccount(auth,true):save();}
     });
   }

@@ -596,10 +596,13 @@ function normalizeRoboColtPreference(value) {
   const name=Array.from((typeof s.name==='string'?s.name:'COLT').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'COLT';
   return {skin:ROBO_COLT_SKINS.includes(s.skin)?s.skin:'Original',headwear:['headphones','horn','sleepcap'].includes(s.headwear)?s.headwear:'none',eyewear:s.eyewear==='sunglasses'?'sunglasses':'none',neckwear:['scarf','bowtie'].includes(s.neckwear)?s.neckwear:'none',name,nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};
 }
+const GUMMY_BEAR_SKINS=['Cherry','Strawberry','Orange','Lemon','Green Apple','Pineapple','Blue Raspberry','Grape'];
+function normalizeGummyPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:GUMMY_BEAR_SKINS.includes(s.skin)?s.skin:'Cherry',name:Array.from((typeof s.name==='string'?s.name:'Gummy').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Gummy',nameplate:s.nameplate!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};}
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
-    pet: source.pet === "dumpling" ? "dumpling" : "colt",
+    pet: ['dumpling','gummy'].includes(source.pet) ? source.pet : 'colt',
+    ...(source.gummy ? {gummy:normalizeGummyPreference(source.gummy)} : {}),
     squishyName: Array.from((typeof source.squishyName==='string'?source.squishyName:'Mochi').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Mochi',
     squishyNameplate: source.squishyNameplate !== false,
     ...(source.robo ? {robo:normalizeRoboColtPreference(source.robo)} : {}),
@@ -3902,7 +3905,8 @@ async function handleApi(req, res, pathname) {
         if(r?.nameplate!==undefined&&typeof r.nameplate!=='boolean')throw new Error('Choose a valid nameplate setting.');
         if(!r||typeof r!=='object'||Array.isArray(r)||(r.skin!==undefined?!ROBO_COLT_SKINS.includes(r.skin):!['Red','Blue','Gold'].includes(r.eye))||!['none','headphones','horn','sleepcap'].includes(r.headwear)||(r.eyewear!==undefined&&!['none','sunglasses'].includes(r.eyewear))||(r.neckwear!==undefined&&!['none','scarf','bowtie'].includes(r.neckwear))||!['small','medium','large','extra-large'].includes(r.size)||['platform','motion','asleep'].some(key=>typeof r[key]!=='boolean'))throw new Error('Choose valid Colt settings.');
       }
-      if (input && (!['colt', 'dumpling'].includes(input.pet)
+      if(input?.gummy!==undefined){const g=input.gummy;if(!g||typeof g!=='object'||Array.isArray(g)||!GUMMY_BEAR_SKINS.includes(g.skin)||typeof g.name!=='string'||Array.from(g.name).length>16||/[\u0000-\u001f\u007f]/.test(g.name)||!['small','medium','large','extra-large'].includes(g.size)||['motion','asleep','nameplate'].some(k=>typeof g[k]!=='boolean'))throw new Error('Choose valid Gummy Bear settings.');}
+      if (input && (!['colt', 'dumpling', 'gummy'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
         || (input.eyewear !== undefined && !['none', 'round', 'sunglasses'].includes(input.eyewear))
@@ -3913,7 +3917,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference({...input,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
+        preferences[key] = normalizeCompanionPreference({...input,gummy:input.gummy??preferences[key]?.gummy,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }

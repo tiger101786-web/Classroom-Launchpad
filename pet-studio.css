@@ -16,3 +16,8 @@ dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-heigh
 .pet-studio #save-status[data-error=true]{color:#ffb7b7}
 .pet-studio .tabs{overflow-x:auto}
 @media(max-width:620px){dialog.pet-studio{width:calc(100% - 16px);max-height:96dvh;border-radius:18px}.pet-studio .studio-header{gap:9px}.pet-studio .pet-switch select{min-width:110px;max-width:130px}}
+.pet-studio #pet-stage .gummy-companion{position:relative!important;inset:auto!important;transform:none!important;width:245px!important;max-width:100%!important;height:auto!important;margin:0!important;z-index:1!important}
+.pet-studio #pet-stage .gummy-companion .pet-button{aspect-ratio:auto!important}
+.pet-studio #pet-stage .gummy-companion{pointer-events:none}
+@media(max-width:850px){.pet-studio #pet-stage .gummy-companion{width:200px!important}}
+@media(max-width:620px){.pet-studio #pet-stage .gummy-companion{width:140px!important}}
