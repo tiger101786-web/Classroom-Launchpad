@@ -1,5 +1,6 @@
 /* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
+ Axolotl:{accent:'#ff79ad',light:'#fff0f6',dark:'#a73064',tint:[1,.32,.56],armor:[1.1,.92,1.02],artwork:'robo-colt/parts-axolotl-v1.png',bounds:[[144,18,632,672],[880,167,1094,649],[219,708,450,1193],[740,731,1196,1174]],face:{eyes:[[295,276],[484,276]],mouth:[390,400,1]},description:'Pearl-pink robot enamel, rosy freckles, and three feathery pink axolotl frills on each side.'},
  'Jack-o-Lantern':{accent:'#ffa42e',light:'#fff3a1',dark:'#a14a0f',tint:[1,.42,.035],armor:[.9,.76,1.05],artwork:'robo-colt/parts-jack-o-lantern-v4.png',bounds:[[127,15,642,677],[873,171,1084,653],[220,692,452,1195],[763,730,1187,1172]],description:'Hollow carved pumpkin armor with one warm inner glow, dimming for sleep and brightening on wake.'},
  Glitter:{accent:'#ffd65c',light:'#fffbe1',dark:'#9c681c',tint:[1,.72,.16],armor:[1.1,1.06,.92],artwork:'robo-colt/parts-glitter-v1.png',bounds:[[127,17,609,672],[851,165,1059,648],[209,699,434,1191],[761,734,1185,1170]],description:'Reflective gold-flake enamel, champagne sparkles, and polished graphite joints.'},
  Panda:{accent:'#bba588',light:'#fff7e7',dark:'#51463a',tint:[.87,.89,.92],armor:[.9,.9,.92],artwork:'robo-colt/parts-panda-v4.png',bounds:[[123,22,638,683],[868,172,1105,665],[224,700,477,1197],[773,739,1218,1177]],face:{eyes:[[290,282],[475,282]],mouth:[384,421,.8]},description:'Panda robot armor with normal Colt ears, bold eye patches, black limbs, and a white belly.'},
@@ -134,19 +135,27 @@ window.createRoboColtSkinPainter = function(pet){
   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="'+skin.light+'"/><stop offset=".5" stop-color="'+skin.accent+'"/><stop offset="1" stop-color="'+skin.dark+'"/>';
   // Retain the original eye groups, anchors, highlights and blink animation.
   // Only the iris finish and pupil shape change for the animal skins.
-  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':name==='Snake'?'snake':null;
+  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':name==='Snake'?'snake':name==='Axolotl'?'axolotl':null;
   if(animalEye)pet.querySelector('#rc-iris').innerHTML=animalEye==='tiger'?'<stop stop-color="#fff1b1"/><stop offset=".42" stop-color="#e9b94c"/><stop offset=".76" stop-color="#bd7825"/><stop offset="1" stop-color="#513319"/>':'<stop stop-color="#faf0aa"/><stop offset=".42" stop-color="#c5c954"/><stop offset=".76" stop-color="#8f9b36"/><stop offset="1" stop-color="#385322"/>';
   pet.querySelectorAll('.eyes-open .eye').forEach(eye=>{
-   const pupil=eye.querySelectorAll('ellipse')[2];
+   const [halo,iris,pupil]=eye.querySelectorAll('ellipse');
+   const axolotl=animalEye==='axolotl';
+   iris.setAttribute('rx',axolotl?'24':'25');iris.setAttribute('ry',axolotl?'24':'32');
+   halo.style.opacity=axolotl?'0':'1';
    pupil.setAttribute('rx',animalEye==='snake'?'4':animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
    pupil.setAttribute('ry',animalEye==='snake'||animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
    pupil.setAttribute('fill',animalEye?'#15180f':'#23060a');
    pupil.dataset.pupil=animalEye||'original';
+   if(axolotl){pupil.setAttribute('rx','19');pupil.setAttribute('ry','19');pupil.setAttribute('fill','#080c14');}
   });
   if(animalEye==='snake')pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#fff4bc"/><stop offset=".42" stop-color="#e7bc62"/><stop offset=".78" stop-color="#b68432"/><stop offset="1" stop-color="#624018"/>';
   pet.querySelectorAll('.eye ellipse[filter]').forEach(e=>e.setAttribute('fill',skin.accent));
   pet.querySelectorAll('.eyes-happy path').forEach(e=>e.setAttribute('stroke',skin.accent));
   pet.querySelectorAll('.eyes-sleep path').forEach(e=>e.setAttribute('stroke',skin.dark));
+  if(animalEye==='axolotl'){
+   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#0b1220"/><stop offset=".72" stop-color="#172539"/><stop offset=".91" stop-color="#536c88"/><stop offset="1" stop-color="#233447"/>';
+   pet.querySelectorAll('.eyes-happy path,.eyes-sleep path').forEach(e=>e.setAttribute('stroke','#35445a'));
+  }
   pet.dataset.skin=name;
   return skin;
  };

@@ -29,7 +29,12 @@ const {createCanvas,loadImage}=require('@napi-rs/canvas');
    }
   }
   assert.equal(await pet.locator('#rc-headphones [filter]').count(),0);
-  assert.equal(await pet.locator('[data-pupil]').first().getAttribute('data-pupil'),skin==='Tiger'?'tiger':skin==='Crocodile'?'crocodile':skin==='Snake'?'snake':'original');
+  assert.equal(await pet.locator('[data-pupil]').first().getAttribute('data-pupil'),skin==='Tiger'?'tiger':skin==='Crocodile'?'crocodile':skin==='Snake'?'snake':skin==='Axolotl'?'axolotl':'original');
+  if(skin==='Axolotl'){
+   assert.equal(await pet.locator('[data-pupil]').first().getAttribute('rx'),'19');
+   assert.equal(await pet.locator('[data-pupil]').first().getAttribute('ry'),'19');
+   assert.equal(await pet.locator('.eye ellipse[filter]').first().evaluate(e=>getComputedStyle(e).opacity),'0');
+  }
   assert.equal(await pet.locator('#rc-headphones image').count(),2,'Both fitted earcups remain independent of skin artwork');
   assert.equal(await pet.locator('#rc-audio-rear-band path').count(),3,'Continuous band stays intact');
   const capture=await pet.screenshot({path:path.join(__dirname,'skin-'+skin.replaceAll(' ','-')+'.png')});

@@ -31,8 +31,11 @@ for(const [side,x,angle] of [['left',204,-22],['right',470,22]]){
 const svgNS='http://www.w3.org/2000/svg',puppet=$('#puppet');
 const bodyArt=puppet.querySelector(':scope > svg');
 const headArt=bodyArt.cloneNode(true);
+// Leave room for skin-specific head fins without shrinking the face or moving accessories.
+headArt.setAttribute('width','700');headArt.setAttribute('viewBox','0 0 700 685');
+pet.querySelector('#rc-body-without-ears rect').setAttribute('width','700');
 const headClip=document.createElementNS(svgNS,'clipPath');headClip.id='rc-head-clip';
-headClip.innerHTML='<path d="M0 0H650V425H470Q367 480 264 425H0Z"/>';
+headClip.innerHTML='<path d="M0 0H700V425H470Q367 480 264 425H0Z"/>';
 const torsoClip=document.createElementNS(svgNS,'clipPath');torsoClip.id='rc-torso-clip';
 torsoClip.innerHTML='<path d="M0 425H264Q367 480 470 425H650V685H0Z"/>';
 pet.querySelector('defs').append(headClip,torsoClip);

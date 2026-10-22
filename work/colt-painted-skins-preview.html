@@ -5,7 +5,7 @@ body{margin:0;background:#29252d;color:#f7f1e9;font:16px system-ui;text-align:ce
 const api=createRoboColt(()=>{});let skin='Jack-o-Lantern',radio=false,asleep=false,phones=false;
 window.showPaintedSkin=function(value){skin=value;render()};
 function render(){api.update({account:'painted-preview',visible:true,radio,preferences:{...roboColtDefaults(),skin,name:skin,asleep,headwear:phones?'headphones':'none'}});document.querySelectorAll('#skins button').forEach(b=>b.setAttribute('aria-pressed',b.textContent===skin));}
-for(const name of ['Camo','Rainbow','Crocodile','Tiger','Zebra','Panda','Snake','Glitter','Jack-o-Lantern']){const b=document.createElement('button');b.textContent=name;b.onclick=()=>showPaintedSkin(name);document.querySelector('#skins').append(b)}
+for(const name of ['Axolotl','Camo','Rainbow','Crocodile','Tiger','Zebra','Panda','Snake','Glitter','Jack-o-Lantern']){const b=document.createElement('button');b.textContent=name;b.onclick=()=>showPaintedSkin(name);document.querySelector('#skins').append(b)}
 const wagButton=document.createElement('button');wagButton.textContent='Tail wag';wagButton.onclick=()=>document.querySelector('[data-setting="action"][data-option="tail"]').click();document.querySelector('#music').parentElement.append(wagButton);
 document.querySelector('#music').onclick=()=>{radio=!radio;render()};document.querySelector('#sleep').onclick=()=>{asleep=!asleep;render()};document.querySelector('#phones').onclick=()=>{phones=!phones;render()};render();
 </script></body></html>

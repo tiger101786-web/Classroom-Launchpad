@@ -195,3 +195,5 @@ body[data-theme="night"] .robo-companion .zs text{fill:#e6d9ff;stroke:#24152f}
 .robo-companion .panel .controls button{white-space:normal}
 @media(prefers-reduced-motion:reduce){.robo-companion .zs text,.robo-companion .notes text{animation:none;opacity:1}}
 
+/* Axolotl has frills only: no foreground hair crop over the headset. */
+.robo-companion .pet-button[data-skin="Axolotl"] #rc-audio-forelock{display:none!important}

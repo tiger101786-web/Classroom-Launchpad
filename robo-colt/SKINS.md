@@ -5,7 +5,7 @@ fitted to the original atlas component bounds. The platform, crop windows, and
 animation pivots do not move. Facial anchors are mapped through the body fit;
 Custom skins share that registration across every expression.
 
-The customization panel includes 27 skins. Four choices per page keep the
+The customization panel includes 28 skins. Four choices per page keep the
 existing panel dimensions. Original comes first, followed by alphabetical names.
 The expanded collection adds Ancient Bronze, Candy Chrome, Carbon Racer,
 Copper Circuit, Deep Sea, Desert Relic, Frostfire, Moonstone, Obsidian Ember,
