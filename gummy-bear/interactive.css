@@ -42,3 +42,9 @@
 .gummy-companion .gb-nameplate:before{display:none}
 .gummy-companion .gb-nameplate>svg{display:block;width:100%;height:auto;overflow:visible}
 .gummy-companion .gb-plate-label{font-family:'Trebuchet MS','Segoe UI',sans-serif;letter-spacing:.015em}
+/* Match the other companions' overall height without stretching the taller gummy artwork. */
+.gummy-companion{width:111px}
+.gummy-companion[data-size=small]{width:96px}
+.gummy-companion[data-size=large]{width:130px}
+.gummy-companion[data-size=extra-large]{width:162px}
+@media(max-width:1119px){.gummy-companion[data-size]{width:48px}}

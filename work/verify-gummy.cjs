@@ -11,6 +11,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    await pet.screenshot({path:'assets/pet-studio/gummy-'+skin.toLowerCase().replaceAll(' ','-')+'.png'});
   }
   await p.evaluate(()=>showGummy('Cherry'));
+  await p.evaluate(()=>api.play('bounce'));assert.equal(await pet.locator('.gb-body').evaluate(e=>e.getAnimations().length),0,'Removed bounce does not run');
   await p.evaluate(()=>{window.ambientAnimation=document.querySelector('.gb-idle-motion').getAnimations()[0];window.ambientStart=ambientAnimation.currentTime});
   assert.equal(await pet.locator('.gb-idle-motion').evaluate(e=>getComputedStyle(e).animationTimingFunction),'linear','Continuous flow must not ease to a stop at each intermediate pose');
   assert.equal(await pet.locator('.gb-idle-motion').evaluate(e=>getComputedStyle(e).animationName),'gb-idle-flow');
@@ -66,7 +67,16 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   await pet.screenshot({path:'work/gummy-cherry.png'});assert.deepEqual(errors,[]);
   const idlePage=await b.newPage();await idlePage.clock.install();await idlePage.goto('file:///C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/gummy-bear-preview.html');
   await idlePage.evaluate(()=>{window.seenIdle=[];new MutationObserver(()=>{seenIdle.push(document.querySelector('.gummy-companion .pet-button').className)}).observe(document.querySelector('.gummy-companion .pet-button'),{attributes:true,attributeFilter:['class']})});
-  await idlePage.clock.runFor(60000);const idleStates=await idlePage.evaluate(()=>seenIdle.join(' '));assert.match(idleStates,/gb-ear-wobble/);assert.match(idleStates,/gb-happy/);assert.match(idleStates,/gb-action/);await idlePage.close();
+  await idlePage.clock.runFor(80000);const idleStates=await idlePage.evaluate(()=>seenIdle.join(' '));assert.match(idleStates,/gb-ear-wobble/);assert.match(idleStates,/gb-happy/);assert.match(idleStates,/gb-action/);assert.match(idleStates,/gb-greeting/);await idlePage.close();
   console.log('PASS: eight colors, solid separate platform, sleeping mouth and breathing, faster happy dance, chatter, ear wobble, action cancellation, and reduced motion.');
+  const sizePage=await b.newPage({viewport:{width:1440,height:1000}});await sizePage.goto('file:///C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/gummy-bear-preview.html');
+  await sizePage.evaluate(()=>{document.querySelector('head style').remove();prefs.motion=false;render()});
+  for(const [size,coltWidth] of [['small',124],['medium',144],['large',168],['extra-large',210]]){
+   await sizePage.evaluate(s=>{prefs.size=s;render()},size);
+   const box=await sizePage.locator('.gummy-companion .pet-button').boundingBox();
+   assert(Math.abs(box.height-coltWidth*1170/920)<2,'Gummy '+size+' matches Colt overall height');
+  }
+  await sizePage.setViewportSize({width:900,height:800});const compact=await sizePage.locator('.gummy-companion .pet-button').boundingBox();assert(Math.abs(compact.height-62*1170/920)<2,'Compact gummy matches other companions');
+  await sizePage.close();
  }finally{await b.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

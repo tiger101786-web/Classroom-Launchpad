@@ -1,8 +1,10 @@
 # Gummy Bear
 
-Idle continuity: ambient motion lives on its own SVG parent and continues through reactions without restarting its phase. The inner body owns bounce/stretch actions only. Regression tests confirm the same ambient animation survives an entire reaction.
+Idle continuity: ambient motion lives on its own SVG parent and continues through reactions without restarting its phase. The inner body owns jelly-wobble actions only. Regression tests confirm the same ambient animation survives an entire reaction.
 
-The idle loop uses phase-offset sine motion with linear interpolation, avoiding a simultaneous pause at the ends of the squash. Bounces use a smooth sine-squared envelope. Pet Studio reserves content-driven height plus bottom padding for the nameplate; desktop, tablet, and mobile checks require at least 16px clearance above the preview controls.
+The idle loop uses phase-offset sine motion with linear interpolation, avoiding a simultaneous pause at the ends of the squash. The standalone bounce action has been removed. Pet Studio reserves content-driven height plus bottom padding for the nameplate; desktop, tablet, and mobile checks require at least 16px clearance above the preview controls.
+
+Dashboard sizes account for the taller gummy silhouette: widths 96/111/130/162px match the Colt's overall named-pet height at small/medium/large/extra-large. Compact screens use 48px width to match the other companions' compact height. Artwork remains uniformly scaled; Pet Studio keeps its larger inspection preview.
 
 The nameplate is a flat gummy plaque, distinct from the round dish, with a taller pale rounded inset and larger automatically fitted lettering. Two head-only crops of the approved bear decorate its ends, with light outlines for contrast. Rounded glossy candy bubbles frame the upper and lower edges, replacing the stretched, washed-out highlight. The whole frame and heads share the flavor tint.
 
@@ -10,7 +12,7 @@ Wake-up now mirrors Squishy's two-second sequence: 450ms Z fade, 1.3-second eye-
 
 ## Personality and candy details
 
-Say hello combines happy eyes, an animated smile, and continuous-image hand/brow flexing. Happy smile is also a separate Play action. When awake and not playing radio, idle reactions cycle through ear wobble, happy expression, bounce, and another happy expression, with randomized 8–14 second rests. Explicit actions, hiding, sleep and motion settings cancel pending reactions.
+Say hello combines happy eyes, an animated smile, and continuous-image hand/brow flexing. Happy smile is also a separate Play action. When awake and not playing radio, idle reactions cycle through ear wobble, happy expression, say hello, and jelly wobble, with randomized 8–14 second rests. Explicit actions, hiding, sleep and motion settings cancel pending reactions.
 
 The native SVG candy headset appears for radio playback and dance preview, including with motion disabled, but not during sleep. Four music notes match the Squishy/Colt styling, 2.4-second motion and staggered delays. The glossy nameplate uses flavor-colored gummy-bear end decorations and safe text content. No new generated raster assets are needed for these renderer-native details.
 
