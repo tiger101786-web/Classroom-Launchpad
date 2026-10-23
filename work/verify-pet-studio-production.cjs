@@ -45,6 +45,44 @@ await studio.locator('#dance').click();assert(await studio.locator('.gummy-compa
 await studio.locator('[data-tab="play"]').click();await studio.locator('[data-toggle="asleep"]').check();await page.waitForTimeout(300);assert(await studio.locator('.gummy-companion .pet-button').evaluate(e=>e.classList.contains('asleep')));assert.equal(await studio.locator('#dance').isDisabled(),true);await studio.locator('[data-toggle="asleep"]').uncheck();
 await studio.locator('[data-tab="appearance"]').click();assert(await studio.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await studio.screenshot({path:'work/gummy-studio-'+role+'.png'});
 await studio.locator('.studio-close').click();await page.reload({waitUntil:'domcontentloaded'});await home();await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await open();assert.equal(await studio.locator('#pet-title').innerText(),'Gummy '+role);assert.equal(await studio.locator('#pet-select').inputValue(),'gummy');
+
+await studio.locator('#pet-select').selectOption('eagle');assert(await studio.locator('.eagle-companion').isVisible());
+await page.setViewportSize({width:1440,height:1000});
+await studio.locator('[data-tab="name"]').click();
+for(const [size,coltWidth] of [['small',124],['medium',144],['large',168],['extra-large',210]]){
+ await studio.locator('#size-select').selectOption(size);
+ await studio.locator('.studio-close').click();await page.waitForFunction(()=>document.querySelector('body > .eagle-companion'));
+ const b=await page.locator('.eagle-companion .pet-button').boundingBox();
+ assert(Math.abs(b.height-coltWidth*940/920)<2,'Eagle '+size+' matches the existing character/perch height');
+ await open();await studio.locator('[data-tab="name"]').click();
+}
+await studio.locator('.studio-close').click();await page.waitForFunction(()=>document.querySelector('body > .eagle-companion'));
+await page.setViewportSize({width:900,height:800});const compactEagle=await page.locator('.eagle-companion .pet-button').boundingBox();assert(Math.abs(compactEagle.height-62*940/920)<2);
+await page.setViewportSize({width:1440,height:1000});await open();
+
+assert.equal(await studio.locator('[data-skin-choice]').count(),1);
+await studio.locator('[data-skin-choice="Bald Eagle"] img').evaluate(img=>img.decode());
+await studio.locator('[data-tab="name"]').click();await studio.locator('#pet-name').fill('Eagle '+role);await studio.locator('#size-select').selectOption('large');await page.waitForTimeout(500);
+let eagleSaved=(await req('/api/companion-preferences',cookie)).data.preferences;
+assert.equal(eagleSaved.pet,'eagle');assert.equal(eagleSaved.eagle.name,'Eagle '+role);assert.equal(eagleSaved.eagle.size,'large');assert.equal(eagleSaved.gummy.name,'Gummy '+role);
+assert.equal((await req('/api/companion-preferences',cookie,{...eagleSaved,eagle:{...eagleSaved.eagle,skin:'invalid'}})).status,400);
+await studio.locator('[data-tab="play"]').click();assert.equal(await studio.locator('[data-action="tilt"]').count(),0);
+await studio.locator('[data-action="wings"]').click();await page.waitForTimeout(1500);
+assert(Number((await studio.locator('.eagle-companion .wing-left').getAttribute('transform')).match(/rotate\(([-\d.]+)/)[1])>25);
+await studio.locator('[data-toggle="asleep"]').check();assert.equal(await studio.locator('.eagle-companion .lid-left').getAttribute('height'),'125');
+await studio.locator('[data-toggle="asleep"]').uncheck();await page.waitForTimeout(1800);
+assert.equal(await studio.locator('.eagle-companion .lower-jaw').getAttribute('transform'),'translate(0 0)');
+await page.waitForTimeout(1600);assert.equal(await studio.locator('.eagle-companion .lid-left').getAttribute('height'),'0');
+await studio.locator('#dance').click();assert(await studio.locator('.eagle-companion .pet-button').evaluate(e=>e.classList.contains('dancing')));await studio.locator('#dance').click();
+for(const width of [1440,390]){await page.setViewportSize({width,height:1000});await page.waitForTimeout(100);assert(await studio.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await studio.screenshot({path:'C:/Users/Sinister/Documents/Email/gummy-bear-qa/eagle-studio-'+role+'-'+width+'.png'});}
+await studio.locator('.studio-close').click();await page.waitForFunction(()=>document.querySelector('body > .eagle-companion'));assert.equal(await page.locator('body > .eagle-companion').count(),1);
+await page.reload({waitUntil:'domcontentloaded'});await home();await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await open();
+assert.equal(await studio.locator('#pet-title').innerText(),'Eagle '+role);assert.equal(await studio.locator('#pet-select').inputValue(),'eagle');
+await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.querySelector('.eagle-companion .pet-button').classList.contains('still'));
+await page.emulateMedia({reducedMotion:'no-preference'});
+await studio.locator('[data-tab="settings"]').click();await studio.locator('#hide-pet').click();assert.equal(await page.locator('.eagle-companion').isVisible(),false);
+await open();assert(await studio.locator('.eagle-companion').isVisible());await studio.locator('#pet-select').selectOption('gummy');
+
 await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.querySelector('.gummy-companion .pet-button').classList.contains('still'));
 await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'login',auth:{authenticated:false}}})));await page.waitForTimeout(100);assert.equal(await studio.isVisible(),false);assert.equal(await page.locator('body > .dumpling-companion').count(),1);assert.equal(await page.locator('body > .gummy-companion').isVisible(),false);assert.deepEqual(errors,[]);await context.close();
 }

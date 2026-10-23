@@ -1,0 +1,52 @@
+# Bald Eagle interactive test
+
+## Fitted branch (current preview)
+
+`branch-fitted-v4.png` replaces the exaggerated bend that left a gap under the bird. Its supporting surface stays continuous beneath the belly, with a gently irregular lower contour and smaller offshoots. Rendered at y=60 to align the generated artwork with the original body. Resting and flapping composites checked; animation tests pass. Built-in image tool source: `exec-88e2fdc9-bd45-4543-b94e-6c15b83f769a.png`.
+
+Final prompt: “Use case: precise-object-edit. Use the attached eagle composition as placement and illustration reference. Deliver ONLY its replacement branch layer, eagle completely removed to transparency. Same 1374x1145 canvas. A handsome natural brown tree bough with warm painted bark, gently uneven tapered lower silhouette, modest asymmetry, a small forked twig at each outer end, not large cut stumps. CRITICAL: retain a continuous supporting upper surface across the entire bird footprint x220 through1150, located at y925 to945, never below y945, so there can be no gap under the existing eagle's broad belly. Main branch bottom varies subtly y1060 to1110, not a large arch or deep wave. Avoid the uniform cylinder/log look through knobby textured bark and subtly tapering ends rather than a huge bend. Side twigs remain outside x180..1200, lower than y850, out of the wings' way. Match original polished 2D painted art, no photorealism. No bird, no feet, no nest, no leaves, no background, genuine transparent alpha. Keep generous transparent area above the branch and all tips inside canvas.”
+
+## Organic branch (superseded iteration)
+
+`branch-organic-v3.png` replaces the overly straight textured branch. The painted asset now has an asymmetric bend, knobby outline and varying thickness; the eagle rig is unchanged. Generated with the built-in image tool from `branch-textured-v2.png`, source `exec-d53bcdc4-ba19-4a83-bfab-a7c0be2766b6.png`. Resting pose and animation checks verified.
+
+Final prompt: “Use case: precise-object-edit. Edit this isolated branch asset. Its main trunk is much too straight and uniformly thick. Redesign the main trunk into an obviously organic, asymmetric gently twisting bough: uneven knobby silhouette, varying thickness, a slight rising bend left of center and a descending taper toward the right, different heights at the ends. No long ruler-straight upper or lower edges, no symmetrical U shape. Keep rich warm brown bark, knots, short forked offshoots and the same polished painted 2D style. Retain the 1374x1145 transparent canvas with branch in the lower part, no new bird or objects. Important placement: central top contact surface around x600–800 should remain near y945 so an unchanged bird sits on it; ends may bend up or down naturally within the canvas. Keep bottom above y1130 and side tips within frame. Preserve true transparency, no background, no text. Only change branch geometry to feel naturally grown.”
+
+## Textured branch (superseded iteration)
+
+The nest is no longer rendered. `branch-textured-v2.png` is a stationary layer behind the unchanged eagle and wings. It adds rugged bark, cracks, knots and short forked side limbs. The prior nest asset is retained as an unused iteration. Animation checks and resting/flapping screenshots were verified with the new perch.
+
+Built-in image tool output: `exec-8dd6d1d4-d22c-4d59-834b-a53b65cf7515.png`, saved locally as `branch-textured-v2.png`.
+
+Final prompt: “Use case: precise-object-edit. Edit target attached eagle on plain log. Output a replacement perch asset ONLY: remove the eagle completely leaving transparent space, retain the horizontal main branch in its exact original position and size at bottom of the original 1374x1145 canvas (main branch upper edge near y950, bottom near y1100). Redesign this smooth log as a natural rugged tree branch with rich layered brown bark, fissures, knots, warm ridged highlights and subtle grain, matching the polished 2D painted shading of the original eagle. Add a few distinct short tapering forked limbs growing naturally from the LEFT and RIGHT ends, some pointing outward and upward along the sides, all inside the canvas. Keep the broad center upper surface level and unobstructed for the bird to sit. No nest, no leaves, no feet, no bird, no background, no text. Preserve original canvas and position: lots of transparent space above the low branch. This is an animation layer placed beneath the unchanged original eagle.”
+
+## Nest perch (superseded iteration)
+
+Previously, `nest-v1.png` was layered behind the bird and through a front-rim SVG crop in front of his lower body. This approach was rejected in favor of the textured branch above.
+
+Generated with the built-in image tool; source `exec-074b50e7-db33-442c-bdc5-f11934fbb14d.png`. Saved locally as `nest-v1.png`.
+
+Final prompt: “Use case: precise-object-edit. Input image is a style and proportions reference for a game pet's replacement perch. Output ONLY a standalone empty eagle nest, no eagle, no bird, no branch or log. Transparent background. A wide shallow bowl of densely intertwined warm brown twigs with a few golden straw fibers, sturdy natural eagle nest, not a basket, no leaves, eggs or decorations. Front-facing view with a slightly visible dark oval inner hollow, thick rounded front rim and woven twig bowl below. Match the reference's polished 2D painted illustration, bold clean contours, broad shaded forms and warm highlights, not photorealistic. Width roughly 3.5 times height; nest fills canvas with small transparent margins, entire silhouette and projecting twig tips visible. This nest will overlay the lower belly of the original eagle to hide its feet; keep center front rim a clean shallow curve. Deliver just the nest asset, genuine transparent background.”
+
+Open `index.html` directly in a browser. This is a standalone test, not a registered production companion. Nothing in the main app, account preferences, or Pet Studio is changed.
+
+The approved front-facing eagle PNG remains the visible face and body. SVG crops keep the branch stationary. Each wing is a separate crop rotating about its shoulder, with matching painted torso backing behind it. No displacement filters are used: they caused face distortion in the initial test. Curious lean has been removed entirely, including its button and idle reaction.
+
+Beak chatter uses a painted open-mouth detail clipped to the lower jaw. The original upper beak is composited over it at its unchanged location. The lower jaw translates vertically at its original proportions, behind a fixed mouth-region crop; neither beak part is stretched. Mouth motion is included in the greeting and chatter action. Eyelids remain native overlays.
+
+Controls: greeting, happy eyes, wing flap, body wobble, blink, chatter, sleep/wake, dancing, idle rotation, size, motion and light/dark background. Reduced motion is respected. Hidden pages stop the animation frame loop. Idle reactions wait during actions, sleep, waking and dancing. Wake-up takes 3.2 seconds with a slow proportion-preserving jaw opening. The original 2.1-second eye-opening and soft-blink sequence runs independently, replacing the altered half-closed hold. The upper beak stays fixed.
+
+The stronger wing-flap action uses a 34-degree amplitude with a smooth start/end envelope (22 degrees during greetings). Happy eyes remain open: softly masked matching artwork relaxes the brow feathers at the original size, crossfading without any eye scaling or stretching. This is used during Happy eyes, greetings, dancing and occasional idle reactions. Blinks and sleep override the happy expression. Sleep retains its slow 5.2-second lower-jaw snore cycle with the upper beak fixed. All motion stops when motion is disabled or reduced motion is requested. Crop boundaries exclude the branch from moving layers.
+
+`approved-eagle.png` is the user-approved generated asset copied from `exec-2ce29f2f-8dbd-4729-a302-6b1e22196830.png`; original canvas 1374 × 1145 with alpha. Kept locally so the preview is independent of the image-generation cache.
+
+Run `node work/eagle-pet-preview/verify.cjs` from the repository with Playwright available. Tests cover the stationary branch, greeting, independent wings, stationary upper-beak transform, absence of displacement filters, sleep/wake guards, dance, disabled/reduced motion, and mobile layout. QA screenshots go outside the repository to the local gummy-bear-qa folder.
+
+## Revised supporting artwork
+
+These edits were generated with the built-in image tool, using the approved eagle as the edit target. Full images are preserved locally; only the necessary regions are shown in the rig.
+
+- `happy-open-eyes-v4.png`: source `exec-1f4b1d73-e456-441c-aac9-91b17c0c565e.png`. Final prompt: “Use case: precise-object-edit. Edit target: attached eagle sprite. Create matching happy open-eyed expression frame for this exact animated eagle. Change ONLY the brow feathers immediately above the two eyes: gently lift/relax the downward inward brow angle so he looks pleased and friendly rather than stern. Eyes MUST remain open with the SAME golden irises, dark pupils, catchlights, position and scale. Do NOT close eyes, add smiling arcs or change beak. Keep exactly the same 1374x1145 canvas, eagle position, head silhouette, feather style, colors, body, wings, branch, transparent background and all other details. Only local brow/eye socket expression adjustment; no head movement or resizing, no new objects. This frame will be composited only around the brows over the original sprite.” Only two feather-blended eye/brow regions are used; the rest of the original remains unchanged.
+
+- `open-beak-v2.png`: source `exec-cf6f4705-a837-4a31-94c5-69c17d8aae66.png`. Prompt: precise-object edit preserving the 1374×1145 canvas, bird placement, feathers, eyes and branch; open the golden lower mandible beneath the existing upper beak, with a small dark cavity and matching golden lower jaw, no teeth or redesign. The generated upper tip changed, so that part is deliberately NOT used; the approved upper beak is layered back over it.
+- `wing-backing-v2.png`: source `exec-112c8827-eb6f-45ce-83b5-b86bd13a96d4.png`. Prompt: remove only the folded side wings and reconstruct the hidden rounded dark-brown feathered torso, continuing broad painted feather shapes without flat panels; retain original head, eyes, beak, branch, pose, canvas and transparency. This is a backing layer only, not replacement visible character artwork.

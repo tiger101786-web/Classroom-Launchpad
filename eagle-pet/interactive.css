@@ -1,0 +1,17 @@
+/* Match the Colt/Squishy character-and-perch height, excluding their separate nameplates.
+   Widths account for the eagle's wider 1494:1205 canvas without stretching the artwork. */
+.eagle-companion{position:fixed;width:183px;max-width:calc(100vw - 16px);z-index:90;user-select:none}
+.eagle-companion[hidden]{display:none!important}
+.eagle-companion[data-size=small]{width:157px}.eagle-companion[data-size=large]{width:213px}.eagle-companion[data-size=extra-large]{width:266px}
+@media(max-width:1119px){.eagle-companion[data-size]{width:79px}}
+.eagle-companion .eagle{display:block;width:100%;height:auto;border:0;padding:0;background:none;box-shadow:none;cursor:grab;touch-action:none}
+.eagle-companion .eagle:hover{transform:none;background:none}
+.eagle-companion .eagle:focus-visible{outline:2px solid #e2b26c;outline-offset:5px;border-radius:16px}
+.eagle-companion .eagle>svg{display:block;width:100%;height:auto;overflow:visible}
+.eagle-companion .body{transform-origin:687px 955px}
+.eagle-companion .notes,.eagle-companion .zs{pointer-events:none}
+.eagle-companion .notes{fill:#dba44d;stroke:#26202c;stroke-width:5;paint-order:stroke;opacity:0}
+.eagle-companion .zs{fill:#9674bd;stroke:#fff;stroke-width:5;paint-order:stroke}
+.pet-studio #pet-stage .eagle-companion{position:relative!important;inset:auto!important;transform:none!important;width:310px!important;max-width:100%!important;height:auto!important;margin:0!important;z-index:1!important;pointer-events:none}
+.pet-studio #pet-stage .eagle-companion .pet-button{aspect-ratio:auto!important}
+@media(max-width:620px){.pet-studio #pet-stage .eagle-companion{width:235px!important}}
