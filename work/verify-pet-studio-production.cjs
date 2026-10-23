@@ -52,21 +52,27 @@ await studio.locator('[data-tab="name"]').click();
 for(const [size,coltWidth] of [['small',124],['medium',144],['large',168],['extra-large',210]]){
  await studio.locator('#size-select').selectOption(size);
  await studio.locator('.studio-close').click();await page.waitForFunction(()=>document.querySelector('body > .eagle-companion'));
- const b=await page.locator('.eagle-companion .pet-button').boundingBox();
+ const b=await page.locator('.eagle-companion .pet-button > svg').boundingBox();
  assert(Math.abs(b.height-coltWidth*940/920)<2,'Eagle '+size+' matches the existing character/perch height');
  await open();await studio.locator('[data-tab="name"]').click();
 }
 await studio.locator('.studio-close').click();await page.waitForFunction(()=>document.querySelector('body > .eagle-companion'));
-await page.setViewportSize({width:900,height:800});const compactEagle=await page.locator('.eagle-companion .pet-button').boundingBox();assert(Math.abs(compactEagle.height-62*940/920)<2);
+await page.setViewportSize({width:900,height:800});const compactEagle=await page.locator('.eagle-companion .pet-button > svg').boundingBox();assert(Math.abs(compactEagle.height-62*940/920)<2);
 await page.setViewportSize({width:1440,height:1000});await open();
 
 assert.equal(await studio.locator('[data-skin-choice]').count(),1);
 await studio.locator('[data-skin-choice="Bald Eagle"] img').evaluate(img=>img.decode());
 await studio.locator('[data-tab="name"]').click();await studio.locator('#pet-name').fill('Eagle '+role);await studio.locator('#size-select').selectOption('large');await page.waitForTimeout(500);
 let eagleSaved=(await req('/api/companion-preferences',cookie)).data.preferences;
+assert.equal(eagleSaved.eagle.nameplate,true);
+await studio.locator('[data-toggle="nameplate"]').uncheck();await page.waitForTimeout(400);assert.equal(await studio.locator('.eagle-nameplate').isVisible(),false);assert.equal((await req('/api/companion-preferences',cookie)).data.preferences.eagle.nameplate,false);
+await studio.locator('[data-toggle="nameplate"]').check();await page.waitForTimeout(400);assert(await studio.locator('.eagle-nameplate').isVisible());
+assert.equal(await studio.locator('.eagle-name-label').textContent(),'Eagle '+role);
 assert.equal(eagleSaved.pet,'eagle');assert.equal(eagleSaved.eagle.name,'Eagle '+role);assert.equal(eagleSaved.eagle.size,'large');assert.equal(eagleSaved.gummy.name,'Gummy '+role);
 assert.equal((await req('/api/companion-preferences',cookie,{...eagleSaved,eagle:{...eagleSaved.eagle,skin:'invalid'}})).status,400);
 await studio.locator('[data-tab="play"]').click();assert.equal(await studio.locator('[data-action="tilt"]').count(),0);
+await studio.locator('[data-action="fast-wings"]').click();
+const fastPeaks=await page.evaluate(()=>new Promise(resolve=>{let peaks=0,above=false;const end=performance.now()+1900;function sample(){const angle=Number(document.querySelector('.eagle-companion .wing-left').getAttribute('transform').match(/rotate\(([-\d.]+)/)[1]);if(angle>15&&!above)peaks++;above=angle>15;if(performance.now()<end)requestAnimationFrame(sample);else resolve(peaks)}sample()}));assert(fastPeaks>=4,'Fast flap has at least four visible wing beats');
 await studio.locator('[data-action="wings"]').click();await page.waitForTimeout(1500);
 assert(Number((await studio.locator('.eagle-companion .wing-left').getAttribute('transform')).match(/rotate\(([-\d.]+)/)[1])>25);
 await studio.locator('[data-toggle="asleep"]').check();assert.equal(await studio.locator('.eagle-companion .lid-left').getAttribute('height'),'125');

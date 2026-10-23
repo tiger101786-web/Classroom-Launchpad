@@ -15,3 +15,10 @@
 .pet-studio #pet-stage .eagle-companion{position:relative!important;inset:auto!important;transform:none!important;width:310px!important;max-width:100%!important;height:auto!important;margin:0!important;z-index:1!important;pointer-events:none}
 .pet-studio #pet-stage .eagle-companion .pet-button{aspect-ratio:auto!important}
 @media(max-width:620px){.pet-studio #pet-stage .eagle-companion{width:235px!important}}
+.eagle-companion .eagle-nameplate{display:block;width:92%;margin:3px auto 0;pointer-events:none}
+.eagle-companion .eagle-nameplate[hidden]{display:none}
+.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){height:auto;min-height:400px;padding:12px 0 24px}
+@media(max-width:850px){.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){min-height:330px}}
+@media(max-width:620px){.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){min-height:235px}}
+.eagle-companion .eagle-nameplate svg{display:block;width:100%;height:auto;overflow:visible}
+.eagle-companion .eagle-name-label{font-family:Georgia,'Times New Roman',serif;font-weight:700;fill:#43230e;stroke:#ffe1a1;stroke-width:3;paint-order:stroke;letter-spacing:3px}
