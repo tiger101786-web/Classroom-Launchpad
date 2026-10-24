@@ -9,7 +9,7 @@
 .pet-studio .count:before{color:#ff5c88;width:1.4em;height:1.4em;margin-right:.4em}
 .pet-studio .subtabs [data-subtab=accessories]:before{content:'♟';font-size:1.6em;vertical-align:middle;margin-right:.6em;color:#d5d1df}
 @media(max-width:700px){.pet-studio:has(#pet-select option[value=eagle]:checked) .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
-dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-height:92dvh;border:0;border-radius:0;background:#09090b;container-type:inline-size;box-shadow:0 24px 100px #000c;color:#f7f2f5}
+dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-height:92dvh;border:0;border-radius:0;background:#09090b;container-type:inline-size;box-shadow:0 24px 100px #000c;color:#f7f2f5;--studio-corner-cut:clamp(12px,2.5vw,30px);clip-path:polygon(var(--studio-corner-cut) 0,calc(100% - var(--studio-corner-cut)) 0,100% var(--studio-corner-cut),100% calc(100% - var(--studio-corner-cut)),calc(100% - var(--studio-corner-cut)) 100%,var(--studio-corner-cut) 100%,0 calc(100% - var(--studio-corner-cut)),0 var(--studio-corner-cut))}
 .pet-studio .studio{width:100%;max-width:none;min-height:66.6667cqw;background:url('assets/pet-studio/crimson-dashboard-frame.png') center top/100% 100% no-repeat;padding:0 0 4cqw;border:0;box-sizing:border-box}
 .pet-studio .studio-header{height:11.6cqw;padding:2.3cqw 3.6cqw 2cqw 70.5cqw;position:relative;background:none;border:0;gap:2.2cqw;align-items:center}
 .pet-studio .studio-logo{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
@@ -33,7 +33,9 @@ dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-heigh
 .pet-studio .controls-pane{padding:0 2.8cqw 0 1.2cqw;background:none;min-height:0;min-width:0}
 .pet-studio .tabs{padding:0 .8cqw;gap:1cqw;border-bottom:1px solid #4b3036;min-height:4.8cqw;overflow-x:auto}
 .pet-studio .tabs button{font-size:1.35cqw;font-weight:600;padding:1.3cqw 1.3cqw 1cqw;color:#aaa9b3;border-bottom:3px solid transparent}
-.pet-studio .tabs button[aria-selected=true]{background:linear-gradient(#33040c99,#d80024);border-color:#ff4964;color:#fff;box-shadow:0 6px 14px #f0003580;clip-path:polygon(0 12%,10% 0,90% 0,100% 15%,100% 100%,0 100%)}
+.pet-studio .tabs button[aria-selected=true]{background:none;border-color:#ff4964;color:#fff;box-shadow:none;clip-path:none;text-shadow:0 0 12px #ff315d66}
+.pet-studio .tabs button{position:relative}
+.pet-studio .tabs button[aria-selected=true]:after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;border-radius:2px;background:#ff96ad;box-shadow:0 0 7px #ff1749;pointer-events:none}
 .pet-studio .tab-content{margin:0 .1cqw;padding:2cqw 1.8cqw 1cqw;min-height:0;height:42cqw;overflow-y:auto;border:1px solid #be1734;border-radius:1.4cqw;background:linear-gradient(140deg,#09090ce8,#09090c99);scrollbar-color:#a81e38 #171016}
 .pet-studio .section-heading{margin-bottom:1.6cqw;gap:1cqw}
 .pet-studio .section-heading h3{font-size:2.1cqw;font-weight:700;line-height:1.2;margin:0 0 .65cqw;color:#fff}
