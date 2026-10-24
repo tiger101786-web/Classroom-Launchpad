@@ -14,11 +14,11 @@
 .pet-studio[data-theme=woodland] .preview-pane h2,.pet-studio[data-theme=woodland] #pet-subtitle,.pet-studio[data-theme=woodland] .preview-tip{color:#fff;text-shadow:0 2px 4px #103850,0 0 10px #103850}
 .pet-studio[data-theme=woodland] .preview-actions button{background:linear-gradient(#594227,#302515);border-color:#c39c60;box-shadow:inset 0 1px 2px #f1d6a488,0 2px 5px #12250e88;color:#fffbe7}
 .pet-studio[data-theme=woodland] .preview-actions #greet{background:linear-gradient(#279d24,#12651b);border-color:#95da57}
-.pet-studio[data-theme=woodland] .tabs{border-color:#976c3b;gap:.5cqw}
+.pet-studio[data-theme=woodland] .tabs{border-color:transparent;gap:.5cqw}
 .pet-studio[data-theme=woodland] .tabs button{color:#eadbc8;background:linear-gradient(#663c1c,#40210f);border:1px solid #987044;border-radius:10px 10px 0 0;padding:1cqw 1.2cqw;margin-top:.6cqw;font-size:1.25cqw}
 .pet-studio[data-theme=woodland] .tabs button[aria-selected=true]{color:#fff;background:linear-gradient(#30a22a,#0d5c17);border-color:#91cd4f;box-shadow:inset 0 1px 2px #cdfa8d77;text-shadow:none}
 .pet-studio[data-theme=woodland] .tabs button[aria-selected=true]:after{background:#c1f692;box-shadow:0 0 5px #59ab2a}
-.pet-studio[data-theme=woodland] .tab-content{background:linear-gradient(100deg,#29120588,#45220b66);border-color:#956533;scrollbar-color:#b1844b #3a2113}
+.pet-studio[data-theme=woodland] .tab-content{background:transparent;border-color:transparent;box-shadow:none;scrollbar-color:#b1844b #3a2113}
 .pet-studio[data-theme=woodland] .section-heading h3{color:#fff9ed}.pet-studio[data-theme=woodland] .section-heading p{color:#eed8bd}
 .pet-studio[data-theme=woodland] .count{background:#39200e;border-color:#aa7b45;color:#ffedd5}.pet-studio[data-theme=woodland] .count:before{color:#a5dd6d}
 .pet-studio[data-theme=woodland] .subtabs{background:#291509;border-color:#a17445}.pet-studio[data-theme=woodland] .subtabs button{color:#ebddc6}
