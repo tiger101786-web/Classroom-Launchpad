@@ -4,12 +4,13 @@ Production version of the approved `work/eagle-pet-preview` animation rig. All i
 
 ## Included
 
-- The original eagle, fitted textured branch, independent wing flaps, greeting, open happy eyes, body wobble, blink and proportion-preserving beak chatter.
+- The original eagle, fitted textured branch, independent wing flaps, greeting, approved curious eyes, body wobble, blink and proportion-preserving beak chatter. Rejected happy/alert/relaxed/wink tests are not exposed.
+- Curious eyes recur in idle. The preview-approved brown-and-brass headphones follow radio dancing and stay attached to the head. Short, timed speech bubbles use the saved name, stay within the viewport, and clear during sleep, hiding and account changes. Speech is suppressed inside Studio to avoid obscuring its controls.
 - Slow sleeping mouth movement and the restored eye-opening sequence with a restrained wake yawn.
 - Idle rotation, radio dancing/music notes, reduced-motion support, and suspension when hidden or signed out.
 - Pet Studio selection, per-account name/size/motion/sleep preferences, drag and keyboard positioning, reset and hide/show.
 - Editable carved-wood nameplate with ivory/brown feather ornaments, saved visibility and automatically fitted lettering. Character size is unchanged.
-- Idle reactions recur after 3.5–6 seconds, emphasizing chatter and flaps; a five-cycle 1.8-second fast flap is also available in Studio.
+- Idle reactions begin after 1.5 seconds and pause 1–2 seconds between actions. Chatter and regular wing flaps dominate the rotation, with fast flaps, greetings, happy eyes and wobble interspersed. The fast flap uses seven beats over 2.4 seconds, also available in Studio and the animation preview. Sleep, waking, dancing and reduced-motion guards remain in place.
 
 ## Nameplate artwork
 

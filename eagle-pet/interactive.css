@@ -22,3 +22,7 @@
 @media(max-width:620px){.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){min-height:235px}}
 .eagle-companion .eagle-nameplate svg{display:block;width:100%;height:auto;overflow:visible}
 .eagle-companion .eagle-name-label{font-family:Georgia,'Times New Roman',serif;font-weight:700;fill:#43230e;stroke:#ffe1a1;stroke-width:3;paint-order:stroke;letter-spacing:3px}
+.eagle-companion .eagle-speech{position:fixed;z-index:95;box-sizing:border-box;padding:12px 16px;background:#fff5df;border:2px solid #a78148;border-radius:16px;color:#38291e;box-shadow:0 5px 20px #0003;text-align:center;pointer-events:none}
+.eagle-companion .eagle-speech[hidden],.pet-studio .eagle-speech{display:none!important}
+.eagle-companion .speech-label{display:block;font:700 9px 'Segoe UI',sans-serif;letter-spacing:2px;color:#846032;margin-bottom:4px;text-transform:uppercase}
+.eagle-companion .speech-message{display:block;font:13px/1.4 'Segoe UI',sans-serif}
