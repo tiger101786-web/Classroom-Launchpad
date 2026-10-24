@@ -1,6 +1,7 @@
 (() => {
   "use strict";
   const scenes = [
+    { id: "squishy-dumpling-swap", name: "Squishy Dumpling Swap", description: "Kids trading colorful squishy dumpling toys in bamboo baskets in a sunny school courtyard", image: "assets/launchpad-scene-squishy-dumpling-swap.png" },
     { id: "bleach-soul-society", name: "Bleach • Soul Society", description: "Seireitei at sunset with drifting spiritual embers", image: "assets/launchpad-scene-bleach-soul-society.png" },
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
     { id: "needoh", name: "NeeDoh • Nice Cube World", description: "Glossy pink, purple and blue NeeDoh cubes in a dreamy waterside world", image: "assets/launchpad-scene-needoh.png" },
