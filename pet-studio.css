@@ -27,4 +27,6 @@ dialog.pet-studio{width:min(1200px,calc(100% - 32px));max-width:1200px;max-heigh
 .pet-studio .studio-logo{flex:0 1 270px;min-width:0;margin:0;line-height:0}
 .pet-studio .studio-logo img{display:block;width:100%;height:auto;object-fit:contain}
 .pet-studio .studio-header .studio-close{flex-shrink:0}
+.pet-studio .studio-header-trail{display:block;flex:1 1 0;min-width:0;width:0;height:90px;object-fit:fill;pointer-events:none;opacity:.85}
+@media(max-width:850px){.pet-studio .studio-header-trail{display:none}}
 @media(max-width:620px){.pet-studio .studio-header{flex-wrap:wrap}.pet-studio .studio-logo{flex:1 1 190px;max-width:250px}.pet-studio .studio-header .studio-close{order:1;margin-left:auto}.pet-studio .studio-header .pet-switch{order:2;flex-basis:100%;margin:4px 0 0;grid-template-columns:auto 1fr;align-items:center;gap:12px}.pet-studio .studio-header .pet-switch select{width:100%;max-width:none;min-width:0}}

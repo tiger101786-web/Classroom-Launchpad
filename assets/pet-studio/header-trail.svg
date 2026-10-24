@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="90" viewBox="0 0 600 90">
+<defs>
+<linearGradient id="fade"><stop stop-color="#ff1850" stop-opacity="0"/><stop offset=".2" stop-color="#b91c49" stop-opacity=".45"/><stop offset=".5" stop-color="#ff315d" stop-opacity=".8"/><stop offset=".8" stop-color="#c32350" stop-opacity=".4"/><stop offset="1" stop-color="#ff1850" stop-opacity="0"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2=".65" y2="1"><stop stop-color="#f4c3d0"/><stop offset=".26" stop-color="#a56980"/><stop offset=".5" stop-color="#432a37"/><stop offset=".72" stop-color="#9c536c"/><stop offset="1" stop-color="#38242e"/></linearGradient>
+<filter id="glow" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="3"/></filter>
+<g id="paw" fill="url(#metal)" stroke="#cc5375" stroke-width=".65"><path d="M-9 5C-7 1-5-2 0-2S7 1 9 5C14 13 7 15 3 13Q0 12-3 13C-8 16-14 12-9 5Z"/><ellipse cx="-11" cy="-5" rx="3.8" ry="5.2" transform="rotate(-28 -11 -5)"/><ellipse cx="-4" cy="-12" rx="4" ry="5.6" transform="rotate(-10 -4 -12)"/><ellipse cx="5" cy="-12" rx="4" ry="5.6" transform="rotate(12 5 -12)"/><ellipse cx="12" cy="-4" rx="3.8" ry="5.2" transform="rotate(30 12 -4)"/></g>
+</defs>
+<path d="M0 60C100 60 133 25 224 40S361 76 438 43S539 29 600 38" fill="none" stroke="url(#fade)" stroke-width="9" filter="url(#glow)" opacity=".65"/>
+<path d="M0 60C100 60 133 25 224 40S361 76 438 43S539 29 600 38" fill="none" stroke="url(#fade)" stroke-width="1.5"/>
+<path d="M0 66C118 65 148 40 230 48S365 68 443 51S550 34 600 43" fill="none" stroke="url(#fade)" stroke-width=".6" opacity=".5"/>
+<use href="#paw" transform="translate(164 29) rotate(-18) scale(.8)" opacity=".5"/><use href="#paw" transform="translate(265 63) rotate(18) scale(.9)" opacity=".7"/><use href="#paw" transform="translate(366 37) rotate(-12)" opacity=".75"/><use href="#paw" transform="translate(465 59) rotate(24) scale(.8)" opacity=".45"/>
+<g fill="#ef7495" opacity=".55"><circle cx="110" cy="46" r="1.3"/><circle cx="222" cy="26" r="1"/><circle cx="320" cy="69" r="1.5"/><circle cx="409" cy="51" r="1.2"/><circle cx="502" cy="28" r="1"/><path d="M304 25l1.2 4.8L310 31l-4.8 1.2L304 37l-1.2-4.8L298 31l4.8-1.2Z"/></g>
+</svg>
