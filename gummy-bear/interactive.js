@@ -9,7 +9,7 @@ window.gummyBearSkins={
  'Blue Raspberry':{rgb:[.075,.62,1],accent:'#62bdf1',description:'Translucent blue raspberry gummy candy.'},
  Grape:{rgb:[.61,.16,.88],accent:'#ba7be0',description:'Rich purple grape gummy candy.'}
 };
-window.gummyBearDefaults=()=>({skin:'Cherry',name:'Gummy',nameplate:true,motion:true,size:'medium',asleep:false});
+window.gummyBearDefaults=()=>({skin:'Cherry',headwear:'none',eyewear:'none',neckwear:'none',name:'Gummy',nameplate:true,motion:true,size:'medium',asleep:false});
 window.createGummyBear=function(onChange,onCustomize){
  const ns='http://www.w3.org/2000/svg',host=document.createElement('div');host.className='gummy-companion';host.hidden=true;
  // Native SVG crops use the approved pixels rather than redrawing the character.
@@ -58,6 +58,7 @@ window.createGummyBear=function(onChange,onCustomize){
  function hush(){clearTimeout(speechTimer);speech.hidden=true;}
  function placeSpeech(){if(speech.hidden)return;const b=pet.getBoundingClientRect(),w=Math.min(238,innerWidth-24);speech.style.width=w+'px';speech.style.left=Math.max(12,Math.min(b.left+b.width/2-w/2,innerWidth-w-12))+'px';speech.style.top=Math.max(12,b.top-speech.offsetHeight-12)+'px';}
  function say(message){if(host.hidden||prefs.asleep||pet.classList.contains('waking')||document.hidden||host.closest('.pet-studio'))return;speech.querySelector('.gb-speech-label').textContent=prefs.name||'Gummy';speech.querySelector('.gb-speech-message').textContent=message;speech.hidden=false;lastSpeech=performance.now();placeSpeech();clearTimeout(speechTimer);speechTimer=setTimeout(hush,3800);}
+ const accessories=window.mountPetAccessories?.(host,'gummy');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const moving=()=>visible&&!hidden&&!host.hidden&&prefs.motion&&!reduced.matches;
  const positionKey=()=>`gummy-position:${account}`;
@@ -74,7 +75,7 @@ window.createGummyBear=function(onChange,onCustomize){
   const t=skin.rgb;pet.querySelector('feColorMatrix').setAttribute('values',t.map(v=>[v,1-v,0,0,0].join(' ')).join(' ')+' 0 0 0 1 0');
   pet.querySelector('.gb-candy').setAttribute('filter',prefs.skin==='Cherry'?'none':'url(#gb-tint)');host.style.setProperty('--gummy-accent',skin.accent);
   const plate=pet.querySelector('.gb-nameplate'),label=plate.querySelector('.gb-plate-label'),name=prefs.name||'Gummy';label.textContent=name;label.setAttribute('font-size','106');plate.querySelector('.gb-plate-art').setAttribute('filter',prefs.skin==='Cherry'?'none':'url(#gb-tint)');plate.hidden=!prefs.nameplate;if(!host.hidden&&prefs.nameplate){const width=label.getComputedTextLength();if(width>580)label.setAttribute('font-size',String(106*580/width));}svg.setAttribute('viewBox',prefs.nameplate?'0 45 1024 1690':'0 45 1024 1460');
-  pet.classList.toggle('radio-active',radio&&!prefs.asleep&&!waking);if(radio){clearTimeout(idleTimer);idleTimer=null;}
+  accessories?.set([prefs.eyewear,prefs.neckwear,...(radio&&!prefs.asleep&&!waking?[]:[prefs.headwear])]);pet.classList.toggle('radio-active',radio&&!prefs.asleep&&!waking);if(radio){clearTimeout(idleTimer);idleTimer=null;}
   pet.setAttribute('aria-label',prefs.asleep?'Wake Gummy Bear. Drag to move.':'Open Gummy Bear controls. Drag to move.');
   const dancing=pet.classList.contains('dancing');if(dancing&&!wasDancing)say('Time to wobble to the beat!');wasDancing=dancing;if(!moving()||prefs.asleep)stop();schedule();place();
  }
