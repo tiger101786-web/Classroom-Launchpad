@@ -1,0 +1,62 @@
+/* Reference-matched decorative shell; all controls and pets remain live. */
+@media(min-width:701px) and (max-width:1100px){.pet-studio .preview-pane .preview-actions{margin-top:24px}.pet-studio .preview-tip{white-space:normal;text-align:center}}
+/* Small controls use the same paw motif as the supplied dashboard. */
+.pet-studio .subtabs [data-subtab=skins]:before,.pet-studio .count:before{content:'';display:inline-block;width:1.6em;height:1.6em;vertical-align:middle;margin-right:.6em;background:currentColor;mask:url('assets/pet-studio/paw-icon.svg') center/contain no-repeat}
+.pet-studio .count:before{color:#ff5c88;width:1.4em;height:1.4em;margin-right:.4em}
+.pet-studio .subtabs [data-subtab=accessories]:before{content:'♟';font-size:1.6em;vertical-align:middle;margin-right:.6em;color:#d5d1df}
+@media(max-width:700px){.pet-studio:has(#pet-select option[value=eagle]:checked) .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+dialog.pet-studio{width:min(1536px,calc(100% - 16px));max-width:1536px;max-height:96dvh;border:0;border-radius:0;background:#09090b;container-type:inline-size;box-shadow:0 24px 100px #000c;color:#f7f2f5}
+.pet-studio .studio{width:100%;max-width:none;min-height:66.6667cqw;background:url('assets/pet-studio/crimson-dashboard-frame.png') center top/100% 100% no-repeat;padding:0 0 4cqw;border:0;box-sizing:border-box}
+.pet-studio .studio-header{height:11.6cqw;padding:2.3cqw 3.6cqw 2cqw 70.5cqw;position:relative;background:none;border:0;gap:2.2cqw;align-items:center}
+.pet-studio .studio-logo{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.pet-studio .studio-header-trail{display:none}
+.pet-studio .pet-switch{margin:0;flex:1;min-width:0;gap:.6cqw;color:#fff;font-size:1.35cqw}
+.pet-studio .pet-switch select{width:100%;min-width:0;max-width:none;background:#111116;border:1px solid #ff1648;border-radius:1.2cqw;padding:1cqw 1.15cqw;font-size:1.5cqw;font-weight:600;color:#fff}
+.pet-studio .studio-header .studio-close{width:3.9cqw;height:3.9cqw;border:1px solid #62636c;border-radius:1cqw;font-size:3cqw;background:linear-gradient(#15151a,#09090d);margin:1.4cqw 0 0;line-height:1}
+.pet-studio .studio-body{display:grid;grid-template-columns:37.5% 62.5%;background:none;min-height:0}
+.pet-studio .preview-pane{padding:2.3cqw 3cqw 0 5cqw;border:0;background:none;gap:0;min-width:0}
+.pet-studio .live-label,.pet-studio .selected-summary{display:none}
+.pet-studio .preview-pane h2{font-size:3.2cqw;line-height:1.1;margin:0 0 .7cqw;font-weight:700;letter-spacing:-.06cqw}
+.pet-studio #pet-subtitle{font-size:1.35cqw;color:#fff;margin:0;line-height:1.3}
+.pet-studio #pet-stage,.pet-studio #pet-stage:has(.gummy-companion:not([hidden])),.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){height:30.5cqw;min-height:0;padding:0 0 1.3cqw;display:flex;align-items:center;justify-content:center;width:100%}
+.pet-studio #pet-stage .eagle-companion{width:30.3cqw!important;max-width:100%!important}
+.pet-studio #pet-stage .gummy-companion{width:18cqw!important;max-width:100%!important}
+.pet-studio #pet-stage .robo-companion,.pet-studio #pet-stage .dumpling-companion{width:25cqw!important;max-width:100%!important}
+.pet-studio .preview-actions{width:100%;gap:1.3cqw;flex-direction:row;margin-top:.8cqw}
+.pet-studio .preview-actions button{flex:1;white-space:nowrap;padding:.9cqw .4cqw;font-size:1.5cqw;font-weight:600;border:2px solid #ff123b;border-radius:1.1cqw;background:linear-gradient(#2b0009,#0b070b);box-shadow:0 0 12px #ff003c55,inset 0 1px 1px #ff7d91;color:#fff}
+.pet-studio .preview-actions #greet{background:linear-gradient(#ee0b2d,#a00018)}
+.pet-studio .preview-tip{font-size:1.25cqw;color:#bbb9c2;margin:1.1cqw 0 0;white-space:nowrap}
+.pet-studio .controls-pane{padding:0 2.8cqw 0 1.2cqw;background:none;min-height:0;min-width:0}
+.pet-studio .tabs{padding:0 .8cqw;gap:1cqw;border-bottom:1px solid #4b3036;min-height:4.8cqw;overflow-x:auto}
+.pet-studio .tabs button{font-size:1.35cqw;font-weight:600;padding:1.3cqw 1.3cqw 1cqw;color:#aaa9b3;border-bottom:3px solid transparent}
+.pet-studio .tabs button[aria-selected=true]{background:linear-gradient(#33040c99,#d80024);border-color:#ff4964;color:#fff;box-shadow:0 6px 14px #f0003580;clip-path:polygon(0 12%,10% 0,90% 0,100% 15%,100% 100%,0 100%)}
+.pet-studio .tab-content{margin:0 .1cqw;padding:2cqw 1.8cqw 1cqw;min-height:0;height:42cqw;overflow-y:auto;border:1px solid #be1734;border-radius:1.4cqw;background:linear-gradient(140deg,#09090ce8,#09090c99);scrollbar-color:#a81e38 #171016}
+.pet-studio .section-heading{margin-bottom:1.6cqw;gap:1cqw}
+.pet-studio .section-heading h3{font-size:2.1cqw;font-weight:700;line-height:1.2;margin:0 0 .65cqw;color:#fff}
+.pet-studio .section-heading p{font-size:1.35cqw;color:#aaa9b1;line-height:1.3}
+.pet-studio .count{padding:.65cqw .9cqw;font-size:1.2cqw;border:1px solid #ff1749;background:#180e16;color:#fff;white-space:nowrap}
+.pet-studio .count:before{content:'♥';color:#ff5785;margin-right:.5cqw}
+.pet-studio .subtabs{padding:.25cqw;margin-bottom:1.45cqw;border:1px solid #45414b;border-radius:1.1cqw;background:#060609;gap:0}
+.pet-studio .subtabs button{font-size:1.35cqw;padding:.85cqw;border-radius:.8cqw;font-weight:600;color:#bcb9c5}
+.pet-studio .subtabs button[aria-pressed=true]{background:linear-gradient(#a61d3a,#a91532);border:1px solid #ff2d58;box-shadow:inset 0 1px 1px #ff899866;color:#fff}
+.pet-studio .search{padding:.85cqw 1.3cqw;font-size:1.35cqw;border:1px solid #55515d;border-radius:1.3cqw;background:linear-gradient(#19181e,#111116);margin-bottom:1.3cqw}
+.pet-studio .filters{gap:.8cqw;margin-bottom:1.6cqw}
+.pet-studio .filters button{font-size:1.3cqw;padding:.6cqw 1.4cqw;border:1px solid #59525b;color:#cbc8d0;background:#101015}
+.pet-studio .filters button[aria-pressed=true]{background:linear-gradient(#ff1438,#ce001f);border-color:#ff6b81;color:#fff}
+.pet-studio .gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:1.3cqw;max-height:25cqw;padding:.4cqw}
+.pet-studio:has(#pet-select option[value=eagle]:checked) .gallery{grid-template-columns:repeat(2,minmax(0,21cqw))}
+.pet-studio .skin-card{padding:.8cqw .7cqw 1cqw;border-radius:1.4cqw;border:1px solid #5a303d;background:linear-gradient(145deg,#2b101d,#160d14)}
+.pet-studio .skin-card[aria-pressed=true]{border:3px solid #ff315a;box-shadow:0 0 10px #ff164b70,inset 0 1px 2px #ffbdce;background:radial-gradient(ellipse at top,#68172c,#24131e 85%)}
+.pet-studio .skin-card img{height:10.5cqw}
+.pet-studio .skin-card .skin-name{font-size:1.3cqw;margin-top:.5cqw}
+.pet-studio .skin-card .check{width:2.7cqw;height:2.7cqw;right:.9cqw;top:.9cqw;font-size:2cqw;color:#fff;background:linear-gradient(#ff6c98,#ff1649);border:1px solid #ff8aa7}
+.pet-studio .studio-footer{padding:.4cqw 1.8cqw;background:none;border:0;font-size:.8cqw;min-height:1.5cqw}
+.pet-studio .studio-footer button{font-size:.85cqw}
+.pet-studio .choices button,.pet-studio .action-grid button{background:linear-gradient(#25151d,#100d12);border-color:#64313e;color:#fff;font-size:1.05cqw}
+.pet-studio .choices button[aria-pressed=true]{background:linear-gradient(#bb1635,#761228);border-color:#ff476b;box-shadow:0 0 8px #f1254a44}
+.pet-studio .accessory-list h4{color:#dcbdc6}.pet-studio .helper-box{background:#1c1017;border-color:#66303d;color:#d7c8cd}
+.pet-studio input:focus-visible,.pet-studio select:focus-visible,.pet-studio button:focus-visible{outline:2px solid #ffb1c0;outline-offset:3px}
+@media(max-width:700px){dialog.pet-studio{width:calc(100% - 12px);border:2px solid #a6243d;border-radius:14px}.pet-studio .studio{background:#0b090e;padding:0 0 16px}.pet-studio .studio-header{height:auto;min-height:160px;background:url('assets/pet-studio/crimson-dashboard-frame.png') left top/760px auto no-repeat;padding:100px 16px 14px;display:flex;flex-wrap:nowrap;gap:12px}.pet-studio .pet-switch{font-size:12px;display:grid;flex:1;order:0!important;margin:0!important;grid-template-columns:1fr!important}.pet-studio .pet-switch select{font-size:16px;padding:10px;border-radius:8px}.pet-studio .studio-header .studio-close{height:40px;width:40px;font-size:28px;margin:15px 0 0;border-radius:8px}.pet-studio .studio-body{display:block}.pet-studio .preview-pane{padding:20px;background:radial-gradient(#4a0c16,#100b10 70%);border-bottom:1px solid #ad1e36}.pet-studio .preview-pane h2{font-size:28px}.pet-studio #pet-subtitle{font-size:13px}.pet-studio #pet-stage,.pet-studio #pet-stage:has(.gummy-companion:not([hidden])),.pet-studio #pet-stage:has(.eagle-companion:not([hidden])){height:295px;padding:8px 0 20px}.pet-studio #pet-stage .eagle-companion{width:255px!important}.pet-studio #pet-stage .gummy-companion{width:165px!important}.pet-studio #pet-stage .robo-companion,.pet-studio #pet-stage .dumpling-companion{width:210px!important}.pet-studio .preview-actions{gap:12px;max-width:350px}.pet-studio .preview-actions button{font-size:14px;padding:10px;border-radius:10px}.pet-studio .preview-tip{display:block;font-size:12px;margin:12px 0}.pet-studio .controls-pane{padding:0 10px}.pet-studio .tabs{gap:3px;padding:0;justify-content:space-between}.pet-studio .tabs button{font-size:12px;padding:15px 6px}.pet-studio .tab-content{height:auto;min-height:400px;max-height:none;padding:20px 12px;border-radius:12px}.pet-studio .section-heading h3{font-size:22px}.pet-studio .section-heading p{font-size:13px}.pet-studio .count{font-size:11px;padding:6px}.pet-studio .section-heading{margin-bottom:18px}.pet-studio .subtabs{margin-bottom:16px;border-radius:10px;padding:3px}.pet-studio .subtabs button{font-size:14px;padding:10px;border-radius:8px}.pet-studio .search{font-size:14px;padding:12px;border-radius:12px;margin-bottom:14px}.pet-studio .filters{gap:8px;margin-bottom:14px}.pet-studio .filters button{font-size:12px;padding:7px 12px}.pet-studio .gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:340px;padding:5px}.pet-studio .skin-card{padding:8px;border-radius:14px}.pet-studio .skin-card img{height:110px}.pet-studio .skin-card .skin-name{font-size:13px}.pet-studio .skin-card .check{width:24px;height:24px;font-size:18px;right:7px;top:7px}.pet-studio .choices button,.pet-studio .action-grid button{font-size:13px}.pet-studio .studio-footer{font-size:11px;padding:14px}.pet-studio .studio-footer button{font-size:11px}}
+.pet-studio .count:before{content:''}
+.pet-studio .subtabs [data-subtab=accessories]:before{content:'';display:inline-block;width:1.5em;height:1.5em;background:url('assets/pet-studio/hat-icon.svg') center/contain no-repeat;vertical-align:middle;margin-right:.6em}
+@media(max-width:700px){.pet-studio:has(#pet-select option[value=eagle]:checked) .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}

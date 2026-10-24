@@ -14,7 +14,7 @@
 .gummy-companion .gb-happy .gb-eye,.gummy-companion .gb-happy .gb-closed{visibility:hidden}
 .gummy-companion .gb-happy .gb-mouth-open{transform-origin:0 0;animation:gb-happy-smile 2.2s ease-in-out both}
 @keyframes gb-happy-smile{0%,100%{transform:scale(.85,.7)}20%,75%{transform:scale(1,1)}}
-.gummy-companion .gb-headset{display:none}.gummy-companion .radio-active .gb-headset{display:inline}
+.gummy-companion .gb-headset{display:none}.gummy-companion .radio-active .gb-headset,.gummy-companion .wearing-headphones .gb-headset{display:inline}
 .gummy-companion .dancing .music-note{animation:gb-music-float 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes gb-music-float{0%{opacity:0;transform:translateY(25px) rotate(-12deg) scale(.8)}20%{opacity:1}75%{opacity:.9}100%{opacity:0;transform:translateY(-110px) rotate(14deg) scale(1.08)}}
 .gummy-companion .gb-nameplate{left:8%;width:84%;bottom:1.5%;min-height:40px;padding:9px 24px;border:3px solid color-mix(in srgb,var(--gummy-accent),white 45%);border-radius:24px 24px 29px 29px;background:radial-gradient(ellipse at 50% 0%,#ffffffdb,transparent 55%),linear-gradient(170deg,color-mix(in srgb,var(--gummy-accent),white 65%),var(--gummy-accent) 55%,color-mix(in srgb,var(--gummy-accent),#74243a 25%));box-shadow:inset 0 3px 2px #fff9,inset 0 -5px 3px #7c254049,0 3px 0 color-mix(in srgb,var(--gummy-accent),#58132b 35%),0 6px 9px #0004;color:#3d1729;font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:900;letter-spacing:.015em;text-shadow:0 1px 0 #fff9;box-sizing:border-box}
