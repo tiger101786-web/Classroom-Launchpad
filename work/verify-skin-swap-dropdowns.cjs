@@ -15,6 +15,8 @@ for(const selector of ['#pet-select','.studio-theme-control select']){
  const actual=await select.evaluate(el=>{const c=getComputedStyle(el),o=getComputedStyle(el.selectedOptions[0]);return {text:c.color,fill:c.webkitTextFillColor,scheme:c.colorScheme,shadow:c.boxShadow,outline:c.outlineColor,option:o.color}});
  const color=theme==='scrapbook'?'rgb(61, 40, 29)':'rgb(6, 60, 118)';
  assert.deepEqual(actual,{text:color,fill:color,scheme:'light',shadow:'none',outline:color,option:color});
+ const backgrounds=await select.evaluate(el=>({selected:getComputedStyle(el.selectedOptions[0]).backgroundColor,ordinary:getComputedStyle([...el.options].find(o=>!o.selected)).backgroundColor}));
+ assert.equal(backgrounds.selected,backgrounds.ordinary,'Selected option must not retain a second highlight');
 }
 }
 await studio.locator('#pet-select').selectOption('labubu');
