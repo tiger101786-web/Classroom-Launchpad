@@ -2749,7 +2749,10 @@ function spotlightCollectionKey(name) {
 }
 
 function studentSpotlightCollections(items) {
-  const collections = new Map();
+  // Keep this assignment available before its first student project is featured.
+  const fallFestivalName = "Design a Fall Festival";
+  const fallFestivalKey = spotlightCollectionKey(fallFestivalName);
+  const collections = new Map([[fallFestivalKey, { key: fallFestivalKey, name: fallFestivalName, items: [] }]]);
   items.forEach(item => {
     const name = String(item.collectionName || item.title || "Featured Work").trim();
     const key = spotlightCollectionKey(name);
@@ -11013,8 +11016,7 @@ function renderDashboardStudentSpotlights() {
       spotlightDisplayName: formatStudentFirstLast(student.name || student.email)
     }))
     .sort((a, b) => a.spotlightDisplayName.localeCompare(b.spotlightDisplayName, undefined, { sensitivity: "base" }));
-  const folderNames = [...new Set(studentSpotlights.map(item => String(item.collectionName || item.title || "").trim()).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  const folderNames = studentSpotlightCollections(studentSpotlights).map(collection => collection.name);
   const sortedSpotlights = [...studentSpotlights].sort((a, b) => {
     const nameComparison = String(a.displayName || "").localeCompare(String(b.displayName || ""), undefined, { sensitivity: "base" });
     return nameComparison || String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" });
