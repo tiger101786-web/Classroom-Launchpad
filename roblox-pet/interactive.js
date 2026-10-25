@@ -1,4 +1,4 @@
-window.robloxDefaults=()=>({skin:'Classic',name:'Buddy',headwear:'none',nameplate:true,platform:true,motion:true,size:'medium',asleep:false});
+window.robloxDefaults=()=>({skin:'Classic',top:'skin',pants:'skin',name:'Buddy',headwear:'none',nameplate:true,platform:true,motion:true,size:'medium',asleep:false});
 window.createRobloxPet=function(onChange,onCustomize){'use strict';
 const host=document.createElement('div');host.className='roblox-companion';host.hidden=true;
 host.innerHTML='<button type="button" class="pet-button" aria-label="Open Roblox Buddy controls"></button><div class="roblox-speech" role="status" hidden></div>';document.body.append(host);
