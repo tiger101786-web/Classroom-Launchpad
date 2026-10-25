@@ -1,6 +1,12 @@
 /* Equal character-and-platform heights to the existing four companions. */
 .labubu-companion #puppet{transform-origin:512px 1460px;will-change:transform}
 .labubu-companion #open-mouth{transform-origin:512px 805px;will-change:transform}
+.labubu-companion[data-state=sleep][data-animate=true] #puppet{animation:labubu-sleep-breathe 5s ease-in-out infinite}
+.labubu-companion[data-state=sleep][data-animate=true] #open-mouth{animation:labubu-sleep-mouth 5s ease-in-out infinite}
+.labubu-companion[data-state=sleep][data-animate=true] #zs{animation:labubu-sleep-drift 5s ease-in-out infinite;will-change:transform}
+@keyframes labubu-sleep-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.009,.992)}}
+@keyframes labubu-sleep-mouth{0%,100%{transform:scaleY(.04)}50%{transform:scaleY(1)}}
+@keyframes labubu-sleep-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
 /* Compensate for Labubu's narrower display scale so symbols match the other pets. */
 .labubu-companion #notes{font:700 180px Arial,sans-serif;stroke:#26202c;stroke-width:7;paint-order:stroke;pointer-events:none}
 .labubu-companion #zs{fill:#9674bd;stroke:#fff;stroke-width:6;paint-order:stroke;pointer-events:none}

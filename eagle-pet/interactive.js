@@ -70,7 +70,8 @@ window.createEaglePet=function(onChange,onCustomize){
   setAttr(wingLeft,'transform',`rotate(${wingAngle} 322 530)`);setAttr(wingRight,'transform',`rotate(${-wingAngle} 1065 530)`);
   zs.style.opacity=asleep?'1':waking?String(1-smooth((now-wakeStart)/500)):'0';zs.style.transform=`translateY(${moving?-5*Math.sin(phase*1.5):0}px)`;
   host.querySelector('.notes').style.opacity=dancing?'1':'0';notes.forEach((e,i)=>{const t=(phase/2.4+i*.25)%1;e.style.opacity=dancing?String(Math.sin(t*Math.PI)):0;e.style.transform=`translateY(${25-135*t}px) rotate(${-12+26*t}deg)`;});
-  if(moving)raf=requestAnimationFrame(tick);
+  // CSS owns sleep transforms; the awake renderer must not invalidate them.
+  if(moving&&!asleep)raf=requestAnimationFrame(tick);
  }
  function start(){if(!raf){last=0;tick(performance.now());}}
 

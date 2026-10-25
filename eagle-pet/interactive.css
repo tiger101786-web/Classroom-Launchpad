@@ -10,6 +10,14 @@
 .eagle-companion .eagle>svg{display:block;width:100%;height:auto;overflow:visible}
 .eagle-companion .body{transform-origin:687px 955px}
 .eagle-companion .body,.eagle-companion .perched-wings,.eagle-companion .lower-jaw{will-change:transform}
+.eagle-companion .asleep:not(.still) .body,.eagle-companion .asleep:not(.still) .perched-wings{animation:eagle-sleep-breathe 5.2s ease-in-out infinite}
+.eagle-companion .asleep:not(.still) .lower-jaw{animation:eagle-sleep-jaw 5.2s ease-in-out infinite}
+.eagle-companion .asleep:not(.still) .beak-motion{animation:eagle-sleep-mouth 5.2s ease-in-out infinite;will-change:opacity}
+.eagle-companion .asleep:not(.still) .zs{animation:eagle-sleep-drift 5.2s ease-in-out infinite;will-change:transform}
+@keyframes eagle-sleep-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.009,.991)}}
+@keyframes eagle-sleep-jaw{0%,100%{transform:translateY(-54px)}50%{transform:translateY(-15.12px)}}
+@keyframes eagle-sleep-mouth{0%,100%{opacity:0}35%,65%{opacity:1}}
+@keyframes eagle-sleep-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
 .eagle-companion .notes,.eagle-companion .zs{pointer-events:none}
 .eagle-companion .notes{fill:#dba44d;stroke:#26202c;stroke-width:5;paint-order:stroke;opacity:0}
 .eagle-companion .zs{fill:#9674bd;stroke:#fff;stroke-width:5;paint-order:stroke}

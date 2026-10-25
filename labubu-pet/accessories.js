@@ -21,8 +21,11 @@ window.mountLabubuClothes=function(host){
  ${shape('M315 909Q512 971 709 909Q745 984 742 1090H282Q279 984 315 909Z','url(#lc-cream)','lc-knit','#b7af9d')}
  ${shape(pants,'url(#lc-mustard)','lc-knit','#8c6423')}
  ${shape('M279 1040Q512 1104 745 1040L768 1300Q670 1343 512 1334Q353 1343 256 1300Z','url(#lc-mustard)','lc-knit','#8c6423')}
- <path d="M336 953L376 1102M688 953L648 1102" stroke="#362719" stroke-width="43"/>
- <path d="M326 956L366 1100M346 951L386 1095M678 951L638 1095M698 956L658 1100" stroke="#bc9a65" stroke-width="2" stroke-dasharray="5 4"/>
+ <defs><clipPath id="lc-strap-neckline"><path d="M315 909Q512 971 709 909Q745 984 742 1120H282Q279 984 315 909Z"/></clipPath></defs>
+ <g clip-path="url(#lc-strap-neckline)">
+ <path d="M320 860Q312 916 336 953L376 1102M704 860Q712 916 688 953L648 1102" fill="none" stroke="#362719" stroke-width="43"/>
+ <path d="M310 860Q302 918 326 956L366 1100M330 860Q322 914 346 951L386 1095M694 860Q702 914 678 951L638 1095M714 860Q722 918 698 956L658 1100" fill="none" stroke="#bc9a65" stroke-width="2" stroke-dasharray="5 4"/>
+ </g>
  <g fill="none" stroke="url(#lc-gold)" stroke-width="8"><rect x="329" y="1011" width="58" height="54" rx="5" transform="rotate(-14 358 1038)"/><rect x="637" y="1011" width="58" height="54" rx="5" transform="rotate(14 666 1038)"/></g>
  ${shape('M416 1135Q512 1150 608 1135L596 1217Q512 1267 428 1217Z','url(#lc-mustard)','lc-knit','#997022')}${seam('M428 1147L439 1211Q512 1249 585 1211L596 1147')}
  <path d="M312 1272Q365 1310 420 1298M603 1298Q658 1310 712 1272" fill="none" stroke="#785018" stroke-opacity=".4" stroke-width="8"/>

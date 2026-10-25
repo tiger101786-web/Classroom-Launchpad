@@ -42,7 +42,7 @@ const durations={hello:2800,happy:2500,blink:360,talk:2200,ears:2400,hand:3200,n
 const reactions=['ears','hello','nose','happy','wobble','talk','hand'];
 const messages=['Hey! Ready for a little adventure?','You’ve got this!','Tiny steps, big discoveries.','That deserves a smile!'];
 function say(text,now=performance.now()){if(host.hidden||host.closest('.pet-studio'))return;$('.labubu-speech').textContent=text;$('.labubu-speech').hidden=false;state.speechUntil=now+3800;}
-function ui(){host.dataset.state=state.mode;clothes?.set(prefs,state.mode==='dance');$('.pet-button').setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Customize '+prefs.name);}
+function ui(){host.dataset.state=state.mode;host.dataset.animate=String(state.motion&&!reduce.matches&&!document.hidden);clothes?.set(prefs,state.mode==='dance');$('.pet-button').setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Customize '+prefs.name);}
 function play(name){name=({excited:'hello',greet:'hello',mouth:'talk',squish:'wobble'})[name]||name;if(!['sleep','wake','dance',...Object.keys(durations)].includes(name))return;if(!state.motion||reduce.matches){if(name==='sleep')state.mode='sleep';else if(name==='wake')state.mode='idle';ui();return;}const now=performance.now();if(name==='sleep'){state.mode='sleep';state.action=null;state.start=now;$('.labubu-speech').hidden=true;}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:now};say('Good morning! Let’s get started.',now);}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;state.start=now;if(state.mode==='dance')say('This is my kind of beat!',now);}else{state.mode='idle';state.action={name,start:now};if(name==='hello')say(messages[state.index++%messages.length],now);}state.nextIdle=now+6000;ui();}
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},nodes=new Map(),attr=(id,k,v)=>{let el=nodes.get(id);if(!el){el=$(id);nodes.set(id,el)}const next=String(typeof v==='number'?Math.round(v*1000)/1000:v);if(el.getAttribute(k)!==next)el.setAttribute(k,next)};
 // Reproduce the original radial displacement fields on the GPU. In particular,
@@ -114,7 +114,7 @@ if(name==='nose'||name==='hello')nose=Math.sin(t*Math.PI*10)*env;
 if(name==='wobble')wobble=Math.sin(t*Math.PI*5)*env;
 if(name==='talk')opening=(.15+.7*Math.sin(t*Math.PI*6)**2)*env;
 if(name==='wake'){closed=1-smooth((t-.42)/.4);yawn=Math.sin(Math.PI*clamp((t-.08)/.8))**2;opening=yawn;ear=Math.sin(t*Math.PI*3)*env;}
-if(state.mode==='sleep'){closed=1;opening=moving?.5-.5*Math.cos(sec*Math.PI*2/5):0;}
+if(state.mode==='sleep'){closed=1;opening=moving?1:0;}
 if(state.mode==='dance'){happy=.8;opening=.35;wobble=Math.sin(sec*Math.PI*2/0.7);ear=.7*Math.sin(sec*7);wave=.4*Math.sin(sec*8);}
 const breathe=moving?Math.sin(now/1000*Math.PI*2/(state.mode==='sleep'?5:4)):0;
 const drift=moving&&state.mode!=='sleep'?Math.sin(now/1000*Math.PI*2/7)*.65:0;
@@ -137,7 +137,8 @@ const teethMarkup=sleeping?'':Array.from({length:9},(_,i)=>{const x=512-rx+8+i*(
 if(teethMarkup!==lastTeeth){$('#teeth').innerHTML=teethMarkup;lastTeeth=teethMarkup;}
 attr('#headphones','opacity',state.mode==='dance'||prefs.headwear==='headphones'?1:0);attr('#notes','opacity',state.mode==='dance'?1:0);attr('#notes','transform',`translate(0 ${moving?Math.sin(sec*3)*20:0})`);attr('#zs','opacity',sleeping?.7+.3*Math.sin(sec*1.2)**2:0);
 if(now>state.speechUntil)$('.labubu-speech').hidden=true;
-if(moving)raf=requestAnimationFrame(tick);
+// Sleeping layers run on the compositor; do not repaint the SVG every frame.
+if(moving&&state.mode!=='sleep')raf=requestAnimationFrame(tick);
 }
 
 function start(){if(!raf&&!host.hidden&&!document.hidden)tick(performance.now());}
