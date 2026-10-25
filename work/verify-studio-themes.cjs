@@ -12,6 +12,11 @@ for(const width of [1920,1440,800,390]){
  await page.setViewportSize({width,height:1000});
  for(const theme of ['woodland','crimson','sky','scrapbook']){
   await studio.getByLabel('Studio theme',{exact:true}).selectOption(theme);
+  if(theme==='scrapbook'){
+   const select=studio.locator('#pet-select');await select.hover();await select.focus();
+   const palette=await select.evaluate(e=>{const s=getComputedStyle(e);return {text:s.color,fill:s.webkitTextFillColor,scheme:s.colorScheme,option:getComputedStyle(e.selectedOptions[0]).color}});
+   assert.deepEqual(palette,{text:'rgb(61, 40, 29)',fill:'rgb(61, 40, 29)',scheme:'light',option:'rgb(61, 40, 29)'});
+  }
   let expected;
   for(const tab of ['appearance','name','play','settings']){
    await studio.locator('[data-tab="'+tab+'"]').click();

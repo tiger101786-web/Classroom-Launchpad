@@ -59,6 +59,11 @@
 .pet-studio[data-theme=scrapbook] .studio-header{padding-left:69cqw;padding-right:4cqw;gap:1.2cqw}
 .pet-studio[data-theme=scrapbook] .pet-switch{background:#ffdfa0;padding:.6cqw 1cqw;box-shadow:1px 3px 5px #62412355;transform:rotate(-2deg);border:1px solid #f4cc7d;color:#513c22}
 .pet-studio[data-theme=scrapbook] .pet-switch select{background:#fff4e6;border-color:#d5ad7a;color:#3d281d;box-shadow:0 2px 2px #ab795c44;font-weight:400;border-radius:.7cqw;font-size:1.6cqw}
+/* This paper theme must not inherit the Studio's native dark select palette. */
+.pet-studio[data-theme=scrapbook] .pet-switch select{color-scheme:light;-webkit-text-fill-color:#3d281d}
+.pet-studio[data-theme=scrapbook] .pet-switch select:is(:hover,:focus,:active){color:#3d281d;-webkit-text-fill-color:#3d281d;background:#fff4e6;border-color:#996c47}
+.pet-studio[data-theme=scrapbook] .pet-switch select option{color:#3d281d;background:#fff4e6;-webkit-text-fill-color:#3d281d}
+.pet-studio[data-theme=scrapbook] .pet-switch select option:is(:hover,:focus,:checked){color:#3d281d;background:#f5c5d2;-webkit-text-fill-color:#3d281d}
 .pet-studio[data-theme=scrapbook] .studio-header .studio-close{background:#f9b5c4;color:#6d4339;border-color:#fff0e6;box-shadow:2px 3px 0 #d9869d55;border-radius:.6cqw;transform:rotate(3deg)}
 .pet-studio[data-theme=scrapbook] .preview-pane{padding:1.3cqw 2.7cqw 0 5.2cqw}
 .pet-studio[data-theme=scrapbook] .controls-pane{padding:0 4cqw 0 3.8cqw}
