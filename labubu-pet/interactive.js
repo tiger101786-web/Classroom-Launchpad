@@ -3,10 +3,11 @@ window.labubuDefaults=()=>({skin:'Tan',name:'Labubu',nameplate:true,platform:tru
 window.createLabubuPet=function(onChange,onCustomize){'use strict';
 const host=document.createElement('div');host.className='labubu-companion';host.hidden=true;
 host.innerHTML='<button class="pet-button" type="button" aria-label="Open Labubu controls"></button><div class="labubu-speech" role="status" hidden></div>';document.body.append(host);
+let renderedSkin=null;
 let prefs=labubuDefaults(),account='',visible=false,hidden=false,radio=false,position=null,drag=null,suppress=false;
 const $=s=>host.querySelector(s),ns='http://www.w3.org/2000/svg';
 const original='labubu-pet/tan.png',underlay='labubu-pet/face-underlay.png';
-const image=`<image href="${original}" width="1024" height="1536"/>`;
+const image=`<g class="labubu-colored-art">${labubuColorArt('Tan')}</g>`;
 // Neutral gray means zero displacement. Soft gradients bend fur continuously,
 // so moving ears/hands never expose a cut edge or a second underlying limb.
 function map(kind){const shape=kind==='nose'?'<ellipse cx="514" cy="754" rx="58" ry="48" fill="url(#r)"/>':kind==='ears'?'<ellipse cx="350" cy="190" rx="175" ry="240" fill="url(#r)"/><ellipse cx="675" cy="190" rx="175" ry="240" fill="url(#l)"/>':'<ellipse cx="221" cy="1110" rx="145" ry="175" fill="url(#r)"/>';return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="${ns}" width="1024" height="1536"><defs><radialGradient id="r"><stop stop-color="${kind==='hand'?'#ff0080':'#ff8080'}"/><stop offset="1" stop-color="#808080"/></radialGradient><radialGradient id="l"><stop stop-color="#008080"/><stop offset="1" stop-color="#808080"/></radialGradient></defs><path fill="#808080" d="M0 0H1024V1536H0Z"/>${shape}</svg>`)}
@@ -20,11 +21,11 @@ ${[.28,.45,.64,.83].map(k=>`<ellipse cx="512" cy="1459" rx="${350*k}" ry="${74*k
 <path d="M173 1493l13 47m39-27 7 50m55-39 6 49m73-35 3 52m86-46 2 51m90-51-2 51m86-58-4 52m72-63-5 49m55-66-7 50m39-74-13 47" stroke="#362319" stroke-opacity=".65" stroke-width="8" stroke-linecap="round"/>
 <path d="M155 1528Q512 1630 869 1528" fill="none" stroke="#c7955b" stroke-opacity=".55" stroke-width="5"/>
 <g fill="#657844" stroke="#34462b" stroke-width="4"><path d="M180 1518Q101 1465 133 1429Q191 1435 180 1518Z"/><path d="M181 1518Q198 1455 236 1466Q232 1508 181 1518Z"/><path d="M844 1518Q923 1465 891 1429Q833 1435 844 1518Z"/><path d="M843 1518Q826 1455 788 1466Q792 1508 843 1518Z"/></g>
-</g><g id="puppet"><g filter="url(#ears)"><g filter="url(#hand)"><g filter="url(#nose)">${image}<image href="${underlay}" width="1024" height="1536" mask="url(#face-patch)"/>
+</g><g id="puppet"><g filter="url(#ears)"><g filter="url(#hand)"><g filter="url(#nose)">${image}<g mask="url(#face-patch)"><g class="labubu-colored-art" data-underlay="true">${labubuColorArt('Tan',null,underlay)}</g></g>
 <g id="eyes"><g clip-path="url(#left-open)"><g clip-path="url(#left-eye)">${image}</g></g><g clip-path="url(#right-open)"><g clip-path="url(#right-eye)">${image}</g></g><path id="closed-left" fill="none" stroke="#70422e" stroke-width="6" stroke-linecap="round" opacity="0"/><path id="closed-right" fill="none" stroke="#70422e" stroke-width="6" stroke-linecap="round" opacity="0"/></g>
 <g id="original-grin" clip-path="url(#grin-crop)">${image}</g><g id="open-mouth" opacity="0"><path id="mouth-shape" fill="url(#mouth-fill)" stroke="#75402b" stroke-width="3"/><g clip-path="url(#mouth-clip)"><ellipse id="tongue" cx="512" cy="865" rx="58" ry="21" fill="#dc8a83"/><g id="teeth" fill="#fff0d9" stroke="#bd9c82" stroke-width="1.5"></g></g></g>
 <g id="headphones" opacity="0"><path d="M255 648C213 350 806 350 768 648" fill="none" stroke="#39281e" stroke-width="38"/><path d="M255 620C225 369 795 369 768 620" fill="none" stroke="#d1a876" stroke-width="17"/><g fill="#523a2c" stroke="#e1bc83" stroke-width="8"><rect x="219" y="602" width="66" height="168" rx="30" transform="rotate(-8 252 686)"/><rect x="739" y="602" width="66" height="168" rx="30" transform="rotate(8 772 686)"/></g><path d="M242 643V715M781 643V715" stroke="#ffe5a8" stroke-width="8" stroke-linecap="round"/></g>
-</g></g></g></g><g id="notes" fill="#ffd28f" font-family="Segoe UI" font-size="110" opacity="0"><text x="60" y="680">♪</text><text x="890" y="850">♫</text><text x="90" y="1080">♫</text></g><g id="zs" fill="#efcba3" font-family="Segoe UI" font-weight="700" opacity="0"><text x="825" y="520" font-size="65">z</text><text x="904" y="413" font-size="90">Z</text></g><g id="nameplate">
+</g></g></g></g><g id="notes" fill="#ffd28f" font-family="Segoe UI" font-size="110" opacity="0"><text x="60" y="680">♪</text><text x="890" y="850">♫</text><text x="90" y="1080">♫</text></g><g id="zs" fill="#efcba3" font-family="Segoe UI" font-weight="700" opacity="0"><text x="825" y="520" font-size="65">z</text><text x="904" y="413" font-size="90">Z</text></g><g id="nameplate" transform="translate(512 1725) scale(1.3 1.22) translate(-512 -1725)">
 <path d="M226 1662Q512 1629 798 1662L817 1690V1756L798 1783Q512 1814 226 1783L207 1756V1690Z" fill="url(#bark)" stroke="#38251b" stroke-width="8"/>
 <path d="M249 1679Q512 1654 775 1679L790 1699V1748L775 1768Q512 1793 249 1768L234 1748V1699Z" fill="url(#plaque)" stroke="#ecce98" stroke-width="5"/>
 <path d="M255 1688Q512 1665 769 1688M255 1759Q512 1782 769 1759" fill="none" stroke="#87613c" stroke-width="3" stroke-dasharray="7 7"/>
@@ -80,8 +81,10 @@ function place(){if(host.hidden||host.closest('.pet-studio'))return;const box=$(
 const positionKey=()=>'labubu-position:'+account;
 function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
 function render(){
+ if(renderedSkin!==prefs.skin){renderedSkin=Object.hasOwn(labubuSkins,prefs.skin)?prefs.skin:'Tan';host.querySelectorAll('.labubu-colored-art').forEach(g=>g.innerHTML=labubuColorArt(renderedSkin,null,g.dataset.underlay?underlay:original));}
+
  host.hidden=!visible||hidden;host.dataset.size=prefs.size;state.motion=prefs.motion;state.idle=true;
- $('#name-label').textContent=prefs.name;attr('#name-label','font-size',Math.min(65,490/(Array.from(prefs.name).length*.63)));
+ $('#name-label').textContent=prefs.name;attr('#name-label','font-size',Math.min(82,490/(Array.from(prefs.name).length*.63)));
  $('#nameplate').style.display=prefs.nameplate?'':'none';$('#platform').style.display=prefs.platform?'':'none';
  if(prefs.asleep&&state.mode!=='sleep')play('sleep');else if(!prefs.asleep&&state.mode==='sleep')play('wake');
  if(!prefs.asleep&&state.action?.name!=='wake'){if(radio&&state.mode!=='dance')play('dance');else if(!radio&&state.mode==='dance')play('dance');}
