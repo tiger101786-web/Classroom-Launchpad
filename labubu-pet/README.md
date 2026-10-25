@@ -1,0 +1,9 @@
+# Labubu companion
+
+Promoted from the approved local Labubu preview. The production controller keeps the same tan artwork, masked face layer, expressions, continuous ear/hand/nose deformation, platform and editable nameplate with actual character heads.
+
+`tan.png` and `face-underlay.png` were created with the built-in image-generation tool. Original artwork prompt: front-facing tan Labubu plush, peach face, tall ears, glossy brown eyes, nine-tooth grin, separated arms, full body and transparent background. Final extraction requested removal of background halo without changing the character. Face-underlay prompt requested removal of eyes, brows, mouth and teeth with matching peach skin while preserving nose, pose, dimensions and alpha. SVG layers restore and animate the original eyes and grin.
+
+Size widths account for the tall 1224:1920 canvas, including platform and nameplate. Measured small/medium/large/extra-large heights are approximately 157/182/212/265 CSS pixels, compared with the Colt's 158/183/214/267 pixels. Compact viewport sizing follows the existing companions. Studio uses a separate fixed preview size regardless of the saved classroom size.
+
+Verification: `work/verify-labubu-production.cjs` uses an isolated test database and checks selection, persistence, animations, sleep/wake, headset, layout, and size comparisons. The old local experiment remains excluded; production depends only on this directory, not ignored work assets.

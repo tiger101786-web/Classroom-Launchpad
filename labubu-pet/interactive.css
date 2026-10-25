@@ -1,0 +1,14 @@
+/* Equal character-and-platform heights to the existing four companions. */
+.labubu-companion{position:fixed;width:116px;max-width:calc(100vw - 16px);z-index:90;user-select:none}
+.labubu-companion[hidden]{display:none!important}
+.labubu-companion[data-size=small]{width:100px}.labubu-companion[data-size=large]{width:135px}.labubu-companion[data-size=extra-large]{width:169px}
+@media(max-width:1119px){.labubu-companion[data-size]{width:50px}}
+.labubu-companion .pet-button{display:block;width:100%;height:auto;aspect-ratio:1224/1920;margin:0;padding:0;border:0;background:none;box-shadow:none;cursor:grab;touch-action:none}
+.labubu-companion .pet-button:hover{transform:none;background:none}.labubu-companion .pet-button:focus-visible{outline:2px solid #edc88e;outline-offset:5px;border-radius:20px}
+.labubu-companion .pet-button>svg{display:block;width:100%;height:auto;overflow:visible}
+.labubu-speech{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:min(240px,80vw);padding:10px 14px;border:1px solid #b58450;border-radius:15px;background:#ffedd4;color:#513422;box-shadow:0 4px 18px #0004;font:600 13px/1.4 'Segoe UI',sans-serif;text-align:center;pointer-events:none}
+.labubu-speech[hidden]{display:none}.labubu-speech:after{content:'';position:absolute;bottom:-7px;left:50%;border:7px solid transparent;border-top-color:#ffedd4;border-bottom:0}
+.pet-studio #pet-stage .labubu-companion{position:relative!important;inset:auto!important;transform:none!important;width:19cqw!important;max-width:100%!important;margin:0!important;z-index:1!important;pointer-events:none}
+.pet-studio #pet-stage .labubu-companion .pet-button{width:100%!important;height:auto!important;aspect-ratio:1224/1920!important}
+.pet-studio .labubu-speech{display:none!important}
+@media(max-width:700px){.pet-studio #pet-stage .labubu-companion{width:175px!important}}
