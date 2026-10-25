@@ -5,9 +5,10 @@ dialog.querySelector('.studio-logo').insertAdjacentHTML('afterend','<img class="
 dialog.querySelector('#pet-select').add(new Option('Bald Eagle','eagle'));
 dialog.querySelector('#pet-select').add(new Option('Labubu','labubu'));
 // Interface themes are a local display preference, separate from pet/account data.
-const themeControl=document.createElement('label');themeControl.className='studio-theme-control';themeControl.innerHTML='Studio theme <select aria-label="Studio theme" title="Saved on this device"><option value="crimson">Crimson</option><option value="woodland">Woodland</option></select>';dialog.querySelector('.studio-footer').append(themeControl);
-const themeSelect=themeControl.querySelector('select');let theme='crimson';try{if(localStorage.getItem('petStudioTheme')==='woodland')theme='woodland'}catch{}
-function applyStudioTheme(value){dialog.dataset.theme=value==='woodland'?'woodland':'crimson';themeSelect.value=dialog.dataset.theme;}
+const themeControl=document.createElement('label');themeControl.className='studio-theme-control';themeControl.innerHTML='Studio theme <select aria-label="Studio theme" title="Saved on this device"><option value="crimson">Crimson</option><option value="woodland">Woodland</option><option value="sky">Cloud Sky</option><option value="scrapbook">Scrapbook</option></select>';dialog.querySelector('.studio-footer').append(themeControl);
+const themeNames=['crimson','woodland','sky','scrapbook'];
+const themeSelect=themeControl.querySelector('select');let theme='crimson';try{const savedTheme=localStorage.getItem('petStudioTheme');if(themeNames.includes(savedTheme))theme=savedTheme}catch{}
+function applyStudioTheme(value){dialog.dataset.theme=themeNames.includes(value)?value:'crimson';themeSelect.value=dialog.dataset.theme;}
 applyStudioTheme(theme);themeSelect.onchange=()=>{applyStudioTheme(themeSelect.value);try{localStorage.setItem('petStudioTheme',dialog.dataset.theme)}catch{}};
 const stage=dialog.querySelector('#pet-stage'),content=dialog.querySelector('#tab-content');
 let state,current='colt',tab='appearance',subtab='skins',filter='All',query='',radio=false,previous=null,opener=null;

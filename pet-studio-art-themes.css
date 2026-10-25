@@ -1,0 +1,128 @@
+/* Reference-derived artwork with live, accessible controls. */
+@font-face{font-family:StudioHand;src:url('assets/pet-studio/PatrickHand-Regular.ttf') format('truetype');font-display:swap}
+@font-face{font-family:StudioRounded;src:url('dumpling-pet/Nunito.ttf') format('truetype');font-display:swap}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]){clip-path:none;border-radius:22px;color:var(--ink);background:var(--base);--ink:#fff;--muted:#e6f8ff;--base:#037bc8;--line:#82dfff;--control:#0660a2;--paper:#c9f5ff;--accent:#ecfbff;--accent-ink:#063c76;--shadow:#00509c55}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio{background-size:100% 100%;padding-bottom:3.3cqw;min-height:68cqw}
+.pet-studio[data-theme=sky] .studio{background-image:url('assets/pet-studio/sky-dashboard-frame.png');font-family:StudioRounded,'Segoe UI',sans-serif}
+.pet-studio[data-theme=sky]{border-radius:4cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) button,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) input,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) select{font-family:inherit}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-header{height:14.4cqw;padding:2.4cqw 3.6cqw 2cqw 62cqw;gap:2cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .pet-switch{color:var(--ink);font-size:1.6cqw;text-shadow:none}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .pet-switch select{background:linear-gradient(#f6feff,#9fe8fc);border:2px solid #e4fcff;color:#063669;box-shadow:0 3px 6px #0054a866,inset 0 1px #fff;border-radius:1.5cqw;font-size:1.8cqw;padding:.8cqw 1.2cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-header .studio-close{width:4.6cqw;height:4.6cqw;border:2px solid var(--line);color:var(--ink);background:linear-gradient(#00a8f5,#0061bd);box-shadow:0 2px 5px var(--shadow),inset 0 0 3px #c1f7ff;font-size:3.5cqw;border-radius:1.4cqw}
+.pet-studio[data-theme=sky] .studio-body{grid-template-columns:44% 56%}
+.pet-studio[data-theme=sky] .preview-pane{padding:2cqw 2.5cqw 0 5cqw}
+.pet-studio[data-theme=sky] .preview-pane h2{font-size:3.8cqw;color:#fff;text-shadow:0 2px 2px #005299}
+.pet-studio[data-theme=sky] #pet-subtitle{font-size:1.65cqw;color:#fff;text-align:center}
+.pet-studio[data-theme=sky] .controls-pane{padding:0 3cqw 0 1.5cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tab-content{background:transparent;border:0;border-radius:0;box-shadow:none;color:var(--ink);scrollbar-color:var(--line) transparent}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs{border-bottom:2px solid var(--line);gap:.4cqw;overflow-y:hidden;padding:0 .4cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs button{font-size:1.5cqw;color:var(--ink);padding:1.1cqw .9cqw .7cqw;background:none;box-shadow:none;text-shadow:none;border-bottom-color:transparent}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs button[aria-selected=true]:after{background:var(--accent);box-shadow:none;left:0;right:0;height:3px}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .section-heading h3{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .section-heading p{color:var(--muted)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .count{background:var(--paper);border:1px solid var(--line);color:var(--accent-ink);box-shadow:0 2px 3px var(--shadow)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .count:before{display:none}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .subtabs{background:var(--control);border-color:var(--line);border-radius:1.3cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .subtabs button{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .subtabs button[aria-pressed=true]{background:linear-gradient(#f4feff,#91ddf5);color:#063669;border:1px solid #ecfeff;box-shadow:inset 0 1px 2px white}
+.pet-studio[data-theme=sky] .subtabs button:before{display:none!important}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .search{background:#53b9eb66;border:2px solid var(--line);color:var(--ink);box-shadow:inset 0 1px 2px #ffffff44}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .search::placeholder{color:var(--muted);opacity:1}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .filters button{background:var(--control);border-color:var(--line);color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .filters button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--line)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) #gallery .skin-card{background:#0469ab55;border:2px solid var(--line);color:var(--ink);box-shadow:0 2px 5px var(--shadow)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) #gallery .skin-card[aria-pressed=true]{background:#0060aa66;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 4px 6px var(--shadow)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) #gallery .skin-name{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) #gallery .check{background:var(--paper);border:1px solid var(--accent);color:var(--accent-ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-actions button{background:linear-gradient(#00b7f5,#0055a9);border:2px solid #23bffc;box-shadow:0 3px 5px #0070a955,inset 0 1px 3px #b4f4ff;color:#fff;border-radius:1.5cqw}
+.pet-studio[data-theme=sky] .preview-actions #greet{background:linear-gradient(#00b7f5,#0055a9)}
+.pet-studio[data-theme=sky] .preview-tip{color:#003e75;font-weight:700;text-shadow:0 1px #e8fcff;text-align:center;white-space:normal}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .field,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .option-row strong{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .field input,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .field select{background:var(--paper);color:var(--accent-ink);border-color:var(--line)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .field small,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .helper,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .option-row p,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .action-grid small{color:var(--muted)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .option-row{border-color:var(--line)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .option-row input{accent-color:var(--accent-ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .choices button,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .action-grid button{background:var(--control);border-color:var(--line);color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .choices button[aria-pressed=true]{background:var(--accent);border-color:var(--line);color:var(--accent-ink);box-shadow:none}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .accessory-list h4{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .helper-box{background:var(--control);color:var(--muted);border-color:var(--line)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer{background:var(--control);border-color:var(--line);color:var(--ink);font-family:'Segoe UI',sans-serif}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer #save-status,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-theme-control{color:var(--ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer button,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-theme-control select{background:var(--paper);color:var(--accent-ink);border-color:var(--line)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer button:disabled{opacity:.7;background:var(--paper);color:var(--accent-ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(button,input,select):focus-visible{outline:3px solid var(--accent-ink);outline-offset:3px}
+/* Paper surfaces, stitched labels and hand-lettering match the craft reference. */
+.pet-studio[data-theme=scrapbook]{--ink:#35261d;--muted:#6d503c;--base:#a46f3c;--line:#c7a57f;--control:#ead7bdc9;--paper:#fff5e5;--accent:#ef4f86;--accent-ink:#3d281d;--shadow:#79523233;border-radius:9px}
+.pet-studio[data-theme=scrapbook] .studio{background-image:url('assets/pet-studio/scrapbook-dashboard-frame.png');font-family:StudioHand,'Segoe Print',cursive}
+.pet-studio[data-theme=scrapbook] .studio-header{padding-left:69cqw;padding-right:4cqw;gap:1.2cqw}
+.pet-studio[data-theme=scrapbook] .pet-switch{background:#ffdfa0;padding:.6cqw 1cqw;box-shadow:1px 3px 5px #62412355;transform:rotate(-2deg);border:1px solid #f4cc7d;color:#513c22}
+.pet-studio[data-theme=scrapbook] .pet-switch select{background:#fff4e6;border-color:#d5ad7a;color:#3d281d;box-shadow:0 2px 2px #ab795c44;font-weight:400;border-radius:.7cqw;font-size:1.6cqw}
+.pet-studio[data-theme=scrapbook] .studio-header .studio-close{background:#f9b5c4;color:#6d4339;border-color:#fff0e6;box-shadow:2px 3px 0 #d9869d55;border-radius:.6cqw;transform:rotate(3deg)}
+.pet-studio[data-theme=scrapbook] .preview-pane{padding:1.3cqw 2.7cqw 0 5.2cqw}
+.pet-studio[data-theme=scrapbook] .controls-pane{padding:0 4cqw 0 3.8cqw}
+.pet-studio[data-theme=scrapbook] .live-label{display:flex;color:#40382d;font-size:1cqw;letter-spacing:.12em;margin-bottom:.5cqw}
+.pet-studio[data-theme=scrapbook] .live-label span{background:#10aa6c;box-shadow:none}
+.pet-studio[data-theme=scrapbook] .preview-pane h2{background:#f5e4c9;padding:.1cqw 2cqw;color:#211711;font-family:StudioHand,cursive;transform:rotate(-2deg);text-shadow:none;font-size:3.6cqw}
+.pet-studio[data-theme=scrapbook] #pet-subtitle{background:#f5b2c6;color:#482d2e;transform:rotate(-2deg);font-size:1.4cqw;padding:.2cqw .8cqw;text-align:center}
+.pet-studio[data-theme=scrapbook] .preview-pane #pet-stage{margin-top:16px;height:30.5cqw}
+.pet-studio[data-theme=scrapbook] .tabs{border:0;gap:.5cqw;padding-top:.5cqw;min-height:4.8cqw}
+.pet-studio[data-theme=scrapbook] .tabs button{border:1px solid #c9a78a;border-bottom:0;border-radius:1cqw 1cqw 0 0;background:#efa0b7;color:#35261d;padding:.9cqw 1.2cqw .7cqw;transform:rotate(-2deg);font-size:1.55cqw}
+.pet-studio[data-theme=scrapbook] .tabs button:nth-child(2){background:#b7cde9;transform:rotate(1deg)}
+.pet-studio[data-theme=scrapbook] .tabs button:nth-child(3){background:#9acdb1;transform:rotate(-1deg)}
+.pet-studio[data-theme=scrapbook] .tabs button:nth-child(4){background:#f6cf7f;transform:rotate(2deg)}
+.pet-studio[data-theme=scrapbook] .tabs button[aria-selected=true]{box-shadow:inset 0 3px 0 #fff7,0 -2px 0 #fff7;color:#1d100d;font-weight:bold}
+.pet-studio[data-theme=scrapbook] .tabs button[aria-selected=true]:after{height:3px;background:#a02f56;left:15%;right:15%}
+.pet-studio[data-theme=scrapbook] #tab-content:has(#gallery) .section-heading h3{font-size:2.5cqw;font-weight:700}
+.pet-studio[data-theme=scrapbook] .subtabs{background:#dcc8ad88;border:1px solid #d0b598}
+.pet-studio[data-theme=scrapbook] .subtabs button[aria-pressed=true]{background:#f2719c;color:#fff;border:1px dashed #fff9ed;box-shadow:0 0 0 2px #ef91ad}
+.pet-studio[data-theme=scrapbook] .search{background:#fff6e6b3;border:2px solid #fffbef;color:#64432e;box-shadow:0 2px 3px #997c6444}
+.pet-studio[data-theme=scrapbook] .count{background:#f7e7d1;border:1px dashed #8b623f;color:#4e3525}
+.pet-studio[data-theme=scrapbook] .filters button{background:#fff6edb3;border:1px solid #c29e85;box-shadow:inset 0 0 0 2px #fff8ed}
+.pet-studio[data-theme=scrapbook] .filters button[aria-pressed=true]{background:#f23e7b;color:white;box-shadow:inset 0 0 0 2px #ff94b4;border-color:#f23e7b}
+.pet-studio[data-theme=scrapbook] #gallery .skin-card{background:#f7e6cfaa;border-color:#c7a17f;box-shadow:inset 0 0 0 4px #fff8e6,0 2px 3px #75513033;border-radius:1.1cqw}
+.pet-studio[data-theme=scrapbook] #gallery .skin-card[aria-pressed=true]{background:#f7e6cfb3;border:3px solid #ed6592;box-shadow:inset 0 0 0 4px #fff8e6,0 2px 3px #75513033}
+.pet-studio[data-theme=scrapbook] #gallery .check{background:#f43f79;color:#fff;border-color:#ffacc8}
+.pet-studio[data-theme=scrapbook] #gallery .skin-name{font-family:StudioHand,cursive;font-size:16px}
+.pet-studio[data-theme=scrapbook] .preview-actions button{background:#ffabbf;color:#302126;box-shadow:1px 2px 3px #b99b8588;border:1px dashed #fff3e9;border-radius:.6cqw;font-family:StudioHand,cursive;font-size:1.8cqw;transform:rotate(-2deg)}
+.pet-studio[data-theme=scrapbook] .preview-actions #greet{background:#ffabbf}
+.pet-studio[data-theme=scrapbook] .preview-actions #dance{background:#c7abe7;transform:rotate(1deg)}
+.pet-studio[data-theme=scrapbook] .preview-tip{font-size:1.4cqw;color:#654b3a;white-space:normal;text-align:center}
+.pet-studio[data-theme=scrapbook] .studio-footer{background:#d1dea6;border-color:#b0bb88;color:#304c2d;border-radius:3px}
+.pet-studio[data-theme=scrapbook] .studio-footer #save-status{color:#155332;font-weight:600}
+/* A single eagle card follows the reference's larger specimen card. */
+@media(min-width:901px){.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content #gallery{grid-template-columns:24cqw;grid-auto-rows:21cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .section-heading h3{font-size:2.4cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .section-heading p{display:block;font-size:1.5cqw;margin-top:.4cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .subtabs{height:4.2cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .subtabs button{font-size:1.6cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .search{font-size:1.6cqw;padding:.7cqw 1cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #tab-content .filters button{font-size:1.4cqw;padding:.4cqw 1.2cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card{height:21cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card img{height:16cqw}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]):has(#pet-select option[value=eagle]:checked) #gallery .skin-name{font-size:1.6cqw}}
+@media(max-width:700px){
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio{padding-bottom:14px;background-size:auto 100%;background-position:center top}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-header{height:auto;min-height:165px;padding:100px 14px 14px;gap:10px;background-size:760px auto;background-position:left top}
+ .pet-studio[data-theme=sky] .studio-header{background-image:url('assets/pet-studio/sky-dashboard-frame.png')}
+ .pet-studio[data-theme=scrapbook] .studio-header{background-image:url('assets/pet-studio/scrapbook-dashboard-frame.png')}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .pet-switch{font-size:13px;padding:4px 8px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .pet-switch select{font-size:16px;padding:8px;border-radius:8px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-header .studio-close{width:40px;height:40px;font-size:28px;border-radius:8px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-body{display:block}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-pane{padding:18px;background:#0473b6;border:0}
+ .pet-studio[data-theme=scrapbook] .preview-pane{background:#f5e7d0}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-pane h2{font-size:30px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) #pet-subtitle{font-size:14px}
+ .pet-studio[data-theme=scrapbook] .live-label{font-size:11px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-pane #pet-stage{height:295px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-actions button{font-size:16px;padding:10px;border-radius:8px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .preview-tip{font-size:13px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .controls-pane{padding:10px;background:#0678bd}
+ .pet-studio[data-theme=scrapbook] .controls-pane{background:#f5e7d0}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs{min-height:46px;gap:2px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .tabs button{font-size:14px;padding:12px 6px;border-radius:7px 7px 0 0}
+ .pet-studio[data-theme=scrapbook] #tab-content:has(#gallery) .section-heading h3{font-size:24px}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer{font-size:12px}
+}
