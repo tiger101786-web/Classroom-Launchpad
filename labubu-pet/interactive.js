@@ -114,9 +114,9 @@ if(name==='nose'||name==='hello')nose=Math.sin(t*Math.PI*10)*env;
 if(name==='wobble')wobble=Math.sin(t*Math.PI*5)*env;
 if(name==='talk')opening=(.15+.7*Math.sin(t*Math.PI*6)**2)*env;
 if(name==='wake'){closed=1-smooth((t-.42)/.4);yawn=Math.sin(Math.PI*clamp((t-.08)/.8))**2;opening=yawn;ear=Math.sin(t*Math.PI*3)*env;}
-if(state.mode==='sleep'){closed=1;opening=moving?1:0;}
+if(state.mode==='sleep'){closed=1;opening=moving?.5-.5*Math.cos(now/1000*Math.PI*2/4):0;}
 if(state.mode==='dance'){happy=.8;opening=.35;wobble=Math.sin(sec*Math.PI*2/0.7);ear=.7*Math.sin(sec*7);wave=.4*Math.sin(sec*8);}
-const breathe=moving?Math.sin(now/1000*Math.PI*2/(state.mode==='sleep'?5:4)):0;
+const breathe=moving?Math.sin(now/1000*Math.PI*2/4):0;
 const drift=moving&&state.mode!=='sleep'?Math.sin(now/1000*Math.PI*2/7)*.65:0;
 const sx=1+(moving?.009*breathe+.018*wobble:0),sy=1-(moving?.008*breathe+.012*wobble:0),angle=moving?drift+2.3*wobble:0;
 $('#puppet').style.transform=`rotate(${angle}deg) scale(${sx},${sy})`;
@@ -129,16 +129,16 @@ for(const [id,cx] of [['left',397],['right',630]]){const top=580+closed*245,bott
 const sleeping=state.mode==='sleep',dynamic=opening>.015||sleeping;
 attr('#original-grin','opacity',dynamic?0:1);attr('#open-mouth','opacity',dynamic?1:0);
 // Keep the sleeping mouth geometry cached; animate its layer, not two clip paths.
-$('#open-mouth').style.transform=sleeping?`scaleY(${.04+.96*opening})`:'';
+$('#open-mouth').style.transform=sleeping?`scaleY(${.12+.88*opening})`:'';
 const rx=sleeping?35:100+yawn*15,top=sleeping?805:800,h=sleeping?88:32+opening*95;
 const d=`M${512-rx} ${top}Q512 ${top-(sleeping?9:16)} ${512+rx} ${top}C${512+rx} ${top+h} ${512-rx} ${top+h} ${512-rx} ${top}Z`;
-attr('#mouth-shape','d',d);attr('#mouth-cut','d',d);attr('#tongue','cy',top+h*.75);attr('#tongue','rx',rx*.57);attr('#tongue','opacity',sleeping?smooth((opening-.18)/.4):1);
+attr('#mouth-shape','d',d);attr('#mouth-cut','d',d);attr('#tongue','cy',top+h*.75);attr('#tongue','rx',rx*.57);attr('#tongue','opacity',1);
 const teethMarkup=sleeping?'':Array.from({length:9},(_,i)=>{const x=512-rx+8+i*(2*rx-16)/9,w=(2*rx-16)/9;return `<path d="M${x} ${top-3}h${w}l${-w/2} 22Z"/>`}).join('');
 if(teethMarkup!==lastTeeth){$('#teeth').innerHTML=teethMarkup;lastTeeth=teethMarkup;}
 attr('#headphones','opacity',state.mode==='dance'||prefs.headwear==='headphones'?1:0);attr('#notes','opacity',state.mode==='dance'?1:0);attr('#notes','transform',`translate(0 ${moving?Math.sin(sec*3)*20:0})`);attr('#zs','opacity',sleeping?.7+.3*Math.sin(sec*1.2)**2:0);
 if(now>state.speechUntil)$('.labubu-speech').hidden=true;
-// Sleeping layers run on the compositor; do not repaint the SVG every frame.
-if(moving&&state.mode!=='sleep')raf=requestAnimationFrame(tick);
+// Same continuous frame loop and four-second breath as the smooth idle motion.
+if(moving)raf=requestAnimationFrame(tick);
 }
 
 function start(){if(!raf&&!host.hidden&&!document.hidden)tick(performance.now());}

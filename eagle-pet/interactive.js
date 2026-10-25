@@ -46,7 +46,7 @@ window.createEaglePet=function(onChange,onCustomize){
  function sleep(){action=null;dancing=false;asleep=!asleep;sleepStart=performance.now();waking=!asleep&&canMove();wakeStart=performance.now();nextIdle=wakeStart+4500;resetFace();ui(asleep?'Resting on the branch':waking?'Waking up slowly':'Ready');start();}
  function tick(now){raf=0;frames++;const delta=last?Math.min(now-last,50):16;last=now;const moving=canMove();if(moving)phase+=delta/1000;
   let scaleX=1,scaleY=1,rotation=0,closure=asleep?1:0,wingAngle=0,talk=0,happy=0,gazeX=0,gazeY=0,gazeAmount=0,asymmetric=0;
-  if(moving){const p=phase*Math.PI*2/4.8;scaleX=1+.006*Math.sin(p);scaleY=1+.009*Math.cos(p);rotation=asleep?0:.35*Math.sin(p);if(asleep){const breath=.5-.5*Math.cos((now-sleepStart)*Math.PI*2/5200);scaleX=1+.009*breath;scaleY=1-.009*breath;talk=.72*breath;}
+  if(moving){const p=phase*Math.PI*2/4.8;scaleX=1+.006*Math.sin(p);scaleY=1+.009*Math.cos(p);rotation=asleep?0:.35*Math.sin(p);if(asleep){talk=.06+.66*(.5-.5*Math.cos(p));}
    if(now>nextBlink&&!asleep&&!waking){blinkStart=now;nextBlink=now+3500+Math.random()*2500;}
    const bt=(now-blinkStart)/360;if(!asleep&&!waking&&bt>=0&&bt<1)closure=Math.sin(bt*Math.PI)**2;
    if(waking){const elapsed=now-wakeStart,t=elapsed/3200,eyeTime=elapsed/2100;talk=smooth((t-.08)/.28)*(1-smooth((t-.62)/.3));closure=eyeTime<.6?1-smooth(eyeTime/.6):eyeTime<.82?.8*Math.sin((eyeTime-.6)/.22*Math.PI)**2:0;if(t>=1){waking=false;dancing=radio;say('Good stretch. Let’s get going!');ui('Awake and ready');nextBlink=now+3000;}}
@@ -66,12 +66,12 @@ window.createEaglePet=function(onChange,onCustomize){
   body.style.transform=`rotate(${rotation}deg) scale(${scaleX},${scaleY})`;eye(closure);happyEyes.style.opacity=String(happy*(1-closure));happySides[0].style.opacity='1';happySides[1].style.opacity=String(1-.8*asymmetric);gaze.style.opacity=String(gazeAmount*(1-closure));gazeArt.forEach(e=>setAttr(e,'transform',`translate(${gazeX} ${gazeY})`));
   host.querySelector('.perched-wings').style.transform=body.style.transform;
   // Expression artwork stays at its original size. Never scale eyes or stretch the beak.
-  mouth.style.opacity=String(asleep?smooth(talk/.3):smooth(talk/.12));jaw.style.transform=`translateY(${-54*(1-Math.max(0,Math.min(1,talk)))}px)`;
+  mouth.style.opacity=String(asleep?(moving?1:0):smooth(talk/.12));jaw.style.transform=`translateY(${-54*(1-Math.max(0,Math.min(1,talk)))}px)`;
   setAttr(wingLeft,'transform',`rotate(${wingAngle} 322 530)`);setAttr(wingRight,'transform',`rotate(${-wingAngle} 1065 530)`);
   zs.style.opacity=asleep?'1':waking?String(1-smooth((now-wakeStart)/500)):'0';zs.style.transform=`translateY(${moving?-5*Math.sin(phase*1.5):0}px)`;
   host.querySelector('.notes').style.opacity=dancing?'1':'0';notes.forEach((e,i)=>{const t=(phase/2.4+i*.25)%1;e.style.opacity=dancing?String(Math.sin(t*Math.PI)):0;e.style.transform=`translateY(${25-135*t}px) rotate(${-12+26*t}deg)`;});
-  // CSS owns sleep transforms; the awake renderer must not invalidate them.
-  if(moving&&!asleep)raf=requestAnimationFrame(tick);
+  // Sleep uses precisely the same frame clock and breath as idle.
+  if(moving)raf=requestAnimationFrame(tick);
  }
  function start(){if(!raf){last=0;tick(performance.now());}}
 
