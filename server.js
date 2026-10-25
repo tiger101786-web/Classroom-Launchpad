@@ -159,6 +159,12 @@ const approvedStudentGradeMigrations = [{
   updateSpotlights: true,
   enforce: true
 }];
+const approvedStudentAdditionMigrations = [{
+  id: "2026-10-25-add-mansoor-yatak-grade-6",
+  email: "mansoor.yatak@scscolts.org",
+  name: "Mansoor Yatak",
+  grade: "6"
+}];
 const approvedStudentRemovalMigrations = [{
   id: "2026-09-13-remove-blakeleigh-freeman",
   email: "blakeleigh.freeman@scscolts.org"
@@ -1326,6 +1332,20 @@ function applyApprovedStudentGradeMigrations(db) {
       applied.add(migration.id);
       changed = true;
     }
+  });
+
+  approvedStudentAdditionMigrations.forEach(migration => {
+    if (applied.has(migration.id) || !isAllowedStudentEmail(migration.email)) return;
+    // Never replace an existing account or reset its credentials/preferences.
+    if (!approvedStudents.some(student => student.email === migration.email)) {
+      approvedStudents = normalizeApprovedStudents([...approvedStudents, {
+        email: migration.email,
+        name: migration.name,
+        grade: migration.grade
+      }]);
+    }
+    applied.add(migration.id);
+    changed = true;
   });
 
   approvedStudentRemovalMigrations.forEach(migration => {
