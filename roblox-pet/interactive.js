@@ -79,7 +79,8 @@ function tick(now){raf=0;if(document.hidden)return;let left=0,right=0,body=0,hea
  const asleep=state.mode==='sleep';$('.happy-mouth').style.display=asleep?'none':'';$('.tongue').style.display=asleep?'none':'';$('.sleep-mouth').style.display=asleep?'':'none';
  const mouthPath=`M494 324Q552 ${410-90*opening-10*yawn} 610 324Q552 ${410+20*opening+35*yawn} 494 324Z`;
  $('.happy-mouth').setAttribute('d',mouthPath);$('.mouth-clip').setAttribute('d',mouthPath);$('.tongue').setAttribute('opacity',smooth((opening-.15)/.5));$('.tongue').setAttribute('cy',383+17*yawn);
- if(moving()&&state.mode!=='sleep')raf=requestAnimationFrame(tick);
+ if(state.mode==='sleep'){const p=now/1000*Math.PI*2/2.8,breath=moving()?Math.sin(p):0,snore=moving()?.5-Math.asin(.98*Math.cos(p))/(2*Math.asin(.98)):0;$('.upper').style.transform=`translateY(${4*breath}px) rotate(${.25*breath}deg)`;$('.sleep-mouth').style.transform=`scaleY(${.18+.82*snore})`;$('.zs').style.transform=`translateY(${-12*breath}px)`;}
+ if(moving())raf=requestAnimationFrame(tick);
 }
 function start(){cancelAnimationFrame(raf);raf=0;tick(performance.now())}
 function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}

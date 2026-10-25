@@ -41,7 +41,7 @@
  function sleep(){action=null;dancing=false;asleep=!asleep;sleepStart=performance.now();waking=!asleep&&canMove();wakeStart=performance.now();nextIdle=wakeStart+4500;resetFace();ui(asleep?'Resting on the branch':waking?'Waking up slowly':'Ready');start();}
  function tick(now){raf=0;frames++;const delta=last?Math.min(now-last,50):16;last=now;const moving=canMove();if(moving)phase+=delta/1000;
   let scaleX=1,scaleY=1,rotation=0,closure=asleep?1:0,wingAngle=0,talk=0,happy=0,gazeX=0,gazeY=0,gazeAmount=0,asymmetric=0;
-  if(moving){const p=phase*Math.PI*2/4.8;scaleX=1+.006*Math.sin(p);scaleY=1+.009*Math.cos(p);rotation=asleep?0:.35*Math.sin(p);if(asleep){talk=.06+.66*(.5-.5*Math.cos(p));}
+  if(moving){const p=phase*Math.PI*2/(asleep?2.8:4.8);scaleX=1+.006*Math.sin(p);scaleY=1+.009*Math.cos(p);rotation=.35*Math.sin(p);if(asleep){talk=.06+.66*(.5-Math.asin(.98*Math.cos(p))/(2*Math.asin(.98)));}
    if(now>nextBlink&&!asleep&&!waking){blinkStart=now;nextBlink=now+3500+Math.random()*2500;}
    const bt=(now-blinkStart)/360;if(!asleep&&!waking&&bt>=0&&bt<1)closure=Math.sin(bt*Math.PI)**2;
    if(waking){const elapsed=now-wakeStart,t=elapsed/3200,eyeTime=elapsed/2100;talk=smooth((t-.08)/.28)*(1-smooth((t-.62)/.3));closure=eyeTime<.6?1-smooth(eyeTime/.6):eyeTime<.82?.8*Math.sin((eyeTime-.6)/.22*Math.PI)**2:0;if(t>=1){waking=false;say('Good stretch. Let’s get going!');ui('Awake and ready');nextBlink=now+3000;}}

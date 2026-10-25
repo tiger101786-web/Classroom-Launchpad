@@ -114,10 +114,10 @@ if(name==='nose'||name==='hello')nose=Math.sin(t*Math.PI*10)*env;
 if(name==='wobble')wobble=Math.sin(t*Math.PI*5)*env;
 if(name==='talk')opening=(.15+.7*Math.sin(t*Math.PI*6)**2)*env;
 if(name==='wake'){closed=1-smooth((t-.42)/.4);yawn=Math.sin(Math.PI*clamp((t-.08)/.8))**2;opening=yawn;ear=Math.sin(t*Math.PI*3)*env;}
-if(state.mode==='sleep'){closed=1;opening=moving?.5-.5*Math.cos(now/1000*Math.PI*2/4):0;}
+if(state.mode==='sleep'){closed=1;opening=moving?.5-Math.asin(.98*Math.cos(now/1000*Math.PI*2/2.8))/(2*Math.asin(.98)):0;}
 if(state.mode==='dance'){happy=.8;opening=.35;wobble=Math.sin(sec*Math.PI*2/0.7);ear=.7*Math.sin(sec*7);wave=.4*Math.sin(sec*8);}
-const breathe=moving?Math.sin(now/1000*Math.PI*2/4):0;
-const drift=moving&&state.mode!=='sleep'?Math.sin(now/1000*Math.PI*2/7)*.65:0;
+const breathe=moving?Math.sin(now/1000*Math.PI*2/(state.mode==='sleep'?2.8:4)):0;
+const drift=moving?Math.sin(now/1000*Math.PI*2/(state.mode==='sleep'?2.8:7))*.65:0;
 const sx=1+(moving?.009*breathe+.018*wobble:0),sy=1-(moving?.008*breathe+.012*wobble:0),angle=moving?drift+2.3*wobble:0;
 $('#puppet').style.transform=`rotate(${angle}deg) scale(${sx},${sy})`;
 drawBends(moving?ear:0,moving?wave:0);
@@ -137,7 +137,7 @@ const teethMarkup=sleeping?'':Array.from({length:9},(_,i)=>{const x=512-rx+8+i*(
 if(teethMarkup!==lastTeeth){$('#teeth').innerHTML=teethMarkup;lastTeeth=teethMarkup;}
 attr('#headphones','opacity',state.mode==='dance'||prefs.headwear==='headphones'?1:0);attr('#notes','opacity',state.mode==='dance'?1:0);attr('#notes','transform',`translate(0 ${moving?Math.sin(sec*3)*20:0})`);attr('#zs','opacity',sleeping?.7+.3*Math.sin(sec*1.2)**2:0);
 if(now>state.speechUntil)$('.labubu-speech').hidden=true;
-// Same continuous frame loop and four-second breath as the smooth idle motion.
+// Rounded constant-speed mouth travel and offset breathing avoid long end-of-breath holds.
 if(moving)raf=requestAnimationFrame(tick);
 }
 
