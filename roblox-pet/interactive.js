@@ -6,7 +6,7 @@ const pet=host.querySelector('.pet-button'),bubble=host.querySelector('.roblox-s
 let prefs=robloxDefaults(),visible=false,hidden=false,radio=false,account='',position=null,drag=null,suppress=false;
 const art='<image href="roblox-pet/approved-roblox.png" width="1107" height="1421"/>';
 pet.innerHTML=`<svg viewBox="-80 0 1267 1810" aria-label="Animated Roblox Buddy with red and white chest logo"><defs>
-<clipPath id="head-cut"><path d="M375 85H735V402Q720 441 552 435Q395 441 375 402Z"/></clipPath>
+<clipPath id="head-cut"><path d="M387 85H722V380Q720 435 552 435Q390 435 387 380Z"/></clipPath>
 <clipPath id="torso-cut"><path d="M319 403H787L803 437V826L794 839L804 855V918H300V856L310 837L303 827V437Z"/></clipPath>
 <clipPath id="left-arm-cut"><path d="M39 397H296L315 426L304 451V830L299 846L306 862V930H39Z"/></clipPath>
 <clipPath id="right-arm-cut"><path d="M810 397H1075V932H797V862L805 845L798 831V448L789 426Z"/></clipPath>
@@ -36,12 +36,12 @@ pet.innerHTML=`<svg viewBox="-80 0 1267 1810" aria-label="Animated Roblox Buddy 
 </g>
 <g class="legs" clip-path="url(#legs-cut)">${art}</g>
 <g class="upper moving"><g class="arm left"><circle cx="293" cy="448" r="40" fill="#dfc81d"/><g clip-path="url(#left-arm-cut)">${art}</g></g><g class="arm right"><circle cx="810" cy="448" r="40" fill="#e9d21e"/><g clip-path="url(#right-arm-cut)">${art}</g></g>
-<g clip-path="url(#torso-cut)">${art}</g><g class="head moving"><g clip-path="url(#head-cut)">${art}</g>
+<g class="skin-torso" clip-path="url(#torso-cut)">${art}</g><g class="head moving"><g clip-path="url(#head-cut)">${art}</g>
 <image class="face-backing" href="roblox-pet/face-underlay.png" width="1107" height="1421" mask="url(#face-backing)"/>
 <g class="gaze"><g class="eyes"><path class="eye-left" fill="#181b15" stroke="#181b15" stroke-width="3" stroke-linecap="round"/><path class="eye-right" fill="#181b15" stroke="#181b15" stroke-width="3" stroke-linecap="round"/></g>
 <g class="mouth"><path class="happy-mouth" fill="#211e18" stroke="#211e18" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/><g clip-path="url(#live-mouth-clip)"><ellipse class="tongue" cx="552" cy="383" rx="28" ry="10" fill="#d67b76"/></g><ellipse class="sleep-mouth" cx="552" cy="345" rx="22" ry="30" fill="#29231c" style="display:none"/></g></g>
 <g class="headset" style="display:none"><path d="M388 249C350 10 751 10 717 249" fill="none" stroke="#172638" stroke-width="32"/><path d="M388 249C350 10 751 10 717 249" fill="none" stroke="#43a8f0" stroke-width="14"/>${[374,704].map(x=>`<g><rect x="${x}" y="205" width="47" height="109" rx="20" fill="#172638" stroke="#71c9ff" stroke-width="6"/><rect x="${x+11}" y="219" width="25" height="80" rx="9" fill="#2677bd"/><path d="M${x+18} 279h12" stroke="#ffe449" stroke-width="5"/></g>`).join('')}</g></g></g>
-<g class="notes" style="display:none"><text x="60" y="450">♪</text><text x="980" y="500">♫</text><text x="-20" y="800">♫</text><text x="1030" y="820">♪</text></g><g class="zs pet-sleep-zs" style="display:none"><text x="760" y="200" font-size="65">z</text><text x="838" y="130" font-size="85">Z</text><text x="934" y="48" font-size="105">Z</text></g>
+<g class="notes" style="display:none"><g transform="translate(10 670) scale(1.15)"><text class="music-note" x="0" y="0" style="animation-delay:0s">♪</text></g><g transform="translate(1100 600) scale(1.15)"><text class="music-note" x="0" y="0" style="animation-delay:-0.6s">♫</text></g><g transform="translate(90 330) scale(1.15)"><text class="music-note" x="0" y="0" style="animation-delay:-1.2s">♫</text></g><g transform="translate(1040 290) scale(1.15)"><text class="music-note" x="0" y="0" style="animation-delay:-1.8s">♪</text></g></g><g class="zs pet-sleep-zs" style="display:none"><text x="760" y="200" font-size="65">z</text><text x="838" y="130" font-size="85">Z</text><text x="934" y="48" font-size="105">Z</text></g>
 <g class="nameplate">
 <path d="M156 1585H948L990 1627V1724L948 1766H156L114 1724V1627Z" fill="#102d48" stroke="#0d2438" stroke-width="8" stroke-linejoin="round"/>
 <path d="M156 1574H948L990 1616V1713L948 1755H156L114 1713V1616Z" fill="url(#blue)" stroke="#77c7f2" stroke-width="6" stroke-linejoin="round"/>
@@ -52,11 +52,12 @@ ${[163,941].map(x=>`<g><rect x="${x-25}" y="1636" width="50" height="57" rx="9" 
 // Namespace artwork references so they cannot collide with the other pets.
 for(const el of pet.querySelectorAll('[id]')){const id=el.id;el.id='roblox-'+id;for(const node of pet.querySelectorAll('*'))for(const attr of [...node.attributes])if(attr.value.includes('url(#'+id+')'))node.setAttribute(attr.name,attr.value.replaceAll('url(#'+id+')','url(#roblox-'+id+')'));}
 const $=s=>pet.querySelector(s.replace(/#([\w-]+)/g,'#roblox-$1')),motion={checked:true},idle={checked:true},reduced=matchMedia('(prefers-reduced-motion:reduce)');
+const skinArt=window.mountRobloxSkins?.(pet);
 const state={mode:'idle',action:null,start:performance.now(),nextIdle:performance.now()+4000,nextBlink:performance.now()+2500,blink:0,index:0};
-const duration={hello:2800,happy:2200,blink:350,talk:2300,hands:2600,wobble:2600,look:4600,wake:4200};let raf=0,speechTimer;
+const duration={hello:2800,happy:2200,blink:350,talk:2300,hands:2600,wobble:2600,look:2200,wake:4200};let raf=0,speechTimer;
 const clamp=t=>Math.min(1,Math.max(0,t)),smooth=t=>{t=clamp(t);return t*t*(3-2*t)},moving=()=>visible&&!hidden&&!document.hidden&&motion.checked&&!reduced.matches;
 function say(text){if(host.hidden||host.closest('.pet-studio')||state.mode==='sleep')return;bubble.textContent=text;bubble.hidden=false;clearTimeout(speechTimer);speechTimer=setTimeout(()=>bubble.hidden=true,3400)}
-function update(){pet.classList.toggle('asleep',state.mode==='sleep');pet.classList.toggle('still',!moving());host.dataset.state=state.mode;$('.headset').style.display=state.mode==='dance'||prefs.headwear==='headphones'?'':'none';$('.notes').style.display=state.mode==='dance'?'':'none';$('.zs').style.display=state.mode==='sleep'?'':'none';pet.setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Open '+prefs.name+' controls. Drag to move.');if(host.hidden||host.closest('.pet-studio'))bubble.hidden=true;}
+function update(){skinArt?.set(prefs,state.mode==='dance');pet.classList.toggle('asleep',state.mode==='sleep');pet.classList.toggle('still',!moving());host.dataset.state=state.mode;$('.headset').style.display=state.mode==='dance'||prefs.headwear==='headphones'?'':'none';$('.notes').style.display=state.mode==='dance'?'':'none';$('.zs').style.display=state.mode==='sleep'?'':'none';pet.setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Open '+prefs.name+' controls. Drag to move.');if(host.hidden||host.closest('.pet-studio'))bubble.hidden=true;}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;bubble.hidden=true;}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action=moving()?{name:'wake',start:performance.now()}:null;say('Good morning! Let’s build something.');}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('Block party!');}else if(duration[name]){state.mode='idle';state.action=moving()?{name,start:performance.now()}:null;if(name==='hello')say(['Hey! Ready for an adventure?','You’ve got this, builder!','Let’s make something awesome!'][state.index++%3]);}state.start=performance.now();state.nextIdle=state.start+5000;update();start();}
 let lookAnimation=null,lookAction=null;
 function setFaceAttribute(node,key,value){value=String(value);if(node.getAttribute(key)!==value)node.setAttribute(key,value);}
@@ -76,7 +77,7 @@ function tick(now){raf=0;if(document.hidden)return;let left=0,right=0,body=0,hea
  const gazeLayer=$('.gaze');
  if(moving()&&a?.name==='look'){
   if(lookAction!==a){lookAnimation?.cancel();lookAction=a;
-   lookAnimation=gazeLayer.animate(Array.from({length:121},(_,i)=>{const p=i/120;return {transform:`translate3d(${-46*Math.sin(2*Math.PI*p)*Math.sin(Math.PI*p)}px,0,0)`}}),{duration:duration.look,easing:'linear'});
+   lookAnimation=gazeLayer.animate([[0,0,0],[.18,-34,-2],[.32,-29,-1],[.62,38,-3],[.78,32,-1],[1,0,0]].map(([offset,x,y])=>({offset,transform:`translate3d(${x}px,${y}px,0)`,easing:'cubic-bezier(.22,.61,.36,1)'})),{duration:duration.look,easing:'linear'});
    lookAnimation.currentTime=Math.max(0,now-a.start);
   }
  }else{lookAnimation?.cancel();lookAnimation=null;lookAction=null;}

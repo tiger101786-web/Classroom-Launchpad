@@ -305,7 +305,7 @@
       if(!allowed()||loadError)return;
       if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='roblox'?'Buddy':kind==='labubu'?'Labubu':kind==='eagle'?'Eagle':kind==='gummy'?'Gummy':kind==='colt'?'COLT':'Mochi');
       if(kind==='colt')preferences.robo={...roboColtDefaults(),...preferences.robo,[key]:value};
-      else if(kind==='roblox')preferences.roblox={...robloxDefaults(),...preferences.roblox,[key]:value};
+      else if(kind==='roblox'){const old={...robloxDefaults(),...preferences.roblox};preferences.roblox={...old,[key]:value};if(key==='skin'&&(old.headwear==='none'||old.headwear===robloxSkins[old.skin]?.headwear))preferences.roblox.headwear=robloxSkins[value]?.headwear||'none';}
       else if(kind==='labubu')preferences.labubu={...labubuDefaults(),...preferences.labubu,[key]:value};
       else if(kind==='eagle')preferences.eagle={...eaglePetDefaults(),...preferences.eagle,[key]:value};
       else if(kind==='gummy')preferences.gummy={...gummyBearDefaults(),...preferences.gummy,[key]:value};
