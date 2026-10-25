@@ -73,9 +73,28 @@ if(gl){
  bendUniform=gl.getUniformLocation(program,'bends');gl.uniform1i(gl.getUniformLocation(program,'art'),0);gl.viewport(0,0,512,768);
  texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
 }
-let textureReady=false;
-function drawBends(ear,wave){if(!gl||!textureReady)return;const key=ear.toFixed(4)+':'+wave.toFixed(4);if(key===lastRaster)return;lastRaster=key;gl.uniform2f(bendUniform,ear,wave);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
-function loadTexture(skin){if(!gl||textureSkin===skin)return;textureSkin=skin;const img=new Image();img.onload=()=>{if(textureSkin!==skin)return;gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);textureReady=true;lastRaster='';drawBends(0,0);baseArt.style.display='none'};img.src='labubu-pet/rendered/'+skin.toLowerCase().replaceAll(' ','-')+'-tan.png';}
+let textureReady=false,lastEar=0,lastWave=0,skinRequest=0,requestedSkin=null;
+function drawBends(ear,wave){lastEar=ear;lastWave=wave;if(!gl||!textureReady)return;const key=ear.toFixed(4)+':'+wave.toFixed(4);if(key===lastRaster)return;lastRaster=key;gl.uniform2f(bendUniform,ear,wave);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
+// Prepare every layer offscreen before one synchronous swap. Rebuilding visible
+// SVG images first exposed the baked-in face while the blank face patch loaded.
+async function loadSkin(skin){
+ if(requestedSkin===skin)return;requestedSkin=skin;const request=++skinRequest,staged=[];
+ try{
+  const url='labubu-pet/rendered/'+skin.toLowerCase().replaceAll(' ','-')+'-',img=new Image();img.src=url+'tan.png';
+  const gpuReady=img.decode();
+  const ready=[...host.querySelectorAll('.labubu-colored-art')].map(target=>new Promise((resolve,reject)=>{
+   const holder=document.createElementNS(ns,'g'),art=document.createElementNS(ns,'image');holder.style.visibility='hidden';holder.setAttribute('aria-hidden','true');
+   art.setAttribute('width','1024');art.setAttribute('height','1536');art.onload=resolve;art.onerror=()=>reject(Error('Unable to load Labubu skin'));
+   staged.push({target,holder,art});holder.append(art);target.after(holder);art.setAttribute('href',url+(target.dataset.underlay?'face-underlay':'tan')+'.png');
+  }));
+  await Promise.all([gpuReady,...ready]);if(request!==skinRequest)return;
+  // No await or animation reset between the texture and face/eye/grin layers.
+  if(gl){gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);textureReady=true;lastRaster='';drawBends(lastEar,lastWave);baseArt.style.display='none'}
+  for(const {target,art} of staged){art.onload=null;art.onerror=null;target.replaceChildren(art)}
+  textureSkin=skin;renderedSkin=skin;host.dataset.renderedSkin=skin;
+ }catch(error){if(request===skinRequest){requestedSkin=null;console.warn('Labubu retained its previous complete skin:',error.message)}}
+ finally{for(const {holder} of staged)holder.remove()}
+}
 const bends=['ears','hand','nose'].map(id=>({id,group:host.querySelector('[filter="url(#'+id+')"]')}));
 let lastTeeth='';
 let raf=0;
@@ -122,8 +141,7 @@ function place(){if(host.hidden||host.closest('.pet-studio'))return;const box=$(
 const positionKey=()=>'labubu-position:'+account;
 function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
 function render(){
- loadTexture(Object.hasOwn(labubuSkins,prefs.skin)?prefs.skin:'Tan');
- if(renderedSkin!==prefs.skin){renderedSkin=Object.hasOwn(labubuSkins,prefs.skin)?prefs.skin:'Tan';host.querySelectorAll('.labubu-colored-art').forEach(g=>g.innerHTML=cachedArt(renderedSkin,g.dataset.underlay?underlay:original));}
+ loadSkin(Object.hasOwn(labubuSkins,prefs.skin)?prefs.skin:'Tan');
 
  host.hidden=!visible||hidden;host.dataset.size=prefs.size;state.motion=prefs.motion;state.idle=true;
  $('#name-label').textContent=prefs.name;attr('#name-label','font-size',Math.min(82,490/(Array.from(prefs.name).length*.63)));

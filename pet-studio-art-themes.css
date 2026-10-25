@@ -53,6 +53,13 @@
 .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer button,.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-theme-control select{background:var(--paper);color:var(--accent-ink);border-color:var(--line)}
 .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer button:disabled{opacity:.7;background:var(--paper);color:var(--accent-ink)}
 .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(button,input,select):focus-visible{outline:3px solid var(--accent-ink);outline-offset:3px}
+/* Both light-theme dropdowns use a light native menu and one theme-colored
+   focus outline, rather than the app's red focus shadow plus a second ring. */
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(.pet-switch,.studio-theme-control) select{color-scheme:light;color:var(--accent-ink);-webkit-text-fill-color:var(--accent-ink);accent-color:var(--accent-ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(.pet-switch,.studio-theme-control) select:is(:hover,:focus,:active){color:var(--accent-ink);-webkit-text-fill-color:var(--accent-ink);background:var(--paper);border-color:var(--accent-ink);box-shadow:none!important}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(.pet-switch,.studio-theme-control) select:focus{outline:2px solid var(--accent-ink);outline-offset:2px}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(.pet-switch,.studio-theme-control) select option{background:var(--paper);color:var(--accent-ink);-webkit-text-fill-color:var(--accent-ink)}
+.pet-studio:is([data-theme=sky],[data-theme=scrapbook]) :is(.pet-switch,.studio-theme-control) select option:is(:hover,:checked,:focus){background:var(--paper);color:var(--accent-ink);-webkit-text-fill-color:var(--accent-ink)}
 /* Paper surfaces, stitched labels and hand-lettering match the craft reference. */
 .pet-studio[data-theme=scrapbook]{--ink:#35261d;--muted:#6d503c;--base:#a46f3c;--line:#c7a57f;--control:#ead7bdc9;--paper:#fff5e5;--accent:#ef4f86;--accent-ink:#3d281d;--shadow:#79523233;border-radius:9px}
 .pet-studio[data-theme=scrapbook] .studio{background-image:url('assets/pet-studio/scrapbook-dashboard-frame.png');font-family:StudioHand,'Segoe Print',cursive}
@@ -63,7 +70,7 @@
 .pet-studio[data-theme=scrapbook] .pet-switch select{color-scheme:light;-webkit-text-fill-color:#3d281d}
 .pet-studio[data-theme=scrapbook] .pet-switch select:is(:hover,:focus,:active){color:#3d281d;-webkit-text-fill-color:#3d281d;background:#fff4e6;border-color:#996c47}
 .pet-studio[data-theme=scrapbook] .pet-switch select option{color:#3d281d;background:#fff4e6;-webkit-text-fill-color:#3d281d}
-.pet-studio[data-theme=scrapbook] .pet-switch select option:is(:hover,:focus,:checked){color:#3d281d;background:#f5c5d2;-webkit-text-fill-color:#3d281d}
+.pet-studio[data-theme=scrapbook] .pet-switch select option:is(:hover,:focus,:checked){color:#3d281d;background:#ead7bd;-webkit-text-fill-color:#3d281d}
 .pet-studio[data-theme=scrapbook] .studio-header .studio-close{background:#f9b5c4;color:#6d4339;border-color:#fff0e6;box-shadow:2px 3px 0 #d9869d55;border-radius:.6cqw;transform:rotate(3deg)}
 .pet-studio[data-theme=scrapbook] .preview-pane{padding:1.3cqw 2.7cqw 0 5.2cqw}
 .pet-studio[data-theme=scrapbook] .controls-pane{padding:0 4cqw 0 3.8cqw}
