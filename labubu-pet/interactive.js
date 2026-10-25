@@ -1,5 +1,5 @@
 /* Labubu: approved local artwork and animations, scoped to one live companion. */
-window.labubuDefaults=()=>({skin:'Tan',name:'Labubu',nameplate:true,platform:true,headwear:'none',motion:true,size:'medium',asleep:false});
+window.labubuDefaults=()=>({skin:'Tan',name:'Labubu',nameplate:true,platform:true,headwear:'none',outfit:'none',neckwear:'none',motion:true,size:'medium',asleep:false});
 window.createLabubuPet=function(onChange,onCustomize){'use strict';
 const host=document.createElement('div');host.className='labubu-companion';host.hidden=true;
 host.innerHTML='<button class="pet-button" type="button" aria-label="Open Labubu controls"></button><div class="labubu-speech" role="status" hidden></div>';document.body.append(host);
@@ -35,13 +35,14 @@ ${[.28,.45,.64,.83].map(k=>`<ellipse cx="512" cy="1459" rx="${350*k}" ry="${74*k
 <defs><clipPath id="nameplate-labubu-head"><path d="M100 0H924V835Q897 905 792 938Q660 972 512 968Q364 972 232 938Q127 905 100 835Z"/></clipPath><filter id="head-shadow" x="-25%" y="-20%" width="150%" height="150%"><feDropShadow dx="0" dy="9" stdDeviation="9" flood-color="#2d1b12" flood-opacity=".85"/></filter></defs>
 ${[224,800].map(x=>`<g class="nameplate-labubu-head" transform="translate(${x-76.8} 1635) scale(.15)" filter="url(#head-shadow)"><g clip-path="url(#nameplate-labubu-head)">${image}</g></g>`).join('')}
 <text id="name-label" x="512" y="1734" text-anchor="middle" dominant-baseline="middle" font-family="Georgia,serif" font-size="65" font-weight="bold" fill="#4c2e20" stroke="#fff0ce" stroke-width="1" paint-order="stroke">Labubu</text></g></svg>`;
+const clothes=window.mountLabubuClothes?.(host);
 const state={mode:'idle',action:null,motion:true,idle:true,start:performance.now(),nextIdle:performance.now()+4500,nextBlink:performance.now()+2500,blink:0,index:0,speechUntil:0};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
 const durations={hello:2800,happy:2500,blink:360,talk:2200,ears:2400,hand:3200,nose:1800,wobble:3800,wake:3800};
 const reactions=['ears','hello','nose','happy','wobble','talk','hand'];
 const messages=['Hey! Ready for a little adventure?','You’ve got this!','Tiny steps, big discoveries.','That deserves a smile!'];
 function say(text,now=performance.now()){if(host.hidden||host.closest('.pet-studio'))return;$('.labubu-speech').textContent=text;$('.labubu-speech').hidden=false;state.speechUntil=now+3800;}
-function ui(){host.dataset.state=state.mode;$('.pet-button').setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Customize '+prefs.name);}
+function ui(){host.dataset.state=state.mode;clothes?.set(prefs,state.mode==='dance');$('.pet-button').setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Customize '+prefs.name);}
 function play(name){name=({excited:'hello',greet:'hello',mouth:'talk',squish:'wobble'})[name]||name;if(!['sleep','wake','dance',...Object.keys(durations)].includes(name))return;if(!state.motion||reduce.matches){if(name==='sleep')state.mode='sleep';else if(name==='wake')state.mode='idle';ui();return;}const now=performance.now();if(name==='sleep'){state.mode='sleep';state.action=null;state.start=now;$('.labubu-speech').hidden=true;}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:now};say('Good morning! Let’s get started.',now);}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;state.start=now;if(state.mode==='dance')say('This is my kind of beat!',now);}else{state.mode='idle';state.action={name,start:now};if(name==='hello')say(messages[state.index++%messages.length],now);}state.nextIdle=now+6000;ui();}
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},nodes=new Map(),attr=(id,k,v)=>{let el=nodes.get(id);if(!el){el=$(id);nodes.set(id,el)}const next=String(typeof v==='number'?Math.round(v*1000)/1000:v);if(el.getAttribute(k)!==next)el.setAttribute(k,next)};
 // Reproduce the original radial displacement fields on the GPU. In particular,
@@ -120,6 +121,7 @@ const drift=moving&&state.mode!=='sleep'?Math.sin(now/1000*Math.PI*2/7)*.65:0;
 const sx=1+(moving?.009*breathe+.018*wobble:0),sy=1-(moving?.008*breathe+.012*wobble:0),angle=moving?drift+2.3*wobble:0;
 $('#puppet').style.transform=`rotate(${angle}deg) scale(${sx},${sy})`;
 drawBends(moving?ear:0,moving?wave:0);
+clothes?.animate(moving?wave:0);
 for(const b of bends){const value=moving?(b.id==='nose'?nose:!gl?({ears:ear,hand:wave})[b.id]:0):0;const next=Math.abs(value)>.001?'url(#'+b.id+')':'none';if(b.group.getAttribute('filter')!==next)b.group.setAttribute('filter',next);}
 attr('#nose-bend','scale',moving?nose*27:0);
 attr('#ears-bend','scale',moving?ear*65:0);attr('#hand-bend','scale',moving?wave*95:0);
