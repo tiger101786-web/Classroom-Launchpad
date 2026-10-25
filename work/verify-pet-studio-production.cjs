@@ -77,7 +77,9 @@ await studio.locator('[data-action="wings"]').click();await page.waitForTimeout(
 assert(Number((await studio.locator('.eagle-companion .wing-left').getAttribute('transform')).match(/rotate\(([-\d.]+)/)[1])>25);
 await studio.locator('[data-toggle="asleep"]').check();assert.equal(await studio.locator('.eagle-companion .lid-left').getAttribute('height'),'125');
 await studio.locator('[data-toggle="asleep"]').uncheck();await page.waitForTimeout(1800);
-assert.equal(await studio.locator('.eagle-companion .lower-jaw').getAttribute('transform'),'translate(0 0)');
+// The smooth sleep/wake renderer moves the jaw using a CSS transform.
+const jawY=await studio.locator('.eagle-companion .lower-jaw').evaluate(e=>new DOMMatrix(getComputedStyle(e).transform).m42);
+assert(Math.abs(jawY)<1,'The lower beak is fully open at the peak of the wake-up yawn');
 await page.waitForTimeout(1600);assert.equal(await studio.locator('.eagle-companion .lid-left').getAttribute('height'),'0');
 await studio.locator('#dance').click();assert(await studio.locator('.eagle-companion .pet-button').evaluate(e=>e.classList.contains('dancing')));await studio.locator('#dance').click();
 for(const width of [1440,390]){await page.setViewportSize({width,height:1000});await page.waitForTimeout(100);assert(await studio.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await studio.screenshot({path:'C:/Users/Sinister/Documents/Email/gummy-bear-qa/eagle-studio-'+role+'-'+width+'.png'});}

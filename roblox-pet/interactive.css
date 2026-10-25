@@ -1,0 +1,18 @@
+.roblox-companion{position:fixed;width:132px;max-width:calc(100vw - 16px);z-index:90;user-select:none}
+.roblox-companion[hidden]{display:none!important}
+.roblox-companion[data-size=small]{width:110px}.roblox-companion[data-size=large]{width:155px}.roblox-companion[data-size=extra-large]{width:185px}
+.roblox-companion .pet-button{display:block;width:100%;height:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;cursor:grab;touch-action:none}
+.roblox-companion .pet-button:hover{background:none;transform:none}.roblox-companion .pet-button:focus-visible{outline:2px solid #f4d34a;outline-offset:4px}
+.roblox-companion .pet-button>svg{display:block;width:100%;height:auto;overflow:visible}
+.roblox-companion .moving,.roblox-companion .arm,.roblox-companion .head,.roblox-companion .sleep-mouth{will-change:transform}
+.roblox-companion .sleep-mouth{transform-origin:552px 340px}.roblox-companion .head{transform-origin:552px 415px}.roblox-companion .upper{transform-origin:552px 914px}.roblox-companion .arm.left{transform-origin:299px 447px}.roblox-companion .arm.right{transform-origin:804px 447px}
+.roblox-companion .asleep:not(.still) .upper{animation:roblox-breathe 5s ease-in-out infinite}.roblox-companion .asleep:not(.still) .sleep-mouth{animation:roblox-snore 5s ease-in-out infinite}.roblox-companion .asleep:not(.still) .zs{animation:roblox-float 5s ease-in-out infinite}
+.roblox-companion .notes text{transform-box:fill-box;transform-origin:center;animation:roblox-notes 2.4s ease-out infinite;will-change:transform,opacity}.roblox-companion .notes text:nth-child(2){animation-delay:-.6s}.roblox-companion .notes text:nth-child(3){animation-delay:-1.2s}.roblox-companion .notes text:nth-child(4){animation-delay:-1.8s}.roblox-companion .still .notes text{animation:none}
+.roblox-companion .notes,.roblox-companion .zs{pointer-events:none;paint-order:stroke;stroke-width:5;stroke:#152437;font-family:Arial,sans-serif;font-weight:bold}.roblox-companion .notes{fill:#ffe56a;font-size:115px}.roblox-companion .zs{fill:#ddd0fa;font-size:90px}.roblox-companion #roblox-plate-name{fill:#f9eece;font:700 92px system-ui;letter-spacing:3px}
+.roblox-speech{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:min(235px,80vw);padding:10px 14px;border:2px solid #cbb25b;border-radius:14px;background:#fff7d2;color:#313328;font:600 13px/1.4 system-ui;text-align:center;pointer-events:none}.roblox-speech[hidden],.pet-studio .roblox-speech{display:none!important}
+.pet-studio #pet-stage .roblox-companion{position:relative!important;inset:auto!important;transform:none!important;width:19cqw!important;max-width:100%!important;margin:0!important;z-index:1!important;pointer-events:none}
+.pet-studio #pet-stage .roblox-companion .pet-button{width:100%!important;height:auto!important;aspect-ratio:1267/1810!important}
+@media(max-width:700px){.pet-studio #pet-stage .roblox-companion{width:170px!important}}
+@media(max-width:1119px){.roblox-companion[data-size]{width:70px}}
+@keyframes roblox-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}@keyframes roblox-snore{0%,100%{transform:scaleY(.18)}50%{transform:scaleY(1)}}@keyframes roblox-float{0%,100%{transform:translateY(0);opacity:.65}50%{transform:translateY(-24px);opacity:1}}@keyframes roblox-notes{0%{transform:translateY(20px) rotate(-10deg);opacity:0}25%{opacity:1}100%{transform:translateY(-120px) rotate(12deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.roblox-companion *{animation:none!important}}
