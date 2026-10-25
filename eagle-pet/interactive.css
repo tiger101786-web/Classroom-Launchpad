@@ -1,3 +1,4 @@
+@import url("../pet-sleep-symbols.css?v=20261025-v1");
 /* Match the Colt/Squishy character-and-perch height, excluding their separate nameplates.
    Widths account for the eagle's wider 1494:1205 canvas without stretching the artwork. */
 .eagle-companion{position:fixed;width:183px;max-width:calc(100vw - 16px);z-index:90;user-select:none}

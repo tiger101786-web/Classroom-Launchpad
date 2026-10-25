@@ -11,6 +11,9 @@ await open();const studio=page.locator('.pet-studio');await studio.locator('#pet
 await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Builder');await studio.locator('#size-select').selectOption('extra-large');await page.waitForTimeout(800);
 await open();assert.equal(await studio.locator('#pet-select').inputValue(),'roblox');assert.equal(await pet.locator('#roblox-plate-name').textContent(),'Builder');
 await studio.locator('[data-tab=play]').click();for(const b of await studio.locator('[data-action]').all()){await b.click();await page.waitForTimeout(150)}
+const lookFrames=await pet.locator('.gaze').evaluate(e=>e.getAnimations()[0]?.effect.getKeyframes());assert(lookFrames?.length===121,'Look-around uses a browser-managed animation');
+await page.waitForTimeout(700);const gazeLeft=await pet.locator('.gaze').evaluate(e=>new DOMMatrix(getComputedStyle(e).transform).m41);assert(gazeLeft < -20);
+await page.waitForTimeout(2400);const gazeRight=await pet.locator('.gaze').evaluate(e=>new DOMMatrix(getComputedStyle(e).transform).m41);assert(gazeRight > 20);
 await studio.locator('[data-toggle=asleep]').check();assert.equal(await pet.getAttribute('data-state'),'sleep');await studio.locator('[data-toggle=asleep]').uncheck();await page.waitForTimeout(4300);
 await studio.locator('#dance').click();assert(await pet.locator('.headset').isVisible());assert(await pet.locator('.notes').isVisible());await studio.locator('#dance').click();assert(!(await pet.locator('.notes').isVisible()));
 await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=accessories]').click();await studio.locator('[data-choice=headphones]').click();assert(await pet.locator('.headset').isVisible());await studio.locator('[data-choice=none]').click();assert(!(await pet.locator('.headset').isVisible()));

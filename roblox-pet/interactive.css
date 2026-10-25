@@ -1,3 +1,5 @@
+@import url("../pet-sleep-symbols.css?v=20261025-v1");
+.roblox-companion .gaze{will-change:transform;transform:translate3d(0,0,0);transform-origin:0 0}
 .roblox-companion{position:fixed;width:132px;max-width:calc(100vw - 16px);z-index:90;user-select:none}
 .roblox-companion[hidden]{display:none!important}
 .roblox-companion[data-size=small]{width:110px}.roblox-companion[data-size=large]{width:155px}.roblox-companion[data-size=extra-large]{width:185px}

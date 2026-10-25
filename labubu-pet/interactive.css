@@ -1,3 +1,4 @@
+@import url("../pet-sleep-symbols.css?v=20261025-v1");
 /* Equal character-and-platform heights to the existing four companions. */
 .labubu-companion #puppet{transform-origin:512px 1460px;will-change:transform}
 .labubu-companion #open-mouth{transform-origin:512px 805px;will-change:transform}

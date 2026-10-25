@@ -41,7 +41,7 @@ pet.innerHTML=`<svg viewBox="-80 0 1267 1810" aria-label="Animated Roblox Buddy 
 <g class="gaze"><g class="eyes"><path class="eye-left" fill="#181b15" stroke="#181b15" stroke-width="3" stroke-linecap="round"/><path class="eye-right" fill="#181b15" stroke="#181b15" stroke-width="3" stroke-linecap="round"/></g>
 <g class="mouth"><path class="happy-mouth" fill="#211e18" stroke="#211e18" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/><g clip-path="url(#live-mouth-clip)"><ellipse class="tongue" cx="552" cy="383" rx="28" ry="10" fill="#d67b76"/></g><ellipse class="sleep-mouth" cx="552" cy="345" rx="22" ry="30" fill="#29231c" style="display:none"/></g></g>
 <g class="headset" style="display:none"><path d="M388 249C350 10 751 10 717 249" fill="none" stroke="#172638" stroke-width="32"/><path d="M388 249C350 10 751 10 717 249" fill="none" stroke="#43a8f0" stroke-width="14"/>${[374,704].map(x=>`<g><rect x="${x}" y="205" width="47" height="109" rx="20" fill="#172638" stroke="#71c9ff" stroke-width="6"/><rect x="${x+11}" y="219" width="25" height="80" rx="9" fill="#2677bd"/><path d="M${x+18} 279h12" stroke="#ffe449" stroke-width="5"/></g>`).join('')}</g></g></g>
-<g class="notes" style="display:none"><text x="60" y="450">♪</text><text x="980" y="500">♫</text><text x="-20" y="800">♫</text><text x="1030" y="820">♪</text></g><g class="zs" style="display:none"><text x="760" y="200" font-size="65">z</text><text x="838" y="130" font-size="85">Z</text><text x="934" y="48" font-size="105">Z</text></g>
+<g class="notes" style="display:none"><text x="60" y="450">♪</text><text x="980" y="500">♫</text><text x="-20" y="800">♫</text><text x="1030" y="820">♪</text></g><g class="zs pet-sleep-zs" style="display:none"><text x="760" y="200" font-size="65">z</text><text x="838" y="130" font-size="85">Z</text><text x="934" y="48" font-size="105">Z</text></g>
 <g class="nameplate">
 <path d="M156 1585H948L990 1627V1724L948 1766H156L114 1724V1627Z" fill="#102d48" stroke="#0d2438" stroke-width="8" stroke-linejoin="round"/>
 <path d="M156 1574H948L990 1616V1713L948 1755H156L114 1713V1616Z" fill="url(#blue)" stroke="#77c7f2" stroke-width="6" stroke-linejoin="round"/>
@@ -58,6 +58,8 @@ const clamp=t=>Math.min(1,Math.max(0,t)),smooth=t=>{t=clamp(t);return t*t*(3-2*t
 function say(text){if(host.hidden||host.closest('.pet-studio')||state.mode==='sleep')return;bubble.textContent=text;bubble.hidden=false;clearTimeout(speechTimer);speechTimer=setTimeout(()=>bubble.hidden=true,3400)}
 function update(){pet.classList.toggle('asleep',state.mode==='sleep');pet.classList.toggle('still',!moving());host.dataset.state=state.mode;$('.headset').style.display=state.mode==='dance'||prefs.headwear==='headphones'?'':'none';$('.notes').style.display=state.mode==='dance'?'':'none';$('.zs').style.display=state.mode==='sleep'?'':'none';pet.setAttribute('aria-label',state.mode==='sleep'?'Wake '+prefs.name:'Open '+prefs.name+' controls. Drag to move.');if(host.hidden||host.closest('.pet-studio'))bubble.hidden=true;}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;bubble.hidden=true;}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action=moving()?{name:'wake',start:performance.now()}:null;say('Good morning! Let’s build something.');}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('Block party!');}else if(duration[name]){state.mode='idle';state.action=moving()?{name,start:performance.now()}:null;if(name==='hello')say(['Hey! Ready for an adventure?','You’ve got this, builder!','Let’s make something awesome!'][state.index++%3]);}state.start=performance.now();state.nextIdle=state.start+5000;update();start();}
+let lookAnimation=null,lookAction=null;
+function setFaceAttribute(node,key,value){value=String(value);if(node.getAttribute(key)!==value)node.setAttribute(key,value);}
 function tick(now){raf=0;if(document.hidden)return;let left=0,right=0,body=0,head=0,closed=0,happy=0,opening=0,yawn=0,gaze=0;
  const a=state.action,t=a?clamp((now-a.start)/duration[a.name]):0,env=Math.sin(Math.PI*t)**2;
  if(moving()){
@@ -66,20 +68,26 @@ function tick(now){raf=0;if(document.hidden)return;let left=0,right=0,body=0,hea
  if(state.mode==='dance'){const p=(now-state.start)/1000*Math.PI*2/.8;left=24+15*Math.sin(p);right=-24+15*Math.sin(p);body=2*Math.sin(p);head=-3*Math.sin(p);happy=.8;opening=.6;}
  if(state.mode==='idle'&&!state.action&&idle.checked&&now>state.nextIdle)play(['hello','hands','happy','look','talk','wobble'][state.index++%6]);
  }
- if(moving()&&a?.name==='look'){head=0;gaze=t<.22?-36*smooth(t/.22):t<.4?-36:t<.63?-36+72*smooth((t-.4)/.23):t<.8?36:36*(1-smooth((t-.8)/.2));}
+ if(moving()&&a?.name==='look'){head=0;gaze=-46*Math.sin(2*Math.PI*t)*Math.sin(Math.PI*t);}
  if(state.mode==='sleep'){closed=1;opening=1;}
  $('.arm.left').style.transform=`rotate(${left}deg)`;$('.arm.right').style.transform=`rotate(${right}deg)`;$('.upper').style.transform=`rotate(${body}deg)`;$('.head').style.transform=`rotate(${head}deg)`;
  // One live eye per side: morph the oval into a closed or smiling curve.
  // No cross-fade can expose an old raster eye underneath this backing plate.
- $('.gaze').setAttribute('transform',`translate(${gaze} 0)`);
+ const gazeLayer=$('.gaze');
+ if(moving()&&a?.name==='look'){
+  if(lookAction!==a){lookAnimation?.cancel();lookAction=a;
+   lookAnimation=gazeLayer.animate(Array.from({length:121},(_,i)=>{const p=i/120;return {transform:`translate3d(${-46*Math.sin(2*Math.PI*p)*Math.sin(Math.PI*p)}px,0,0)`}}),{duration:duration.look,easing:'linear'});
+   lookAnimation.currentTime=Math.max(0,now-a.start);
+  }
+ }else{lookAnimation?.cancel();lookAnimation=null;lookAction=null;}
  for(const [side,cx] of [['left',519],['right',584]]){
   const squeeze=Math.max(closed,happy),height=31*(1-squeeze),curve=closed>=happy?7*closed:-17*happy;
-  $(`.eye-${side}`).setAttribute('d',`M${cx-12} 219C${cx-12} ${219-height+curve} ${cx+12} ${219-height+curve} ${cx+12} 219C${cx+12} ${219+height+curve} ${cx-12} ${219+height+curve} ${cx-12} 219Z`);
+  setFaceAttribute($(`.eye-${side}`),'d',`M${cx-12} 219C${cx-12} ${219-height+curve} ${cx+12} ${219-height+curve} ${cx+12} 219C${cx+12} ${219+height+curve} ${cx-12} ${219+height+curve} ${cx-12} 219Z`);
  }
  const asleep=state.mode==='sleep';$('.happy-mouth').style.display=asleep?'none':'';$('.tongue').style.display=asleep?'none':'';$('.sleep-mouth').style.display=asleep?'':'none';
  const mouthPath=`M494 324Q552 ${410-90*opening-10*yawn} 610 324Q552 ${410+20*opening+35*yawn} 494 324Z`;
- $('.happy-mouth').setAttribute('d',mouthPath);$('.mouth-clip').setAttribute('d',mouthPath);$('.tongue').setAttribute('opacity',smooth((opening-.15)/.5));$('.tongue').setAttribute('cy',383+17*yawn);
- if(state.mode==='sleep'){const p=now/1000*Math.PI*2/2.8,breath=moving()?Math.sin(p):0,snore=moving()?.5-Math.asin(.98*Math.cos(p))/(2*Math.asin(.98)):0;$('.upper').style.transform=`translateY(${4*breath}px) rotate(${.25*breath}deg)`;$('.sleep-mouth').style.transform=`scaleY(${.18+.82*snore})`;$('.zs').style.transform=`translateY(${-12*breath}px)`;}
+ setFaceAttribute($('.happy-mouth'),'d',mouthPath);setFaceAttribute($('.mouth-clip'),'d',mouthPath);setFaceAttribute($('.tongue'),'opacity',smooth((opening-.15)/.5));setFaceAttribute($('.tongue'),'cy',383+17*yawn);
+ if(state.mode==='sleep'){const p=now/1000*Math.PI*2/2.8,breath=moving()?Math.sin(p):0,snore=moving()?.5-Math.asin(.98*Math.cos(p))/(2*Math.asin(.98)):0;$('.upper').style.transform=`translateY(${4*breath}px) rotate(${.25*breath}deg)`;$('.sleep-mouth').style.transform=`scaleY(${.18+.82*snore})`;$('.zs').style.transform='';}
  if(moving())raf=requestAnimationFrame(tick);
 }
 function start(){cancelAnimationFrame(raf);raf=0;tick(performance.now())}

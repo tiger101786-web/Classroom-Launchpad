@@ -1,0 +1,14 @@
+/* Match Squishy Dumpling: each Z rises diagonally and fades over three seconds. */
+.asleep:not(.still) .pet-sleep-zs text,
+.labubu-companion[data-state=sleep][data-animate=true] .pet-sleep-zs text{
+  animation:pet-sleep-z 3s ease-out infinite;
+  will-change:transform,opacity;
+}
+.pet-sleep-zs text:nth-child(2){animation-delay:-1s!important}
+.pet-sleep-zs text:nth-child(3){animation-delay:-2s!important}
+@keyframes pet-sleep-z{
+  0%{opacity:0;transform:translate(-20px,45px)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(25px,-65px)}
+}
+@media(prefers-reduced-motion:reduce){.pet-sleep-zs text{animation:none!important}}

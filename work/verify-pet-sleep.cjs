@@ -11,6 +11,11 @@ const {pathToFileURL}=require('node:url');
   page.on('pageerror',e=>errors.push(e.message));await page.goto(pathToFileURL(fixture).href);
   await page.evaluate(()=>{window.pets=[createLabubuPet(()=>{}),createEaglePet(()=>{}),createRobloxPet(()=>{})];window.settings=[labubuDefaults(),eaglePetDefaults(),robloxDefaults()];pets.forEach((pet,i)=>{settings[i]={...settings[i],asleep:true,size:'extra-large'};pet.update({account:'test',visible:true,radio:false,preferences:settings[i]});pet.host.style.left=(200+i*500)+'px';pet.host.style.top='100px';});});
   await page.waitForTimeout(1200);
+  for(const host of ['.labubu-companion','.eagle-companion','.roblox-companion']){
+   const symbols=page.locator(host+' .pet-sleep-zs text');assert.equal(await symbols.count(),3);
+   const data=await symbols.evaluateAll(nodes=>nodes.map(e=>{const a=e.getAnimations()[0];return {name:getComputedStyle(e).animationName,duration:a?.effect.getTiming().duration,delay:a?.effect.getTiming().delay,easing:getComputedStyle(e).animationTimingFunction,frames:a?.effect.getKeyframes()}}));
+   data.forEach((d,i)=>{assert.equal(d.name,'pet-sleep-z');assert.equal(d.duration,3000);assert.equal(d.delay,i?-i*1000:0);assert.equal(d.easing,'ease-out');assert.equal(d.frames[0].transform,'translate(-20px, 45px)');assert.equal(d.frames.at(-1).transform,'translate(25px, -65px)');});
+  }
   await page.evaluate(()=>{window.sleepMutations=0;window.sleepObserver=new MutationObserver(m=>sleepMutations+=m.length);pets.forEach(p=>sleepObserver.observe(p.host,{subtree:true,attributes:true,childList:true}));});
   const samples=await page.evaluate(()=>new Promise(resolve=>{const rows=[];let last;const capture=t=>{rows.push({dt:last?t-last:0,lab:getComputedStyle(document.querySelector('#open-mouth')).transform,jaw:getComputedStyle(document.querySelector('.lower-jaw')).transform,roblox:getComputedStyle(document.querySelector('.roblox-companion .sleep-mouth')).transform,path:document.querySelector('#mouth-shape').getAttribute('d')});last=t;if(rows.length<180)requestAnimationFrame(capture);else resolve(rows)};requestAnimationFrame(capture)}));
   assert((await page.evaluate(()=>{sleepObserver.disconnect();return sleepMutations}))>100,'Sleep uses the same live frame loop as idle');
