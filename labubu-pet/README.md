@@ -1,5 +1,9 @@
 # Labubu companion
 
+## Smooth motion and ear-color refinement
+
+The approved ear and two-hand displacement fields run on a small WebGL canvas, preserving horizontal ear motion and both vertical and horizontal hand motion. The original SVG deformation remains the fallback when WebGL is unavailable. Reduced-motion controls still disable all motion. Cached `rendered/` images are 512×768 renders of the existing SVG color masks, not redesigned artwork; they avoid recoloring every animated layer each frame. The recessed ear channels now match each fur palette while the surrounding peach/tan rims are protected. Skin thumbnails use the same corrected masks. `pet-studio-gallery.css` gives the shared gallery one scroll region with a compact toolbar and four columns on desktop.
+
 ## Macaron palette
 
 The original Tan remains available alongside Soymilk, Lychee Berry, Green Grape, Sea Salt Coconut, Toffee, and Sesame Bean. Names verified against POP MART's official Exciting Macaron listing: https://www.popmart.com/us/products/1789/the-monsters-exciting-macaron-vinyl-face-blind-box . Palette values are visual matches to the user's reference, not official numerical color specifications. `skins.js` is shared by browser and server. SVG fur masking preserves the original face, hands, feet, inner ears, alpha and fur texture; nameplate heads and gallery thumbnails use the same color renderer. The nameplate is enlarged independently of pet size.

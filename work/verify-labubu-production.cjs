@@ -9,6 +9,20 @@ browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chr
 const open=async()=>{await page.goto(origin,{waitUntil:'domcontentloaded'});await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'home',auth:{authenticated:true,role:'teacher'}}})));await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();};
 await open();const studio=page.locator('.pet-studio');await studio.locator('#pet-select').selectOption('labubu');
 assert(await studio.locator('.labubu-companion').isVisible());
+await page.setViewportSize({width:1920,height:1080});
+await studio.locator('[data-skin-choice="Sea Salt Coconut"]').click();
+await page.waitForFunction(()=>document.querySelector('#puppet .labubu-colored-art')?.style.display==='none');
+const visibleSkins=await studio.locator('#gallery').evaluate(g=>{const r=g.getBoundingClientRect();return [...g.children].filter(e=>{const c=e.getBoundingClientRect();return c.top>=r.top&&c.bottom<=r.bottom}).length});
+assert.equal(visibleSkins,7,'All seven Labubu skins fit at 1920x1080');
+await studio.screenshot({path:path.join(dir,'labubu-gallery-1920.png')});
+await studio.locator('[data-tab=play]').click();
+let baselineFPS;
+for(const action of ['idle','ears','hand']){
+ if(action!=='idle')await studio.locator('[data-action="'+action+'"]').click();
+ const frames=await page.evaluate(()=>new Promise(resolve=>{let last=0,samples=[];function sample(t){if(last)samples.push(t-last);last=t;if(samples.length<100)requestAnimationFrame(sample);else resolve(samples)}requestAnimationFrame(sample)}));
+ const fps=1000/(frames.reduce((a,b)=>a+b)/frames.length);console.log(action+' FPS: '+fps.toFixed(1));if(action==='idle')baselineFPS=fps;else assert(fps>=baselineFPS*.8,'Wiggles should not substantially slow the live page');
+}
+await page.setViewportSize({width:1440,height:1000});
 await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Cocoa');await studio.locator('#size-select').selectOption('extra-large');
 await page.waitForTimeout(900);
 await open();assert.equal(await studio.locator('#pet-select').inputValue(),'labubu');assert.equal(await studio.locator('#name-label').textContent(),'Cocoa');
