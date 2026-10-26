@@ -70,18 +70,37 @@ window.mountLabubuClothes=function(host){
  <path d="M223 584Q139 789 282 914Q512 988 742 914Q885 789 801 584Q764 444 512 435Q260 444 223 584Z" fill="none" stroke="#575960" stroke-width="13"/>
  ${seam('M205 579Q116 791 270 932Q512 1010 754 932Q908 791 819 579Q776 421 512 413Q248 421 205 579')}
  </g>`;
+ // Reuse the corrected garment silhouettes, neck openings, and sleeve rig.
+ // New fabric gradients are scoped to the clones, leaving approved outfits intact.
+ layer.querySelector('defs').insertAdjacentHTML('beforeend',`${fabric('denim','#6d9ac0','#386889','#203b55')}${fabric('sage','#a2b58d','#6d835c','#3e5239')}${fabric('navy','#455b80','#263958','#121e35')}`);
+ function variant(source,id,replacements){const copy=layer.querySelector(`[data-lc-value="${source}"]`).cloneNode(true);copy.dataset.lcValue=id;let markup=copy.innerHTML;for(const [from,to] of replacements)markup=markup.split(from).join(to);markup=markup.split('lc-strap-neckline').join('lc-strap-neckline-'+id);copy.innerHTML=markup;layer.append(copy);return copy;}
+ const denim=[['url(#lc-mustard)','url(#lc-denim)'],['lc-knit','lc-twill'],['#8c6423','#254862'],['#997022','#31546f'],['#b58524','#2d526f'],['#785018','#1f3d58']];
+ const dungarees=variant('mustard-overalls','denim-overalls',denim);
+ dungarees.insertAdjacentHTML('beforeend',`<path d="M300 1262Q355 1290 404 1279M620 1279Q669 1290 724 1262" fill="none" stroke="#b7cbd4" stroke-width="3" stroke-dasharray="5 5"/><g transform="translate(512 1188)"><rect x="-38" y="-19" width="76" height="38" rx="5" fill="#b28a58" stroke="#624d38" stroke-width="3"/><path d="M-23 7L-8 -7L3 2L15 -9L25 7Z" fill="#443e35"/></g>`);
+ variant('mustard-cap','denim-cap',denim);
+ const coveredShoulder='M348 909Q252 910 196 1008Q155 1050 145 1092Q170 1130 232 1139L321 1085Z',coveredTorso=torso.replace('M335 934Q512 971 689 934','M315 909Q512 971 709 909');
+ const explorer=variant('black-hoodie','sage-jacket',[['url(#lc-black)','url(#lc-sage)'],['#1b1c20','#3f5239'],['#191a1d','#3f5239'],['#191a1f','#435837'],['#686970','#b7bd92']]);
+ // Replace hoodie drawstrings and pouch with a zip-front field jacket.
+ explorer.innerHTML=`${sleeves('url(#lc-sage)','lc-twill','#3f5239',coveredShoulder)}${shape(pants,'url(#lc-cream)','lc-twill','#8c826d')}${shape(coveredTorso,'url(#lc-sage)','lc-twill','#3f5239')}<path d="M512 977V1305" stroke="#304532" stroke-width="15"/><path d="M512 977V1305" stroke="#c7c6a4" stroke-width="5" stroke-dasharray="5 3"/><path d="M353 952L444 987L414 1040M671 952L580 987L610 1040" fill="none" stroke="#c4c6a0" stroke-width="13"/>${[336,554].map(x=>`${shape(`M${x} 1085H${x+134}V1197Q${x+67} 1220 ${x} 1197Z`,'url(#lc-sage)','lc-twill','#3f5239')}<path d="M${x} 1085L${x+67} 1120L${x+134} 1085" fill="#8fa17c" stroke="#465d3f" stroke-width="4"/><circle cx="${x+67}" cy="1128" r="7" fill="#d3bc79"/>${seam(`M${x+10} 1145V1189Q${x+67} 1208 ${x+124} 1189V1145`)}`).join('')}${rib(285,1380,184,'#a49b83')}${rib(555,1380,184,'#a49b83')}${seam('M306 1277Q512 1325 718 1277')}`;
+ const bucket=variant('black-bucket','sage-bucket',[['url(#lc-black)','url(#lc-sage)'],['#191a1d','#3f5239']]);
+ bucket.querySelector('g[transform="translate(512 416)"]')?.remove();
+ bucket.insertAdjacentHTML('beforeend',`<g transform="translate(512 418)"><rect x="-47" y="-29" width="94" height="58" rx="9" fill="#ded2a6" stroke="#3f5239" stroke-width="4"/><path d="M-30 17L-8 -19L8 4L19 -10L33 17Z" fill="#45613c"/>${seam('M-39 -20H39V20H-39Z')}</g>`);
+ const varsity=variant('black-hoodie','navy-varsity',[]);
+ varsity.innerHTML=`${sleeves('url(#lc-cream)','lc-twill','#b4aa94',coveredShoulder)}${shape(pants,'url(#lc-navy)','lc-twill','#16253e')}${shape(coveredTorso,'url(#lc-navy)','lc-twill','#16253e')}<path d="M350 950Q512 1020 674 950" fill="none" stroke="#e6d5ac" stroke-width="19"/><path d="M512 982V1303" stroke="#d7bd83" stroke-width="9"/>${[1040,1110,1180,1250].map(y=>`<circle cx="528" cy="${y}" r="8" fill="#eedbb4" stroke="#6e664e" stroke-width="2"/>`).join('')}<path d="M331 1208L424 1167M693 1208L600 1167" stroke="#e8d5ac" stroke-width="12" stroke-linecap="round"/><path d="M285 1295Q512 1340 739 1295" fill="none" stroke="#dfc89b" stroke-width="18"/><text x="383" y="1104" text-anchor="middle" font-family="Georgia,serif" font-size="88" font-weight="900" fill="#f3dfb0" stroke="#a2814c" stroke-width="2">L</text>${rib(285,1380,184,'#263958')}${rib(555,1380,184,'#263958')}<path d="M292 1392H461M563 1392H732" stroke="#e1c997" stroke-width="6"/>`;
+ variant('black-hood','navy-hood',[['url(#lc-black)','url(#lc-navy)'],['#191a1d','#16253e'],['#575960','#b7c5d4']]);
+ layer.insertAdjacentHTML('beforeend',`<g data-lc-slot="neckwear" data-lc-value="compass" style="display:none"><path d="M329 954Q512 1090 695 954" fill="none" stroke="#443525" stroke-width="14"/><path d="M329 951Q512 1087 695 951" fill="none" stroke="#b59a66" stroke-width="5"/><g transform="translate(512 1044)"><circle r="35" fill="url(#lc-gold)" stroke="#59462b" stroke-width="5"/><circle r="26" fill="#233c38" stroke="#f0dba0" stroke-width="3"/><path d="M0 -22L8 0L0 22L-8 0Z" fill="#f1d990"/><path d="M0 -22L8 0H-8Z" fill="#db685b"/><circle r="4" fill="#fff1bc"/></g></g>`);
  // The clothes share the body transform; headphones stay above hats during music.
  // Garments surround the fur silhouette rather than leaving an exposed strip
  // down either side. Keep the neck and face openings inside the hood.
  for(const outfit of layer.querySelectorAll('[data-lc-slot="outfit"]'))outfit.setAttribute('transform','translate(512 0) scale(1.14 1) translate(-512 0)');
- layer.querySelector('[data-lc-value="black-hood"]').setAttribute('transform','translate(512 0) scale(1.09 1) translate(-512 0)');
+ for(const id of ['black-hood','navy-hood'])layer.querySelector(`[data-lc-value="${id}"]`).setAttribute('transform','translate(512 0) scale(1.09 1) translate(-512 0)');
  const headphones=host.querySelector('#headphones');headphones.before(layer);
  const items=[...layer.querySelectorAll('[data-lc-slot]')],sleeveNodes=[...layer.querySelectorAll('.lc-sleeve')];
  return {
   set(prefs,dancing){for(const item of items){const show=prefs[item.dataset.lcSlot]===item.dataset.lcValue&&!(dancing&&item.dataset.lcSlot==='headwear');item.style.display=show?'':'none';}
    // Replace the covered torso's fur silhouette, rather than pasting a smaller
    // garment over it. Bare hands/feet and the sleeveless outfit's arms remain.
-   const dressed=['mustard-overalls','black-streetwear','black-hoodie'].includes(prefs.outfit);
+   const dressed=items.some(item=>item.dataset.lcSlot==='outfit'&&item.dataset.lcValue===prefs.outfit);
    for(const art of [host.querySelector('#puppet .labubu-colored-art'),host.querySelector('#puppet foreignObject')].filter(Boolean)){
     if(dressed)art.setAttribute('mask','url(#lc-dressed-body)');else art.removeAttribute('mask');
    }
