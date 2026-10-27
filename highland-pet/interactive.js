@@ -33,7 +33,7 @@ const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias
 let render=()=>{};
 if(!gl)throw Error('This animation test requires WebGL. Enable browser hardware acceleration.');
 const vs=`attribute vec2 p;varying vec2 uv;
-uniform float ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble;
+uniform float ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble,attachment;
 float field(vec2 q,vec2 c,vec2 r){vec2 d=(q-c)/r;return exp(-dot(d,d)*2.0);}
 void main(){uv=p/1024.0;vec2 q=p;
 float el=field(p,vec2(243.,277.),vec2(125.,98.));float er=field(p,vec2(789.,277.),vec2(125.,98.));q.y+=ear*(el-er)*23.;q.x+=ear*(el+er)*6.;
@@ -58,6 +58,9 @@ q.x+=(p.x-512.)*.035*breath*chest;
 float upper=1.-smoothstep(570.,835.,p.y);q.x+=wobble*13.*upper;
 // A subtle knee shuffle, never whole-body vertical bobbing.
 float knees=field(p,vec2(465.,750.),vec2(120.,95.))*(1.-smoothstep(815.,865.,p.y));q.x+=wobble*3.*knees;
+// Accessories use their approved rigid fitting transforms on the same GPU clock.
+if(attachment>0.5){q=p;q.y+=(p.y-909.)*.012*breath;q.x+=wobble*(attachment>1.5&&attachment<2.5?10.:13.);
+ if(attachment>2.5){q.x+=ear*(el+er)*6.;q.y+=ear*(el-er)*23.;}}
 gl_Position=vec4(q.x/512.-1.,1.-q.y/512.,0.,1.);}`;
 const fs=`precision mediump float;varying vec2 uv;uniform sampler2D art;void main(){gl_FragColor=texture2D(art,uv);}`;
 function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
@@ -66,14 +69,20 @@ const verts=[];for(let y=0;y<1024;y+=16)for(let x=0;x<1024;x+=16)verts.push(x,y,
 const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);const pos=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
 const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
 const uniforms=Object.fromEntries(['ear','tail','hoof','hoofRight','rearStep','nose','breath','wobble'].map(k=>[k,gl.getUniformLocation(program,k)]));
-render=values=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const k in uniforms)gl.uniform1f(uniforms[k],values[k]||0);gl.drawArrays(gl.TRIANGLES,0,verts.length/2)};
+const attachment=gl.getUniformLocation(program,'attachment'),wearableTextures={};
+gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+render=values=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const k in uniforms)gl.uniform1f(uniforms[k],values[k]||0);
+ gl.uniform1f(attachment,0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.drawArrays(gl.TRIANGLES,0,verts.length/2);
+ for(const id of accessories.selected){gl.uniform1f(attachment,id==='scarf'?2:id==='headphones'?3:1);gl.bindTexture(gl.TEXTURE_2D,wearableTextures[id]);gl.drawArrays(gl.TRIANGLES,0,verts.length/2)}
+};
 cow.replaceChildren(fo);cow.removeAttribute('clip-path');
 add(cow,`<g id="face-motion"><g id="lids">${[[420,289],[609,289]].map(([x,y],i)=>`<g><clipPath id="lid-crop-${i}"><path id="lid-path-${i}"/></clipPath><g clip-path="url(#lid-crop-${i})"><image href="highland-art.png" width="1024" height="1536" transform="translate(0 61)"/></g><path id="lid-line-${i}" fill="none" stroke="#512b18" stroke-width="5" stroke-linecap="round"/></g>`).join('')}</g><g id="mouth-motion" opacity="0"><path id="mouth-shape" fill="url(#mouth-depth)" stroke="#723e30" stroke-width="3"/><g clip-path="url(#mouth-window)"><ellipse id="tongue" cx="512" cy="446" rx="24" ry="11" fill="#c9897e"/></g><path id="lip" fill="none" stroke="#c48a69" stroke-width="3"/></g></g>`);
 svg.querySelector('.notes').remove();add(svg,`<g class="symbols" id="music" opacity="0"><text x="110" y="450" font-size="110">♪</text><text x="850" y="530" font-size="120">♫</text><text x="160" y="700" font-size="100">♫</text><text x="810" y="260" font-size="105">♪</text></g><g class="symbols" id="sleep-zs" opacity="0"><text x="780" y="200" font-size="75">z</text><text x="830" y="150" font-size="95">Z</text><text x="880" y="100" font-size="110">Z</text></g>`);
 const state={mode:'idle',action:null,motion:true,idle:true,phase:0,frames:0,nextIdle:3,nextBlink:2,blinkStart:-99,index:0};const durations={hello:2.7,happy:2.5,blink:.32,talk:2.2,ears:1.7,tail:1.8,hoof:2.4,nose:1.7,wake:3.2};const reduce=matchMedia('(prefers-reduced-motion: reduce)');let last=0,raf,speechTimer;
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},set=(id,key,value)=>$(id).setAttribute(key,value);
 function say(text){if(host.hidden||host.closest('.pet-studio'))return;clearTimeout(speechTimer);$('#speech').textContent=text;$('#speech').hidden=false;speechTimer=setTimeout(()=>$('#speech').hidden=true,3500)}
-const accessories=window.createHighlandAccessories(host);
+const accessories=await window.createHighlandAccessories(host);
+for(const [id,image] of Object.entries(accessories.artwork)){const t=gl.createTexture();wearableTextures[id]=t;gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)}
 function ui(){host.dataset.state=state.mode;accessories.update(options,state.mode==='dance');}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;$('#speech').hidden=true}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:state.phase};say('Morning mist is lifting. Ready to roam the Highlands!')}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('A little Highland shuffle!')}else{state.mode='idle';state.action={name,start:state.phase};if(name==='hello')say(['Hello from the heather, wee friend!','Hooves steady, horns high. You’ve got this!','Fancy a wee adventure beyond the pasture?'][state.index%3])}state.nextIdle=state.phase+6;ui()}
 
@@ -95,7 +104,7 @@ if(state.mode==='sleep'){close=1;open=.08+.48*(.5+.5*Math.sin(time*Math.PI*2/3.4
 if(name==='wake'){close=1-smooth((t-.35)/.5);open=.95*Math.sin(Math.PI*clamp((t-.05)/.9))**2;ear=.4*Math.sin(t*Math.PI*4)*env;}
 if(state.mode==='dance'){wobble=Math.sin(time*Math.PI*2/.7);ear=.35*Math.sin(time*9);tail=.45*Math.sin(time*14);happy=.75;open=.35+.08*Math.sin(time*8);const step=Math.sin(time*Math.PI*2/1.4);hoof=.65*Math.max(0,step)**2;hoofRight=.65*Math.max(0,-step)**2;rearStep=step;}
 cow.removeAttribute('transform');
-state.pose={ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble};render(state.pose);accessories.frame(state.pose);
+state.pose={ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble};render(state.pose);
 // Expressions follow the head's breathing without moving any feet.
 set('#face-motion','transform',`translate(${wobble*13} ${-909*.012*breath}) scale(1 ${1+.012*breath})`);
 // Cover eyes with nearby fur, never scale the eye itself. Happy lids lift gently from below.

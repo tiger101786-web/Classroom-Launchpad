@@ -1,5 +1,5 @@
 /* Approved preview artwork, shared with the live cow rig. */
-window.createHighlandAccessories=function(host){
+window.createHighlandAccessories=async function(host){
 const ns='http://www.w3.org/2000/svg',cow=host.querySelector('.cow'),layer=document.createElementNS(ns,'g');layer.id='cow-accessories';layer.style.pointerEvents='none';
 const grad=(id,a,b,c)=>`<linearGradient id="ha-${id}" x2=".8" y2="1"><stop stop-color="${a}"/><stop offset=".45" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
 const sprig=(x,y,r,s=1)=>`<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><path d="M0 4Q-5 -20 1 -63M-1 -12L-15 -29M-1 -26L14 -43" fill="none" stroke="#44542b" stroke-width="4" stroke-linecap="round"/>${Array.from({length:9},(_,i)=>{const yy=-12-i*5.3,xx=(i%2?1:-1)*(7-i*.45);return `<path d="M${xx} ${yy+8}q-8 -3 -3 -10q5 -5 10 1q3 7 -7 9" fill="${['#514481','#7760a4','#9880bb'][i%3]}" stroke="#403661" stroke-width="1.4"/><circle cx="${xx+1}" cy="${yy}" r="1.5" fill="#c5b4df"/>`}).join('')}</g>`;
@@ -38,7 +38,21 @@ ${[false,true].map(right=>`<g class="ha-cup" data-side="${right?'right':'left'}"
 <g data-ha="wreath" style="display:none"><g class="ha-head">
 <image href="highland-pet/heather-wreath-v3.png" x="270" y="92" width="484" height="155" preserveAspectRatio="none"/>
 </g></g>`;
-cow.append(layer);
-return {update(p,dancing=false){const head=dancing?'headphones':p.headwear;layer.querySelectorAll('[data-ha]').forEach(g=>{g.style.display=g.dataset.ha==='scarf'?(p.neckwear==='scarf'?'':'none'):g.dataset.ha===head?'':'none'})},frame(pose){const b=pose.breath*.012;layer.querySelectorAll('.ha-head').forEach(g=>g.setAttribute('transform',`translate(${pose.wobble*13} ${-909*b}) scale(1 ${1+b})`));layer.querySelector('.ha-neck').setAttribute('transform',`translate(${pose.wobble*10} ${-909*b}) scale(1 ${1+b})`);layer.querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}};
+// Rasterize the approved artwork once. The cow renderer animates these textures,
+// avoiding tiny independently repainted SVG transforms on each breathing frame.
+const wreath=await fetch('highland-pet/heather-wreath-v3.png');
+if(!wreath.ok)throw Error('Unable to load Highland wreath');
+const blob=await wreath.blob();
+const embedded=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)});
+layer.querySelector('image').setAttribute('href',embedded);
+const artwork={};
+await Promise.all([...layer.querySelectorAll('[data-ha]')].map(async g=>{
+ const copy=g.cloneNode(true);copy.removeAttribute('style');
+ const svg=document.createElementNS(ns,'svg');svg.setAttribute('width','1024');svg.setAttribute('height','1024');svg.setAttribute('viewBox','0 0 1024 1024');svg.append(layer.querySelector('defs').cloneNode(true),copy);
+ const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'}));
+ try{const image=new Image();image.src=url;await image.decode();artwork[g.dataset.ha]=image}finally{URL.revokeObjectURL(url)}
+}));
+let selected=[];
+return {artwork,get selected(){return selected},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
 };
 

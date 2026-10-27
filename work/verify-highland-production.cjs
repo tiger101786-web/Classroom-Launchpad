@@ -11,22 +11,26 @@ await open();const studio=page.locator('.pet-studio');await studio.locator('#pet
 await studio.locator('[data-subtab=accessories]').click();
 for(const hat of ['cap','wreath','headphones','none']){
  await studio.locator('[data-choice-key=headwear][data-choice="'+hat+'"]').click();
- assert.equal(await pet.locator('[data-ha]:visible').count(),hat==='none'?0:1);
- if(hat!=='none')assert(await pet.locator('[data-ha="'+hat+'"]').isVisible());
+ assert.equal(await pet.getAttribute('data-headwear'),hat);
+ assert.equal(await pet.locator('canvas').count(),1);
 }
 await studio.locator('[data-choice-key=headwear][data-choice=wreath]').click();
 await studio.locator('[data-choice-key=neckwear][data-choice=scarf]').click();
-assert(await pet.locator('[data-ha=scarf]').isVisible());
+assert.equal(await pet.getAttribute('data-neckwear'),'scarf');
 await page.waitForTimeout(700);
 const saved=await (await fetch(origin+'/api/companion-preferences',{headers:{Cookie:cookie}})).json();
 assert.equal(saved.preferences.highland.headwear,'wreath');assert.equal(saved.preferences.highland.neckwear,'scarf');
 const invalidAccessory=await fetch(origin+'/api/companion-preferences',{method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({...saved.preferences,highland:{...saved.preferences.highland,headwear:'invalid'}})});assert.equal(invalidAccessory.status,400);
 await studio.screenshot({path:path.join(dir,'accessories.png')});
+// Body, scarf, and wreath must draw in one frame, without SVG transform repaints.
+const playback=await page.evaluate(()=>new Promise(resolve=>{const original=WebGLRenderingContext.prototype.drawArrays;let draws=0,frames=0;const batches=[];WebGLRenderingContext.prototype.drawArrays=function(...args){if(this.canvas.closest('.highland-companion'))draws++;return original.apply(this,args)};function sample(){if(frames++)batches.push(draws);draws=0;if(frames<75)requestAnimationFrame(sample);else{WebGLRenderingContext.prototype.drawArrays=original;resolve(batches)}}requestAnimationFrame(sample)}));
+assert(playback.filter(n=>n===3).length>=65,'Cow and both accessories should render together on consecutive animation frames');
+assert.equal(await pet.locator('.ha-head,.ha-neck').count(),0,'No independently repainted SVG accessory layers');
 await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Heather');await studio.locator('#size-select').selectOption('extra-large');await page.waitForTimeout(700);
 await open();assert.equal(await studio.locator('#pet-select').inputValue(),'highland');await page.waitForFunction(()=>document.querySelector('.highland-companion').dataset.ready==='true');assert.equal(await pet.locator('#highland-pet-name').textContent(),'Heather');
 await studio.locator('[data-tab=play]').click();assert.equal(await studio.locator('[data-action=look]').count(),0);for(const b of await studio.locator('[data-action]').all()){await b.click();await page.waitForTimeout(100)}
 await studio.locator('[data-toggle=asleep]').check();assert.equal(await pet.getAttribute('data-state'),'sleep');await page.waitForTimeout(300);assert.equal(await pet.locator('#highland-tongue').getAttribute('opacity'),'0');const a=await pet.locator('#highland-face-motion').getAttribute('transform');await page.waitForTimeout(200);assert.notEqual(await pet.locator('#highland-face-motion').getAttribute('transform'),a);await studio.locator('[data-toggle=asleep]').uncheck();await page.waitForTimeout(3600);
-await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-state'),'dance');assert(await pet.locator('[data-ha=headphones]').isVisible());assert(!(await pet.locator('[data-ha=wreath]').isVisible()));assert(await pet.locator('[data-ha=scarf]').isVisible());await studio.locator('#dance').click();assert(await pet.locator('[data-ha=wreath]').isVisible());
+await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-state'),'dance');assert.equal(await pet.getAttribute('data-headwear'),'headphones');assert.equal(await pet.locator('#cow-accessories').count(),0);assert.equal(await pet.getAttribute('data-neckwear'),'scarf');await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-headwear'),'wreath');
 for(const theme of ['crimson','woodland','sky','scrapbook']){await studio.locator('[aria-label="Studio theme"]').selectOption(theme);await studio.screenshot({path:path.join(dir,theme+'.png')});}
 for(const width of [1920,1440,800,390]){await page.setViewportSize({width,height:1080});await page.waitForTimeout(100);const m=await studio.evaluate(d=>{const p=d.querySelector('.highland-companion .pet-button').getBoundingClientRect(),s=d.querySelector('#pet-subtitle').getBoundingClientRect(),a=d.querySelector('.preview-actions').getBoundingClientRect();return {gap:p.top-s.bottom,bottom:p.bottom,actions:a.top,overflow:d.scrollWidth>d.clientWidth+1}});assert(m.gap>=0,JSON.stringify(m));assert(m.bottom<=m.actions+1,JSON.stringify(m));assert(!m.overflow,JSON.stringify(m));await studio.screenshot({path:path.join(dir,'studio-'+width+'.png')});}
 await page.setViewportSize({width:1920,height:1080});await studio.locator('[data-tab=name]').click();await studio.locator('[data-toggle=platform]').uncheck();assert(!(await pet.locator('.highland-platform').isVisible()));assert(!(await pet.locator('.highland-nameplate').isVisible()));await studio.locator('[data-toggle=platform]').check();await studio.locator('[data-toggle=nameplate]').uncheck();assert(!(await pet.locator('.highland-nameplate').isVisible()));await studio.locator('[data-toggle=nameplate]').check();
