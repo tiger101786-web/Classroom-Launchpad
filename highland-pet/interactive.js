@@ -32,6 +32,11 @@ const fo=document.createElementNS(ns,'foreignObject');fo.setAttribute('width','1
 const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:true});
 let render=()=>{};
 if(!gl)throw Error('This animation test requires WebGL. Enable browser hardware acceleration.');
+// Supersample both the artwork and output, not just the source textures.
+// Keep logical fitting coordinates unchanged and respect smaller GPU limits.
+const detailResolution=Math.min(2048,gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
+canvas.width=detailResolution;canvas.height=detailResolution;gl.viewport(0,0,detailResolution,detailResolution);
+host.dataset.renderResolution=String(detailResolution);
 const vs=`attribute vec2 p;varying vec2 uv;
 uniform float ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble,attachment;
 float field(vec2 q,vec2 c,vec2 r){vec2 d=(q-c)/r;return exp(-dot(d,d)*2.0);}
@@ -81,7 +86,7 @@ svg.querySelector('.notes').remove();add(svg,`<g class="symbols" id="music" opac
 const state={mode:'idle',action:null,motion:true,idle:true,phase:0,frames:0,nextIdle:3,nextBlink:2,blinkStart:-99,index:0};const durations={hello:2.7,happy:2.5,blink:.32,talk:2.2,ears:1.7,tail:1.8,hoof:2.4,nose:1.7,wake:3.2};const reduce=matchMedia('(prefers-reduced-motion: reduce)');let last=0,raf,speechTimer;
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},set=(id,key,value)=>$(id).setAttribute(key,value);
 function say(text){if(host.hidden||host.closest('.pet-studio'))return;clearTimeout(speechTimer);$('#speech').textContent=text;$('#speech').hidden=false;speechTimer=setTimeout(()=>$('#speech').hidden=true,3500)}
-const accessories=await window.createHighlandAccessories(host);
+const accessories=await window.createHighlandAccessories(host,detailResolution);
 for(const [id,image] of Object.entries(accessories.artwork)){const t=gl.createTexture();wearableTextures[id]=t;gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)}
 function ui(){host.dataset.state=state.mode;accessories.update(options,state.mode==='dance');}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;$('#speech').hidden=true}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:state.phase};say('Morning mist is lifting. Ready to roam the Highlands!')}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('A little Highland shuffle!')}else{state.mode='idle';state.action={name,start:state.phase};if(name==='hello')say(['Hello from the heather, wee friend!','Hooves steady, horns high. You’ve got this!','Fancy a wee adventure beyond the pasture?'][state.index%3])}state.nextIdle=state.phase+6;ui()}
