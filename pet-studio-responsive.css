@@ -1,0 +1,20 @@
+/* Fit the decorative shell to short displays as well as narrow ones. */
+dialog.pet-studio {
+  width:min(1200px,calc(100vw - 24px),max(760px,calc((100dvh - 80px) * 1.3)));
+  max-height:calc(100dvh - 24px);
+  overflow:auto;
+  overscroll-behavior:contain;
+  scroll-padding:16px;
+}
+@media(max-width:700px) {
+  dialog.pet-studio {width:calc(100vw - 16px);max-height:calc(100dvh - 16px);clip-path:none}
+  /* One outer scroll area: no clipped gallery or trapped nested touch scroll. */
+  dialog.pet-studio .studio {min-height:0}
+  dialog.pet-studio #tab-content,
+  dialog.pet-studio #tab-content:has(#gallery) {
+    flex:0 0 auto;height:auto;min-height:360px;max-height:none;overflow:visible;
+  }
+  dialog.pet-studio #tab-content #gallery {flex:none;max-height:none;overflow:visible}
+  dialog.pet-studio .tabs {flex-wrap:wrap;overflow:visible}
+  dialog.pet-studio .studio-footer {margin-bottom:12px}
+}
