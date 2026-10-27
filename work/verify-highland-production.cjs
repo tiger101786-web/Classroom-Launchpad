@@ -22,10 +22,15 @@ const saved=await (await fetch(origin+'/api/companion-preferences',{headers:{Coo
 assert.equal(saved.preferences.highland.headwear,'wreath');assert.equal(saved.preferences.highland.neckwear,'scarf');
 const invalidAccessory=await fetch(origin+'/api/companion-preferences',{method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({...saved.preferences,highland:{...saved.preferences.highland,headwear:'invalid'}})});assert.equal(invalidAccessory.status,400);
 await studio.screenshot({path:path.join(dir,'accessories.png')});
-// Body, scarf, and wreath must draw in one frame, without SVG transform repaints.
+// Native preview artwork follows the body clock through composited wrappers.
 const playback=await page.evaluate(()=>new Promise(resolve=>{const original=WebGLRenderingContext.prototype.drawArrays;let draws=0,frames=0;const batches=[];WebGLRenderingContext.prototype.drawArrays=function(...args){if(this.canvas.closest('.highland-companion'))draws++;return original.apply(this,args)};function sample(){if(frames++)batches.push(draws);draws=0;if(frames<75)requestAnimationFrame(sample);else{WebGLRenderingContext.prototype.drawArrays=original;resolve(batches)}}requestAnimationFrame(sample)}));
-assert(playback.filter(n=>n===3).length>=65,'Cow and both accessories should render together on consecutive animation frames');
-assert.equal(await pet.locator('.ha-head,.ha-neck').count(),0,'No independently repainted SVG accessory layers');
+assert(playback.filter(n=>n===1).length>=65,'Cow should render on consecutive animation frames without re-rasterizing accessories');
+const accessoryFrames=await pet.evaluate(host=>new Promise(resolve=>{const frames=[];function sample(){frames.push([...host.querySelectorAll('[data-highland-wearable]:not([hidden])')].map(n=>n.style.transform));if(frames.length<40)requestAnimationFrame(sample);else resolve(frames)}sample()}));
+assert(accessoryFrames.every(f=>f.length===2&&f[0]===f[1]),'Scarf and wreath should follow identical breathing transforms');
+assert(new Set(accessoryFrames.map(f=>f[0])).size>30,'Accessory motion should advance continuously');
+assert.equal(await pet.locator('[data-highland-wearable=scarf] svg pattern').count(),2,'Scarf retains original vector patterns');
+assert.equal(await pet.locator('[data-highland-wearable=wreath] image').getAttribute('href'),'highland-pet/heather-wreath-v3.png');
+assert.equal(fs.readFileSync('highland-pet/heather-wreath-v3.png').compare(fs.readFileSync('work/highland-cow-preview/heather-wreath-v3.png')),0,'Wreath must be the exact approved preview image');
 await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Heather');await studio.locator('#size-select').selectOption('extra-large');await page.waitForTimeout(700);
 await open();assert.equal(await studio.locator('#pet-select').inputValue(),'highland');await page.waitForFunction(()=>document.querySelector('.highland-companion').dataset.ready==='true');assert.equal(await pet.locator('#highland-pet-name').textContent(),'Heather');
 await studio.locator('[data-tab=play]').click();assert.equal(await studio.locator('[data-action=look]').count(),0);for(const b of await studio.locator('[data-action]').all()){await b.click();await page.waitForTimeout(100)}

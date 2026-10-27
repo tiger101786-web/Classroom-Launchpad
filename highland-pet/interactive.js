@@ -74,11 +74,11 @@ const verts=[];for(let y=0;y<1024;y+=16)for(let x=0;x<1024;x+=16)verts.push(x,y,
 const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);const pos=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
 const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
 const uniforms=Object.fromEntries(['ear','tail','hoof','hoofRight','rearStep','nose','breath','wobble'].map(k=>[k,gl.getUniformLocation(program,k)]));
-const attachment=gl.getUniformLocation(program,'attachment'),wearableTextures={};
+const attachment=gl.getUniformLocation(program,'attachment');
 gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
 render=values=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const k in uniforms)gl.uniform1f(uniforms[k],values[k]||0);
  gl.uniform1f(attachment,0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.drawArrays(gl.TRIANGLES,0,verts.length/2);
- for(const id of accessories.selected){gl.uniform1f(attachment,id==='scarf'?2:id==='headphones'?3:1);gl.bindTexture(gl.TEXTURE_2D,wearableTextures[id]);gl.drawArrays(gl.TRIANGLES,0,verts.length/2)}
+ accessories.frame(values);
 };
 cow.replaceChildren(fo);cow.removeAttribute('clip-path');
 add(cow,`<g id="face-motion"><g id="lids">${[[420,289],[609,289]].map(([x,y],i)=>`<g><clipPath id="lid-crop-${i}"><path id="lid-path-${i}"/></clipPath><g clip-path="url(#lid-crop-${i})"><image href="highland-art.png" width="1024" height="1536" transform="translate(0 61)"/></g><path id="lid-line-${i}" fill="none" stroke="#512b18" stroke-width="5" stroke-linecap="round"/></g>`).join('')}</g><g id="mouth-motion" opacity="0"><path id="mouth-shape" fill="url(#mouth-depth)" stroke="#723e30" stroke-width="3"/><g clip-path="url(#mouth-window)"><ellipse id="tongue" cx="512" cy="446" rx="24" ry="11" fill="#c9897e"/></g><path id="lip" fill="none" stroke="#c48a69" stroke-width="3"/></g></g>`);
@@ -86,8 +86,8 @@ svg.querySelector('.notes').remove();add(svg,`<g class="symbols" id="music" opac
 const state={mode:'idle',action:null,motion:true,idle:true,phase:0,frames:0,nextIdle:3,nextBlink:2,blinkStart:-99,index:0};const durations={hello:2.7,happy:2.5,blink:.32,talk:2.2,ears:1.7,tail:1.8,hoof:2.4,nose:1.7,wake:3.2};const reduce=matchMedia('(prefers-reduced-motion: reduce)');let last=0,raf,speechTimer;
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},set=(id,key,value)=>$(id).setAttribute(key,value);
 function say(text){if(host.hidden||host.closest('.pet-studio'))return;clearTimeout(speechTimer);$('#speech').textContent=text;$('#speech').hidden=false;speechTimer=setTimeout(()=>$('#speech').hidden=true,3500)}
-const accessories=await window.createHighlandAccessories(host,detailResolution);
-for(const [id,image] of Object.entries(accessories.artwork)){const t=gl.createTexture();wearableTextures[id]=t;gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)}
+const surface=document.createElement('div');surface.style.cssText='position:relative;width:1024px;height:1024px';fo.append(surface);surface.append(canvas);
+const accessories=await window.createHighlandAccessories(host,surface);
 function ui(){host.dataset.state=state.mode;accessories.update(options,state.mode==='dance');}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;$('#speech').hidden=true}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:state.phase};say('Morning mist is lifting. Ready to roam the Highlands!')}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('A little Highland shuffle!')}else{state.mode='idle';state.action={name,start:state.phase};if(name==='hello')say(['Hello from the heather, wee friend!','Hooves steady, horns high. You’ve got this!','Fancy a wee adventure beyond the pasture?'][state.index%3])}state.nextIdle=state.phase+6;ui()}
 
