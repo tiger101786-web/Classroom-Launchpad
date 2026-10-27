@@ -33,16 +33,22 @@ const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias
 let render=()=>{};
 if(!gl)throw Error('This animation test requires WebGL. Enable browser hardware acceleration.');
 const vs=`attribute vec2 p;varying vec2 uv;
-uniform float ear,tail,hoof,hoofRight,nose,breath,wobble;
+uniform float ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble;
 float field(vec2 q,vec2 c,vec2 r){vec2 d=(q-c)/r;return exp(-dot(d,d)*2.0);}
 void main(){uv=p/1024.0;vec2 q=p;
 float el=field(p,vec2(243.,277.),vec2(125.,98.));float er=field(p,vec2(789.,277.),vec2(125.,98.));q.y+=ear*(el-er)*23.;q.x+=ear*(el+er)*6.;
 float t=field(p,vec2(160.,720.),vec2(130.,160.))*(1.-smoothstep(230.,270.,p.x));q.x+=tail*t*43.;q.y-=tail*t*10.;
-// Whole forehoof lifts, while the opposite hoof and rear feet retain exact contacts.
+// Forehoof lifts and rear-leg weight shifts have separate, smoothly blended masks.
 float h=smoothstep(376.,398.,p.x)*(1.-smoothstep(519.,531.,p.x))*smoothstep(610.,830.,p.y);
 q.y-=hoof*h*67.;q.x-=hoof*h*19.;
 float hr=smoothstep(523.,535.,p.x)*(1.-smoothstep(645.,667.,p.x))*smoothstep(610.,830.,p.y);
 q.y-=hoofRight*hr*67.;q.x+=hoofRight*hr*19.;
+// Alternating rear-knee flex: taper to zero at the soles to preserve contact.
+float rearAnchor=1.-smoothstep(825.,884.,p.y);
+float rearL=field(p,vec2(337.,785.),vec2(65.,125.))*rearAnchor;
+float rearR=field(p,vec2(703.,785.),vec2(65.,125.))*rearAnchor;
+q.x+=rearStep*11.*(rearL+rearR);
+q.y+=rearStep*4.*(rearL-rearR);
 float n=field(p,vec2(512.,373.),vec2(85.,55.));q.x+=nose*n*6.;
 // Restore visible torso/head breathing, fading out before the contact points.
 float anchoredBreath=1.-smoothstep(730.,835.,p.y);
@@ -59,7 +65,7 @@ const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER
 const verts=[];for(let y=0;y<1024;y+=16)for(let x=0;x<1024;x+=16)verts.push(x,y,x+16,y,x,y+16,x+16,y,x+16,y+16,x,y+16);
 const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);const pos=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
 const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-const uniforms=Object.fromEntries(['ear','tail','hoof','hoofRight','nose','breath','wobble'].map(k=>[k,gl.getUniformLocation(program,k)]));
+const uniforms=Object.fromEntries(['ear','tail','hoof','hoofRight','rearStep','nose','breath','wobble'].map(k=>[k,gl.getUniformLocation(program,k)]));
 render=values=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const k in uniforms)gl.uniform1f(uniforms[k],values[k]||0);gl.drawArrays(gl.TRIANGLES,0,verts.length/2)};
 cow.replaceChildren(fo);cow.removeAttribute('clip-path');
 add(cow,`<g id="face-motion"><g id="lids">${[[420,289],[609,289]].map(([x,y],i)=>`<g><clipPath id="lid-crop-${i}"><path id="lid-path-${i}"/></clipPath><g clip-path="url(#lid-crop-${i})"><image href="highland-art.png" width="1024" height="1536" transform="translate(0 61)"/></g><path id="lid-line-${i}" fill="none" stroke="#512b18" stroke-width="5" stroke-linecap="round"/></g>`).join('')}</g><g id="mouth-motion" opacity="0"><path id="mouth-shape" fill="url(#mouth-depth)" stroke="#723e30" stroke-width="3"/><g clip-path="url(#mouth-window)"><ellipse id="tongue" cx="512" cy="446" rx="24" ry="11" fill="#c9897e"/></g><path id="lip" fill="none" stroke="#c48a69" stroke-width="3"/></g></g>`);
@@ -75,7 +81,7 @@ if(state.action&&time-state.action.start>=durations[state.action.name]){state.ac
 if(moving&&state.mode==='idle'&&!state.action&&state.idle&&time>state.nextIdle)play(['ears','tail','happy','talk','hello','hoof','nose'][state.index++%7]);
 if(moving&&state.mode==='idle'&&time>state.nextBlink){state.blinkStart=time;state.nextBlink=time+3.1+Math.random()*2}
 const a=state.action,name=a?.name,t=a?clamp((time-a.start)/durations[name]):0,env=Math.sin(Math.PI*t)**2;
-let close=0,happy=0,open=0,ear=0,tail=0,hoof=0,hoofRight=0,nose=0,wobble=0;const bt=(time-state.blinkStart)/.32;if(bt>=0&&bt<1)close=Math.sin(bt*Math.PI)**2;
+let close=0,happy=0,open=0,ear=0,tail=0,hoof=0,hoofRight=0,rearStep=0,nose=0,wobble=0;const bt=(time-state.blinkStart)/.32;if(bt>=0&&bt<1)close=Math.sin(bt*Math.PI)**2;
 if(name==='blink')close=Math.sin(t*Math.PI)**2;
 if(name==='happy'||name==='hello'){happy=env;open=.3*env}
 if(name==='ears'||name==='hello')ear=Math.sin(t*Math.PI*8)*env;
@@ -86,9 +92,9 @@ if(name==='talk')open=(.2+.8*(.5-.5*Math.cos(t*Math.PI*10)))*env;
 const breath=Math.sin(time*Math.PI*2/3.4);
 if(state.mode==='sleep'){close=1;open=.08+.48*(.5+.5*Math.sin(time*Math.PI*2/3.4));}
 if(name==='wake'){close=1-smooth((t-.35)/.5);open=.95*Math.sin(Math.PI*clamp((t-.05)/.9))**2;ear=.4*Math.sin(t*Math.PI*4)*env;}
-if(state.mode==='dance'){wobble=Math.sin(time*Math.PI*2/.7);ear=.35*Math.sin(time*9);tail=.45*Math.sin(time*14);happy=.75;open=.35+.08*Math.sin(time*8);const step=Math.sin(time*Math.PI*2/1.4);hoof=.65*Math.max(0,step)**2;hoofRight=.65*Math.max(0,-step)**2;}
+if(state.mode==='dance'){wobble=Math.sin(time*Math.PI*2/.7);ear=.35*Math.sin(time*9);tail=.45*Math.sin(time*14);happy=.75;open=.35+.08*Math.sin(time*8);const step=Math.sin(time*Math.PI*2/1.4);hoof=.65*Math.max(0,step)**2;hoofRight=.65*Math.max(0,-step)**2;rearStep=step;}
 cow.removeAttribute('transform');
-state.pose={ear,tail,hoof,hoofRight,nose,breath,wobble};render(state.pose);
+state.pose={ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble};render(state.pose);
 // Expressions follow the head's breathing without moving any feet.
 set('#face-motion','transform',`translate(${wobble*13} ${-909*.012*breath}) scale(1 ${1+.012*breath})`);
 // Cover eyes with nearby fur, never scale the eye itself. Happy lids lift gently from below.
