@@ -1,5 +1,5 @@
 /* Approved preview artwork, shared with the live cow rig. */
-window.createHighlandAccessories=async function(host,surface){
+window.createHighlandAccessories=async function(host){
 const ns='http://www.w3.org/2000/svg',cow=host.querySelector('.cow'),layer=document.createElementNS(ns,'g');layer.id='cow-accessories';layer.style.pointerEvents='none';
 const grad=(id,a,b,c)=>`<linearGradient id="ha-${id}" x2=".8" y2="1"><stop stop-color="${a}"/><stop offset=".45" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
 const sprig=(x,y,r,s=1)=>`<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><path d="M0 4Q-5 -20 1 -63M-1 -12L-15 -29M-1 -26L14 -43" fill="none" stroke="#44542b" stroke-width="4" stroke-linecap="round"/>${Array.from({length:9},(_,i)=>{const yy=-12-i*5.3,xx=(i%2?1:-1)*(7-i*.45);return `<path d="M${xx} ${yy+8}q-8 -3 -3 -10q5 -5 10 1q3 7 -7 9" fill="${['#514481','#7760a4','#9880bb'][i%3]}" stroke="#403661" stroke-width="1.4"/><circle cx="${xx+1}" cy="${yy}" r="1.5" fill="#c5b4df"/>`}).join('')}</g>`;
@@ -38,20 +38,19 @@ ${[false,true].map(right=>`<g class="ha-cup" data-side="${right?'right':'left'}"
 <g data-ha="wreath" style="display:none"><g class="ha-head">
 <image href="highland-pet/heather-wreath-v3.png" x="270" y="92" width="484" height="155" preserveAspectRatio="none"/>
 </g></g>`;
-// Keep the preview's native SVG and original wreath image, rather than baking
-// them into a filtered texture. Composited wrappers follow the body frame clock.
+// Match the approved preview's SVG scene graph and fractional SVG transforms.
+// HTML/3D compositor layers inside a scaled foreignObject can snap/repaint at
+// different times from the cow. Keep all wearable motion in its SVG coordinates.
 const originalWreath=new Image();originalWreath.src='highland-pet/heather-wreath-v3.png';await originalWreath.decode();
+const prefix='ha-'+crypto.randomUUID()+'-';
+layer.querySelectorAll('[id]').forEach(node=>node.id=prefix+node.id);
+layer.querySelectorAll('*').forEach(node=>{for(const attr of [...node.attributes])if(attr.value.includes('url(#'))node.setAttribute(attr.name,attr.value.replaceAll('url(#','url(#'+prefix))});
 const layers={};
 for(const g of layer.querySelectorAll('[data-ha]')){
- const copy=g.cloneNode(true);copy.removeAttribute('style');
- const svg=document.createElementNS(ns,'svg');svg.setAttribute('width','1024');svg.setAttribute('height','1024');svg.setAttribute('viewBox','0 0 1024 1024');svg.style.cssText='display:block;overflow:visible';svg.append(layer.querySelector('defs').cloneNode(true),copy);
- // Each layer needs its own paint-server IDs, including when another pet is mounted.
- const prefix='ha-'+crypto.randomUUID()+'-';
- svg.querySelectorAll('[id]').forEach(node=>node.id=prefix+node.id);
- svg.querySelectorAll('*').forEach(node=>{for(const attr of [...node.attributes])if(attr.value.includes('url(#'))node.setAttribute(attr.name,attr.value.replaceAll('url(#','url(#'+prefix))});
- const wrapper=document.createElement('div');wrapper.dataset.highlandWearable=g.dataset.ha;wrapper.style.cssText='position:absolute;inset:0;width:1024px;height:1024px;pointer-events:none;transform-origin:0 0;will-change:transform';wrapper.append(svg);surface.append(wrapper);layers[g.dataset.ha]=wrapper;
+ g.dataset.highlandWearable=g.dataset.ha;layers[g.dataset.ha]=g;
 }
+cow.append(layer);
 let selected=[];
-return {frame(pose){const b=pose.breath*.012;for(const id of selected){layers[id].style.transform=`translate3d(${pose.wobble*(id==='scarf'?10:13)}px,${-909*b}px,0) scaleY(${1+b})`;if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,wrapper] of Object.entries(layers))wrapper.hidden=!selected.includes(id);host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
+return {frame(pose){const b=pose.breath*.012;for(const id of selected){layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} ${-909*b}) scale(1 ${1+b})`);if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
 };
 

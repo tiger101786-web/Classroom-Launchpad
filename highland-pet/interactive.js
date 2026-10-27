@@ -86,8 +86,7 @@ svg.querySelector('.notes').remove();add(svg,`<g class="symbols" id="music" opac
 const state={mode:'idle',action:null,motion:true,idle:true,phase:0,frames:0,nextIdle:3,nextBlink:2,blinkStart:-99,index:0};const durations={hello:2.7,happy:2.5,blink:.32,talk:2.2,ears:1.7,tail:1.8,hoof:2.4,nose:1.7,wake:3.2};const reduce=matchMedia('(prefers-reduced-motion: reduce)');let last=0,raf,speechTimer;
 const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},set=(id,key,value)=>$(id).setAttribute(key,value);
 function say(text){if(host.hidden||host.closest('.pet-studio'))return;clearTimeout(speechTimer);$('#speech').textContent=text;$('#speech').hidden=false;speechTimer=setTimeout(()=>$('#speech').hidden=true,3500)}
-const surface=document.createElement('div');surface.style.cssText='position:relative;width:1024px;height:1024px';fo.append(surface);surface.append(canvas);
-const accessories=await window.createHighlandAccessories(host,surface);
+const accessories=await window.createHighlandAccessories(host);
 function ui(){host.dataset.state=state.mode;accessories.update(options,state.mode==='dance');}
 function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;$('#speech').hidden=true}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:state.phase};say('Morning mist is lifting. Ready to roam the Highlands!')}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('A little Highland shuffle!')}else{state.mode='idle';state.action={name,start:state.phase};if(name==='hello')say(['Hello from the heather, wee friend!','Hooves steady, horns high. You’ve got this!','Fancy a wee adventure beyond the pasture?'][state.index%3])}state.nextIdle=state.phase+6;ui()}
 
