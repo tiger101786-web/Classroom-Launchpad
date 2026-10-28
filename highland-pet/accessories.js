@@ -38,46 +38,24 @@ ${[false,true].map(right=>`<g class="ha-cup" data-side="${right?'right':'left'}"
 <g data-ha="wreath" style="display:none"><g class="ha-head">
 <image href="highland-pet/heather-wreath-v3.png" x="270" y="92" width="484" height="155" preserveAspectRatio="none"/>
 </g></g>`;
-// Keep native preview artwork in a top-level HTML overlay, not a foreignObject.
-// Browser-managed transforms continue on the compositor between JavaScript frames.
-const originalWreath=new Image();originalWreath.src='highland-pet/heather-wreath-v3.png';await originalWreath.decode();
-const overlay=document.createElement('div');overlay.id='cow-accessories';overlay.setAttribute('aria-hidden','true');
-overlay.style.cssText='position:absolute;inset:0;pointer-events:none';
-const layers={},animations={};
-const wave=(amplitude,period,kind)=>Array.from({length:Math.round(period*60)+1},(_,i)=>{
- const p=i/(Math.round(period*60)),s=Math.sin(p*Math.PI*2);
- return {offset:p,transform:kind==='breath'?`translate3d(0,${-909*.012*s/1024*100}%,0) scaleY(${1+.012*s})`:`translate3d(${amplitude*s/1024*100}%,0,0)`};
-});
-for(const g of layer.querySelectorAll('[data-ha]')){
- const id=g.dataset.ha,wrapper=document.createElement('div'),breathing=document.createElement('div');
- wrapper.dataset.highlandWearable=id;wrapper.hidden=true;
- wrapper.style.cssText='position:absolute;left:0;top:0;width:100%;aspect-ratio:1;pointer-events:none;transform-origin:0 0;will-change:transform';
- breathing.style.cssText='width:100%;height:100%;transform-origin:0 0;will-change:transform';
- const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 1024 1024');svg.style.cssText='display:block;width:100%;height:100%;overflow:visible';
- const copy=g.cloneNode(true);copy.removeAttribute('style');svg.append(layer.querySelector('defs').cloneNode(true),copy);
- const prefix='ha-'+crypto.randomUUID()+'-';svg.querySelectorAll('[id]').forEach(node=>node.id=prefix+node.id);
- svg.querySelectorAll('*').forEach(node=>{for(const attr of [...node.attributes])if(attr.value.includes('url(#'))node.setAttribute(attr.name,attr.value.replaceAll('url(#','url(#'+prefix))});
- breathing.append(svg);wrapper.append(breathing);overlay.append(wrapper);layers[id]=wrapper;
- const breath=breathing.animate(wave(0,3.4,'breath'),{duration:3400,iterations:Infinity,easing:'linear'});
- const dance=wrapper.animate(wave(id==='scarf'?10:13,.7,'dance'),{duration:700,iterations:Infinity,easing:'linear'});
- breath.pause();breath.currentTime=0;dance.pause();dance.currentTime=0;animations[id]={breath,dance};
-}
-host.querySelector('.pet-button').append(overlay);
-let selected=[],lastClock=0;
-function clock(animation,time,playing){
- const shouldPlay=playing&&selected.length>0;
- if(shouldPlay&&animation.playState!=='running'){animation.currentTime=time*1000;animation.play()}
- else if(!shouldPlay){animation.pause();animation.currentTime=time*1000}
- // Resynchronize after tab suspension or a deliberate pose/time reset only.
- else if(Math.abs((animation.currentTime||0)-time*1000)>120)animation.currentTime=time*1000;
-}
+// Accessories are children of the cow, never independent animation layers.
+// Breathing comes from the shared cow-motion parent; local transforms only
+// handle the preview's small dancing offset and headphone ear-following.
+const wreath=new Image();wreath.src='highland-pet/heather-wreath-v3.png';await wreath.decode();
+const prefix='ha-'+crypto.randomUUID()+'-';
+layer.querySelectorAll('[id]').forEach(node=>node.id=prefix+node.id);
+layer.querySelectorAll('*').forEach(node=>{for(const attr of [...node.attributes])if(attr.value.includes('url(#'))node.setAttribute(attr.name,attr.value.replaceAll('url(#','url(#'+prefix))});
+const layers={};
+for(const g of layer.querySelectorAll('[data-ha]')){g.dataset.highlandWearable=g.dataset.ha;layers[g.dataset.ha]=g}
+cow.append(layer);
+let selected=[];
 return {
- frame(pose,time=lastClock,moving=true,dancing=false){lastClock=time;for(const id of selected){
-  clock(animations[id].breath,time,moving);clock(animations[id].dance,dancing?time:0,moving&&dancing);
+ frame(pose){for(const id of selected){
+  layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} 0)`);
   if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`));
  }},
  update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];
-  for(const [id,g] of Object.entries(layers)){g.hidden=!selected.includes(id);if(g.hidden||host.hidden){animations[id].breath.pause();animations[id].dance.pause()}}
+  for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';
   host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none';
  }
 };
