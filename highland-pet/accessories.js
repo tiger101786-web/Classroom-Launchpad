@@ -38,26 +38,19 @@ ${[false,true].map(right=>`<g class="ha-cup" data-side="${right?'right':'left'}"
 <g data-ha="wreath" style="display:none"><g class="ha-head">
 <image href="highland-pet/heather-wreath-v3.png" x="270" y="92" width="484" height="155" preserveAspectRatio="none"/>
 </g></g>`;
-// Accessories are children of the cow, never independent animation layers.
-// Breathing comes from the shared cow-motion parent; local transforms only
-// handle the preview's small dancing offset and headphone ear-following.
-const wreath=new Image();wreath.src='highland-pet/heather-wreath-v3.png';await wreath.decode();
+// Match the approved preview's SVG scene graph and fractional SVG transforms.
+// HTML/3D compositor layers inside a scaled foreignObject can snap/repaint at
+// different times from the cow. Keep all wearable motion in its SVG coordinates.
+const originalWreath=new Image();originalWreath.src='highland-pet/heather-wreath-v3.png';await originalWreath.decode();
 const prefix='ha-'+crypto.randomUUID()+'-';
 layer.querySelectorAll('[id]').forEach(node=>node.id=prefix+node.id);
 layer.querySelectorAll('*').forEach(node=>{for(const attr of [...node.attributes])if(attr.value.includes('url(#'))node.setAttribute(attr.name,attr.value.replaceAll('url(#','url(#'+prefix))});
 const layers={};
-for(const g of layer.querySelectorAll('[data-ha]')){g.dataset.highlandWearable=g.dataset.ha;layers[g.dataset.ha]=g}
+for(const g of layer.querySelectorAll('[data-ha]')){
+ g.dataset.highlandWearable=g.dataset.ha;layers[g.dataset.ha]=g;
+}
 cow.append(layer);
 let selected=[];
-return {
- frame(pose){for(const id of selected){
-  layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} 0)`);
-  if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`));
- }},
- update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];
-  for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';
-  host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none';
- }
-};
+return {frame(pose){const b=pose.breath*.012;for(const id of selected){layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} ${-909*b}) scale(1 ${1+b})`);if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
 };
 

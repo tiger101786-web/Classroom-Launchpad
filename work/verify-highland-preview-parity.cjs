@@ -11,20 +11,18 @@ const {chromium}=require('playwright');
   await page.evaluate(()=>{highlandTest.state.motion=false;highlandTest.state.idle=false;highlandAccessories.choices.headwear='wreath';highlandAccessories.choices.scarf=true;highlandAccessories.update()});
   await page.waitForTimeout(100);
   await page.evaluate(async()=>{const image=new Image();image.src='heather-wreath-v3.png';await image.decode()});
-  await page.evaluate(()=>{window.previewFrame=window.highlandAccessoryFrame;window.highlandAccessoryFrame=null;const pet=document.querySelector('.pet');pet.classList.add('pet-button');pet.style.position='relative'});
+  await page.evaluate(()=>{window.previewFrame=window.highlandAccessoryFrame;window.highlandAccessoryFrame=null});
   const source=fs.readFileSync('highland-pet/accessories.js','utf8').replaceAll('highland-pet/heather-wreath-v3.png','heather-wreath-v3.png');
   await page.addScriptTag({content:source});
   for(const size of [200,320]){
    await page.locator('.pet').evaluate((e,size)=>e.style.width=size+'px',size);
-   for(const time of [0,.425,.85,1.7,2.55]){
-    const breath=Math.sin(time*Math.PI*2/3.4),pose={breath,wobble:0,ear:0,time};
+   for(const breath of [-1,-.55,0,.35,1]){
+    const pose={breath,wobble:0,ear:0};
     await page.evaluate(p=>previewFrame(p),pose);
     await page.locator('.pet').screenshot({path:path.join(screenshots,`reference-${size}-${breath}.png`)});
     await page.evaluate(async p=>{
-     window.previewLayer=document.querySelector('#cow-accessories');window.previewMatrices={};for(const id of ['scarf','wreath']){const m=previewLayer.querySelector(`[data-ha=${id}] > g`).getScreenCTM();previewMatrices[id]=[m.a,m.b,m.c,m.d,m.e,m.f]}previewLayer.remove();
-     const shared=document.createElement('div');shared.className='test-shared-motion';shared.style.cssText=`position:absolute;left:0;top:0;width:100%;aspect-ratio:1;transform-origin:0 0;transform:translateY(${-909*.012*p.breath/1024*100}%) scaleY(${1+.012*p.breath})`;
-     shared.innerHTML='<svg viewBox="0 0 1024 1024" style="display:block;width:100%;height:100%;overflow:visible"><g class="cow"></g></svg>';document.querySelector('.pet').append(shared);
-     window.liveAccessories=await createHighlandAccessories(shared);
+     window.previewLayer=document.querySelector('#cow-accessories');previewLayer.remove();
+     window.liveAccessories=await createHighlandAccessories(document.body);
      liveAccessories.update({headwear:'wreath',neckwear:'scarf'});liveAccessories.frame(p);
     },pose);
     await page.waitForTimeout(150);
@@ -34,15 +32,12 @@ const {chromium}=require('playwright');
     const matching=await page.evaluate(()=>['scarf','wreath'].every(id=>{
      const before=previewLayer.querySelector(`[data-ha=${id}]`).cloneNode(true);
      const after=document.querySelector(`#cow-accessories [data-ha=${id}]`).cloneNode(true);
-     before.removeAttribute('style');after.removeAttribute('style');before.firstElementChild.removeAttribute('transform');after.firstElementChild.removeAttribute('transform');
      after.removeAttribute('data-highland-wearable');
      after.querySelectorAll('*').forEach(n=>{for(const a of [...n.attributes])if(a.value.includes('url(#'))n.setAttribute(a.name,a.value.replace(/url\(#ha-[0-9a-f-]{36}-/g,'url(#'))});
      return before.outerHTML===after.outerHTML;
     }));
     assert(matching,`Preview artwork/transform mismatch at width ${size}, breath ${breath}`);
-    const fitting=await page.evaluate(()=>['scarf','wreath'].every(id=>{const m=document.querySelector(`#cow-accessories [data-ha=${id}] > g`).getScreenCTM();return [m.a,m.b,m.c,m.d,m.e,m.f].every((v,i)=>Math.abs(v-previewMatrices[id][i])<.1)}));
-    assert(fitting,`Preview fitting mismatch at width ${size}, time ${time}`);
-    await page.evaluate(()=>{document.querySelector('.test-shared-motion').remove();document.querySelector('.cow').append(previewLayer)});
+    await page.evaluate(()=>{document.querySelector('#cow-accessories').remove();document.querySelector('.cow').append(previewLayer)});
    }
   }
   console.log('PASS: live scarf/wreath artwork and fractional transforms match preview at 10 breathing/size samples.');
