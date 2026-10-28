@@ -22,15 +22,26 @@ const saved=await (await fetch(origin+'/api/companion-preferences',{headers:{Coo
 assert.equal(saved.preferences.highland.headwear,'wreath');assert.equal(saved.preferences.highland.neckwear,'scarf');
 const invalidAccessory=await fetch(origin+'/api/companion-preferences',{method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({...saved.preferences,highland:{...saved.preferences.highland,headwear:'invalid'}})});assert.equal(invalidAccessory.status,400);
 await studio.screenshot({path:path.join(dir,'accessories.png')});
+const cdp=await context.newCDPSession(page);let compositorLayers=[];cdp.on('LayerTree.layerTreeDidChange',e=>compositorLayers=e.layers||[]);await cdp.send('LayerTree.enable');await page.waitForTimeout(200);
+const documentNode=await cdp.send('DOM.getDocument');
+for(const id of ['scarf','wreath']){
+ const selected=await cdp.send('DOM.querySelector',{nodeId:documentNode.root.nodeId,selector:`[data-highland-wearable=${id}] > div`});
+ const {node}=await cdp.send('DOM.describeNode',{nodeId:selected.nodeId});
+ const layer=compositorLayers.find(l=>l.backendNodeId===node.backendNodeId);assert(layer,`${id} must have its own compositor layer`);
+ const reasons=await cdp.send('LayerTree.compositingReasons',{layerId:layer.layerId});
+ assert(reasons.compositingReasons.some(reason=>/active accelerated transform animation/i.test(reason)),`${id} animation must run on the compositor`);
+}
+await cdp.detach();
 // Accessories share the preview's native SVG transforms and body frame clock.
 const playback=await page.evaluate(()=>new Promise(resolve=>{const original=WebGLRenderingContext.prototype.drawArrays;let draws=0,frames=0;const batches=[];WebGLRenderingContext.prototype.drawArrays=function(...args){if(this.canvas.closest('.highland-companion'))draws++;return original.apply(this,args)};function sample(){if(frames++)batches.push(draws);draws=0;if(frames<75)requestAnimationFrame(sample);else{WebGLRenderingContext.prototype.drawArrays=original;resolve(batches)}}requestAnimationFrame(sample)}));
 assert(playback.filter(n=>n===1).length>=65,'Cow should render on consecutive animation frames without re-rasterizing accessories');
-const accessoryFrames=await pet.evaluate(host=>new Promise(resolve=>{const frames=[];function sample(){frames.push([...host.querySelectorAll('[data-highland-wearable]')].filter(n=>n.style.display!=='none').map(n=>n.firstElementChild.getAttribute('transform')));if(frames.length<40)requestAnimationFrame(sample);else resolve(frames)}sample()}));
-assert(accessoryFrames.every(f=>f.length===2&&f[0]===f[1]),'Scarf and wreath should follow identical breathing transforms');
+const accessoryFrames=await pet.evaluate(host=>new Promise(resolve=>{const frames=[];function sample(){frames.push([...host.querySelectorAll('[data-highland-wearable]:not([hidden])')].map(n=>getComputedStyle(n.firstElementChild).transform));if(frames.length<40)requestAnimationFrame(sample);else resolve(frames)}sample()}));
+assert(accessoryFrames.every(f=>f.length===2),'Scarf and wreath both remain visible');
 assert(new Set(accessoryFrames.map(f=>f[0])).size>30,'Accessory motion should advance continuously');
-assert.equal(await pet.locator('#cow-accessories pattern').count(),2,'Scarf retains original vector patterns');
+assert.equal(await pet.locator('[data-highland-wearable=scarf] pattern').count(),2,'Scarf retains original vector patterns');
 assert.equal(await pet.locator('foreignObject [data-highland-wearable]').count(),0,'Accessories must not use nested HTML compositor layers');
-assert.equal(await pet.locator('.cow > #cow-accessories').count(),1,'Accessories live in the same SVG scene as the preview');
+assert.equal(await pet.locator('.pet-button > #cow-accessories').count(),1,'Wearables are outside the main-thread SVG/foreignObject paint surface');
+assert.equal(await pet.evaluate(h=>h.querySelector('[data-highland-wearable=scarf]').firstElementChild.getAnimations()[0].playState),'running');
 assert.equal(await pet.locator('[data-highland-wearable=wreath] image').getAttribute('href'),'highland-pet/heather-wreath-v3.png');
 assert.equal(fs.readFileSync('highland-pet/heather-wreath-v3.png').compare(fs.readFileSync('work/highland-cow-preview/heather-wreath-v3.png')),0,'Wreath must be the exact approved preview image');
 await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Heather');await studio.locator('#size-select').selectOption('extra-large');await page.waitForTimeout(700);
@@ -41,7 +52,7 @@ await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data
 for(const theme of ['crimson','woodland','sky','scrapbook']){await studio.locator('[aria-label="Studio theme"]').selectOption(theme);await studio.screenshot({path:path.join(dir,theme+'.png')});}
 for(const width of [1920,1440,800,390]){await page.setViewportSize({width,height:1080});await page.waitForTimeout(100);const m=await studio.evaluate(d=>{const p=d.querySelector('.highland-companion .pet-button').getBoundingClientRect(),s=d.querySelector('#pet-subtitle').getBoundingClientRect(),a=d.querySelector('.preview-actions').getBoundingClientRect();return {gap:p.top-s.bottom,bottom:p.bottom,actions:a.top,overflow:d.scrollWidth>d.clientWidth+1}});assert(m.gap>=0,JSON.stringify(m));assert(m.bottom<=m.actions+1,JSON.stringify(m));assert(!m.overflow,JSON.stringify(m));await studio.screenshot({path:path.join(dir,'studio-'+width+'.png')});}
 await page.setViewportSize({width:1920,height:1080});await studio.locator('[data-tab=name]').click();await studio.locator('[data-toggle=platform]').uncheck();assert(!(await pet.locator('.highland-platform').isVisible()));assert(!(await pet.locator('.highland-nameplate').isVisible()));await studio.locator('[data-toggle=platform]').check();await studio.locator('[data-toggle=nameplate]').uncheck();assert(!(await pet.locator('.highland-nameplate').isVisible()));await studio.locator('[data-toggle=nameplate]').check();
-await studio.locator('[data-tab=settings]').click();await studio.locator('[data-toggle=motion]').uncheck();await page.waitForTimeout(80);const frozen=await pet.locator('#highland-face-motion').getAttribute('transform');await page.waitForTimeout(180);assert.equal(await pet.locator('#highland-face-motion').getAttribute('transform'),frozen);await studio.locator('[data-toggle=motion]').check();
+await studio.locator('[data-tab=settings]').click();await studio.locator('[data-toggle=motion]').uncheck();await page.waitForTimeout(80);const frozen=await pet.locator('#highland-face-motion').getAttribute('transform');await page.waitForTimeout(180);assert.equal(await pet.locator('#highland-face-motion').getAttribute('transform'),frozen);assert.equal(await pet.evaluate(h=>h.querySelector('[data-highland-wearable=wreath]').firstElementChild.getAnimations()[0].playState),'paused','Motion off pauses compositor animation');await studio.locator('[data-toggle=motion]').check();
 for(const kind of ['colt','squishy','gummy','eagle','labubu','roblox','highland']){await studio.locator('#pet-select').selectOption(kind);await page.waitForTimeout(100)}
 await studio.locator('.studio-close').click();await pet.waitFor({state:'visible'});assert(await pet.isVisible());assert.equal(await pet.getAttribute('data-size'),'extra-large');assert.equal(Math.round((await pet.boundingBox()).width),200);await page.screenshot({path:path.join(dir,'live.png')});
 await pet.locator('.pet-button').focus();const before=await pet.boundingBox();await page.keyboard.press('ArrowLeft');assert((await pet.boundingBox()).x<before.x);

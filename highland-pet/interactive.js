@@ -78,7 +78,6 @@ const attachment=gl.getUniformLocation(program,'attachment');
 gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
 render=values=>{gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const k in uniforms)gl.uniform1f(uniforms[k],values[k]||0);
  gl.uniform1f(attachment,0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.drawArrays(gl.TRIANGLES,0,verts.length/2);
- accessories.frame(values);
 };
 cow.replaceChildren(fo);cow.removeAttribute('clip-path');
 add(cow,`<g id="face-motion"><g id="lids">${[[420,289],[609,289]].map(([x,y],i)=>`<g><clipPath id="lid-crop-${i}"><path id="lid-path-${i}"/></clipPath><g clip-path="url(#lid-crop-${i})"><image href="highland-art.png" width="1024" height="1536" transform="translate(0 61)"/></g><path id="lid-line-${i}" fill="none" stroke="#512b18" stroke-width="5" stroke-linecap="round"/></g>`).join('')}</g><g id="mouth-motion" opacity="0"><path id="mouth-shape" fill="url(#mouth-depth)" stroke="#723e30" stroke-width="3"/><g clip-path="url(#mouth-window)"><ellipse id="tongue" cx="512" cy="446" rx="24" ry="11" fill="#c9897e"/></g><path id="lip" fill="none" stroke="#c48a69" stroke-width="3"/></g></g>`);
@@ -108,7 +107,7 @@ if(state.mode==='sleep'){close=1;open=.08+.48*(.5+.5*Math.sin(time*Math.PI*2/3.4
 if(name==='wake'){close=1-smooth((t-.35)/.5);open=.95*Math.sin(Math.PI*clamp((t-.05)/.9))**2;ear=.4*Math.sin(t*Math.PI*4)*env;}
 if(state.mode==='dance'){wobble=Math.sin(time*Math.PI*2/.7);ear=.35*Math.sin(time*9);tail=.45*Math.sin(time*14);happy=.75;open=.35+.08*Math.sin(time*8);const step=Math.sin(time*Math.PI*2/1.4);hoof=.65*Math.max(0,step)**2;hoofRight=.65*Math.max(0,-step)**2;rearStep=step;}
 cow.removeAttribute('transform');
-state.pose={ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble};render(state.pose);
+state.pose={ear,tail,hoof,hoofRight,rearStep,nose,breath,wobble};render(state.pose);accessories.frame(state.pose,time,moving,state.mode==='dance');
 // Expressions follow the head's breathing without moving any feet.
 set('#face-motion','transform',`translate(${wobble*13} ${-909*.012*breath}) scale(1 ${1+.012*breath})`);
 // Cover eyes with nearby fur, never scale the eye itself. Happy lids lift gently from below.

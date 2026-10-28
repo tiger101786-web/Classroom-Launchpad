@@ -4,6 +4,8 @@
 .highland-companion .pet-button{display:block;width:100%;height:auto;aspect-ratio:1024/1420;padding:0;margin:0;background:none;border:0;box-shadow:none;cursor:grab;touch-action:none}
 .highland-companion .pet-button>svg{display:block;width:100%;height:auto;overflow:visible}
 .highland-companion .cow,.highland-companion .notes text{animation:none!important}
+.highland-companion .pet-button{position:relative}
+.highland-companion [data-highland-wearable][hidden]{display:none!important}
 .highland-companion .symbols text{paint-order:stroke;stroke:#28372b;stroke-width:6;fill:#ebc68d;font-family:Arial,sans-serif;font-weight:bold}
 .highland-companion .highland-speech{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:230px;padding:10px 14px;border:1px solid #876443;border-radius:13px;background:#f7ecd3;color:#493221;font:13px/1.4 system-ui;text-align:center;pointer-events:none}
 .highland-companion .highland-speech[hidden],.pet-studio .highland-speech{display:none!important}
