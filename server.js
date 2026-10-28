@@ -227,6 +227,7 @@ const defaultDb = {
   threads: [],
   directMessages: [],
   radioFavorites: {},
+  myLaunchpads: {},
   coltCustomizations: {},
   companionPreferences: {},
   mutedStudents: [],
@@ -563,6 +564,20 @@ function radioFavoritesAccountKey(session) {
   return session && session.role === "teacher"
     ? "teacher"
     : `student:${normalizeEmail(session && session.email)}`;
+}
+
+function normalizeMyLaunchpads(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const valid = id => typeof id === 'string' && /^(link|app):[^\s<>"']{1,180}$/.test(id);
+  return Object.fromEntries(Object.entries(value).filter(([key]) => key === 'teacher' || key.startsWith('student:')).map(([key,record]) => {
+    const favorites = [...new Set((Array.isArray(record?.favorites) ? record.favorites : []).filter(valid))];
+    const seen = new Set();
+    const recent = (Array.isArray(record?.recent) ? record.recent : []).filter(item => {
+      if (!valid(item?.id) || seen.has(item.id) || !Number.isFinite(Date.parse(item.at))) return false;
+      seen.add(item.id); return true;
+    }).slice(0,12).map(item => ({id:item.id,at:item.at}));
+    return [key,{favorites,recent}];
+  }));
 }
 
 const defaultColtCustomization = Object.freeze({
@@ -1389,6 +1404,7 @@ function writeDb(db) {
     threads: pruneModeratedThreads(migrateGradeScopedThreads(db.threads)),
     directMessages: normalizeDirectMessages(db.directMessages),
     radioFavorites: normalizeRadioFavorites(db.radioFavorites),
+    myLaunchpads: normalizeMyLaunchpads(db.myLaunchpads),
     coltCustomizations: normalizeColtCustomizations(db.coltCustomizations),
     companionPreferences: normalizeCompanionPreferences(db.companionPreferences),
     mutedStudents: Array.isArray(db.mutedStudents) ? db.mutedStudents : [],
@@ -4075,6 +4091,39 @@ async function handleApi(req, res, pathname) {
     const allowed = requireRole(req, res, ["student", "teacher"]);
     if (!allowed) return true;
     sendJson(res, 200, { directMessages: visibleDirectMessages(readDb().directMessages, allowed) });
+    return true;
+  }
+
+  if (pathname === '/api/my-launchpad' && ['GET','POST'].includes(req.method)) {
+    if (req.method === 'POST' && !requireSameOrigin(req,res)) return true;
+    const allowed = requireRole(req,res,['student','teacher']);
+    if (!allowed) return true;
+    try {
+      // Read after awaiting the body so simultaneous accounts cannot overwrite each other.
+      const body = req.method === 'POST' ? await readBody(req) : null;
+      const db = readDb(), key = radioFavoritesAccountKey(allowed);
+      const records = normalizeMyLaunchpads(db.myLaunchpads);
+      const preferences = records[key] || {favorites:[],recent:[]};
+      if (body) {
+        if (!['favorite','visit','swap','clearRecent'].includes(body.action)) throw Error('Unknown Launchpad action.');
+        const valid = id => typeof id === 'string' && /^(link|app):[^\s<>"']{1,180}$/.test(id);
+        if (body.action !== 'clearRecent' && !valid(body.id)) throw Error('Invalid shortcut.');
+        if (body.action === 'favorite') {
+          if (typeof body.value !== 'boolean') throw Error('Choose whether to favorite this shortcut.');
+          if (body.value && !preferences.favorites.includes(body.id)) preferences.favorites.push(body.id);
+          if (!body.value) preferences.favorites = preferences.favorites.filter(id=>id!==body.id);
+        }
+        if (body.action === 'visit') preferences.recent = [{id:body.id,at:new Date().toISOString()},...preferences.recent.filter(item=>item.id!==body.id)].slice(0,12);
+        if (body.action === 'swap') {
+          const a=preferences.favorites.indexOf(body.id),b=preferences.favorites.indexOf(body.other);
+          if(a<0||b<0) throw Error('Favorite no longer exists.');
+          [preferences.favorites[a],preferences.favorites[b]]=[preferences.favorites[b],preferences.favorites[a]];
+        }
+        if (body.action === 'clearRecent') preferences.recent=[];
+        db.myLaunchpads={...records,[key]:preferences};writeDb(db);
+      }
+      sendJson(res,200,{preferences});
+    } catch(error) {sendJson(res,400,{error:error.message})}
     return true;
   }
 

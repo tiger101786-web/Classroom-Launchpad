@@ -60,7 +60,7 @@ Colt Assistant reads the current active website list from Classroom Launchpad. I
 - No more than three recommendations are shown at once.
 - Manage website names, descriptions, categories, and active status through the existing Teacher Dashboard.
 
-Today’s Directions reads the existing teacher-managed Today’s Launch message. It does not maintain a second copy of those directions.
+Today’s Directions points students to the classroom board or their teacher. My Launchpad replaces the old Today’s Launch card with account-owned favorites and recent activity; it is not an assignment list. Old daily-launch records are retained but no longer displayed or edited in the dashboard.
 
 ## Edit troubleshooting directions
 

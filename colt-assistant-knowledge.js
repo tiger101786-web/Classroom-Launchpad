@@ -128,7 +128,7 @@
       noContextForRepeat: "Tell me what you would like repeated, or choose one of the classroom help buttons."
     },
     earlyFinisher: {
-      response: "First, check Today’s Launch and make sure your assigned work is complete. Then choose a teacher-approved activity.",
+      response: "First, check the classroom board or ask your teacher, and make sure your assigned work is complete. Then choose a teacher-approved activity from My Launchpad or the website categories.",
       followUps: ["Create something", "Play a learning game", "Solve a puzzle", "Practice computer skills"]
     },
     troubleshooting: [
@@ -274,7 +274,7 @@
       noApprovedMatches: "I could not find an active approved website for that request. Please ask Mr. Nieves.",
       linksLoading: "The approved website list is still loading. Please wait a moment and try again.",
       navigation: "Use the search box to find an approved website, or choose a Website Category on the home page. Use the Classroom Launchpad bookmark to return from another page.",
-      todayDirectionsIntro: "Here are Mr. Nieves’s current directions:",
+      todayDirectionsIntro: "For today’s class directions:",
       askQuestion: "Type a short classroom question below. Please do not enter your name, email, password, grade, or other private information.",
       rulesIntro: "Here are the Classroom Launchpad expectations:",
       recommendationsIntro: "Here are approved choices:",

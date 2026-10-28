@@ -92,7 +92,7 @@ const HOME_NAVIGATION_COLLAPSED_KEY = "classroomLaunchpadHomeNavigationCollapsed
 const COLT_CORNER_SEEN_TOPICS_KEY = "classroomLaunchpadColtCornerSeenTopicsV1";
 const HOME_NAVIGATION_ITEMS = [
   { id: "home-top", label: "Home", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"></path></svg>' },
-  { id: "home-launch", label: "Today's Launch", icon: "&#10003;" },
+  { id: "home-launch", label: "My Launchpad", icon: "&#9733;" },
   { id: "home-expectations", label: "Expectations", icon: '<svg viewBox="0 0 24 24" focusable="false"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"></path></svg>' },
   { id: "home-categories", label: "Website Categories", icon: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M5.2 7.5h13.6M5.2 16.5h13.6M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3c-2.4 2.5-3.6 5.5-3.6 9S9.6 18.5 12 21"></path></svg>' },
   { id: "home-student-spotlight", label: "Student Spotlight", icon: '<svg viewBox="0 0 24 24" focusable="false"><rect class="spotlight-board-top" x="3.2" y="3.4" width="17.6" height="2.2" rx="1.1"></rect><rect class="spotlight-board" x="4.8" y="5.8" width="14.4" height="10.2" rx=".65"></rect><path class="spotlight-board-accent" d="m12 7.3 1.05 2.15 2.38.35-1.72 1.67.4 2.36L12 12.72l-2.11 1.11.4-2.36-1.72-1.67 2.38-.35L12 7.3Zm-4.65.15.38.78.86.12-.62.61.15.85-.77-.4-.77.4.15-.85-.62-.61.86-.12.38-.78Zm9.45 5.25.38.78.86.12-.62.61.15.85-.77-.4-.77.4.15-.85-.62-.61.86-.12.38-.78Z"></path><path class="spotlight-board-stand" d="M10.9 15.5h2.2v2.05l4.2 3.55-1.45 1.5L12 19.35 8.15 22.6 6.7 21.1l4.2-3.55Z"></path></svg>', requiresAuth: true },
@@ -2581,52 +2581,23 @@ function renderHome() {
   `;
 }
 
+function myLaunchpadCatalog() {
+  const approved = links.filter(link=>link.active).filter(link=>link.url===COLT_RUN_URL||/^https?:\/\//i.test(link.url)).map(link=>({id:`link:${link.id}`,title:link.title,category:link.category,...(link.url===COLT_RUN_URL?{action:'openColtRun',icon:'▶'}:{url:link.url})}));
+  return [
+    {id:'app:classroom',title:'Google Classroom',category:'Assignments & feedback',url:GOOGLE_CLASSROOM_URL,icon:'▣'},
+    {id:'app:spotlight',title:'Student Spotlight',category:'Class creations',action:'openStudentSpotlights',icon:'✦'},
+    {id:'app:corner',title:'Colt Corner',category:'Class discussions',action:'openColtCorner',icon:'☏'},
+    {id:'app:drive',title:'Google Drive',category:'Your files',url:'https://drive.google.com/',icon:'△'},
+    {id:'app:slides',title:'Google Slides',category:'Presentations',url:'https://docs.google.com/presentation/u/0/',icon:'▤'},
+    {id:'app:docs',title:'Google Docs',category:'Documents',url:'https://docs.google.com/document/u/0/',icon:'▥'},
+    ...approved
+  ];
+}
+
 function renderHomeDefault() {
-  const launchGrade = isTeacher() ? teacherDailyLaunchGrade : String(authSession.grade || "");
-  const launch = dailyLaunchRecord(launchGrade);
-  const launchMessage = isSignedIn()
-    ? sanitizeLaunchHtml(launch.message)
-    : "Log in to view today's instructions for your grade.";
-  const launchAudienceLabel = isTeacher() ? "Teacher View" : (launchGrade ? `Grade ${launchGrade}` : "");
   return `
-    <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="Launch tools">
-      <section class="daily-launch-card" aria-label="Today's Launch">
-        <video class="daily-launch-bg-video" autoplay muted loop playsinline aria-hidden="true">
-          <source data-src="assets/daily-launch-bg.mp4?v=20260905-optimized1" type="video/mp4">
-        </video>
-        <div class="daily-launch-copy">
-          <header class="daily-launch-heading">
-            <div class="daily-launch-title-group">
-              <div class="daily-launch-icon" aria-hidden="true">✓</div>
-              <div><span class="feature-kicker">Your daily briefing</span><h2>Today's Launch</h2></div>
-            </div>
-            <div class="daily-launch-audience">
-              ${!isTeacher() && launchAudienceLabel ? `<span class="daily-launch-grade">${escapeHtml(launchAudienceLabel)}</span>` : ""}
-            </div>
-          </header>
-          <div class="daily-launch-message">${launchMessage}</div>
-          ${isTeacher() ? `
-            <div class="daily-launch-controls">
-            <span class="daily-launch-grade">Teacher View</span>
-            <div class="daily-launch-teacher-preview" aria-label="Preview Today's Launch by grade">
-              <span>Showing:</span>
-              <div role="tablist" aria-label="Choose a grade to preview">
-                ${CLASSROOM_GRADES.map(grade => `
-                  <button
-                    type="button"
-                    role="tab"
-                    class="daily-launch-preview-tab ${grade === teacherDailyLaunchGrade ? "is-active" : ""}"
-                    data-action="dailyLaunchGrade"
-                    data-grade="${grade}"
-                    aria-selected="${grade === teacherDailyLaunchGrade ? "true" : "false"}"
-                  >Grade ${grade}</button>
-                `).join("")}
-              </div>
-            </div>
-            </div>
-          ` : ""}
-        </div>
-      </section>
+    <section id="home-launch" class="launch-row home-navigation-anchor" aria-label="My Launchpad">
+      ${window.MyLaunchpad.render()}
     </section>
     <section id="home-expectations" class="rules-card home-navigation-anchor">
       <div class="expectations-copy">
@@ -2908,7 +2879,7 @@ function renderRandomActivityCard() {
         <article class="random-activity-result random-activity-locked">
           <h3>Locked</h3>
           <span>Teacher Controlled</span>
-          <p>Please read the Today's Launch section.</p>
+          <p>Please check the classroom board or ask your teacher for directions.</p>
         </article>
       ` : selected ? `
         <article class="random-activity-result">
@@ -3485,6 +3456,7 @@ function renderStudentLink(link) {
       <p class="instruction">${escapeHtml(link.instruction)}</p>
       <p class="meta">${escapeHtml(link.category)}</p>
       <div class="actions">
+        ${window.MyLaunchpad.star(`link:${link.id}`)}
         <button class="primary-btn" data-action="${isColtRun ? "openColtRun" : "open"}" ${isColtRun ? "" : `data-url="${escapeHtml(link.url)}"`}>${isColtRun ? "▶ Play Game" : "↗ Open Site"}</button>
       </div>
     </article>
@@ -10208,7 +10180,6 @@ function renderRegisteredStudents() {
 
 function renderLegacyDashboard() {
   const sorted = [...links].sort((a, b) => `${a.category}${a.title}`.localeCompare(`${b.category}${b.title}`));
-  const launchRecord = dailyLaunchRecord(teacherDailyLaunchGrade);
   return `
     ${pageHeader("Teacher Dashboard", "", true)}
     <section class="dashboard-actions">
@@ -10217,102 +10188,6 @@ function renderLegacyDashboard() {
       <button class="outline-btn" data-action="reset">↺ Reset Sample Links</button>
     </section>
     ${renderApprovedStudentManager()}
-    <section class="form-card daily-launch-editor">
-      <div>
-        <span class="feature-kicker">Homepage Message</span>
-        <h2>Today's Launch</h2>
-        <p class="instruction">Give each grade its own directions. Students only receive the message for their account's grade.</p>
-      </div>
-      <form id="dailyLaunchForm" class="form-grid">
-        <div class="daily-launch-grade-tabs" role="tablist" aria-label="Choose a grade to edit">
-          ${CLASSROOM_GRADES.map(grade => `
-            <button
-              type="button"
-              role="tab"
-              class="daily-launch-grade-tab ${grade === teacherDailyLaunchGrade ? "is-active" : ""}"
-              data-action="dailyLaunchGrade"
-              data-grade="${grade}"
-              ${grade === teacherDailyLaunchGrade ? 'aria-selected="true"' : 'aria-selected="false"'}
-            >Grade ${grade}</button>
-          `).join("")}
-        </div>
-        <div class="field">
-          <label for="dailyLaunchMessage">Grade ${escapeHtml(teacherDailyLaunchGrade)} launch message</label>
-          <div class="mini-editor" aria-label="Today's Launch word processor">
-            <div class="mini-editor-toolbar" aria-label="Formatting tools">
-              <div class="editor-tool-group editor-select-group">
-                <select id="launchFontName" data-editor-select="fontName" title="Font">
-                  <option value="Aptos">Aptos</option>
-                  <option value="Arial">Arial</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Verdana">Verdana</option>
-                </select>
-                <select id="launchFontSize" data-editor-select="fontSize" title="Font size">
-                  <option value="2">12</option>
-                  <option value="3" selected>14</option>
-                  <option value="4">16</option>
-                  <option value="5">18</option>
-                  <option value="6">24</option>
-                </select>
-              </div>
-              <div class="editor-tool-group">
-                <button type="button" data-editor-command="undo" title="Undo">↶</button>
-                <button type="button" data-editor-command="redo" title="Redo">↷</button>
-              </div>
-              <div class="editor-tool-group">
-                <button type="button" data-editor-command="bold" title="Bold"><b>B</b></button>
-                <button type="button" data-editor-command="italic" title="Italic"><i>I</i></button>
-                <button type="button" data-editor-command="underline" title="Underline"><u>U</u></button>
-              </div>
-              <div class="editor-tool-group">
-                <div class="editor-color-menu">
-                  <button type="button" class="editor-color-tool" data-editor-palette="color" title="Text color">A</button>
-                  <div class="editor-color-popover" data-editor-popover="color" aria-label="Text color choices">
-                    <button type="button" class="editor-swatch" style="--swatch:#7b0b31" data-editor-swatch="color" data-color="#7b0b31" title="Maroon text"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#222222" data-editor-swatch="color" data-color="#222222" title="Black text"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#6b7280" data-editor-swatch="color" data-color="#6b7280" title="Gray text"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#2563eb" data-editor-swatch="color" data-color="#2563eb" title="Blue text"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#15803d" data-editor-swatch="color" data-color="#15803d" title="Green text"></button>
-                  </div>
-                </div>
-                <div class="editor-color-menu">
-                  <button type="button" class="editor-color-tool" data-editor-palette="backgroundColor" title="Highlight">H</button>
-                  <div class="editor-color-popover" data-editor-popover="backgroundColor" aria-label="Highlight color choices">
-                    <button type="button" class="editor-swatch" style="--swatch:#fff176" data-editor-swatch="backgroundColor" data-color="#fff176" title="Yellow highlight"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#fecdd3" data-editor-swatch="backgroundColor" data-color="#fecdd3" title="Pink highlight"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#bbf7d0" data-editor-swatch="backgroundColor" data-color="#bbf7d0" title="Green highlight"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#bfdbfe" data-editor-swatch="backgroundColor" data-color="#bfdbfe" title="Blue highlight"></button>
-                    <button type="button" class="editor-swatch" style="--swatch:#e5e7eb" data-editor-swatch="backgroundColor" data-color="#e5e7eb" title="Gray highlight"></button>
-                  </div>
-                </div>
-              </div>
-              <div class="editor-tool-group">
-                <button type="button" data-editor-command="insertUnorderedList" title="Bulleted list">•</button>
-                <button type="button" data-editor-command="insertOrderedList" title="Numbered list">1.</button>
-              </div>
-              <div class="editor-tool-group">
-                <button type="button" data-editor-command="justifyLeft" title="Align left">☰</button>
-                <button type="button" data-editor-command="justifyCenter" title="Align center">≡</button>
-                <button type="button" data-editor-command="justifyRight" title="Align right">☷</button>
-              </div>
-            </div>
-            <div id="dailyLaunchMessage" class="mini-editor-surface" contenteditable="true" role="textbox" aria-multiline="true">${sanitizeLaunchHtml(launchRecord.message)}</div>
-          </div>
-        </div>
-        <fieldset class="daily-launch-copy-options">
-          <legend>Also copy this message to</legend>
-          ${CLASSROOM_GRADES.filter(grade => grade !== teacherDailyLaunchGrade).map(grade => `
-            <label><input type="checkbox" name="dailyLaunchCopyGrade" value="${grade}"> Grade ${grade}</label>
-          `).join("")}
-        </fieldset>
-        <p class="daily-launch-updated">${launchRecord.updatedAt ? `Grade ${escapeHtml(teacherDailyLaunchGrade)} last updated ${escapeHtml(formatShortDate(launchRecord.updatedAt))}.` : `Grade ${escapeHtml(teacherDailyLaunchGrade)} is using the original launch message.`}</p>
-        <p id="dailyLaunchStatus" class="request-message" aria-live="polite"></p>
-        <div class="daily-launch-save-actions">
-          <button class="primary-btn" type="submit" name="launchSaveMode" value="selected">Save Grade ${escapeHtml(teacherDailyLaunchGrade)}</button>
-          <button class="outline-btn" type="submit" name="launchSaveMode" value="all">Use for All Grades</button>
-        </div>
-      </form>
-    </section>
     <section class="form-card class-timer-editor">
       <div>
         <span class="feature-kicker">Class Timer</span>
@@ -10451,7 +10326,7 @@ function renderDashboardOverview() {
 
 function renderDashboardClassroomTools() {
   const legacy = renderLegacyDashboard();
-  const start = legacy.indexOf('<section class="form-card daily-launch-editor">');
+  const start = legacy.indexOf('<section class="form-card class-timer-editor">');
   const end = legacy.indexOf('<h2 class="section-title">Colt Corner Threads</h2>');
   return `<div class="dashboard-tools-grid">${legacy.slice(start, end)}</div>`;
 }
@@ -11379,6 +11254,7 @@ function renderModal() {
 }
 
 function render() {
+  window.MyLaunchpad.configure(authSession, myLaunchpadCatalog());
   stopColtRunGame();
   if (["coltCorner", "thread"].includes(screen.name)) markVisibleColtCornerTopicsSeen();
   if (homeNavigationObserver) homeNavigationObserver.disconnect();
@@ -12005,92 +11881,6 @@ function attachScreenHandlers() {
       if (error) return;
       saveLinks(id ? links.map(link => link.id === id ? next : link) : [...links, next]);
       setScreen({ name: "dashboard" });
-    });
-  }
-
-  const dailyLaunchForm = document.getElementById("dailyLaunchForm");
-  if (dailyLaunchForm) {
-    const editor = document.getElementById("dailyLaunchMessage");
-    let savedEditorRange = null;
-    const rememberSelection = () => {
-      savedEditorRange = saveEditorSelection(editor) || savedEditorRange;
-    };
-    ["keyup", "mouseup", "input", "focus"].forEach(eventName => editor.addEventListener(eventName, rememberSelection));
-    document.addEventListener("selectionchange", () => {
-      if (document.activeElement === editor) rememberSelection();
-    });
-    dailyLaunchForm.querySelectorAll("[data-editor-command]").forEach(button => {
-      button.addEventListener("mousedown", event => event.preventDefault());
-      button.addEventListener("click", () => {
-        restoreEditorSelection(editor, savedEditorRange);
-        runEditorCommand(button.dataset.editorCommand);
-        rememberSelection();
-      });
-    });
-    dailyLaunchForm.querySelectorAll("[data-editor-select]").forEach(select => {
-      select.addEventListener("mousedown", rememberSelection);
-      select.addEventListener("change", () => {
-        restoreEditorSelection(editor, savedEditorRange);
-        runEditorCommand(select.dataset.editorSelect, select.value);
-        rememberSelection();
-      });
-    });
-    dailyLaunchForm.querySelectorAll("[data-editor-palette]").forEach(button => {
-      button.addEventListener("mousedown", event => {
-        event.preventDefault();
-        rememberSelection();
-      });
-      button.addEventListener("click", () => {
-        const palette = button.dataset.editorPalette;
-        const popover = dailyLaunchForm.querySelector(`[data-editor-popover="${palette}"]`);
-        dailyLaunchForm.querySelectorAll("[data-editor-popover]").forEach(item => {
-          if (item !== popover) item.classList.remove("is-open");
-        });
-        popover.classList.toggle("is-open");
-      });
-    });
-    dailyLaunchForm.querySelectorAll("[data-editor-swatch]").forEach(button => {
-      button.addEventListener("mousedown", event => {
-        event.preventDefault();
-        rememberSelection();
-      });
-      button.addEventListener("click", () => {
-        savedEditorRange = applyEditorInlineStyle(editor, savedEditorRange, {
-          [button.dataset.editorSwatch]: button.dataset.color
-        });
-        dailyLaunchForm.querySelectorAll("[data-editor-popover]").forEach(item => item.classList.remove("is-open"));
-      });
-    });
-    dailyLaunchForm.addEventListener("submit", async event => {
-      event.preventDefault();
-      const message = sanitizeLaunchHtml(editor.innerHTML);
-      const status = document.getElementById("dailyLaunchStatus");
-      if (!getLaunchPlainText(message)) {
-        status.textContent = "Please type a launch message.";
-        status.classList.add("error");
-        return;
-      }
-      editor.innerHTML = message;
-      const copyGrades = [...dailyLaunchForm.querySelectorAll('input[name="dailyLaunchCopyGrade"]:checked')].map(input => input.value);
-      const grades = event.submitter && event.submitter.value === "all"
-        ? [...CLASSROOM_GRADES]
-        : [...new Set([teacherDailyLaunchGrade, ...copyGrades])];
-      dailyLaunchForm.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = true; });
-      status.textContent = "Saving...";
-      status.classList.remove("error");
-      try {
-        await saveDailyLaunch({ message, grade: teacherDailyLaunchGrade, grades, updatedAt: new Date().toISOString() }, false);
-        status.textContent = grades.length === 1
-          ? `Grade ${teacherDailyLaunchGrade} Today's Launch saved.`
-          : `Today's Launch saved for Grades ${grades.join(", ")}.`;
-        const updated = dailyLaunchForm.querySelector(".daily-launch-updated");
-        if (updated) updated.textContent = `Grade ${teacherDailyLaunchGrade} last updated just now.`;
-      } catch (error) {
-        status.textContent = error.message || "Today's Launch could not be saved.";
-        status.classList.add("error");
-      } finally {
-        dailyLaunchForm.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = false; });
-      }
     });
   }
 
@@ -13337,15 +13127,6 @@ app.addEventListener("click", async event => {
     }
     document.getElementById("dashboardWorkspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  if (action === "dailyLaunchGrade") {
-    teacherDailyLaunchGrade = CLASSROOM_GRADES.includes(target.dataset.grade) ? target.dataset.grade : "4";
-    render();
-    requestAnimationFrame(() => {
-      const editor = document.getElementById("dailyLaunchMessage");
-      if (editor) editor.focus();
-      else document.querySelector(`.daily-launch-preview-tab[data-grade="${teacherDailyLaunchGrade}"]`)?.focus();
-    });
-  }
   if (action === "coltCornerGrade") {
     cornerGradeReadStatus = "";
     coltCornerTopicPage = 1;
@@ -13962,8 +13743,7 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
     return [...CLASSROOM_EXPECTATIONS];
   },
   getTodayDirections() {
-    if (!isSignedIn()) return "Log in to view today's instructions for your grade.";
-    return getLaunchPlainText(dailyLaunchRecord().message).slice(0, 1000);
+    return "Check the classroom board or ask your teacher for today's instructions. My Launchpad holds your personal favorites and recently opened activities, not assignments.";
   },
   getCurrentScreen() {
     return screen.name;
@@ -13977,6 +13757,7 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
     try {
       const url = new URL(approved.url);
       if (!["http:", "https:"].includes(url.protocol)) return false;
+      window.MyLaunchpad.record(`link:${approved.id}`);
       window.open(url.href, "_blank", "noopener,noreferrer");
       return true;
     } catch {
