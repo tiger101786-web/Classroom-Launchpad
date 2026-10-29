@@ -1,0 +1,4 @@
+# Local visual inspection / regression captures, not pet assets.
+test-*.png
+preview*.png
+face-inspection.png

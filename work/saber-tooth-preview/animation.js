@@ -1,0 +1,113 @@
+/* One clock for body mesh, face, headphones, and floating symbols. Preview only. */
+(async()=>{
+ const ns='http://www.w3.org/2000/svg',svg=pet.querySelector('svg'),tiger=$('.tiger');
+ tiger.style.animation='none';
+ const original=new Image();original.src=window.saberArtData;await original.decode();
+ const underlay=new Image();underlay.src=window.saberUnderlayData;await underlay.decode();
+ const fo=document.createElementNS(ns,'foreignObject');fo.setAttribute('width',1024);fo.setAttribute('height',1024);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=1536;canvas.style.cssText='width:1024px;height:1024px;display:block';fo.append(canvas);
+ const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:true});
+ if(!gl)throw Error('Please enable browser hardware acceleration to test animations.');
+ const vertex=`attribute vec2 p;varying vec2 uv;uniform float breath,ear,paw,pawRight,nose,sway,tilt,jaw,brow,rear,layer;
+ float field(vec2 p,vec2 c,vec2 r){vec2 d=(p-c)/r;return exp(-dot(d,d)*2.);}
+ void main(){uv=p/1024.;vec2 q=p;
+ float leftEar=field(p,vec2(303.,125.),vec2(95.,92.));float rightEar=field(p,vec2(739.,125.),vec2(95.,92.));
+ q.y+=ear*(leftEar-rightEar)*14.;q.x+=ear*(leftEar+rightEar)*5.;
+ // Separate foreground limbs: no displacement can propagate into rear legs.
+ float lift=layer==1.?paw:(layer==2.?pawRight:0.);
+ float hinge=smoothstep(630.,880.,p.y);
+ q.y-=lift*92.*hinge;q.x+=(layer==1.?-1.:1.)*lift*12.*hinge;
+ float rearLeft=field(p,vec2(238.,875.),vec2(65.,100.));float rearRight=field(p,vec2(850.,875.),vec2(65.,100.));
+ if(layer==0.)q.y-=max(rear,0.)*rearLeft*9.+max(-rear,0.)*rearRight*9.;
+ q.y-=brow*18.*(field(p,vec2(413.,207.),vec2(65.,30.))+field(p,vec2(626.,207.),vec2(65.,30.)));
+ q.x+=nose*5.*field(p,vec2(520.,389.),vec2(70.,46.));
+ q.y+=jaw*12.*field(p,vec2(520.,508.),vec2(62.,45.));
+ float head=1.-smoothstep(590.,845.,p.y);float a=tilt*.01745329*head;vec2 d=q-vec2(520.,465.);q=vec2(cos(a)*d.x-sin(a)*d.y,sin(a)*d.x+cos(a)*d.y)+vec2(520.,465.);
+ float anchor=1.-smoothstep(850.,972.,p.y);q.y+=(q.y-987.)*.007*breath*anchor;
+ q.x+=(p.x-520.)*.008*breath*field(p,vec2(520.,700.),vec2(260.,190.))*anchor;
+ q.x+=sway*9.*head;
+ gl_Position=vec4(q.x/512.-1.,1.-q.y/512.,0.,1.);}`;
+ const fragment=`precision highp float;varying vec2 uv;uniform sampler2D art,clean,limbs;uniform float gaze,layer;
+ void main(){vec2 q=uv*1024.;float l=1.-smoothstep(20.,34.,length((q-vec2(429.,257.))*vec2(1.,1.1)));float r=1.-smoothstep(20.,34.,length((q-vec2(617.,257.))*vec2(1.,1.1)));vec2 sampleUV=uv;sampleUV.x-=gaze*7.*max(l,r)/1024.;vec4 source=texture2D(art,sampleUV);vec4 mask=texture2D(limbs,uv);
+ // Reveal each complete rear foot, not just the portion inside the foreleg cutout.
+ // The blend ends in the fur above the toes; no mask edge crosses a rear claw.
+ float rearFeet=smoothstep(770.,850.,q.y);
+ if(layer==0.)gl_FragColor=mix(source,texture2D(clean,uv),max(max(mask.r,mask.g),rearFeet));else gl_FragColor=source*(layer==1.?mask.r:mask.g);}`;
+ function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
+ const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
+ const vertices=[];for(let y=0;y<1024;y+=8)for(let x=0;x<1024;x+=8)vertices.push(x,y,x+8,y,x,y+8,x+8,y,x+8,y+8,x,y+8);
+ const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);const loc=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+ const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,original);for(const [key,value] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,key,value);
+ gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+ const maskCanvas=document.createElement('canvas');maskCanvas.width=maskCanvas.height=2048;
+ const mc=maskCanvas.getContext('2d');mc.scale(2,2);mc.fillStyle='black';mc.fillRect(0,0,1024,1024);
+ // Contours follow the original forelegs, leaving rear paws outside the masks.
+ // Include the inward-facing dewclaws behind each forepaw. They belong to
+ // the moving foreleg, not the stationary rear-foot/torso layer.
+ const leftContour=new Path2D('M277 625 Q278 739 306 838 Q306 861 283 873 Q248 878 245 925 Q241 965 265 983 Q350 1000 470 987 Q490 962 481 923 L493 927 Q500 901 487 876 Q478 862 467 861 L450 838 Q425 749 393 685 L370 625Z');
+ const rightContour=new Path2D('M800 625 Q806 745 770 841 Q773 862 794 878 Q829 890 832 931 Q839 969 813 987 Q705 1001 595 986 Q577 966 588 920 L575 925 Q568 899 581 874 Q590 860 601 859 L617 831 Q645 744 673 685 L700 625Z');
+ mc.fillStyle='#ff0000';mc.fill(leftContour);mc.fillStyle='#00ff00';mc.fill(rightContour);
+ function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);for(const k of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR);for(const k of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE);gl.uniform1i(gl.getUniformLocation(program,name),unit)}
+ extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
+ const layerUniform=gl.getUniformLocation(program,'layer');
+ // Render at the displayed pixel density, avoiding a second oversized bitmap resample.
+ const resize=new ResizeObserver(()=>{const size=Math.max(384,Math.min(2048,Math.ceil(pet.getBoundingClientRect().width*devicePixelRatio*2)));if(canvas.width!==size){canvas.width=canvas.height=size;gl.viewport(0,0,size,size);start()}});resize.observe(pet);
+ const uniforms=Object.fromEntries(['breath','ear','paw','pawRight','nose','sway','tilt','jaw','brow','rear','gaze'].map(k=>[k,gl.getUniformLocation(program,k)]));
+ tiger.replaceChildren(fo);
+ svg.querySelector('defs').insertAdjacentHTML('beforeend',`<linearGradient id="lid-fur" x2="0" y2="1"><stop stop-color="#bc752e"/><stop offset=".6" stop-color="#d1aa79"/><stop offset="1" stop-color="#ecd0a0"/></linearGradient><radialGradient id="gape"><stop stop-color="#492d25"/><stop offset="1" stop-color="#1c1511"/></radialGradient>
+ <clipPath id="eye-left"><path d="M388 232Q400 224 416 238L460 278Q459 297 430 302Q390 301 384 266Q381 246 388 232Z"/></clipPath><clipPath id="eye-right"><path d="M652 232Q640 224 624 238L580 278Q581 297 610 302Q650 301 656 266Q659 246 652 232Z"/></clipPath>`);
+ tiger.insertAdjacentHTML('beforeend',`<g id="face"><g clip-path="url(#eye-left)"><path id="lid-left" fill="url(#lid-fur)"/><path id="lash-left" fill="none" stroke="#34271c" stroke-width="5" stroke-linecap="round"/></g><g clip-path="url(#eye-right)"><path id="lid-right" fill="url(#lid-fur)"/><path id="lash-right" fill="none" stroke="#34271c" stroke-width="5" stroke-linecap="round"/></g><g id="mouth" opacity="0"><path id="mouth-shape" fill="url(#gape)" stroke="#342119" stroke-width="3"/><path id="mouth-tongue" fill="#ba7c72"/></g></g>
+ <g id="headphones" visibility="hidden"><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#32261d" stroke-width="30"/><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#9c7542" stroke-width="18"/><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#e4c78f" stroke-width="2" stroke-dasharray="5 5"/>${[277,763].map((x,i)=>`<g transform="translate(${x} 159) rotate(${i?24:-24})"><rect x="-39" y="-60" width="78" height="120" rx="29" fill="#332c24" stroke="#211e19" stroke-width="6"/><rect x="-31" y="-51" width="62" height="102" rx="24" fill="#ac814a" stroke="#efdba5" stroke-width="3"/><rect x="-23" y="-42" width="46" height="84" rx="18" fill="#614630"/><path d="M-10 -16Q12 -24 13 -8L-1 20L-5 1Z" fill="#f0d9a6"/></g>`).join('')}</g>`);
+ svg.insertAdjacentHTML('beforeend',`<g id="music" class="symbols" opacity="0">${[[90,380],[870,400],[110,650],[870,670]].map(([x,y],i)=>`<text x="${x}" y="${y}" font-size="105">${i%2?'♫':'♪'}</text>`).join('')}</g><g id="zs" class="symbols" opacity="0">${[[810,190],[860,130],[920,80]].map(([x,y],i)=>`<text x="${x}" y="${y}" font-size="${70+i*15}">${i?'Z':'z'}</text>`).join('')}</g>`);
+ stage.insertAdjacentHTML('beforeend','<div id="speech" class="speech" role="status" hidden></div>');
+ const state={mode:'idle',action:null,time:0,motion:true,idle:true,nextIdle:4,nextBlink:2,blinkStart:-10,index:0,frames:0};
+ // A clipped row of small incisors sits inside the opening, never across the fangs.
+ svg.querySelector('defs').insertAdjacentHTML('beforeend','<clipPath id="mouth-clip"><path id="mouth-clip-shape"/></clipPath>');
+ $('#mouth').insertAdjacentHTML('beforeend','<g id="small-teeth" clip-path="url(#mouth-clip)" fill="#f6e7c9" stroke="#bba88a" stroke-width="1">'+[487,503,519,535,551].map(x=>`<path d="M${x-5} 462L${x+5} 462L${x+1} 477Q${x} 479 ${x-1} 477Z"/>`).join('')+'</g>');
+ const durations={hello:2.5,happy:2.4,blink:.3,talk:2.3,ears:1.7,paw:1.65,nose:1.5,wobble:1.6,look:3.5,wake:3.4};
+ $('[data-action="wobble"]').textContent='Body shake';
+ $('[data-action="look"]').textContent='Eye scan';
+ $('[data-action="happy"]').textContent='Happy expression';
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)'),clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x)};
+ let last=0,raf=0,speechTimer,inTick=false;
+ function say(message){clearTimeout(speechTimer);$('#speech').textContent=message;$('#speech').hidden=false;speechTimer=setTimeout(()=>$('#speech').hidden=true,3500)}
+ function ui(){pet.dataset.state=state.mode;$('#status').textContent=state.mode==='sleep'?'Resting those mighty paws…':state.mode==='dance'?'Prehistoric paws. Present-day rhythm.':state.action?'Trying '+state.action.name+'…':'Steady paws. Quiet confidence.';document.querySelectorAll('[data-action]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.action===state.mode||b.dataset.action===state.action?.name)))}
+ function play(name){if(name==='sleep'){state.mode='sleep';state.action=null;$('#speech').hidden=true}else if(name==='wake'||state.mode==='sleep'){state.mode='idle';state.action={name:'wake',start:state.time};say('That was a mammoth-sized nap!')}else if(name==='dance'){state.mode=state.mode==='dance'?'idle':'dance';state.action=null;if(state.mode==='dance')say('These paws have found their rhythm.')}else{state.mode='idle';state.action={name,start:state.time};if(name==='hello')say(['Big fangs. Bigger courage. You’ve got this!','Your prehistoric study buddy is here.','Ready to sink our teeth into something new?'][state.index++%3])}state.nextIdle=state.time+6;ui();start()}
+ document.querySelectorAll('[data-action]').forEach(button=>button.onclick=()=>play(button.dataset.action));
+ $('#motion').onchange=e=>{state.motion=e.target.checked;last=0;start()};$('#idle').onchange=e=>{state.idle=e.target.checked;state.nextIdle=state.time+4};
+ function set(id,key,value){$(id).setAttribute(key,value)}
+ function tick(now){raf=0;if(document.hidden)return;inTick=true;const dt=last?Math.min((now-last)/1000,.06):0;last=now;if(state.motion&&!reduce.matches)state.time+=dt;const time=state.time;
+  if(state.action&&time-state.action.start>=durations[state.action.name]){state.action=null;state.nextIdle=time+3;ui()}
+  if(state.mode==='idle'&&!state.action&&state.idle&&time>state.nextIdle)play(['ears','happy','paw','nose','hello','talk','look','wobble'][state.index++%8]);
+  if(state.mode==='idle'&&time>state.nextBlink){state.blinkStart=time;state.nextBlink=time+3.2+Math.random()*2}
+  const action=state.action,name=action?.name,t=action?clamp((time-action.start)/durations[name]):0,envelope=Math.sin(t*Math.PI)**2;
+  let close=0,happy=0,open=0,ear=0,paw=0,pawRight=0,nose=0,sway=0,tilt=0,gaze=0,rear=0;
+  const blink=(time-state.blinkStart)/.3;if(blink>=0&&blink<1)close=Math.sin(blink*Math.PI)**2;
+  if(name==='blink')close=envelope;
+  if(name==='happy'||name==='hello'){happy=envelope;open=.4*envelope}
+  if(name==='hello'||name==='paw')paw=1.25*envelope*(.82+.18*Math.sin(t*Math.PI*12));
+  if(name==='ears'||name==='hello')ear=Math.sin(t*Math.PI*6)*envelope;
+  if(name==='nose')nose=Math.sin(t*Math.PI*8)*envelope;
+  if(name==='wobble'){sway=Math.sin(t*Math.PI*20)*envelope*1.5;tilt=sway*1.1;ear=-sway*.7}
+  if(name==='look')gaze=Math.sin(t*Math.PI*2)*envelope;
+  if(name==='talk')open=(.3+.7*(.5-.5*Math.cos(t*Math.PI*10)))*envelope;
+  if(state.mode==='sleep'){close=1;open=.15+.5*(.5+.5*Math.sin(time*2*Math.PI/3.4))}
+  if(name==='wake'){close=1-ease((t-.38)/.14);if(t>.62&&t<.72)close=.7*Math.sin((t-.62)/.1*Math.PI)**2;open=Math.sin(Math.PI*clamp((t-.05)/.85))**2;ear=.25*Math.sin(t*Math.PI*4)*envelope}
+  if(state.mode==='dance'){sway=Math.sin(time*Math.PI*2/.8);tilt=sway*1.4;ear=.25*Math.sin(time*8);const step=Math.sin(time*Math.PI*2/1.2);paw=.6*Math.max(0,step)**2;pawRight=.6*Math.max(0,-step)**2;rear=-step;happy=.6;open=.32+.08*Math.sin(time*8)}
+  const breath=Math.sin(time*Math.PI*2/3.4),pose={breath,ear,paw,pawRight,nose,sway,tilt,jaw:open,brow:happy,rear,gaze};state.pose=pose;
+  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);for(const [key,loc] of Object.entries(uniforms))gl.uniform1f(loc,pose[key]);for(let layer=0;layer<3;layer++){gl.uniform1f(layerUniform,layer);gl.drawArrays(gl.TRIANGLES,0,vertices.length/2)}
+  const transform=`translate(${sway*9} ${-987*.007*breath}) scale(1 ${1+.007*breath}) rotate(${tilt} 520 465)`;set('#face','transform',transform);set('#headphones','transform',transform);set('#headphones','visibility',state.mode==='dance'?'visible':'hidden');
+  for(const [side,x] of [['left',425],['right',615]]){let d='M0 0Z';const c=ease(close),upper=200+80*c,lower=335-55*c;if(c>.001)d=`M${x-50} 218H${x+50}V258Q${x} ${upper} ${x-50} 258Z M${x-50} 258Q${x} ${lower} ${x+50} 258V312H${x-50}Z`;set('#lid-'+side,'d',d);set('#lash-'+side,'d',c>.85?`M${x-34} 263Q${x} 278 ${x+34} 263`:'M0 0Z')}
+  const sleeping=state.mode==='sleep',rx=sleeping?27:45+open*10,depth=(sleeping?5:2)+open*(name==='wake'?50:32),cy=468;
+  set('#mouth','opacity',ease(open/.15));set('#mouth-shape','d',`M${520-rx} ${cy}Q520 ${cy-7} ${520+rx} ${cy}C${520+rx} ${cy+depth*1.5} ${520-rx} ${cy+depth*1.5} ${520-rx} ${cy}Z`);
+  set('#mouth-clip-shape','d',$('#mouth-shape').getAttribute('d'));set('#small-teeth','opacity',sleeping?0:1);
+  set('#mouth-tongue','d',sleeping?'M0 0Z':`M${520-rx*.55} ${cy+depth*.95}Q520 ${cy+depth*.5} ${520+rx*.55} ${cy+depth*.95}Q520 ${cy+depth*1.2} ${520-rx*.55} ${cy+depth*.95}Z`);
+  set('#music','opacity',state.mode==='dance'?1:0);set('#zs','opacity',sleeping?1:0);
+  $('#music').querySelectorAll('text').forEach((node,i)=>{const p=(time/2.4+i*.25)%1;node.setAttribute('transform',`translate(${Math.sin(p*Math.PI*2)*12} ${25-135*p})`);node.style.opacity=Math.sin(Math.PI*p)});
+  $('#zs').querySelectorAll('text').forEach((node,i)=>{const p=(time/3+i/3)%1;node.setAttribute('transform',`translate(${-20+45*p} ${45-110*p})`);node.style.opacity=p<.25?p*4:1-(p-.25)/.75});
+  state.frames++;inTick=false;if(state.motion&&!reduce.matches)raf=requestAnimationFrame(tick);
+ }
+ function start(){if(!raf&&!inTick&&!document.hidden)raf=requestAnimationFrame(tick)}
+ document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;start()});reduce.addEventListener('change',()=>{last=0;start()});
+ window.saberTest={state,play,ready:true};ui();start();
+})().catch(error=>{console.error(error);$('#status').textContent='Animation could not start: '+error.message});

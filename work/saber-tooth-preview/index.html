@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saber-tooth · Pet Studio test</title><link rel="stylesheet" href="preview.css"><link rel="stylesheet" href="animation.css"></head>
+<body><main><header><p class="eyebrow">PET STUDIO / PRIVATE WORKING PREVIEW</p><h1>A little prehistoric presence.</h1><p>A weathered fossil outcrop, an ivory stone nameplate, and a personality of his own.</p></header>
+<div class="layout"><section class="stage" aria-label="Saber-tooth tiger preview"><span class="badge">TEST PET · NOT ADDED TO LAUNCHPAD</span><div id="pet" class="pet">
+<svg viewBox="0 0 1024 1380" role="img" aria-label="Seated saber-tooth tiger on a stone platform with a personalized nameplate">
+<defs>
+ <linearGradient id="rock" x2=".25" y2="1"><stop stop-color="#8c8271"/><stop offset=".4" stop-color="#4c4941"/><stop offset="1" stop-color="#282b29"/></linearGradient>
+ <linearGradient id="top" x2=".3" y2="1"><stop stop-color="#aaa18b"/><stop offset=".55" stop-color="#706c5e"/><stop offset="1" stop-color="#4d5146"/></linearGradient>
+ <linearGradient id="amber" x2=".7" y2="1"><stop stop-color="#ffdfa0"/><stop offset=".5" stop-color="#d39534"/><stop offset="1" stop-color="#83451a"/></linearGradient>
+ <linearGradient id="plate" x2="0" y2="1"><stop stop-color="#f9dda5"/><stop offset=".5" stop-color="#d8ad69"/><stop offset="1" stop-color="#ba8542"/></linearGradient>
+ <linearGradient id="ivory" x2="1" y2="0"><stop stop-color="#a98a60"/><stop offset=".45" stop-color="#fff0ca"/><stop offset="1" stop-color="#d3ad78"/></linearGradient>
+ <pattern id="grain" width="87" height="43" patternUnits="userSpaceOnUse"><path d="M8 9l16 -3m25 21l21 -6M3 34l12 -2m60 -24l8 1" stroke="#e7ddc1" stroke-opacity=".17" stroke-width="2"/></pattern>
+ <g id="fang"><path d="M0 0Q48 -12 62 12Q58 85 17 137Q30 65 0 0Z" fill="url(#ivory)" stroke="#493b2b" stroke-width="5"/><path d="M21 10Q47 48 27 99" fill="none" stroke="#fff3ce" stroke-width="5"/></g>
+</defs>
+<!-- A deep top surface beneath all four paws; no paw cutouts. -->
+<g id="platform">
+ <ellipse cx="512" cy="1095" rx="420" ry="35" fill="#000" opacity=".22"/>
+ <path d="M61 992L111 941L264 911L507 899L762 914L914 949L969 996L955 1057L879 1098L676 1122L379 1120L159 1097L74 1060Z" fill="url(#rock)" stroke="#292821" stroke-width="8"/>
+ <path d="M61 992L111 941L264 911L507 899L762 914L914 949L969 996L909 1030L747 1060L502 1073L260 1058L113 1031Z" fill="url(#top)" stroke="#c1b49a" stroke-width="5"/>
+ <path d="M61 992L111 941L264 911L507 899L762 914L914 949L969 996L909 1030L747 1060L502 1073L260 1058L113 1031Z" fill="url(#grain)"/>
+ <path d="M117 1036L159 1062L254 1069L278 1107M748 1064L710 1092L670 1118M914 1033L869 1052L890 1091" fill="none" stroke="#292923" stroke-width="8"/>
+ <path d="M120 1047L162 1071L252 1077L268 1103M907 1042L871 1061L884 1082" fill="none" stroke="url(#amber)" stroke-width="5"/>
+ <path d="M480 1077L512 1060L545 1078L535 1108L510 1119L488 1104Z" fill="#282921" stroke="#a87d3a" stroke-width="5"/><path d="M494 1080L512 1070L533 1080L512 1109Z" fill="url(#amber)"/>
+</g>
+<g class="tiger"><image href="tiger.png" width="1024" height="1024"/></g>
+<g class="nameplate" transform="translate(112 1172)">
+ <path d="M45 3L743 3L797 39L790 116L749 147L43 147L0 111L7 35Z" fill="url(#rock)" stroke="#282821" stroke-width="7"/>
+ <path d="M66 19L728 19L765 45L761 104L725 129L67 129L35 103L39 45Z" fill="url(#amber)" stroke="#aa7c37" stroke-width="5"/>
+ <path d="M87 31H708L739 51L734 97L705 117H88L61 96L64 52Z" fill="url(#plate)" stroke="#6b4c29" stroke-width="4"/>
+ <path d="M107 42H688M107 106H688" stroke="#fbe2aa" stroke-width="3" opacity=".7"/>
+ <use href="#fang" transform="translate(11 0) scale(.8)"/><use href="#fang" transform="translate(785 0) scale(-.8 .8)"/>
+ <text id="name-text" x="400" y="82" text-anchor="middle" dominant-baseline="middle" fill="#39281c" style="font:700 73px Georgia,serif;letter-spacing:2px">Saber</text>
+</g></svg></div><p id="status" aria-live="polite">Steady paws. Quiet confidence.</p></section>
+<aside><p class="eyebrow">MEET YOUR NEXT COMPANION</p><h2>Saber-tooth tiger</h2><p>Golden eyes, broad paws, and ivory fangs. Try his expressions and movements below.</p><label for="name">Pet name</label><input id="name" maxlength="16" value="Saber" autocomplete="off"><label for="size">Preview size</label><select id="size"><option value="200">Extra-large pet size</option><option value="280" selected>Detail view</option><option value="360">Close-up</option></select><div class="toggles"><label><input type="checkbox" id="motion" checked> Motion</label><label><input type="checkbox" id="idle" checked> Idle reactions</label><label><input type="checkbox" id="light"> Light background</label><label><input type="checkbox" id="platform-toggle" checked> Show platform</label></div><div id="actions" class="actions"><button id="greet" data-action="hello">Say hello</button><button data-action="happy">Happy eyes</button><button data-action="blink">Blink</button><button data-action="talk">Mouth movement</button><button data-action="ears">Ear flick</button><button data-action="paw">Paw wave</button><button data-action="nose">Nose wiggle</button><button data-action="wobble">Body sway</button><button data-action="look">Look around</button><button data-action="sleep">Sleep</button><button data-action="wake">Wake up</button><button data-action="dance">Try dancing</button></div><p class="note">Working test only. Dancing includes headphones and music notes; sleep includes breathing, snoring, and drifting Z’s. Nothing has been added to the live pet selection.</p></aside></div></main><script src="art-data.js"></script><script src="preview.js"></script><script src="animation.js"></script></body></html>
