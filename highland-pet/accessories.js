@@ -50,7 +50,51 @@ for(const g of layer.querySelectorAll('[data-ha]')){
  g.dataset.highlandWearable=g.dataset.ha;layers[g.dataset.ha]=g;
 }
 cow.append(layer);
+// Preserve the approved native SVG renderer in Chrome, Edge and Safari.
+// Firefox on iOS uses WebKit and must also keep the native renderer.
+const firefox=/Firefox\//.test(navigator.userAgent)&&!/FxiOS\//.test(navigator.userAgent);
+host.dataset.accessoryRenderer=firefox?'canvas':'svg';
+if(!firefox){
+ let selected=[];
+ return {frame(pose){const b=pose.breath*.012;for(const id of selected){layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} ${-909*b}) scale(1 ${1+b})`);if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
+}
+// Small SVG scale changes can reuse a pixel-snapped raster in Firefox. The
+// recording showed stationary cloth followed by jumps while the body advanced.
+// Keep the original SVG as the artwork source, rasterize it ONCE at 4x, then
+// apply fractional transforms in a canvas on the body's existing frame callback.
+// No new animation clock, CSS animation, or modification of the cow rig.
+const drawings={};
+for(const [id,g] of Object.entries(layers)){
+ if(id!=='scarf'&&id!=='wreath')continue;
+ g.style.display='';
+ // The live pet initializes hidden. Measure a visible offscreen clone instead
+ // of getBBox() on a display:none ancestor (which returns an empty rectangle).
+ const measure=document.createElementNS(ns,'svg');measure.setAttribute('viewBox','0 0 1024 1024');measure.style.cssText='position:fixed;left:-10000px;top:0;width:1024px;height:1024px;pointer-events:none';const measured=g.cloneNode(true);measure.append(layer.querySelector('defs').cloneNode(true),measured);document.body.append(measure);const bounds=measured.getBBox();measure.remove();
+ const pad=8,x=Math.floor(bounds.x-pad),y=Math.floor(bounds.y-pad),w=Math.ceil(bounds.width+pad*2),h=Math.ceil(bounds.height+pad*2);
+ const source=document.createElementNS(ns,'svg');source.setAttribute('xmlns',ns);source.setAttribute('viewBox',`${x} ${y} ${w} ${h}`);source.setAttribute('width',w*4);source.setAttribute('height',h*4);
+ source.append(layer.querySelector('defs').cloneNode(true),g.cloneNode(true));
+ for(const image of source.querySelectorAll('image')){
+  const blob=await (await fetch(image.getAttribute('href'))).blob();
+  const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)});image.setAttribute('href',data);
+ }
+ const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(source)],{type:'image/svg+xml'}));
+ const image=new Image();try{image.src=url;await image.decode();const raster=document.createElement('canvas');raster.width=w*4;raster.height=h*4;raster.getContext('2d').drawImage(image,0,0);
+ // Firefox does not implement high-quality canvas downsampling. Build a
+ // half-size pyramid once so tartan/flowers cannot alias during a large shrink.
+ const levels=[raster];while(levels.at(-1).width>64){const prev=levels.at(-1),next=document.createElement('canvas');next.width=Math.ceil(prev.width/2);next.height=Math.ceil(prev.height/2);next.getContext('2d').drawImage(prev,0,0,next.width,next.height);levels.push(next)}
+ drawings[id]={levels,x,y,w,h}}finally{URL.revokeObjectURL(url)}
+ g.style.display='none';
+}
+layer.style.visibility='hidden';
+const surface=document.createElementNS(ns,'foreignObject');surface.setAttribute('width','1024');surface.setAttribute('height','1024');surface.setAttribute('aria-hidden','true');surface.style.pointerEvents='none';
+const canvas=document.createElement('canvas');canvas.width=canvas.height=2048;canvas.style.cssText='display:block;width:1024px;height:1024px';canvas.dataset.highlandAccessorySurface='';surface.append(canvas);cow.append(surface);
+const context=canvas.getContext('2d');context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
+let resolution=0;
+let displayWidth=host.getBoundingClientRect().width;
+const resize=new ResizeObserver(entries=>{displayWidth=entries[0].contentRect.width});resize.observe(host);
 let selected=[];
-return {frame(pose){const b=pose.breath*.012;for(const id of selected){layers[id].firstElementChild.setAttribute('transform',`translate(${pose.wobble*(id==='scarf'?10:13)} ${-909*b}) scale(1 ${1+b})`);if(id==='headphones')layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`))}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,g] of Object.entries(layers))g.style.display=selected.includes(id)?'':'none';host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
+return {frame(pose){const target=Math.max(256,Math.min(2048,Math.ceil(displayWidth*(window.devicePixelRatio||1)*2)));if(target!==resolution){resolution=target;canvas.width=canvas.height=target;context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high'}const scale=resolution/1024,b=pose.breath*.012;context.setTransform(1,0,0,1,0,0);context.clearRect(0,0,resolution,resolution);for(const id of selected){const dx=pose.wobble*(id==='scarf'?10:13);layers[id].firstElementChild.setAttribute('transform',`translate(${dx} ${-909*b}) scale(1 ${1+b})`);if(id==='headphones'){// Keep earcups attached to independently moving ears using the native rig.
+ layers[id].querySelectorAll('.ha-cup').forEach(g=>g.setAttribute('transform',`translate(${pose.ear*6} ${pose.ear*(g.dataset.side==='left'?23:-23)})`));continue;
+ }const art=drawings[id];if(art){let image=art.levels[0];for(const level of art.levels){if(level.width<art.w*scale)break;image=level}context.setTransform(scale,0,0,scale*(1+b),scale*dx,-scale*909*b);context.drawImage(image,art.x,art.y,art.w,art.h)}}},update(p,dancing=false){const head=dancing?'headphones':p.headwear;selected=[...(p.neckwear==='scarf'?['scarf']:[]),...(head&&head!=='none'?[head]:[])];for(const [id,g] of Object.entries(layers)){g.style.display=selected.includes(id)?'':'none';g.style.visibility=drawings[id]?'hidden':'visible'}host.dataset.headwear=head||'none';host.dataset.neckwear=p.neckwear||'none'}};
 };
 
