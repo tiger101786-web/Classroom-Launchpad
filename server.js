@@ -4108,7 +4108,7 @@ async function handleApi(req, res, pathname) {
       const records = normalizeMyLaunchpads(db.myLaunchpads);
       const preferences = records[key] || {favorites:[],recent:[]};
       if (body) {
-        if (!['favorite','visit','swap','move','clearRecent'].includes(body.action)) throw Error('Unknown Launchpad action.');
+        if (!['favorite','visit','swap','move','place','clearRecent'].includes(body.action)) throw Error('Unknown Launchpad action.');
         const valid = id => typeof id === 'string' && /^(link|app):[^\s<>"']{1,180}$/.test(id);
         if (body.action !== 'clearRecent' && !valid(body.id)) throw Error('Invalid shortcut.');
         if (body.action === 'favorite') {
@@ -4128,6 +4128,15 @@ async function handleApi(req, res, pathname) {
           preferences.favorites=preferences.favorites.filter(id=>id!==body.id);
           if(body.placement==='front') preferences.favorites.unshift(body.id);
           else preferences.favorites.push(body.id);
+        }
+        if (body.action === 'place') {
+          if (!['before','after'].includes(body.placement)) throw Error('Choose a valid drop position.');
+          if (!preferences.favorites.includes(body.id) || !preferences.favorites.includes(body.target)) throw Error('Favorite no longer exists.');
+          if(body.id!==body.target){
+            preferences.favorites=preferences.favorites.filter(id=>id!==body.id);
+            const index=preferences.favorites.indexOf(body.target)+(body.placement==='after'?1:0);
+            preferences.favorites.splice(index,0,body.id);
+          }
         }
         if (body.action === 'clearRecent') preferences.recent=[];
         db.myLaunchpads={...records,[key]:preferences};writeDb(db);

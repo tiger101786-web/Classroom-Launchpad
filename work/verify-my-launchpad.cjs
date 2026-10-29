@@ -25,6 +25,14 @@ const req=async(route,cookie,body,method)=>fetch(origin+route,{method:method||(b
  await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.ml-tile').length===6);
  assert.equal(await page.locator('.daily-launch-card').count(),0);
  await page.locator('#home-launch').screenshot({path:path.join(dir,'desktop.png')});
+ // Sort directly on the compact strip and verify saved insertion (not swapping).
+ const firstTile=await page.locator('.ml-tile').nth(0).boundingBox(),thirdTile=await page.locator('.ml-tile').nth(2).boundingBox();
+ await page.mouse.move(firstTile.x+80,firstTile.y+35);await page.mouse.down();await page.mouse.move(thirdTile.x+thirdTile.width-10,thirdTile.y+35,{steps:12});await page.mouse.up();
+ await page.waitForFunction(()=>document.querySelectorAll('.ml-tile')[2]?.dataset.mlDrag==='app:classroom');
+ assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites[2],'app:classroom');
+ assert.equal((await req('/api/my-launchpad',cookie,{action:'place',id:'app:classroom',target:'app:not-a-favorite',placement:'before'})).status,400);
+ await req('/api/my-launchpad',cookie,{action:'place',id:'app:classroom',target:'app:spotlight',placement:'before'});
+ await page.reload();await page.waitForFunction(()=>document.querySelectorAll('.ml-tile').length===6);
  await page.locator('[data-ml-dialog=add]').click();
  await page.route('**/api/my-launchpad',async route=>{if(route.request().method()==='POST')await new Promise(r=>setTimeout(r,350));await route.continue()});
  const scrollTestId=await page.locator('.ml-results [data-ml-star]').nth(18).getAttribute('data-ml-star');
@@ -41,12 +49,29 @@ const req=async(route,cookie,body,method)=>fetch(origin+route,{method:method||(b
  await page.unroute('**/api/my-launchpad');await page.keyboard.press('Escape');
  await page.locator('[data-ml-dialog=favorites]').click();await page.locator('#ml-search').fill('Slides');assert.equal(await page.locator('.ml-result').count(),1);
  await page.locator('#ml-search').fill('');
- await page.locator('[data-ml-position="app:docs"][data-placement=front]').click();await page.waitForFunction(()=>document.querySelector('.ml-result')?.dataset.mlRow==='app:docs');
+ // Drag the first card below the third without opening its destination.
+ const source=await page.locator('.ml-result').nth(0).boundingBox(),target=await page.locator('.ml-result').nth(2).boundingBox();
+ await page.mouse.move(source.x+120,source.y+25);await page.mouse.down();await page.mouse.move(target.x+120,target.y+target.height-5,{steps:12});await page.mouse.up();
+ await page.waitForFunction(()=>!document.querySelector('.ml-dialog .ml-status').textContent.includes('Saving'));
+ assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites[2],'app:classroom');
+ assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.recent.length,0,'Dragging must not open a shortcut');
+ // Real touch events on the handle should reorder without scrolling the page.
+ const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true});
+ const touchId=await page.locator('.ml-result').first().getAttribute('data-ml-row'),handle=await page.locator('.ml-result .ml-grip').first().boundingBox(),touchTarget=await page.locator('.ml-result').nth(2).boundingBox();
+ const tx=handle.x+handle.width/2,ty=handle.y+handle.height/2,endY=touchTarget.y+touchTarget.height-8;
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:tx,y:ty}]});
+ for(let i=1;i<=10;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:tx,y:ty+(endY-ty)*i/10}]});await page.waitForTimeout(16)}
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:false});
+ await page.waitForFunction(id=>document.querySelectorAll('.ml-result')[2]?.dataset.mlRow===id,touchId);
+ assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites[2],touchId);
+ await page.locator('.ml-dialog').screenshot({path:path.join(dir,'favorites-drag.png')});
+ await page.waitForTimeout(450);
+ await page.locator('.ml-dialog [data-ml-grip="app:docs"]').focus();await page.keyboard.press('Home');await page.waitForFunction(()=>document.querySelector('.ml-result')?.dataset.mlRow==='app:docs');
  assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites[0],'app:docs');
- await page.locator('[data-ml-position="app:docs"][data-placement=back]').click();await page.waitForFunction(()=>[...document.querySelectorAll('.ml-result')].at(-1)?.dataset.mlRow==='app:docs');
+ await page.locator('.ml-dialog [data-ml-grip="app:docs"]').focus();await page.keyboard.press('End');await page.waitForFunction(()=>[...document.querySelectorAll('.ml-result')].at(-1)?.dataset.mlRow==='app:docs');
  assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites.at(-1),'app:docs');
  assert.equal((await req('/api/my-launchpad',cookie,{action:'move',id:'app:docs',placement:'invalid'})).status,400);
- await page.locator('#ml-search').fill('');await page.locator('[data-ml-move="app:docs"][data-direction="-1"]').click();await page.waitForFunction(()=>!document.querySelector('.ml-dialog .ml-status').textContent.includes('Saving'));
+ await page.locator('#ml-search').fill('');await page.locator('.ml-dialog [data-ml-grip="app:docs"]').focus();await page.keyboard.press('ArrowUp');await page.waitForFunction(()=>!document.querySelector('.ml-dialog .ml-status').textContent.includes('Saving'));
  assert.equal((await (await req('/api/my-launchpad',cookie)).json()).preferences.favorites[4],'app:docs');
  await page.locator('[data-ml-mode=add]').click();await page.locator('#ml-search').fill('Typing');await page.waitForFunction(()=>document.querySelectorAll('.ml-result [data-ml-star^="link:"]').length>0);
  const star=page.locator('.ml-result [data-ml-star^="link:"]').first(),linkId=await star.getAttribute('data-ml-star');await star.click();await page.waitForFunction(id=>document.querySelector(`[data-ml-star="${id}"]`)?.getAttribute('aria-pressed')==='true',linkId);
