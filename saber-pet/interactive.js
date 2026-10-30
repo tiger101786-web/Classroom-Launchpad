@@ -8,7 +8,7 @@ window.createSaberPet=function(onChange,onCustomize){
  const pet=host.querySelector('.pet-button'),positionKey=()=> 'saber-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
- function refresh(){host.hidden=!visible||hidden;host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize=Math.min(73,580/Math.max(1,Array.from(preferences.name).length*.63))+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
+ function refresh(){const still=host.querySelector('.tiger>image');if(still&&window.saberSkins?.[preferences.skin])still.setAttribute('href',saberSkins[preferences.skin].art);host.hidden=!visible||hidden;host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize=Math.min(73,580/Math.max(1,Array.from(preferences.name).length*.63))+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
  pet.onclick=()=>{if(suppress){suppress=false;return}if(preferences.asleep){preferences={...preferences,asleep:false};refresh();onChange({...preferences})}else onCustomize?.()};
  pet.addEventListener('pointerdown',e=>{if(e.button!==0||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:b.left,top:b.top,moved:false};pet.setPointerCapture(e.pointerId)});
  pet.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)<6)return;drag.moved=true;position={x:drag.left+dx,y:drag.top+dy};host.querySelector('.saber-speech').hidden=true;place()});
@@ -16,16 +16,20 @@ window.createSaberPet=function(onChange,onCustomize){
  pet.addEventListener('pointerup',end);pet.addEventListener('pointercancel',end);
  pet.addEventListener('keydown',e=>{if(host.closest('.pet-studio'))return;const d={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!d)return;e.preventDefault();const b=pet.getBoundingClientRect();position={x:b.left+d[0],y:b.top+d[1]};place();remember()});
  window.addEventListener('resize',place);
- mountSaberRig(host).then(value=>{rig=value;host.dataset.ready='true';refresh()}).catch(error=>{host.dataset.ready='error';console.warn('Saber-tooth tiger is displaying its static artwork:',error.message)});
+ mountSaberRig(host,()=>preferences).then(value=>{rig=value;host.dataset.ready='true';refresh()}).catch(error=>{host.dataset.ready='error';console.warn('Saber-tooth tiger is displaying its static artwork:',error.message)});
  return {host,play(name){if(!host.hidden&&!preferences.asleep&&preferences.motion)rig?.play(({excited:'hello',greet:'hello',mouth:'talk'})[name]||name)},update(value){if(account!==value.account){account=value.account;position=null;hidden=false;rig?.reset();try{const p=JSON.parse(localStorage.getItem(positionKey())||'null');if(Number.isFinite(p?.x)&&Number.isFinite(p?.y))position=p}catch{}}preferences={...saberDefaults(),...value.preferences};visible=value.visible;radio=value.radio;refresh()},show(){hidden=false;refresh()},hide(){hidden=true;refresh()},reset(){position=null;try{localStorage.removeItem(positionKey())}catch{}place()},refresh};
 };
 /* One clock for body mesh, face, headphones, and floating symbols. Production rig from the approved preview. */
-async function mountSaberRig(host){
+async function mountSaberRig(host,getPreferences=()=>saberDefaults()){
  const pet=host.querySelector('.pet-button'),$=s=>host.querySelector(s.replace(/#([a-z][a-z0-9-]*)/gi,'#saber-rig-$1'));let options=saberDefaults();
  const ns='http://www.w3.org/2000/svg',svg=pet.querySelector('svg'),tiger=$('.tiger');
  tiger.style.animation='none';
- const original=new Image();original.src=window.saberArtData;await original.decode();
- const underlay=new Image();underlay.src=window.saberUnderlayData;await underlay.decode();
+ // Yield until the controller has received the saved account preferences.
+ await Promise.resolve();
+ const initialName=window.saberSkins?.[getPreferences().skin]?getPreferences().skin:'Saber-tooth';
+ const initialSkin=window.saberSkins?.[initialName];
+ const original=new Image();original.src=initialSkin?.art||window.saberArtData;await original.decode();
+ const underlay=new Image();underlay.src=initialSkin?.underlay||window.saberUnderlayData;await underlay.decode();
  const fo=document.createElementNS(ns,'foreignObject');fo.setAttribute('width',1024);fo.setAttribute('height',1024);
  const canvas=document.createElement('canvas');canvas.width=canvas.height=1536;canvas.style.cssText='width:1024px;height:1024px;display:block';fo.append(canvas);
  const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:true});
@@ -80,8 +84,27 @@ async function mountSaberRig(host){
  const leftContour=new Path2D('M277 625 Q278 739 306 838 Q306 861 283 873 Q248 878 245 925 Q241 965 265 983 Q350 1000 470 987 Q490 962 481 923 L493 927 Q500 901 487 876 Q478 862 467 861 L450 838 Q425 749 393 685 L370 625Z');
  const rightContour=new Path2D('M800 625 Q806 745 770 841 Q773 862 794 878 Q829 890 832 931 Q839 969 813 987 Q705 1001 595 986 Q577 966 588 920 L575 925 Q568 899 581 874 Q590 860 601 859 L617 831 Q645 744 673 685 L700 625Z');
  mc.fillStyle='#ff0000';mc.fill(leftContour);mc.fillStyle='#00ff00';mc.fill(rightContour);
- function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);uploadFiltered(source);gl.uniform1i(gl.getUniformLocation(program,name),unit)}
- extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
+ function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);uploadFiltered(source);gl.uniform1i(gl.getUniformLocation(program,name),unit);return t}
+ const cleanTexture=extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
+ let skinVersion=0,requestedSkin=initialName;host.dataset.renderedSkin=initialName;
+ const skinImages=new Map();
+ function decodeSkin(url){if(!skinImages.has(url)){const image=new Image();image.src=url;const task=image.decode().then(()=>image).catch(error=>{skinImages.delete(url);throw error});skinImages.set(url,task)}return skinImages.get(url)}
+ async function selectSkin(name){
+  const skin=window.saberSkins?.[name];if(!skin||requestedSkin===name)return;
+  requestedSkin=name;const version=++skinVersion;host.dataset.skinLoading='true';
+  try{
+   const [art,clean]=await Promise.all([decodeSkin(skin.art),decodeSkin(skin.underlay)]);
+   if(version!==skinVersion)return;
+   // Upload both matching layers in one task. Never show an orange underlay
+   // or a static replacement face while a different skin is loading.
+   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);uploadFiltered(art);
+   gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,cleanTexture);uploadFiltered(clean);
+   gl.activeTexture(gl.TEXTURE0);
+   host.querySelectorAll('#saber-rig-lid-fur stop').forEach((stop,i)=>stop.setAttribute('stop-color',skin.lid[i]));
+   host.dataset.renderedSkin=name;delete host.dataset.skinError;start();
+  }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError='true';console.warn('Saber skin could not load:',name,error.message)}}
+  finally{if(version===skinVersion)delete host.dataset.skinLoading}
+ }
  const layerUniform=gl.getUniformLocation(program,'layer');
  // Keep the detailed fur at full resolution even when mounted hidden or shown
  // at classroom size. A 384px intermediate discarded detail before SVG scaling.
@@ -108,6 +131,7 @@ async function mountSaberRig(host){
  <g id="saber-rig-headphones" visibility="hidden"><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#32261d" stroke-width="30"/><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#9c7542" stroke-width="18"/><path d="M277 154C248 -14 786 -14 763 154" fill="none" stroke="#e4c78f" stroke-width="2" stroke-dasharray="5 5"/>${[277,763].map((x,i)=>`<g transform="translate(${x} 159) rotate(${i?24:-24})"><rect x="-39" y="-60" width="78" height="120" rx="29" fill="#332c24" stroke="#211e19" stroke-width="6"/><rect x="-31" y="-51" width="62" height="102" rx="24" fill="#ac814a" stroke="#efdba5" stroke-width="3"/><rect x="-23" y="-42" width="46" height="84" rx="18" fill="#614630"/><path d="M-10 -16Q12 -24 13 -8L-1 20L-5 1Z" fill="#f0d9a6"/></g>`).join('')}</g>`);
  svg.insertAdjacentHTML('beforeend',`<g id="saber-rig-music" class="symbols" opacity="0">${[[90,380],[870,400],[110,650],[870,670]].map(([x,y],i)=>`<text x="${x}" y="${y}" font-size="105">${i%2?'♫':'♪'}</text>`).join('')}</g><g id="saber-rig-zs" class="symbols" opacity="0">${[[810,190],[860,130],[920,80]].map(([x,y],i)=>`<text x="${x}" y="${y}" font-size="${70+i*15}">${i?'Z':'z'}</text>`).join('')}</g>`);
 
+ if(initialSkin)host.querySelectorAll('#saber-rig-lid-fur stop').forEach((stop,i)=>stop.setAttribute('stop-color',initialSkin.lid[i]));
  const state={mode:'idle',action:null,time:0,motion:true,idle:true,nextIdle:4,nextBlink:2,blinkStart:-10,index:0,frames:0};
  // A clipped row of small incisors sits inside the opening, never across the fangs.
  svg.querySelector('defs').insertAdjacentHTML('beforeend','<clipPath id="saber-rig-mouth-clip"><path id="saber-rig-mouth-clip-shape"/></clipPath>');
@@ -153,5 +177,5 @@ async function mountSaberRig(host){
  function start(){if(!raf&&!inTick&&!document.hidden&&!host.hidden)raf=requestAnimationFrame(tick)}
  document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;start()});reduce.addEventListener('change',()=>{last=0;start()});
  ui();start();
- return {play,reset(){state.mode='idle';state.action=null;state.time=0;state.nextIdle=4;last=0;},update(value){const wasAsleep=options.asleep;options=value;state.motion=value.motion;const mode=value.asleep?'sleep':value.radio?'dance':'idle';if(mode!==state.mode){if(mode==='idle'&&wasAsleep)play('wake');else{state.mode=mode;state.action=null;ui();}}if(host.hidden){cancelAnimationFrame(raf);raf=0;last=0;host.querySelector('.saber-speech').hidden=true;}else start();}};
+ return {play,reset(){state.mode='idle';state.action=null;state.time=0;state.nextIdle=4;last=0;},update(value){const wasAsleep=options.asleep;options=value;selectSkin(value.skin);state.motion=value.motion;const mode=value.asleep?'sleep':value.radio?'dance':'idle';if(mode!==state.mode){if(mode==='idle'&&wasAsleep)play('wake');else{state.mode=mode;state.action=null;ui();}}if(host.hidden){cancelAnimationFrame(raf);raf=0;last=0;host.querySelector('.saber-speech').hidden=true;}else start();}};
 }

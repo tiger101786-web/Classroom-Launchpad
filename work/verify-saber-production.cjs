@@ -7,11 +7,29 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  const login=await fetch(origin+'/api/auth/teacher',{method:'POST',headers:{'Content-Type':'application/json',Origin:origin},body:JSON.stringify({pin:'654321'})});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie').split(';')[0],eq=cookie.indexOf('=');
  browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'});const context=await browser.newContext({viewport:{width:1920,height:1080}});await context.addCookies([{name:cookie.slice(0,eq),value:cookie.slice(eq+1),url:origin}]);const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='warning'&&m.text().includes('Saber'))console.log(m.text())});
  const open=async()=>{await page.goto(origin,{waitUntil:'domcontentloaded'});await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'home',auth:{authenticated:true,role:'teacher'}}})));await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();};
- await open();const studio=page.locator('.pet-studio'),pet=page.locator('.saber-companion');await studio.locator('#pet-select').selectOption('saber');await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.ready);assert.equal(await pet.getAttribute('data-ready'),'true');assert.equal(await pet.locator('canvas').evaluate(c=>c.width),2048);assert(await pet.isVisible());assert.equal(await studio.locator('.skin-card').count(),1);
+ await open();const studio=page.locator('.pet-studio'),pet=page.locator('.saber-companion');await studio.locator('#pet-select').selectOption('saber');await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.ready);assert.equal(await pet.getAttribute('data-ready'),'true');assert.equal(await pet.locator('canvas').evaluate(c=>c.width),2048);assert(await pet.isVisible());assert.equal(await studio.locator('.skin-card').count(),8);
+ for(const name of ['Arctic','Shadow','Bengal','Snow Leopard','Sandstone','Woodland','Storm','Saber-tooth']){
+  await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-skin-choice="'+name+'"]').click();
+  await page.waitForFunction(name=>document.querySelector('.saber-companion').dataset.renderedSkin===name,name);
+  assert.equal(await pet.locator('canvas').evaluate(c=>c.width),2048);
+  assert.equal(await pet.getAttribute('data-skin-error'),null);
+  await pet.screenshot({path:path.join(dir,name+'-idle.png')});
+  await studio.locator('[data-tab=play]').click();await studio.locator('[data-action=paw]').click();await page.waitForTimeout(650);
+  await pet.screenshot({path:path.join(dir,name+'-paw.png')});
+  await studio.locator('[data-toggle=asleep]').check();await page.waitForTimeout(100);
+  await pet.screenshot({path:path.join(dir,name+'-sleep.png')});await studio.locator('[data-toggle=asleep]').uncheck();
+  await studio.locator('#dance').click();await page.waitForTimeout(300);await pet.screenshot({path:path.join(dir,name+'-dance.png')});await studio.locator('#dance').click();
+ }
+ await studio.locator('[data-tab=appearance]').click();
  await studio.locator('[data-subtab=accessories]').click();await studio.locator('[data-choice=headphones]').click();await page.waitForTimeout(100);assert.equal(await pet.locator('#saber-rig-headphones').getAttribute('visibility'),'visible');await studio.locator('[data-choice=none]').click();
+ await studio.locator('[data-subtab=skins]').click();
+ // Superseded image decodes must never replace the latest selection.
+ await page.evaluate(()=>{for(const name of ['Shadow','Arctic','Bengal','Storm'])document.querySelector('[data-skin-choice="'+name+'"]').click()});
+ await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.renderedSkin==='Storm');
+ await page.waitForTimeout(300);assert.equal(await pet.getAttribute('data-rendered-skin'),'Storm');
  await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Fang');await studio.locator('#size-select').selectOption('extra-large');await page.waitForTimeout(700);
- const saved=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);assert.equal(saved.pet,'saber');assert.equal(saved.saber.name,'Fang');
- await open();assert.equal(await studio.locator('#pet-select').inputValue(),'saber');await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.ready==='true');assert.equal(await pet.locator('#saber-pet-name').textContent(),'Fang');
+ const saved=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);assert.equal(saved.pet,'saber');assert.equal(saved.saber.name,'Fang');assert.equal(saved.saber.skin,'Storm');
+ await open();assert.equal(await studio.locator('#pet-select').inputValue(),'saber');await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.ready==='true');assert.equal(await pet.locator('#saber-pet-name').textContent(),'Fang');await page.waitForFunction(()=>document.querySelector('.saber-companion').dataset.renderedSkin==='Storm');
  await studio.locator('[data-tab=play]').click();for(const button of await studio.locator('[data-action]').all()){await button.click();await page.waitForTimeout(80)}
  await studio.locator('[data-toggle=asleep]').check();assert.equal(await pet.getAttribute('data-state'),'sleep');await page.waitForTimeout(120);assert.equal(await pet.locator('#saber-rig-zs').getAttribute('opacity'),'1');await studio.locator('[data-toggle=asleep]').uncheck();await page.waitForTimeout(3500);
  await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-state'),'dance');await page.waitForTimeout(100);assert.equal(await pet.locator('#saber-rig-headphones').getAttribute('visibility'),'visible');await studio.locator('#dance').click();
