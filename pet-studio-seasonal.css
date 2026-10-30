@@ -1,0 +1,59 @@
+/* Reference-derived seasonal scenery; all text, pets and controls remain live. */
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]){--season-frame:url('assets/pet-studio/tropical-dashboard-frame.png');clip-path:none;border-radius:20px;background:#62300e;color:#fff4e2}
+.pet-studio[data-theme=autumn]{--season-frame:url('assets/pet-studio/autumn-dashboard-frame.png')}
+.pet-studio[data-theme=autumn] .studio-body .controls-pane{padding-left:4cqw}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-actions #greet{background:linear-gradient(#ffad09,#f05b00)}
+@media(min-width:901px){
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #tab-content #gallery{grid-template-columns:20cqw;grid-auto-rows:19cqw}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card{height:19cqw}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card img{height:14cqw}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-name{font-size:1.6cqw}
+}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio{background-image:var(--season-frame);background-size:100% 100%;min-height:68cqw;padding-bottom:3cqw;font-family:StudioRounded,'Segoe UI',sans-serif}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header{height:14cqw;padding:2.7cqw 5.5cqw 1.8cqw 56cqw}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-body{grid-template-columns:47% 53%}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-pane{padding:3cqw 3cqw 0 5cqw}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .controls-pane{padding:0 4cqw 0 1.5cqw}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch{color:#fff4de;text-shadow:0 2px 2px #301303}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch select{background:linear-gradient(#fff0d2,#eac59b);color:#48220d;-webkit-text-fill-color:#48220d;color-scheme:light;border:2px solid #fff0d1;box-shadow:0 3px 5px #31110299;font-family:inherit}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch option{background:#fff0d2;color:#48220d}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header .studio-close{background:linear-gradient(#fba220,#ac3902);color:white;border:2px solid #ffbf53;box-shadow:inset 0 1px #ffe9b3,0 2px 5px #381402}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-pane h2,.pet-studio:is([data-theme=tropical],[data-theme=autumn]) #pet-subtitle,.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-tip{color:#fff9e9;text-shadow:0 2px 3px #351804,0 0 7px #351804}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-tip{white-space:normal;text-align:center}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tabs{gap:.3cqw;padding:0;border-color:#cf8338}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tabs button{color:#fff2da;background:linear-gradient(#87400c,#4e2009);border:1px solid #b76b24;border-radius:1cqw 1cqw 0 0;font-size:1.15cqw;padding:1.1cqw .7cqw;flex:1;text-shadow:0 1px 2px #321305}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tabs button[aria-selected=true]{background:linear-gradient(#ffad09,#f55d00);border-color:#ffdf83;box-shadow:0 0 10px #ff9b0988;color:white}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tabs button[aria-selected=true]:after{background:#ffe49e;box-shadow:0 0 6px #ffb514}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tab-content{background:linear-gradient(120deg,#612604b8,#6e2e08a8);border:1px solid #a3612e;box-shadow:inset 0 1px #f8be5733;scrollbar-color:#dc9b47 #4c220c}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .section-heading h3{color:#fff7eb;font-size:2cqw;text-shadow:0 2px 2px #321305}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .section-heading p{color:#ffe4c2}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .count{background:#ffe5b9;color:#54270c;border-color:#fff3d9}.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .count:before{color:#b85c13}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .subtabs{background:#482009;border-color:#b77c40}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .subtabs button{color:#fff2dc}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .subtabs button[aria-pressed=true],.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .filters button[aria-pressed=true],.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .choices button[aria-pressed=true]{background:linear-gradient(#ffad09,#f55d00);color:#fff;border-color:#ffe39a;box-shadow:0 0 9px #ff9a0c99}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .search{background:#99603977;border-color:#c18a57;color:#fff6e8}.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .search::placeholder{color:#f2d9bc;opacity:1}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .filters button,.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .choices button,.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .action-grid button{background:linear-gradient(#80421d,#4d240c);border-color:#b1773c;color:#fff3de}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) #gallery .skin-card{background:linear-gradient(#743309aa,#3f1b08cc);border-color:#bd874b;box-shadow:inset 0 1px #eec68c66;border-radius:1.2cqw}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) #gallery .skin-card[aria-pressed=true]{border:2px solid #ffe39b;box-shadow:0 0 10px #ff9409,inset 0 0 0 2px #fb880c}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) #gallery .skin-name{color:#fff7ea}.pet-studio:is([data-theme=tropical],[data-theme=autumn]) #gallery .check{background:linear-gradient(#ffc22a,#f27600);border-color:#fff5b5;color:white}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-actions button{background:linear-gradient(#ffad09,#f05b00);border-color:#ffe099;box-shadow:inset 0 1px #fff0b4,0 3px 7px #431c09;color:#fff}
+.pet-studio[data-theme=tropical] .preview-actions #dance{background:linear-gradient(#12bcff,#0046e6);border-color:#8be6ff}.pet-studio[data-theme=autumn] .preview-actions #dance{background:linear-gradient(#ff4247,#d00512);border-color:#ffb289}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .field input,.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .field select{background:#52280f;border-color:#c28c52;color:#fff3de}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .helper-box{background:#50230e;border-color:#bc864c;color:#ffe5c2}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) :is(.field small,.helper,.option-row p,.action-grid small,.accessory-list h4){color:#f4d2a5}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .option-row{border-color:#ae7840}.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .option-row input{accent-color:#ff9b12}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-footer{background:#492109;border-color:#c48a45;color:#fff0cf}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-footer :is(button,select){background:#613212;border-color:#bd874c;color:#fff0dc}
+.pet-studio:is([data-theme=tropical],[data-theme=autumn]) :is(button,input,select):focus-visible{outline:3px solid #fff0b0;outline-offset:2px}
+@media(max-width:700px){
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio{background:#512609;padding-bottom:14px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header{height:auto;min-height:175px;padding:110px 16px 16px;background:var(--season-frame) left top/760px auto;gap:12px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-body{display:block}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-pane{padding:20px;background:linear-gradient(#34170922,#34170955),var(--season-frame) left bottom/950px auto no-repeat}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .controls-pane{padding:12px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .tabs button{font-size:12px;padding:13px 6px;border-radius:8px 8px 0 0}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .section-heading h3{font-size:23px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch{font-size:14px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch select{font-size:16px;padding:8px}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header .studio-close{width:42px;height:42px;font-size:30px}
+}
