@@ -72,8 +72,12 @@ async function mountSaberRig(host){
  function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);for(const k of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR);for(const k of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE);gl.uniform1i(gl.getUniformLocation(program,name),unit)}
  extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
  const layerUniform=gl.getUniformLocation(program,'layer');
- // Render at the displayed pixel density, avoiding a second oversized bitmap resample.
- const resize=new ResizeObserver(()=>{const size=Math.max(384,Math.min(2048,Math.ceil(pet.getBoundingClientRect().width*devicePixelRatio*2)));if(canvas.width!==size){canvas.width=canvas.height=size;gl.viewport(0,0,size,size);start()}});resize.observe(pet);
+ // Keep the detailed fur at full resolution even when mounted hidden or shown
+ // at classroom size. A 384px intermediate discarded detail before SVG scaling.
+ // CSS handles display sizing; moving into/out of Studio must not resize the art.
+ const renderResolution=Math.min(2048,gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),gl.getParameter(gl.MAX_TEXTURE_SIZE));
+ canvas.width=canvas.height=renderResolution;gl.viewport(0,0,renderResolution,renderResolution);
+ host.dataset.renderResolution=String(renderResolution);
  const uniforms=Object.fromEntries(['breath','ear','paw','pawRight','nose','sway','tilt','jaw','brow','rear','gaze'].map(k=>[k,gl.getUniformLocation(program,k)]));
  tiger.replaceChildren(fo);
  svg.querySelector('defs').insertAdjacentHTML('beforeend',`<linearGradient id="saber-rig-lid-fur" x2="0" y2="1"><stop stop-color="#bc752e"/><stop offset=".6" stop-color="#d1aa79"/><stop offset="1" stop-color="#ecd0a0"/></linearGradient><radialGradient id="saber-rig-gape"><stop stop-color="#492d25"/><stop offset="1" stop-color="#1c1511"/></radialGradient>
