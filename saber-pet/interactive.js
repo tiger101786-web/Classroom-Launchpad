@@ -1,5 +1,5 @@
 window.saberDefaults=()=>({skin:'Saber-tooth',name:'Saber',nameplate:true,platform:true,motion:true,size:'medium',asleep:false,headwear:'none'});
-window.saberMarkup=()=>"<svg viewBox=\"-68 0 1160 1420\" role=\"img\" aria-label=\"Saber-tooth tiger on a fossil stone platform\"><defs></defs><g class=\"saber-platform\"><image href=\"saber-pet/platform-v2.png\" x=\"-68\" y=\"720\" width=\"1160\" height=\"480\" preserveAspectRatio=\"none\"/></g><g class=\"tiger\"><image href=\"saber-pet/tiger.png\" width=\"1024\" height=\"1024\"/></g><g class=\"saber-nameplate\" transform=\"translate(90 1180)\"><image href=\"saber-pet/nameplate-v2.png\" x=\"0\" y=\"-50\" width=\"844\" height=\"290\" preserveAspectRatio=\"none\"/><text id=\"saber-pet-name\" x=\"422\" y=\"92\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"#49301d\" style=\"font:700 73px Georgia,serif;letter-spacing:1px\">Saber</text></g></svg>";
+window.saberMarkup=()=>"<svg viewBox=\"-68 0 1160 1420\" role=\"img\" aria-label=\"Saber-tooth tiger on a fossil stone platform\"><defs></defs><g class=\"saber-platform\"><image href=\"saber-pet/platform-v2.png\" x=\"-68\" y=\"720\" width=\"1160\" height=\"480\" preserveAspectRatio=\"none\"/></g><g class=\"tiger\"><image href=\"saber-pet/tiger.png\" width=\"1024\" height=\"1024\"/></g><g class=\"saber-nameplate\" transform=\"translate(39.36 1186) scale(1.12)\"><image href=\"saber-pet/nameplate-v2.png\" x=\"0\" y=\"-50\" width=\"844\" height=\"290\" preserveAspectRatio=\"none\"/><text id=\"saber-pet-name\" x=\"422\" y=\"92\" text-anchor=\"middle\" dominant-baseline=\"middle\" fill=\"#49301d\" style=\"font:700 80px Georgia,serif;letter-spacing:1px\">Saber</text></g></svg>";
 window.createSaberPet=function(onChange,onCustomize){
  const host=document.createElement('div');host.className='saber-companion';host.hidden=true;
  host.innerHTML='<button type="button" class="pet-button" aria-label="Open Saber Tiger controls">'+saberMarkup()+'</button><div id="saber-speech" class="saber-speech" role="status" hidden></div>';
@@ -8,7 +8,7 @@ window.createSaberPet=function(onChange,onCustomize){
  const pet=host.querySelector('.pet-button'),positionKey=()=> 'saber-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
- function refresh(){const still=host.querySelector('.tiger>image');if(still&&window.saberSkins?.[preferences.skin])still.setAttribute('href',saberSkins[preferences.skin].art);host.hidden=!visible||hidden;host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize=Math.min(73,580/Math.max(1,Array.from(preferences.name).length*.63))+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
+ function refresh(){const still=host.querySelector('.tiger>image');if(still&&window.saberSkins?.[preferences.skin])still.setAttribute('href',saberSkins[preferences.skin].art);host.hidden=!visible||hidden;host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize='80px';const textWidth=label.getComputedTextLength();if(textWidth>580)label.style.fontSize=(80*580/textWidth)+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
  pet.onclick=()=>{if(suppress){suppress=false;return}if(preferences.asleep){preferences={...preferences,asleep:false};refresh();onChange({...preferences})}else onCustomize?.()};
  pet.addEventListener('pointerdown',e=>{if(e.button!==0||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:b.left,top:b.top,moved:false};pet.setPointerCapture(e.pointerId)});
  pet.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)<6)return;drag.moved=true;position={x:drag.left+dx,y:drag.top+dy};host.querySelector('.saber-speech').hidden=true;place()});
@@ -28,8 +28,8 @@ async function mountSaberRig(host,getPreferences=()=>saberDefaults()){
  await Promise.resolve();
  const initialName=window.saberSkins?.[getPreferences().skin]?getPreferences().skin:'Saber-tooth';
  const initialSkin=window.saberSkins?.[initialName];
- const original=new Image();original.src=initialSkin?.art||window.saberArtData;await original.decode();
- const underlay=new Image();underlay.src=initialSkin?.underlay||window.saberUnderlayData;await underlay.decode();
+ const original=initialSkin&&window.saberCoatedImage?await saberCoatedImage(initialSkin.art,initialSkin.material):await (async()=>{const i=new Image();i.src=window.saberArtData;await i.decode();return i})();
+ const underlay=initialSkin&&window.saberCoatedImage?await saberCoatedImage(initialSkin.underlay,initialSkin.material):await (async()=>{const i=new Image();i.src=window.saberUnderlayData;await i.decode();return i})();
  const fo=document.createElementNS(ns,'foreignObject');fo.setAttribute('width',1024);fo.setAttribute('height',1024);
  const canvas=document.createElement('canvas');canvas.width=canvas.height=1536;canvas.style.cssText='width:1024px;height:1024px;display:block';fo.append(canvas);
  const gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:true});
@@ -87,13 +87,11 @@ async function mountSaberRig(host,getPreferences=()=>saberDefaults()){
  function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);uploadFiltered(source);gl.uniform1i(gl.getUniformLocation(program,name),unit);return t}
  const cleanTexture=extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
  let skinVersion=0,requestedSkin=initialName;host.dataset.renderedSkin=initialName;
- const skinImages=new Map();
- function decodeSkin(url){if(!skinImages.has(url)){const image=new Image();image.src=url;const task=image.decode().then(()=>image).catch(error=>{skinImages.delete(url);throw error});skinImages.set(url,task)}return skinImages.get(url)}
  async function selectSkin(name){
   const skin=window.saberSkins?.[name];if(!skin||requestedSkin===name)return;
   requestedSkin=name;const version=++skinVersion;host.dataset.skinLoading='true';
   try{
-   const [art,clean]=await Promise.all([decodeSkin(skin.art),decodeSkin(skin.underlay)]);
+   const [art,clean]=await Promise.all([saberCoatedImage(skin.art,skin.material),saberCoatedImage(skin.underlay,skin.material)]);
    if(version!==skinVersion)return;
    // Upload both matching layers in one task. Never show an orange underlay
    // or a static replacement face while a different skin is loading.

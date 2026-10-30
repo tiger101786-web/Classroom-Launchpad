@@ -1,5 +1,15 @@
 # Saber skin assets
 
+## October 30 replacement — current implementation
+
+The six separately drawn skins below were rejected and removed from the project. They are recoverable at `C:/Users/Sinister/Documents/Email/saber-rejected-skins-20261030`. Storm and its underlay are retained unchanged.
+
+Arctic, Shadow, Bengal, Snow Leopard, Sandstone, and Woodland now use the **original tiger.png and limb-underlay.png**. `../materials.js` changes only RGB coat colors and UV-attached markings at each source's native resolution. No pixel positions, alpha values, face features, animation masks or mesh vertices are changed. The same material renders thumbnails, visible fur and hidden limbs. No replacement AI drawing is used for these six coats. Production checks verify every original alpha value and source dimensions, alongside animations and persistence.
+
+The nameplate is now 12% larger, centered with its previous top clearance. The base font increased from 73 to 80 units (plus the plate scale); longer names still fit automatically. Storm artwork, platform and tiger size are unchanged.
+
+## Historical preparation record (only Storm remains in use)
+
 Seven user-supplied 1254 × 1254 PNGs were prepared with the built-in image-generation editing tool. The originals had opaque black backgrounds. The delivered transparent cutouts retain the original canvas dimensions and are stored as full-size lossless PNGs, not thumbnail textures. Original desktop files were not overwritten.
 
 | Skin | Asset prefix | User source (Desktop) |

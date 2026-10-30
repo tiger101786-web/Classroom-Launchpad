@@ -20,6 +20,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   await pet.screenshot({path:path.join(dir,name+'-sleep.png')});await studio.locator('[data-toggle=asleep]').uncheck();
   await studio.locator('#dance').click();await page.waitForTimeout(300);await pet.screenshot({path:path.join(dir,name+'-dance.png')});await studio.locator('#dance').click();
  }
+ const exactCoats=await page.evaluate(async()=>{const results=[];for(const s of Object.values(saberSkins).filter(s=>s.material)){const original=await saberCoatedImage(s.art),coat=await saberCoatedImage(s.art,s.material);const c=document.createElement('canvas');c.width=original.naturalWidth;c.height=original.naturalHeight;c.getContext('2d').drawImage(original,0,0);const a=c.getContext('2d').getImageData(0,0,c.width,c.height).data,b=coat.getContext('2d').getImageData(0,0,coat.width,coat.height).data;let same=c.width===coat.width&&c.height===coat.height;for(let i=3;i<a.length;i+=4)if(a[i]!==b[i]){same=false;break}results.push(same)}return results});assert(exactCoats.length===6&&exactCoats.every(Boolean),'All replacement coats must preserve source dimensions and every alpha pixel');
  await studio.locator('[data-tab=appearance]').click();
  await studio.locator('[data-subtab=accessories]').click();await studio.locator('[data-choice=headphones]').click();await page.waitForTimeout(100);assert.equal(await pet.locator('#saber-rig-headphones').getAttribute('visibility'),'visible');await studio.locator('[data-choice=none]').click();
  await studio.locator('[data-subtab=skins]').click();
