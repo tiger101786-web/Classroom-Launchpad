@@ -1,6 +1,24 @@
 # Saber skin assets
 
-## October 30 replacement — current implementation
+## October 30 natural-coat revision — current implementation
+
+Arctic, Shadow, Bengal, Snow Leopard, Sandstone and Woodland now use lossless full-size `*-v3.png` / `*-v3-underlay.png` pairs. The image-editing tool used the original tiger as its edit target and the rejected skins only as color/marking references. The original broad face, rounded eyes, fangs and paw layout were the design constraints; generated pixels are not claimed to be byte-identical to the original. The existing animation geometry and timing are unchanged. Storm and the original artwork retain their previous SHA-256 hashes.
+
+The procedural RGB filters and mathematical markings described below are retired. `materials.js` now only caches decoded source images, with no recoloring or source downsampling. The gallery and animated pet use the same PNGs. All pairs are tested for full-size matching dimensions; production tests capture idle, paw, sleep and dance for visual review.
+
+### Coat-transfer prompt and provenance
+
+Built-in image editing, transparent background enabled. First reference: `saber-pet/tiger.png`. Second reference: the archived coat listed in the source table below. Each output was copied unchanged from the generated-images folder into this directory.
+
+> EDIT IMAGE 1 ONLY. Image 1 is the locked ORIGINAL saber-tooth character; image 2 is ONLY a fur color/pattern reference. Paint the reference coat onto the ORIGINAL image 1. Preserve image 1's exact full body proportions, huge rounded eyes and eyelid/expression shapes, brows, muzzle, nose, cheek tufts, head width, paw and claw positions, fang lengths/shapes, detailed fur direction/strand texture, canvas alignment and silhouette. Do NOT copy image 2's narrower eyes, face, head or different body. Pigment-only edit to original fur; preserve original anatomy and shading. Rich natural photographic fur markings, not flat recolor, not procedural dots or bands. Transparent background. Same original full square framing, no zoom/crop/movement, no platform, no text, high resolution. Original design identity is the highest priority; only iris color and fur pigmentation can change.
+
+Coat directions: Arctic ivory with subtle warm-gray stripes and icy eyes; Shadow dimensional charcoal with silver guard hairs; Bengal orange/cream with natural tapered black stripes; Snow Leopard warm pale gray/cream with irregular dark rosettes; Sandstone sandy buff with tawny spots; Woodland earthy gold/brown with dark markings and olive-gold eyes.
+
+Underlays use the original `limb-underlay.png` as the locked first reference and each new coat as the second:
+
+> Image 1 is the locked ORIGINAL animation underlay: a saber tiger WITHOUT front legs. Image 2 is a fur pigmentation reference ONLY. Repaint only image 1's fur colors, iris color and natural markings to match image 2 exactly. KEEP IMAGE 1 GEOMETRY, pose, face, belly, rear legs and every rear claw, transparent background, scale and framing unchanged. Do NOT add front legs or front paws. Do NOT change anatomy to match image 2. This image will be behind moving front legs from image 2. Need seamless matching chest/side fur color and natural markings. Detailed high-resolution fur, no text, same square canvas.
+
+## Earlier October 30 procedural replacement — retired
 
 The six separately drawn skins below were rejected and removed from the project. They are recoverable at `C:/Users/Sinister/Documents/Email/saber-rejected-skins-20261030`. Storm and its underlay are retained unchanged.
 
