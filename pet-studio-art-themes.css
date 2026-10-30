@@ -1,4 +1,7 @@
 /* Reference-derived artwork with live, accessible controls. */
+/* Keep the hat legible on cream paper and on the selected pink tab. */
+.pet-studio[data-theme=scrapbook] .subtabs [data-subtab=accessories]:before{background:#65402d;mask:url('assets/pet-studio/hat-icon.svg') center/contain no-repeat}
+.pet-studio[data-theme=scrapbook] .subtabs [data-subtab=accessories][aria-pressed=true]:before{background:#fff8ed}
 @font-face{font-family:StudioHand;src:url('assets/pet-studio/PatrickHand-Regular.ttf') format('truetype');font-display:swap}
 @font-face{font-family:StudioRounded;src:url('dumpling-pet/Nunito.ttf') format('truetype');font-display:swap}
 .pet-studio:is([data-theme=sky],[data-theme=scrapbook]){clip-path:none;border-radius:22px;color:var(--ink);background:var(--base);--ink:#fff;--muted:#e6f8ff;--base:#037bc8;--line:#82dfff;--control:#0660a2;--paper:#c9f5ff;--accent:#ecfbff;--accent-ink:#063c76;--shadow:#00509c55}

@@ -8,7 +8,9 @@
   'Snow Leopard':{file:'snow-v3',lid:['#a79b8a','#c8bdac','#e6ddcc']},
   'Sandstone':{file:'sand-v3',lid:['#b4946a','#d1b48b','#ecd9bd']},
   'Woodland':{file:'woodland-v3',lid:['#695234','#a08b6c','#d4c7ad']},
-  'Storm':{file:'storm',lid:['#173d7c','#4377b3','#c1d7ed']}
+  'Storm':{file:'storm',lid:['#173d7c','#4377b3','#c1d7ed']},
+  'Fire':{file:'fire-v1',lid:['#7c2417','#bd5020','#efb15d']},
+  'Ice':{file:'ice-v1',lid:['#4d8caa','#a4d7e5','#e6f7fa']}
  };
  for(const [name,s] of Object.entries(skins)){s.label??=name;if(s.file){s.art=`saber-pet/skins/${s.file}.png`;s.underlay=`saber-pet/skins/${s.file}-underlay.png`;}}
  if(typeof module==='object'&&module.exports)module.exports=skins;
