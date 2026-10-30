@@ -49,17 +49,28 @@ async function mountSaberRig(host){
  q.x+=(p.x-520.)*.008*breath*field(p,vec2(520.,700.),vec2(260.,190.))*anchor;
  q.x+=sway*9.*head;
  gl_Position=vec4(q.x/512.-1.,1.-q.y/512.,0.,1.);}`;
- const fragment=`precision highp float;varying vec2 uv;uniform sampler2D art,clean,limbs;uniform float gaze,layer;
- void main(){vec2 q=uv*1024.;float l=1.-smoothstep(20.,34.,length((q-vec2(429.,257.))*vec2(1.,1.1)));float r=1.-smoothstep(20.,34.,length((q-vec2(617.,257.))*vec2(1.,1.1)));vec2 sampleUV=uv;sampleUV.x-=gaze*7.*max(l,r)/1024.;vec4 source=texture2D(art,sampleUV);vec4 mask=texture2D(limbs,uv);
+ const fragment=`precision highp float;varying vec2 uv;uniform sampler2D art,clean,limbs;uniform float gaze,layer,detailBias;
+ void main(){vec2 q=uv*1024.;float l=1.-smoothstep(20.,34.,length((q-vec2(429.,257.))*vec2(1.,1.1)));float r=1.-smoothstep(20.,34.,length((q-vec2(617.,257.))*vec2(1.,1.1)));vec2 sampleUV=uv;sampleUV.x-=gaze*7.*max(l,r)/1024.;vec4 source=texture2D(art,sampleUV,detailBias);vec4 mask=texture2D(limbs,uv,detailBias);
  // Reveal each complete rear foot, not just the portion inside the foreleg cutout.
  // The blend ends in the fur above the toes; no mask edge crosses a rear claw.
  float rearFeet=smoothstep(770.,850.,q.y);
- if(layer==0.)gl_FragColor=mix(source,texture2D(clean,uv),max(max(mask.r,mask.g),rearFeet));else gl_FragColor=source*(layer==1.?mask.r:mask.g);}`;
+ if(layer==0.)gl_FragColor=mix(source,texture2D(clean,uv,detailBias),max(max(mask.r,mask.g),rearFeet));else gl_FragColor=source*(layer==1.?mask.r:mask.g);}`;
  function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
  const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
  const vertices=[];for(let y=0;y<1024;y+=8)for(let x=0;x<1024;x+=8)vertices.push(x,y,x+8,y,x,y+8,x+8,y,x+8,y+8,x,y+8);
  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);const loc=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
- const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,original);for(const [key,value] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,key,value);
+ // Power-of-two textures allow filtered mip levels in WebGL 1. Keep the
+ // original files untouched; filtering happens only in GPU upload/display.
+ function uploadFiltered(source){
+  const upload=document.createElement('canvas');upload.width=upload.height=2048;
+  const ctx=upload.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(source,0,0,2048,2048);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,upload);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  for(const k of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE);
+  gl.generateMipmap(gl.TEXTURE_2D);
+ }
+ const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);uploadFiltered(original);
  gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
  const maskCanvas=document.createElement('canvas');maskCanvas.width=maskCanvas.height=2048;
  const mc=maskCanvas.getContext('2d');mc.scale(2,2);mc.fillStyle='black';mc.fillRect(0,0,1024,1024);
@@ -69,7 +80,7 @@ async function mountSaberRig(host){
  const leftContour=new Path2D('M277 625 Q278 739 306 838 Q306 861 283 873 Q248 878 245 925 Q241 965 265 983 Q350 1000 470 987 Q490 962 481 923 L493 927 Q500 901 487 876 Q478 862 467 861 L450 838 Q425 749 393 685 L370 625Z');
  const rightContour=new Path2D('M800 625 Q806 745 770 841 Q773 862 794 878 Q829 890 832 931 Q839 969 813 987 Q705 1001 595 986 Q577 966 588 920 L575 925 Q568 899 581 874 Q590 860 601 859 L617 831 Q645 744 673 685 L700 625Z');
  mc.fillStyle='#ff0000';mc.fill(leftContour);mc.fillStyle='#00ff00';mc.fill(rightContour);
- function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);for(const k of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR);for(const k of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE);gl.uniform1i(gl.getUniformLocation(program,name),unit)}
+ function extraTexture(unit,name,source){gl.activeTexture(gl.TEXTURE0+unit);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);uploadFiltered(source);gl.uniform1i(gl.getUniformLocation(program,name),unit)}
  extraTexture(1,'clean',underlay);extraTexture(2,'limbs',maskCanvas);gl.activeTexture(gl.TEXTURE0);
  const layerUniform=gl.getUniformLocation(program,'layer');
  // Keep the detailed fur at full resolution even when mounted hidden or shown
@@ -78,6 +89,17 @@ async function mountSaberRig(host){
  const renderResolution=Math.min(2048,gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),gl.getParameter(gl.MAX_TEXTURE_SIZE));
  canvas.width=canvas.height=renderResolution;gl.viewport(0,0,renderResolution,renderResolution);
  host.dataset.renderResolution=String(renderResolution);
+ // The SVG shrinks this canvas again. Account for that second minification
+ // rather than sending single-pixel fur detail to a ~190px on-screen tiger.
+ const detailUniform=gl.getUniformLocation(program,'detailBias');
+ function updateDetail(){
+  const pixels=canvas.getBoundingClientRect().width*(window.devicePixelRatio||1);
+  if(pixels<=0)return;
+  // Retain a half-level of supersampled detail for the final browser resize.
+  const bias=Math.max(0,Math.log2(renderResolution/pixels)-.5);
+  gl.uniform1f(detailUniform,bias);host.dataset.detailBias=bias.toFixed(3);start();
+ }
+ new ResizeObserver(updateDetail).observe(pet);
  const uniforms=Object.fromEntries(['breath','ear','paw','pawRight','nose','sway','tilt','jaw','brow','rear','gaze'].map(k=>[k,gl.getUniformLocation(program,k)]));
  tiger.replaceChildren(fo);
  svg.querySelector('defs').insertAdjacentHTML('beforeend',`<linearGradient id="saber-rig-lid-fur" x2="0" y2="1"><stop stop-color="#bc752e"/><stop offset=".6" stop-color="#d1aa79"/><stop offset="1" stop-color="#ecd0a0"/></linearGradient><radialGradient id="saber-rig-gape"><stop stop-color="#492d25"/><stop offset="1" stop-color="#1c1511"/></radialGradient>

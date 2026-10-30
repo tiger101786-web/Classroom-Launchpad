@@ -2,6 +2,8 @@
 
 Rendering quality: production keeps a fixed GPU-limited 2048px animation surface instead of reducing it to 384–640px at normal pet sizes. Hidden initialization and moving between Studio and the classroom no longer change that resolution. Source textures, geometry, animation timing and display sizes are unchanged.
 
+Small-size filtering: GPU uploads use 2048px power-of-two textures with trilinear mipmaps. A display-size/DPR-aware sampling bias accounts for the SVG's final downscale, preventing high-frequency fur from aliasing into speckles. A half-level of supersampling retains detail; larger views automatically use sharper mip levels. No source assets are modified. `work/verify-saber-quality.cjs` captures the actual small production pet and a same-size original reference, and checks filtering at small/large sizes.
+
 Production integration of the approved `work/saber-tooth-preview` artwork and animation rig. The original tiger, hidden limb underlay, platform and nameplate are copied without recompression. The platform remains 1160 × 480 at (-68,720); the nameplate remains at (90,1180). Production uses a wider viewBox to include the platform in layout sizing.
 
 Includes animated greeting, brow expression, blink, mouth/teeth, ear flick, paw wave, nose wiggle, body shake, eye scan, anchored breathing, idle rotation, sleep/snoring/Zs, wake/yawn and dance with alternating front paws, subtle rear-leg motion, headphones and notes. Headphones are also selectable in Headwear. All layers share one frame clock; hidden pets stop rendering. SVG identifiers are namespaced to prevent interference with other pets.
