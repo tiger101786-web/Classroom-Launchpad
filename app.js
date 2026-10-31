@@ -73,17 +73,17 @@ function coltRunShareUrl() {
 }
 
 const HOME_PROFILE_VIDEOS = [
-  "assets/mr-nieves-colts.mp4",
+  "assets/optimized-home/mr-nieves-colts.mp4",
   "assets/home-profile-02.mp4",
   "assets/home-profile-03.mp4",
-  "assets/home-profile-04.mp4",
+  "assets/optimized-home/home-profile-04.mp4",
   "assets/home-profile-05.mp4",
-  "assets/home-profile-06.mp4",
-  "assets/home-profile-07.mp4",
-  "assets/home-profile-08.mp4",
-  "assets/home-profile-09.mp4",
-  "assets/home-profile-10.mp4",
-  "assets/home-profile-11.mp4",
+  "assets/optimized-home/home-profile-06.mp4",
+  "assets/optimized-home/home-profile-07.mp4",
+  "assets/optimized-home/home-profile-08.mp4",
+  "assets/optimized-home/home-profile-09.mp4",
+  "assets/optimized-home/home-profile-10.mp4",
+  "assets/optimized-home/home-profile-11.mp4",
   "assets/home-profile-12.mp4"
 ];
 const HOME_PROFILE_QUEUE_KEY = "classroomLaunchpadHomeProfileQueueV1";
@@ -2402,7 +2402,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
     <div class="topbar">
       <div class="title-group">
         ${back ? `<button class="back-btn" data-action="back"> Back</button>` : ""}
-        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
+        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/optimized-home/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<h1 class="home-title-art" aria-label="Classroom Launchpad"><img src="assets/classroom-launchpad-title.png" width="1983" height="793" alt="" fetchpriority="high"></h1>` : `<h1>${escapeHtml(title)}</h1>`}
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
