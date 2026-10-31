@@ -1452,6 +1452,23 @@ let homeNavigationActive = "home-top";
 let clockTimer = null;
 let classTimerClock = null;
 let sharedSyncTimer = null;
+let sharedStateLoads = 0;
+let classroomPassLoads = 0;
+
+function refreshVisibleSharedState() {
+  if (!document.hidden && sharedStateLoads === 0) return loadSharedState(true);
+}
+
+function refreshVisibleClassroomPass() {
+  const relevant = screen.name === "classroomPass" || (screen.name === "dashboard" && dashboardSection === "passes");
+  if (!document.hidden && relevant && classroomPassLoads === 0) return loadClassroomPassData(true);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  if (sharedSyncTimer) refreshVisibleSharedState();
+  refreshVisibleClassroomPass();
+});
 let randomActivity = null;
 let coltRunGame = null;
 let authConfig = { studentEmailDomain: "scscolts.org", studentLoginConfigured: false, teacherConfigured: false };
@@ -2006,7 +2023,7 @@ async function loadSharedState(shouldRender = true) {
 function startSharedSync() {
   if (!sharedBackend.enabled || sharedSyncTimer) return;
   loadSharedState(true);
-  sharedSyncTimer = window.setInterval(() => loadSharedState(true), 4000);
+  sharedSyncTimer = window.setInterval(refreshVisibleSharedState, 4000);
 }
 
 function setScreen(next) {
@@ -11418,6 +11435,7 @@ async function loadApprovedStudents() {
 async function loadClassroomPassData(shouldRender = false) {
   if (!sharedBackend.enabled || !isSignedIn()) return;
   const before = JSON.stringify(classroomPassData);
+  classroomPassLoads++;
   try {
     classroomPassData = normalizeClassroomPassPayload(await sharedBackend.loadClassroomPass());
     if (shouldRender && before !== JSON.stringify(classroomPassData)) {
@@ -11426,10 +11444,11 @@ async function loadClassroomPassData(shouldRender = false) {
     }
   } catch (error) {
     classroomPassMessage = error.message;
-  }
+  } finally { classroomPassLoads--; }
 }
 
 function updateClassroomPassClocks() {
+  if (document.hidden) return;
   document.querySelectorAll("[data-pass-start]").forEach(element => {
     const end = element.dataset.passEnd || Date.now();
     element.textContent = classroomPassDuration(element.dataset.passStart, end);
@@ -11445,7 +11464,7 @@ function startClassroomPassTimers() {
   if (!relevant) return;
   updateClassroomPassClocks();
   classroomPassClock = window.setInterval(updateClassroomPassClocks, 1000);
-  classroomPassRefreshTimer = window.setInterval(() => loadClassroomPassData(true), 5000);
+  classroomPassRefreshTimer = window.setInterval(refreshVisibleClassroomPass, 5000);
 }
 
 function attachScreenHandlers() {
