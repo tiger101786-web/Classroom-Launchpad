@@ -12999,3 +12999,6 @@ body[data-theme="night"] .colt-run-volume {
 /* Static Colt hero: original artwork remains behind the existing panel content. */
 .hero-panel > .hero-static-art { position:absolute; inset:0; z-index:0; width:100%; height:100%; object-fit:cover; object-position:right center; pointer-events:none; }
 @media (max-width:720px) { .hero-panel > .hero-static-art { object-position:right center; } }
+
+/* Preserve the full static mascot within wide and narrow category buttons. */
+.category-card-bg.category-static-art { object-fit:contain; object-position:right center; background:#080708; }
