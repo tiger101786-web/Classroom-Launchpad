@@ -38,18 +38,7 @@ fs.writeFileSync(path.join(dataDir, "classroom-launchpad-db.json"), JSON.stringi
   ]
 }, null, 2));
 
-const child = spawn(process.execPath, ["server.js"], {
-  cwd: root,
-  env: {
-    ...process.env,
-    PORT: "8097",
-    DATA_DIR: dataDir,
-    SESSION_SECRET: "test-session-secret-at-least-32-characters",
-    TEACHER_PIN: "654321",
-    STUDENT_EMAIL_DOMAIN: "scscolts.org"
-  },
-  stdio: ["ignore", "pipe", "pipe"]
-});
+let child, ai;
 
 const base = "http://localhost:8097";
 const originHeaders = { Origin: base, "Content-Type": "application/json" };
@@ -59,6 +48,21 @@ function check(value, message) {
 }
 
 async function run() {
+  ai = await require("./corner-ai-fixture").startCornerAiFixture();
+  child = spawn(process.execPath, ["server.js"], {
+  cwd: root,
+  env: {
+    ...process.env,
+    ...ai.env,
+    PORT: "8097",
+    DATA_DIR: dataDir,
+    SESSION_SECRET: "test-session-secret-at-least-32-characters",
+    TEACHER_PIN: "654321",
+    STUDENT_EMAIL_DOMAIN: "scscolts.org"
+  },
+  stdio: ["ignore", "pipe", "pipe"]
+});
+
   await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("Server did not start.")), 5000);
     child.stdout.on("data", chunk => {
@@ -318,6 +322,7 @@ async function run() {
   });
   const newTopicResult = await newTopic.json();
   check(newTopic.status === 200, `Approved student topic returned ${newTopic.status}.`);
+  check(newTopicResult.threads?.length, "No visible topic: " + JSON.stringify(newTopicResult));
   check(newTopicResult.threads[0].studentName === "Student, Test", "Student could spoof another name or replace the approved roster name.");
   check(newTopicResult.threads[0].grade === "5", "Student could spoof another grade.");
   check(newTopicResult.threads[0].id !== "student-supplied-id", "Server trusted a student-supplied topic ID.");
@@ -373,4 +378,4 @@ run()
     console.error(error.stack || error.message);
     process.exitCode = 1;
   })
-  .finally(() => child.kill());
+  .finally(async () => { child?.kill(); await ai?.close(); });

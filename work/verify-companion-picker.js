@@ -101,8 +101,8 @@ async function request(route, cookie='', body, method) {
     const moved=await pet.boundingBox();
     assert(moved.x<before.x-250 && moved.y>before.y+60,'Pet must move with pointer');
     assert.equal(await panel.isVisible(),false,'Drag must not open controls');
-    const bubble=page.locator('.dumpling-companion .dumpling-speech');
-    assert.equal(await bubble.isVisible(),true,'Move reaction shows speech');
+    const bubble=page.locator('.pet-chat[data-pet="squishy"]');
+    await bubble.waitFor({state:'visible'});assert.equal(await bubble.isVisible(),true,'Move reaction shows speech');
     assert.match(await bubble.innerText(),/New spot, same squish/);
     const bubbleBox=await bubble.boundingBox();assert(bubbleBox.x>=0&&bubbleBox.x+bubbleBox.width<=1280&&bubbleBox.y>=0&&bubbleBox.y+bubbleBox.height<=900);
     await page.screenshot({path:path.join(repo,'work',`companion-move-speech-${role}.png`)});

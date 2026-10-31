@@ -28,7 +28,7 @@ function register(host){if(seen.has(host)||!info(host))return;const source=host.
 }
 function start(){bubble=document.createElement('div');bubble.className='pet-chat';bubble.hidden=true;bubble.setAttribute('role','status');bubble.setAttribute('aria-live','polite');bubble.setAttribute('aria-atomic','true');bubble.innerHTML='<strong></strong><span></span>';document.body.append(bubble);document.querySelectorAll(selector).forEach(register);
  new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType!==1)return;if(n.matches(selector))register(n);n.querySelectorAll(selector).forEach(register)}))).observe(document.body,{childList:true});
- document.addEventListener('pointerdown',e=>{const host=e.target.closest(selector);if(!host||host.closest('.pet-studio')||e.button!==0||!e.target.closest('.pet-button'))return;drag={host,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};if(active?.host===host)hide()},true);
+ document.addEventListener('pointerdown',e=>{const host=e.target.closest?.(selector);if(!host||host.closest('.pet-studio')||e.button!==0||!e.target.closest?.('.pet-button'))return;drag={host,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};if(active?.host===host)hide()},true);
  document.addEventListener('pointermove',e=>{if(drag?.id===e.pointerId&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.moved=true},true);
  document.addEventListener('pointerup',e=>{if(drag?.id!==e.pointerId)return;const d=drag;drag=null;if(d.moved)setTimeout(()=>show(d.host,info(d.host)[2]),0)},true);
  document.addEventListener('pointercancel',()=>drag=null,true);document.addEventListener('visibilitychange',()=>{if(document.hidden)hide()});

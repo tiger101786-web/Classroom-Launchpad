@@ -69,9 +69,9 @@ async function run() {
         profileSize: Math.round(profile.width),
         profileLeftInset: Math.round(profile.left - hero.left),
         profileRightInset: Math.round(hero.right - profile.right),
-        profileClearOfTitle: profile.left >= document.querySelector(".hero-panel h1").getBoundingClientRect().right,
+        profileClearOfTitle: profile.left >= document.querySelector(".hero-panel h1").getBoundingClientRect().right || profile.top >= document.querySelector(".hero-panel h1").getBoundingClientRect().bottom,
         profileContained: profile.top >= hero.top && profile.right <= hero.right && profile.bottom <= hero.bottom,
-        heroBackgroundPosition: getComputedStyle(document.querySelector(".hero-bg-video")).objectPosition,
+        heroBackgroundPosition: getComputedStyle(document.querySelector(".hero-static-art")).objectPosition,
         homeFeatureChildren: document.querySelector(".home-feature").children.length,
         retiredSearchCount: document.querySelectorAll("#studentSearch").length,
         retiredSubtitleCount: document.querySelectorAll(".hero-panel .subtitle").length,
@@ -93,9 +93,9 @@ async function run() {
       };
     });
     if (wideNavigation.itemCount !== 8 || wideNavigation.navigationWidth < 200 || wideNavigation.heroWidth !== 1132 || !wideNavigation.labelsVisible || wideNavigation.homeCircle < 38 || wideNavigation.homeHouse < 22 || wideNavigation.expectationsStar < 22 || wideNavigation.expectationsPaths !== 1 || wideNavigation.categoriesGlobe < 22 || wideNavigation.categoriesParts !== 2 || wideNavigation.googleClassroomIcon < 22 || wideNavigation.classroomPassTicket < 22 || !wideNavigation.classroomPassUsesCurrentColor || wideNavigation.coltCornerMessages < 23 || wideNavigation.coltCornerBubbles !== 2 || wideNavigation.coltCornerDots !== 6 || wideNavigation.logicLightbulb < 25 || wideNavigation.logicLightbulbPaths !== 2
-      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 1 || wideNavigation.profileTopRatio < 0.28
-      || wideNavigation.profileSize < 300 || wideNavigation.profileLeftInset > 430 || wideNavigation.profileRightInset < 350 || !wideNavigation.profileClearOfTitle || !wideNavigation.profileContained || wideNavigation.heroHeight > 510
-      || wideNavigation.heroBackgroundPosition !== "50% 0%") {
+      || wideNavigation.retiredSearchCount !== 0 || wideNavigation.retiredSubtitleCount !== 0 || wideNavigation.homeFeatureChildren !== 3 || wideNavigation.profileTopRatio < 0.28
+      || wideNavigation.profileSize < 300 || wideNavigation.profileLeftInset > 430 || wideNavigation.profileRightInset < 350 || !wideNavigation.profileClearOfTitle || !wideNavigation.profileContained || wideNavigation.heroHeight > 1100
+      || wideNavigation.heroBackgroundPosition !== "100% 50%") {
       throw new Error(`Wide homepage navigation changed existing content sizing: ${JSON.stringify(wideNavigation)}.`);
     }
     const wideCategoryPanels = await page.evaluate(() => [...document.querySelectorAll(".category-card")].map(card => {
@@ -169,10 +169,11 @@ async function run() {
     await page.waitForTimeout(700);
     const navigationJump = await page.evaluate(() => ({
       scrollY: Math.round(window.scrollY),
+      targetTop: Math.round(document.getElementById("home-launch").getBoundingClientRect().top),
       activeTarget: document.querySelector(".home-navigation-button.is-active")?.dataset.target
     }));
-    if (navigationJump.scrollY < 100 || navigationJump.activeTarget !== "home-launch") {
-      throw new Error(`Homepage navigation did not move to Today's Launch: ${JSON.stringify(navigationJump)}.`);
+    if (navigationJump.scrollY < 100 || Math.abs(navigationJump.targetTop) > 100) {
+      throw new Error(`Homepage navigation did not reach My Launchpad: ${JSON.stringify(navigationJump)}.`);
     }
     await page.locator('.home-navigation-list .home-navigation-button[data-target="home-top"]').click();
     await page.waitForTimeout(700);
@@ -442,10 +443,11 @@ async function run() {
       await page.reload({ waitUntil: "networkidle" });
       const sources = await page.locator(".school-photo source").evaluateAll(items => items.map(item => item.getAttribute("data-src").split("?")[0]));
       if (sources.length !== 1) throw new Error(`Expected one selected home profile video, found ${sources.length}.`);
-      const profileMetadata = await page.locator(".school-photo").evaluate(video => new Promise((resolve, reject) => {
+      await page.locator(".school-photo").scrollIntoViewIfNeeded();
+      const profileMetadata = await page.locator(".school-photo video, video.school-photo").evaluate(video => new Promise((resolve, reject) => {
         const done = () => resolve({ width: video.videoWidth, height: video.videoHeight, duration: video.duration });
         if (video.readyState >= 1) return done();
-        const timer = setTimeout(() => reject(new Error("Profile video metadata timed out.")), 5000);
+        const timer = setTimeout(() => reject(new Error("Profile video metadata timed out: " + JSON.stringify({src:video.currentSrc,ready:video.readyState,network:video.networkState,connected:video.isConnected,error:video.error?.message,html:video.outerHTML.slice(0,500)}))), 5000);
         video.addEventListener("loadedmetadata", () => { clearTimeout(timer); done(); }, { once: true });
         video.addEventListener("error", () => { clearTimeout(timer); reject(new Error("Profile video failed to load.")); }, { once: true });
       }));
@@ -585,12 +587,12 @@ async function run() {
         const messaged = new DOMParser().parseFromString(renderDashboardMessages(), "text/html");
         return {
           names: rows.map(row => row.querySelector("strong")?.childNodes[0]?.textContent.trim()),
-          noConversationBell: Boolean(rows[0]?.querySelector(".teacher-message-conversation-bell")),
-          existingConversationBell: Boolean(rows[1]?.querySelector(".teacher-message-conversation-bell:not(.has-unread)")),
-          unreadBellCount: rows[2]?.querySelector(".teacher-message-conversation-bell.has-unread b")?.textContent.trim(),
+          noConversationStatus: rows[0]?.querySelector(".inbox-state")?.textContent.trim(),
+          existingConversationStatus: rows[1]?.querySelector(".inbox-state")?.textContent.trim(),
+          unreadStatus: rows[2]?.querySelector(".inbox-state.is-unread")?.textContent.trim(),
           studentReplyAuthor: thread.querySelector(".direct-message-bubble strong")?.textContent.trim(),
           messagedCount: messaged.querySelectorAll(".teacher-message-student").length,
-          filterLabels: [...all.querySelectorAll(".teacher-message-history-filter button")].map(button => button.textContent.replace(/\s+/g, " ").trim())
+          filterLabels: [...all.querySelectorAll(".inbox-views button")].map(button => button.textContent.replace(/\s+/g, " ").trim())
         };
       } finally {
         authSession = originalSession;
@@ -603,10 +605,10 @@ async function run() {
       }
     });
     if (teacherMessageRosterFixture.names.join("|") !== "Andy, Le|Emily, Leite|Lucas, Song"
-      || teacherMessageRosterFixture.noConversationBell || !teacherMessageRosterFixture.existingConversationBell
-      || teacherMessageRosterFixture.unreadBellCount !== "1" || teacherMessageRosterFixture.messagedCount !== 2
+      || teacherMessageRosterFixture.noConversationStatus !== "No messages" || teacherMessageRosterFixture.existingConversationStatus !== "Replied"
+      || teacherMessageRosterFixture.unreadStatus !== "1 unread" || teacherMessageRosterFixture.messagedCount !== 2
       || teacherMessageRosterFixture.studentReplyAuthor !== "Lucas, Song"
-      || !teacherMessageRosterFixture.filterLabels.some(label => label.startsWith("Messaged"))) {
+      || !teacherMessageRosterFixture.filterLabels.some(label => label.startsWith("Conversations"))) {
       throw new Error(`Teacher message roster indicators are incomplete: ${JSON.stringify(teacherMessageRosterFixture)}.`);
     }
     const coltCornerTopicAlert = await page.evaluate(() => {
@@ -853,35 +855,17 @@ async function run() {
     if (quickHeadingGap < 8) throw new Error(`Quick Actions heading gap is too small: ${quickHeadingGap}.`);
 
     await page.locator('[data-action="back"]').first().click();
-    const teacherLaunchBadge = await page.locator(".daily-launch-grade").innerText();
-    if (teacherLaunchBadge.trim() !== "TEACHER VIEW") {
-      throw new Error(`Teacher homepage launch badge incorrectly shows ${teacherLaunchBadge}.`);
+    await page.locator('#home-launch .ml-panel').waitFor();
+    if ((await page.locator('#ml-title').textContent()).trim() !== 'My Launchpad'
+      || await page.locator('.daily-launch-card,.daily-launch-preview-tab').count()) {
+      throw new Error('The homepage must show My Launchpad instead of the retired daily directions card.');
     }
-    if (await page.locator(".daily-launch-preview-tab").count() !== 4) {
-      throw new Error("Teacher homepage does not provide four grade preview buttons.");
-    }
-    await page.locator('.daily-launch-preview-tab[data-grade="7"]').click();
-    const activeLaunchPreview = await page.locator(".daily-launch-preview-tab.is-active").innerText();
-    if (activeLaunchPreview.trim() !== "Grade 7" || await page.locator(".daily-launch-grade").innerText() !== "TEACHER VIEW") {
-      throw new Error("Teacher homepage grade preview did not switch cleanly while preserving Teacher View.");
-    }
-    const longLaunchLayout = await page.locator(".daily-launch-card").evaluate(card => {
-      const message = card.querySelector(".daily-launch-message");
-      message.innerHTML = `<ol>${Array.from({ length: 14 }, (_, index) => `<li>Multi-step classroom direction ${index + 1}</li>`).join("")}</ol>`;
-      const cardBox = card.getBoundingClientRect();
-      const messageBox = message.getBoundingClientRect();
-      const randomBox = document.querySelector(".random-activity-card").getBoundingClientRect();
-      const nextSectionBox = document.querySelector("#home-expectations").getBoundingClientRect();
-      return {
-        cardHeight: Math.round(cardBox.height),
-        randomHeight: Math.round(randomBox.height),
-        contentFits: messageBox.bottom <= cardBox.bottom + 1,
-        nextSectionClearsCard: nextSectionBox.top >= cardBox.bottom
-      };
+    const launchpadLayout = await page.locator('#home-launch').evaluate(section => {
+      const panel = section.querySelector('.ml-panel').getBoundingClientRect();
+      return { fits: section.scrollWidth <= section.clientWidth + 1,
+        nextSectionClear: document.getElementById('home-expectations').getBoundingClientRect().top >= panel.bottom };
     });
-    if (longLaunchLayout.cardHeight <= 300 || longLaunchLayout.randomHeight !== 300 || !longLaunchLayout.contentFits || !longLaunchLayout.nextSectionClearsCard) {
-      throw new Error(`Long Today's Launch directions do not expand cleanly: ${JSON.stringify(longLaunchLayout)}.`);
-    }
+    if (!launchpadLayout.fits || !launchpadLayout.nextSectionClear) throw new Error('My Launchpad overlaps the following section.');
     const coltCornerBellLayout = await page.evaluate(() => {
       const stats = document.querySelector(".colt-corner-stats");
       const replies = stats?.querySelector("span:nth-of-type(2)");
@@ -1060,25 +1044,21 @@ async function run() {
     await secondContext.close();
     await page.locator(".dashboard-nav").waitFor();
     await page.locator('[data-action="dashboardSection"][data-section="tools"]').first().click();
-    if (!await page.locator("#dailyLaunchForm").count() || !await page.locator("#classTimerForm").count()) {
-      throw new Error("Classroom tools were not preserved in the redesigned dashboard.");
+    if (!await page.locator('#classTimerForm').count() || await page.locator('#dailyLaunchForm').count()) {
+      throw new Error('Classroom tools must retain the timer without the retired daily directions editor.');
     }
-    if (await page.locator('[data-action="dailyLaunchGrade"]').count() !== 4) {
-      throw new Error("Today's Launch does not show all four grade tabs.");
-    }
-    await page.locator('[data-action="dailyLaunchGrade"][data-grade="5"]').click();
-    await page.locator("#dailyLaunchMessage").fill("Grade 5 browser test directions.");
-    await page.locator('input[name="dailyLaunchCopyGrade"][value="6"]').check();
-    const launchSave = page.waitForResponse(response => response.url().endsWith("/api/daily-launch") && response.request().method() === "PUT");
-    await page.locator('button[name="launchSaveMode"][value="selected"]').click();
-    const launchSaveResponse = await launchSave;
-    const launchSavePayload = await launchSaveResponse.json();
-    if (!launchSaveResponse.ok()
-      || launchSavePayload.dailyLaunch.grades["5"].message !== "Grade 5 browser test directions."
-      || launchSavePayload.dailyLaunch.grades["6"].message !== "Grade 5 browser test directions."
-      || launchSavePayload.dailyLaunch.grades["4"].message === "Grade 5 browser test directions.") {
-      throw new Error("Today's Launch grade save/copy controls did not keep grade messages separate.");
-    }
+    await page.locator('#classTimerMinutes').fill('2');
+    const timerSave = page.waitForResponse(response => response.url().endsWith('/api/class-timer') && response.request().method() === 'PUT');
+    await page.locator('#classTimerForm').evaluate(form => form.requestSubmit());
+    if (!(await timerSave).ok()) throw new Error('Class timer could not be started.');
+    await page.locator('#classTimerDisplay').waitFor();
+    const timerPause = page.waitForResponse(response => response.url().endsWith('/api/class-timer') && response.request().method() === 'PUT');
+    await page.locator('[data-action="pauseTimer"]').click();
+    if (!(await timerPause).ok()) throw new Error('Class timer could not be paused.');
+    await page.locator('[data-action="resumeTimer"]').waitFor({state:'visible'});
+    const timerClear = page.waitForResponse(response => response.url().endsWith('/api/class-timer') && response.request().method() === 'PUT');
+    await page.locator('[data-action="clearTimer"]').click();
+    if (!(await timerClear).ok() || await page.locator('#classTimerDisplay').count()) throw new Error('Class timer could not be cleared.');
     await page.screenshot({ path: path.join(dataDir, "teacher-dashboard-ui-qa.png"), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-action="dashboardSection"][data-section="overview"]').first().click();
@@ -1113,9 +1093,9 @@ async function run() {
       loginBesidePlusPortal: true,
       darkModeGuestHeaderButtonsMatch: true,
       darkModeTeacherHeaderButtonsMatch: true,
-      teacherHomepageLaunchBadgeIsNotAStudentGrade: true,
-      teacherHomepageCanPreviewEveryGradeLaunch: true,
-      longDailyLaunchDirectionsExpandWithoutClipping: true,
+      teacherHomepageShowsMyLaunchpad: true,
+      retiredHomepageDirectionsAreAbsent: true,
+      myLaunchpadDoesNotOverlapFollowingSection: true,
       coltCornerShowsProtectedState: true,
       coltRunHowToPlayPanelComplete: true,
       coltRunUsesDedicatedLiveStatus: true,
@@ -1126,7 +1106,7 @@ async function run() {
       privateRosterNamesDisplay: true,
       studentManagerSearchWorks: true,
       registeredStudentDetailsShowOnlyActivatedAccounts: true,
-      teacherMessageRosterUsesFirstNamesAndConversationBells: true,
+      teacherMessageRosterUsesFirstNamesAndConversationStatus: true,
       teacherForumIdentityAutomatic: true,
       coltCornerBellIsPermanentAndGradeAware: true,
       coltCornerBellMatchesReplyBubbleRow: true,
@@ -1136,11 +1116,11 @@ async function run() {
       websiteSearchWorks: true,
       outdatedHomepageSearchRemoved: true,
       outdatedHomepageSubtitleRemoved: true,
-      compactHomepageHeroPreservesHorseFaceClearance: true,
+      staticHomepageArtworkPreservesContentClearance: true,
       websiteAdditionsSyncAcrossBrowsers: true,
       existingBrowserAdditionsAreMigrated: true,
       classroomToolsPreserved: true,
-      dailyLaunchGradeTabsAndCopyControlsWork: true,
+      classTimerStartPauseAndClearWork: true,
       teacherFeedbackDashboardMatchesStudentForm: true,
       teacherDashboardAlwaysOpensOnOverview: true,
       mobileHorizontalOverflow: mobileOverflow
