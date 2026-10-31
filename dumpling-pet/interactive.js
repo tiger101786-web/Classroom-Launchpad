@@ -20,11 +20,11 @@ window.createDumplingPet = function(root) {
     </defs><ellipse class="basket-interior" cx="627" cy="765" rx="555" ry="105" fill="#b47a40"/>
     <g class="breathing"><g class="moving-bun"><g class="tinted-bun" style="isolation:isolate"><g class="bun-texture">
       <!-- Extend the glitter body under the fixed lip, keeping the source basket out of its tint. -->
-      <image class="glitter-body" href="${asset}" width="1254" height="1290" preserveAspectRatio="none" clip-path="url(#bun-clip)"/>
+      <image class="glitter-body" data-pet-href="${asset}" width="1254" height="1290" preserveAspectRatio="none" clip-path="url(#bun-clip)"/>
       <!-- Nearby glitter texture conceals the printed features; separate face layers can move. -->
-      <g mask="url(#eye-cover)"><image href="${asset}" y="160" width="1254" height="1254"/></g>
-      <g mask="url(#mouth-cover)"><image href="${asset}" y="200" width="1254" height="1254"/></g>
-    </g><image class="rainbow-color" href="dumpling-pet/rainbow-smooth-front-v1.png" width="1254" height="1254" clip-path="url(#bun-clip)" style="display:none"/></g><g class="face">
+      <g mask="url(#eye-cover)"><image data-pet-href="${asset}" y="160" width="1254" height="1254"/></g>
+      <g mask="url(#mouth-cover)"><image data-pet-href="${asset}" y="200" width="1254" height="1254"/></g>
+    </g><image class="rainbow-color" data-pet-href="dumpling-pet/rainbow-smooth-front-v1.png" width="1254" height="1254" clip-path="url(#bun-clip)" style="display:none"/></g><g class="face">
       <g class="rainbow-cheeks" style="display:none" fill="none" stroke="#d84655" stroke-width="19" stroke-linecap="round"><path d="M418 685l13 25M443 680l13 25M468 685l13 25M793 710l13-25M818 705l13-25M843 710l13-25"/></g>
       <g class="galaxy-cheeks" fill="#e98d91"><ellipse cx="445" cy="699" rx="43" ry="30"/><ellipse cx="829" cy="699" rx="43" ry="30"/></g>
       <!-- Clean independent eyes: no clipped photo edges or fixed printed-eye outline. -->
@@ -36,7 +36,7 @@ window.createDumplingPet = function(root) {
       <g class="mouth-open"><path d="M592 636 Q637 649 681 636 C680 712 597 712 592 636Z" fill="#191211"/><path d="M612 685 Q637 669 662 685 Q637 708 612 685" fill="#e98d91"/></g>
       <g class="mouth-sleep" opacity="0"><ellipse cx="637" cy="662" rx="23" ry="29" fill="#191211"/></g>
     </g></g></g>
-    <image class="fixed-basket" href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
+    <image class="fixed-basket" data-pet-href="${asset}" width="1254" height="1254" mask="url(#basket-mask)"/>
     <!-- A clean basket-colored inner lip covers source-photo color fringes at the cut. -->
     <path class="basket-inner-lip" d="M77 650C110 755 230 834 627 844C1024 834 1144 755 1177 650" fill="none" stroke="#e4aa6b" stroke-width="8" stroke-linecap="round"/>
     <g class="music-notes" pointer-events="none" font-family="Arial, sans-serif" font-size="140" font-weight="bold" text-anchor="middle" fill="#a81747" stroke="#fff1cf" stroke-width="7" paint-order="stroke">
@@ -93,10 +93,10 @@ window.createDumplingPet = function(root) {
       const smooth=name==='Rainbow'||name==='USA'||metallic||galaxy;
       puppet.querySelector('.bun-texture').style.display=smooth?'none':'inline';
       const texture=puppet.querySelector('.rainbow-color');
-      texture.setAttribute('href',galaxy?'dumpling-pet/galaxy-front-v1.png':metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
+      texture.setAttribute('data-pet-href',galaxy?'dumpling-pet/galaxy-front-v1.png':metallic?'dumpling-pet/metallic-gold-front-v1.png':name==='USA'?'dumpling-pet/usa-smooth-front-v1.png':'dumpling-pet/rainbow-smooth-front-v1.png');
       texture.setAttribute('y',metallic||galaxy?'-10':'0');texture.setAttribute('height',galaxy?'1166':metallic?'1190':'1254');texture.setAttribute('preserveAspectRatio','none');
       texture.setAttribute('x',metallic||galaxy?'27':'0');texture.setAttribute('width',metallic||galaxy?'1200':'1254');
-      texture.style.display=smooth?'inline':'none';
+      texture.style.display=smooth?'inline':'none';if(!root.hidden)loadPetArtwork(root);
       const cheeks=puppet.querySelector('.rainbow-cheeks');
       cheeks.style.display=smooth&&!galaxy?'inline':'none';cheeks.setAttribute('stroke',name==='USA'?'#71192c':'#d84655');
       puppet.querySelector('.fixed-basket').style.filter=galaxy?'hue-rotate(225deg) saturate(.8) brightness(.65)':'none';

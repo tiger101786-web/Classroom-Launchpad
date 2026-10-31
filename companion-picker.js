@@ -175,6 +175,7 @@
     gummy.update({account,visible:allowed()&&preferences.pet==='gummy',radio:radioPlaying||studioRadio,preferences:preferences.gummy});
     robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying||studioRadio,preferences:preferences.robo});
     host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
+    loadPetArtwork(host);
     host.dataset.size=preferences.size||'medium';
     const showNameplate=preferences.squishyNameplate!==false;
     host.classList.toggle('has-nameplate',showNameplate);
