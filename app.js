@@ -13832,6 +13832,10 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
   }
 });
 
+window.addEventListener('launchpad-scene-styles-ready', () => {
+  if (homeSceneSessionReady && screen.name === 'home') render();
+});
+
 async function initializeApp() {
   let initialSharedState = null;
   render();

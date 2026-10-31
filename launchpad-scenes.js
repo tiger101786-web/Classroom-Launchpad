@@ -1,5 +1,33 @@
 (() => {
   "use strict";
+  let sceneStylesPromise = null, sceneStylesError = '', sceneStylesNotification = false;
+  const sceneStyleMarkers = [...document.querySelectorAll('meta[data-scene-stylesheet]')];
+  const stylesReady = () => sceneStyleMarkers.every(marker => marker.previousElementSibling?.dataset.sceneStylesReady === marker.dataset.sceneStylesheet);
+  function ensureSceneStyles() {
+    if (stylesReady()) return Promise.resolve();
+    if (sceneStylesPromise) return sceneStylesPromise;
+    sceneStylesPromise = Promise.all(sceneStyleMarkers.map(marker => {
+      if (marker.previousElementSibling?.dataset.sceneStylesReady === marker.dataset.sceneStylesheet) return;
+      return new Promise((resolve, reject) => {
+        const link = document.createElement('link'); link.rel = 'stylesheet';
+        link.onload = () => { link.dataset.sceneStylesReady = marker.dataset.sceneStylesheet; resolve(); };
+        link.onerror = () => { link.remove(); reject(new Error('Scene styles could not load. Please retry.')); };
+        link.href = marker.dataset.sceneStylesheet; marker.before(link);
+      });
+    })).catch(error => { sceneStylesPromise = null; throw error; });
+    return sceneStylesPromise;
+  }
+  function requestSceneStyles() {
+    if (sceneStylesNotification) return;
+    sceneStylesNotification = true;
+    ensureSceneStyles().catch(error => { sceneStylesError = error.message; }).finally(() => {
+      sceneStylesNotification = false;
+      window.dispatchEvent(new Event('launchpad-scene-styles-ready'));
+    });
+  }
+  document.addEventListener('click', event => {
+    if (event.target.closest?.('[data-retry-scene-styles]')) { sceneStylesError = ''; requestSceneStyles(); }
+  });
   const scenes = [
     { id: "squishy-dumpling-swap", name: "Squishy Dumpling Swap", description: "Kids trading colorful squishy dumpling toys in bamboo baskets in a sunny school courtyard", image: "assets/launchpad-scene-squishy-dumpling-swap.png" },
     { id: "bleach-soul-society", name: "Bleach • Soul Society", description: "Seireitei at sunset with drifting spiritual embers", image: "assets/launchpad-scene-bleach-soul-society.png" },
@@ -370,6 +398,10 @@
     // Do not create or fetch the default video before the saved account choice is known.
     if (!sessionReady) return `<section class="home-feature home-scene-feature" aria-busy="true"><div class="school-photo launch-scene scene-loading" role="status">Loading your scene…</div></section>`;
     const scene = settings(session);
+    if ((scene.id !== 'original' || scene.frame !== 'none') && !stylesReady()) {
+      if (!sceneStylesError) requestSceneStyles();
+      return '<section class="home-feature home-scene-feature" aria-busy="'+(!sceneStylesError)+'"><div class="school-photo launch-scene scene-loading" role="status">'+(sceneStylesError ? 'Scene styles could not load. <button type="button" class="outline-btn" data-retry-scene-styles>Retry</button>' : 'Loading your scene…')+'</div></section>';
+    }
     return `<section class="home-feature home-scene-feature">
       <div class="launch-scene-stage">${artwork(scene.id, scene.motion, video)}${frameArt(scene.frame)}
       <button type="button" id="launchSceneSettings" class="launch-scene-settings" aria-label="Scene settings" title="Scene settings" aria-expanded="false" aria-controls="launchSceneMenu" popovertarget="launchSceneMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2 .9-2.2-.7-2 3.4 1.7 1.7v2.6L2.2 15l2 3.4 2.2-.7 2 .9L9 21h4l.6-2.4 2-.9 2.2.7 2-3.4-1.7-1.7v-2.6L19.8 9l-2-3.4-2.2.7-2-.9L13 3Z"/><circle cx="11" cy="12" r="3"/></svg></button>
@@ -437,7 +469,10 @@
         document.getElementById("launchSceneSettings")?.focus();
       } catch (error) { status.textContent = error.message; toggle.disabled = reduced.matches; }
     });
-    document.getElementById("chooseLaunchScene")?.addEventListener("click", () => {
+    document.getElementById("chooseLaunchScene")?.addEventListener("click", async event => {
+      const openingButton = event.currentTarget;
+      try { await ensureSceneStyles(); } catch (error) { document.getElementById("launchSceneStatus").textContent = error.message; return; }
+      if (!openingButton.isConnected) return;
       menu.hidePopover();
       const draft = settings(session);
       const dialog = document.createElement("dialog");
@@ -472,7 +507,10 @@
       });
       dialog.showModal();
     });
-    document.getElementById("chooseLaunchFrame")?.addEventListener("click", () => {
+    document.getElementById("chooseLaunchFrame")?.addEventListener("click", async event => {
+      const openingButton = event.currentTarget;
+      try { await ensureSceneStyles(); } catch (error) { document.getElementById("launchSceneStatus").textContent = error.message; return; }
+      if (!openingButton.isConnected) return;
       menu.hidePopover();
       const draft = settings(session);
       const dialog = document.createElement("dialog");
