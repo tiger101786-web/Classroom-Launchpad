@@ -2,13 +2,13 @@ window.nuggetDefaults=()=>({skin:'Golden',name:'Nugget',nameplate:true,platform:
 window.nuggetMarkup=()=>'<img class="nugget-fallback" src="nugget-pet/nugget-concept.png" alt="Crispy chicken nugget in a red basket"><span id="nugget-pet-name">Nugget</span>';
 window.createNuggetPet=function(onChange,onCustomize){
  const host=document.createElement('div');host.className='nugget-companion';host.hidden=true;
- host.innerHTML='<button type="button" class="pet-button" aria-label="Open Chicken Nugget controls">'+nuggetMarkup()+'</button><div id="nugget-speech" class="nugget-speech" role="status" hidden></div>';
+ host.innerHTML='<button type="button" class="pet-button" aria-label="Open Chicken Nugget controls">'+deferPetArtwork(nuggetMarkup())+'</button><div id="nugget-speech" class="nugget-speech" role="status" hidden></div>';
  document.body.append(host);
  let preferences=nuggetDefaults(),visible=false,hidden=false,radio=false,account='',position=null,drag=null,suppress=false,rig=null;
  const pet=host.querySelector('.pet-button'),positionKey=()=> 'nugget-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
- function refresh(){host.hidden=!visible||hidden;ensureRig();host.dataset.size=preferences.size;const label=host.querySelector('#nugget-pet-name');label.textContent=preferences.name;label.style.fontSize='';label.style.display=preferences.platform&&preferences.nameplate?'':'none';fitName();host.querySelector('.nugget-speech').hidden=true;rig?.update({...preferences,radio,visible:!host.hidden});place();}
+ function refresh(){host.hidden=!visible||hidden;loadPetArtwork(host);ensureRig();host.dataset.size=preferences.size;const label=host.querySelector('#nugget-pet-name');label.textContent=preferences.name;label.style.fontSize='';label.style.display=preferences.platform&&preferences.nameplate?'':'none';fitName();host.querySelector('.nugget-speech').hidden=true;rig?.update({...preferences,radio,visible:!host.hidden});place();}
  function fitName(){const label=host.querySelector('#nugget-pet-name');label.style.fontSize=(pet.clientWidth*.075)+'px';while(label.scrollWidth>label.clientWidth&&parseFloat(label.style.fontSize)>6)label.style.fontSize=(parseFloat(label.style.fontSize)-1)+'px'}
  new ResizeObserver(fitName).observe(pet);
  pet.onclick=()=>{if(suppress){suppress=false;return}if(preferences.asleep){preferences={...preferences,asleep:false};refresh();onChange({...preferences})}else onCustomize?.()};
