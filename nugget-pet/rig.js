@@ -32,7 +32,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  let action='',started=0,clock=0,last=0,dance=false,asleep=false,closed=0,blinkAt=3.4,blinkStart=-10,raf=0,enabled=!reduced.matches;
 
  const idleActions=['happy','look','foot','hands','wave','talk','shake','hello'];
- let nextIdle=3.5,idleIndex=0;
+ let nextIdle=3.5,idleIndex=0,speaking=false,speechStarted=0;
  const durations={hello:2.4,happy:2.1,blink:.32,talk:2,hands:2,wave:2.2,shake:1.1,look:3.2,foot:1.5,wake:1.8};
  const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},envelope=(t,d)=>smooth(t/.25)*smooth((d-t)/.35);
  const leftArm=new Path2D('M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z');
@@ -91,6 +91,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(action==='foot')leftLift=e*18;
   if(action==='wake')jaw=e*Math.sin(Math.PI*clamp(elapsed/d))*.85;
   if(dance){wave=.35+.25*beat;rightWave=.35-.25*beat;leftLift=Math.max(0,beat)*10;rightLift=Math.max(0,-beat)*10;happy=1;jaw=0}
+  if(speaking&&enabled&&!asleep)jaw=.2+.8*(.5+.5*Math.sin((clock-speechStarted)*13));
   if(asleep)jaw=.5+.3*(breath*.5+.5);
   if(enabled&&clock>blinkAt&&!asleep){blinkStart=clock;blinkAt=clock+3.2+Math.random()*2.1}
   const bt=(clock-blinkStart)/.3,blink=bt>=0&&bt<=1?Math.sin(bt*Math.PI):0;
@@ -124,6 +125,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(previousDance!==dance){action='';nextIdle=clock+3.5;}
   if(!previousEnabled&&enabled)nextIdle=clock+3.5;
   if(previousSleep&&!asleep){action='wake';started=clock}
+  if(asleep||!enabled||!options.visible)speaking=false;
   if(asleep){action='';dance=false}
   if(!enabled){action='';dance=false;closed=Number(asleep);blinkStart=-10}
   if(!enabled||!options.visible){cancelAnimationFrame(raf);raf=0;last=0}
@@ -131,7 +133,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  }
  reduced.addEventListener('change',()=>update(options));
  document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;if(!document.hidden)schedule()});
- const api={play,update,render,getState:()=>({action,dance,asleep,enabled,clock}),reset(){action='';dance=false;asleep=false;closed=0;clock=0;last=0;blinkStart=-10;blinkAt=3.4;nextIdle=3.5;idleIndex=0}};
+ const api={play,update,render,setSpeaking(value){speaking=Boolean(value&&enabled&&!asleep&&options.visible);speechStarted=clock;render();schedule()},getState:()=>({action,dance,asleep,enabled,clock,speaking}),reset(){speaking=false;action='';dance=false;asleep=false;closed=0;clock=0;last=0;blinkStart=-10;blinkAt=3.4;nextIdle=3.5;idleIndex=0}};
  host.dataset.ready='true';sync();render();schedule();return api;
  }catch(error){host.dataset.error=error.message;throw error}
 };

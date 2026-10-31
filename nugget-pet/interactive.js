@@ -5,6 +5,8 @@ window.createNuggetPet=function(onChange,onCustomize){
  host.innerHTML='<button type="button" class="pet-button" aria-label="Open Chicken Nugget controls">'+deferPetArtwork(nuggetMarkup())+'</button><div id="nugget-speech" class="nugget-speech" role="status" hidden></div>';
  document.body.append(host);
  let preferences=nuggetDefaults(),visible=false,hidden=false,radio=false,account='',position=null,drag=null,suppress=false,rig=null;
+ let speaking=false;
+ host.addEventListener('pet-speech-change',event=>{speaking=Boolean(event.detail?.speaking);rig?.setSpeaking(speaking)});
  const pet=host.querySelector('.pet-button'),positionKey=()=> 'nugget-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
@@ -22,7 +24,7 @@ window.createNuggetPet=function(onChange,onCustomize){
  function ensureRig(){
   if(rigStarted||host.hidden)return;
   rigStarted=true;
- mountNuggetRig(pet,{onState:state=>host.dataset.state=state}).then(value=>{rig=value;host.dataset.ready='true';refresh()}).catch(error=>{host.dataset.ready='error';console.warn('Nugget animation could not load:',error.message)});
+ mountNuggetRig(pet,{onState:state=>host.dataset.state=state}).then(value=>{rig=value;host.dataset.ready='true';refresh();rig.setSpeaking(speaking)}).catch(error=>{host.dataset.ready='error';console.warn('Nugget animation could not load:',error.message)});
  }
  return {host,play(name){if(!host.hidden&&!preferences.asleep&&preferences.motion)rig?.play(({excited:'hello',greet:'hello',mouth:'talk'})[name]||name)},update(value){if(account!==value.account){account=value.account;position=null;hidden=false;rig?.reset();try{const p=JSON.parse(localStorage.getItem(positionKey())||'null');if(Number.isFinite(p?.x)&&Number.isFinite(p?.y))position=p}catch{}}preferences={...nuggetDefaults(),...value.preferences};visible=value.visible;radio=value.radio;refresh()},show(){hidden=false;refresh()},hide(){hidden=true;refresh()},reset(){position=null;try{localStorage.removeItem(positionKey())}catch{}place()},refresh};
 };

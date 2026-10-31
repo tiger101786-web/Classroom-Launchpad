@@ -14,14 +14,14 @@ const types={
 const selector=Object.keys(types).map(c=>'.'+c).join(','),seen=new WeakSet();let bubble,active,timer,frame,drag;
 function info(host){return types[Object.keys(types).find(c=>host.classList.contains(c))]}
 function allowed(host){const pet=host.querySelector('.pet-button');return host.isConnected&&!host.hidden&&!document.hidden&&!host.closest('.pet-studio')&&host.getClientRects().length&&host.dataset.state!=='sleep'&&!pet?.matches('.asleep,.sleeping')}
-function hide(){clearTimeout(timer);cancelAnimationFrame(frame);active=null;bubble.hidden=true}
+function hide(){active?.host.dispatchEvent(new CustomEvent('pet-speech-change',{detail:{speaking:false}}));clearTimeout(timer);cancelAnimationFrame(frame);active=null;bubble.hidden=true}
 function place(){if(!active)return;const {host}=active;if(!allowed(host)){hide();return}const p=(host.querySelector('.pet-button')||host).getBoundingClientRect(),w=bubble.offsetWidth,h=bubble.offsetHeight;
  const left=Math.max(10,Math.min(p.left+p.width/2-w/2,innerWidth-w-10));
  const below=p.top<h+26;const top=Math.max(10,Math.min(below?p.bottom+14:p.top-h-14,innerHeight-h-10));
  bubble.dataset.side=below?'below':'above';bubble.style.left=left+'px';bubble.style.top=top+'px';bubble.style.setProperty('--tail-x',Math.max(20,Math.min(w-20,p.left+p.width/2-left))+'px');
  frame=requestAnimationFrame(place);
 }
-function show(host,text,source=null){if(!allowed(host)||!text)return;clearTimeout(timer);cancelAnimationFrame(frame);active={host,source};const [kind,label]=info(host);bubble.dataset.pet=kind;bubble.querySelector('strong').textContent=label;bubble.querySelector('span').textContent=text;bubble.hidden=false;place();timer=setTimeout(hide,4200)}
+function show(host,text,source=null){if(!allowed(host)||!text)return;if(active?.host!==host)active?.host.dispatchEvent(new CustomEvent('pet-speech-change',{detail:{speaking:false}}));clearTimeout(timer);cancelAnimationFrame(frame);active={host,source};const [kind,label]=info(host);bubble.dataset.pet=kind;bubble.querySelector('strong').textContent=label;bubble.querySelector('span').textContent=text;bubble.hidden=false;host.dispatchEvent(new CustomEvent('pet-speech-change',{detail:{speaking:true}}));place();timer=setTimeout(hide,4200)}
 function register(host){if(seen.has(host)||!info(host))return;const source=host.querySelector('.dumpling-speech,.gb-speech,.eagle-speech,.labubu-speech,.roblox-speech,.highland-speech,.saber-speech,.nugget-speech');if(!source)return;seen.add(host);source.classList.add('pet-native-speech');
  const sync=()=>{if(source.hidden){if(active?.source===source)hide();return}const text=(source.querySelector('.dumpling-speech-message,.gb-speech-message,.speech-message')||source).textContent.trim();show(host,text,source)};
  new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['hidden'],childList:true,characterData:true,subtree:true});sync();
