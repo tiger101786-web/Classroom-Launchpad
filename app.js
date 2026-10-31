@@ -2578,12 +2578,7 @@ function renderHome() {
     ${renderHomeNavigation()}
     <div class="home-page-content">
     <section id="home-top" class="hero-panel home-navigation-anchor">
-      <video class="hero-bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/hero-panel-bg.mp4?v=20260926-original-restored" type="video/mp4">
-      </video>
-      <video class="hero-colt-mobile-video" autoplay muted loop playsinline aria-hidden="true">
-        <source data-src="assets/hero-panel-bg-mobile.mp4?v=20260905-optimized1" type="video/mp4">
-      </video>
+      <img class="hero-static-art" src="assets/hero-colt-static.jpg?v=20261031-v1" alt="" aria-hidden="true" fetchpriority="high" decoding="async" width="1536" height="1024">
       ${pageHeader(
         "Classroom Launchpad",
         "",
