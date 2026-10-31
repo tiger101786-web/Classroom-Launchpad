@@ -6,7 +6,7 @@ Chicken Nugget is selectable in the shared Pet Studio and companion picker. Pref
 
 Golden is joined by Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy and Burnt. Each coating has a matching dip. See skins/README.md for source PNGs, built-in generation prompts, and exact-geometry rendering details.
 
-Approved face contrast is shared with the preview: Burnt and BBQ use glossy black eyes and black expressions. Spicy and the remaining flavors retain eye-brown features. Soft toasted shading behind the dark flavors preserves coating texture; dips retain the original sauce relief, highlights and rim shadows.
+Face colors are shared with the preview: Spicy, Burnt and BBQ use glossy black eyes and black expressions; remaining flavors retain eye-brown features. No lighter face patch is applied. Dips retain the original sauce relief, highlights and rim shadows. The live pet retains its selected size at narrow window widths rather than shrinking to 95px; source assets and the 2048px render buffer remain unchanged.
 
 ## Shared artwork and animation
 - rig.js is used by production and work/chicken-nugget-preview; there is no separate reduced-quality production rig.
@@ -17,6 +17,8 @@ Approved face contrast is shared with the preview: Burnt and BBQ use glossy blac
 - Production respects reduced motion and stops its frame loop when hidden. The preview permits explicit motion opt-in.
 
 ## Integration
+
+Basket sides are selectable under Appearance → Accessories: None, French fries, or Waffle fries. The `basketAccessory` preference is validated and persisted per account. They are independent of headphones and skins, remain stationary with the basket, and disappear with the platform. `accessories.js` uses the approved full-resolution transparent PNGs in `accessories/`, with foot clearance and a ceramic-rim mask that excludes the red liner above the sauce cup. Preview and production use the same implementation. Generation prompts are retained in `../work/chicken-nugget-preview/accessories/README.md`.
 interactive.js owns positioning, drag/keyboard movement, naming, hide/show, and studio opening. Pet Studio uses this same live instance. Red/gold headphones can be equipped separately; radio and dance mode show them automatically. Basket and nameplate visibility are configurable. A nugget-themed speech bubble announces a new spot after dragging.
 
 Changes are local until committed and deployed. Restart the application server after deployment for the new server-side preference validation.

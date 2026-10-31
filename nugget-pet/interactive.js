@@ -1,4 +1,4 @@
-window.nuggetDefaults=()=>({skin:'Golden',name:'Nugget',nameplate:true,platform:true,motion:true,size:'medium',asleep:false,headwear:'none'});
+window.nuggetDefaults=()=>({skin:'Golden',name:'Nugget',nameplate:true,platform:true,motion:true,size:'medium',asleep:false,headwear:'none',basketAccessory:'none'});
 window.nuggetMarkup=()=>'<img class="nugget-fallback" src="nugget-pet/nugget-concept.png" alt="Crispy chicken nugget in a red basket"><span id="nugget-pet-name">Nugget</span>';
 window.createNuggetPet=function(onChange,onCustomize){
  const host=document.createElement('div');host.className='nugget-companion';host.hidden=true;

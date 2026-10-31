@@ -16,7 +16,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  for(const name of ['Spicy','Buffalo','BBQ','Garlic Parm','Honey Mustard','Extra Crispy','Burnt','Golden']){
   await studio.locator('[data-skin-choice="'+name+'"]').click();
   await page.waitForFunction(n=>document.querySelector('.nugget-companion .pet-button').dataset.renderedSkin===n,name);
-  assert.equal(await page.evaluate(n=>nuggetFacePalette(n).ink,name),['Burnt','BBQ'].includes(name)?'#000000':'#491e18');
+  assert.equal(await page.evaluate(n=>nuggetFacePalette(n).ink,name),['Spicy','Burnt','BBQ'].includes(name)?'#000000':'#491e18');
   await page.waitForTimeout(300);
   const selected=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);
   assert.equal(selected.nugget.skin,name);
@@ -33,6 +33,13 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await page.waitForTimeout(700);await pet.screenshot({path:path.join(dir,'sleep.png')});
  await studio.locator('[data-toggle=asleep]').uncheck();assert.equal(await pet.getAttribute('data-state'),'wake');
  await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=accessories]').click();await studio.locator('[data-choice=headphones]').click();
+ for(const side of ['french-fries','waffle-fries']){
+  await studio.locator('[data-choice="'+side+'"]').click();
+  await page.waitForFunction(n=>document.querySelector('.nugget-companion .pet-button').dataset.basketAccessory===n,side);
+  const prefs=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);
+  assert.equal(prefs.nugget.basketAccessory,side);
+  await pet.screenshot({path:path.join(dir,side+'.png')});
+ }
  await studio.locator('[data-tab=name]').click();await studio.locator('#pet-name').fill('Crispy');await studio.locator('#size-select').selectOption('extra-large');
  await page.waitForTimeout(900);let saved=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);
  assert.equal(saved.pet,'nugget');assert.equal(saved.nugget.name,'Crispy');assert.equal(saved.nugget.headwear,'headphones');
@@ -46,6 +53,13 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await page.setViewportSize({width:1920,height:1080});await studio.locator('#pet-select').selectOption('saber');assert(!(await pet.isVisible()));await studio.locator('#pet-select').selectOption('nugget');
  await page.waitForTimeout(900);await open();assert.equal(await studio.locator('#pet-select').inputValue(),'nugget');await page.waitForFunction(()=>document.querySelector('.nugget-companion').dataset.ready==='true');assert.equal(await pet.locator('#nugget-pet-name').textContent(),'Crispy');
  await studio.locator('.studio-close').click();assert(await pet.isVisible());
+ await page.waitForFunction(()=>document.querySelector('.nugget-companion .pet-button').dataset.basketAccessory==='waffle-fries');
+ for(const width of [1100,800,390]){
+  await page.setViewportSize({width,height:1080});
+  assert.equal(await pet.evaluate(p=>p.getBoundingClientRect().width),250,'Live pet must retain selected extra-large size instead of shrinking to 95px');
+  assert.equal(await pet.locator('canvas').evaluate(c=>c.width),2048);
+ }
+ await page.setViewportSize({width:1920,height:1080});
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:true}})));assert.equal(await pet.getAttribute('data-state'),'dance');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('colt-radio-playback',{detail:{playing:false}})));
  await pet.screenshot({path:path.join(dir,'classroom.png')});

@@ -2,7 +2,7 @@
 (async()=>{
  const host=document.querySelector('.pet'),status=document.querySelector('#animation-status');
  const motion=document.querySelector('#motion'),dance=document.querySelector('#dance'),sleep=document.querySelector('#sleep');
- let options={skin:'Burnt',motion:!matchMedia('(prefers-reduced-motion: reduce)').matches,visible:true,platform:true,asleep:false,radio:false};
+ let options={skin:'Golden',motion:!matchMedia('(prefers-reduced-motion: reduce)').matches,visible:true,platform:true,asleep:false,radio:false};
  motion.checked=options.motion;
  try{
  const rig=await mountNuggetRig(host,{assetBase:'../../nugget-pet/',respectReducedMotion:false,onState(state,enabled){
@@ -21,5 +21,12 @@
  Object.keys(nuggetSkins).forEach(name=>skin.add(new Option(name,name)));
  skin.onchange=()=>{options.skin=skin.value;update();document.querySelector('#dip-label').textContent=nuggetSkins[skin.value].dip+' dip'};
  skin.value=options.skin;skin.onchange();
+ const accessory=document.querySelector('#basket-accessory'),accessoryStatus=document.querySelector('#accessory-status');
+ Object.entries({none:'No basket accessory','french-fries':'French fries','waffle-fries':'Waffle fries'}).forEach(([value,label])=>accessory.add(new Option(label,value)));
+ accessory.onchange=async()=>{
+  options.basketAccessory=accessory.value;update();
+  accessoryStatus.textContent=accessory.value==='none'?'Original basket.':accessory.selectedOptions[0].text+' · shared Pet Studio artwork';
+ };
+ accessory.value='french-fries';await accessory.onchange();
  }catch(error){status.textContent='Animation could not load: '+error.message;console.error(error)}
 })();

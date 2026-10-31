@@ -7,7 +7,7 @@
 .nugget-companion #nugget-pet-name{position:absolute;left:28%;top:80%;width:44%;height:9%;display:flex;align-items:center;justify-content:center;color:#9d2420;font:800 14px/1 Georgia,serif;white-space:nowrap;pointer-events:none}
 .nugget-companion .pet-button:focus-visible{outline:2px solid #e4bf7e;outline-offset:4px;border-radius:12px}
 .nugget-companion .nugget-speech{display:none}
-@media(max-width:1119px){.nugget-companion[data-size]{width:95px}}
+/* Keep the chosen display size on smaller windows; max-width already prevents overflow. */
 .pet-studio #pet-stage .nugget-companion{position:relative!important;inset:auto!important;transform:none!important;width:auto!important;height:100%!important;max-height:100%;aspect-ratio:1;max-width:100%!important;margin:0!important;z-index:1!important}
 .pet-studio #pet-stage .nugget-companion .pet-button{width:100%!important;height:100%!important;aspect-ratio:1!important;pointer-events:none}
 .pet-studio #pet-stage .nugget-companion canvas{width:100%;height:100%;object-fit:contain}

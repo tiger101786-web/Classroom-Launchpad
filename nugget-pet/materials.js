@@ -6,13 +6,13 @@
  const base=new URL('.',document.currentScript.src);
  function load(file){const url=new URL(file,base).href;if(!images.has(url))images.set(url,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>{images.delete(url);reject(Error('Cannot load '+file))};i.src=url}));return images.get(url)}
  function pixels(image){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(image,0,0);return {canvas:c,ctx:g,image:g.getImageData(0,0,c.width,c.height)}}
- async function coat(source,map,isBody,softFace=false){
+ async function coat(source,map,isBody,blackEyes=false){
   const out=pixels(source),d=out.image.data,w=source.width,h=source.height,tex=map.image.data,tw=map.canvas.width,th=map.canvas.height;
   for(let y=0;y<h;y++){if(y%64===0)await new Promise(resolve=>setTimeout(resolve,0));for(let x=0;x<w;x++){const i=(y*w+x)*4;if(!d[i+3])continue;
    const wx=isBody?98+x/w*795:x/w*1024,wy=isBody?10+y/h*795:y/h*1024;
-   // Preserve eye shape and reflections; Burnt and BBQ get neutral black eyes.
+   // Preserve eye shape and reflections for the black-feature flavors.
    if(!isBody&&(((wx-438)/21)**2+((wy-322)/22)**2<1||((wx-597)/21)**2+((wy-322)/22)**2<1)){
-    if(softFace==='Burnt'||softFace==='BBQ'){
+    if(blackEyes){
      const black=255*Math.pow(Math.min(d[i],d[i+1],d[i+2])/255,1.6);
      d[i]=d[i+1]=d[i+2]=black;
     }
@@ -23,15 +23,6 @@
    const lum=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];
    const shade=Math.min(1.18,.20+.95*lum/200);
    for(let k=0;k<3;k++)d[i+k]=Math.min(255,tex[j+k]*shade);
-   if(softFace){
-    // A softly toasted area, retaining the material detail; no hard-edged mask.
-    const burnt=softFace==='Burnt',bbq=softFace==='BBQ';
-    const strength=burnt?.53:bbq?.42:.72;
-    const tone=burnt?[170,117,76]:bbq?[188,121,72]:[218,156,96];
-    const feather=burnt||bbq?[190,115]:[155,92];
-    const weight=strength*Math.exp(-2*(((wx-516)/feather[0])**2+((wy-331)/feather[1])**2));
-    for(let k=0;k<3;k++)d[i+k]=d[i+k]*(1-weight)+(tone[k]*.8+d[i+k]*.2)*weight;
-   }
   }}out.ctx.putImageData(out.image,0,0);return out.canvas;
  }
  function sauce(source,map){
@@ -63,8 +54,8 @@
     const [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
     const skin=nuggetSkins[name];if(!skin.file)return {original,body,basket};
     const atlas=await load('skins/'+skin.file+'-material.png'),map=pixels(atlas);
-    const softFace=['Burnt','Spicy','BBQ'].includes(name)?name:false;
-    const [coatedOriginal,coatedBody]=await Promise.all([coat(original,map,false,softFace),coat(body,map,true,softFace)]);
+    const blackEyes=['Burnt','Spicy','BBQ'].includes(name);
+    const [coatedOriginal,coatedBody]=await Promise.all([coat(original,map,false,blackEyes),coat(body,map,true,blackEyes)]);
     return {original:coatedOriginal,body:coatedBody,basket:sauce(basket,map)};
    })().catch(error=>{sets.delete(name);throw error});
    sets.set(name,promise);
@@ -72,8 +63,8 @@
    if(sets.size>3)sets.delete(sets.keys().next().value);
   }return sets.get(name);
  };
- // Burnt and BBQ use black expressions; other flavors retain eye-brown.
- window.nuggetFacePalette=name=>['Burnt','BBQ'].includes(name)?{ink:'#000000',mouth:'#000000',eyeRing:null}:{ink:'#491e18',mouth:'#491e18',eyeRing:null};
+ // Spicy, Burnt and BBQ use black expressions; other flavors retain eye-brown.
+ window.nuggetFacePalette=name=>['Spicy','Burnt','BBQ'].includes(name)?{ink:'#000000',mouth:'#000000',eyeRing:null}:{ink:'#491e18',mouth:'#491e18',eyeRing:null};
  const thumbs=new Map();
  window.nuggetThumbnail=async name=>{
   if(!thumbs.has(name))thumbs.set(name,(async()=>{

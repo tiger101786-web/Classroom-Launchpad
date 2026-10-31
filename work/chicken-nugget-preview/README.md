@@ -1,5 +1,9 @@
 # Chicken Nugget — animation test
 
+## Current basket-accessory test
+
+Choose French fries, Waffle fries, or No basket accessory at http://127.0.0.1:8766/. The approved accessories are integrated into Pet Studio. Preview and production share nugget-pet/accessories.js, materials.js and rig.js. rig-accessories-test.js and basket-accessories.js are archived test snapshots and are no longer loaded. See accessories/README.md for generation prompts and placement details.
+
 ## Approved eye-brown facial features
 
 The approved eye-brown facial features now use the shared production renderer, nugget-pet/rig.js. Eyebrows, closed/happy eyes, smile outlines and open-mouth fill use #491e18, sampled from the original left eye at logical coordinate (433,335). Line widths, shapes, timing and source artwork are unchanged. rig-test.js remains an archived test snapshot and is no longer loaded by the preview.
@@ -14,7 +18,7 @@ The full-size transparent artwork is nugget-concept.png. The nameplate label is 
 
 Use the Nugget flavor selector to try Golden and seven generated coatings with matching dips. The preview and Pet Studio load the same skins.js, materials.js and rig.js modules. Flavor assets and generation prompts are documented in ../../nugget-pet/skins/README.md.
 
-BBQ and Burnt override the original eye-brown palette with glossy black eyes and black expressions. Dark flavors retain the approved softly toasted face shading and textured dips. materials-face-test.js is an archived approval snapshot, no longer loaded by the preview.
+Spicy, BBQ and Burnt override the original eye-brown palette with glossy black eyes and black expressions, with no lighter face patches. materials-face-test.js is an archived earlier approval snapshot, no longer loaded by the preview.
 
 ## Animation
 
