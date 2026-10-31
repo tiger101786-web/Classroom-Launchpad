@@ -1971,6 +1971,7 @@ function sharedSnapshot() {
 async function loadSharedState(shouldRender = true) {
   if (!sharedBackend.enabled) return;
   const before = sharedSnapshot();
+  sharedStateLoads++;
   try {
     const state = await sharedBackend.loadState();
     if (state && state.auth) authSession = state.auth;
@@ -2023,7 +2024,7 @@ async function loadSharedState(shouldRender = true) {
     store.saveClassTimer(classTimer);
     store.saveRandomActivitySettings(randomActivitySettings);
     if (shouldRender && before !== sharedSnapshot() && !isEditingForm()) render();
-  } catch {}
+  } catch {} finally { sharedStateLoads--; }
 }
 
 function startSharedSync() {
