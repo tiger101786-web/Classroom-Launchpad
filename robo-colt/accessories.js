@@ -2,7 +2,7 @@
 window.createRoboColtAccessories=function(pet){
  const ns='http://www.w3.org/2000/svg',head=pet.querySelector('#rc-head');
  const fit={horn:[297,-65,140,242],sleepcap:[194,10,440,263],sunglasses:[198,186,338,169],scarf:[230,405,336,156],bowtie:[280,423,174,94]};
- function image(name,box){const art=document.createElementNS(ns,'image');art.setAttribute('href','robo-colt/accessory-'+name+(['horn','sleepcap','scarf'].includes(name)?'-v3.png':'-v2.png'));art.setAttribute('preserveAspectRatio','none');for(const [i,k] of ['x','y','width','height'].entries())art.setAttribute(k,box[i]);return art;}
+ function image(name,box){const art=document.createElementNS(ns,'image');art.setAttribute('data-pet-href','robo-colt/accessory-'+name+(['horn','sleepcap','scarf'].includes(name)?'-v3.png':'-v2.png'));art.setAttribute('preserveAspectRatio','none');for(const [i,k] of ['x','y','width','height'].entries())art.setAttribute(k,box[i]);return art;}
  const nodes={};
  // Neckwear, including its hanging end, sits in front of the forelegs.
  const puppet=pet.querySelector('#rc-puppet');
@@ -32,5 +32,6 @@ window.createRoboColtAccessories=function(pet){
   const piece=document.createElementNS(ns,'g');if(transform)piece.setAttribute('transform',transform);
   const art=image('headphones',[85,10,564,270]);art.setAttribute('clip-path','url(#'+clip.id+')');piece.append(art);(part==='band'?rearBand:headset).append(piece);
  }
- return prefs=>{const phones=pet.classList.contains('wear-phones');rearBand.style.display=phones?'inline':'none';pet.querySelector('#rc-audio-forelock').style.display=phones?'inline':'none';for(const [name,g] of Object.entries(nodes))g.style.display=(name==='sunglasses'?prefs.eyewear===name:['scarf','bowtie'].includes(name)?prefs.neckwear===name:prefs.headwear===name&&!phones)?'inline':'none';};
+ function load(group){group.querySelectorAll('[data-pet-href]').forEach(art=>{art.setAttribute('href',art.getAttribute('data-pet-href'));art.removeAttribute('data-pet-href')});}
+ return prefs=>{const phones=pet.classList.contains('wear-phones');rearBand.style.display=phones?'inline':'none';pet.querySelector('#rc-audio-forelock').style.display=phones?'inline':'none';for(const [name,g] of Object.entries(nodes))g.style.display=(name==='sunglasses'?prefs.eyewear===name:['scarf','bowtie'].includes(name)?prefs.neckwear===name:prefs.headwear===name&&!phones)?'inline':'none';for(const g of Object.values(nodes))if(g.style.display==='inline')load(g);if(phones)load(headset);};
 };
