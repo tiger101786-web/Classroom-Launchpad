@@ -1237,7 +1237,7 @@ const store = {
     }
   },
   saveLinks(links) {
-    localStorage.setItem(this.linksKey, JSON.stringify(links));
+    saveStoredJsonIfChanged(this.linksKey, links);
   },
   getPin() {
     const storedPin = localStorage.getItem(this.pinKey);
@@ -1266,7 +1266,7 @@ const store = {
     }
   },
   saveRequests(requests) {
-    localStorage.setItem(this.requestsKey, JSON.stringify(requests));
+    saveStoredJsonIfChanged(this.requestsKey, requests);
   },
   loadThreads() {
     const raw = localStorage.getItem(this.threadsKey);
@@ -1278,7 +1278,7 @@ const store = {
     }
   },
   saveThreads(threads) {
-    localStorage.setItem(this.threadsKey, JSON.stringify(threads));
+    saveStoredJsonIfChanged(this.threadsKey, threads);
   },
   loadMutedStudents() {
     const raw = localStorage.getItem(this.mutedStudentsKey);
@@ -1290,7 +1290,7 @@ const store = {
     }
   },
   saveMutedStudents(students) {
-    localStorage.setItem(this.mutedStudentsKey, JSON.stringify(students));
+    saveStoredJsonIfChanged(this.mutedStudentsKey, students);
   },
   loadDailyLaunch() {
     const raw = localStorage.getItem(this.dailyLaunchKey);
@@ -1302,7 +1302,7 @@ const store = {
     }
   },
   saveDailyLaunch(launch) {
-    localStorage.setItem(this.dailyLaunchKey, JSON.stringify(normalizeDailyLaunch(launch)));
+    saveStoredJsonIfChanged(this.dailyLaunchKey, normalizeDailyLaunch(launch));
   },
   loadClassTimer() {
     const raw = localStorage.getItem(this.classTimerKey);
@@ -1314,7 +1314,7 @@ const store = {
     }
   },
   saveClassTimer(timer) {
-    localStorage.setItem(this.classTimerKey, JSON.stringify(normalizeClassTimer(timer)));
+    saveStoredJsonIfChanged(this.classTimerKey, normalizeClassTimer(timer));
   },
   loadRandomActivitySettings() {
     const raw = localStorage.getItem(this.randomActivityKey);
@@ -1326,7 +1326,7 @@ const store = {
     }
   },
   saveRandomActivitySettings(settings) {
-    localStorage.setItem(this.randomActivityKey, JSON.stringify(normalizeRandomActivitySettings(settings)));
+    saveStoredJsonIfChanged(this.randomActivityKey, normalizeRandomActivitySettings(settings));
   }
 };
 
@@ -1941,6 +1941,12 @@ function isEditingForm() {
   if (document.querySelector("dialog[open]")) return true;
   const active = document.activeElement;
   return Boolean(active && active.closest && active.closest("form"));
+}
+
+// Compare against storage directly to respect edits made in other tabs.
+function saveStoredJsonIfChanged(key, value) {
+  const serialized = JSON.stringify(value);
+  if (localStorage.getItem(key) !== serialized) localStorage.setItem(key, serialized);
 }
 
 function sharedSnapshot() {
