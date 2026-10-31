@@ -1,4 +1,4 @@
-/* Preview-only color test; rig-test.js preserves the approved motion and line widths. */
+/* Approved preview and Pet Studio use the same renderer and facial colors. */
 (async()=>{
  const host=document.querySelector('.pet'),status=document.querySelector('#animation-status');
  const motion=document.querySelector('#motion'),dance=document.querySelector('#dance'),sleep=document.querySelector('#sleep');

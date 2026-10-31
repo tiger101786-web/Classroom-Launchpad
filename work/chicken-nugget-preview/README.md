@@ -1,8 +1,8 @@
 # Chicken Nugget — animation test
 
-## Current preview-only experiment
+## Approved eye-brown facial features
 
-The preview loads rig-test.js instead of the production renderer to test eye-brown facial features. Eyebrows, closed/happy eyes, smile outlines and open-mouth fill use #491e18, sampled from the original left eye at logical coordinate (433,335). Line widths, shapes, timing and source artwork are unchanged. Pet Studio still uses nugget-pet/rig.js with its existing colors. This experiment has not been promoted to production.
+The approved eye-brown facial features now use the shared production renderer, nugget-pet/rig.js. Eyebrows, closed/happy eyes, smile outlines and open-mouth fill use #491e18, sampled from the original left eye at logical coordinate (433,335). Line widths, shapes, timing and source artwork are unchanged. rig-test.js remains an archived test snapshot and is no longer loaded by the preview.
 
 Open index.html directly in a browser. This standalone preview shares its renderer with the Chicken Nugget now available in Pet Studio. No production files or account data are changed.
 

@@ -27,13 +27,13 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  const image=(source)=>ctx.drawImage(source,0,0,1024,1024);
  function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(path);image(original);ctx.restore()}
  function eye(x,y,open,gaze,happy){
-  ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#241009';
+  ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#491e18';
   if(open<.07||happy>.8){ctx.beginPath();ctx.moveTo(-18,0);ctx.quadraticCurveTo(0,happy>.8?-13:10,18,0);ctx.stroke()}
   else{ctx.scale(1,Math.max(.06,open));ctx.beginPath();ctx.ellipse(0,0,24,25,0,0,Math.PI*2);ctx.clip();ctx.drawImage(original,0,0,original.width,original.height,-x,-y,1024,1024)}
   ctx.restore();
  }
- function mouth(open,smile){ctx.save();ctx.translate(516,361);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#241009';
-  if(open>.08){ctx.beginPath();ctx.ellipse(0,6,30+smile*5,4+open*24,0,0,Math.PI*2);ctx.fillStyle='#190907';ctx.fill();ctx.stroke();ctx.save();ctx.clip();ctx.fillStyle='#ae5b45';ctx.beginPath();ctx.ellipse(0,23,14,7,0,0,Math.PI*2);ctx.fill();ctx.restore()}
+ function mouth(open,smile){ctx.save();ctx.translate(516,361);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#491e18';
+  if(open>.08){ctx.beginPath();ctx.ellipse(0,6,30+smile*5,4+open*24,0,0,Math.PI*2);ctx.fillStyle='#491e18';ctx.fill();ctx.stroke();ctx.save();ctx.clip();ctx.fillStyle='#ae5b45';ctx.beginPath();ctx.ellipse(0,23,14,7,0,0,Math.PI*2);ctx.fill();ctx.restore()}
   else{ctx.beginPath();ctx.moveTo(-34-smile*5,-2);ctx.quadraticCurveTo(0,25+smile*8,34+smile*5,-2);ctx.stroke()}
   ctx.restore();
  }
@@ -65,7 +65,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();
   piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);
   eye(438,322,eyeOpen,gaze,happy);eye(597,322,eyeOpen,gaze,happy);mouth(jaw,happy);
-  if(happy>.1){ctx.strokeStyle='#241009';ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
+  if(happy>.1){ctx.strokeStyle='#491e18';ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
   if(dance||options.headwear==='headphones')headphones();ctx.restore();
   if(enabled&&(asleep||dance))symbols(clock,asleep);
   canvas.dataset.frame=String(Math.round(clock*1000));
