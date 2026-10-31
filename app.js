@@ -492,6 +492,9 @@ function chooseSharedClassTimer(primary, fallback) {
 
 const isGitHubPagesHost = /\.github\.io$/i.test(window.location.hostname);
 
+let resolveInitialSharedState;
+window.launchpadInitialSharedState = new Promise(resolve => { resolveInitialSharedState = resolve; });
+
 const sharedBackend = {
   enabled: ["http:", "https:"].includes(window.location.protocol) && !isGitHubPagesHost,
   async request(path, options = {}) {
@@ -2033,12 +2036,13 @@ async function loadSharedState(shouldRender = true) {
       if (timerOnly && screen.name !== "dashboard") refreshClassTimerBadge();
       else render();
     }
+    return state;
   } catch {} finally { sharedStateLoads--; }
 }
 
-function startSharedSync() {
+function startSharedSync(refreshImmediately = true) {
   if (!sharedBackend.enabled || sharedSyncTimer) return;
-  loadSharedState(true);
+  if (refreshImmediately) loadSharedState(true);
   sharedSyncTimer = window.setInterval(refreshVisibleSharedState, 4000);
 }
 
@@ -13805,6 +13809,7 @@ window.ClassroomLaunchpadAssistantData = Object.freeze({
 });
 
 async function initializeApp() {
+  let initialSharedState = null;
   render();
   if (sharedBackend.enabled) {
     try {
@@ -13814,14 +13819,15 @@ async function initializeApp() {
       ]);
       authConfig = { ...authConfig, ...(configResult || {}) };
       authSession = sessionResult && sessionResult.session ? sessionResult.session : authSession;
-      await loadSharedState(false);
+      initialSharedState = await loadSharedState(false);
       if (isSignedIn()) await loadClassroomPassData(false);
       if (isTeacher()) await loadApprovedStudents();
     } catch {}
   }
+  resolveInitialSharedState(initialSharedState);
   homeSceneSessionReady = true;
   render();
-  startSharedSync();
+  startSharedSync(!initialSharedState);
 }
 
 initializeApp();

@@ -340,5 +340,5 @@
     });
   }
   const initialEpoch=epoch;
-  fetch('/api/state').then(r=>r.ok?r.json():null).then(state=>{if(!state||epoch!==initialEpoch)return;enabled=state.launchpadColt?.enabled!==false;updateAccount(state.auth);}).catch(()=>{});
+  (window.launchpadInitialSharedState || fetch('/api/state').then(r=>r.ok?r.json():null)).then(state=>{if(!state||epoch!==initialEpoch)return;enabled=state.launchpadColt?.enabled!==false;updateAccount(state.auth);}).catch(()=>{});
 })();

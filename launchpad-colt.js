@@ -1010,9 +1010,13 @@
   async function start() {
     let initialCustomization = null;
     try {
-      const response = await fetch("/api/state", { headers: { Accept: "application/json" } });
-      if (response.ok) {
-        const state = await response.json();
+      let state;
+      if (globalObject.launchpadInitialSharedState) state = await globalObject.launchpadInitialSharedState;
+      else {
+        const response = await fetch("/api/state", { headers: { Accept: "application/json" } });
+        if (response.ok) state = await response.json();
+      }
+      if (state) {
         session = { ...session, ...(state.auth || {}) };
         globallyEnabled = !state.launchpadColt || state.launchpadColt.enabled !== false;
         initialCustomization = state.coltCustomization || null;
