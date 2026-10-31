@@ -5,7 +5,8 @@ const allowed=new Set(['index.html','preview.js','animation.js','rig-test.js','r
 http.createServer((req,res)=>{
  const name=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';
  const production=/^nugget-pet\/accessories\/(french-fries|waffle-fries)-v2\.png$/.test(name)||name.startsWith('nugget-pet/')&&(['accessories.js','rig.js','materials.js','skins.js','nugget-concept.png','body.png','basket.png'].includes(name.slice(11))||/^nugget-pet\/skins\/(spicy|buffalo|bbq|garlic-parm|honey-mustard|extra-crispy|burnt)-material\.png$/.test(name));
- if(!allowed.has(name)&&!/^accessories\/(french-fries|waffle-fries)-v2\.png$/.test(name)&&!production){res.writeHead(404);res.end('Not found');return}
+ const themeAsset=['themes-preview.js','rig-themes-test.js'].includes(name)||/^themes\/(mcdonalds|chick-fil-a|burger-king|raising-canes)\.png$/.test(name);
+ if(!allowed.has(name)&&!themeAsset&&!/^accessories\/(french-fries|waffle-fries)-v2\.png$/.test(name)&&!production){res.writeHead(404);res.end('Not found');return}
  fs.readFile(production?path.join(__dirname,'../..',name):path.join(__dirname,name),(error,data)=>{
   if(error){res.writeHead(500);res.end('Unable to read preview asset');return}
   res.writeHead(200,{'Content-Type':types[path.extname(name)],'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(data);

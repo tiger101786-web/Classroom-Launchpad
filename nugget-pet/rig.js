@@ -72,7 +72,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(enabled&&clock>blinkAt&&!asleep){blinkStart=clock;blinkAt=clock+3.2+Math.random()*2.1}
   const bt=(clock-blinkStart)/.3,blink=bt>=0&&bt<=1?Math.sin(bt*Math.PI):0;
   const eyeOpen=1-Math.max(closed,blink);
-  ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,1024,1024);if(options.platform){image(basket);basketAccessories?.draw(ctx,basket);}
+  ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,1024,1024);if(options.platform){if(!['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(basketAccessories?.selected))image(basket);basketAccessories?.draw(ctx,basket);}
   piece(leftFoot,400,722,0,leftLift);piece(rightFoot,606,722,0,rightLift);
   ctx.save();const sy=1+(enabled?.006*breath:0),skew=enabled?(shake+(dance?beat*.012:0)):0;ctx.transform(1,0,skew,sy,-skew*668,668*(1-sy));
   // Register the isolated body back to the approved composite's coordinates.
@@ -90,7 +90,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  function update(next){
   const previousSleep=asleep;options={...options,...next};
   selectSkin(options.skin||'Golden');
-  const accessory=['french-fries','waffle-fries'].includes(options.basketAccessory)?options.basketAccessory:'none';
+  const accessory=['french-fries','waffle-fries','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(options.basketAccessory)?options.basketAccessory:'none';
   if(basketAccessories&&accessory!==requestedAccessory){
    requestedAccessory=accessory;
    basketAccessories.select(accessory).then(name=>{host.dataset.basketAccessory=name;delete host.dataset.accessoryError;render();schedule()}).catch(error=>{requestedAccessory=basketAccessories.selected;host.dataset.accessoryError=error.message;console.warn(error)});

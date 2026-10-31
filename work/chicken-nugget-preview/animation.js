@@ -28,5 +28,13 @@
   accessoryStatus.textContent=accessory.value==='none'?'Original basket.':accessory.selectedOptions[0].text+' · shared Pet Studio artwork';
  };
  accessory.value='french-fries';await accessory.onchange();
+ const theme=document.querySelector('#basket-theme'),themeStatus=document.querySelector('#theme-status');
+ Object.entries(nuggetThemePreview.labels).forEach(([value,label])=>theme.add(new Option(label,value)));
+ theme.onchange=async()=>{
+  themeStatus.textContent='Loading full-resolution basket…';
+  try{const name=await nuggetThemePreview.select(theme.value);host.dataset.basketTheme=name;rig.render();accessory.disabled=name!=='none';themeStatus.textContent=name==='none'?'Original basket and skin-matched sauce.':nuggetThemePreview.labels[name]+' · complete themed basket · preview only';}
+  catch(error){themeStatus.textContent=error.message}
+ };
+ theme.value='mcdonalds';await theme.onchange();
  }catch(error){status.textContent='Animation could not load: '+error.message;console.error(error)}
 })();

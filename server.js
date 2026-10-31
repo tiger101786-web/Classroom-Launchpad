@@ -630,7 +630,7 @@ const ROBLOX_HEADWEAR=['none','headphones','hard-hat','bacon-hair','knight-helme
 function normalizeRobloxPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(ROBLOX_SKINS,s.skin)?s.skin:'Classic',top:Object.hasOwn(ROBLOX_SKINS,s.top)?s.top:'skin',pants:Object.hasOwn(ROBLOX_SKINS,s.pants)?s.pants:'skin',name:Array.from((typeof s.name==='string'?s.name:'Buddy').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Buddy',headwear:ROBLOX_HEADWEAR.includes(s.headwear)?s.headwear:'none',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};}
 function normalizeHighlandPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:'Copper',name:Array.from((typeof s.name==='string'?s.name:'Hamish').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Hamish',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','cap','wreath','headphones'].includes(s.headwear)?s.headwear:'none',neckwear:s.neckwear==='scarf'?'scarf':'none'};}
 function normalizeSaberPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(saberSkins,s.skin)?s.skin:'Saber-tooth',name:Array.from((typeof s.name==='string'?s.name:'Saber').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Saber',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','headphones'].includes(s.headwear)?s.headwear:'none'};}
-function normalizeNuggetPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(nuggetSkins,s.skin)?s.skin:'Golden',name:Array.from((typeof s.name==='string'?s.name:'Nugget').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Nugget',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','headphones'].includes(s.headwear)?s.headwear:'none',basketAccessory:['none','french-fries','waffle-fries'].includes(s.basketAccessory)?s.basketAccessory:'none'};}
+function normalizeNuggetPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(nuggetSkins,s.skin)?s.skin:'Golden',name:Array.from((typeof s.name==='string'?s.name:'Nugget').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Nugget',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','headphones'].includes(s.headwear)?s.headwear:'none',basketAccessory:['none','french-fries','waffle-fries','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(s.basketAccessory)?s.basketAccessory:'none'};}
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
@@ -1513,7 +1513,16 @@ function base64urlJson(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
 }
 
+function studentSessionVersion(student) {
+  return crypto.createHmac("sha256", sessionSecret).update(student.passwordSalt + ':' + student.passwordHash).digest("hex");
+}
+
 function createSessionToken(payload) {
+  if (payload.role === "student") {
+    const student = normalizeApprovedStudents(readDb().approvedStudents).find(item => item.email === normalizeEmail(payload.email));
+    if (!student || !student.passwordHash) throw new Error("Student account is unavailable.");
+    payload = { ...payload, accountVersion: studentSessionVersion(student) };
+  }
   const encoded = base64urlJson(payload);
   const signature = crypto.createHmac("sha256", sessionSecret).update(encoded).digest("base64url");
   return `${encoded}.${signature}`;
@@ -1535,6 +1544,12 @@ function readSession(req) {
   try {
     const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
     if (!payload.exp || Date.now() >= payload.exp) return null;
+    if (payload.role === "student") {
+      const student = normalizeApprovedStudents(readDb().approvedStudents).find(item => item.email === normalizeEmail(payload.email));
+      if (!student || !student.passwordHash || payload.accountVersion !== studentSessionVersion(student)) return null;
+      payload.name = student.name;
+      payload.grade = student.grade;
+    }
     return payload;
   } catch {
     return null;
@@ -2019,7 +2034,7 @@ async function handleAuthApi(req, res, pathname) {
       approved.passwordHash = passwordRecord.hash;
       db.approvedStudents = db.approvedStudents.map(student => normalizeEmail(student.email) === approved.email ? approved : student);
       writeDb(db);
-      sendJson(res, 200, { ok: true });
+      sendJson(res, 200, { ok: true }, { "Set-Cookie": sessionCookie(req, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -3965,7 +3980,7 @@ async function handleApi(req, res, pathname) {
       if(input?.eagle!==undefined){const e=input.eagle;if(!e||(e.headwear!==undefined&&!['none','flight-cap','ranger','sheriff','earmuffs'].includes(e.headwear))||(e.eyewear!==undefined&&!['none','goggles','bronze-goggles'].includes(e.eyewear))||(e.neckwear!==undefined&&!['none','bandana','compass','medal','shoulder-scarf','flight-vest'].includes(e.neckwear))||typeof e!=='object'||Array.isArray(e)||e.skin!=='Bald Eagle'||typeof e.name!=='string'||Array.from(e.name).length>16||/[\u0000-\u001f\u007f]/.test(e.name)||!['small','medium','large','extra-large'].includes(e.size)||(e.nameplate!==undefined&&typeof e.nameplate!=='boolean')||['motion','asleep'].some(k=>typeof e[k]!=='boolean'))throw new Error('Choose valid Bald Eagle settings.');}
       if(input?.highland!==undefined){const p=input.highland;if(!p||typeof p!=='object'||Array.isArray(p)||p.skin!=='Copper'||(p.headwear!==undefined&&!['none','cap','wreath','headphones'].includes(p.headwear))||(p.neckwear!==undefined&&!['none','scarf'].includes(p.neckwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Highland Cow settings.');}
       if(input?.saber!==undefined){const p=input.saber;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(saberSkins,p.skin)||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Saber-tooth Tiger settings.');}
-      if(input?.nugget!==undefined){const p=input.nugget;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(nuggetSkins,p.skin)||(p.basketAccessory!==undefined&&!['none','french-fries','waffle-fries'].includes(p.basketAccessory))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Chicken Nugget settings.');}
+      if(input?.nugget!==undefined){const p=input.nugget;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(nuggetSkins,p.skin)||(p.basketAccessory!==undefined&&!['none','french-fries','waffle-fries','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(p.basketAccessory))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Chicken Nugget settings.');}
       if (input && (!['colt', 'dumpling', 'gummy', 'eagle', 'labubu', 'roblox', 'highland', 'saber', 'nugget'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
@@ -4710,6 +4725,12 @@ function serveStatic(req, res, url) {
   } catch {
     res.writeHead(400);
     res.end("Bad request");
+    return;
+  }
+  const protectedPath = decoded.replaceAll('\\', '/').toLowerCase();
+  if (['data', 'work', 'private', '.git', 'node_modules'].some(name => protectedPath === '/' + name || protectedPath.startsWith('/' + name + '/')) || protectedPath === '/.env' || protectedPath.startsWith('/.env.')) {
+    res.writeHead(404);
+    res.end("Not found");
     return;
   }
   const vendorFilePath = vendorFiles.get(pathname);

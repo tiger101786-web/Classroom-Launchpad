@@ -2,12 +2,12 @@
 const nuggetAccessoryBase=new URL('accessories/',document.currentScript.src);
 window.createNuggetBasketAccessories=()=>{
  const images=new Map();let selected='none',version=0;
- const labels={none:'No basket accessory','french-fries':'French fries','waffle-fries':'Waffle fries'};
+ const labels={none:'No basket accessory','french-fries':'French fries','waffle-fries':'Waffle fries',mcdonalds:"McDonald's basket",'chick-fil-a':'Chick-fil-A basket','burger-king':'Burger King basket','raising-canes':"Raising Cane's basket"};
  async function select(name){
   if(!Object.hasOwn(labels,name))name='none';
   const current=++version;
   if(name!=='none'&&!images.has(name)){
-   const image=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Could not load '+labels[name]));i.src=new URL(name+'-v2.png',nuggetAccessoryBase).href});
+   const image=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Could not load '+labels[name]));i.src=new URL((['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(name)?'themes/'+name+'.png':name+'-v2.png'),nuggetAccessoryBase).href});
    images.set(name,image);
   }
   if(current===version)selected=name;
@@ -15,6 +15,7 @@ window.createNuggetBasketAccessories=()=>{
  }
  function draw(ctx,basket){
   const image=images.get(selected);if(!image||selected==='none')return;
+  if(['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(selected)){ctx.drawImage(image,0,0,1024,1024);return;}
   // Generous portions surround the pet, behind its moving body and limbs.
   // Clip to the inside of the basket, preserving the foreground rim and label.
   ctx.save();ctx.beginPath();ctx.moveTo(20,285);ctx.lineTo(1004,285);ctx.lineTo(1004,650);ctx.bezierCurveTo(950,735,740,775,510,775);ctx.bezierCurveTo(275,775,80,730,20,660);ctx.closePath();ctx.clip();
