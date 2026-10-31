@@ -89,7 +89,7 @@
       <button class="launchpad-colt-character" type="button" aria-label="Open Launchpad Colt controls. Drag to move him." title="Drag Launchpad Colt to move him" aria-expanded="false">
         <span class="launchpad-colt-platform" aria-hidden="true"></span>
         <span class="launchpad-colt-prop" aria-hidden="true"></span>
-        <video class="launchpad-colt-pose" data-pose="idle" src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+        <video class="launchpad-colt-pose" data-pose="idle" data-src="${VIDEO_ASSETS.idle}" poster="${ASSET_URL}" autoplay muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="welcome" data-src="${VIDEO_ASSETS.welcome}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="greetingExcited" data-src="${VIDEO_ASSETS.greetingExcited}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
         <video class="launchpad-colt-pose" data-pose="pointing" data-src="${VIDEO_ASSETS.pointing}" muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"></video>
@@ -203,7 +203,7 @@
     poseVideos.forEach(video => {
       const selected = video.dataset.pose === activePose;
       video.dataset.active = String(selected);
-      if (!selected || !prefs.motion || selectedCompanion !== "colt") {
+      if (!selected || !prefs.motion || !shouldShow() || prefs.hidden || documentObject.hidden) {
         video.pause();
         return;
       }
