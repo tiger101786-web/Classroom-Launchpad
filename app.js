@@ -1949,7 +1949,7 @@ function saveStoredJsonIfChanged(key, value) {
   if (localStorage.getItem(key) !== serialized) localStorage.setItem(key, serialized);
 }
 
-function sharedSnapshot() {
+function sharedSnapshot(includeTimer = true) {
   return JSON.stringify({
     links,
     classThreads,
@@ -1960,7 +1960,7 @@ function sharedSnapshot() {
     submissions,
     studentSpotlights,
     dailyLaunch,
-    classTimer,
+    classTimer: includeTimer ? classTimer : undefined,
     randomActivitySettings,
     pendingModeration,
     moderationQueue,
@@ -1971,6 +1971,9 @@ function sharedSnapshot() {
 async function loadSharedState(shouldRender = true) {
   if (!sharedBackend.enabled) return;
   const before = sharedSnapshot();
+  const beforeWithoutTimer = sharedSnapshot(false);
+  const beforeAuth = JSON.stringify(authSession);
+  const beforePostingBlocked = postingBlocked;
   sharedStateLoads++;
   try {
     const state = await sharedBackend.loadState();
@@ -2023,7 +2026,13 @@ async function loadSharedState(shouldRender = true) {
     store.saveDailyLaunch(dailyLaunch);
     store.saveClassTimer(classTimer);
     store.saveRandomActivitySettings(randomActivitySettings);
-    if (shouldRender && before !== sharedSnapshot() && !isEditingForm()) render();
+    if (shouldRender && before !== sharedSnapshot() && !isEditingForm()) {
+      const timerOnly = beforeWithoutTimer === sharedSnapshot(false)
+        && beforeAuth === JSON.stringify(authSession)
+        && beforePostingBlocked === postingBlocked;
+      if (timerOnly && screen.name !== "dashboard") refreshClassTimerBadge();
+      else render();
+    }
   } catch {} finally { sharedStateLoads--; }
 }
 
@@ -2206,6 +2215,16 @@ function renderClassTimerBadge() {
       <strong id="classTimerDisplay">${escapeHtml(ended ? "Time is up" : formatTimerSeconds(remaining))}</strong>
     </section>
   `;
+}
+
+function refreshClassTimerBadge() {
+  const current = app.querySelector('.class-timer-badge');
+  const html = renderClassTimerBadge();
+  if (current) {
+    if (html) current.outerHTML = html;
+    else current.remove();
+  } else if (html) app.insertAdjacentHTML('beforeend', html);
+  startClassTimerClock();
 }
 
 function getActiveLinks() {
