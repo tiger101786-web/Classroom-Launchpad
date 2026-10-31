@@ -1,0 +1,14 @@
+.nugget-companion{position:fixed;width:190px;max-width:calc(100vw - 16px);z-index:90;user-select:none}
+.nugget-companion[hidden]{display:none!important}
+.nugget-companion[data-size=small]{width:160px}.nugget-companion[data-size=large]{width:220px}.nugget-companion[data-size=extra-large]{width:250px}
+.nugget-companion .pet-button{display:block;position:relative;width:100%;height:auto;aspect-ratio:1;padding:0;margin:0;background:none;border:0;box-shadow:none;cursor:grab;touch-action:none}
+.nugget-companion canvas,.nugget-companion .nugget-fallback{display:block;width:100%;height:auto}
+.nugget-companion .nugget-fallback[hidden]{display:none!important}
+.nugget-companion #nugget-pet-name{position:absolute;left:28%;top:80%;width:44%;height:9%;display:flex;align-items:center;justify-content:center;color:#9d2420;font:800 14px/1 Georgia,serif;white-space:nowrap;pointer-events:none}
+.nugget-companion .pet-button:focus-visible{outline:2px solid #e4bf7e;outline-offset:4px;border-radius:12px}
+.nugget-companion .nugget-speech{display:none}
+@media(max-width:1119px){.nugget-companion[data-size]{width:95px}}
+.pet-studio #pet-stage .nugget-companion{position:relative!important;inset:auto!important;transform:none!important;width:auto!important;height:100%!important;max-height:100%;aspect-ratio:1;max-width:100%!important;margin:0!important;z-index:1!important}
+.pet-studio #pet-stage .nugget-companion .pet-button{width:100%!important;height:100%!important;aspect-ratio:1!important;pointer-events:none}
+.pet-studio #pet-stage .nugget-companion canvas{width:100%;height:100%;object-fit:contain}
+.pet-chat[data-pet=nugget]{--paper:#fff0d5;--edge:#bb302e;--ink:#54250c;--label:#9d2420;border-radius:18px 18px 10px 10px;box-shadow:inset 0 -4px #e9b75d,0 5px 0 #91322955,0 10px 25px #0003}
