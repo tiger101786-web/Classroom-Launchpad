@@ -31,6 +31,8 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  let action='',started=0,clock=0,last=0,dance=false,asleep=false,closed=0,blinkAt=3.4,blinkStart=-10,raf=0,enabled=!reduced.matches;
 
+ const idleActions=['happy','look','foot','hands','wave','talk','shake','hello'];
+ let nextIdle=3.5,idleIndex=0;
  const durations={hello:2.4,happy:2.1,blink:.32,talk:2,hands:2,wave:2.2,shake:1.1,look:3.2,foot:1.5,wake:1.8};
  const clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x)},envelope=(t,d)=>smooth(t/.25)*smooth((d-t)/.35);
  const leftArm=new Path2D('M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z');
@@ -57,7 +59,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  function play(name){if(!enabled||asleep)return;dance=false;action=name;started=clock;if(name==='blink')blinkStart=clock;sync();schedule()}
  function render(){
   const elapsed=clock-started,d=durations[action]||1,e=action?envelope(elapsed,d):0,breath=Math.sin(clock*Math.PI*2/3.2),beat=Math.sin(clock*Math.PI*2/1.05);
-  if(action&&elapsed>d){action='';sync()}
+  if(action&&elapsed>d){action='';nextIdle=clock+3+Math.random()*2;sync()}
   let wave=0,rightWave=0,happy=action==='happy'?e:0,gaze=0,jaw=0,shake=0,leftLift=0,rightLift=0;
   if(action==='hello'||action==='wave')wave=e*(1.4+.32*Math.sin(elapsed*15));
   if(action==='hello'){happy=e*.65;jaw=e*.25*(.5+.5*Math.sin(elapsed*12))}
@@ -86,10 +88,10 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   canvas.dataset.frame=String(Math.round(clock*1000));
  }
 
- function tick(now){raf=0;const dt=last?Math.min((now-last)/1000,.05):0;last=now;if(enabled)clock+=dt;closed+=(Number(asleep)-closed)*Math.min(1,dt*8);render();schedule()}
+ function tick(now){raf=0;const dt=last?Math.min((now-last)/1000,.05):0;last=now;if(enabled)clock+=dt;if(enabled&&options.visible&&!document.hidden&&!asleep&&!dance&&!action&&clock>=nextIdle)play(idleActions[idleIndex++%idleActions.length]);closed+=(Number(asleep)-closed)*Math.min(1,dt*8);render();schedule()}
  function schedule(){if(!raf&&enabled&&options.visible&&!document.hidden)raf=requestAnimationFrame(tick)}
  function update(next){
-  const previousSleep=asleep;options={...options,...next};
+  const previousSleep=asleep,previousDance=dance,previousEnabled=enabled;options={...options,...next};
   selectSkin(options.skin||'Golden');
   const accessory=['french-fries','waffle-fries','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(options.basketAccessory)?options.basketAccessory:'none';
   if(basketAccessories&&accessory!==requestedAccessory){
@@ -98,6 +100,8 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   }
   enabled=options.motion&&(!respectReducedMotion||!reduced.matches);asleep=Boolean(options.asleep);
   dance=Boolean(options.radio&&!asleep&&enabled);
+  if(previousDance!==dance){action='';nextIdle=clock+3.5;}
+  if(!previousEnabled&&enabled)nextIdle=clock+3.5;
   if(previousSleep&&!asleep){action='wake';started=clock}
   if(asleep){action='';dance=false}
   if(!enabled){action='';dance=false;closed=Number(asleep);blinkStart=-10}
@@ -106,7 +110,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  }
  reduced.addEventListener('change',()=>update(options));
  document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;if(!document.hidden)schedule()});
- const api={play,update,render,getState:()=>({action,dance,asleep,enabled,clock}),reset(){action='';dance=false;asleep=false;closed=0;clock=0;last=0;blinkStart=-10;blinkAt=3.4}};
+ const api={play,update,render,getState:()=>({action,dance,asleep,enabled,clock}),reset(){action='';dance=false;asleep=false;closed=0;clock=0;last=0;blinkStart=-10;blinkAt=3.4;nextIdle=3.5;idleIndex=0}};
  host.dataset.ready='true';sync();render();schedule();return api;
  }catch(error){host.dataset.error=error.message;throw error}
 };
