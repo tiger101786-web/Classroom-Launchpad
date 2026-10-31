@@ -54,7 +54,28 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   ctx.restore();
  }
  function headphones(){ctx.save();ctx.lineWidth=17;ctx.strokeStyle='#6e1019';ctx.beginPath();ctx.ellipse(510,285,237,207,0,Math.PI,Math.PI*2);ctx.stroke();ctx.lineWidth=6;ctx.strokeStyle='#f4bd69';ctx.stroke();for(const x of [280,741]){ctx.fillStyle='#9e2232';ctx.strokeStyle='#f4bd69';ctx.lineWidth=4;ctx.beginPath();ctx.roundRect(x-25,235,50,93,16);ctx.fill();ctx.stroke();ctx.fillStyle='#3e2020';ctx.beginPath();ctx.roundRect(x-15,246,30,70,12);ctx.fill()}ctx.restore()}
- function symbols(t,sleep){ctx.save();ctx.font='bold 64px Georgia';ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#392224';ctx.fillStyle=sleep?'#ffe1a3':'#ffdb77';for(let i=0;i<3;i++){const phase=(t/(sleep?2.5:1.9)+i/3)%1;ctx.globalAlpha=Math.sin(Math.PI*phase);const x=(sleep?815:170)+(i%2?50:-20)+Math.sin(phase*5+i)*16,y=370-phase*210+i*16;const text=sleep?'Z':i%2?'♫':'♪';ctx.strokeText(text,x,y);ctx.fillText(text,x,y)}ctx.restore()}
+ // Match Robo-Colt's four outlined notes and the eagle's diagonal z/Z/Z trail.
+ function symbols(t,sleep){
+  ctx.save();ctx.textAlign='center';ctx.lineJoin='round';
+  if(sleep){
+   ctx.fillStyle='#9674bd';ctx.strokeStyle='#fff';ctx.lineWidth=4;
+   [[790,260,54,'z'],[855,190,69,'Z'],[920,110,84,'Z']].forEach(([x,y,size,label],i)=>{
+    const phase=(t/3+i/3)%1,ease=1-Math.pow(1-phase,2);
+    ctx.save();ctx.globalAlpha=phase<.25?phase/.25:(1-phase)/.75;
+    ctx.translate(x-15+34*ease,y+34-83*ease);ctx.font='700 '+size+'px "Segoe UI",sans-serif';
+    ctx.strokeText(label,0,0);ctx.fillText(label,0,0);ctx.restore();
+   });
+  }else{
+   ctx.fillStyle='#a81747';ctx.strokeStyle='#fff1cf';ctx.lineWidth=5;ctx.font='bold 104px Arial,sans-serif';
+   [[105,440,'♪'],[915,420,'♫'],[145,225,'♫'],[875,205,'♪']].forEach(([x,y,label],i)=>{
+    const phase=(t/2.4+i*.25)%1,ease=1-Math.pow(1-phase,2),size=.8+.28*ease;
+    ctx.save();ctx.globalAlpha=phase<.2?phase/.2:phase<.75?1-(phase-.2)/.55*.1:(1-phase)/.25*.9;
+    ctx.translate(x,y+25-135*ease);ctx.rotate((-12+26*ease)*Math.PI/180);ctx.scale(size,size);
+    ctx.strokeText(label,0,0);ctx.fillText(label,0,0);ctx.restore();
+   });
+  }
+  ctx.restore();
+ }
  function sync(){host.dataset.state=asleep?'sleep':dance?'dance':action||'idle';onState(host.dataset.state,enabled)}
  function play(name){if(!enabled||asleep)return;dance=false;action=name;started=clock;if(name==='blink')blinkStart=clock;sync();schedule()}
  function render(){
