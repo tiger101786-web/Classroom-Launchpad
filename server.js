@@ -1389,13 +1389,26 @@ function applyApprovedStudentGradeMigrations(db) {
   };
 }
 
+let databaseReadCache = null;
+
+function databaseFileVersion() {
+  const stat = fs.statSync(dbPath, { bigint: true });
+  return [stat.dev, stat.ino, stat.size, stat.mtimeNs, stat.ctimeNs].join(':');
+}
+
 function readDb() {
   ensureDb();
   try {
+    const version = databaseFileVersion();
+    if (databaseReadCache && databaseReadCache.version === version) {
+      return structuredClone(databaseReadCache.data);
+    }
     const migrated = applyApprovedStudentGradeMigrations({ ...defaultDb, ...JSON.parse(fs.readFileSync(dbPath, "utf8")) });
     if (migrated.changed) writeDb(migrated.db);
     const db = withTeacherTestStudent(migrated.db);
-    return { ...db, threads: migrateGradeScopedThreads(db.threads), dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch) };
+    const result = { ...db, threads: migrateGradeScopedThreads(db.threads), dailyLaunch: normalizeGradeDailyLaunch(db.dailyLaunch) };
+    databaseReadCache = { version: databaseFileVersion(), data: structuredClone(result) };
+    return result;
   } catch {
     writeDb(defaultDb);
     const db = withTeacherTestStudent({ ...defaultDb });
@@ -1464,6 +1477,7 @@ function writeDb(db) {
   const tempPath = `${dbPath}.tmp`;
   fs.writeFileSync(tempPath, JSON.stringify(next, null, 2));
   fs.renameSync(tempPath, dbPath);
+  databaseReadCache = null;
 }
 
 function sendJson(res, status, payload, extraHeaders = {}) {
