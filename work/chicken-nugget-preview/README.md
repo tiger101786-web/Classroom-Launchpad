@@ -1,5 +1,9 @@
 # Chicken Nugget — animation test
 
+## Current preview-only experiment
+
+The preview loads rig-test.js instead of the production renderer to test eye-brown facial features. Eyebrows, closed/happy eyes, smile outlines and open-mouth fill use #491e18, sampled from the original left eye at logical coordinate (433,335). Line widths, shapes, timing and source artwork are unchanged. Pet Studio still uses nugget-pet/rig.js with its existing colors. This experiment has not been promoted to production.
+
 Open index.html directly in a browser. This standalone preview shares its renderer with the Chicken Nugget now available in Pet Studio. No production files or account data are changed.
 
 For Codex's embedded browser, run `node work/chicken-nugget-preview/serve.cjs` from the repository and open http://127.0.0.1:8766/. The loopback-only server serves this preview's public assets without caching. This avoids embedded file-preview image loading failures. The loader uses image load events and identifies any failing asset by filename. Test the web route with `NUGGET_PREVIEW_URL=http://127.0.0.1:8766/` set when running verify-animation.cjs.

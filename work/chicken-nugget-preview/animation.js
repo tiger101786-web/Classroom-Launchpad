@@ -1,4 +1,4 @@
-/* The preview uses the exact same renderer as Pet Studio. */
+/* Preview-only color test; rig-test.js preserves the approved motion and line widths. */
 (async()=>{
  const host=document.querySelector('.pet'),status=document.querySelector('#animation-status');
  const motion=document.querySelector('#motion'),dance=document.querySelector('#dance'),sleep=document.querySelector('#sleep');

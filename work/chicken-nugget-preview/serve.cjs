@@ -1,7 +1,7 @@
 // Local-only preview server. Serves only this preview's public assets.
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png'};
-const allowed=new Set(['index.html','preview.js','animation.js','preview.css','nugget-concept.png','body.png','basket.png']);
+const allowed=new Set(['index.html','preview.js','animation.js','rig-test.js','preview.css','nugget-concept.png','body.png','basket.png']);
 http.createServer((req,res)=>{
  const name=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';
  const production=name.startsWith('nugget-pet/')&&['rig.js','nugget-concept.png','body.png','basket.png'].includes(name.slice(11));
