@@ -2,6 +2,12 @@
 
 Chicken Nugget is selectable in the shared Pet Studio and companion picker. Preferences are validated and saved through the existing companion-preferences API.
 
+## Flavors
+
+Golden is joined by Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy and Burnt. Each coating has a matching dip. See skins/README.md for source PNGs, built-in generation prompts, and exact-geometry rendering details.
+
+Approved face contrast is shared with the preview: Burnt and BBQ use glossy black eyes and black expressions. Spicy and the remaining flavors retain eye-brown features. Soft toasted shading behind the dark flavors preserves coating texture; dips retain the original sauce relief, highlights and rim shadows.
+
 ## Shared artwork and animation
 - rig.js is used by production and work/chicken-nugget-preview; there is no separate reduced-quality production rig.
 - nugget-concept.png, body.png and basket.png are byte-for-byte copies of the approved preview assets. Generation provenance is documented in ../work/chicken-nugget-preview/README.md.

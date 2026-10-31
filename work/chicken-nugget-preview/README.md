@@ -10,6 +10,12 @@ For Codex's embedded browser, run `node work/chicken-nugget-preview/serve.cjs` f
 
 The full-size transparent artwork is nugget-concept.png. The nameplate label is live HTML text; controls change the name, display size and backdrop. No source downsampling or lossy conversion is applied.
 
+## Flavor preview
+
+Use the Nugget flavor selector to try Golden and seven generated coatings with matching dips. The preview and Pet Studio load the same skins.js, materials.js and rig.js modules. Flavor assets and generation prompts are documented in ../../nugget-pet/skins/README.md.
+
+BBQ and Burnt override the original eye-brown palette with glossy black eyes and black expressions. Dark flavors retain the approved softly toasted face shading and textured dips. materials-face-test.js is an archived approval snapshot, no longer loaded by the preview.
+
 ## Animation
 
 Gentle anchored breathing, automatic blinking, hello, happy eyes, chatter, arm wiggle, wave, quick body shake, eye scanning, foot lift, dance, sleep and waking. Dancing includes headphones, alternating feet and floating music notes. Sleeping includes continuous breathing and rising Zs. Music mode is silent in this preview.

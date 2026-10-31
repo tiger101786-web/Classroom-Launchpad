@@ -11,7 +11,17 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await open();const studio=page.locator('.pet-studio'),pet=page.locator('.nugget-companion');
  await studio.locator('#pet-select').selectOption('nugget');await page.waitForFunction(()=>document.querySelector('.nugget-companion').dataset.ready==='true');
  assert(await pet.isVisible());assert.equal(await pet.locator('canvas').evaluate(c=>c.width),2048);
- assert.equal(await studio.locator('.skin-card').count(),1);
+ assert.equal(await studio.locator('.skin-card').count(),8);
+
+ for(const name of ['Spicy','Buffalo','BBQ','Garlic Parm','Honey Mustard','Extra Crispy','Burnt','Golden']){
+  await studio.locator('[data-skin-choice="'+name+'"]').click();
+  await page.waitForFunction(n=>document.querySelector('.nugget-companion .pet-button').dataset.renderedSkin===n,name);
+  assert.equal(await page.evaluate(n=>nuggetFacePalette(n).ink,name),['Burnt','BBQ'].includes(name)?'#000000':'#491e18');
+  await page.waitForTimeout(300);
+  const selected=await page.evaluate(async()=> (await (await fetch('/api/companion-preferences')).json()).preferences);
+  assert.equal(selected.nugget.skin,name);
+ }
+ await page.waitForFunction(()=>[...document.querySelectorAll('[data-nugget-thumb]')].every(i=>i.complete&&i.naturalWidth===320));
  await studio.screenshot({path:path.join(dir,'studio.png')});
  await studio.locator('#greet').click();assert.equal(await pet.getAttribute('data-state'),'hello');
  await studio.locator('[data-tab=play]').click();

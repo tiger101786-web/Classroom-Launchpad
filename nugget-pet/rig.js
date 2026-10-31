@@ -12,7 +12,18 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   image.src=new URL(assetBase+src,document.baseURI).href;
  });
  try{
- const [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
+ let [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
+ let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
+ async function selectSkin(name){
+  name=Object.hasOwn(window.nuggetSkins||{},name)?name:'Golden';if(name===requestedSkin)return;
+  requestedSkin=name;const version=++skinVersion;host.dataset.skinLoading='true';
+  try{
+   const layers=await nuggetSkinLayers(name);if(version!==skinVersion)return;
+   original=layers.original;body=layers.body;basket=layers.basket;
+   host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
+  }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
+  finally{if(version===skinVersion)delete host.dataset.skinLoading}
+ }
  const canvas=document.createElement('canvas');canvas.width=canvas.height=2048;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Animated chicken nugget in a red basket');host.insertBefore(canvas,fallback);fallback.hidden=true;
  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -26,14 +37,15 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  const rightFoot=new Path2D('M566 657 C552 674 542 698 551 718 C560 738 607 741 640 732 C670 726 678 710 660 689 L638 661Z');
  const image=(source)=>ctx.drawImage(source,0,0,1024,1024);
  function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(path);image(original);ctx.restore()}
+ function facePalette(){return window.nuggetFacePalette?.(host.dataset.renderedSkin)||{ink:'#491e18',mouth:'#491e18'}}
  function eye(x,y,open,gaze,happy){
-  ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#491e18';
+  ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
   if(open<.07||happy>.8){ctx.beginPath();ctx.moveTo(-18,0);ctx.quadraticCurveTo(0,happy>.8?-13:10,18,0);ctx.stroke()}
-  else{ctx.scale(1,Math.max(.06,open));ctx.beginPath();ctx.ellipse(0,0,24,25,0,0,Math.PI*2);ctx.clip();ctx.drawImage(original,0,0,original.width,original.height,-x,-y,1024,1024)}
+  else{ctx.scale(1,Math.max(.06,open));ctx.beginPath();ctx.ellipse(0,0,24,25,0,0,Math.PI*2);ctx.clip();ctx.drawImage(original,0,0,original.width,original.height,-x,-y,1024,1024);if(facePalette().eyeRing){ctx.strokeStyle=facePalette().eyeRing;ctx.lineWidth=2;ctx.stroke()}}
   ctx.restore();
  }
- function mouth(open,smile){ctx.save();ctx.translate(516,361);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle='#491e18';
-  if(open>.08){ctx.beginPath();ctx.ellipse(0,6,30+smile*5,4+open*24,0,0,Math.PI*2);ctx.fillStyle='#491e18';ctx.fill();ctx.stroke();ctx.save();ctx.clip();ctx.fillStyle='#ae5b45';ctx.beginPath();ctx.ellipse(0,23,14,7,0,0,Math.PI*2);ctx.fill();ctx.restore()}
+ function mouth(open,smile){ctx.save();ctx.translate(516,361);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
+  if(open>.08){ctx.beginPath();ctx.ellipse(0,6,30+smile*5,4+open*24,0,0,Math.PI*2);ctx.fillStyle=facePalette().mouth;ctx.fill();ctx.stroke();ctx.save();ctx.clip();ctx.fillStyle='#ae5b45';ctx.beginPath();ctx.ellipse(0,23,14,7,0,0,Math.PI*2);ctx.fill();ctx.restore()}
   else{ctx.beginPath();ctx.moveTo(-34-smile*5,-2);ctx.quadraticCurveTo(0,25+smile*8,34+smile*5,-2);ctx.stroke()}
   ctx.restore();
  }
@@ -65,7 +77,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();
   piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);
   eye(438,322,eyeOpen,gaze,happy);eye(597,322,eyeOpen,gaze,happy);mouth(jaw,happy);
-  if(happy>.1){ctx.strokeStyle='#491e18';ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
+  if(happy>.1){ctx.strokeStyle=facePalette().ink;ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
   if(dance||options.headwear==='headphones')headphones();ctx.restore();
   if(enabled&&(asleep||dance))symbols(clock,asleep);
   canvas.dataset.frame=String(Math.round(clock*1000));
@@ -75,6 +87,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  function schedule(){if(!raf&&enabled&&options.visible&&!document.hidden)raf=requestAnimationFrame(tick)}
  function update(next){
   const previousSleep=asleep;options={...options,...next};
+  selectSkin(options.skin||'Golden');
   enabled=options.motion&&(!respectReducedMotion||!reduced.matches);asleep=Boolean(options.asleep);
   dance=Boolean(options.radio&&!asleep&&enabled);
   if(previousSleep&&!asleep){action='wake';started=clock}
