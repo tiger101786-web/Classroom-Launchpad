@@ -10,12 +10,16 @@ window.createNuggetBasketAccessories=()=>{
    const image=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Could not load '+labels[name]));i.src=new URL((['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(name)?'themes/'+name+'.png':name+'-v2.png'),nuggetAccessoryBase).href});
    images.set(name,image);
   }
+  if(name==='raising-canes'&&!images.has('coleslaw')){
+   const cup=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Could not load coleslaw'));i.src=new URL('themes/coleslaw.png',nuggetAccessoryBase).href});
+   images.set('coleslaw',cup);
+  }
   if(current===version)selected=name;
   return selected;
  }
  function draw(ctx,basket){
   const image=images.get(selected);if(!image||selected==='none')return;
-  if(['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(selected)){ctx.drawImage(image,0,0,1024,1024);return;}
+  if(['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(selected)){ctx.drawImage(image,0,0,1024,1024);if(selected==='raising-canes'&&images.has('coleslaw'))ctx.drawImage(images.get('coleslaw'),190,600,240,180);return;}
   // Generous portions surround the pet, behind its moving body and limbs.
   // Clip to the inside of the basket, preserving the foreground rim and label.
   ctx.save();ctx.beginPath();ctx.moveTo(20,285);ctx.lineTo(1004,285);ctx.lineTo(1004,650);ctx.bezierCurveTo(950,735,740,775,510,775);ctx.bezierCurveTo(275,775,80,730,20,660);ctx.closePath();ctx.clip();
