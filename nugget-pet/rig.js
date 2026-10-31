@@ -81,6 +81,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   eye(438,322,eyeOpen,gaze,happy);eye(597,322,eyeOpen,gaze,happy);mouth(jaw,happy);
   if(happy>.1){ctx.strokeStyle=facePalette().ink;ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
   if(dance||options.headwear==='headphones')headphones();ctx.restore();
+  if(options.platform)basketAccessories?.drawForeground(ctx);
   if(enabled&&(asleep||dance))symbols(clock,asleep);
   canvas.dataset.frame=String(Math.round(clock*1000));
  }

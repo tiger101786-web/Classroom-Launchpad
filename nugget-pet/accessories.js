@@ -19,7 +19,7 @@ window.createNuggetBasketAccessories=()=>{
  }
  function draw(ctx,basket){
   const image=images.get(selected);if(!image||selected==='none')return;
-  if(['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(selected)){ctx.drawImage(image,0,0,1024,1024);if(selected==='raising-canes'&&images.has('coleslaw'))ctx.drawImage(images.get('coleslaw'),190,600,240,180);return;}
+  if(['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(selected)){ctx.drawImage(image,0,0,1024,1024);return;}
   // Generous portions surround the pet, behind its moving body and limbs.
   // Clip to the inside of the basket, preserving the foreground rim and label.
   ctx.save();ctx.beginPath();ctx.moveTo(20,285);ctx.lineTo(1004,285);ctx.lineTo(1004,650);ctx.bezierCurveTo(950,735,740,775,510,775);ctx.bezierCurveTo(275,775,80,730,20,660);ctx.closePath();ctx.clip();
@@ -43,5 +43,15 @@ window.createNuggetBasketAccessories=()=>{
   ctx.bezierCurveTo(705,618,703,580,698,566);
   ctx.closePath();ctx.clip();ctx.drawImage(basket,0,0,1024,1024);ctx.restore();
  }
- return {select,draw,labels,get selected(){return selected}};
+ function drawForeground(ctx){
+  if(selected==='raising-canes'&&images.has('coleslaw')){
+   ctx.drawImage(images.get('coleslaw'),100,620,280,180);
+   // Restore the near basket rim over the cup so it sits inside the basket.
+   ctx.save();ctx.beginPath();ctx.moveTo(0,640);
+   ctx.bezierCurveTo(85,742,260,778,510,790);
+   ctx.lineTo(510,1024);ctx.lineTo(0,1024);ctx.closePath();ctx.clip();
+   ctx.drawImage(images.get(selected),0,0,1024,1024);ctx.restore();
+  }
+ }
+ return {select,draw,drawForeground,labels,get selected(){return selected}};
 };
