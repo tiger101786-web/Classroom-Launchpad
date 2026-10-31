@@ -1,3 +1,21 @@
+/* Studio-only styles are inserted at their original cascade positions. */
+const loadPetStudioStyles=(()=>{
+ const markers=[...document.querySelectorAll('meta[data-pet-studio-stylesheet]')];
+ let pending=null;
+ return ()=>{
+  if(pending)return pending;
+  pending=Promise.allSettled(markers.map(marker=>{
+   if(marker.previousElementSibling?.dataset.petStudioStylesReady===marker.dataset.petStudioStylesheet)return;
+   return new Promise((resolve,reject)=>{
+    const link=document.createElement('link');link.rel='stylesheet';
+    link.onload=()=>{link.dataset.petStudioStylesReady=marker.dataset.petStudioStylesheet;resolve()};
+    link.onerror=()=>{link.remove();reject(new Error('Pet Studio could not open. Please try again.'))};
+    link.href=marker.dataset.petStudioStylesheet;marker.before(link);
+   });
+  })).then(results=>{const failure=results.find(r=>r.status==='rejected');if(failure){pending=null;throw failure.reason}});
+  return pending;
+ };
+})();
 /* Shared production customization UI. Rendering and persistence stay with the existing pet controllers. */
 window.createPetStudio=function(bridge){
 const dialog=document.createElement('dialog');dialog.className='pet-studio';dialog.setAttribute('aria-labelledby','pet-studio-title');dialog.innerHTML="<main class=\"studio\"><header class=\"studio-header\"><h1 id=\"pet-studio-title\" class=\"studio-logo\"><img src=\"assets/pet-studio/pet-studio-logo.png\" alt=\"Pet Studio\" width=\"2172\" height=\"724\"></h1><label class=\"pet-switch\">Your companion<select id=\"pet-select\"><option value=\"colt\">Robo-Colt</option><option value=\"squishy\">Squishy Dumpling</option><option value=\"gummy\">Gummy Bear</option></select></label><button class=\"studio-close\" aria-label=\"Close Pet Studio\">×</button></header>\n<div class=\"studio-body\"><aside class=\"preview-pane\"><div class=\"live-label\"><span></span> LIVE PREVIEW</div><h2 id=\"pet-title\">Ember</h2><p id=\"pet-subtitle\">Jack-o-Lantern · Robo-Colt</p><div id=\"pet-stage\"></div><div class=\"preview-actions\"><button id=\"greet\">✦ Say hello</button><button id=\"dance\">♫ Try dancing</button></div><div class=\"preview-tip\">A little personality for your school day.</div><div class=\"selected-summary\"><span>YOUR LOOK</span><strong id=\"look-summary\"></strong></div></aside>\n<section class=\"controls-pane\"><nav class=\"tabs\" role=\"tablist\" aria-label=\"Pet settings\"><button role=\"tab\" data-tab=\"appearance\" aria-selected=\"true\">Appearance</button><button role=\"tab\" data-tab=\"name\" aria-selected=\"false\">Name & display</button><button role=\"tab\" data-tab=\"play\" aria-selected=\"false\">Play</button><button role=\"tab\" data-tab=\"settings\" aria-selected=\"false\">Settings</button></nav><div class=\"tab-content\" id=\"tab-content\" role=\"tabpanel\"></div><footer class=\"studio-footer\"><span id=\"save-status\" role=\"status\">✓ Saved</span><button class=\"studio-retry\" hidden>Retry</button><button id=\"undo\" disabled>↶ Undo change</button></footer></section></div></main>";document.body.append(dialog);
@@ -15,6 +33,7 @@ const themeSelect=themeControl.querySelector('select');let theme='crimson';try{c
 function applyStudioTheme(value){dialog.dataset.theme=themeNames.includes(value)?value:'crimson';themeSelect.value=dialog.dataset.theme;}
 applyStudioTheme(theme);themeSelect.onchange=()=>{applyStudioTheme(themeSelect.value);try{localStorage.setItem('petStudioTheme',dialog.dataset.theme)}catch{}};
 const stage=dialog.querySelector('#pet-stage'),content=dialog.querySelector('#tab-content');
+let openRevision=0,loadErrorNotice=null;
 let state,current='colt',tab='appearance',subtab='skins',filter='All',query='',radio=false,previous=null,opener=null;
 const squishyColors=[...bridge.squishyHost.querySelectorAll('[data-color]')].map(b=>({id:b.dataset.color,label:b.textContent}));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -60,7 +79,7 @@ function render(){content.setAttribute('aria-labelledby','studio-tab-'+tab);dial
 }
 
 function play(action){if(!bridge.canEdit()||state[current].asleep||!state[current].motion)return;bridge.play(current,action);}
-function close(){if(dialog.open)dialog.close();}
+function close(){openRevision++;loadErrorNotice?.remove();loadErrorNotice=null;if(dialog.open)dialog.close();}
 dialog.querySelector('#pet-select').onchange=e=>{current=e.target.value;previous=null;query='';filter='All';radio=false;bridge.dance(false);bridge.select(current);sync();render();save()};
 dialog.querySelectorAll('[data-tab]').forEach((b,i,all)=>{b.id='studio-tab-'+b.dataset.tab;b.setAttribute('aria-controls','tab-content');b.onclick=()=>{tab=b.dataset.tab;content.setAttribute('aria-labelledby',b.id);render()};b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowRight'?1:-1)+all.length)%all.length;all[j].click();all[j].focus()}}});
 dialog.querySelector('#greet').onclick=()=>play(current==='colt'?'greet':'excited');
@@ -71,7 +90,14 @@ dialog.addEventListener('close',()=>{radio=false;for(const [host,placeholder] of
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}});
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>{if(dialog.open){sync();render()}});
 return {
- open(pet){if(!bridge.canOpen())return;current=pet;opener=document.activeElement;bridge.prepare();state=bridge.read();previous=null;radio=false;query='';filter='All';tab='appearance';subtab='skins';
+ async open(pet){if(!bridge.canOpen())return;const revision=++openRevision,requestedOpener=document.activeElement;loadErrorNotice?.remove();loadErrorNotice=null;
+  try{await loadPetStudioStyles()}catch(error){
+   if(revision!==openRevision||!bridge.canOpen())return;
+   loadErrorNotice=document.createElement('div');loadErrorNotice.className='pet-studio-load-error';loadErrorNotice.setAttribute('role','alert');
+   const text=document.createElement('span');text.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.textContent='Try again';retry.onclick=()=>this.open(pet);loadErrorNotice.append(text,retry);document.body.append(loadErrorNotice);return;
+  }
+  if(revision!==openRevision||!bridge.canOpen())return;
+  current=pet;opener=requestedOpener;bridge.prepare();state=bridge.read();previous=null;radio=false;query='';filter='All';tab='appearance';subtab='skins';
   if(!dialog.open){for(const host of [bridge.coltHost,bridge.squishyHost,bridge.gummyHost,bridge.eagleHost,bridge.labubuHost,bridge.robloxHost,bridge.highlandHost,bridge.saberHost,bridge.nuggetHost].filter(Boolean)){const placeholder=document.createComment('pet-studio-home');host.before(placeholder);homes.set(host,placeholder);stage.append(host);host.querySelector('.pet-button').tabIndex=-1;}dialog.showModal();}
   sync();render();save();dialog.querySelector('.studio-close').focus();
  },

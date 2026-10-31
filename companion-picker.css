@@ -133,3 +133,5 @@ body[data-theme="night"] .dumpling-companion .dumpling-group button:not([aria-pr
 .dumpling-companion .dumpling-panel-body>.pet-status{margin:8px 20px 12px;font-size:11px;opacity:.7}
 .dumpling-companion .dumpling-panel-body>button{margin:0 20px 14px}
 @media(max-width:560px){.dumpling-companion .panel{height:min(500px,calc(100dvh - 24px))}.dumpling-companion .dumpling-sections{grid-template-columns:1fr}}
+
+.pet-studio-load-error{position:fixed;z-index:10000;bottom:20px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--paper,#fff);color:var(--ink,#222);box-shadow:0 4px 20px #0004}.pet-studio-load-error button{margin-left:10px}
