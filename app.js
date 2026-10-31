@@ -1952,15 +1952,15 @@ function saveStoredJsonIfChanged(key, value) {
   if (localStorage.getItem(key) !== serialized) localStorage.setItem(key, serialized);
 }
 
-function sharedSnapshot(includeTimer = true) {
+function sharedSnapshot(includeTimer = true, includeActivity = true) {
   return JSON.stringify({
     links,
     classThreads,
-    directMessages,
+    directMessages: includeActivity ? directMessages : undefined,
     mutedStudents,
     websiteRequests,
-    assignments,
-    submissions,
+    assignments: includeActivity ? assignments : undefined,
+    submissions: includeActivity ? submissions : undefined,
     studentSpotlights,
     dailyLaunch,
     classTimer: includeTimer ? classTimer : undefined,
@@ -1975,6 +1975,7 @@ async function loadSharedState(shouldRender = true) {
   if (!sharedBackend.enabled) return;
   const before = sharedSnapshot();
   const beforeWithoutTimer = sharedSnapshot(false);
+  const beforeWithoutActivity = sharedSnapshot(false, false);
   const beforeAuth = JSON.stringify(authSession);
   const beforePostingBlocked = postingBlocked;
   sharedStateLoads++;
@@ -2033,7 +2034,13 @@ async function loadSharedState(shouldRender = true) {
       const timerOnly = beforeWithoutTimer === sharedSnapshot(false)
         && beforeAuth === JSON.stringify(authSession)
         && beforePostingBlocked === postingBlocked;
-      if (timerOnly && screen.name !== "dashboard") refreshClassTimerBadge();
+      const activityOnly = beforeWithoutActivity === sharedSnapshot(false, false)
+        && beforeAuth === JSON.stringify(authSession)
+        && beforePostingBlocked === postingBlocked;
+      if (activityOnly && ["home", "category"].includes(screen.name)) {
+        refreshClassTimerBadge();
+        refreshDirectMessageIndicators();
+      } else if (timerOnly && screen.name !== "dashboard") refreshClassTimerBadge();
       else render();
     }
     return state;
@@ -2229,6 +2236,23 @@ function refreshClassTimerBadge() {
     else current.remove();
   } else if (html) app.insertAdjacentHTML('beforeend', html);
   startClassTimerClock();
+}
+
+function refreshDirectMessageIndicators() {
+  const count = unreadDirectMessageCount();
+  app.querySelectorAll('.header-message-control').forEach(button => {
+    button.setAttribute('aria-label', count ? count + ' unread ' + (count === 1 ? 'message' : 'messages') : 'Open private messages');
+    let badge = button.querySelector('.header-message-badge');
+    if (!count) badge?.remove();
+    else {
+      if (!badge) { badge = document.createElement('span'); badge.className = 'header-message-badge'; badge.setAttribute('aria-hidden', 'true'); button.append(badge); }
+      badge.textContent = count > 99 ? '99+' : String(count);
+    }
+  });
+  const current = app.querySelector('.direct-message-notification');
+  const html = renderDirectMessageNotification();
+  if (current) { if (html) current.outerHTML = html; else current.remove(); }
+  else if (html) app.insertAdjacentHTML('beforeend', html);
 }
 
 function getActiveLinks() {
