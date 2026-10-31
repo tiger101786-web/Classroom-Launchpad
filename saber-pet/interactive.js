@@ -8,7 +8,7 @@ window.createSaberPet=function(onChange,onCustomize){
  const pet=host.querySelector('.pet-button'),positionKey=()=> 'saber-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function remember(){try{localStorage.setItem(positionKey(),JSON.stringify(position))}catch{}}
- function refresh(){const still=host.querySelector('.tiger>image');if(still&&window.saberSkins?.[preferences.skin])still.setAttribute('href',saberSkins[preferences.skin].art);host.hidden=!visible||hidden;host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize='80px';const textWidth=label.getComputedTextLength();if(textWidth>580)label.style.fontSize=(80*580/textWidth)+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
+ function refresh(){const still=host.querySelector('.tiger>image');if(still&&window.saberSkins?.[preferences.skin])still.setAttribute('href',saberSkins[preferences.skin].art);host.hidden=!visible||hidden;ensureRig();host.dataset.size=preferences.size;const label=host.querySelector('#saber-pet-name');label.textContent=preferences.name;label.style.fontSize='80px';const textWidth=label.getComputedTextLength();if(textWidth>580)label.style.fontSize=(80*580/textWidth)+'px';host.querySelector('.saber-platform').style.display=preferences.platform?'':'none';host.querySelector('.saber-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';host.querySelector('.saber-speech').hidden=true;rig?.update({...preferences,radio});place();}
  pet.onclick=()=>{if(suppress){suppress=false;return}if(preferences.asleep){preferences={...preferences,asleep:false};refresh();onChange({...preferences})}else onCustomize?.()};
  pet.addEventListener('pointerdown',e=>{if(e.button!==0||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:b.left,top:b.top,moved:false};pet.setPointerCapture(e.pointerId)});
  pet.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)<6)return;drag.moved=true;position={x:drag.left+dx,y:drag.top+dy};host.querySelector('.saber-speech').hidden=true;place()});
@@ -16,7 +16,12 @@ window.createSaberPet=function(onChange,onCustomize){
  pet.addEventListener('pointerup',end);pet.addEventListener('pointercancel',end);
  pet.addEventListener('keydown',e=>{if(host.closest('.pet-studio'))return;const d={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!d)return;e.preventDefault();const b=pet.getBoundingClientRect();position={x:b.left+d[0],y:b.top+d[1]};place();remember()});
  window.addEventListener('resize',place);
+ let rigStarted=false;
+ function ensureRig(){
+  if(rigStarted||host.hidden)return;
+  rigStarted=true;
  mountSaberRig(host,()=>preferences).then(value=>{rig=value;host.dataset.ready='true';refresh()}).catch(error=>{host.dataset.ready='error';console.warn('Saber-tooth tiger is displaying its static artwork:',error.message)});
+ }
  return {host,play(name){if(!host.hidden&&!preferences.asleep&&preferences.motion)rig?.play(({excited:'hello',greet:'hello',mouth:'talk'})[name]||name)},update(value){if(account!==value.account){account=value.account;position=null;hidden=false;rig?.reset();try{const p=JSON.parse(localStorage.getItem(positionKey())||'null');if(Number.isFinite(p?.x)&&Number.isFinite(p?.y))position=p}catch{}}preferences={...saberDefaults(),...value.preferences};visible=value.visible;radio=value.radio;refresh()},show(){hidden=false;refresh()},hide(){hidden=true;refresh()},reset(){position=null;try{localStorage.removeItem(positionKey())}catch{}place()},refresh};
 };
 /* One clock for body mesh, face, headphones, and floating symbols. Production rig from the approved preview. */
