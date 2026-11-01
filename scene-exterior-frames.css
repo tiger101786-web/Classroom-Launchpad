@@ -169,5 +169,5 @@
 .is-paused .nugget-scene-steam i{animation-play-state:paused;opacity:0}
 @media(prefers-reduced-motion:reduce){.nugget-scene-steam i{animation:none;opacity:0}}
 
-/* Measured rim opening: 42.82% radius; enlarge the frame only, within the 116% stage cap. */
-.launch-scene-stage > .scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-9.5%}
+/* Nugget-only artwork: measured opening radius 41.71%; scale only the frame. */
+.launch-scene-stage > .scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-10.2%}

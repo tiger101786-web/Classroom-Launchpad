@@ -1,5 +1,7 @@
 # Chicken Nugget scene and narrow frame
 
+The original gold/red frame described below has been replaced by the nugget-only narrow frame. Current asset, prompts, measurements and validation: [chicken-nugget-only-frame.md](chicken-nugget-only-frame.md). The scene photograph remains unchanged.
+
 Added as optional scene `chicken-nugget` and frame `match-chicken-nugget`. Existing selections and artwork are preserved.
 
 Generated with the built-in imagegen tool. Prompt briefs: a photoreal diner basket of crispy chicken nuggets, fries, honey mustard and ketchup, warm natural window lighting, with the food composed safely inside a circular crop; a separate thin dimensional gold circular rim with miniature nugget/fries relief and crimson accents, transparent center and exterior, without hearts, faces, lettering or a scene inside. Earlier cartoon and thicker frame drafts were rejected.
