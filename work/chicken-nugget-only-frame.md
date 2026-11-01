@@ -1,5 +1,7 @@
 # Nugget-only narrow frame replacement
 
+Superseded by the detailed v4 artwork and standard maximum-opening fit. See [nugget-frame-standard-fit.md](nugget-frame-standard-fit.md) for the corrected geometry, prompts and gap regression checks.
+
 Replaces the decorative artwork for the existing `match-chicken-nugget` frame selection, without changing the scene photograph or any saved scene/frame IDs. The frame is exclusively realistic chicken nuggets; there is no metallic ring, red trim, fries, sauce, hearts, gems or other decorative object.
 
 Generated with the built-in imagegen tool. Final source: `C:\Users\Sinister\.codex\generated_images\01a19363-e9fe-7dc2-86a1-e1134a57d914\exec-d5197a1d-c28a-4878-9ab8-7277209d3cd7.png`.

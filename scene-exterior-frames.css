@@ -169,5 +169,6 @@
 .is-paused .nugget-scene-steam i{animation-play-state:paused;opacity:0}
 @media(prefers-reduced-motion:reduce){.nugget-scene-steam i{animation:none;opacity:0}}
 
-/* Nugget-only artwork: measured opening radius 41.71%; scale only the frame. */
-.launch-scene-stage > .scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-10.2%}
+/* Same max-opening fit as the collection audit: -min(.08, (.498/max - 1)/2).
+   Align the furthest inner edge to the photo with the standard small overlap. */
+.scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-7.398%}

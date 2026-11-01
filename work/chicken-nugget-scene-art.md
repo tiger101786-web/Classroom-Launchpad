@@ -1,6 +1,6 @@
 # Chicken Nugget scene and narrow frame
 
-The original gold/red frame described below has been replaced by the nugget-only narrow frame. Current asset, prompts, measurements and validation: [chicken-nugget-only-frame.md](chicken-nugget-only-frame.md). The scene photograph remains unchanged.
+The original gold/red frame described below has been replaced by the detailed nugget-only narrow frame. Current asset, prompts, standard frame proportions and gap validation: [nugget-frame-standard-fit.md](nugget-frame-standard-fit.md). The scene photograph remains unchanged.
 
 Added as optional scene `chicken-nugget` and frame `match-chicken-nugget`. Existing selections and artwork are preserved.
 
