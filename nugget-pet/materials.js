@@ -8,15 +8,36 @@
  function pixels(image){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(image,0,0);return {canvas:c,ctx:g,image:g.getImageData(0,0,c.width,c.height)}}
  // Dedicated photographic skins bypass texture multiplication entirely. Keep
  // their native pixel dimensions while registering them to the existing rig.
- function photoLayers(reference,eyes,basket,blackFeatures=false){
+ function photoLayers(reference,eyes,basket,blackFeatures=false,templateBody){
   const source=pixels(reference),data=source.image.data,w=reference.width,h=reference.height;
   let left=w,top=h,right=0,bottom=0;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(data[(y*w+x)*4+3]>100){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y)}
   const full=document.createElement('canvas');full.width=w;full.height=h;
   const g=full.getContext('2d');g.imageSmoothingQuality='high';g.scale(w/1024,h/1024);
   g.drawImage(reference,left,top,right-left+1,bottom-top+1,221,45,551,695);
-  // Preserve the complete silhouette. Arms and feet move on a continuous mesh;
-  // no photographic limb is cut away from the body.
+  // The approved armless silhouette separates hand pixels from torso pixels.
+  // Keep native RGB detail and the complete feet; alter only joint alpha.
+  const template=document.createElement('canvas');template.width=w;template.height=h;
+  template.getContext('2d').drawImage(templateBody,98*w/1024,10*h/1024,795*w/1024,795*h/1024);
+  const mask=template.getContext('2d').getImageData(0,0,w,h).data;
+  const torso=pixels(full),arms={};
+  for(const side of ['left','right']){const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;arms[side]={canvas,ctx:canvas.getContext('2d')};}
+  const smooth=(a,b,n)=>{const t=Math.max(0,Math.min(1,(n-a)/(b-a)));return t*t*(3-2*t)};
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const i=(y*w+x)*4,wx=x/w*1024,wy=y/h*1024,bodyAlpha=mask[i+3]/255;
+   const band=smooth(400,430,wy)*(1-smooth(595,610,wy));
+   torso.image.data[i+3]*=1-band*(1-bodyAlpha);
+  }
+  torso.ctx.putImageData(torso.image,0,0);
+  for(const [side,cx] of [['left',274],['right',730]]){
+   const g=arms[side].ctx;g.clearRect(0,0,w,h);g.save();g.scale(w/1024,h/1024);g.beginPath();g.ellipse(cx,510,48,76,0,0,Math.PI*2);g.clip();
+   // Continue the native hand texture beneath transparent edge pixels. A
+   // complete rounded matte cannot carry a detached alpha shard into a wave.
+   const sample=(Math.floor(510/1024*h)*w+Math.floor(cx/1024*w))*4;
+   g.fillStyle=`rgb(${torso.image.data[sample]} ${torso.image.data[sample+1]} ${torso.image.data[sample+2]})`;g.fillRect(cx-48,434,96,152);
+   g.drawImage(full,(cx-22)/1024*w,478/1024*h,44/1024*w,64/1024*h,cx-48,434,96,152);
+   g.drawImage(full,0,0,1024,1024);g.restore();
+  }
   const registered=document.createElement('canvas');registered.width=w;registered.height=h;
   const r=registered.getContext('2d');r.imageSmoothingQuality='high';r.drawImage(full,-98*w/795,-10*h/795,w*1024/795,h*1024/795);
   if(blackFeatures){
@@ -28,7 +49,7 @@
    }
    e.ctx.putImageData(e.image,0,0);eyes=e.canvas;
   }
-  return {original:full,body:registered,wholeBody:full,basket,eyes,photographic:true};
+  return {original:full,body:registered,wholeBody:full,torso:torso.canvas,armLayers:{left:arms.left.canvas,right:arms.right.canvas},basket,eyes,photographic:true};
  }
  async function coat(source,map,isBody,blackEyes=false){
   const out=pixels(source),d=out.image.data,w=source.width,h=source.height,tex=map.image.data,tw=map.canvas.width,th=map.canvas.height;
@@ -91,7 +112,7 @@
     }
     if(skin.photographic){
      const [reference,atlas]=await Promise.all([load('skins/'+(skin.characterFile||skin.file+'-character-v2.png')),load('skins/'+skin.file+'-material.png')]);
-     return photoLayers(reference,original,sauce(basket,pixels(atlas)),skin.blackFeatures);
+     return photoLayers(reference,original,sauce(basket,pixels(atlas)),skin.blackFeatures,body);
     }
     const atlas=await load('skins/'+skin.file+'-material.png'),map=pixels(atlas);
     const blackEyes=['Burnt','Spicy','BBQ','Frozen'].includes(name);

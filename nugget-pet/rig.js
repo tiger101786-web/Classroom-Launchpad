@@ -18,6 +18,8 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  let eyeSource=original;
  let photographicSkin=false;
  let photoBodySource=null;
+ let photoFullBodySource=null;
+ let photoArmSources=null;
  let photoDeformer;
  let referenceSkin=false;
  let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
@@ -28,7 +30,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
    const layers=await nuggetSkinLayers(name);if(version!==skinVersion)return;
    original=layers.original;body=layers.body;basket=layers.basket;eyeSource=layers.eyes||original;referenceSkin=Boolean(layers.reference);
    photographicSkin=Boolean(layers.photographic);
-   photoBodySource=layers.wholeBody||null;
+   photoBodySource=layers.torso||layers.wholeBody||null;
+   photoFullBodySource=layers.wholeBody||null;
+   photoArmSources=layers.armLayers||null;
    host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
   }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
   finally{if(version===skinVersion)delete host.dataset.skinLoading}
@@ -54,15 +58,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(!gl)return null;
   const vertex=`attribute vec2 p;varying vec2 uv;uniform vec4 pose;
    void main(){uv=p/1024.;vec2 q=p;
-    float distance=(p.y-510.)/85.;float band=exp(-2.*distance*distance);
-    float left=(1.-smoothstep(276.,330.,p.x))*band;
-    float right=smoothstep(666.,720.,p.x)*band;
-    // A bounded lift bends each complete arm without folding the mesh or
-    // stretching the adjacent torso into a new point at the shoulder.
-    q+=vec2(-18.,-32.)*sin(pose.x)*left;
-    q+=vec2(18.,-32.)*sin(pose.y)*right;
-    float l=(p.x-400.)/90.;float r=(p.x-606.)/90.;
-    q.y-=max(p.y-610.,0.)/130.*(pose.z*exp(-l*l)+pose.w*exp(-r*r));
+    float l=1.-smoothstep(80.,120.,abs(p.x-390.));
+    float r=1.-smoothstep(80.,120.,abs(p.x-610.));
+    q.y-=smoothstep(610.,660.,p.y)*(pose.z*l+pose.w*r);
     gl_Position=vec4(q.x/512.-1.,1.-q.y/512.,0.,1.);
    }`;
   const fragment='precision highp float;varying vec2 uv;uniform sampler2D art;void main(){gl_FragColor=texture2D(art,uv);}';
@@ -80,13 +78,15 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform4f(pose,left,right,footLeft,footRight);gl.drawArrays(gl.TRIANGLES,0,vertices.length/2);return surface;
   };
  }
- function photoBody(left,right,leftLift,rightLift){
-  if(Math.abs(left)+Math.abs(right)+leftLift+rightLift<.01){image(photoBodySource);return;}
+ function photoBody(leftLift,rightLift,separateArms){
+  const source=separateArms?photoBodySource:photoFullBodySource;
+  if(leftLift+rightLift<.01){image(source);return;}
   if(photoDeformer===undefined){try{photoDeformer=createPhotoDeformer();}catch(error){photoDeformer=null;console.warn('Nugget motion fallback:',error.message)}host.dataset.photoMotion=photoDeformer?'continuous-mesh':'continuous-canvas';}
-  const surface=photoDeformer?.(photoBodySource,left,right,leftLift,rightLift);
+  const surface=photoDeformer?.(source,0,0,leftLift,rightLift);
   if(surface)image(surface);
-  else{ctx.save();ctx.translate(0,-(leftLift+rightLift)*.2);ctx.translate(516,668);ctx.rotate((left-right)*.025);ctx.translate(-516,-668);image(photoBodySource);ctx.restore();}
+  else{ctx.save();ctx.translate(0,-(leftLift+rightLift)*.2);image(source);ctx.restore();}
  }
+ function photoArm(source,px,angle){ctx.save();ctx.translate(px,448);ctx.rotate(angle);ctx.translate(-px,-448);image(source);ctx.restore()}
  function facePalette(){return window.nuggetFacePalette?.(host.dataset.renderedSkin)||{ink:'#491e18',mouth:'#491e18'}}
  function eye(x,y,open,gaze,happy){
   ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
@@ -134,9 +134,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(action==='talk')jaw=e*(.2+.8*(.5+.5*Math.sin(elapsed*13)));
   if(action==='shake')shake=e*Math.sin(elapsed*34)*.022;
   if(action==='look')gaze=Math.sin(elapsed/d*Math.PI*2)*e*7;
-  if(action==='foot')leftLift=e*18;
+  if(action==='foot')leftLift=e*(photographicSkin?20:18);
   if(action==='wake')jaw=e*Math.sin(Math.PI*clamp(elapsed/d))*.85;
-  if(dance){wave=.35+.25*beat;rightWave=.35-.25*beat;leftLift=Math.max(0,beat)*10;rightLift=Math.max(0,-beat)*10;happy=1;jaw=0}
+  if(dance){wave=.35+.25*beat;rightWave=.35-.25*beat;const step=photographicSkin?12:10;leftLift=Math.max(0,beat)*step;rightLift=Math.max(0,-beat)*step;happy=1;jaw=0}
   if(speaking&&enabled&&!asleep)jaw=.2+.8*(.5+.5*Math.sin((clock-speechStarted)*13));
   if(asleep)jaw=.5+.3*(breath*.5+.5);
   if(enabled&&clock>blinkAt&&!asleep){blinkStart=clock;blinkAt=clock+3.2+Math.random()*2.1}
@@ -146,9 +146,11 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(!photographicSkin){piece(leftFoot,400,722,0,leftLift);piece(rightFoot,606,722,0,rightLift);}
   ctx.save();const sy=1+(enabled?.006*breath:0),skew=enabled?(shake+(dance?beat*.012:0)):0;ctx.transform(1,0,skew,sy,-skew*668,668*(1-sy));
   // Register the isolated body back to the approved composite's coordinates.
-  if(photographicSkin)photoBody(wave,rightWave,leftLift,rightLift);
+  const movingArms=Math.abs(wave)+Math.abs(rightWave)>.001;
+  if(photographicSkin)photoBody(leftLift,rightLift,movingArms);
   else{ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();}
-  if(!photographicSkin){piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);}
+  if(photographicSkin){if(movingArms){photoArm(photoArmSources.left,291,wave);photoArm(photoArmSources.right,713,-rightWave);}}
+  else{piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);}
   if(referenceSkin){
    // Cover only the small feature area while it moves; the resting pose retains the uploaded face.
    if(eyeOpen<.99||happy>.8)for(const x of [438,597])ctx.drawImage(original,x-29,260,58,55,x-29,294,58,55);

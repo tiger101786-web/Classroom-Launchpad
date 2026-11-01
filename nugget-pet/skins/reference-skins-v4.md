@@ -6,6 +6,8 @@ Buffalo, Extra Crispy and Burnt now select new versioned artwork; their previous
 
 ## Arm correction
 
+The subsequent restoration of the original wave and dance angles supersedes the continuous-arm approach described below. Current layer construction, full-foot lift and movement-range validation are documented in [nugget-motion-restoration.md](../../work/nugget-motion-restoration.md).
+
 The rotating cutouts captured wedges of torso texture or left small pointed remnants beneath the moving arms. Photographic skins now retain their complete original silhouette, with no arm or ankle cutouts at all. A continuous textured mesh gently lifts the arms and feet while keeping their attachments joined. Arm displacement is bounded to avoid folding or stretching the torso. Resting poses and gallery thumbnails draw the uncut native image directly. The mesh uploads the native source texture, uses high-precision sampling and renders at 2048px; a continuous canvas fallback preserves the silhouette when WebGL is unavailable. Golden and Frozen keep their original rendering paths.
 
 ## Assets and prompts

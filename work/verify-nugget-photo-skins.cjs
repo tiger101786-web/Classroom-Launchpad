@@ -18,7 +18,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   assert.equal(await pet.locator('.pet-button').getAttribute('data-skin-error'),null);
   const dimensions=await page.evaluate(async name=>{const s=await nuggetSkinLayers(name),source=new Image(),skin=nuggetSkins[name];source.src='/nugget-pet/skins/'+(skin.characterFile||skin.file+'-character-v2.png');await source.decode();const c=document.createElement('canvas');c.width=source.naturalWidth;c.height=source.naturalHeight;const g=c.getContext('2d');g.drawImage(source,0,0);const d=g.getImageData(0,0,c.width,c.height).data;return {source:[source.naturalWidth,source.naturalHeight],body:[s.body.width,s.body.height],full:[s.original.width,s.original.height],eyes:!!s.eyes,photo:s.photographic,corners:[d[3],d[c.width*4-1],d[(c.height-1)*c.width*4+3],d[d.length-1]]}},name);
   assert(dimensions.source.every(n=>n>=1024));assert.deepEqual(dimensions.body,dimensions.source);assert.deepEqual(dimensions.body,dimensions.full);assert(dimensions.photo&&dimensions.eyes);
-  assert.equal(await page.evaluate(async n=>{const s=await nuggetSkinLayers(n);return s.original===s.wholeBody},name),true,'Photographic limbs must remain part of the uncut source');
+  assert.equal(await page.evaluate(async n=>{const s=await nuggetSkinLayers(n);return s.original===s.wholeBody},name),true,'Native photographic source master must stay intact');
   assert(dimensions.corners.every(a=>a<=1),'Transparent background (at most one alpha level of edge noise): '+name);
   // A still rig must reproduce the complete original feet, with no clipped
   // scraps, holes, duplicate foot fragments or texture changes at either ankle.
@@ -30,13 +30,23 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   const footPixels=await page.evaluate(async name=>{
    const skin=await nuggetSkinLayers(name),actual=document.querySelector('#foot-art-audit canvas'),expected=document.createElement('canvas');expected.width=expected.height=2048;const g=expected.getContext('2d');g.imageSmoothingQuality='high';g.setTransform(2,0,0,2,0,0);g.drawImage(skin.basket,0,0,1024,1024);g.drawImage(skin.original,0,0,1024,1024);
    const a=actual.getContext('2d').getImageData(400,1220,1200,300).data,b=g.getImageData(400,1220,1200,300).data;let changed=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])changed++;
-   document.querySelector('#foot-art-audit').remove();delete window.footAuditRig;return changed;
+   return changed;
   },name);
   assert.equal(footPixels,0,'Both feet must match the uncut artwork exactly: '+name);
+  const range=await page.evaluate(async()=>{
+   const rig=footAuditRig,canvas=document.querySelector('#foot-art-audit canvas');
+   const sample=()=>{const d=canvas.getContext('2d').getImageData(0,0,2048,2048).data;let armY=0,armCount=0,footBottom=0;for(let y=380;y<610;y++)for(let x=170;x<292;x++)if(d[((y*2)*2048+x*2)*4+3]>128){armY+=y;armCount++}for(let y=650;y<770;y++)for(let x=310;x<470;x++)if(d[((y*2)*2048+x*2)*4+3]>128)footBottom=y;return {armY:armY/armCount,footBottom}};
+   rig.reset();rig.update({platform:false,motion:false});const rest=sample();
+   const pose=async(action,time)=>{rig.reset();rig.update({motion:true,visible:true});rig.play(action);await new Promise(resolve=>{const tick=()=>rig.getState().clock>=time?resolve():requestAnimationFrame(tick);requestAnimationFrame(tick)});rig.update({visible:false});return sample()};
+   const wave=await pose('wave',.5),foot=await pose('foot',.6);rig.update({motion:false,visible:false});document.querySelector('#foot-art-audit').remove();delete window.footAuditRig;return {waveRise:rest.armY-wave.armY,footRise:rest.footBottom-foot.footBottom};
+  });
+  console.log(name+' motion range '+JSON.stringify(range));
+  assert(range.waveRise>=20,'Wave must visibly raise the complete hand: '+name);
+  assert(range.footRise>=18,'Foot lift must retain the original height: '+name);
   const prefs=(await (await context.request.get(origin+'/api/companion-preferences')).json()).preferences;assert.equal(prefs.nugget.skin,name);
   await studio.locator('[data-tab=settings]').click();await studio.locator('[data-toggle=motion]').uncheck();await pet.screenshot({path:path.join(output,name+'-studio.png')});await studio.locator('[data-toggle=motion]').check();
   await studio.locator('[data-tab=play]').click();
-  for(const action of ['blink','talk','wave','hands','foot']){await studio.locator('[data-action='+action+']').click();assert.equal(await pet.getAttribute('data-state'),action);const before=await pet.locator('canvas').evaluate(c=>c.toDataURL());await page.waitForTimeout(130);assert.notEqual(await pet.locator('canvas').evaluate(c=>c.toDataURL()),before,'Animation must actually redraw '+name+' '+action);if(action==='wave'||action==='hands'){await page.waitForTimeout(570);await pet.screenshot({path:path.join(output,name+'-'+action+'.png')})}}
+  for(const action of ['blink','talk','wave','hands','foot']){await studio.locator('[data-action='+action+']').click();assert.equal(await pet.getAttribute('data-state'),action);const before=await pet.locator('canvas').evaluate(c=>c.toDataURL());await page.waitForTimeout(130);assert.notEqual(await pet.locator('canvas').evaluate(c=>c.toDataURL()),before,'Animation must actually redraw '+name+' '+action);if(action==='wave'||action==='hands'){await page.waitForTimeout(action==='wave'?370:570);await pet.screenshot({path:path.join(output,name+'-'+action+'.png')})}}
   assert.equal(await pet.locator('.pet-button').getAttribute('data-photo-motion'),'continuous-mesh');
   await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-state'),'dance');await page.waitForTimeout(350);await pet.screenshot({path:path.join(output,name+'-dance.png')});await studio.locator('#dance').click();
   await studio.locator('[data-toggle=asleep]').check();assert.equal(await pet.getAttribute('data-state'),'sleep');await page.waitForTimeout(350);await pet.screenshot({path:path.join(output,name+'-sleep.png')});await studio.locator('[data-toggle=asleep]').uncheck();

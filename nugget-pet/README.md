@@ -12,7 +12,7 @@ Face colors are shared with the preview: photographic reference skins and Frozen
 - rig.js is used by production and work/chicken-nugget-preview; there is no separate reduced-quality production rig.
 - nugget-concept.png, body.png and basket.png are byte-for-byte copies of the approved preview assets. Generation provenance is documented in ../work/chicken-nugget-preview/README.md.
 - A fixed 2048 × 2048 canvas preserves detail at all display sizes. The basket remains stationary, and body/face/limbs use the same animation clock.
-- Photographic skins retain one uncut body/arm/foot image. A continuous mesh gently lifts the limbs, avoiding clipped arm slivers and ankle fragments; resting poses use the native artwork directly.
+- Photographic skins retain their uncut native source image for resting poses. Raised arms use full rounded hand layers and an armless torso underlay so the original shoulder angles work without dragging torso fragments. Feet use a continuous mesh with full-toe movement. See ../work/nugget-motion-restoration.md for movement checks.
 - Idle breathing/blinking, hello, happy eyes, chatter, arm wiggle, wave, shake, scanning eyes, foot lift, dance, sleep and wake are supported.
 - Dancing has happy eyes, a smile, headphones, alternating limbs and rising notes; sleep has the approved wider mouth and moving Zs.
 - Production respects reduced motion and stops its frame loop when hidden. The preview permits explicit motion opt-in.
