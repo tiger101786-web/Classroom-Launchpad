@@ -169,7 +169,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  function update(next){
   const previousSleep=asleep,previousDance=dance,previousEnabled=enabled;options={...options,...next};
   selectSkin(options.skin||'Golden');
-  const accessory=['french-fries','waffle-fries','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(options.basketAccessory)?options.basketAccessory:'none';
+  const accessory=['french-fries','waffle-fries','tater-tots','fried-pickles','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(options.basketAccessory)?options.basketAccessory:'none';
   if(basketAccessories&&accessory!==requestedAccessory){
    requestedAccessory=accessory;
    basketAccessories.select(accessory).then(name=>{host.dataset.basketAccessory=name;delete host.dataset.accessoryError;render();schedule()}).catch(error=>{requestedAccessory=basketAccessories.selected;host.dataset.accessoryError=error.message;console.warn(error)});

@@ -2,7 +2,7 @@
 const nuggetAccessoryBase=new URL('accessories/',document.currentScript.src);
 window.createNuggetBasketAccessories=()=>{
  const images=new Map();let selected='none',version=0;
- const labels={none:'No basket accessory','french-fries':'French fries','waffle-fries':'Waffle fries',mcdonalds:"McDonald's basket",'chick-fil-a':'Chick-fil-A basket','burger-king':'Burger King basket','raising-canes':"Raising Cane's basket"};
+ const labels={none:'No basket accessory','french-fries':'French fries','waffle-fries':'Waffle fries','tater-tots':'Tater tots','fried-pickles':'Fried pickles',mcdonalds:"McDonald's basket",'chick-fil-a':'Chick-fil-A basket','burger-king':'Burger King basket','raising-canes':"Raising Cane's basket"};
  async function select(name){
   if(!Object.hasOwn(labels,name))name='none';
   const current=++version;
@@ -33,7 +33,7 @@ window.createNuggetBasketAccessories=()=>{
   ctx.drawImage(image,0,0,1024,1024);
   ctx.restore();
   // Follow the ceramic rim rather than copying the red liner above/right of it.
-  // Shared by both fry types and all matching sauce flavors.
+  // Shared by fries, tots, pickles and all matching sauce flavors.
   ctx.save();ctx.beginPath();ctx.moveTo(694,543);
   ctx.bezierCurveTo(694,514,750,493,819,493);
   ctx.bezierCurveTo(889,493,947,514,951,545);
