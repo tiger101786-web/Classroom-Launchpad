@@ -18,8 +18,8 @@ const loadPetStudioStyles=(()=>{
 })();
 /* Shared production customization UI. Rendering and persistence stay with the existing pet controllers. */
 window.createPetStudio=function(bridge){
-const dialog=document.createElement('dialog');dialog.className='pet-studio';dialog.setAttribute('aria-labelledby','pet-studio-title');dialog.innerHTML="<main class=\"studio\"><header class=\"studio-header\"><h1 id=\"pet-studio-title\" class=\"studio-logo\"><img src=\"assets/pet-studio/pet-studio-logo.png\" alt=\"Pet Studio\" width=\"2172\" height=\"724\"></h1><label class=\"pet-switch\">Your companion<select id=\"pet-select\"><option value=\"colt\">Robo-Colt</option><option value=\"squishy\">Squishy Dumpling</option><option value=\"gummy\">Gummy Bear</option></select></label><button class=\"studio-close\" aria-label=\"Close Pet Studio\">×</button></header>\n<div class=\"studio-body\"><aside class=\"preview-pane\"><div class=\"live-label\"><span></span> LIVE PREVIEW</div><h2 id=\"pet-title\">Ember</h2><p id=\"pet-subtitle\">Jack-o-Lantern · Robo-Colt</p><div id=\"pet-stage\"></div><div class=\"preview-actions\"><button id=\"greet\">✦ Say hello</button><button id=\"dance\">♫ Try dancing</button></div><div class=\"preview-tip\">A little personality for your school day.</div><div class=\"selected-summary\"><span>YOUR LOOK</span><strong id=\"look-summary\"></strong></div></aside>\n<section class=\"controls-pane\"><nav class=\"tabs\" role=\"tablist\" aria-label=\"Pet settings\"><button role=\"tab\" data-tab=\"appearance\" aria-selected=\"true\">Appearance</button><button role=\"tab\" data-tab=\"name\" aria-selected=\"false\">Name & display</button><button role=\"tab\" data-tab=\"play\" aria-selected=\"false\">Play</button><button role=\"tab\" data-tab=\"settings\" aria-selected=\"false\">Settings</button></nav><div class=\"tab-content\" id=\"tab-content\" role=\"tabpanel\"></div><footer class=\"studio-footer\"><span id=\"save-status\" role=\"status\">✓ Saved</span><button class=\"studio-retry\" hidden>Retry</button><button id=\"undo\" disabled>↶ Undo change</button></footer></section></div></main>";document.body.append(dialog);
-dialog.querySelector('.studio-logo').insertAdjacentHTML('afterend','<img class="studio-header-trail" src="assets/pet-studio/header-trail.svg" alt="" aria-hidden="true" width="600" height="90">');
+const dialog=document.createElement('dialog');dialog.className='pet-studio';dialog.setAttribute('aria-labelledby','pet-studio-title');dialog.innerHTML="<main class=\"studio\"><header class=\"studio-header\"><h1 id=\"pet-studio-title\" class=\"studio-logo\"><img data-studio-src=\"assets/pet-studio/pet-studio-logo.png\" alt=\"Pet Studio\" width=\"2172\" height=\"724\"></h1><label class=\"pet-switch\">Your companion<select id=\"pet-select\"><option value=\"colt\">Robo-Colt</option><option value=\"squishy\">Squishy Dumpling</option><option value=\"gummy\">Gummy Bear</option></select></label><button class=\"studio-close\" aria-label=\"Close Pet Studio\">×</button></header>\n<div class=\"studio-body\"><aside class=\"preview-pane\"><div class=\"live-label\"><span></span> LIVE PREVIEW</div><h2 id=\"pet-title\">Ember</h2><p id=\"pet-subtitle\">Jack-o-Lantern · Robo-Colt</p><div id=\"pet-stage\"></div><div class=\"preview-actions\"><button id=\"greet\">✦ Say hello</button><button id=\"dance\">♫ Try dancing</button></div><div class=\"preview-tip\">A little personality for your school day.</div><div class=\"selected-summary\"><span>YOUR LOOK</span><strong id=\"look-summary\"></strong></div></aside>\n<section class=\"controls-pane\"><nav class=\"tabs\" role=\"tablist\" aria-label=\"Pet settings\"><button role=\"tab\" data-tab=\"appearance\" aria-selected=\"true\">Appearance</button><button role=\"tab\" data-tab=\"name\" aria-selected=\"false\">Name & display</button><button role=\"tab\" data-tab=\"play\" aria-selected=\"false\">Play</button><button role=\"tab\" data-tab=\"settings\" aria-selected=\"false\">Settings</button></nav><div class=\"tab-content\" id=\"tab-content\" role=\"tabpanel\"></div><footer class=\"studio-footer\"><span id=\"save-status\" role=\"status\">✓ Saved</span><button class=\"studio-retry\" hidden>Retry</button><button id=\"undo\" disabled>↶ Undo change</button></footer></section></div></main>";document.body.append(dialog);
+dialog.querySelector('.studio-logo').insertAdjacentHTML('afterend','<img class="studio-header-trail" data-studio-src="assets/pet-studio/header-trail.svg" alt="" aria-hidden="true" width="600" height="90">');
 dialog.querySelector('#pet-select').add(new Option('Bald Eagle','eagle'));
 dialog.querySelector('#pet-select').add(new Option('Labubu','labubu'));
 dialog.querySelector('#pet-select').add(new Option('Roblox Buddy','roblox'));
@@ -33,6 +33,21 @@ const themeSelect=themeControl.querySelector('select');let theme='crimson';try{c
 function applyStudioTheme(value){dialog.dataset.theme=themeNames.includes(value)?value:'crimson';themeSelect.value=dialog.dataset.theme;}
 applyStudioTheme(theme);themeSelect.onchange=()=>{applyStudioTheme(themeSelect.value);try{localStorage.setItem('petStudioTheme',dialog.dataset.theme)}catch{}};
 const stage=dialog.querySelector('#pet-stage'),content=dialog.querySelector('#tab-content');
+let headerAssetsPromise=null;
+function loadStudioHeaderAssets(){
+ if(headerAssetsPromise)return headerAssetsPromise;
+ headerAssetsPromise=Promise.allSettled([...dialog.querySelectorAll('[data-studio-src]')].map(image=>{
+  if(image.complete&&image.naturalWidth>0)return;
+  image.src=image.dataset.studioSrc;
+  return image.decode();
+ })).then(results=>{
+  if(results.some(result=>result.status==='rejected')){
+   headerAssetsPromise=null;
+   throw new Error('Pet Studio could not open. Please try again.');
+  }
+ });
+ return headerAssetsPromise;
+}
 let openRevision=0,loadErrorNotice=null;
 let state,current='colt',tab='appearance',subtab='skins',filter='All',query='',radio=false,previous=null,opener=null;
 const squishyColors=[...bridge.squishyHost.querySelectorAll('[data-color]')].map(b=>({id:b.dataset.color,label:b.textContent}));
@@ -91,7 +106,7 @@ dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoun
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>{if(dialog.open){sync();render()}});
 return {
  async open(pet){if(!bridge.canOpen())return;const revision=++openRevision,requestedOpener=document.activeElement;loadErrorNotice?.remove();loadErrorNotice=null;
-  try{await loadPetStudioStyles()}catch(error){
+  try{await Promise.all([loadPetStudioStyles(),loadStudioHeaderAssets()])}catch(error){
    if(revision!==openRevision||!bridge.canOpen())return;
    loadErrorNotice=document.createElement('div');loadErrorNotice.className='pet-studio-load-error';loadErrorNotice.setAttribute('role','alert');
    const text=document.createElement('span');text.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.textContent='Try again';retry.onclick=()=>this.open(pet);loadErrorNotice.append(text,retry);document.body.append(loadErrorNotice);return;
