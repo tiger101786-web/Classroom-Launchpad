@@ -53,8 +53,20 @@
    const promise=(async()=>{
     const [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
     const skin=nuggetSkins[name];if(!skin.file)return {original,body,basket};
+    if(name==='Frozen'){
+     const reference=await load('skins/frozen-reference.png');
+     const full=document.createElement('canvas');full.width=full.height=1024;
+     full.getContext('2d').drawImage(reference,133,45,reference.width*.58,reference.height*.58);
+     // Register the uploaded artwork directly; do not recolor or regenerate it.
+     const isolated=document.createElement('canvas');isolated.width=isolated.height=1024;
+     const g=isolated.getContext('2d');g.drawImage(full,0,0);g.globalCompositeOperation='destination-out';
+     for(const path of ['M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z','M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z'])g.fill(new Path2D(path));
+     const registered=document.createElement('canvas');registered.width=registered.height=1024;
+     registered.getContext('2d').drawImage(isolated,-98*1024/795,-10*1024/795,1024*1024/795,1024*1024/795);
+     return {original:full,body:registered,basket,reference:true};
+    }
     const atlas=await load('skins/'+skin.file+'-material.png'),map=pixels(atlas);
-    const blackEyes=['Burnt','Spicy','BBQ'].includes(name);
+    const blackEyes=['Burnt','Spicy','BBQ','Frozen'].includes(name);
     const [coatedOriginal,coatedBody]=await Promise.all([coat(original,map,false,blackEyes),coat(body,map,true,blackEyes)]);
     return {original:coatedOriginal,body:coatedBody,basket:sauce(basket,map)};
    })().catch(error=>{sets.delete(name);throw error});
@@ -64,11 +76,12 @@
   }return sets.get(name);
  };
  // Spicy, Burnt and BBQ use black expressions; other flavors retain eye-brown.
- window.nuggetFacePalette=name=>['Spicy','Burnt','BBQ'].includes(name)?{ink:'#000000',mouth:'#000000',eyeRing:null}:{ink:'#491e18',mouth:'#491e18',eyeRing:null};
+ window.nuggetFacePalette=name=>['Spicy','Burnt','BBQ','Frozen'].includes(name)?{ink:'#000000',mouth:'#000000',eyeRing:null}:{ink:'#491e18',mouth:'#491e18',eyeRing:null};
  const thumbs=new Map();
  window.nuggetThumbnail=async name=>{
   if(!thumbs.has(name))thumbs.set(name,(async()=>{
    const s=await nuggetSkinLayers(name),c=document.createElement('canvas');c.width=c.height=320;const g=c.getContext('2d');g.scale(320/1024,320/1024);g.imageSmoothingQuality='high';g.drawImage(s.basket,0,0,1024,1024);
+   if(s.reference){g.drawImage(s.original,0,0,1024,1024);return c.toDataURL('image/png');}
    const piece=path=>{g.save();g.clip(new Path2D(path));g.drawImage(s.original,0,0,1024,1024);g.restore()};
    piece('M370 657 C349 674 335 696 342 717 C347 738 387 743 421 732 C450 726 467 711 456 690 L437 661Z');
    piece('M566 657 C552 674 542 698 551 718 C560 738 607 741 640 732 C670 726 678 710 660 689 L638 661Z');

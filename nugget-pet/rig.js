@@ -15,13 +15,14 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  });
  try{
  let [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
+ let referenceSkin=false;
  let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
  async function selectSkin(name){
   name=Object.hasOwn(window.nuggetSkins||{},name)?name:'Golden';if(name===requestedSkin)return;
   requestedSkin=name;const version=++skinVersion;host.dataset.skinLoading='true';
   try{
    const layers=await nuggetSkinLayers(name);if(version!==skinVersion)return;
-   original=layers.original;body=layers.body;basket=layers.basket;
+   original=layers.original;body=layers.body;basket=layers.basket;referenceSkin=Boolean(layers.reference);
    host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
   }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
   finally{if(version===skinVersion)delete host.dataset.skinLoading}
@@ -102,7 +103,12 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   // Register the isolated body back to the approved composite's coordinates.
   ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();
   piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);
-  eye(438,322,eyeOpen,gaze,happy);eye(597,322,eyeOpen,gaze,happy);mouth(jaw,happy);
+  if(referenceSkin){
+   // Cover only the small feature area while it moves; the resting pose retains the uploaded face.
+   if(eyeOpen<.99||happy>.8)for(const x of [438,597])ctx.drawImage(original,x-29,260,58,55,x-29,294,58,55);
+   if(jaw>.08||happy>.1)ctx.drawImage(original,479,401,76,56,479,343,76,56);
+  }
+  eye(438,322,eyeOpen,gaze,happy);eye(597,322,eyeOpen,gaze,happy);if(!referenceSkin||jaw>.08||happy>.1)mouth(jaw,happy);
   if(happy>.1){ctx.strokeStyle=facePalette().ink;ctx.lineWidth=6;ctx.lineCap='round';for(const x of [438,597]){ctx.beginPath();ctx.moveTo(x-17,285-happy*7);ctx.quadraticCurveTo(x,276-happy*7,x+17,285-happy*7);ctx.stroke()}}
   if(dance||options.headwear==='headphones')headphones();ctx.restore();
   if(options.platform)basketAccessories?.drawForeground(ctx);

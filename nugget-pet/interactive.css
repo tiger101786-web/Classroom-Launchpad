@@ -12,3 +12,7 @@
 .pet-studio #pet-stage .nugget-companion .pet-button{width:100%!important;height:100%!important;aspect-ratio:1!important;pointer-events:none}
 .pet-studio #pet-stage .nugget-companion canvas{width:100%;height:100%;object-fit:contain}
 .pet-chat[data-pet=nugget]{--paper:#fff0d5;--edge:#bb302e;--ink:#54250c;--label:#9d2420;border-radius:18px 18px 10px 10px;box-shadow:inset 0 -4px #e9b75d,0 5px 0 #91322955,0 10px 25px #0003}
+
+/* Smooth vector borders avoid the source basket image’s irregular painted edges. */
+.nugget-companion .nugget-nameplate-art{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;object-fit:contain}
+.nugget-companion .nugget-nameplate-art[hidden]{display:none!important}

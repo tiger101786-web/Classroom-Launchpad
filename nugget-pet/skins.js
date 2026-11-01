@@ -6,6 +6,12 @@
     "dip": "Honey mustard",
     "file": null
   },
+  "Frozen": {
+    "label": "Frozen",
+    "file": "frozen",
+    "dip": "Frosted honey mustard",
+    "description": "Golden breading dusted with white freezer frost and fine ice crystals"
+  },
   "Spicy": {
     "label": "Spicy",
     "file": "spicy",
