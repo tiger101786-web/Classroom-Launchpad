@@ -79,6 +79,14 @@
     "dip": "Herbed ranch",
     "description": "Thick ivory ranch dressing with fine green herbs, rounded drips and an exposed golden face center"
   },
+  "Bacon Cheddar": {
+    "label": "Bacon Cheddar",
+    "file": "bacon-cheddar",
+    "photographic": true,
+    "blackFeatures": true,
+    "dip": "Bacon cheddar",
+    "description": "Glossy melted orange cheddar with rounded drips and crisp reddish-brown bacon pieces over golden breading"
+  },
   "Burnt": {
     "label": "Burnt",
     "file": "burnt",

@@ -1,8 +1,10 @@
 # Nugget flavor materials
 
-Generated with the built-in image-generation tool. Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy, Teriyaki Sesame, Ranch and Burnt use dedicated native-resolution photographic character layers instead of multiplying two breading textures. See [reference-skins-v4.md](reference-skins-v4.md) for the latest Buffalo/Extra Crispy/Burnt replacements, new Ranch skin, arm correction, prompts and validation. Earlier sources are documented in [photo-skins-v2.md](photo-skins-v2.md) and [reference-skins-v3.md](reference-skins-v3.md). Matching dips use their material atlases; Ranch has a dedicated herbed ranch dip texture. The bowl, basket, deli paper and nameplate remain unchanged.
+Generated with the built-in image-generation tool. Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy, Teriyaki Sesame, Ranch, Burnt and Bacon Cheddar use dedicated native-resolution photographic character layers instead of multiplying two breading textures. See [reference-skins-v4.md](reference-skins-v4.md) for the latest Buffalo/Extra Crispy/Burnt replacements, new Ranch skin, arm correction, prompts and validation. Earlier sources are documented in [photo-skins-v2.md](photo-skins-v2.md) and [reference-skins-v3.md](reference-skins-v3.md). Matching dips use their material atlases; Ranch has a dedicated herbed ranch dip texture. The bowl, basket, deli paper and nameplate remain unchanged.
 
 The runtime samples the top 65% and bottom 79–99% of each atlas, avoiding the generated transition. Coated layers retain the source image dimensions; the pet renders at 2048×2048. Only gallery thumbnails use smaller images. Coating work yields between scanline groups and caches a bounded number of full-size layer sets. Latest-selection tokens prevent stale image loads from replacing a newer choice.
+
+Bacon Cheddar adds melted cheddar drips, bacon pieces and a matching dip. See [the Retro Diner and Bacon Cheddar notes](../../work/retro-diner-and-bacon-cheddar.md) for generation prompts and verification.
 
 ## Flavors and dips
 

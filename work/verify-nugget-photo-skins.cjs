@@ -12,7 +12,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  const studio=page.locator('.pet-studio'),pet=page.locator('.nugget-companion');
  await studio.locator('#pet-select').selectOption('nugget');await page.waitForFunction(()=>document.querySelector('.nugget-companion').dataset.ready==='true');
  const selectedSkins=process.argv.slice(2);
- for(const name of selectedSkins.length?selectedSkins:['Buffalo','Extra Crispy','BBQ','Garlic Parm','Honey Mustard','Teriyaki Sesame','Spicy','Ranch','Burnt']){
+ for(const name of selectedSkins.length?selectedSkins:['Buffalo','Extra Crispy','BBQ','Garlic Parm','Honey Mustard','Teriyaki Sesame','Spicy','Ranch','Burnt','Bacon Cheddar']){
   await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=skins]').click();await studio.locator('[data-skin-choice="'+name+'"]').click();
   await page.waitForFunction(n=>document.querySelector('.nugget-companion .pet-button').dataset.renderedSkin===n,name);
   assert.equal(await pet.locator('.pet-button').getAttribute('data-skin-error'),null);
@@ -63,6 +63,6 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   assert.equal(await pet.locator('.pet-button').getAttribute('data-skin-error'),null);
   assert.equal(await page.evaluate(async n=>!!(await nuggetSkinLayers(n)).parts,name),false);
  }
- assert.equal(await page.evaluate(()=>Object.keys(nuggetSkins).length),11);
+ assert.equal(await page.evaluate(()=>Object.keys(nuggetSkins).length),12);
  assert.deepEqual(errors,[]);console.log('PASS: native-resolution photo layers, selection, saved reload, extra-large HiDPI canvas, thumbnails, blink/talk/limbs, dance, sleep and legacy-skin switching. Previews: '+output);
 }finally{await browser?.close();server.kill()}})().catch(e=>{console.error(e);process.exitCode=1});
