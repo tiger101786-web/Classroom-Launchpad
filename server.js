@@ -47,6 +47,8 @@ homeSceneIds.add("pokemon-indoor-arena");
 ["nezuko", "shinobu", "akaza", "tanjiro", "rengoku", "giyu"].forEach(name => homeSceneIds.add(`demon-slayer-${name}`));
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
+homeSceneIds.add("chicken-nugget");
+homeSceneFrameIds.add("match-chicken-nugget");
 homeSceneIds.add("squishy");
 homeSceneIds.add("jdm");
 ["holiday-christmas","holiday-thanksgiving","holiday-easter","holiday-valentine","holiday-st-patrick","holiday-mardi-gras","holiday-halloween","holiday-new-year","holiday-usa"].forEach(id => homeSceneIds.add(id));

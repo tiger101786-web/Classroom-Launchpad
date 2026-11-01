@@ -158,3 +158,16 @@
 .scene-frame-exterior[data-exterior-frame="match-moonlit-cherry-village"] { --exterior-frame-inset:-7.716%; }
 .scene-frame-exterior[data-exterior-frame="match-walled-city-fountain"] { --exterior-frame-inset:-8.000%; }
 .scene-frame-exterior[data-exterior-frame="match-demon-slayer-nezuko"] { --exterior-frame-inset:-7.293%; }
+
+/* Realistic food scene: the photograph stays fixed; only faint heat wisps move. */
+.scene-chicken-nugget .launch-scene-particles{display:none}
+.nugget-scene-steam{position:absolute;inset:0;overflow:hidden;border-radius:50%;pointer-events:none}
+.nugget-scene-steam i{position:absolute;left:39%;top:36%;width:5%;height:16%;border-left:2px solid #fff6eaaa;border-radius:50%;filter:blur(1.5px);opacity:0;animation:nugget-scene-warmth 6s ease-in-out infinite}
+.nugget-scene-steam i:nth-child(2){left:51%;top:33%;animation-delay:-2s}
+.nugget-scene-steam i:nth-child(3){left:62%;top:36%;animation-delay:-4s}
+@keyframes nugget-scene-warmth{0%{opacity:0;transform:translateY(5px) rotate(-6deg)}35%{opacity:.16}100%{opacity:0;transform:translateY(-10px) rotate(8deg)}}
+.is-paused .nugget-scene-steam i{animation-play-state:paused;opacity:0}
+@media(prefers-reduced-motion:reduce){.nugget-scene-steam i{animation:none;opacity:0}}
+
+/* Measured rim opening: 42.82% radius; enlarge the frame only, within the 116% stage cap. */
+.launch-scene-stage > .scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-9.5%}

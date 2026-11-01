@@ -29,6 +29,7 @@
     if (event.target.closest?.('[data-retry-scene-styles]')) { sceneStylesError = ''; requestSceneStyles(); }
   });
   const scenes = [
+    { id: "chicken-nugget", name: "Chicken Nugget • Diner Basket", description: "Crispy nuggets, fries and dipping sauces with gentle rising warmth", image: "assets/launchpad-scene-chicken-nugget.png" },
     { id: "squishy-dumpling-swap", name: "Squishy Dumpling Swap", description: "Kids trading colorful squishy dumpling toys in bamboo baskets in a sunny school courtyard", image: "assets/launchpad-scene-squishy-dumpling-swap.png" },
     { id: "bleach-soul-society", name: "Bleach • Soul Society", description: "Seireitei at sunset with drifting spiritual embers", image: "assets/launchpad-scene-bleach-soul-society.png" },
     { id: "original", name: "Classroom Original", description: "Mr. Nieves & Colt videos", image: "" },
@@ -139,6 +140,7 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   scenes.push(...[{"id":"holiday-christmas","name":"Christmas Village","description":"Snowy village, glowing Christmas tree & wrapped gifts","image":"assets/launchpad-scene-holiday-christmas.png"},{"id":"holiday-thanksgiving","name":"Thanksgiving Harvest","description":"Cornucopia, autumn orchard & cozy farmhouse","image":"assets/launchpad-scene-holiday-thanksgiving.png"},{"id":"holiday-easter","name":"Easter Garden","description":"Pastel eggs, spring flowers & a little bunny","image":"assets/launchpad-scene-holiday-easter.png"},{"id":"holiday-valentine","name":"Valentine’s Day Cottage","description":"Heart lanterns, roses & a storybook cottage","image":"assets/launchpad-scene-holiday-valentine.png"},{"id":"holiday-st-patrick","name":"St. Patrick’s Day Meadow","description":"Shamrocks, rainbow & an Irish cottage","image":"assets/launchpad-scene-holiday-st-patrick.png"},{"id":"holiday-mardi-gras","name":"Mardi Gras Celebration","description":"Carnival mask, beads & French Quarter lights","image":"assets/launchpad-scene-holiday-mardi-gras.png"},{"id":"holiday-halloween","name":"Halloween Candy Cottage","description":"Friendly ghosts, glowing pumpkins & candy","image":"assets/launchpad-scene-holiday-halloween.png"},{"id":"holiday-new-year","name":"New Year’s Celebration","description":"Midnight clock, golden stars & fireworks","image":"assets/launchpad-scene-holiday-new-year.png"},{"id":"holiday-usa","name":"USA Patriotic","description":"American flag, summer town & red-white-blue fireworks","image":"assets/launchpad-scene-holiday-usa.png"}]);
   const frames = [
+    { id: "match-chicken-nugget", name: "Chicken Nugget • Golden Rim", description: "A narrow gold rim with tiny realistic nuggets, fries and crimson accents", decorative: true },
     { id: "hero-armor", name: "Superhero • Reactor Armor", description: "Crimson and gold armor with cyan energy jewels", decorative: true },
     { id: "hero-lightning", name: "Superhero • Lightning Power", description: "Cobalt armor, silver trim and golden lightning", decorative: true },
     { id: "disney-castle", name: "Disney • Fairytale Castle", description: "Blue castle towers, pearls and golden stars", decorative: true },
@@ -391,8 +393,9 @@
     const expansion = disneyExpansionIds.has(scene.id);
     const extraEffects = expansion ? '<span class="disney-extra-effects" aria-hidden="true"><b class="disney-light"></b><b class="disney-water"></b><b class="disney-detail"></b></span>' : '';
     const trackSun = scene.id === "minibike-track" ? '<span class="minibike-track-sun" aria-hidden="true"><b class="minibike-sun-glow"></b><b class="minibike-sun-rays"></b></span>' : '';
+    const nuggetSteam = scene.id === 'chicken-nugget' ? '<span class="nugget-scene-steam" aria-hidden="true"><i></i><i></i><i></i></span>' : '';
     const needohSun = scene.id === "needoh" ? '<span class="needoh-sun" aria-hidden="true"><b class="needoh-sun-glow"></b><b class="needoh-sun-rays"></b></span>' : '';
-    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}${trackSun}${needohSun}</div>`;
+    return `<div class="school-photo launch-scene scene-${scene.id}${expansion ? " scene-oct6" : ""}${paused ? " is-paused" : ""}" data-scene="${scene.id}" data-motion="${motion}">${content}${coins}${extraEffects}${trackSun}${needohSun}${nuggetSteam}</div>`;
   }
   function render(session, video, sessionReady = true) {
     // Do not create or fetch the default video before the saved account choice is known.
