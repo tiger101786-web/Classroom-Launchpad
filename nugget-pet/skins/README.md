@@ -1,6 +1,6 @@
 # Nugget flavor materials
 
-Generated with the built-in image-generation tool, one PNG atlas per flavor. These are original food-coating textures, not regenerated character silhouettes. All seven source PNGs are copied unchanged into this directory. Top regions provide breading/coating detail; bottom regions provide matching smooth dip textures. Runtime materials preserve the original alpha, eye placement, body registration and animation masks. The bowl, basket, deli paper and nameplate are not retextured.
+Generated with the built-in image-generation tool. Most flavors use one PNG atlas per flavor. Buffalo and Extra Crispy now use dedicated native-resolution photographic character layers instead of multiplying two breading textures; see [photo-skins-v2.md](photo-skins-v2.md) for prompts, sources and validation. The existing atlases still supply their matching dips. The bowl, basket, deli paper and nameplate remain unchanged.
 
 The runtime samples the top 65% and bottom 79–99% of each atlas, avoiding the generated transition. Coated layers retain the source image dimensions; the pet renders at 2048×2048. Only gallery thumbnails use smaller images. Coating work yields between scanline groups and caches a bounded number of full-size layer sets. Latest-selection tokens prevent stale image loads from replacing a newer choice.
 

@@ -6,6 +6,22 @@
  const base=new URL('.',document.currentScript.src);
  function load(file){const url=new URL(file,base).href;if(!images.has(url))images.set(url,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>{images.delete(url);reject(Error('Cannot load '+file))};i.src=url}));return images.get(url)}
  function pixels(image){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(image,0,0);return {canvas:c,ctx:g,image:g.getImageData(0,0,c.width,c.height)}}
+ // Dedicated photographic skins bypass texture multiplication entirely. Keep
+ // their native pixel dimensions while registering them to the existing rig.
+ function photoLayers(reference,eyes,basket){
+  const source=pixels(reference),data=source.image.data,w=reference.width,h=reference.height;
+  let left=w,top=h,right=0,bottom=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(data[(y*w+x)*4+3]>100){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y)}
+  const full=document.createElement('canvas');full.width=w;full.height=h;
+  const g=full.getContext('2d');g.imageSmoothingQuality='high';g.scale(w/1024,h/1024);
+  g.drawImage(reference,left,top,right-left+1,bottom-top+1,221,45,551,695);
+  const isolated=document.createElement('canvas');isolated.width=w;isolated.height=h;
+  const b=isolated.getContext('2d');b.imageSmoothingQuality='high';b.drawImage(full,0,0);b.scale(w/1024,h/1024);b.globalCompositeOperation='destination-out';
+  for(const path of ['M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z','M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z'])b.fill(new Path2D(path));
+  const registered=document.createElement('canvas');registered.width=w;registered.height=h;
+  const r=registered.getContext('2d');r.imageSmoothingQuality='high';r.drawImage(isolated,-98*w/795,-10*h/795,w*1024/795,h*1024/795);
+  return {original:full,body:registered,basket,eyes,photographic:true};
+ }
  async function coat(source,map,isBody,blackEyes=false){
   const out=pixels(source),d=out.image.data,w=source.width,h=source.height,tex=map.image.data,tw=map.canvas.width,th=map.canvas.height;
   for(let y=0;y<h;y++){if(y%64===0)await new Promise(resolve=>setTimeout(resolve,0));for(let x=0;x<w;x++){const i=(y*w+x)*4;if(!d[i+3])continue;
@@ -65,6 +81,10 @@
      registered.getContext('2d').drawImage(isolated,-98*1024/795,-10*1024/795,1024*1024/795,1024*1024/795);
      return {original:full,body:registered,basket,reference:true};
     }
+    if(name==='Buffalo'||name==='Extra Crispy'){
+     const [reference,atlas]=await Promise.all([load('skins/'+skin.file+'-character-v2.png'),load('skins/'+skin.file+'-material.png')]);
+     return photoLayers(reference,original,sauce(basket,pixels(atlas)));
+    }
     const atlas=await load('skins/'+skin.file+'-material.png'),map=pixels(atlas);
     const blackEyes=['Burnt','Spicy','BBQ','Frozen'].includes(name);
     const [coatedOriginal,coatedBody]=await Promise.all([coat(original,map,false,blackEyes),coat(body,map,true,blackEyes)]);
@@ -89,7 +109,7 @@
    piece('M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z');
    piece('M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z');
    const face=nuggetFacePalette(name);
-   for(const x of [438,597]){g.save();g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.clip();g.drawImage(s.original,0,0,1024,1024);g.restore();if(face.eyeRing){g.strokeStyle=face.eyeRing;g.lineWidth=2;g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.stroke()}}
+   for(const x of [438,597]){g.save();g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.clip();g.drawImage(s.eyes||s.original,0,0,1024,1024);g.restore();if(face.eyeRing){g.strokeStyle=face.eyeRing;g.lineWidth=2;g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.stroke()}}
    g.strokeStyle=face.ink;g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(482,359);g.quadraticCurveTo(516,386,550,359);g.stroke();
    return c.toDataURL('image/png');
   })().catch(e=>{thumbs.delete(name);throw e}));

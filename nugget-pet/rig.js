@@ -15,6 +15,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  });
  try{
  let [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
+ let eyeSource=original;
  let referenceSkin=false;
  let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
  async function selectSkin(name){
@@ -22,7 +23,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   requestedSkin=name;const version=++skinVersion;host.dataset.skinLoading='true';
   try{
    const layers=await nuggetSkinLayers(name);if(version!==skinVersion)return;
-   original=layers.original;body=layers.body;basket=layers.basket;referenceSkin=Boolean(layers.reference);
+   original=layers.original;body=layers.body;basket=layers.basket;eyeSource=layers.eyes||original;referenceSkin=Boolean(layers.reference);
    host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
   }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
   finally{if(version===skinVersion)delete host.dataset.skinLoading}
@@ -46,7 +47,7 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  function eye(x,y,open,gaze,happy){
   ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
   if(open<.07||happy>.8){ctx.beginPath();ctx.moveTo(-18,0);ctx.quadraticCurveTo(0,happy>.8?-13:10,18,0);ctx.stroke()}
-  else{ctx.scale(1,Math.max(.06,open));ctx.beginPath();ctx.ellipse(0,0,24,25,0,0,Math.PI*2);ctx.clip();ctx.drawImage(original,0,0,original.width,original.height,-x,-y,1024,1024);if(facePalette().eyeRing){ctx.strokeStyle=facePalette().eyeRing;ctx.lineWidth=2;ctx.stroke()}}
+  else{ctx.scale(1,Math.max(.06,open));ctx.beginPath();ctx.ellipse(0,0,24,25,0,0,Math.PI*2);ctx.clip();ctx.drawImage(eyeSource,0,0,eyeSource.width,eyeSource.height,-x,-y,1024,1024);if(facePalette().eyeRing){ctx.strokeStyle=facePalette().eyeRing;ctx.lineWidth=2;ctx.stroke()}}
   ctx.restore();
  }
  function mouth(open,smile){ctx.save();ctx.translate(516,361);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
