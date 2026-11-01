@@ -6,12 +6,6 @@
  const base=new URL('.',document.currentScript.src);
  function load(file){const url=new URL(file,base).href;if(!images.has(url))images.set(url,new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>{images.delete(url);reject(Error('Cannot load '+file))};i.src=url}));return images.get(url)}
  function pixels(image){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(image,0,0);return {canvas:c,ctx:g,image:g.getImageData(0,0,c.width,c.height)}}
- const photoParts={
-  leftArm:'M290 430 C250 430 221 477 221 530 C221 575 248 597 285 585 C318 579 329 548 320 505 C315 472 307 446 290 430Z',
-  rightArm:'M710 430 C747 432 773 478 774 530 C774 575 748 596 715 582 C686 568 685 528 691 484 C695 459 700 441 710 430Z',
-  leftFoot:'M348 645 C326 649 301 677 301 706 C301 744 348 750 401 743 C444 739 470 720 460 688 L437 645Z',
-  rightFoot:'M566 645 C545 661 536 691 544 719 C555 746 607 749 650 741 C685 735 699 716 685 688 L654 645Z'
- };
  // Dedicated photographic skins bypass texture multiplication entirely. Keep
  // their native pixel dimensions while registering them to the existing rig.
  function photoLayers(reference,eyes,basket,blackFeatures=false){
@@ -21,14 +15,10 @@
   const full=document.createElement('canvas');full.width=w;full.height=h;
   const g=full.getContext('2d');g.imageSmoothingQuality='high';g.scale(w/1024,h/1024);
   g.drawImage(reference,left,top,right-left+1,bottom-top+1,221,45,551,695);
-  const isolated=document.createElement('canvas');isolated.width=w;isolated.height=h;
-  const b=isolated.getContext('2d');b.imageSmoothingQuality='high';b.drawImage(full,0,0);b.scale(w/1024,h/1024);b.globalCompositeOperation='destination-out';
-  // Keep the entire body and feet together. Legacy foot masks cut across the
-  // wider photographic silhouettes and leave triangular scraps at the ankles.
-  const masks=blackFeatures?[photoParts.leftArm,photoParts.rightArm]:['M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z','M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z'];
-  for(const path of masks)b.fill(new Path2D(path));
+  // Preserve the complete silhouette. Arms and feet move on a continuous mesh;
+  // no photographic limb is cut away from the body.
   const registered=document.createElement('canvas');registered.width=w;registered.height=h;
-  const r=registered.getContext('2d');r.imageSmoothingQuality='high';r.drawImage(isolated,-98*w/795,-10*h/795,w*1024/795,h*1024/795);
+  const r=registered.getContext('2d');r.imageSmoothingQuality='high';r.drawImage(full,-98*w/795,-10*h/795,w*1024/795,h*1024/795);
   if(blackFeatures){
    const e=pixels(eyes),d=e.image.data,ew=eyes.width,eh=eyes.height;
    for(let y=Math.floor(eh*295/1024);y<Math.ceil(eh*350/1024);y++)for(let x=Math.floor(ew*410/1024);x<Math.ceil(ew*625/1024);x++){
@@ -38,7 +28,7 @@
    }
    e.ctx.putImageData(e.image,0,0);eyes=e.canvas;
   }
-  return {original:full,body:registered,wholeBody:isolated,basket,eyes,photographic:true,parts:blackFeatures?photoParts:undefined};
+  return {original:full,body:registered,wholeBody:full,basket,eyes,photographic:true};
  }
  async function coat(source,map,isBody,blackEyes=false){
   const out=pixels(source),d=out.image.data,w=source.width,h=source.height,tex=map.image.data,tw=map.canvas.width,th=map.canvas.height;
@@ -100,7 +90,7 @@
      return {original:full,body:registered,basket,reference:true};
     }
     if(skin.photographic){
-     const [reference,atlas]=await Promise.all([load('skins/'+skin.file+'-character-v2.png'),load('skins/'+skin.file+'-material.png')]);
+     const [reference,atlas]=await Promise.all([load('skins/'+(skin.characterFile||skin.file+'-character-v2.png')),load('skins/'+skin.file+'-material.png')]);
      return photoLayers(reference,original,sauce(basket,pixels(atlas)),skin.blackFeatures);
     }
     const atlas=await load('skins/'+skin.file+'-material.png'),map=pixels(atlas);
@@ -123,8 +113,7 @@
    const piece=(path,part)=>{g.save();g.clip(new Path2D(s.parts?.[part]||path));g.drawImage(s.original,0,0,1024,1024);g.restore()};
    if(!s.photographic){piece('M370 657 C349 674 335 696 342 717 C347 738 387 743 421 732 C450 726 467 711 456 690 L437 661Z','leftFoot');piece('M566 657 C552 674 542 698 551 718 C560 738 607 741 640 732 C670 726 678 710 660 689 L638 661Z','rightFoot');}
    g.save();g.beginPath();g.rect(0,0,1024,s.photographic?1024:672);g.clip();if(s.wholeBody)g.drawImage(s.wholeBody,0,0,1024,1024);else g.drawImage(s.body,98,10,795,795);g.restore();
-   piece('M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z','leftArm');
-   piece('M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z','rightArm');
+   if(!s.photographic){piece('M282 429 C260 436 242 456 234 485 C223 514 221 546 232 568 C242 594 275 596 297 576 C318 556 325 521 316 492 L303 451Z','leftArm');piece('M700 430 C719 433 744 452 757 479 C770 504 785 546 772 569 C760 591 729 590 710 568 C694 548 690 515 687 481Z','rightArm');}
    const face=nuggetFacePalette(name);
    for(const x of [438,597]){g.save();g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.clip();g.drawImage(s.eyes||s.original,0,0,1024,1024);g.restore();if(face.eyeRing){g.strokeStyle=face.eyeRing;g.lineWidth=2;g.beginPath();g.ellipse(x,322,24,25,0,0,Math.PI*2);g.stroke()}}
    g.strokeStyle=face.ink;g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(482,359);g.quadraticCurveTo(516,386,550,359);g.stroke();

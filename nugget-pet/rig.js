@@ -16,10 +16,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  try{
  let [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
  let eyeSource=original;
- let skinParts=null;
  let photographicSkin=false;
  let photoBodySource=null;
- let photoWarp=null;
+ let photoDeformer;
  let referenceSkin=false;
  let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
  async function selectSkin(name){
@@ -30,7 +29,6 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
    original=layers.original;body=layers.body;basket=layers.basket;eyeSource=layers.eyes||original;referenceSkin=Boolean(layers.reference);
    photographicSkin=Boolean(layers.photographic);
    photoBodySource=layers.wholeBody||null;
-   skinParts=layers.parts?new Map([[leftArm,new Path2D(layers.parts.leftArm)],[rightArm,new Path2D(layers.parts.rightArm)],[leftFoot,new Path2D(layers.parts.leftFoot)],[rightFoot,new Path2D(layers.parts.rightFoot)]]):null;
    host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
   }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
   finally{if(version===skinVersion)delete host.dataset.skinLoading}
@@ -49,25 +47,45 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  const leftFoot=new Path2D('M370 657 C349 674 335 696 342 717 C347 738 387 743 421 732 C450 726 467 711 456 690 L437 661Z');
  const rightFoot=new Path2D('M566 657 C552 674 542 698 551 718 C560 738 607 741 640 732 C670 726 678 710 660 689 L638 661Z');
  const image=(source)=>ctx.drawImage(source,0,0,1024,1024);
- function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(skinParts?.get(path)||path);image(original);ctx.restore()}
- function photoBody(leftLift,rightLift){
-  if(leftLift<.01&&rightLift<.01){image(photoBodySource);return;}
-  // Assemble the moving feet on an axis-aligned surface first. Applying the
-  // body's breathing/skew to individual strips creates antialiased seams.
-  if(!photoWarp){photoWarp=document.createElement('canvas');photoWarp.width=photoWarp.height=2048;}
-  const g=photoWarp.getContext('2d');g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,1024,1024);g.imageSmoothingQuality='high';
-  // Continuous deformation below the torso preserves every source pixel at
-  // rest. Smooth weights lift each foot without cutting out an ankle polygon.
-  const join=610,bottom=805;
-  g.drawImage(photoBodySource,0,0,photoBodySource.width,join/1024*photoBodySource.height,0,0,1024,join);
-  // The registered cutout occupies x=221..772; skip transparent outer margins.
-  for(let x=216;x<780;x+=4){
-   const width=Math.min(4,780-x),center=x+width/2;
-   const lift=leftLift*Math.exp(-(((center-400)/90)**2))+rightLift*Math.exp(-(((center-606)/90)**2));
-   const scale=1-lift/130;
-   g.drawImage(photoBodySource,x/1024*photoBodySource.width,join/1024*photoBodySource.height,width/1024*photoBodySource.width,(bottom-join)/1024*photoBodySource.height,x,join,width,(bottom-join)*scale);
-  }
-  image(photoWarp);
+ function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(path);image(original);ctx.restore()}
+ function createPhotoDeformer(){
+  const surface=document.createElement('canvas');surface.width=surface.height=2048;
+  const gl=surface.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:true,preserveDrawingBuffer:true});
+  if(!gl)return null;
+  const vertex=`attribute vec2 p;varying vec2 uv;uniform vec4 pose;
+   void main(){uv=p/1024.;vec2 q=p;
+    float distance=(p.y-510.)/85.;float band=exp(-2.*distance*distance);
+    float left=(1.-smoothstep(276.,330.,p.x))*band;
+    float right=smoothstep(666.,720.,p.x)*band;
+    // A bounded lift bends each complete arm without folding the mesh or
+    // stretching the adjacent torso into a new point at the shoulder.
+    q+=vec2(-18.,-32.)*sin(pose.x)*left;
+    q+=vec2(18.,-32.)*sin(pose.y)*right;
+    float l=(p.x-400.)/90.;float r=(p.x-606.)/90.;
+    q.y-=max(p.y-610.,0.)/130.*(pose.z*exp(-l*l)+pose.w*exp(-r*r));
+    gl_Position=vec4(q.x/512.-1.,1.-q.y/512.,0.,1.);
+   }`;
+  const fragment='precision highp float;varying vec2 uv;uniform sampler2D art;void main(){gl_FragColor=texture2D(art,uv);}';
+  const shader=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s};
+  const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
+  const vertices=[];for(let y=0;y<1024;y+=8)for(let x=0;x<1024;x+=8)vertices.push(x,y,x+8,y,x,y+8,x+8,y,x+8,y+8,x,y+8);
+  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);const attribute=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,2,gl.FLOAT,false,0,0);
+  const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
+  for(const wrap of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,wrap,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.uniform1i(gl.getUniformLocation(program,'art'),0);const pose=gl.getUniformLocation(program,'pose');gl.viewport(0,0,2048,2048);let uploaded;
+  return (source,left,right,footLeft,footRight)=>{
+   if(gl.isContextLost())return null;
+   if(uploaded!==source){gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);uploaded=source;}
+   gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform4f(pose,left,right,footLeft,footRight);gl.drawArrays(gl.TRIANGLES,0,vertices.length/2);return surface;
+  };
+ }
+ function photoBody(left,right,leftLift,rightLift){
+  if(Math.abs(left)+Math.abs(right)+leftLift+rightLift<.01){image(photoBodySource);return;}
+  if(photoDeformer===undefined){try{photoDeformer=createPhotoDeformer();}catch(error){photoDeformer=null;console.warn('Nugget motion fallback:',error.message)}host.dataset.photoMotion=photoDeformer?'continuous-mesh':'continuous-canvas';}
+  const surface=photoDeformer?.(photoBodySource,left,right,leftLift,rightLift);
+  if(surface)image(surface);
+  else{ctx.save();ctx.translate(0,-(leftLift+rightLift)*.2);ctx.translate(516,668);ctx.rotate((left-right)*.025);ctx.translate(-516,-668);image(photoBodySource);ctx.restore();}
  }
  function facePalette(){return window.nuggetFacePalette?.(host.dataset.renderedSkin)||{ink:'#491e18',mouth:'#491e18'}}
  function eye(x,y,open,gaze,happy){
@@ -128,9 +146,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   if(!photographicSkin){piece(leftFoot,400,722,0,leftLift);piece(rightFoot,606,722,0,rightLift);}
   ctx.save();const sy=1+(enabled?.006*breath:0),skew=enabled?(shake+(dance?beat*.012:0)):0;ctx.transform(1,0,skew,sy,-skew*668,668*(1-sy));
   // Register the isolated body back to the approved composite's coordinates.
-  if(photographicSkin)photoBody(leftLift,rightLift);
+  if(photographicSkin)photoBody(wave,rightWave,leftLift,rightLift);
   else{ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();}
-  piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);
+  if(!photographicSkin){piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);}
   if(referenceSkin){
    // Cover only the small feature area while it moves; the resting pose retains the uploaded face.
    if(eyeOpen<.99||happy>.8)for(const x of [438,597])ctx.drawImage(original,x-29,260,58,55,x-29,294,58,55);

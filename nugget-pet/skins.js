@@ -23,7 +23,9 @@
   "Buffalo": {
     "label": "Buffalo",
     "file": "buffalo",
+    "characterFile": "buffalo-character-v4.png",
     "photographic": true,
+    "blackFeatures": true,
     "dip": "Buffalo sauce",
     "description": "rich vivid burnt-orange buffalo butter sauce clinging to craggy chicken breading, silky glossy glaze gathered in tiny valleys, small golden crispy exposed peaks"
   },
@@ -54,9 +56,11 @@
   "Extra Crispy": {
     "label": "Extra Crispy",
     "file": "extra-crispy",
+    "characterFile": "extra-crispy-character-v4.png",
     "photographic": true,
+    "blackFeatures": true,
     "dip": "Toasted butter pepper",
-    "description": "deep golden amber double-breaded fried chicken crust, highly detailed chunky jagged panko flakes, bubbled crispy ridges and caramelized toasted brown crumb tips, matte dry crunch with restrained oil sheen"
+    "description": "Rich golden-orange breading with tightly curled crunchy flakes and a lighter golden center"
   },
   "Teriyaki Sesame": {
     "label": "Teriyaki Sesame",
@@ -66,11 +70,23 @@
     "dip": "Sesame teriyaki",
     "description": "Glossy amber-mahogany teriyaki glaze with small ivory sesame seeds over crispy golden breading"
   },
+  "Ranch": {
+    "label": "Ranch",
+    "file": "ranch",
+    "characterFile": "ranch-character-v4.png",
+    "photographic": true,
+    "blackFeatures": true,
+    "dip": "Herbed ranch",
+    "description": "Thick ivory ranch dressing with fine green herbs, rounded drips and an exposed golden face center"
+  },
   "Burnt": {
     "label": "Burnt",
     "file": "burnt",
+    "characterFile": "burnt-character-v4.png",
+    "photographic": true,
+    "blackFeatures": true,
     "dip": "Charred-pepper BBQ",
-    "description": "very dark toasted charcoal-brown fried chicken breading, cracked blackened crust peaks with deep umber and occasional copper-brown fissures, realistic dry char texture; retain readable detailed relief, not a flat black surface"
+    "description": "Glossy caramel-amber breading with strongly blackened charred ridges and a warm golden center"
   }
 };
  if(typeof module==='object'&&module.exports)module.exports=skins;

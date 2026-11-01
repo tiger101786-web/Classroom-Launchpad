@@ -4,14 +4,15 @@ Chicken Nugget is selectable in the shared Pet Studio and companion picker. Pref
 
 ## Flavors
 
-Golden is joined by Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy and Burnt. Each coating has a matching dip. See skins/README.md for source PNGs, built-in generation prompts, and exact-geometry rendering details.
+Golden is joined by Frozen, Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy, Teriyaki Sesame, Ranch and Burnt. Each coating has a matching dip. See skins/README.md for source PNGs, built-in generation prompts, and rendering details.
 
-Face colors are shared with the preview: Spicy, Burnt and BBQ use glossy black eyes and black expressions; remaining flavors retain eye-brown features. No lighter face patch is applied. Dips retain the original sauce relief, highlights and rim shadows. The live pet retains its selected size at narrow window widths rather than shrinking to 95px; source assets and the 2048px render buffer remain unchanged.
+Face colors are shared with the preview: photographic reference skins and Frozen use black expressions; Golden retains its original eye-brown features. No lighter face patch is applied. Dips retain the original sauce relief, highlights and rim shadows. The live pet retains its selected size at narrow window widths rather than shrinking to 95px; source assets and the 2048px render buffer remain unchanged.
 
 ## Shared artwork and animation
 - rig.js is used by production and work/chicken-nugget-preview; there is no separate reduced-quality production rig.
 - nugget-concept.png, body.png and basket.png are byte-for-byte copies of the approved preview assets. Generation provenance is documented in ../work/chicken-nugget-preview/README.md.
 - A fixed 2048 × 2048 canvas preserves detail at all display sizes. The basket remains stationary, and body/face/limbs use the same animation clock.
+- Photographic skins retain one uncut body/arm/foot image. A continuous mesh gently lifts the limbs, avoiding clipped arm slivers and ankle fragments; resting poses use the native artwork directly.
 - Idle breathing/blinking, hello, happy eyes, chatter, arm wiggle, wave, shake, scanning eyes, foot lift, dance, sleep and wake are supported.
 - Dancing has happy eyes, a smile, headphones, alternating limbs and rising notes; sleep has the approved wider mouth and moving Zs.
 - Production respects reduced motion and stops its frame loop when hidden. The preview permits explicit motion opt-in.

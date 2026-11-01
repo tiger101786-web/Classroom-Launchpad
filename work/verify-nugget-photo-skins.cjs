@@ -11,12 +11,15 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await page.goto(origin);await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();
  const studio=page.locator('.pet-studio'),pet=page.locator('.nugget-companion');
  await studio.locator('#pet-select').selectOption('nugget');await page.waitForFunction(()=>document.querySelector('.nugget-companion').dataset.ready==='true');
- for(const name of ['Buffalo','Extra Crispy','BBQ','Garlic Parm','Honey Mustard','Teriyaki Sesame','Spicy']){
+ const selectedSkins=process.argv.slice(2);
+ for(const name of selectedSkins.length?selectedSkins:['Buffalo','Extra Crispy','BBQ','Garlic Parm','Honey Mustard','Teriyaki Sesame','Spicy','Ranch','Burnt']){
   await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=skins]').click();await studio.locator('[data-skin-choice="'+name+'"]').click();
   await page.waitForFunction(n=>document.querySelector('.nugget-companion .pet-button').dataset.renderedSkin===n,name);
   assert.equal(await pet.locator('.pet-button').getAttribute('data-skin-error'),null);
-  const dimensions=await page.evaluate(async name=>{const s=await nuggetSkinLayers(name),source=new Image();source.src='/nugget-pet/skins/'+nuggetSkins[name].file+'-character-v2.png';await source.decode();return {source:[source.naturalWidth,source.naturalHeight],body:[s.body.width,s.body.height],full:[s.original.width,s.original.height],eyes:!!s.eyes,photo:s.photographic}},name);
+  const dimensions=await page.evaluate(async name=>{const s=await nuggetSkinLayers(name),source=new Image(),skin=nuggetSkins[name];source.src='/nugget-pet/skins/'+(skin.characterFile||skin.file+'-character-v2.png');await source.decode();const c=document.createElement('canvas');c.width=source.naturalWidth;c.height=source.naturalHeight;const g=c.getContext('2d');g.drawImage(source,0,0);const d=g.getImageData(0,0,c.width,c.height).data;return {source:[source.naturalWidth,source.naturalHeight],body:[s.body.width,s.body.height],full:[s.original.width,s.original.height],eyes:!!s.eyes,photo:s.photographic,corners:[d[3],d[c.width*4-1],d[(c.height-1)*c.width*4+3],d[d.length-1]]}},name);
   assert(dimensions.source.every(n=>n>=1024));assert.deepEqual(dimensions.body,dimensions.source);assert.deepEqual(dimensions.body,dimensions.full);assert(dimensions.photo&&dimensions.eyes);
+  assert.equal(await page.evaluate(async n=>{const s=await nuggetSkinLayers(n);return s.original===s.wholeBody},name),true,'Photographic limbs must remain part of the uncut source');
+  assert(dimensions.corners.every(a=>a<=1),'Transparent background (at most one alpha level of edge noise): '+name);
   // A still rig must reproduce the complete original feet, with no clipped
   // scraps, holes, duplicate foot fragments or texture changes at either ankle.
   await page.evaluate(async name=>{
@@ -33,7 +36,8 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   const prefs=(await (await context.request.get(origin+'/api/companion-preferences')).json()).preferences;assert.equal(prefs.nugget.skin,name);
   await studio.locator('[data-tab=settings]').click();await studio.locator('[data-toggle=motion]').uncheck();await pet.screenshot({path:path.join(output,name+'-studio.png')});await studio.locator('[data-toggle=motion]').check();
   await studio.locator('[data-tab=play]').click();
-  for(const action of ['blink','talk','wave','hands','foot']){await studio.locator('[data-action='+action+']').click();assert.equal(await pet.getAttribute('data-state'),action);const before=await pet.locator('canvas').evaluate(c=>c.toDataURL());await page.waitForTimeout(130);assert.notEqual(await pet.locator('canvas').evaluate(c=>c.toDataURL()),before,'Animation must actually redraw '+name+' '+action);if(action==='wave')await pet.screenshot({path:path.join(output,name+'-wave.png')})}
+  for(const action of ['blink','talk','wave','hands','foot']){await studio.locator('[data-action='+action+']').click();assert.equal(await pet.getAttribute('data-state'),action);const before=await pet.locator('canvas').evaluate(c=>c.toDataURL());await page.waitForTimeout(130);assert.notEqual(await pet.locator('canvas').evaluate(c=>c.toDataURL()),before,'Animation must actually redraw '+name+' '+action);if(action==='wave'||action==='hands'){await page.waitForTimeout(570);await pet.screenshot({path:path.join(output,name+'-'+action+'.png')})}}
+  assert.equal(await pet.locator('.pet-button').getAttribute('data-photo-motion'),'continuous-mesh');
   await studio.locator('#dance').click();assert.equal(await pet.getAttribute('data-state'),'dance');await page.waitForTimeout(350);await pet.screenshot({path:path.join(output,name+'-dance.png')});await studio.locator('#dance').click();
   await studio.locator('[data-toggle=asleep]').check();assert.equal(await pet.getAttribute('data-state'),'sleep');await page.waitForTimeout(350);await pet.screenshot({path:path.join(output,name+'-sleep.png')});await studio.locator('[data-toggle=asleep]').uncheck();
   await studio.locator('[data-tab=name]').click();await studio.locator('#size-select').selectOption('extra-large');await studio.locator('.studio-close').click();
@@ -49,6 +53,6 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   assert.equal(await pet.locator('.pet-button').getAttribute('data-skin-error'),null);
   assert.equal(await page.evaluate(async n=>!!(await nuggetSkinLayers(n)).parts,name),false);
  }
- assert.equal(await page.evaluate(()=>Object.keys(nuggetSkins).length),10);
+ assert.equal(await page.evaluate(()=>Object.keys(nuggetSkins).length),11);
  assert.deepEqual(errors,[]);console.log('PASS: native-resolution photo layers, selection, saved reload, extra-large HiDPI canvas, thumbnails, blink/talk/limbs, dance, sleep and legacy-skin switching. Previews: '+output);
 }finally{await browser?.close();server.kill()}})().catch(e=>{console.error(e);process.exitCode=1});
