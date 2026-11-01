@@ -16,6 +16,10 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  try{
  let [original,body,basket]=await Promise.all(['nugget-concept.png','body.png','basket.png'].map(load));
  let eyeSource=original;
+ let skinParts=null;
+ let photographicSkin=false;
+ let photoBodySource=null;
+ let photoWarp=null;
  let referenceSkin=false;
  let requestedSkin='Golden',skinVersion=0;host.dataset.renderedSkin='Golden';
  async function selectSkin(name){
@@ -24,6 +28,9 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   try{
    const layers=await nuggetSkinLayers(name);if(version!==skinVersion)return;
    original=layers.original;body=layers.body;basket=layers.basket;eyeSource=layers.eyes||original;referenceSkin=Boolean(layers.reference);
+   photographicSkin=Boolean(layers.photographic);
+   photoBodySource=layers.wholeBody||null;
+   skinParts=layers.parts?new Map([[leftArm,new Path2D(layers.parts.leftArm)],[rightArm,new Path2D(layers.parts.rightArm)],[leftFoot,new Path2D(layers.parts.leftFoot)],[rightFoot,new Path2D(layers.parts.rightFoot)]]):null;
    host.dataset.renderedSkin=name;delete host.dataset.skinError;render();schedule();
   }catch(error){if(version===skinVersion){requestedSkin=host.dataset.renderedSkin;host.dataset.skinError=error.message;console.warn('Nugget skin could not load:',error.message)}}
   finally{if(version===skinVersion)delete host.dataset.skinLoading}
@@ -42,7 +49,26 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
  const leftFoot=new Path2D('M370 657 C349 674 335 696 342 717 C347 738 387 743 421 732 C450 726 467 711 456 690 L437 661Z');
  const rightFoot=new Path2D('M566 657 C552 674 542 698 551 718 C560 738 607 741 640 732 C670 726 678 710 660 689 L638 661Z');
  const image=(source)=>ctx.drawImage(source,0,0,1024,1024);
- function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(path);image(original);ctx.restore()}
+ function piece(path,px,py,angle=0,lift=0){ctx.save();ctx.translate(px,py-lift);ctx.rotate(angle);ctx.translate(-px,-py);ctx.clip(skinParts?.get(path)||path);image(original);ctx.restore()}
+ function photoBody(leftLift,rightLift){
+  if(leftLift<.01&&rightLift<.01){image(photoBodySource);return;}
+  // Assemble the moving feet on an axis-aligned surface first. Applying the
+  // body's breathing/skew to individual strips creates antialiased seams.
+  if(!photoWarp){photoWarp=document.createElement('canvas');photoWarp.width=photoWarp.height=2048;}
+  const g=photoWarp.getContext('2d');g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,1024,1024);g.imageSmoothingQuality='high';
+  // Continuous deformation below the torso preserves every source pixel at
+  // rest. Smooth weights lift each foot without cutting out an ankle polygon.
+  const join=610,bottom=805;
+  g.drawImage(photoBodySource,0,0,photoBodySource.width,join/1024*photoBodySource.height,0,0,1024,join);
+  // The registered cutout occupies x=221..772; skip transparent outer margins.
+  for(let x=216;x<780;x+=4){
+   const width=Math.min(4,780-x),center=x+width/2;
+   const lift=leftLift*Math.exp(-(((center-400)/90)**2))+rightLift*Math.exp(-(((center-606)/90)**2));
+   const scale=1-lift/130;
+   g.drawImage(photoBodySource,x/1024*photoBodySource.width,join/1024*photoBodySource.height,width/1024*photoBodySource.width,(bottom-join)/1024*photoBodySource.height,x,join,width,(bottom-join)*scale);
+  }
+  image(photoWarp);
+ }
  function facePalette(){return window.nuggetFacePalette?.(host.dataset.renderedSkin)||{ink:'#491e18',mouth:'#491e18'}}
  function eye(x,y,open,gaze,happy){
   ctx.save();ctx.translate(x+gaze,y);ctx.lineCap='round';ctx.lineWidth=7;ctx.strokeStyle=facePalette().ink;
@@ -99,10 +125,11 @@ window.mountNuggetRig=async function(host,{assetBase='nugget-pet/',onState=()=>{
   const bt=(clock-blinkStart)/.3,blink=bt>=0&&bt<=1?Math.sin(bt*Math.PI):0;
   const eyeOpen=1-Math.max(closed,blink);
   ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,1024,1024);if(options.platform){if(!['mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(basketAccessories?.selected))image(basket);basketAccessories?.draw(ctx,basket);}
-  piece(leftFoot,400,722,0,leftLift);piece(rightFoot,606,722,0,rightLift);
+  if(!photographicSkin){piece(leftFoot,400,722,0,leftLift);piece(rightFoot,606,722,0,rightLift);}
   ctx.save();const sy=1+(enabled?.006*breath:0),skew=enabled?(shake+(dance?beat*.012:0)):0;ctx.transform(1,0,skew,sy,-skew*668,668*(1-sy));
   // Register the isolated body back to the approved composite's coordinates.
-  ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();
+  if(photographicSkin)photoBody(leftLift,rightLift);
+  else{ctx.save();ctx.beginPath();ctx.rect(0,0,1024,672);ctx.clip();ctx.drawImage(body,98,10,795,795);ctx.restore();}
   piece(leftArm,291,448,wave);piece(rightArm,713,448,-rightWave);
   if(referenceSkin){
    // Cover only the small feature area while it moves; the resting pose retains the uploaded face.

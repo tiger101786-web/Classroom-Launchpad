@@ -1,6 +1,6 @@
 # Nugget flavor materials
 
-Generated with the built-in image-generation tool. Most flavors use one PNG atlas per flavor. Buffalo and Extra Crispy now use dedicated native-resolution photographic character layers instead of multiplying two breading textures; see [photo-skins-v2.md](photo-skins-v2.md) for prompts, sources and validation. The existing atlases still supply their matching dips. The bowl, basket, deli paper and nameplate remain unchanged.
+Generated with the built-in image-generation tool. Spicy, Buffalo, BBQ, Garlic Parm, Honey Mustard, Extra Crispy and Teriyaki Sesame use dedicated native-resolution photographic character layers instead of multiplying two breading textures. See [photo-skins-v2.md](photo-skins-v2.md) for Buffalo/Extra Crispy and [reference-skins-v3.md](reference-skins-v3.md) for the five latest reference skins, prompts, sources and validation. The existing atlases supply matching dips; Teriyaki Sesame has a new sesame-teriyaki dip texture. The bowl, basket, deli paper and nameplate remain unchanged.
 
 The runtime samples the top 65% and bottom 79–99% of each atlas, avoiding the generated transition. Coated layers retain the source image dimensions; the pet renders at 2048×2048. Only gallery thumbnails use smaller images. Coating work yields between scanline groups and caches a bounded number of full-size layer sets. Latest-selection tokens prevent stale image loads from replacing a newer choice.
 
