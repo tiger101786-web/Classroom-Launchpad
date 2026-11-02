@@ -18,6 +18,8 @@ Both artwork skins use square outer corners so the original player's rounded ove
 
 The gear is registered as the dropdown's native popover invoker. A second click closes it without light-dismiss reopening it. Selection, outside clicks and Escape also dismiss it; the selected option receives native autofocus for keyboard navigation. Repeated gear toggles are covered by the browser checks.
 
+Dropdown placement is measured after the popover opens, rather than from a beforetoggle microtask that can run before usable layout exists. The menu stays within the active visual viewport, flips above the gear when space below is insufficient, and updates when scrolling, resizing or loading the skin stylesheet. Event listeners follow the current document when controls move into and out of the floating player and are removed when the dropdown closes.
+
 Neon Gaming is an optional Pet Studio theme saved with the existing device-local Studio theme preference. Its current backdrop is `assets/pet-studio/neon-gaming-room-v2.png`, with no baked selection board. The original theme choices remain available. The background is requested only when Neon Gaming is selected, and Studio still uses its existing seven delayed stylesheets.
 
 The diner now uses `assets/pet-studio/diner-room-backdrop-v2.png`: the large illustrated board and fake tabs were removed and replaced with matching red diner wall/booth scenery. A single live chrome frame wraps the actual tabs, opaque content and footer, avoiding independent chrome edges when switching tabs.
@@ -49,6 +51,7 @@ Both were produced with the built-in image-generation tool from the supplied/exi
 ## Validation
 
 - `npm run check` and JavaScript syntax checks for the new preview code.
+- `node work/verify-radio-skin-menu-position.cjs`: gear-relative placement on desktop, mobile and short displays; resize/scroll while open; floating/returned controls; delayed stylesheet loading; repeated gear toggling.
 - `node work/verify-radio-skins-neon-studio.cjs`: delayed production loading, normal-visit saved choices, gear settings/Escape/reset, reload persistence, unchanged audio element/source/play-pause-load calls/volume/favorites, floating-window skin switching and return, four radio sizes in light/dark modes, standalone test page, neon lazy artwork and account preference isolation, exact layout comparisons for all eight themes across all Studio tabs at four sizes, eight visible desktop cards, theme persistence and diner backdrop.
 - Audio calls are simulated in this layout test; it verifies that skin changes never restart playback, without relying on external radio availability.
 - `node work/verify-retro-diner.cjs`: four-size tab sizing, readable labels, opaque content/footer with zero gap, centered companion selector, pet controls and skin persistence.

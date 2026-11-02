@@ -1112,7 +1112,7 @@
     function loadRadioSkins() {
       if (skinScript || panel.querySelector('.colt-radio-skin-gear')) return;
       skinScript = document.createElement("script");
-      skinScript.src = "radio-skins.js?v=20261101-production-v1";
+      skinScript.src = "radio-skins.js?v=20261102-menu-position-v2";
       skinScript.onerror = () => { skinScript.remove(); skinScript = null; };
       document.head.append(skinScript);
     }

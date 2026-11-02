@@ -5,7 +5,7 @@
   panel.dataset.radioSkins = 'true';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'radio-skins.css?v=20261101-production-v1';
+  stylesheet.href = 'radio-skins.css?v=20261102-menu-position-v2';
   document.head.append(stylesheet);
 
   const gear = document.createElement('button');
@@ -64,17 +64,48 @@
   }
   function positionMenu() {
     if (!menu.matches(':popover-open')) return;
-    const anchor = gear.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
     const view = menu.ownerDocument.defaultView;
-    menu.style.left = Math.max(8, Math.min(anchor.right - bounds.width, view.innerWidth - bounds.width - 8)) + 'px';
-    menu.style.top = Math.max(8, Math.min(anchor.bottom + 6, view.innerHeight - bounds.height - 8)) + 'px';
+    const viewport = view.visualViewport;
+    const left = viewport?.offsetLeft || 0, top = viewport?.offsetTop || 0;
+    const width = viewport?.width || view.innerWidth, height = viewport?.height || view.innerHeight;
+    menu.style.maxWidth = Math.max(0, width - 16) + 'px';
+    menu.style.maxHeight = Math.max(0, height - 16) + 'px';
+    const anchor = gear.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
+    const below = anchor.bottom + 6, above = anchor.top - bounds.height - 6;
+    const preferredTop = below + bounds.height <= top + height - 8 ? below : above;
+    menu.style.left = Math.max(left + 8, Math.min(anchor.right - bounds.width, left + width - bounds.width - 8)) + 'px';
+    menu.style.top = Math.max(top + 8, Math.min(preferredTop, top + height - bounds.height - 8)) + 'px';
+    menu.style.opacity = '1';
     gear.setAttribute('aria-expanded', 'true');
+  }
+  let stopWatchingPosition = () => {};
+  function watchPosition() {
+    stopWatchingPosition();
+    const doc = menu.ownerDocument, view = doc.defaultView, viewport = view.visualViewport;
+    const onScroll = event => { if (!menu.contains(event.target)) positionMenu(); };
+    view.addEventListener('resize', positionMenu);
+    doc.addEventListener('scroll', onScroll, true);
+    viewport?.addEventListener('resize', positionMenu);
+    viewport?.addEventListener('scroll', positionMenu);
+    stopWatchingPosition = () => {
+      view.removeEventListener('resize', positionMenu);
+      doc.removeEventListener('scroll', onScroll, true);
+      viewport?.removeEventListener('resize', positionMenu);
+      viewport?.removeEventListener('scroll', positionMenu);
+    };
   }
   menu.addEventListener('beforetoggle', event => {
     gear.setAttribute('aria-expanded', String(event.newState === 'open'));
-    if (event.newState === 'open') queueMicrotask(positionMenu);
+    if (event.newState === 'open') menu.style.opacity = '0';
   });
-  menu.addEventListener('toggle', () => gear.setAttribute('aria-expanded', String(menu.matches(':popover-open'))));
+  // beforetoggle runs before layout exists; measure only after the popover is open.
+  menu.addEventListener('toggle', () => {
+    const open = menu.matches(':popover-open');
+    gear.setAttribute('aria-expanded', String(open));
+    if (open) { watchPosition(); positionMenu(); }
+    else stopWatchingPosition();
+  });
+  stylesheet.addEventListener('load', positionMenu);
   choices.forEach(button => button.addEventListener('click', () => {
     applySkin(button.dataset.radioSkinChoice);
     closeMenu(true);
