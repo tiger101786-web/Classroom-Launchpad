@@ -182,6 +182,8 @@ dialog.pet-studio[data-theme=neon]{--neon-cyan:#00e5ff;--neon-purple:#ac25ff;cli
 .pet-studio[data-theme=neon] :is(.studio-footer button,.studio-theme-control){color:#e9efff;font-size:12px}
 .pet-studio[data-theme=neon] .studio-footer button{border-color:#6978be;background:#171f43}
 .pet-studio[data-theme=neon] .studio-theme-control select{font-size:12px;padding:4px 7px;border-radius:8px}
+.pet-studio[data-theme=neon] .studio-footer .studio-theme-control select,.pet-studio[data-theme=neon] .studio-footer .studio-theme-control select:is(:hover,:focus,:active){color-scheme:light;background:#cde3ff;color:#08132c;-webkit-text-fill-color:#08132c;border-color:#849ed5}
+.pet-studio[data-theme=neon] .studio-footer .studio-theme-control select option,.pet-studio[data-theme=neon] .studio-footer .studio-theme-control select option:is(:hover,:checked,:focus,:active){background:#cde3ff;color:#08132c;-webkit-text-fill-color:#08132c}
 .pet-studio[data-theme=neon] :is(button,input,select):focus-visible{outline:3px solid #82e9ff;outline-offset:3px}
 @media(max-width:700px){
  dialog.pet-studio[data-theme=neon]{border-radius:16px}
@@ -249,7 +251,7 @@ dialog.pet-studio[data-theme=diner]{--diner-ink:#74151a;--diner-red:#b51420;--di
 .pet-studio[data-theme=diner] .filters button[aria-pressed=true]{color:#fff4dd;background:linear-gradient(#dc3034,#a3151e);border-color:#9f3022}
 .pet-studio[data-theme=diner] .skin-card{background:linear-gradient(145deg,#fff6e3,#f2cc95);border-color:#cf9772;box-shadow:inset 0 1px 2px white;border-radius:18px;color:#702016}
 .pet-studio[data-theme=diner] .skin-card[aria-pressed=true]{border-color:#d91f28;background:linear-gradient(145deg,#fff9ec,#f6d8a6);box-shadow:0 0 0 2px #fff0d6,inset 0 0 0 1px #f05b46}
-.pet-studio[data-theme=diner] #gallery .skin-name{background:linear-gradient(#d6282f,#a2111b);color:#fff5de;border-radius:9px;padding:3px;font-family:Georgia,serif;font-style:italic}
+.pet-studio[data-theme=diner] #gallery .skin-name{background:linear-gradient(#d6282f,#a2111b);color:#fff5de;border-radius:9px;padding:0 3px;white-space:normal;overflow-wrap:anywhere;font-family:Georgia,serif;font-style:italic}
 .pet-studio[data-theme=diner] #gallery .check{background:#b61520;color:#fff5df;border-color:#fff3dd;box-shadow:0 0 0 2px #b11b23}
 .pet-studio[data-theme=diner] :is(.choices button,.action-grid button){color:#74211a;background:linear-gradient(#fff7e5,#f1d3ac);border-color:#bd9578;border-radius:12px}
 .pet-studio[data-theme=diner] .choices button[aria-pressed=true]{color:#fff3dc;background:linear-gradient(#d62d34,#9c111b);border-color:#c6282b;box-shadow:inset 0 1px 1px #ffd9bd}
