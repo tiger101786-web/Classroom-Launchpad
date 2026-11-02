@@ -1,0 +1,89 @@
+/* Preview skins share the original player's layout from styles.css. Paint only. */
+.colt-radio-panel[data-skin-preview]{container-type:inline-size}
+.colt-radio-panel[data-skin-preview] .colt-radio-filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}
+.colt-radio-skin-gear{position:relative;display:grid;place-items:center;width:34px;min-height:34px;padding:0;border:1px solid #b9405a;border-radius:5px;background:#180c12;color:#fff;cursor:pointer}
+.colt-radio-skin-gear .dashboard-nav-icon{width:auto;height:auto;font-size:22px;line-height:1}
+.colt-radio-skin-gear:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.colt-radio-skin-menu{position:fixed;inset:auto;width:196px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);margin:0;padding:5px;overflow:auto;border:1px solid var(--radio-hot,#b63550);border-radius:9px;background:linear-gradient(145deg,#1a1724,#090a13);color:#f7f7ff;box-shadow:0 12px 30px #000b,0 0 12px #0008,inset 0 1px #ffffff14;font:600 13px/1.2 'Segoe UI',sans-serif;color-scheme:dark}
+.colt-radio-skin-menu::backdrop{background:transparent}
+.colt-radio-skin-menu button{display:grid;grid-template-columns:27px minmax(0,1fr) 16px;align-items:center;gap:9px;width:100%;min-height:37px;margin:0;padding:5px 8px;border:1px solid transparent;border-radius:5px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.colt-radio-skin-menu button:hover,.colt-radio-skin-menu button:focus-visible{outline:0;background:#ffffff0d;border-color:var(--radio-cool,#d7788b)}
+.colt-radio-skin-menu button[aria-checked=true]{background:linear-gradient(100deg,#ffffff17,#ffffff04);color:#fff}
+.radio-skin-selected{visibility:hidden;color:var(--radio-cool,#ff738d);font-size:16px}
+[aria-checked=true]>.radio-skin-selected{visibility:visible}
+.radio-skin-swatch{height:25px;width:27px;border:1px solid #ffffff55;border-radius:4px;box-shadow:inset 0 1px #ffffff44}
+[data-radio-skin-choice=classic] .radio-skin-swatch{background:linear-gradient(135deg,#d53b50,#421017 55%,#10080c)}
+[data-radio-skin-choice=arcade] .radio-skin-swatch{background:linear-gradient(145deg,transparent 40%,#fb22ca 42% 48%,transparent 50%),repeating-linear-gradient(0deg,transparent 0 5px,#00d9ff66 5px 6px),linear-gradient(135deg,#132a69,#17051d)}
+[data-radio-skin-choice=graffiti] .radio-skin-swatch{background:linear-gradient(135deg,#caff00 0 24%,transparent 25% 48%,#ff14ae 49% 65%,transparent 66%),linear-gradient(45deg,#101014 55%,#00dae8 56%)}
+
+/* No skin-specific panel width/height, section spacing, tile sizes or typography. */
+body .colt-radio-panel[data-radio-skin]{border-radius:0}
+body .colt-radio-panel[data-radio-skin]{--radio-hot:#ff16bd;--radio-cool:#00e5ff;--radio-trim:#9858ff;--radio-art:url('assets/radio-skins/retro-arcade-reference.png');border-color:var(--radio-hot);background:#050511;color:#fff;color-scheme:dark;box-shadow:0 0 20px #ed14cf55,0 28px 80px #000c}
+body .colt-radio-panel[data-radio-skin=graffiti]{--radio-art:url('assets/radio-skins/neon-graffiti-reference.png');--radio-cool:#ccff00;--radio-trim:#00dcea}
+.colt-radio-panel[data-radio-skin] .colt-radio-header{background:var(--radio-art) center top/100% auto no-repeat;border-bottom-color:var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-header:after{content:'';position:absolute;inset:23.2cqw 0 0;background:#050511;pointer-events:none}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-header:after{top:26.2cqw}
+.colt-radio-panel[data-radio-skin] .colt-radio-heading{opacity:0;pointer-events:none}
+/* Mask baked buttons; preserve the live heading/actions layout, including wrapping. */
+.colt-radio-panel[data-radio-skin] .colt-radio-header:before{display:block;inset:auto;left:76%;top:7.2cqw;width:23%;height:7cqw;min-height:26px;background:#050511;box-shadow:none}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-header:before{left:72%;top:9.6cqw;width:26.5%;height:9cqw}
+.colt-radio-panel[data-radio-skin] .colt-radio-header-actions{background:#050511}
+.colt-radio-panel[data-radio-skin] .colt-radio-icon-btn{border-color:#ffb3ef;background:#080510;color:#fff;box-shadow:0 0 5px var(--radio-hot),inset 0 0 5px #ff16bd66}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-icon-btn{border-color:var(--radio-cool);box-shadow:0 2px 5px #ccff0044}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-icon-btn:nth-child(2){border-color:#ffa000}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-icon-btn:nth-child(3){border-color:#ff16bd}
+.colt-radio-panel[data-radio-skin] .colt-radio-filters{background:transparent}
+.colt-radio-panel[data-radio-skin] .colt-radio-filter{border-color:var(--radio-cool);background:linear-gradient(#071529,#020614);color:#d7f8ff;box-shadow:inset 0 0 10px #00e5ff22}
+.colt-radio-panel[data-radio-skin] .colt-radio-filter.is-active{border-color:#ffa9ec;background:linear-gradient(#7d0759,#390127);color:#fff;box-shadow:0 0 9px #ff16bd88,inset 0 0 14px #ff16bd55}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-filter.is-active{background:linear-gradient(120deg,#edff12,#b6f000);color:#101200;border-color:#ff16bd;box-shadow:3px 2px 0 #ff16bd}
+.colt-radio-panel[data-radio-skin] .colt-radio-skin-gear{border-color:var(--radio-hot);background:#10071c;color:var(--radio-cool);box-shadow:0 0 6px #ff16bd66}
+.colt-radio-panel[data-radio-skin] .colt-radio-search{background:#050511}
+.colt-radio-panel[data-radio-skin] .colt-radio-search-input{border-color:var(--radio-cool);background:#050b1d;color:#fff;box-shadow:inset 0 0 10px #00dfff33,0 0 5px #00dfff44}
+.colt-radio-panel[data-radio-skin] .colt-radio-search-input::placeholder{color:#b2cce3}
+.colt-radio-panel[data-radio-skin] :is(.colt-radio-search-icon,.colt-radio-search-clear){color:var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-stations{background:repeating-linear-gradient(0deg,transparent 0 7px,#37226522 7px 8px),repeating-linear-gradient(90deg,transparent 0 7px,#37226522 7px 8px),#060511;scrollbar-color:var(--radio-hot) #080814}
+.colt-radio-panel[data-radio-skin] .colt-radio-station{border-color:var(--radio-trim);border-left-color:var(--radio-cool);background:linear-gradient(135deg,#152048,#080b1a 16%,#090817 85%,#3a135c);color:#fff;box-shadow:inset 0 0 14px #54207722}
+.colt-radio-panel[data-radio-skin] .colt-radio-station-icon{border-color:transparent;background:none;box-shadow:none;color:var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-station-icon svg{filter:drop-shadow(0 0 3px #ff16bd66)}
+.colt-radio-panel[data-radio-skin] .colt-radio-favorite{color:var(--radio-hot);text-shadow:none}
+.colt-radio-panel[data-radio-skin] .colt-radio-favorite.is-favorite{color:#fff;text-shadow:0 0 7px var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-station.is-active{color:#fff;border-color:#fff0fa;background:linear-gradient(135deg,#59104a,#10071c);box-shadow:0 0 9px var(--radio-hot),inset 0 0 12px #ff16bd55}
+.colt-radio-panel[data-radio-skin] .colt-radio-station.is-active .colt-radio-station-icon{color:var(--radio-hot);border-color:transparent;box-shadow:none}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station{background:linear-gradient(135deg,#ff16bd 0 4%,transparent 4% 90%,#ff16bd 90% 94%,transparent 94%),repeating-linear-gradient(150deg,#14141b 0 3px,#090b0e 3px 7px);border-color:#765b87}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station-item:nth-child(3n+2){--tile-accent:#ffa500}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station-item:nth-child(3n){--tile-accent:#00e5ee}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station-item{--tile-accent:#ff16bd}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station-icon{color:var(--tile-accent)}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station.is-active{background:linear-gradient(135deg,#3b4906,#0c1004 55%,#536600);border-color:#eaff7f;box-shadow:0 0 12px #cfff00,inset 0 0 12px #cfff0055}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-station.is-active .colt-radio-station-icon{color:#ceff00}
+.colt-radio-panel[data-radio-skin] .colt-radio-player{border-color:var(--radio-hot);background:#050815;box-shadow:0 0 10px #ff16bd88,inset 0 0 0 1px #00dfff66}
+.colt-radio-panel[data-radio-skin] .colt-radio-now-playing{background:repeating-linear-gradient(0deg,transparent 0 7px,#37226544 7px 8px),repeating-linear-gradient(90deg,transparent 0 7px,#37226544 7px 8px),linear-gradient(140deg,#080b22,#180927);color:#fff}
+.colt-radio-panel[data-radio-skin] .colt-radio-now-playing:after{display:none}
+.colt-radio-panel[data-radio-skin] .colt-radio-stream-artwork{border-color:var(--radio-cool);background:#070615;box-shadow:0 0 6px #ff16bd88}
+.colt-radio-panel[data-radio-skin] .colt-radio-stream-artwork:before{content:'';position:absolute;left:0;right:0;top:50%;aspect-ratio:1;transform:translateY(-50%);background:var(--radio-art) 9% 69.2%/460% auto no-repeat}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-stream-artwork:before{aspect-ratio:1/1.1;background-size:452% auto;background-position:12.4% 75%}
+.colt-radio-panel[data-radio-skin] .colt-radio-stream-artwork img{visibility:hidden}
+.colt-radio-panel[data-radio-skin] .colt-radio-stream-label{color:var(--radio-cool)}
+.colt-radio-panel[data-radio-skin] .colt-radio-now-playing strong{color:#fff}
+.colt-radio-panel[data-radio-skin] .colt-radio-live-badge{border-color:var(--radio-hot);background:#3b082e;color:#ffa2e9;box-shadow:0 0 6px #ff16bd55}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-live-badge{background:#ffc400;color:#161100;border-color:#ffbd00;box-shadow:none}
+.colt-radio-panel[data-radio-skin] .colt-radio-play{border-color:#fff;background:radial-gradient(circle,#7d034f,#2d061f);box-shadow:0 0 10px var(--radio-hot),inset 0 0 9px var(--radio-hot);color:#fff}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-play{background:radial-gradient(circle,#4d6900,#0d1c02);box-shadow:0 0 10px #ccff00,inset 0 0 9px #ccff00}
+.colt-radio-panel[data-radio-skin] .colt-radio-equalizer i{background:linear-gradient(var(--radio-hot),#6b2cff);box-shadow:none}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-equalizer i:nth-child(3n){background:#00e5ee}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-equalizer i:nth-child(3n+1){background:#ffc000}
+.colt-radio-panel[data-radio-skin] .colt-radio-mute{color:var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-volume-slider::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--radio-hot) 0 var(--radio-volume),#514264 var(--radio-volume) 100%);box-shadow:0 0 6px var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-volume-slider::-moz-range-track{background:linear-gradient(to right,var(--radio-hot) 0 var(--radio-volume),#514264 var(--radio-volume) 100%);box-shadow:0 0 6px var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-volume-slider::-webkit-slider-thumb{background:var(--radio-hot);border-color:#ffeaff;box-shadow:0 0 7px var(--radio-hot)}
+.colt-radio-panel[data-radio-skin] .colt-radio-volume-slider::-moz-range-thumb{background:var(--radio-hot);border-color:#ffeaff;box-shadow:0 0 7px var(--radio-hot)}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-volume-slider{--radio-hot:#ccff00}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-mute{color:#ccff00}
+.colt-radio-panel[data-radio-skin] :is(.colt-radio-note,.colt-radio-search-empty,.colt-radio-favorites-empty){color:#e5e6fb;border-color:var(--radio-trim)}
+/* Lower reference decoration is painted under the existing note, never an extra row. */
+.colt-radio-panel[data-radio-skin] .colt-radio-note{background:linear-gradient(#050511ee,#050511ee),var(--radio-art) center bottom/100% auto no-repeat}
+.colt-radio-panel[data-radio-skin] .colt-radio-note:before,.colt-radio-panel[data-radio-skin] .colt-radio-note:after{background:var(--radio-hot);mask:url('assets/radio-skins/headphones.svg') center/contain no-repeat;opacity:1}
+.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:before,.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:after{background:#ccff00}
+.colt-radio-panel[data-radio-skin] :is(button,input):focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:350px){.colt-radio-panel[data-skin-preview] .colt-radio-filter{gap:5px;padding-inline:4px}}
+

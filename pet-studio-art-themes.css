@@ -146,9 +146,86 @@
  .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-footer{font-size:12px}
 }
 
+/* Neon Gaming: reference art behind functional controls; device-local and opt-in. */
+dialog.pet-studio[data-theme=neon]{--neon-cyan:#00e5ff;--neon-purple:#ac25ff;clip-path:none;border:1px solid #5e38ad;border-radius:24px;background:#070b24;color:#f5f6ff;color-scheme:dark}
+.pet-studio[data-theme=neon] .studio{min-height:80cqw;padding-bottom:8cqw;background:url('assets/pet-studio/neon-gaming-dashboard-frame.png') center top/100% 100% no-repeat;font-family:'Segoe UI',sans-serif}
+.pet-studio[data-theme=neon] .studio-header{height:16.3cqw;padding:0;background:none;border:0}
+.pet-studio[data-theme=neon] .pet-switch{position:absolute;left:55.5%;right:11%;top:5.7cqw;margin:0;gap:.8cqw;color:#e9f5ff;font:600 clamp(13px,1.7cqw,22px)/1.2 'Segoe UI',sans-serif}
+.pet-studio[data-theme=neon] #pet-select{border:1px solid #9bb9fd;background:linear-gradient(#d0e6ff,#a8c8ee);color:#08132c;-webkit-text-fill-color:#08132c;color-scheme:light;box-shadow:0 0 12px #007fff55;min-height:40px;padding:1cqw 1.1cqw;border-radius:1cqw;font-size:clamp(14px,1.8cqw,22px)}
+.pet-studio[data-theme=neon] .pet-switch select option{background:#cde3ff;color:#08132c}
+.pet-studio[data-theme=neon] .studio-header .studio-close{position:absolute;right:3.2cqw;top:7.6cqw;margin:0;width:5.5cqw;height:5.5cqw;min-width:36px;min-height:36px;border:2px solid #5289de;border-radius:1.2cqw;background:linear-gradient(135deg,#05436d,#1b073e);color:#eaf6ff;box-shadow:2px 2px 0 #c122ff;font-size:clamp(28px,4cqw,48px)}
+.pet-studio[data-theme=neon] .studio-body{grid-template-columns:48% 52%;min-height:50cqw}
+.pet-studio[data-theme=neon] .preview-pane{padding:3cqw 3.5cqw 0;background:none;border:0}
+.pet-studio[data-theme=neon] .preview-pane h2{font-size:3.2cqw;color:#fff;text-shadow:0 2px 5px #000,0 0 12px #600cbe}
+.pet-studio[data-theme=neon] #pet-subtitle{font-size:1.3cqw;color:#f1f7ff;text-shadow:0 1px 5px #000,0 0 4px #020413}
+.pet-studio[data-theme=neon] #pet-stage{height:30cqw}
+.pet-studio[data-theme=neon] .preview-actions button{background:linear-gradient(#322568,#101735);border-color:#715bd3;border-radius:1.2cqw;color:#fff;box-shadow:0 0 10px #6936ff66;font-size:1.5cqw}
+.pet-studio[data-theme=neon] .preview-actions #greet{background:linear-gradient(120deg,#136cf9,#8308fa);border-color:#59dfff;box-shadow:0 0 12px #00c9ff77}
+.pet-studio[data-theme=neon] .preview-tip{display:block;white-space:normal;text-align:center;font-size:1.3cqw;color:#f4eaff;text-shadow:0 1px 4px #000}
+.pet-studio[data-theme=neon] .controls-pane{padding:1cqw 1.8cqw 0 1.5cqw;background:none}
+.pet-studio[data-theme=neon] .tabs{gap:.2cqw;padding:0 .2cqw;min-height:5cqw;border:0}
+.pet-studio[data-theme=neon] .tabs button{flex:1;padding:.8cqw .4cqw;border:1px solid #324681;border-radius:1.3cqw;background:linear-gradient(#152449,#070d27);color:#f4f4ff;font-size:clamp(11px,1.3cqw,17px);white-space:normal;font-weight:700}
+.pet-studio[data-theme=neon] .tabs button[aria-selected=true]{color:#fff;border-color:#83eeff;background:linear-gradient(130deg,#009aff,#7121ff,#9b00ff);box-shadow:0 0 12px #00cbff, inset 0 0 4px #c4a9ff}
+.pet-studio[data-theme=neon] .tabs button[aria-selected=true]:after{display:none}
+.pet-studio[data-theme=neon] #tab-content,.pet-studio[data-theme=neon] #tab-content:has(#gallery){flex:0 0 auto;height:29.5cqw;min-height:0;margin:0;padding:1.8cqw 1.5cqw 1cqw;background:linear-gradient(130deg,#080f27,#101333 65%,#220d3d);color:#f4f4ff;border:0;border-radius:0;scrollbar-color:#8b49de #0d1430}
+.pet-studio[data-theme=neon] #tab-content .section-heading h3,.pet-studio[data-theme=neon] #tab-content:has(#gallery) .section-heading h3{font-size:2.2cqw;color:#f7f8ff;line-height:1.2}
+.pet-studio[data-theme=neon] #tab-content .section-heading p,.pet-studio[data-theme=neon] #tab-content:has(#gallery) .section-heading p{display:block;color:#d1d4ed;font-size:1.3cqw;line-height:1.4}
+.pet-studio[data-theme=neon] .count{color:#fff;background:linear-gradient(135deg,#1e426b,#402282);border:1px solid #8ba8ff;border-radius:22px;font-size:1.15cqw}
+.pet-studio[data-theme=neon] .count:before{color:#91eaff}
+.pet-studio[data-theme=neon] .subtabs{border:1px solid #285a88;border-radius:2cqw;background:#030c20}
+.pet-studio[data-theme=neon] #tab-content:has(#gallery) .subtabs button{color:#f7f9ff;border-radius:1.8cqw;font-size:1.5cqw}
+.pet-studio[data-theme=neon] #tab-content:has(#gallery) .subtabs button[aria-pressed=true]{border:1px solid #9c8bff;background:linear-gradient(120deg,#007cff,#7713ff,#a80bff);box-shadow:0 0 10px #005fff99;color:#fff}
+.pet-studio[data-theme=neon] :is(input:not([type=checkbox]):not([type=range]),select){background:linear-gradient(110deg,#122548,#251846);color:#edf5ff;-webkit-text-fill-color:#edf5ff;border:1px solid #7765c1;border-radius:1.3cqw;color-scheme:dark}
+.pet-studio[data-theme=neon] input::placeholder{color:#c3c5e9;opacity:1}
+.pet-studio[data-theme=neon] .filters button{background:#0b1833;border-color:#344a89;color:#fff;border-radius:24px}
+.pet-studio[data-theme=neon] .filters button[aria-pressed=true]{background:linear-gradient(#b016ff,#6600c0);border-color:#e2a7ff;box-shadow:0 0 8px #bc05ff99}
+.pet-studio[data-theme=neon] .skin-card{background:linear-gradient(135deg,#0a2347,#1d123b);border-color:#4665a3;border-radius:12px;color:#fff}
+.pet-studio[data-theme=neon] .skin-card[aria-pressed=true]{border-color:#78ecff;box-shadow:0 0 9px #00c9ff,inset 0 0 12px #6711aa}
+.pet-studio[data-theme=neon] #gallery .skin-name{background:linear-gradient(#56229e,#251740);color:#fff;border-radius:6px}
+.pet-studio[data-theme=neon] #gallery .check{border-color:#c8f8ff;background:#5743db;color:#fff;box-shadow:0 0 7px #1edcff}
+.pet-studio[data-theme=neon] #tab-content #gallery{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pet-studio[data-theme=neon] :is(.choices button,.action-grid button,.helper-box,.toggle){background:#111c3b;color:#e8edff;border-color:#4b5796;border-radius:10px}
+.pet-studio[data-theme=neon] .choices button[aria-pressed=true]{background:linear-gradient(#235fcb,#7d1ac4);border-color:#71e8ff;color:#fff}
+.pet-studio[data-theme=neon] :is(.accessory-list h4,.option-row p,.action-grid small){color:#c7d7f5}
+.pet-studio[data-theme=neon] :is(input[type=checkbox],input[type=range]){accent-color:#9b40ff}
+.pet-studio[data-theme=neon] .studio-footer{margin-top:0;min-height:36px;padding:.6cqw 1cqw;background:#0a1230;border:0;border-top:1px solid #3d4377;border-radius:0 0 16px 16px;color:#edf2ff;gap:8px;flex-wrap:wrap;font-size:12px}
+.pet-studio[data-theme=neon] .studio-footer #save-status{color:#a3f4d7}
+.pet-studio[data-theme=neon] :is(.studio-footer button,.studio-theme-control){color:#e9efff;font-size:12px}
+.pet-studio[data-theme=neon] .studio-footer button{border-color:#6978be;background:#171f43}
+.pet-studio[data-theme=neon] .studio-theme-control select{font-size:12px;padding:4px 7px;border-radius:8px}
+.pet-studio[data-theme=neon] :is(button,input,select):focus-visible{outline:3px solid #82e9ff;outline-offset:3px}
+@media(max-width:700px){
+ dialog.pet-studio[data-theme=neon]{border-radius:16px}
+ .pet-studio[data-theme=neon] .studio{min-height:0;padding-bottom:12px;background:#080d23}
+ .pet-studio[data-theme=neon] .studio-header{height:auto;min-height:210px;padding:120px 14px 14px;background:url('assets/pet-studio/neon-gaming-dashboard-frame.png') left top/620px auto no-repeat;gap:12px}
+ .pet-studio[data-theme=neon] .pet-switch{position:static;left:auto;right:auto;top:auto;flex:1;margin:0;padding:6px;background:#061129ed;border-radius:10px;font-size:14px}
+ .pet-studio[data-theme=neon] #pet-select{padding:9px;font-size:16px;border-radius:8px}
+ .pet-studio[data-theme=neon] .studio-header .studio-close{position:static;width:40px;height:40px;font-size:30px;border-radius:8px}
+ .pet-studio[data-theme=neon] .studio-body{display:block;min-height:0}
+ .pet-studio[data-theme=neon] .preview-pane{padding:20px 16px;background:linear-gradient(#07102044,#07102088),url('assets/pet-studio/neon-gaming-dashboard-frame.png') left -180px/850px auto no-repeat}
+ .pet-studio[data-theme=neon] .preview-pane h2{font-size:30px}
+ .pet-studio[data-theme=neon] #pet-subtitle{font-size:14px}
+ .pet-studio[data-theme=neon] #pet-stage{height:295px;padding-bottom:18px}
+ .pet-studio[data-theme=neon] .preview-actions button{padding:10px;font-size:16px;border-radius:12px}
+ .pet-studio[data-theme=neon] .preview-tip{font-size:14px}
+ .pet-studio[data-theme=neon] .controls-pane{padding:10px;margin:10px;border:2px solid #6556ac;border-radius:16px;background:#0c1330;box-shadow:0 0 8px #00dfff44}
+ .pet-studio[data-theme=neon] .tabs{gap:2px;min-height:48px;padding:0}
+ .pet-studio[data-theme=neon] .tabs button{font-size:12px;min-height:48px;min-width:0;padding:10px 3px;border-radius:8px}
+ .pet-studio[data-theme=neon] #tab-content,.pet-studio[data-theme=neon] #tab-content:has(#gallery){height:auto;min-height:360px;overflow:visible;max-height:none;padding:18px 8px}
+ .pet-studio[data-theme=neon] #tab-content:has(#gallery) .section-heading h3{font-size:24px}
+ .pet-studio[data-theme=neon] #tab-content:has(#gallery) .section-heading p{font-size:13px}
+ .pet-studio[data-theme=neon] .count{font-size:12px}
+ .pet-studio[data-theme=neon] #tab-content:has(#gallery) .subtabs button{font-size:16px}
+ .pet-studio[data-theme=neon] #tab-content #gallery{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none;overflow:visible;grid-auto-rows:152px}
+ .pet-studio[data-theme=neon] #gallery .skin-card{height:152px}
+ .pet-studio[data-theme=neon] #gallery .skin-card img{height:108px}
+ .pet-studio[data-theme=neon] :is(input:not([type=checkbox]):not([type=range]),select){font-size:16px;border-radius:10px}
+ .pet-studio[data-theme=neon] .studio-footer{padding:10px}
+}
+
 /* Retro Diner: reference scenery beneath live controls, scoped to this theme. */
 dialog.pet-studio[data-theme=diner]{--diner-ink:#74151a;--diner-red:#b51420;--diner-cream:#fff0d4;clip-path:none;border-radius:24px;color:var(--diner-ink);color-scheme:light;background:#86141b}
-.pet-studio[data-theme=diner] .studio{background:url('assets/pet-studio/diner-dashboard-frame.png') center top/100% 100% no-repeat;min-height:75cqw;padding-bottom:6cqw;font-family:Georgia,'Times New Roman',serif}
+.pet-studio[data-theme=diner] .studio{background:url('assets/pet-studio/diner-room-backdrop-v2.png') center top/100% 100% no-repeat;min-height:75cqw;padding-bottom:6cqw;font-family:Georgia,'Times New Roman',serif}
 .pet-studio[data-theme=diner] .studio-header{height:12cqw;padding:1.6cqw 2.4cqw 1.4cqw 70cqw;gap:1cqw;align-items:center}
 .pet-studio[data-theme=diner] .pet-switch{position:absolute;left:70.2%;right:1.6%;top:2.5cqw;flex:none;margin:0;color:#7d1718;font:italic 700 clamp(12px,1.45cqw,19px)/1.2 Georgia,serif;text-align:center;gap:.35cqw}
 .pet-studio[data-theme=diner] .pet-switch select{font:700 clamp(14px,1.7cqw,21px)/1.2 'Segoe UI',sans-serif;min-height:38px;padding:.65cqw 2.2cqw;background:#fff0d5;color:#511c16;-webkit-text-fill-color:#511c16;text-align:center;text-align-last:center;border:2px solid #b68a66;border-radius:2cqw;box-shadow:inset 0 1px 3px #fff9}
@@ -161,9 +238,9 @@ dialog.pet-studio[data-theme=diner]{--diner-ink:#74151a;--diner-red:#b51420;--di
 .pet-studio[data-theme=diner] .preview-actions button{font:italic 700 clamp(12px,1.6cqw,20px)/1.25 Georgia,serif;min-height:44px;border:3px solid #eee0cd;border-radius:3cqw;padding:.8cqw .6cqw;background:linear-gradient(#e52c32,#a40e1a);color:#fff4df;box-shadow:0 0 0 2px #625b5b,inset 0 1px 2px #ffc2b1,0 3px 7px #4d080666}
 .pet-studio[data-theme=diner] .preview-actions #greet{background:linear-gradient(#fff9e9,#f6dfb6);color:#861a1b}
 .pet-studio[data-theme=diner] .preview-tip{display:block;color:#fff3dd;font:italic 700 clamp(11px,1.35cqw,17px)/1.5 Georgia,serif;white-space:normal;text-align:center;text-shadow:0 1px 3px #41090a}
-.pet-studio[data-theme=diner] .controls-pane{padding:0 2.8cqw 0 1.2cqw;background:none}
+.pet-studio[data-theme=diner] .controls-pane{align-self:start;margin:0 2.8cqw 0 1.2cqw;padding:.8cqw;border:5px solid transparent;border-radius:3cqw;background:linear-gradient(#ba1521,#7f0c18) padding-box,linear-gradient(110deg,#ffeddf,#706c74 4%,#fff 9%,#69616a 14%,#faf8ec 20%,#a49b9d 50%,#fff1e0 78%,#514d55 86%,#fff3e2 94%,#8c8185) border-box;box-shadow:0 0 0 1px #4e3337,inset 0 0 0 1px #ffc3a4,0 8px 20px #29080777;overflow:hidden}
 .pet-studio[data-theme=diner] .tabs{gap:.3cqw;padding:0 .3cqw;min-height:5.5cqw;border:0;align-items:stretch}
-.pet-studio[data-theme=diner] .tabs button{flex:1;padding:.9cqw .4cqw;color:#fff2dd;font:italic 700 clamp(12px,1.6cqw,20px)/1.2 Georgia,serif;border:2px solid #ffd5b0;border-bottom:0;border-radius:2cqw 2cqw 0 0;background:linear-gradient(#e2272d,#9b111b);box-shadow:inset 0 2px 2px #fff5;text-shadow:0 1px 1px #681016}
+.pet-studio[data-theme=diner] .tabs button{flex:1;min-width:0;white-space:normal;padding:.9cqw .4cqw;color:#fff2dd;font:italic 700 clamp(12px,1.45cqw,18px)/1.2 Georgia,serif;border:2px solid #ffd5b0;border-bottom:0;border-radius:2cqw 2cqw 0 0;background:linear-gradient(#e2272d,#9b111b);box-shadow:inset 0 2px 2px #fff5;text-shadow:0 1px 1px #681016}
 .pet-studio[data-theme=diner] .tabs button[aria-selected=true]{color:#82191a;background:linear-gradient(#fff8e8,#f8dfb6);border-color:#e7c2a0;text-shadow:none;box-shadow:inset 0 2px 1px #fff}
 .pet-studio[data-theme=diner] .tabs button[aria-selected=true]:after{background:#8c171b;box-shadow:none;left:15%;right:15%;height:2px}
 .pet-studio[data-theme=diner] #tab-content,.pet-studio[data-theme=diner] #tab-content:has(#gallery){position:relative;z-index:1;flex:0 0 auto;height:43cqw;min-height:0;margin:0;padding:1.7cqw 1.7cqw 1cqw;border:0;border-radius:0;background:linear-gradient(125deg,#fff2dc,#ffedcf);color:#571b13;scrollbar-color:#a62424 #f7e3c3}
@@ -190,7 +267,7 @@ dialog.pet-studio[data-theme=diner]{--diner-ink:#74151a;--diner-red:#b51420;--di
 .pet-studio[data-theme=diner] :is(.helper-box,.toggle){color:#633024;background:#fff3dc;border-color:#cfad84}
 .pet-studio[data-theme=diner] .accessory-list h4{color:#8a2220}
 .pet-studio[data-theme=diner] :is(input[type=checkbox],input[type=range]){accent-color:#b51d28}
-.pet-studio[data-theme=diner] .studio-footer{margin-top:0;padding:.6cqw 1.6cqw;background:#fff0d4;border:1px solid #ba957b;border-radius:0 0 14px 14px;color:#67261b;font:12px 'Segoe UI',sans-serif;gap:8px;flex-wrap:wrap}
+.pet-studio[data-theme=diner] .studio-footer{margin:0;padding:.6cqw 1.6cqw;background:#fff0d4;border:1px solid #ba957b;border-radius:0 0 14px 14px;color:#67261b;font:12px 'Segoe UI',sans-serif;gap:8px;flex-wrap:wrap}
 .pet-studio[data-theme=diner] .studio-footer #save-status{color:#335a36}
 .pet-studio[data-theme=diner] :is(.studio-theme-control,.studio-footer button){color:#70261c;font-size:12px}
 .pet-studio[data-theme=diner] .studio-footer button{background:#fff7e8;border-color:#b3947a}
@@ -204,11 +281,11 @@ dialog.pet-studio[data-theme=diner]{--diner-ink:#74151a;--diner-red:#b51420;--di
 @media(max-width:700px){
  dialog.pet-studio[data-theme=diner]{border:2px solid #a71d26;border-radius:16px}
  .pet-studio[data-theme=diner] .studio{min-height:0;padding-bottom:12px;background:#8c1420}
- .pet-studio[data-theme=diner] .studio-header{height:auto;min-height:185px;padding:110px 14px 14px;background:url('assets/pet-studio/diner-dashboard-frame.png') left top/700px auto no-repeat;gap:10px}
+ .pet-studio[data-theme=diner] .studio-header{height:auto;min-height:185px;padding:110px 14px 14px;background:url('assets/pet-studio/diner-room-backdrop-v2.png') left top/700px auto no-repeat;gap:10px}
  .pet-studio[data-theme=diner] .pet-switch{position:static;left:auto;right:auto;top:auto;flex:1;margin:0;padding:4px;background:#fff0d4dd;border-radius:12px;font-size:13px;text-shadow:0 1px 2px #fff}
  .pet-studio[data-theme=diner] .pet-switch select{font-size:16px;padding:9px}
  .pet-studio[data-theme=diner] .studio-header .studio-close{position:static;width:40px;height:40px}
- .pet-studio[data-theme=diner] .preview-pane{padding:20px 16px;background:linear-gradient(#4d111333,#4d111366),url('assets/pet-studio/diner-dashboard-frame.png') left -180px/950px auto no-repeat;border-bottom:4px solid #d8c5ae}
+ .pet-studio[data-theme=diner] .preview-pane{padding:20px 16px;background:linear-gradient(#4d111333,#4d111366),url('assets/pet-studio/diner-room-backdrop-v2.png') left -180px/950px auto no-repeat;border-bottom:4px solid #d8c5ae}
  .pet-studio[data-theme=diner] .preview-pane h2{font-size:30px}
  .pet-studio[data-theme=diner] #pet-stage{height:295px;padding-bottom:18px}
  .pet-studio[data-theme=diner] .preview-actions button{font-size:16px;padding:10px;border-radius:28px}

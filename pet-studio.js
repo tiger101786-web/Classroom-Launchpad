@@ -28,7 +28,8 @@ dialog.querySelector('#pet-select').add(new Option('Saber-tooth Tiger','saber'))
 dialog.querySelector('#pet-select').add(new Option('Chicken Nugget','nugget'));
 // Interface themes are a local display preference, separate from pet/account data.
 const themeControl=document.createElement('label');themeControl.className='studio-theme-control';themeControl.innerHTML='Studio theme <select aria-label="Studio theme" title="Saved on this device"><option value="crimson">Crimson</option><option value="woodland">Woodland</option><option value="sky">Cloud Sky</option><option value="scrapbook">Scrapbook</option><option value="tropical">Tropical</option><option value="autumn">Autumn</option><option value="diner">Retro Diner</option></select>';dialog.querySelector('.studio-footer').append(themeControl);
-const themeNames=['crimson','woodland','sky','scrapbook','tropical','autumn','diner'];
+themeControl.querySelector('select').add(new Option('Neon Gaming','neon'));
+const themeNames=['crimson','woodland','sky','scrapbook','tropical','autumn','diner','neon'];
 const themeSelect=themeControl.querySelector('select');let theme='crimson';try{const savedTheme=localStorage.getItem('petStudioTheme');if(themeNames.includes(savedTheme))theme=savedTheme}catch{}
 function applyStudioTheme(value){dialog.dataset.theme=themeNames.includes(value)?value:'crimson';themeSelect.value=dialog.dataset.theme;}
 applyStudioTheme(theme);themeSelect.onchange=()=>{applyStudioTheme(themeSelect.value);try{localStorage.setItem('petStudioTheme',dialog.dataset.theme)}catch{}};

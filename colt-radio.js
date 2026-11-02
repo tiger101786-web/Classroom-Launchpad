@@ -1107,6 +1107,13 @@
     panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
+    // Skin experiments are opt-in; normal visits load neither the preview nor its art.
+    if (new URLSearchParams(globalObject.location.search).get("radioSkins") === "preview") {
+      const preview = document.createElement("script");
+      preview.src = "radio-skins-preview.js?v=20261101-gear-toggle-v7";
+      document.head.append(preview);
+    }
+
     let activeStation = "";
     let playlistTrackIndex = -1;
     let metadataTimer = 0;
