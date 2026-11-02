@@ -82,7 +82,7 @@ body .colt-radio-panel[data-radio-skin=graffiti]{--radio-art:url('assets/radio-s
 .colt-radio-panel[data-radio-skin] :is(.colt-radio-note,.colt-radio-search-empty,.colt-radio-favorites-empty){color:#e5e6fb;border-color:var(--radio-trim)}
 /* Lower reference decoration is painted under the existing note, never an extra row. */
 .colt-radio-panel[data-radio-skin] .colt-radio-note{background:linear-gradient(#050511ee,#050511ee),var(--radio-art) center bottom/100% auto no-repeat}
-.colt-radio-panel[data-radio-skin] .colt-radio-note:before,.colt-radio-panel[data-radio-skin] .colt-radio-note:after{background:var(--radio-hot);mask:url('assets/radio-skins/headphones.svg') center/contain no-repeat;opacity:1}
+.colt-radio-panel[data-radio-skin] .colt-radio-note:before,.colt-radio-panel[data-radio-skin] .colt-radio-note:after{content:'';display:block;width:16px;height:16px;color:transparent;background:var(--radio-hot);mask:url('assets/radio-skins/headphones.svg?v=20261102-connected-v2') center/contain no-repeat;opacity:1}
 .colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:before,.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:after{background:#ccff00}
 .colt-radio-panel[data-radio-skin] :is(button,input):focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media(max-width:350px){.colt-radio-panel[data-radio-skins] .colt-radio-filter{gap:5px;padding-inline:4px}}

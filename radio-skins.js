@@ -5,7 +5,7 @@
   panel.dataset.radioSkins = 'true';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'radio-skins.css?v=20261102-menu-position-v2';
+  stylesheet.href = 'radio-skins.css?v=20261102-headphones-v3';
   document.head.append(stylesheet);
 
   const gear = document.createElement('button');
