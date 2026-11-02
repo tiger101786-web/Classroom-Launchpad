@@ -1,11 +1,11 @@
 (function () {
   'use strict';
   const panel = document.querySelector('.colt-radio-panel');
-  if (!panel || panel.dataset.skinPreview) return;
-  panel.dataset.skinPreview = 'true';
+  if (!panel || panel.dataset.radioSkins) return;
+  panel.dataset.radioSkins = 'true';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'radio-skins-preview.css?v=20261101-styled-dropdown-v6';
+  stylesheet.href = 'radio-skins.css?v=20261101-production-v1';
   document.head.append(stylesheet);
 
   const gear = document.createElement('button');
@@ -41,7 +41,7 @@
   });
   panel.append(menu);
 
-  const key = 'coltRadioSkinPreview';
+  const key = 'coltRadioSkin';
   function applySkin(skin) {
     if (!skins.some(([value]) => value === skin)) skin = 'classic';
     if (skin === 'classic') delete panel.dataset.radioSkin;
@@ -55,7 +55,7 @@
     try { localStorage.setItem(key, skin); } catch {}
   }
   let saved = 'classic';
-  try { saved = localStorage.getItem(key) || saved; } catch {}
+  try { saved = localStorage.getItem(key) || localStorage.getItem('coltRadioSkinPreview') || saved; } catch {}
   applySkin(saved);
   function closeMenu(focus = false) {
     menu.hidePopover();

@@ -11,11 +11,12 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  assert.equal((await context.request.post(origin+'/api/auth/teacher',{headers:{Origin:origin},data:{pin:'654321'}})).status(),200);
  const page=await context.newPage(),errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  await page.goto(origin);await page.locator('.colt-radio-launcher').waitFor({state:'visible'});
- assert(!requests.some(u=>u.includes('radio-skins')||u.includes('neon-gaming-dashboard')),'No preview or neon art requested on normal visits');
- await page.locator('.colt-radio-launcher').click();assert.equal(await page.locator('.colt-radio-skin-gear').count(),0);
+ assert(!requests.some(u=>/\/radio-skins(?:\.js|\.css|\/)/.test(u)||u.includes('neon-gaming-room')),'No radio skin code/styles/art or neon art requested at startup');
+ await page.locator('.colt-radio-launcher').click();await page.locator('.colt-radio-skin-gear').waitFor();await page.waitForFunction(()=>document.querySelector('link[href^="radio-skins.css"]')?.sheet);
+ assert.equal(await page.locator('.colt-radio-skin-gear').count(),1,'Skins available on normal visits');
  await page.locator('.colt-radio-search-input').fill('House Chill');await page.locator('[data-station="chill-house"]').click();await page.locator('.colt-radio-search-input').fill('');
  const normalSizes=new Map();for(const [width,height] of [[1440,1100],[800,900],[390,844],[320,740]]){await page.setViewportSize({width,height});normalSizes.set(width,await page.locator('.colt-radio-panel').evaluate(e=>{const r=e.getBoundingClientRect();return {width:r.width,height:r.height};}));}
- await page.goto(origin+'/?radioSkins=preview');await page.locator('.colt-radio-launcher').click();
+ await page.goto(origin);await page.locator('.colt-radio-launcher').click();
  const panel=page.locator('.colt-radio-panel'),gear=panel.getByRole('button',{name:'Change Colt Radio skin',exact:true});
  const chooseSkin=async(skin,scope=page)=>{await scope.getByRole('button',{name:'Change Colt Radio skin',exact:true}).click();await scope.locator('[data-radio-skin-choice='+skin+']').click();};
  await gear.waitFor();assert.equal(await panel.getAttribute('data-radio-skin'),null);
@@ -67,13 +68,13 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await chooseSkin('graffiti');
  await page.reload();await page.locator('.colt-radio-launcher').click();await gear.waitFor();assert.equal(await panel.getAttribute('data-radio-skin'),'graffiti');
  await chooseSkin('classic');assert.equal(await panel.getAttribute('data-radio-skin'),null);
- await chooseSkin('arcade');await page.goto(origin);await page.locator('.colt-radio-launcher').click();assert.equal(await panel.getAttribute('data-radio-skin'),null);assert.equal(await gear.count(),0,'Saved preview skin does not leak onto regular site');
+ await chooseSkin('arcade');await page.goto(origin);await page.locator('.colt-radio-launcher').click();await gear.waitFor();assert.equal(await panel.getAttribute('data-radio-skin'),'arcade');assert.equal(await gear.count(),1,'Production skin persists on normal visits');
  await panel.locator('[aria-label="Minimize Colt Radio"]').click();
  await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();const studio=page.locator('.pet-studio');await studio.waitFor({state:'visible'});
- assert(!requests.some(u=>u.includes('neon-gaming-dashboard')),'Neon scenery loads only after choosing it');
+ assert(!requests.some(u=>u.includes('neon-gaming-room')),'Neon scenery loads only after choosing it');
  const preferences=async()=>(await (await context.request.get(origin+'/api/companion-preferences')).json()).preferences;
  const petBefore=await preferences();await studio.getByLabel('Studio theme',{exact:true}).selectOption('neon');assert.deepEqual(await preferences(),petBefore);
- await page.evaluate(async()=>{const i=new Image();i.src='/assets/pet-studio/neon-gaming-dashboard-frame.png';await i.decode();});
+ await page.evaluate(async()=>{const i=new Image();i.src='/assets/pet-studio/neon-gaming-room-v2.png';await i.decode();});
  assert.equal(await studio.locator('#pet-select').evaluate(e=>getComputedStyle(e).color),'rgb(8, 19, 44)','Reference pale blue companion menu keeps dark text');
  assert.equal(await studio.locator('#pet-select').evaluate(e=>getComputedStyle(e).colorScheme),'light');
  await studio.locator('#pet-select').selectOption('eagle');
@@ -85,14 +86,30 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   await studio.locator('[data-tab=appearance]').click();await studio.evaluate(e=>e.scrollTop=0);await studio.screenshot({path:path.join(output,'neon-studio-'+width+'.png')});
   if(width===390){await studio.locator('#skin-search').scrollIntoViewIfNeeded();await studio.screenshot({path:path.join(output,'neon-studio-mobile-controls.png')});}
  }
+ // Compare both requested themes with the original layout using the same pet/tab.
+ await studio.locator('#pet-select').selectOption('nugget');
+ const studioSize=()=>studio.evaluate(d=>{const s=d.querySelector('.studio').getBoundingClientRect(),p=d.querySelector('#tab-content').getBoundingClientRect();return {width:s.width,height:s.height,panelWidth:p.width,panelHeight:p.height};});
+ for(const width of [1440,1366,800,390]){
+  await page.setViewportSize({width,height:1000});
+  for(const tab of ['appearance','name','play','settings']){
+   await studio.getByLabel('Studio theme',{exact:true}).selectOption('crimson');await studio.locator('[data-tab='+tab+']').click();const base=await studioSize();
+   for(const theme of ['woodland','sky','scrapbook','tropical','autumn','neon','diner']){await studio.getByLabel('Studio theme',{exact:true}).selectOption(theme);const actual=await studioSize();for(const [key,value] of Object.entries(base)){if(width<=700&&!key.startsWith('panel'))continue;assert(Math.abs(actual[key]-value)<=2,theme+' matches original '+key+' at '+width+' '+tab+': '+JSON.stringify({actual,base}));}
+    if(tab==='appearance'&&width>700){const visible=await studio.locator('#gallery').evaluate(g=>{g.scrollTop=0;const b=g.getBoundingClientRect();return [...g.querySelectorAll('.skin-card')].filter(c=>{const r=c.getBoundingClientRect();return r.top>=b.top-1&&r.bottom<=b.bottom+1}).length;});assert.equal(visible,8,theme+' shows four columns and two complete rows at '+width);}
+   }
+  }
+ }
+ await studio.getByLabel('Studio theme',{exact:true}).selectOption('neon');
+ await studio.locator('[data-tab=appearance]').click();
+ await page.setViewportSize({width:1440,height:1000});
+ await studio.screenshot({path:path.join(output,'neon-studio-standard-gallery.png')});
  await studio.locator('.studio-close').click();await page.reload();await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();assert.equal(await studio.getAttribute('data-theme'),'neon');
  await page.setViewportSize({width:1440,height:1100});await studio.getByLabel('Studio theme',{exact:true}).selectOption('diner');
  await page.evaluate(async()=>{const i=new Image();i.src='/assets/pet-studio/diner-room-backdrop-v2.png';await i.decode();});
  for(const tab of ['appearance','settings']){await studio.locator('[data-tab='+tab+']').click();await studio.screenshot({path:path.join(output,'diner-single-chrome-'+tab+'.png')});}
  assert((await studio.locator('.studio').evaluate(e=>getComputedStyle(e).backgroundImage)).includes('diner-room-backdrop-v2'));
  assert.equal((await context.request.get(origin+'/radio-skins-test.html')).status(),200,'Standalone test page is served');
- await page.setViewportSize({width:1440,height:1200});await page.goto(origin+'/radio-skins-test.html');await page.waitForURL('**/radio-skins-test.html?radioSkins=preview');await page.locator('.colt-radio-launcher').click();await gear.waitFor();
+ await page.setViewportSize({width:1440,height:1200});await page.goto(origin+'/radio-skins-test.html');await page.locator('.colt-radio-launcher').click();await gear.waitFor();
  for(const skin of ['arcade','graffiti']){await chooseSkin(skin);assert.equal(await panel.getAttribute('data-radio-skin'),skin);await panel.screenshot({path:path.join(output,'radio-skin-'+skin+'-preview.png')});}
  await gear.click();await page.screenshot({path:path.join(output,'radio-skin-picker-preview.png')});
- assert.deepEqual(errors,[]);console.log('PASS: preview isolation, gear/keyboard/reset, skin persistence, unchanged audio/station/volume/favorites, floating window skins/return, both skins at four sizes and light/dark modes; neon theme lazy art, account isolation, four tabs/four sizes/persistence, diner single chrome backdrop.');
+ assert.deepEqual(errors,[]);console.log('PASS: production radio skins load only on opening, gear/keyboard/reset, saved choices on normal visits, unchanged audio/station/volume/favorites, floating controls, four sizes/light-dark modes; all eight Studio themes share dimensions across all tabs, show eight desktop skins and match mobile panels, with persistence and delayed artwork.');
 }finally{await browser?.close();server.kill();}})().catch(e=>{console.error(e);process.exitCode=1;});

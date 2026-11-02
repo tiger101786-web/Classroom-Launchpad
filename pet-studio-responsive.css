@@ -18,3 +18,86 @@ dialog.pet-studio {
   dialog.pet-studio .tabs {flex-wrap:wrap;overflow:visible}
   dialog.pet-studio .studio-footer {margin-bottom:12px}
 }
+
+/* One shared layout for every Studio theme; artwork never sizes the controls. */
+.pet-studio[data-theme] #tab-content:has(#gallery){gap:6px;padding:12px 20px}
+.pet-studio[data-theme] #tab-content:has(#gallery) .section-heading{height:32px;min-height:32px;align-items:center}
+.pet-studio[data-theme] #tab-content:has(#gallery) .section-heading>div{min-width:0;flex:1}
+.pet-studio[data-theme] #tab-content:has(#gallery) .section-heading h3{font-size:22px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
+.pet-studio[data-theme] #tab-content:has(#gallery) .section-heading p{display:none}
+.pet-studio[data-theme] #tab-content:has(#gallery) .count{flex-shrink:0;height:28px;padding:5px 10px;font-size:11px;line-height:16px}
+.pet-studio[data-theme] #tab-content:has(#gallery) .subtabs{height:36px}
+.pet-studio[data-theme] #tab-content:has(#gallery) .subtabs button{padding:2px 7px;font-size:14px;line-height:1}
+.pet-studio[data-theme] #tab-content:has(#gallery) .search{height:38px;min-height:38px;padding:8px 12px;font-size:14px;line-height:20px}
+.pet-studio[data-theme] #tab-content:has(#gallery) .filters{gap:6px}
+.pet-studio[data-theme] #tab-content:has(#gallery) .filters button{height:30px;padding:6px 12px;font-size:12px;line-height:16px}
+.pet-studio[data-theme] #tab-content #gallery{gap:8px;padding:4px;grid-template-rows:none}
+.pet-studio[data-theme] #gallery .skin-card{display:flex;flex-direction:column;min-height:0;padding:6px 5px;border-width:2px}
+.pet-studio[data-theme] #gallery .skin-card>:is(img,svg,canvas,.labubu-skin-thumb){display:block;flex:1 1 0;min-height:0;height:0;width:100%;object-fit:contain}
+.pet-studio[data-theme] #gallery .skin-name{flex:0 0 24px;height:24px;min-height:24px;margin:2px 0 0;font-size:12px;line-height:12px}
+.pet-studio[data-theme] #tab-content:not(:has(#gallery)){font-family:'Segoe UI',sans-serif}
+.pet-studio[data-theme] #tab-content:not(:has(#gallery)) .section-heading h3{font-family:inherit;font-size:22px;line-height:1.2}
+.pet-studio[data-theme] #tab-content:not(:has(#gallery)) .section-heading p{font-family:inherit;font-size:13px;line-height:1.3}
+.pet-studio[data-theme] #tab-content .field{gap:9px;margin:22px 0;font:13px/normal 'Segoe UI',sans-serif}
+.pet-studio[data-theme] #tab-content .field :is(input,select){height:46px;padding:12px;border-width:1px;font:16px/20px 'Segoe UI',sans-serif}
+.pet-studio[data-theme] #tab-content :is(.field small,.helper,.option-row p,.action-grid small){font-family:'Segoe UI',sans-serif;font-size:12px;line-height:1.6}
+.pet-studio[data-theme] #tab-content .action-grid button{padding:20px 14px;border-width:1px;font:13px/20px 'Segoe UI',sans-serif}
+.pet-studio[data-theme] #tab-content .helper-box{padding:17px;border-width:1px;font:12px/1.7 'Segoe UI',sans-serif}
+@media(min-width:701px){
+ dialog.pet-studio[data-theme]{border:0}
+ .pet-studio[data-theme] .studio{min-height:66.6667cqw;padding-bottom:4cqw}
+ .pet-studio[data-theme] .studio-header{height:11.6cqw}
+ .pet-studio[data-theme] .studio-body{grid-template-columns:37.5% 62.5%;min-height:0;height:calc(max(42cqw,440px) + 4.8cqw + 58px)}
+ .pet-studio[data-theme] .preview-pane{padding:2.3cqw 3cqw 0 5cqw}
+ .pet-studio[data-theme] .preview-pane h2{font-size:3.2cqw;line-height:1.1;margin:0 0 .7cqw}
+ .pet-studio[data-theme] #pet-subtitle{font-size:1.35cqw;line-height:1.3;margin:0}
+ .pet-studio[data-theme] #pet-stage{flex-shrink:1;min-height:0;height:30.5cqw;max-height:30.5cqw;padding:0 0 1.3cqw}
+ .pet-studio[data-theme] .preview-actions{gap:1.3cqw;margin-top:.8cqw}
+ .pet-studio[data-theme] .preview-actions button{font-size:1.5cqw;line-height:1.2;padding:.9cqw .4cqw}
+ .pet-studio[data-theme] .preview-tip{font-size:1.25cqw;line-height:1.3;margin:1.1cqw 0 0;white-space:normal;text-align:center}
+ .pet-studio[data-theme] .studio-body .controls-pane{position:relative;align-self:stretch;margin:0;padding:0 2.8cqw 0 1.2cqw;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}
+ .pet-studio:is([data-theme=neon],[data-theme=diner]) .controls-pane:before{content:'';position:absolute;inset:0 2.8cqw 0 1.2cqw;pointer-events:none;border-radius:2cqw;background:linear-gradient(#b51724 0 4.8cqw,#fff0d4 4.8cqw);box-shadow:0 0 0 2px #625c64,0 0 0 4px #efe6d8,0 0 0 5px #867980,0 5px 14px #0006}
+ .pet-studio[data-theme=neon] .controls-pane:before{background:#0b1230;box-shadow:0 0 0 2px #475190,-2px 0 0 4px #00dcff,2px 0 0 4px #ad25ff,0 0 14px #641cff99}
+ .pet-studio[data-theme] .controls-pane>.tabs,.pet-studio[data-theme] .studio-footer{position:relative;z-index:1}
+ .pet-studio[data-theme] .tabs{height:4.8cqw;min-height:0;flex-shrink:0;gap:1cqw;padding:0 .8cqw;border-bottom:1px solid transparent}
+ .pet-studio[data-theme] .tabs button{min-height:0;min-width:0;padding:1.3cqw .4cqw 1cqw;font-size:1.35cqw;line-height:1.2}
+ .pet-studio[data-theme] #tab-content,.pet-studio[data-theme] #tab-content:has(#gallery){position:relative;z-index:1;flex:0 0 max(42cqw,440px);height:max(42cqw,440px);min-height:0;max-height:max(42cqw,440px);margin:0 .1cqw;padding:2cqw 1.8cqw 1cqw;border:1px solid transparent;border-radius:0}
+ .pet-studio[data-theme] #tab-content:has(#gallery) .section-heading p{display:none}
+ .pet-studio[data-theme] .studio-footer{flex-shrink:0;flex-wrap:nowrap;margin:10px 0 0;height:48px;min-height:48px;padding:10px 14px;border:1px solid transparent;font:13px 'Segoe UI',sans-serif;gap:12px;align-items:center}
+ .pet-studio[data-theme] .studio-footer #save-status{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .pet-studio[data-theme] .studio-footer button{font-size:13px;padding:6px 9px}
+ .pet-studio[data-theme] .studio-theme-control{font-size:11px}
+ .pet-studio[data-theme] .studio-theme-control select{font:inherit;padding:5px 7px}
+ .pet-studio[data-theme] #tab-content #gallery{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:calc((100% - 16px)/2)}
+ .pet-studio[data-theme] #gallery .skin-card{height:100%}
+ .pet-studio[data-theme=neon] .pet-switch{left:70.5%;right:9%;top:2.5cqw}
+ .pet-studio[data-theme=neon] .studio-header .studio-close{right:2cqw;top:4.5cqw;width:4.5cqw;height:4.5cqw}
+}
+
+@media(max-width:700px){
+ dialog.pet-studio[data-theme]{border-width:2px}
+ .pet-studio[data-theme] .studio{padding-bottom:16px}
+ .pet-studio[data-theme] .studio-header{min-height:160px;padding:100px 16px 14px;gap:12px}
+ .pet-studio[data-theme] .pet-switch{padding:0;font-size:12px}
+ .pet-studio[data-theme] #pet-select{padding:10px;font-size:16px}
+ .pet-studio[data-theme] .studio-header .studio-close{margin:15px 0 0}
+ .pet-studio[data-theme] .preview-pane{padding:20px}
+ .pet-studio[data-theme] .preview-pane h2{font-size:28px;line-height:1.1}
+ .pet-studio[data-theme] #pet-subtitle{font-size:13px;line-height:1.3}
+ .pet-studio[data-theme] #pet-stage{height:295px;padding:8px 0 20px}
+ .pet-studio[data-theme] .preview-actions{gap:12px;max-width:350px}
+ .pet-studio[data-theme] .preview-actions button{font-size:14px;padding:10px}
+ .pet-studio[data-theme] .preview-tip{font-size:12px;line-height:normal;margin:12px 0}
+ .pet-studio[data-theme] .studio-body .controls-pane{margin:0;padding:0 10px;border:0;box-shadow:none}
+ .pet-studio[data-theme] .tabs{min-height:0;gap:3px;padding:0}
+ .pet-studio[data-theme] .tabs button{flex:initial;min-height:0;padding:15px 6px;font-size:12px;line-height:normal}
+ .pet-studio[data-theme] #tab-content{margin:0 .1cqw;padding:20px 12px;border:1px solid transparent}
+ .pet-studio[data-theme] #tab-content:has(#gallery){padding:12px 20px}
+ .pet-studio[data-theme] #tab-content:has(#gallery) .section-heading h3{font-size:22px}
+ .pet-studio[data-theme] #tab-content:has(#gallery) .section-heading p{display:none}
+ .pet-studio[data-theme] #tab-content:has(#gallery) .subtabs button{font-size:14px}
+ .pet-studio[data-theme] #tab-content #gallery{grid-auto-rows:136px;gap:8px}
+ .pet-studio[data-theme] #gallery .skin-card{height:136px}
+ .pet-studio[data-theme] #gallery .skin-card img{height:94px}
+ .pet-studio[data-theme] .studio-footer{margin:10px 0 12px;min-height:48px;padding:10px 14px;gap:12px;font:13px 'Segoe UI',sans-serif}
+}

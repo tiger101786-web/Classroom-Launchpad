@@ -1,10 +1,10 @@
-# Radio skin preview, Neon Gaming Studio, and diner chrome repair
+# Colt Radio skins and shared Pet Studio layouts
 
 ## Try the radio skins
 
-Open `/radio-skins-test.html` on the local server. This standalone test page automatically enables `?radioSkins=preview`. Open the player and click the gear beside Favorites. Original, Retro Arcade and Neon Graffiti are available. To test with the rest of Launchpad, visit `/?radioSkins=preview`.
+Colt Radio now offers Original, Retro Arcade and Neon Graffiti on regular website visits. Open the player and use the gear beside Favorites. `/radio-skins-test.html` remains a standalone comparison page, using the same production code.
 
-Normal visits do not load the radio preview script, stylesheet or artwork, and do not show the gear. A saved test choice never applies without the preview query. This is a reviewable trial, not a rollout of radio skins. The preview preference uses the separate localStorage key `coltRadioSkinPreview` and does not change account data.
+`radio-skins.js` and `radio-skins.css` load only when the radio is first opened. Theme artwork loads only when selected. The choice is stored in `coltRadioSkin`, with migration from the previous `coltRadioSkinPreview` key. Original remains the default for new devices. Account preferences and playback are unchanged.
 
 ## Artwork
 
@@ -18,9 +18,21 @@ Both artwork skins use square outer corners so the original player's rounded ove
 
 The gear is registered as the dropdown's native popover invoker. A second click closes it without light-dismiss reopening it. Selection, outside clicks and Escape also dismiss it; the selected option receives native autofocus for keyboard navigation. Repeated gear toggles are covered by the browser checks.
 
-Neon Gaming is an optional Pet Studio theme saved with the existing device-local Studio theme preference. Its backdrop is `assets/pet-studio/neon-gaming-dashboard-frame.png`. The original theme choices remain available. The background is requested only when Neon Gaming is selected, and Studio still uses its existing seven delayed stylesheets.
+Neon Gaming is an optional Pet Studio theme saved with the existing device-local Studio theme preference. Its current backdrop is `assets/pet-studio/neon-gaming-room-v2.png`, with no baked selection board. The original theme choices remain available. The background is requested only when Neon Gaming is selected, and Studio still uses its existing seven delayed stylesheets.
 
 The diner now uses `assets/pet-studio/diner-room-backdrop-v2.png`: the large illustrated board and fake tabs were removed and replaced with matching red diner wall/booth scenery. A single live chrome frame wraps the actual tabs, opaque content and footer, avoiding independent chrome edges when switching tabs.
+
+## Standard-size Neon Gaming room update
+
+The former large illustrated board was removed so a live neon frame can follow the shared Studio geometry. The new room master remains at native resolution.
+
+### Reflow reference prompt
+
+Edit this supplied Neon Gaming Pet Studio decorative dashboard shell to match the larger standard Studio selection area. Keep the exact neon cyan/magenta/violet gaming-room style, paw graphics, furniture, monitors, vines, floor, chair and controller as closely as practical. Reflow layout precisely: shrink and move the Pet Studio logo entirely into x4%-36%, y1%-14%; move the SMALL blank companion header frame into x69%-99%, y1%-14%; EXPAND the LARGE blank selector frame into x38%-99%, y16%-88%, keeping its glowing cyan left/bottom and violet right beveled border. This is a substantial increase in width and height of the blank right panel. Remove all traces of its old x49%-99%, y20%-69% frame so there are no duplicate borders. Recompose gaming-room scenery into left x0%-37% and bottom strip, with objects and plants always BEHIND the right selector panel, never intruding into its blank interior. Keep both panel interiors completely blank opaque dark navy, without any controls, labels, text or placeholder widgets. The only text is the existing Pet Studio logo. Same landscape proportions and high detailed quality. Main panel must stay thin-edged with maximum interior usable space, not a thick border.
+
+### Remove baked board prompt
+
+Precise edit: remove ONLY the large blank right-hand rectangular dashboard panel and ALL its neon border rails from this image. This large panel occupies roughly x36%-100%, y16%-81%. Fill the removed rectangle seamlessly with the same dark navy gaming-room wall and floor, with cyan/magenta architectural lighting, but no replacement board, no panels and no rectangular border outlines. Keep the SMALL top-right companion header frame completely unchanged. Preserve Pet Studio logo, vines, existing left gaming desk/monitors/tower/chair, rug, controller and bottom-right plant. Keep these objects in their existing left/bottom areas; do not add props or text in the clear right wall area. This room image will be underneath a correctly sized live HTML frame. Preserve the exact visual style and composition of all remaining art. Only remove large board/frame, reconstruct underlying room naturally. Same dimensions/aspect.
 
 ## Generated asset prompts
 
@@ -37,11 +49,11 @@ Both were produced with the built-in image-generation tool from the supplied/exi
 ## Validation
 
 - `npm run check` and JavaScript syntax checks for the new preview code.
-- `node work/verify-radio-skins-neon-studio.cjs`: opt-in isolation, gear settings/Escape/reset, reload persistence, unchanged audio element/source/play-pause-load calls/volume/favorites, floating-window skin switching and return, four radio sizes in light/dark modes, standalone test page, neon lazy artwork and account preference isolation, all Studio tabs at four sizes, theme persistence and diner backdrop.
+- `node work/verify-radio-skins-neon-studio.cjs`: delayed production loading, normal-visit saved choices, gear settings/Escape/reset, reload persistence, unchanged audio element/source/play-pause-load calls/volume/favorites, floating-window skin switching and return, four radio sizes in light/dark modes, standalone test page, neon lazy artwork and account preference isolation, exact layout comparisons for all eight themes across all Studio tabs at four sizes, eight visible desktop cards, theme persistence and diner backdrop.
 - Audio calls are simulated in this layout test; it verifies that skin changes never restart playback, without relying on external radio availability.
 - `node work/verify-retro-diner.cjs`: four-size tab sizing, readable labels, opaque content/footer with zero gap, centered companion selector, pet controls and skin persistence.
 - `node work/verify-studio-style-loading.cjs`: unchanged seven-sheet delayed loading, retries, reopening and logout cancellation.
 - `git diff --check`.
 
-Browser checks use isolated temporary data. Preview captures go to `PREVIEW_OUTPUT` when supplied, otherwise to a temporary directory. Desktop/mobile screenshots were visually reviewed. No commit, push or deployment is performed by these changes.
+Browser checks use isolated temporary data. Preview captures go to `PREVIEW_OUTPUT` when supplied, otherwise to a temporary directory. Desktop/mobile screenshots were visually reviewed. All eight Studio themes share the same geometry in pet-studio-responsive.css; desktop galleries show four columns and two full rows within one scroll region, with a 440px minimum selection area. Mobile uses a shared two-column layout. Decorative frames follow live controls instead of controlling their size. No commit, push or deployment is performed by these changes.
 

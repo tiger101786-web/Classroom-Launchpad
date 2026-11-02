@@ -3,12 +3,6 @@
 .pet-studio[data-theme=autumn]{--season-frame:url('assets/pet-studio/autumn-dashboard-frame.png')}
 .pet-studio[data-theme=autumn] .studio-body .controls-pane{padding-left:4cqw}
 .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .preview-actions #greet{background:linear-gradient(#ffad09,#f05b00)}
-@media(min-width:901px){
- .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #tab-content #gallery{grid-template-columns:20cqw;grid-auto-rows:19cqw}
- .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card{height:19cqw}
- .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-card img{height:14cqw}
- .pet-studio:is([data-theme=tropical],[data-theme=autumn]):has(#pet-select option[value=eagle]:checked) #gallery .skin-name{font-size:1.6cqw}
-}
 .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio{background-image:var(--season-frame);background-size:100% 100%;min-height:68cqw;padding-bottom:3cqw;font-family:StudioRounded,'Segoe UI',sans-serif}
 .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header{height:14cqw;padding:2.7cqw 5.5cqw 1.8cqw 56cqw}
 .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-body{grid-template-columns:47% 53%}

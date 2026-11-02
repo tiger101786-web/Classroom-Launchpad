@@ -1107,11 +1107,14 @@
     panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
-    // Skin experiments are opt-in; normal visits load neither the preview nor its art.
-    if (new URLSearchParams(globalObject.location.search).get("radioSkins") === "preview") {
-      const preview = document.createElement("script");
-      preview.src = "radio-skins-preview.js?v=20261101-gear-toggle-v7";
-      document.head.append(preview);
+    // Load customization only when the player is first opened; retry failed requests.
+    let skinScript = null;
+    function loadRadioSkins() {
+      if (skinScript || panel.querySelector('.colt-radio-skin-gear')) return;
+      skinScript = document.createElement("script");
+      skinScript.src = "radio-skins.js?v=20261101-production-v1";
+      skinScript.onerror = () => { skinScript.remove(); skinScript = null; };
+      document.head.append(skinScript);
     }
 
     let activeStation = "";
@@ -1670,6 +1673,8 @@
     globalObject.addEventListener('pagehide', returnPlayer);
     popout.addEventListener('click', floatPlayer);
     function minimizePanel({ focusLauncher = true } = {}) {
+      const skinMenu = panel.querySelector('.colt-radio-skin-menu');
+      if (skinMenu?.matches(':popover-open')) skinMenu.hidePopover();
       returnPlayer();
       panel.hidden = true;
       launcher.hidden = false;
@@ -1733,6 +1738,7 @@
     }
 
     function openPanel() {
+      loadRadioSkins();
       if (floatingWindow) { floatingWindow.focus(); return; }
       if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       if (!streamArtworkImage.src) streamArtworkImage.src = streamArtworkImage.dataset.src;

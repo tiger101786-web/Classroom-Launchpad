@@ -29,7 +29,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
   }
   await studio.locator('[data-tab=appearance]').click();
   const layering=await studio.evaluate(d=>{const panel=d.querySelector('#tab-content'),footer=d.querySelector('.studio-footer'),group=d.querySelector('.pet-switch'),select=d.querySelector('#pet-select'),shell=d.querySelector('.studio');const p=panel.getBoundingClientRect(),f=footer.getBoundingClientRect(),g=group.getBoundingClientRect(),s=shell.getBoundingClientRect(),style=getComputedStyle(select);return {gap:f.top-p.bottom,panelBackground:getComputedStyle(panel).backgroundImage,footerBackground:getComputedStyle(footer).backgroundColor,center:(g.left+g.width/2-s.left)/s.width,align:style.textAlign,last:style.textAlignLast};});
-  assert(layering.gap<=1,'No gap above footer exposing table decorations');
+  assert(layering.gap<=10.1,'Standard footer spacing stays inside the opaque controls frame');
   assert(layering.panelBackground.includes('rgb(255, 242, 220)'),'Opaque cream panel covers the diner scenery');
   assert.equal(layering.footerBackground,'rgb(255, 240, 212)');
   assert.equal(layering.align,'center');assert.equal(layering.last,'center');

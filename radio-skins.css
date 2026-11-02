@@ -1,6 +1,6 @@
-/* Preview skins share the original player's layout from styles.css. Paint only. */
-.colt-radio-panel[data-skin-preview]{container-type:inline-size}
-.colt-radio-panel[data-skin-preview] .colt-radio-filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}
+/* All skins share the original player's layout from styles.css. Paint only. */
+.colt-radio-panel[data-radio-skins]{container-type:inline-size}
+.colt-radio-panel[data-radio-skins] .colt-radio-filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}
 .colt-radio-skin-gear{position:relative;display:grid;place-items:center;width:34px;min-height:34px;padding:0;border:1px solid #b9405a;border-radius:5px;background:#180c12;color:#fff;cursor:pointer}
 .colt-radio-skin-gear .dashboard-nav-icon{width:auto;height:auto;font-size:22px;line-height:1}
 .colt-radio-skin-gear:focus-visible{outline:2px solid #fff;outline-offset:2px}
@@ -85,5 +85,5 @@ body .colt-radio-panel[data-radio-skin=graffiti]{--radio-art:url('assets/radio-s
 .colt-radio-panel[data-radio-skin] .colt-radio-note:before,.colt-radio-panel[data-radio-skin] .colt-radio-note:after{background:var(--radio-hot);mask:url('assets/radio-skins/headphones.svg') center/contain no-repeat;opacity:1}
 .colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:before,.colt-radio-panel[data-radio-skin=graffiti] .colt-radio-note:after{background:#ccff00}
 .colt-radio-panel[data-radio-skin] :is(button,input):focus-visible{outline:2px solid #fff;outline-offset:2px}
-@media(max-width:350px){.colt-radio-panel[data-skin-preview] .colt-radio-filter{gap:5px;padding-inline:4px}}
+@media(max-width:350px){.colt-radio-panel[data-radio-skins] .colt-radio-filter{gap:5px;padding-inline:4px}}
 
