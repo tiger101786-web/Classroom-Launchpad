@@ -1107,11 +1107,24 @@
     panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
-    // Retired themes always return to the original player on the next visit.
-    try {
-      localStorage.removeItem("coltRadioSkin");
-      localStorage.removeItem("coltRadioSkinPreview");
-    } catch {}
+    // Load customization on first open; artwork loads only for the chosen skin.
+    let skinLoad = null;
+    function loadRadioSkins() {
+      if (skinLoad) return skinLoad;
+      skinLoad = (async () => {
+        if (!globalObject.initializeColtRadioSkins) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'radio-skins.js?v=20261103-approved-v1';
+            script.onload = resolve;
+            script.onerror = () => { script.remove(); reject(new Error('Radio skins unavailable')); };
+            document.head.append(script);
+          });
+        }
+        await globalObject.initializeColtRadioSkins(panel);
+      })().catch(() => { skinLoad = null; });
+      return skinLoad;
+    }
 
     let activeStation = "";
     let playlistTrackIndex = -1;
@@ -1616,11 +1629,17 @@
       popout.disabled = true;
       let win;
       try {
+        await loadRadioSkins();
         if (globalObject.documentPictureInPicture?.requestWindow) {
           win = await globalObject.documentPictureInPicture.requestWindow({ width:420, height:620 });
         } else {
-          win = globalObject.open('', 'colt-radio-floating', 'popup,width=420,height=620');
+          win = globalObject.open('radio-popout.html', 'colt-radio-floating', 'popup,width=420,height=620');
           if (!win) throw new Error('Popup blocked');
+          // Use a loaded same-site document so browsers can fetch skin artwork.
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Popup load timed out')), 10000);
+            win.addEventListener('load', () => { clearTimeout(timeout); resolve(); }, { once: true });
+          });
         }
         const doc = win.document;
         doc.title = 'Colt Radio';
@@ -1732,6 +1751,7 @@
     }
 
     function openPanel() {
+      loadRadioSkins();
       if (floatingWindow) { floatingWindow.focus(); return; }
       if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       if (!streamArtworkImage.src) streamArtworkImage.src = streamArtworkImage.dataset.src;
