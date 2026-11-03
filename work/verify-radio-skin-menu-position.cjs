@@ -11,7 +11,7 @@ const {chromium}=require('playwright');
  });
  const page=await context.newPage();await page.goto('http://radio.test/');await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
  const gear=page.getByRole('button',{name:'Change Colt Radio skin',exact:true}),menu=page.locator('.colt-radio-skin-menu');await gear.waitFor();
- const check=async(target,label)=>{await target.waitForFunction(()=>{const m=document.querySelector('.colt-radio-skin-menu');return m?.matches(':popover-open')&&m.style.top!==''&&getComputedStyle(m).opacity==='1';});
+ const check=async(target,label)=>{await target.waitForFunction(()=>{const m=document.querySelector('.colt-radio-skin-menu');if(!m?.matches(':popover-open')||m.style.top===''||getComputedStyle(m).opacity!=='1')return false;const r=m.getBoundingClientRect(),v=visualViewport,x=v?.offsetLeft||0,y=v?.offsetTop||0;return r.left>=x&&r.right<=x+(v?.width||innerWidth)+1&&r.top>=y&&r.bottom<=y+(v?.height||innerHeight)+1;});
   const g=await target.evaluate(()=>{const m=document.querySelector('.colt-radio-skin-menu').getBoundingClientRect(),a=document.querySelector('.colt-radio-skin-gear').getBoundingClientRect(),v=window.visualViewport;return {menu:m.toJSON(),anchor:a.toJSON(),width:v?.width||innerWidth,height:v?.height||innerHeight,x:v?.offsetLeft||0,y:v?.offsetTop||0};});
   assert(g.menu.left>=g.x&&g.menu.right<=g.x+g.width+1&&g.menu.top>=g.y&&g.menu.bottom<=g.y+g.height+1,label+': menu stays on screen '+JSON.stringify(g));
   assert(Math.abs(g.menu.top-g.anchor.bottom-6)<2||Math.abs(g.menu.bottom-g.anchor.top+6)<2||Math.abs(g.menu.top-g.y-8)<2,label+': menu stays next to gear '+JSON.stringify(g));

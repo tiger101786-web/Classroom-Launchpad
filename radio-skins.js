@@ -5,8 +5,16 @@
   panel.dataset.radioSkins = 'true';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'radio-skins.css?v=20261102-headphones-v3';
+  stylesheet.href = 'radio-skins.css?v=20261102-proportional-headers-v5';
   document.head.append(stylesheet);
+
+  // Clip the original header region inside an independently fitted art layer.
+  // Its width and height always use the same scale; source image files stay intact.
+  const headerArt = document.createElement('div');
+  headerArt.className = 'colt-radio-header-art';
+  headerArt.setAttribute('aria-hidden', 'true');
+  headerArt.innerHTML = '<div class="colt-radio-header-art-frame"></div>';
+  panel.querySelector('.colt-radio-header').prepend(headerArt);
 
   const gear = document.createElement('button');
   gear.type = 'button';
@@ -28,11 +36,23 @@
   // Register the real invoker so browser light-dismiss cannot close then reopen it.
   gear.setAttribute('popovertarget', menu.id);
   gear.setAttribute('popovertargetaction', 'toggle');
-  const skins = [['classic', 'Original'], ['arcade', 'Retro Arcade'], ['graffiti', 'Neon Graffiti']];
+  const skins = [['classic', 'Original'], ['arcade', 'Retro Arcade'], ['graffiti', 'Neon Graffiti'],
+    ['rock-stage', 'Rock Stage'],
+    ['bayou', 'Bayou Dance Hall'],
+    ['arctic', 'Arctic Aurora'],
+    ['cosmic', 'Cosmic Voyage'],
+    ['sakura', 'Moonlit Sakura'],
+    ['forge', 'Industrial Forge'],
+    ['neon-city', 'Neon City'],
+    ['underwater', 'Underwater'],
+    ['samurai', 'Cyber Samurai'],
+    ['pirate', 'Pirate Cove']
+  ];
   const choices = skins.map(([value, label]) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.radioSkinChoice = value;
+    if (!['classic', 'arcade', 'graffiti'].includes(value)) button.dataset.radioSkinNew = 'true';
     button.setAttribute('role', 'menuitemradio');
     button.innerHTML = '<span class="radio-skin-swatch" aria-hidden="true"></span><span></span><span class="radio-skin-selected" aria-hidden="true">✓</span>';
     button.children[1].textContent = label;
@@ -46,6 +66,7 @@
     if (!skins.some(([value]) => value === skin)) skin = 'classic';
     if (skin === 'classic') delete panel.dataset.radioSkin;
     else panel.dataset.radioSkin = skin;
+    panel.toggleAttribute('data-radio-extended', !['classic', 'arcade', 'graffiti'].includes(skin));
     choices.forEach(button => {
       const selected = button.dataset.radioSkinChoice === skin;
       button.setAttribute('aria-checked', String(selected));
@@ -69,13 +90,18 @@
     const left = viewport?.offsetLeft || 0, top = viewport?.offsetTop || 0;
     const width = viewport?.width || view.innerWidth, height = viewport?.height || view.innerHeight;
     menu.style.maxWidth = Math.max(0, width - 16) + 'px';
-    menu.style.maxHeight = Math.max(0, height - 16) + 'px';
-    const anchor = gear.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
+    const anchor = gear.getBoundingClientRect();
+    const roomBelow = Math.max(0, top + height - 8 - anchor.bottom - 6);
+    const roomAbove = Math.max(0, anchor.top - 6 - top - 8);
+    menu.style.maxHeight = Math.max(0, Math.min(296, height - 16, Math.max(roomBelow, roomAbove))) + 'px';
+    const bounds = menu.getBoundingClientRect();
     const below = anchor.bottom + 6, above = anchor.top - bounds.height - 6;
     const preferredTop = below + bounds.height <= top + height - 8 ? below : above;
     menu.style.left = Math.max(left + 8, Math.min(anchor.right - bounds.width, left + width - bounds.width - 8)) + 'px';
     menu.style.top = Math.max(top + 8, Math.min(preferredTop, top + height - bounds.height - 8)) + 'px';
     menu.style.opacity = '1';
+    const focused = menu.ownerDocument.activeElement;
+    if (menu.contains(focused)) focused.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     gear.setAttribute('aria-expanded', 'true');
   }
   let stopWatchingPosition = () => {};

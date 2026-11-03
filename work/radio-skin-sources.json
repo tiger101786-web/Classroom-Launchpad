@@ -1,0 +1,102 @@
+[
+  {
+    "skin": "rock-stage",
+    "label": "Rock Stage",
+    "originalFile": "ChatGPT Image Nov 2, 2026, 04_21_45 PM.png",
+    "asset": "assets/radio-skins/rock-stage-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 304,
+    "sha256": "ea7a3d993225ce457087194abc8d7129194b183dcc4c6b903931492849fb1a18"
+  },
+  {
+    "skin": "bayou",
+    "label": "Bayou Dance Hall",
+    "originalFile": "ChatGPT Image Nov 2, 2026, 04_19_35 PM.png",
+    "asset": "assets/radio-skins/bayou-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 270,
+    "sha256": "91fd80b00bf5a53733ecc1f953a6471c8aa05fa0248e760b7c1438cb03310fd3"
+  },
+  {
+    "skin": "arctic",
+    "label": "Arctic Aurora",
+    "originalFile": "ChatGPT Image Nov 2, 2026, 04_21_37 PM.png",
+    "asset": "assets/radio-skins/arctic-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 300,
+    "sha256": "6ef4d2fdbaff2a758aad29615d6840277d34007837a56d28021c2da82af1b516"
+  },
+  {
+    "skin": "cosmic",
+    "label": "Cosmic Voyage",
+    "originalFile": "sdfsdfsdfsdf.png",
+    "asset": "assets/radio-skins/cosmic-reference.png",
+    "width": 923,
+    "height": 1703,
+    "headerHeight": 257,
+    "sha256": "09aec8dca8e105b621f7b94f028dd793bf8dd472304ed626e4f780ade2deb8f2"
+  },
+  {
+    "skin": "sakura",
+    "label": "Moonlit Sakura",
+    "originalFile": "Moonlit Sakura Colt Radio Interface.png",
+    "asset": "assets/radio-skins/sakura-reference.png",
+    "width": 923,
+    "height": 1704,
+    "headerHeight": 275,
+    "sha256": "ffe5896c0bdb8013baa2b5e91a8e983e0212481095718b9d8256e517a7259f52"
+  },
+  {
+    "skin": "forge",
+    "label": "Industrial Forge",
+    "originalFile": "ChatGPT Image Nov 2, 2026, 04_28_32 PM.png",
+    "asset": "assets/radio-skins/forge-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 245,
+    "sha256": "99d493dab00aa5fce54c46cd3f8f42e64a6dc9ca1499bc4300e4703d4f98a60b"
+  },
+  {
+    "skin": "neon-city",
+    "label": "Neon City",
+    "originalFile": "Neon Colt Radio Cyberpunk Interface.png",
+    "asset": "assets/radio-skins/neon-city-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 227,
+    "sha256": "dfc71c268a8acfaae3a5d0fbdb6a93bd5920feb86647289b7a2a9c455c74f776"
+  },
+  {
+    "skin": "underwater",
+    "label": "Underwater",
+    "originalFile": "Colt Radio_ Underwater Neon Soundscape.png",
+    "asset": "assets/radio-skins/underwater-reference.png",
+    "width": 923,
+    "height": 1703,
+    "headerHeight": 245,
+    "sha256": "6615d549a24d2ef798e0a778d1665c31c70beccef562eb27a9ffc145b0820672"
+  },
+  {
+    "skin": "samurai",
+    "label": "Cyber Samurai",
+    "originalFile": "Cyber Samurai Colt Radio.png",
+    "asset": "assets/radio-skins/samurai-reference.png",
+    "width": 923,
+    "height": 1703,
+    "headerHeight": 231,
+    "sha256": "616226a75565ee9e2fede9749cf37b65a0a9bc95fdd0a06de3a04e28d3ae431d"
+  },
+  {
+    "skin": "pirate",
+    "label": "Pirate Cove",
+    "originalFile": "ChatGPT Image Nov 2, 2026, 04_25_12 PM.png",
+    "asset": "assets/radio-skins/pirate-reference.png",
+    "width": 924,
+    "height": 1702,
+    "headerHeight": 282,
+    "sha256": "e56710d8e18f5375049fba785b6d30737daa784968ee6c925b340e1332ab3d72"
+  }
+]
