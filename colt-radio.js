@@ -1107,15 +1107,11 @@
     panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
-    // Load customization only when the player is first opened; retry failed requests.
-    let skinScript = null;
-    function loadRadioSkins() {
-      if (skinScript || panel.querySelector('.colt-radio-skin-gear')) return;
-      skinScript = document.createElement("script");
-      skinScript.src = "radio-skins.js?v=20261102-rebuilt-art-v6";
-      skinScript.onerror = () => { skinScript.remove(); skinScript = null; };
-      document.head.append(skinScript);
-    }
+    // Retired themes always return to the original player on the next visit.
+    try {
+      localStorage.removeItem("coltRadioSkin");
+      localStorage.removeItem("coltRadioSkinPreview");
+    } catch {}
 
     let activeStation = "";
     let playlistTrackIndex = -1;
@@ -1673,8 +1669,6 @@
     globalObject.addEventListener('pagehide', returnPlayer);
     popout.addEventListener('click', floatPlayer);
     function minimizePanel({ focusLauncher = true } = {}) {
-      const skinMenu = panel.querySelector('.colt-radio-skin-menu');
-      if (skinMenu?.matches(':popover-open')) skinMenu.hidePopover();
       returnPlayer();
       panel.hidden = true;
       launcher.hidden = false;
@@ -1738,7 +1732,6 @@
     }
 
     function openPanel() {
-      loadRadioSkins();
       if (floatingWindow) { floatingWindow.focus(); return; }
       if (!headingHorse.src) headingHorse.src = headingHorse.dataset.src;
       if (!streamArtworkImage.src) streamArtworkImage.src = streamArtworkImage.dataset.src;
