@@ -5,16 +5,8 @@
   panel.dataset.radioSkins = 'true';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'radio-skins.css?v=20261102-proportional-headers-v5';
+  stylesheet.href = 'radio-skins.css?v=20261102-rebuilt-art-v6';
   document.head.append(stylesheet);
-
-  // Clip the original header region inside an independently fitted art layer.
-  // Its width and height always use the same scale; source image files stay intact.
-  const headerArt = document.createElement('div');
-  headerArt.className = 'colt-radio-header-art';
-  headerArt.setAttribute('aria-hidden', 'true');
-  headerArt.innerHTML = '<div class="colt-radio-header-art-frame"></div>';
-  panel.querySelector('.colt-radio-header').prepend(headerArt);
 
   const gear = document.createElement('button');
   gear.type = 'button';

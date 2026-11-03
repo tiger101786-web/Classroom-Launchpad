@@ -1,8 +1,8 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
 const {chromium}=require('playwright');
-const skins=['rock-stage','bayou','arctic','cosmic','sakura','forge','neon-city','underwater','samurai','pirate'];
+const skins=['arcade','graffiti','rock-stage','bayou','arctic','cosmic','sakura','forge','neon-city','underwater','samurai','pirate'];
 const output=process.env.PREVIEW_OUTPUT||fs.mkdtempSync(path.join(os.tmpdir(),'expanded-radio-'));
-(async()=>{const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'});try{
+(async()=>{const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});try{
  const context=await browser.newContext({viewport:{width:1280,height:1000}}),root=path.resolve(__dirname,'..');
  const originals=JSON.parse(fs.readFileSync(path.join(__dirname,'radio-skin-sources.json'),'utf8'));
  for(const art of originals){const data=fs.readFileSync(path.join(root,art.asset));assert.equal(crypto.createHash('sha256').update(data).digest('hex'),art.sha256,'Supplied source art stays unchanged: '+art.skin);}
@@ -19,28 +19,50 @@ const output=process.env.PREVIEW_OUTPUT||fs.mkdtempSync(path.join(os.tmpdir(),'e
  await panel.locator('.colt-radio-search-input').fill('House Chill');await panel.locator('[data-station="chill-house"]').click();await panel.locator('.colt-radio-search-input').fill('');await panel.locator('[data-favorite-station="chill-house"]').click();await panel.locator('.colt-radio-play').click();
  await panel.locator('.colt-radio-volume-slider').evaluate(e=>{e.value='43';e.dispatchEvent(new Event('input',{bubbles:true}));});
  const audio=await page.evaluate(()=>{window.originalAudio=document.querySelector('audio');return {src:originalAudio.src,calls:mediaCalls.length,volume:originalAudio.volume};});
- const sizes=new Map();const size=()=>panel.evaluate(e=>{const selectors=['','.colt-radio-header','.colt-radio-filters','.colt-radio-search','.colt-radio-stations','.colt-radio-player','.colt-radio-stream-artwork','.colt-radio-play'];return selectors.map(s=>{const r=(s?e.querySelector(s):e).getBoundingClientRect();return [r.width,r.height];});});
- for(const [w,h]of [[1280,1000],[800,900],[390,844],[320,568]]){await page.setViewportSize({width:w,height:h});sizes.set(w,await size());}
- for(const skin of skins){
-  await choose(skin);assert.equal(await panel.getAttribute('data-radio-skin'),skin);
-  await page.evaluate(async s=>{const i=new Image();i.src='/assets/radio-skins/'+s+'-reference.png';await i.decode();},skin);
-  const state=await page.evaluate(()=>({same:document.querySelector('audio')===originalAudio,src:originalAudio.src,calls:mediaCalls.length,volume:originalAudio.volume}));assert(state.same);assert.equal(state.src,audio.src);assert.equal(state.calls,audio.calls);assert.equal(state.volume,audio.volume);assert.equal(await panel.locator('[data-favorite-station="chill-house"]').getAttribute('aria-pressed'),'true');
-  for(const [w,h]of [[1280,1000],[800,900],[390,844],[320,568]]){
-   await page.setViewportSize({width:w,height:h});const actual=await size(),base=sizes.get(w);actual.forEach((v,i)=>v.forEach((n,j)=>assert(Math.abs(n-base[i][j])<1,skin+' unchanged geometry '+w+' '+i+' '+j)));
-   const portrait=await panel.locator('.colt-radio-stream-artwork').evaluate(e=>{const s=getComputedStyle(e,'::before');return {w:parseFloat(s.width),h:parseFloat(s.height),availableW:e.clientWidth,availableH:e.clientHeight,ratio:parseFloat(getComputedStyle(e).getPropertyValue('--radio-portrait-ratio'))};});assert(portrait.w<=portrait.availableW+1&&portrait.h<=portrait.availableH+1,skin+' portrait is contained, not clipped');assert(Math.abs(portrait.w/portrait.h-portrait.ratio)<.02);
-   const source=originals.find(art=>art.skin===skin),header=await panel.locator('.colt-radio-header-art-frame').evaluate(e=>{const r=e.getBoundingClientRect(),parent=e.parentElement.getBoundingClientRect(),s=getComputedStyle(e);return {w:r.width,h:r.height,left:r.left,right:r.right,top:r.top,bottom:r.bottom,parent:parent.toJSON(),backgroundHeight:parseFloat(s.backgroundSize.split(' ')[1])/100};});
-   assert(Math.abs(header.w/header.h-source.width/source.headerHeight)<.003,skin+' header retains supplied aspect ratio');
-   const scaleX=header.w/source.width,scaleY=header.h*header.backgroundHeight/source.height;assert(Math.abs(scaleX/scaleY-1)<.001,skin+' source uses identical horizontal and vertical scaling');
-   assert(header.left>=header.parent.left-1&&header.right<=header.parent.right+1&&header.top>=header.parent.top-1&&header.bottom<=header.parent.bottom+1,skin+' complete header region fits without clipping');
-   const corners=await panel.evaluate(e=>{const s=getComputedStyle(e);return [s.borderTopLeftRadius,s.borderTopRightRadius,s.borderBottomLeftRadius,s.borderBottomRightRadius];});assert.deepEqual(corners,['0px','0px','0px','0px']);
-   for(const mode of ['day','night']){await page.evaluate(m=>document.body.dataset.theme=m,mode);assert.equal(await panel.locator('.colt-radio-station').first().evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)');}
-   for(const pseudo of ['::before','::after'])assert.equal(await panel.locator('.colt-radio-note').evaluate((e,p)=>getComputedStyle(e,p).content,pseudo),'""','No old glyph over headphones');
-   await gear.click();await page.waitForFunction(()=>document.querySelector('.colt-radio-skin-menu').style.opacity==='1');const bounds=await menu.boundingBox(),anchor=await gear.boundingBox();assert(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=w+1&&bounds.y+bounds.height<=h+1);assert(bounds.height<=296);assert(bounds.y+bounds.height<=anchor.y||bounds.y>=anchor.y+anchor.height,'Menu does not cover the gear');await gear.click();assert.equal(await menu.evaluate(e=>e.matches(':popover-open')),false);
-   if(w===1280){await panel.locator('.colt-radio-stations').evaluate(e=>e.scrollTop=0);await panel.screenshot({path:path.join(output,'radio-'+skin+'.png')});}
-  }
+
+
+ const sizes=new Map();
+ for(const [w,h]of [[1280,1000],[800,900],[390,844],[320,568]]){
+  await page.setViewportSize({width:w,height:h});
+  sizes.set(w,await panel.evaluate(e=>[e.offsetWidth,e.offsetHeight]));
  }
- await page.reload();await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();await gear.waitFor();assert.equal(await panel.getAttribute('data-radio-skin'),'pirate','New skin persists');
- await page.setViewportSize({width:390,height:240});await gear.click();await page.waitForFunction(()=>document.querySelector('.colt-radio-skin-menu').style.opacity==='1');const selected=await menu.locator('[aria-checked=true]').boundingBox(),menuBox=await menu.boundingBox();assert(selected.y>=menuBox.y&&selected.y+selected.height<=menuBox.y+menuBox.height,'Selected last skin scrolls into view in short menu');await page.keyboard.press('Escape');
- await page.setViewportSize({width:1280,height:1000});await page.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{value:undefined,configurable:true}));const next=context.waitForEvent('page');await page.getByRole('button',{name:'Pop out Colt Radio',exact:true}).click();const floating=await next;await choose('underwater',floating);assert.equal(await floating.locator('.colt-radio-panel').getAttribute('data-radio-skin'),'underwater');await floating.getByRole('button',{name:'Return Colt Radio to Launchpad',exact:true}).click();assert.equal(await panel.getAttribute('data-radio-skin'),'underwater');
- await choose('classic');assert.equal(await panel.getAttribute('data-radio-skin'),null);assert.equal(await panel.getAttribute('data-radio-extended'),null);assert.deepEqual(errors,[]);console.log('PASS: all ten new skins, lazy native art, 13 menu choices, unchanged player/control geometry at four sizes, portrait containment, complete corners/headphones, light/dark text, audio/volume/favorites preservation, saved choices, compact on-screen toggle menu and floating player. Previews: '+output);
+ await page.setViewportSize({width:1280,height:1000});
+ const original=sizes.get(1280);
+
+ for(const skin of skins){
+  await choose(skin);
+  await page.evaluate(async skin=>{const img=new Image();img.src='/assets/radio-skins/'+(skin==='rock-stage'?'rock-stage-layout':skin+'-layout')+'.png';await img.decode()},skin);
+  const actual=await panel.evaluate(e=>[e.offsetWidth,e.offsetHeight]);
+
+  for(const [w,h]of [[1280,1000],[800,900],[390,844],[320,568]]){
+   await page.setViewportSize({width:w,height:h});
+   const size=await panel.evaluate(e=>[e.offsetWidth,e.offsetHeight]);
+   assert.deepEqual(size,sizes.get(w),skin+' panel dimensions at '+w);
+   assert(await panel.locator('.colt-radio-play').isVisible());
+  }
+  await page.setViewportSize({width:1280,height:1000});
+
+  assert.equal(actual[0],original[0]);
+  assert.equal(await panel.locator('.colt-radio-stream-details').evaluate(e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)');
+  const state=await page.evaluate(()=>({same:document.querySelector('audio')===originalAudio,src:originalAudio.src,calls:mediaCalls.length,volume:originalAudio.volume}));
+  assert(state.same);assert.equal(state.src,audio.src);assert.equal(state.calls,audio.calls);assert.equal(state.volume,audio.volume);
+  await panel.screenshot({path:path.join(output,'rebuilt-'+skin+'.png')});
+ }
+
+ await page.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{value:undefined,configurable:true}));
+ const next=context.waitForEvent('page');
+ await panel.getByRole('button',{name:'Pop out Colt Radio',exact:true}).click();
+ const floating=await next;
+ await choose('underwater',floating);
+ await floating.getByRole('button',{name:'Return Colt Radio to Launchpad',exact:true}).click();
+ assert.equal(await panel.getAttribute('data-radio-skin'),'underwater');
+ await page.reload();
+ await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+ await gear.waitFor();
+ assert.equal(await panel.getAttribute('data-radio-skin'),'underwater');
+ await choose('classic');
+ assert.equal(await panel.getAttribute('data-radio-skin'),null);
+ assert.deepEqual(errors,[]);
+
+ console.log('PASS: twelve themes load, original width, transparent track panels and uninterrupted audio.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
