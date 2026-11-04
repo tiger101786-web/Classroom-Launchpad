@@ -20,3 +20,5 @@
 .pet-chat:focus-visible{outline:3px solid #fff;outline-offset:4px}
 .pet-chat[data-pet=nugget]{--paper:#fff1cd;--edge:#a45f20;--ink:#513418;--label:#80501e;border-radius:23px;background:linear-gradient(135deg,#fffaf0,var(--paper));box-shadow:0 5px 0 #a45f2055,0 10px 25px #0003}
 @media(prefers-reduced-motion:reduce){.pet-chat{transition:none}}
+.pet-chat[data-conversation=true] { width: min(310px, calc(100vw - 20px)); font-size: 17px; line-height: 1.5; }
+.pet-chat[data-conversation=true] span { max-height: max(60px, calc(100dvh - 90px)); overflow: auto; }

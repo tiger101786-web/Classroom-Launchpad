@@ -315,7 +315,7 @@
       if(!allowed())return null;
       const kind=preferences.pet==='dumpling'?'squishy':preferences.pet;
       const hosts={colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
-      const look=readStudio()[kind];return look?{kind,host:hosts[kind],look,name:look.name||window.PetConversationData.personalities[kind].label,account}:null;
+      const look=readStudio()[kind];return look && hosts[kind] ? {kind,host:hosts[kind],name:look.name||"Pet",account} : null;
     });
     const setStudio=(kind,key,value)=>{
       if(!allowed()||loadError)return;

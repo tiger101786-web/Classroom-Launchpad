@@ -1,65 +1,175 @@
-/* One compact chat window. The bridge only reads existing pet state. */
 window.createPetTalk = function(read) {
   'use strict';
-  const panel=document.createElement('section');
-  panel.className='pet-talk';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-labelledby','pet-talk-name');
-  panel.innerHTML='<header><img class="pet-talk-portrait" alt=""><div><small>TALK TO PET</small><h2 id="pet-talk-name"></h2></div><button type="button" data-talk-close aria-label="Close pet chat">×</button></header><p class="pet-talk-note">Pretend pet · Built-in replies · Chats are not saved</p><div class="pet-talk-messages" role="log" aria-label="Recent conversation" aria-live="off" tabindex="0"></div><div class="pet-talk-prompts"><button type="button">Tell me a joke</button><button type="button">Ask me a question</button></div><form autocomplete="off"><label for="pet-talk-input">Your message</label><div><input id="pet-talk-input" type="text" maxlength="240" placeholder="Say hello…" autocomplete="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="send"><button type="submit">Send</button></div><p class="pet-talk-status" role="status">Try a joke, a fact, or a riddle.</p></form>';
+  const panel = document.createElement('section');
+  panel.className = 'pet-talk';
+  panel.hidden = true;
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-labelledby', 'pet-talk-name');
+  panel.innerHTML = '<header><button type="button" class="pet-talk-grip" aria-label="Move chat with arrow keys" title="Drag to move">⠿</button><h2 id="pet-talk-name"></h2><button type="button" data-history aria-label="Recent messages" aria-expanded="false">↶</button><button type="button" data-talk-close aria-label="Close pet chat">×</button></header><div class="pet-talk-messages" role="log" aria-label="Recent conversation" aria-live="off" tabindex="0" hidden></div><form autocomplete="off"><input id="pet-talk-input" aria-label="Your message" maxlength="240" placeholder="Type a message…" spellcheck="false" enterkeyhint="send"><button type="submit" aria-label="Send message" title="Send message">➤</button></form><p class="pet-talk-status" role="status" hidden></p>';
   document.body.append(panel);
-  const log=panel.querySelector('.pet-talk-messages'),input=panel.querySelector('input'),status=panel.querySelector('.pet-talk-status'),portrait=panel.querySelector('img');
-  let current=null,engine=null,frame=0,lastSent=-Infinity,opener=null,portraitRevision=0;
-  const icons={colt:'assets/pet-studio/colt-original.png',squishy:'assets/pet-studio/squishy-gold.png',gummy:'assets/pet-studio/gummy-strawberry.png',eagle:'assets/pet-studio/eagle-bald-eagle.png',labubu:'assets/pet-studio/labubu-tan.png',roblox:'assets/pet-studio/roblox-classic.png',highland:'highland-pet/highland-art.png',saber:'saber-pet/tiger.png'};
-  function append(text,from){const row=document.createElement('p');row.dataset.from=from;const label=document.createElement('strong');label.textContent=from==='pet'?current.name:'You';const message=document.createElement('span');message.textContent=text;row.append(label,message);log.append(row);while(log.children.length>24)log.firstElementChild.remove();log.scrollTop=log.scrollHeight;}
-  function reply(response){append(response.text,'pet');window.PetSpeech.say(current.host,response.text);}
-  function refresh(){
-    const next=read();
-    if(!next||!next.host?.isConnected||next.host.hidden||next.host.closest('.pet-studio')){close(false);return false;}
-    const changed=current?.kind!==next.kind||current?.account!==next.account;
-    current=next;panel.querySelector('h2').textContent=current.name;
-    if(changed){
-      window.PetSpeech.dismiss();log.replaceChildren();input.value='';engine=window.PetConversation.create(current.kind);lastSent=-Infinity;
-      const revision=++portraitRevision;portrait.hidden=true;portrait.removeAttribute('src');
-      portrait.onload=()=>{if(revision===portraitRevision)portrait.hidden=false};portrait.onerror=()=>portrait.hidden=true;
-      if(current.kind==='nugget')window.nuggetThumbnail?.('Golden').then(src=>{if(revision===portraitRevision)portrait.src=src}).catch(()=>{});
-      else if(icons[current.kind])portrait.src=icons[current.kind];
-      reply(engine.start());
+  const title = panel.querySelector('h2');
+  const grip = panel.querySelector('.pet-talk-grip');
+  const log = panel.querySelector('.pet-talk-messages');
+  const historyButton = panel.querySelector('[data-history]');
+  const input = panel.querySelector('input');
+  const sendButton = panel.querySelector('[type=submit]');
+  const status = panel.querySelector('.pet-talk-status');
+  let current, request, opener, position, drag;
+  const history = [];
+
+  function notice(message = '') {
+    status.textContent = message;
+    status.hidden = !message;
+    if (!panel.hidden) place();
+  }
+
+  function place() {
+    if (panel.hidden || !current) return;
+    const viewport = window.visualViewport;
+    const x = viewport?.offsetLeft || 0, y = viewport?.offsetTop || 0;
+    const width = viewport?.width || innerWidth, height = viewport?.height || innerHeight;
+    panel.style.width = Math.min(260, width - 16) + 'px';
+    const pet = current.host.querySelector('.pet-button').getBoundingClientRect();
+    const left = position?.left ?? pet.left + (pet.width - panel.offsetWidth) / 2;
+    const top = position?.top ?? (pet.bottom + panel.offsetHeight + 20 < y + height
+      ? pet.bottom + 10 : pet.top - panel.offsetHeight - 120);
+    panel.style.left = Math.max(x + 8, Math.min(left, x + width - panel.offsetWidth - 8)) + 'px';
+    panel.style.top = Math.max(y + 8, Math.min(top, y + height - panel.offsetHeight - 8)) + 'px';
+  }
+
+  function close(focus = true) {
+    if (panel.hidden) return;
+    panel.hidden = true;
+    request?.abort();
+    request = null;
+    sendButton.disabled = false;
+    window.PetSpeech.dismiss();
+    history.length = 0;
+    log.replaceChildren();
+    log.hidden = true;
+    historyButton.setAttribute('aria-expanded', 'false');
+    input.value = '';
+    current = null;
+    drag = null;
+    if (focus && opener?.isConnected && !opener.closest('[hidden]')) opener.focus();
+    opener = null;
+  }
+
+  function sync() {
+    if (panel.hidden) return;
+    const next = read();
+    if (!next || next.host.hidden || next.host.closest('.pet-studio') ||
+        next.kind !== current.kind || next.account !== current.account) {
+      close(false);
+      return;
     }
-    return true;
+    current = next;
+    title.textContent = 'Talk to ' + current.name;
   }
-  function place(){
-    if(panel.hidden)return;
-    if(!current?.host.isConnected||current.host.hidden||current.host.closest('.pet-studio')||document.querySelector('dialog[open]')){close(false);return;}
-    const v=window.visualViewport,x=v?.offsetLeft||0,y=v?.offsetTop||0,w=v?.width||innerWidth,h=v?.height||innerHeight;
-    panel.style.width=Math.min(340,w-20)+'px';
-    const pet=current.host.querySelector('.pet-button').getBoundingClientRect();
-    const belowSpace=y+h-pet.bottom-20,aboveSpace=pet.top-y-20;
-    const compact=w<650;
-    const dockBelow=compact&&belowSpace>=280;
-    panel.style.maxHeight=Math.max(150,Math.min(h-20,dockBelow?belowSpace:compact&&aboveSpace>=240?aboveSpace:460))+'px';
-    panel.dataset.compact=String(parseFloat(panel.style.maxHeight)<350);
-    const box=panel.getBoundingClientRect();
-    // Opposite corner on wide screens; above the pet on narrow screens. Never move the pet.
-    const left=pet.left+pet.width/2>x+w/2?x+10:x+w-box.width-10;
-    let top=y+Math.max(10,(h-box.height)/2);
-    if(compact)top=dockBelow?pet.bottom+10:y+10;
-    panel.style.left=Math.max(x+10,left)+'px';panel.style.top=Math.max(y+10,Math.min(top,y+h-box.height-10))+'px';
-    frame=requestAnimationFrame(place);
+
+  function open() {
+    if (!panel.hidden) return input.focus();
+    current = read();
+    if (!current || current.host.hidden || current.host.closest('.pet-studio')) return;
+    opener = document.activeElement;
+    title.textContent = 'Talk to ' + current.name;
+    panel.hidden = false;
+    notice();
+    input.focus({preventScroll: true});
   }
-  function close(focus=true){cancelAnimationFrame(frame);panel.hidden=true;window.PetSpeech.dismiss();log.replaceChildren();input.value='';engine=null;current=null;++portraitRevision;portrait.removeAttribute('src');if(focus&&opener?.isConnected&&!opener.closest('[hidden]'))opener.focus();opener=null;}
-  function open(){if(!panel.hidden){input.focus();return;}opener=document.activeElement;panel.hidden=false;status.textContent='Try a joke, a fact, or a riddle.';if(!refresh())return;place();input.focus({preventScroll:true});}
-  function send(){
-    if(panel.hidden||!refresh())return;
-    const message=input.value.trim();if(!message){status.textContent='Type a message first.';return;}
-    if(message.length>window.PetConversation.maxLength){status.textContent='Keep your message to 240 characters.';return;}
-    const now=performance.now();if(now-lastSent<window.PetConversation.cooldown){status.textContent='One moment—then you can send another message.';return;}
-    lastSent=now;const response=engine.respond(message,current.look);
-    append(response.redact?'Let’s choose a safe chat topic.':message,'student');input.value='';reply(response);status.textContent='Reply ready. Click its bubble to dismiss it.';input.focus({preventScroll:true});
+
+  function append(role, content) {
+    history.push({role, content});
+    const line = document.createElement('p');
+    const label = document.createElement('strong');
+    label.textContent = role === 'user' ? 'You: ' : current.name + ': ';
+    line.append(label, content);
+    log.append(line);
+    if (history.length > 8) {
+      history.shift();
+      log.firstElementChild.remove();
+    }
+    log.scrollTop = log.scrollHeight;
   }
-  panel.querySelector('form').addEventListener('submit',e=>{e.preventDefault();if(!composing)send()});
-  let composing=false;input.addEventListener('compositionstart',()=>composing=true);input.addEventListener('compositionend',()=>composing=false);
-  panel.querySelector('[data-talk-close]').onclick=()=>close();
-  panel.querySelectorAll('.pet-talk-prompts button').forEach(b=>b.onclick=()=>{input.value=b.textContent;send()});
-  panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}});
-  window.addEventListener('pagehide',()=>close(false));
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)close(false)});
-  return {open,close,sync(){if(!panel.hidden)refresh()}};
+
+  async function send() {
+    sync();
+    const prompt = input.value.trim();
+    if (panel.hidden || request || !prompt) return;
+    const controller = new AbortController();
+    request = controller;
+    sendButton.disabled = true;
+    input.value = '';
+    notice(current.name + ' is thinking…');
+    try {
+      const response = await fetch('/api/pet-talk/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({kind: current.kind, prompt, history}),
+        signal: controller.signal
+      });
+      const result = await response.json();
+      if (request !== controller) return;
+      if (!response.ok || !result.answer) throw new Error(result.error || 'Pet AI couldn’t reply.');
+      append('user', prompt);
+      append('assistant', result.answer);
+      notice();
+      window.PetSpeech.say(current.host, result.answer);
+    } catch (error) {
+      if (request !== controller) return;
+      if (!input.value) input.value = prompt;
+      notice(error.message || 'Pet AI couldn’t reply.');
+    } finally {
+      if (request === controller) {
+        request = null;
+        sendButton.disabled = false;
+      }
+    }
+  }
+
+  panel.querySelector('form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!composing) send();
+  });
+  let composing = false;
+  input.addEventListener('compositionstart', () => composing = true);
+  input.addEventListener('compositionend', () => composing = false);
+  historyButton.onclick = () => {
+    log.hidden = !log.hidden;
+    historyButton.setAttribute('aria-expanded', String(!log.hidden));
+    place();
+    log.scrollTop = log.scrollHeight;
+  };
+  grip.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    const box = panel.getBoundingClientRect();
+    drag = {id: event.pointerId, x: event.clientX - box.left, y: event.clientY - box.top};
+    grip.setPointerCapture(event.pointerId);
+  });
+  grip.addEventListener('pointermove', event => {
+    if (drag?.id !== event.pointerId) return;
+    position = {left: event.clientX - drag.x, top: event.clientY - drag.y};
+    place();
+  });
+  grip.addEventListener('lostpointercapture', () => drag = null);
+  grip.addEventListener('keydown', event => {
+    const delta = {ArrowLeft: [-16, 0], ArrowRight: [16, 0], ArrowUp: [0, -16], ArrowDown: [0, 16]}[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    const box = panel.getBoundingClientRect();
+    position = {left: box.left + delta[0], top: box.top + delta[1]};
+    place();
+  });
+  panel.querySelector('[data-talk-close]').onclick = () => close();
+  panel.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      close();
+    }
+  });
+  window.addEventListener('resize', place);
+  window.visualViewport?.addEventListener('resize', place);
+  window.visualViewport?.addEventListener('scroll', place);
+  window.addEventListener('pagehide', () => close(false));
+  return {open, close, sync};
 };
