@@ -1,0 +1,30 @@
+.pet-talk{position:fixed;z-index:2147483645;box-sizing:border-box;width:340px;display:flex;flex-direction:column;max-height:calc(100dvh - 20px);overflow:hidden;border:2px solid #b45878;border-radius:20px;background:#211923;color:#fff4f7;box-shadow:0 12px 44px #0006;font:15px/1.45 'Segoe UI',sans-serif;text-align:left;color-scheme:dark}
+.pet-talk[hidden]{display:none}
+.pet-talk *{box-sizing:border-box}
+.pet-talk header{display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(120deg,#452537,#291e30);flex-shrink:0}
+.pet-talk header>div{flex:1;min-width:0}
+.pet-talk header small{color:#ffb7d0;font-size:10px;font-weight:800;letter-spacing:1.4px}
+.pet-talk h2{margin:2px 0 0;font-size:19px;overflow-wrap:anywhere;line-height:1.2;color:inherit}
+.pet-talk-portrait{width:44px;height:52px;object-fit:contain}
+.pet-talk button{min-height:44px;border:1px solid #946078;border-radius:10px;padding:8px 12px;color:#fff;background:#563147;font:inherit;cursor:pointer;touch-action:manipulation}
+.pet-talk button:hover{background:#73415a}
+.pet-talk button:focus-visible,.pet-talk input:focus-visible,.pet-talk-messages:focus-visible{outline:3px solid #ffd48b;outline-offset:2px}
+.pet-talk [data-talk-close]{width:44px;flex-shrink:0;font-size:25px;line-height:1;background:transparent}
+.pet-talk-note{margin:0;padding:7px 12px;color:#dcc1d1;font-size:11px;flex-shrink:0}
+.pet-talk-messages{overflow:auto;overscroll-behavior:contain;min-height:48px;max-height:190px;flex:1 1 190px;padding:4px 12px;scrollbar-width:thin;scrollbar-color:#a77590 #211923}
+.pet-talk-messages p{margin:6px 0 12px;padding:10px 12px;background:#372837;border-radius:13px 13px 13px 3px;overflow-wrap:anywhere}
+.pet-talk-messages p[data-from=student]{background:#593047;margin-left:22px;border-radius:13px 13px 3px 13px}
+.pet-talk-messages strong{display:block;font-size:11px;color:#ffc4db;margin-bottom:3px}
+.pet-talk-messages span{display:block}
+.pet-talk-prompts{display:flex;gap:6px;padding:7px 12px;flex-shrink:0}
+.pet-talk-prompts button{font-size:12px;padding:6px 8px;flex:1;background:#302433}
+.pet-talk form{padding:8px 12px 10px;margin:0;border-top:1px solid #614154;flex-shrink:0}
+.pet-talk form label{display:block;font-weight:700;font-size:12px;margin-bottom:5px}
+.pet-talk form>div{display:flex;gap:7px}
+.pet-talk input{min-width:0;width:100%;min-height:44px;border:1px solid #a4708a;border-radius:10px;padding:9px;background:#17121b;color:#fff;font:16px 'Segoe UI',sans-serif}
+.pet-talk input::placeholder{color:#c9b5c2}
+.pet-talk-status{margin:6px 0 0;min-height:16px;font-size:11px;color:#e7c8d9}
+.pet-talk[data-compact=true] .pet-talk-prompts{display:none}
+.pet-studio[data-theme] .preview-actions .pet-talk-open{min-height:44px;min-width:0;margin:0;white-space:normal;cursor:pointer}
+.pet-studio .pet-talk-open:focus-visible{outline:3px solid #ffd48b;outline-offset:3px}
+@media(max-height:500px){.pet-talk header{padding:6px 12px}.pet-talk-note,.pet-talk-prompts{display:none}.pet-talk-messages{flex-basis:100px}.pet-talk-status{font-size:10px}}

@@ -4,7 +4,7 @@
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
   let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
-  let studio=null,studioRadio=false;
+  let studio=null,studioRadio=false,petTalk=null;
   const picker=document.createElement('dialog');
   picker.className='companion-picker';picker.setAttribute('aria-labelledby','companion-picker-title');
   picker.innerHTML='<header class="pet-picker-heading"><div><span class="pet-picker-kicker">YOUR CLASSROOM COMPANION</span><h2 id="companion-picker-title">My Pet</h2></div><button type="button" data-pet-close aria-label="Close pet selection">✕</button></header><div class="pet-picker-body"><p class="pet-picker-intro">A little personality for your school day.</p><fieldset class="pet-picker-group"><legend>01 · Choose your companion</legend><label>Choose pet <select aria-label="Choose pet"><option value="colt">Colt</option><option value="dumpling">Squishy Dumpling</option></select></label><p class="pet-picker-hint">Your choice saves automatically.</p></fieldset><fieldset class="pet-picker-group"><legend>02 · Make yourself at home</legend><p class="pet-picker-help">Click your pet to open its controls. Drag it to find a cozy spot.</p><div class="pet-tools"><button type="button" data-pet-customize>Customize dumpling</button><button type="button" data-pet-show>Show dumpling</button></div><p class="pet-picker-note">Colt keeps his own controls and settings.</p></fieldset><footer class="pet-picker-footer"><p class="pet-status" role="status"></p><button class="pet-retry" hidden>Retry save</button></footer></div>';
@@ -207,7 +207,7 @@
     host.classList.toggle('is-listening',radioPlaying);
     radioBadge.textContent=asleep?'☾ Sleeping · Wake Squishy to play again':radioPlaying?'♫ Colt Radio · Headphones on'+(motion?' · Squish along!':' · Motion paused'):'♫ Radio ready · Headphones appear when music plays';
     host.querySelector('.accessory-hint').textContent=radioPlaying&&!asleep?'Your hat returns when music stops.':'Choose headwear. Add glasses below.';
-    applying=false;place();studio?.refresh();
+    applying=false;place();studio?.refresh();petTalk?.sync();
   }
   function applyAppearance(){
     applying=true;
@@ -311,6 +311,12 @@
   // storage keys or account-saving paths are introduced.
   if(window.createPetStudio){
     const readStudio=()=>({nugget:{...nuggetDefaults(),...preferences.nugget},saber:{...saberDefaults(),...preferences.saber},highland:{...highlandDefaults(),...preferences.highland},roblox:{...robloxDefaults(),...preferences.roblox},labubu:{...labubuDefaults(),...preferences.labubu},eagle:{...eaglePetDefaults(),...preferences.eagle},gummy:{...gummyBearDefaults(),...preferences.gummy},colt:{...roboColtDefaults(),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
+    petTalk=window.createPetTalk?.(()=>{
+      if(!allowed())return null;
+      const kind=preferences.pet==='dumpling'?'squishy':preferences.pet;
+      const hosts={colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
+      const look=readStudio()[kind];return look?{kind,host:hosts[kind],look,name:look.name||window.PetConversationData.personalities[kind].label,account}:null;
+    });
     const setStudio=(kind,key,value)=>{
       if(!allowed()||loadError)return;
       if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='nugget'?'Nugget':kind==='saber'?'Saber':kind==='highland'?'Hamish':kind==='roblox'?'Buddy':kind==='labubu'?'Labubu':kind==='eagle'?'Eagle':kind==='gummy'?'Gummy':kind==='colt'?'COLT':'Mochi');
@@ -328,7 +334,8 @@
     studio=createPetStudio({
       nuggetHost:nugget.host,saberHost:saber.host,highlandHost:highland.host,coltHost:document.querySelector('.robo-companion'),squishyHost:host,gummyHost:gummy.host,eagleHost:eagle.host,labubuHost:labubu.host,robloxHost:roblox.host,
       canOpen:()=>allowed(),canEdit:()=>allowed()&&!loadError,read:readStudio,
-      prepare(){closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
+      prepare(){petTalk?.close(false);closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
+      talk(){petTalk?.open();},
       change:setStudio,
       select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();selectPet();applyAppearance();save();},
       restore(value){if(!allowed()||loadError)return;preferences={...preferences,nugget:{...value.nugget},saber:{...value.saber},highland:{...value.highland},roblox:{...value.roblox},labubu:{...value.labubu},eagle:{...value.eagle},gummy:{...value.gummy},robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
