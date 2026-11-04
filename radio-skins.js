@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261103-hiphop-art-v2', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261104-cyberpunk-v3', document.currentScript.src).href;
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
     const stylesheet = document.createElement('link');
@@ -12,7 +12,7 @@
       document.head.append(stylesheet);
     });
     panel.dataset.radioSkins = 'true';
-    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ']];
+    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk']];
     const key = 'coltRadioIllustratedSkin';
     const backdrop = document.createElement('div');
     backdrop.className = 'colt-radio-skin-backdrop';

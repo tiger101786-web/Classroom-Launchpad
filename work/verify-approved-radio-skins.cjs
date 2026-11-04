@@ -4,7 +4,7 @@ const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const root = path.resolve(__dirname, '..');
 const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(), 'approved-radio-'));
 const reference = process.env.RADIO_REFERENCE_DIR;
-const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
+const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'cyberpunk'];
 (async () => {
  const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -33,13 +33,13 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
   await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click();
   const panel = page.locator('.colt-radio-panel'), gear = page.getByRole('button', { name: 'Change Colt Radio skin', exact: true });
   await gear.waitFor();
-  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 7, 'Six approved skins and Original');
+  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 8, 'Seven illustrated skins and Original');
   assert.equal(artRequests.length, 0, 'Original loads no themed artwork');
   const choose = async (skin, target = page) => {
    await target.getByRole('button', { name: 'Change Colt Radio skin', exact: true }).click();
    await target.locator('[data-radio-skin-choice=' + skin + ']').click();
    if (skin !== 'original') await target.evaluate(async id => {
-    await Promise.race([Promise.all(['atlas', ['bayou','hiphop'].includes(id) ? 'header' : 'header-v2'].map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
+    await Promise.race([Promise.all(['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2'].map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
    }, skin);
   };
   await panel.locator('[data-station="chill-house"]').click();
@@ -49,6 +49,18 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
   const originalGeometry = await geometry();
   for (const skin of skins) {
    await choose(skin);
+   if (skin === 'cyberpunk') {
+    await page.evaluate(() => document.fonts.load('800 24px ColtRadioCyber'));
+    await panel.locator('.colt-radio-header').screenshot({path:path.join(output,'cyberpunk-header-live.png')});
+    const art = await panel.evaluate(panel => ({
+      backdrop:getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop')).backgroundImage,
+      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(element=>getComputedStyle(element).backgroundImage),
+      labels:[...panel.querySelectorAll('.colt-radio-station-name')].every(element=>element.scrollWidth<=element.clientWidth+1)
+    }));
+    assert.match(art.backdrop,/cyberpunk-frame/,'Cyberpunk has real illustrated side panels');
+    assert(art.portraits.every(url=>url.includes('cyberpunk-atlas')),'Both portraits use Cyber Colt');
+    assert(art.labels,'Station labels fit holographic controls');
+   }
    if (skin === 'hiphop') {
     const art = await panel.evaluate(panel => {
      const sides = panel.querySelector('.colt-radio-skin-backdrop');
@@ -64,15 +76,15 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
     assert.match(art.right,/hiphop-atlas/);
     assert.match(art.tile,/hiphop-crate/);
    }
-   if (['bayou','hiphop'].includes(skin)) {
+   if (['bayou','hiphop','cyberpunk'].includes(skin)) {
     const current = await geometry();
     for (let i = 2; i < current.length; i++) assert.deepEqual(current[i].slice(2), originalGeometry[i].slice(2), 'Bayou preserves control dimensions');
     assert(Math.abs(current[1][2] / current[1][3] - 3) < .03, 'Full 3:1 Bayou header');
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
    const capture = await panel.screenshot({ path: path.join(output, skin + '.png') });
-   if (reference) {
-    const old = await loadImage(path.join(reference, (skin === 'inferno' ? 'inferno-forge' : ['bayou','hiphop'].includes(skin) ? 'bayou-nights' : skin) + '.png'));
+   if (reference && skin !== "cyberpunk") {
+    const old = await loadImage(path.join(reference, (skin === 'inferno' ? 'inferno-forge' : skin === 'bayou' ? 'bayou-nights' : skin) + '.png'));
     const current = await loadImage(capture);
     assert.equal(current.width, old.width); assert.equal(current.height, old.height);
     const canvas = createCanvas(old.width, old.height), ctx = canvas.getContext('2d');
@@ -114,11 +126,11 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
     assert(r.x >= 0 && r.y >= 0 && r.x + r.width <= width + 1 && r.y + r.height <= height + 1);
     await page.keyboard.press('Escape');
     assert(await panel.isVisible());
-    if (['bayou','hiphop'].includes(skin)) {
+    if (['bayou','hiphop','cyberpunk'].includes(skin)) {
      const header = await panel.locator('.colt-radio-header').boundingBox();
      const backdrop = await panel.locator('.colt-radio-skin-backdrop').boundingBox();
      assert(Math.abs(header.width / header.height - 3) < .03, 'Uncropped mobile header');
-     if (skin === 'bayou') assert(Math.abs(backdrop.y - header.y - header.height) < 1, 'No gap below header');
+     if (['bayou','cyberpunk'].includes(skin)) assert(Math.abs(backdrop.y - header.y - header.height) < 1, 'No gap below header');
      if (height > 500) await panel.screenshot({path:path.join(output,skin+'-'+width+'.png')});
     }
    }
@@ -126,7 +138,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'hiphop', 'Saved skin restored');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'cyberpunk', 'Saved skin restored');
   await gear.click(); await page.keyboard.press('Home'); await page.keyboard.press('Enter');
   assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Keyboard can return to Original');
   await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { value: undefined, configurable: true }));
@@ -135,12 +147,12 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
   await panel.getByRole('button', { name: 'Pop out Colt Radio', exact: true }).click();
   const floating = await popup;
   await floating.bringToFront();
-  await choose('bayou', floating);
-  await floating.screenshot({path:path.join(output,'floating-bayou.png')});
+  await choose('cyberpunk', floating);
+  await floating.screenshot({path:path.join(output,'floating-cyberpunk.png')});
   await floating.getByRole('button', { name: 'Return Colt Radio to Launchpad', exact: true }).click();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'bayou');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'cyberpunk');
   await gear.click(); await gear.click();
   assert.deepEqual(errors, []);
-  console.log('PASS: approved appearance, full Bayou and DJ headers, lazy loading, original reset, seven choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
+  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, eight choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
