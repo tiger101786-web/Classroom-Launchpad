@@ -129,7 +129,7 @@ window.createPetTalk = function(read) {
       const response = await fetch('/api/pet-talk/chat', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({kind: current.kind, skin: current.skin, prompt, history}),
+        body: JSON.stringify({kind: current.kind, skin: current.skin, appearance: current.appearance, prompt, history}),
         signal: controller.signal
       });
       const result = await response.json();

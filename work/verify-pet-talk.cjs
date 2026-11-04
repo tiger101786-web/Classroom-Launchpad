@@ -22,6 +22,12 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await openStudio();
  await studio.locator('#pet-select').selectOption('nugget');
  await studio.locator('[data-skin-choice="Spicy"]').click();
+ await studio.locator('[data-tab="name"]').click();
+ await studio.locator('#pet-name').fill('Spice Buddy');
+ await studio.locator('[data-tab="appearance"]').click();
+ await studio.locator('[data-subtab="accessories"]').click();
+ await studio.locator('[data-choice="headphones"]').click();
+ await studio.locator('[data-choice="waffle-fries"]').click();
  for(const width of [1440,800,320]){
    await page.setViewportSize({width,height:850});
    assert(await studio.locator('.preview-actions button, .preview-actions .pet-talk-open').evaluateAll(buttons=>
@@ -38,6 +44,9 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await bubble.locator('span').filter({hasText:'waffle castle'}).waitFor();
  assert.equal(requests[0].kind,'nugget');
  assert.equal(requests[0].skin,'Spicy');
+ assert.equal(requests[0].appearance.name,'Spice Buddy');
+ assert.equal(requests[0].appearance.headwear,'headphones');
+ assert.equal(requests[0].appearance.basketAccessory,'waffle-fries');
  await page.clock.fastForward(60_000);
  assert(await bubble.isVisible(),'AI bubble stays visible for slow readers');
  await input.fill('What goes around it?');

@@ -341,7 +341,14 @@
       if(!allowed())return null;
       const kind=preferences.pet==='dumpling'?'squishy':preferences.pet;
       const hosts={colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
-      const look=readStudio()[kind];return look && hosts[kind] ? {kind,host:hosts[kind],name:look.name||"Pet",skin:kind==='squishy'?look.color:look.skin,account} : null;
+      const look=readStudio()[kind];
+      if (!look || !hosts[kind]) return null;
+      const appearance = Object.fromEntries(['name','headwear','accessory','eyewear','neckwear','outfit','basketAccessory','top','pants']
+        .filter(key => typeof look[key] === 'string').map(key => [key, look[key]]));
+      if (radioPlaying && !look.asleep && !hosts[kind].querySelector('.waking')) {
+        appearance[kind === 'squishy' ? 'accessory' : 'headwear'] = 'headphones';
+      }
+      return {kind,host:hosts[kind],name:look.name||"Pet",skin:kind==='squishy'?look.color:look.skin,appearance,account};
     });
     const setStudio=(kind,key,value)=>{
       if(!allowed()||loadError)return;
