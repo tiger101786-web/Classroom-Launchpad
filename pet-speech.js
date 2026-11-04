@@ -79,7 +79,7 @@ function show(host,text,source=null){
  bubble.removeAttribute('aria-busy');
  bubble.title='Click to dismiss';
  bubble.hidden=false;
- host.dispatchEvent(new CustomEvent('pet-speech-change',{detail:{speaking:true}}));
+ host.dispatchEvent(new CustomEvent('pet-speech-change',{detail:{speaking:true,conversation:talk}}));
  if(talk) reveal(text);
  else {
   bubble.querySelector('span').textContent=text;

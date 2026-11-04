@@ -275,6 +275,7 @@ return {
   if(radioChanged&&radio)say('Time for a little two-step!');
  },
  customize,close,show(){hiddenByUser=false;sync();touch()},
+ speak(){if(!sleeping&&!waking&&prefs.motion&&!reduced.matches)mouth()},
  announce(message,error,retry){panel.querySelector('.pet-status').textContent=message;const b=panel.querySelector('[data-retry]');b.hidden=!error;b.onclick=retry}
 };
 };

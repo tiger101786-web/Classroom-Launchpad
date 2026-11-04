@@ -33,3 +33,89 @@
 .pet-talk-messages { max-height: min(150px, 25dvh); overflow: auto; overflow-wrap: anywhere; padding: 0 5px; }
 .pet-talk-messages p, .pet-talk-status { margin: 5px 2px; overflow-wrap: anywhere; }
 .pet-talk-status { font-size: 12px; color: #ffd8e6; }
+
+/* Compact character themes reuse each species' materials and colors. */
+.pet-talk {
+ --talk-paper:#211923;--talk-ink:#fff4f7;--talk-edge:#b45878;
+ --talk-field:#241923;--talk-send:#883653;--talk-send-ink:#fff;
+ --talk-header:#ffffff08;
+ color:var(--talk-ink);border:2px solid var(--talk-edge);
+ background:var(--talk-paper);
+ box-shadow:inset 0 1px #ffffff80,0 7px 22px #0005;
+}
+.pet-talk header {padding:2px 0 4px;border-bottom:1px solid var(--talk-edge);background:var(--talk-header);border-radius:8px 8px 0 0}
+.pet-talk header:before {content:'';font-size:20px;order:1;flex:0 0 22px;text-align:center;filter:drop-shadow(0 1px 1px #0003)}
+.pet-talk header h2 {order:2;font-size:13px}
+.pet-talk header [data-history] {order:3}
+.pet-talk header [data-talk-close] {order:4}
+.pet-talk .pet-talk-grip {flex-basis:23px}
+.pet-talk input,.pet-talk button {border-color:var(--talk-edge);background:var(--talk-field);color:var(--talk-ink)}
+.pet-talk button[type=submit] {background:var(--talk-send);color:var(--talk-send-ink)}
+.pet-talk-status {color:var(--talk-ink)}
+.pet-talk input::placeholder {color:var(--talk-ink);opacity:.7}
+.pet-talk-messages p {padding:5px;border-radius:6px;background:var(--talk-field)}
+.pet-talk[data-pet=nugget] {
+ --talk-paper:#fff1d2;--talk-ink:#563015;--talk-edge:#b16b25;
+ --talk-field:#fffaf0;--talk-send:#9d4c18;--talk-header:linear-gradient(#f8d276,#e8ac41);
+ border-radius:15px 15px 12px 12px;
+ border-bottom:6px solid transparent;
+ background:linear-gradient(#fff1d2,#fff1d2) padding-box,
+ repeating-conic-gradient(#ae3330 0 25%,#fff3db 0 50%) 0 0/12px 12px border-box;
+}
+.pet-talk[data-pet=colt] {
+ --talk-ink:#fff0e6;--talk-edge:#e9695a;--talk-field:#201e29;--talk-send:#a33338;
+ --talk-header:linear-gradient(120deg,#554955,#25202e);
+ background:radial-gradient(circle at 5px 5px,#b4acbd 0 2px,transparent 3px),
+ radial-gradient(circle at calc(100% - 5px) calc(100% - 5px),#b4acbd 0 2px,transparent 3px),
+ repeating-linear-gradient(0deg,#2f2b37 0 1px,#25212b 1px 4px);
+ border-radius:9px;box-shadow:inset 0 0 0 2px #18131d,0 0 8px #e6575344,0 7px 22px #0005;
+}
+.pet-talk[data-pet=squishy] {
+ --talk-paper:#fff1d7;--talk-ink:#57351d;--talk-edge:#ae7c40;
+ --talk-field:#fffaf0;--talk-send:#8b5929;--talk-header:linear-gradient(#e9c78c,#dab477);
+ background:repeating-linear-gradient(0deg,transparent 0 5px,#ac77300c 5px 7px),
+ repeating-linear-gradient(90deg,#fff1d7 0 10px,#f1dfba 10px 12px);
+ border-radius:19px;
+}
+.pet-talk[data-pet=gummy] {
+ --talk-paper:#ffe5f1;--talk-ink:#6a2344;--talk-edge:#d84a8d;
+ --talk-field:#fff6fc;--talk-send:#b02f6b;--talk-header:linear-gradient(#fff,#ffb3d6);
+ background:radial-gradient(ellipse at 25% 0,#fff 0,transparent 65%),#ffe5f1;
+ border-radius:21px;box-shadow:inset 0 0 0 3px #fff8,0 4px 0 #b02f6b55,0 8px 22px #0004;
+}
+.pet-talk[data-pet=eagle] {
+ --talk-paper:#fff2d8;--talk-ink:#4c301b;--talk-edge:#91602f;
+ --talk-field:#fff9ec;--talk-send:#785128;--talk-header:linear-gradient(#f0d89c,#d6b573);
+ background:repeating-linear-gradient(2deg,#fff2d8 0 7px,#f0dfbc 7px 8px);
+ border-radius:8px 18px 8px 18px;
+}
+.pet-talk[data-pet=labubu] {
+ --talk-paper:#efe3d1;--talk-ink:#4c392c;--talk-edge:#9c7357;
+ --talk-field:#fff6e9;--talk-send:#657345;--talk-header:linear-gradient(#f7ebd8,#d4bea1);
+ border-style:dashed;border-radius:19px;
+ box-shadow:inset 0 0 0 3px #fff8ec,0 7px 22px #0005;
+}
+.pet-talk[data-pet=roblox] {
+ --talk-paper:#e9f4ff;--talk-ink:#173b62;--talk-edge:#2b6ea9;
+ --talk-field:#fff;--talk-send:#195a92;--talk-header:radial-gradient(circle,#fff6 0 3px,#0001 3px 5px,transparent 6px) 0 0/18px 18px,#ffd44e;
+ border-radius:5px;border-width:3px;box-shadow:4px 4px 0 #d5a52e,0 7px 22px #0005;
+}
+.pet-talk[data-pet=highland] {
+ --talk-paper:#faf0dc;--talk-ink:#483622;--talk-edge:#747b52;
+ --talk-field:#fffaf0;--talk-send:#647249;
+ --talk-header:repeating-linear-gradient(90deg,#9c799933 0 8px,transparent 8px 16px),
+ repeating-linear-gradient(0deg,#63794433 0 8px,#d8d8b6 8px 16px);
+ border-radius:17px 10px 17px 10px;
+}
+.pet-talk[data-pet=saber] {
+ --talk-paper:#ffedd1;--talk-ink:#4d3017;--talk-edge:#915b2d;
+ --talk-field:#fff9ec;--talk-send:#8b4d21;--talk-header:linear-gradient(#f4cd7e,#dfac52);
+ background:linear-gradient(#ffedd1,#ffedd1) padding-box,
+ repeating-linear-gradient(125deg,#663b20 0 7px,#e2ad52 7px 15px) border-box;
+ border-left:5px solid transparent;border-right:5px solid transparent;border-radius:15px;
+}
+.pet-talk header {padding:0 0 3px}
+.pet-talk header:before {
+ content:'';height:30px;flex-basis:25px;
+ background:var(--talk-portrait) center/contain no-repeat;
+}

@@ -60,6 +60,37 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await chat.locator('[data-talk-close]').click();
  assert(!(await chat.isVisible()));
  assert(!(await bubble.isVisible()));
+ const themes = new Set();
+ const pets = {colt:'robo',squishy:'dumpling',gummy:'gummy',eagle:'eagle',labubu:'labubu',roblox:'roblox',highland:'highland',saber:'saber',nugget:'nugget'};
+ for (const [kind, prefix] of Object.entries(pets)) {
+  await openStudio();
+  await studio.locator('#pet-select').selectOption(kind);
+  await page.waitForTimeout(600);
+  await studio.locator('.pet-talk-open').click();
+  await chat.waitFor({state:'visible'});
+  assert.equal(await chat.getAttribute('data-pet'),kind);
+  themes.add(await chat.evaluate(element => getComputedStyle(element).getPropertyValue('--talk-edge')));
+  assert((await chat.boundingBox()).height<110,'Themed chat stays compact');
+  const pet=page.locator('body > .'+prefix+'-companion');
+  await input.fill('Tell me about your next adventure');
+  await input.press('Enter');
+  await bubble.and(page.locator('[aria-busy=true]')).waitFor({state:'visible'});
+  if(kind==='colt') assert(await pet.locator('.pet-button').evaluate(e=>e.classList.contains('talking')));
+  if(kind==='gummy') assert(await pet.locator('.pet-button').evaluate(e=>e.classList.contains('gb-talking')));
+  if(kind==='squishy') assert(await pet.locator('.mouth-open').evaluate(e=>e.getAnimations().some(a=>a.playState==='running')));
+  const mouthSelectors={eagle:'.lower-jaw',labubu:'#mouth-shape',roblox:'.happy-mouth',highland:'#highland-mouth-shape',saber:'#saber-rig-mouth-shape'};
+  if(mouthSelectors[kind]){
+   const mouth=pet.locator(mouthSelectors[kind]).first();
+   const before=await mouth.evaluate(e=>e.getAttribute('d')||e.getAttribute('style'));
+   await page.waitForTimeout(240);
+   const after=await mouth.evaluate(e=>e.getAttribute('d')||e.getAttribute('style'));
+   assert.notEqual(after,before,kind+' mouth moves during the reply');
+  }
+  await chat.screenshot({path:path.join(dir,'chat-'+kind+'.png')});
+  await bubble.click();
+  await chat.locator('[data-talk-close]').click();
+ }
+ assert.equal(themes.size,9,'Every pet has a distinct themed chat');
  assert.deepEqual(errors,[]);
- console.log('PASS: compact chat, Studio label fit, drag, generated reply display, context, history, and persistent bubble.');
+ console.log('PASS: compact themed chats for nine pets, mouth animations, Studio label fit, drag, generated reply display, context, history, and persistent bubble. Screenshots: '+dir);
 }finally{await browser?.close();server.kill()}})().catch(error=>{console.error(error);process.exitCode=1});

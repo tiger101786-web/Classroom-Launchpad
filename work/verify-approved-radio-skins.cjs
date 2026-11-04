@@ -49,6 +49,21 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop'];
   const originalGeometry = await geometry();
   for (const skin of skins) {
    await choose(skin);
+   if (skin === 'hiphop') {
+    const art = await panel.evaluate(panel => {
+     const sides = panel.querySelector('.colt-radio-skin-backdrop');
+     return {
+      visible:getComputedStyle(sides).display,
+      left:getComputedStyle(sides,'::before').backgroundImage,
+      right:getComputedStyle(sides,'::after').backgroundImage,
+      tile:getComputedStyle(panel.querySelector('.colt-radio-station')).backgroundImage
+     };
+    });
+    assert.notEqual(art.visible,'none','Illustrated DJ sides are displayed');
+    assert.match(art.left,/hiphop-atlas/);
+    assert.match(art.right,/hiphop-atlas/);
+    assert.match(art.tile,/hiphop-crate/);
+   }
    if (['bayou','hiphop'].includes(skin)) {
     const current = await geometry();
     for (let i = 2; i < current.length; i++) assert.deepEqual(current[i].slice(2), originalGeometry[i].slice(2), 'Bayou preserves control dimensions');

@@ -156,7 +156,7 @@ window.createDumplingPet = function(root) {
     idle.textContent = `Motion: ${on ? 'on' : 'off'}`;
     scheduleFace();
     syncRadio();
-    if (!on) { animation?.cancel();clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
+    if (!on) { setSpeaking(false);animation?.cancel();clearTimeout(smileEnd); puppet.classList.remove('smiling'); eyes.forEach(e => e.getAnimations().forEach(a => a.cancel())); }
   }
   function finishWake() {
     if(!puppet.classList.contains('waking'))return;
@@ -196,6 +196,7 @@ window.createDumplingPet = function(root) {
     if(!on&&animateWake&&canAnimate())startWake();
     else {scheduleFace();syncRadio();}
   }
+  let speakingAnimation;
   setIdle(!reduced.matches);
   idle.onclick = () => setIdle(!puppet.classList.contains('idle'));
   reduced.addEventListener('change', () => { if (reduced.matches) setIdle(false); });
@@ -220,5 +221,16 @@ window.createDumplingPet = function(root) {
   section.querySelectorAll('[data-motion]').forEach(b => b.onclick = () => play(b.dataset.motion));
   panel.querySelector('.note').innerHTML = '<p><strong>Interactive 2D preview.</strong> The face blinks and smiles, following the squishy during movement. Idle controls automatic movement; try Blink or Happy smile anytime. The basket stays rigid. This is not a 3D model.</p><p>Your existing Colt and classroom site are unchanged.</p>';
   function excite(){if(canAnimate())play('excited',true);else if(!puppet.classList.contains('asleep'))smile();}
-  return {setIdle,setRadio,setSleep,excite};
+  function setSpeaking(on) {
+    speakingAnimation?.cancel();
+    speakingAnimation = null;
+    if (!on || !canAnimate()) return;
+    speakingAnimation = puppet.querySelector('.mouth-open').animate([
+      {opacity:1,transform:'scaleY(.15)'},
+      {opacity:1,transform:'scaleY(.9)',offset:.4},
+      {opacity:1,transform:'scaleY(.3)',offset:.7},
+      {opacity:1,transform:'scaleY(.15)'}
+    ], {duration:480,iterations:Infinity});
+  }
+  return {setIdle,setRadio,setSleep,excite,setSpeaking};
 };

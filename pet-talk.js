@@ -16,6 +16,29 @@ window.createPetTalk = function(read) {
   const status = panel.querySelector('.pet-talk-status');
   let current, request, opener, position, drag;
   const history = [];
+  const portraits = {
+    colt:'assets/pet-studio/colt-original.png',
+    squishy:'assets/pet-studio/squishy-gold.png',
+    gummy:'assets/pet-studio/gummy-strawberry.png',
+    eagle:'assets/pet-studio/eagle-bald-eagle.png',
+    labubu:'assets/pet-studio/labubu-tan.png',
+    roblox:'assets/pet-studio/roblox-classic.png',
+    highland:'highland-pet/highland-art.png',
+    saber:'saber-pet/tiger.png'
+  };
+
+  function theme() {
+    panel.dataset.pet = current.kind;
+    panel.style.removeProperty('--talk-portrait');
+    if (portraits[current.kind]) {
+      panel.style.setProperty('--talk-portrait', 'url("' + portraits[current.kind] + '")');
+    } else if (current.kind === 'nugget') {
+      const pet = current;
+      window.nuggetThumbnail?.(pet.skin).then(url => {
+        if (!panel.hidden && current?.kind === pet.kind && current.skin === pet.skin) panel.style.setProperty('--talk-portrait', 'url("' + url + '")');
+      }).catch(() => {});
+    }
+  }
 
   function notice(message = '') {
     status.textContent = message;
@@ -71,6 +94,7 @@ window.createPetTalk = function(read) {
     if (!panel.hidden) return input.focus();
     current = read();
     if (!current || current.host.hidden || current.host.closest('.pet-studio')) return;
+    theme();
     opener = document.activeElement;
     title.textContent = 'Talk to ' + current.name;
     panel.hidden = false;

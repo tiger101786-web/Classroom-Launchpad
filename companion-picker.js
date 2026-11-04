@@ -311,6 +311,32 @@
   // storage keys or account-saving paths are introduced.
   if(window.createPetStudio){
     const readStudio=()=>({nugget:{...nuggetDefaults(),...preferences.nugget},saber:{...saberDefaults(),...preferences.saber},highland:{...highlandDefaults(),...preferences.highland},roblox:{...robloxDefaults(),...preferences.roblox},labubu:{...labubuDefaults(),...preferences.labubu},eagle:{...eaglePetDefaults(),...preferences.eagle},gummy:{...gummyBearDefaults(),...preferences.gummy},colt:{...roboColtDefaults(),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
+    const talkingPets = [
+      ['colt', document.querySelector('.robo-companion'), () => robo.speak(), 1350],
+      ['squishy', host, () => petApi.setSpeaking(true), 0],
+      ['gummy', gummy.host, () => gummy.play('mouth'), 2450],
+      ['eagle', eagle.host, () => eagle.play('mouth'), 2050],
+      ['labubu', labubu.host, () => labubu.play('mouth'), 2250],
+      ['roblox', roblox.host, () => roblox.play('mouth'), 2350],
+      ['highland', highland.host, () => highland.play('mouth'), 2250],
+      ['saber', saber.host, () => saber.play('mouth'), 2350]
+    ];
+    for (const [kind, petHost, playMouth, duration] of talkingPets) {
+      let mouthTimer;
+      petHost.addEventListener('pet-speech-change', event => {
+        clearTimeout(mouthTimer);
+        if (kind === 'squishy') petApi.setSpeaking(false);
+        if (!event.detail?.speaking || !event.detail.conversation) return;
+        function speak() {
+          const look = readStudio()[kind];
+          if (!allowed() || petHost.hidden || petHost.closest('.pet-studio') || look.asleep ||
+              !look.motion || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          playMouth();
+          if (duration) mouthTimer = setTimeout(speak, duration);
+        }
+        speak();
+      });
+    }
     petTalk=window.createPetTalk?.(()=>{
       if(!allowed())return null;
       const kind=preferences.pet==='dumpling'?'squishy':preferences.pet;

@@ -474,3 +474,35 @@
  radial-gradient(circle at 3px calc(100% - 3px),#ffeaba 0 1px,#90621c 1px 2px,transparent 2.5px),
  radial-gradient(circle at calc(100% - 3px) calc(100% - 3px),#ffeaba 0 1px,#90621c 1px 2px,transparent 2.5px);
 }
+
+/* The approved concept supplies the actual cable, hardware and vinyl side artwork. */
+.colt-radio-panel[data-radio-skin=hiphop] {isolation:isolate;background:#120e10!important}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop {
+ display:block;position:absolute;inset:0;z-index:-2;pointer-events:none;overflow:hidden;
+}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop span {display:none}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop:before,
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop:after {
+ content:'';position:absolute;top:0;bottom:0;width:3.6%;
+ background-image:url('assets/radio-skins/illustrated/hiphop-atlas.png');
+ background-size:2777.7778% auto;background-repeat:repeat-y;
+}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop:before {left:0;background-position:left top}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-skin-backdrop:after {right:0;background-position:right top}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-station {
+ background:url('assets/radio-skins/illustrated/hiphop-crate.png') center/100% 100% no-repeat!important;
+ border-color:#a27632!important;box-shadow:0 2px 5px #000a!important;border-radius:5px;
+}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-station:before,
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-station:after {display:none}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-station.is-active {
+ background:linear-gradient(#c3881f33,#d6a22a44),url('assets/radio-skins/illustrated/hiphop-crate.png') center/100% 100% no-repeat!important;
+ box-shadow:0 0 7px #eeb34477!important;border-color:#ffe39a!important;
+}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-filter {
+ background:linear-gradient(145deg,#141113dd,#21170ff0),url('assets/radio-skins/illustrated/hiphop-crate.png') center/100% 100%;
+ box-shadow:inset 0 0 0 1px #ffdb7b66,inset 0 -2px #7f531e;color:#ffefb8;
+}
+.colt-radio-panel[data-radio-skin=hiphop] .colt-radio-filter.is-active {
+ background:linear-gradient(145deg,#ae701633,#dca33266),url('assets/radio-skins/illustrated/hiphop-crate.png') center/100% 100%;
+}
