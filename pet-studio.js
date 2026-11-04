@@ -97,7 +97,17 @@ function render(){content.setAttribute('aria-labelledby','studio-tab-'+tab);dial
 function play(action){if(!bridge.canEdit()||state[current].asleep||!state[current].motion)return;bridge.play(current,action);}
 function close(){openRevision++;loadErrorNotice?.remove();loadErrorNotice=null;if(dialog.open)dialog.close();}
 // Use the existing pet controls entry point; return the live pet to the desktop first.
-if(bridge.talk){const talk=document.createElement('button');talk.type='button';talk.className='pet-talk-open';talk.textContent='Talk to Pet';dialog.querySelector('.preview-actions').append(talk);talk.onclick=()=>{dialog.addEventListener('close',()=>bridge.talk(),{once:true});close()};}
+if (bridge.talk) {
+ const talk = document.createElement('button');
+ talk.type = 'button';
+ talk.className = 'pet-talk-open';
+ talk.textContent = 'Talk to Pet';
+ dialog.querySelector('.preview-tip').replaceChildren(talk);
+ talk.onclick = () => {
+  dialog.addEventListener('close', () => bridge.talk(), {once:true});
+  close();
+ };
+}
 dialog.querySelector('#pet-select').onchange=e=>{current=e.target.value;previous=null;query='';filter='All';radio=false;bridge.dance(false);bridge.select(current);sync();render();save()};
 dialog.querySelectorAll('[data-tab]').forEach((b,i,all)=>{b.id='studio-tab-'+b.dataset.tab;b.setAttribute('aria-controls','tab-content');b.onclick=()=>{tab=b.dataset.tab;content.setAttribute('aria-labelledby',b.id);render()};b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowRight'?1:-1)+all.length)%all.length;all[j].click();all[j].focus()}}});
 dialog.querySelector('#greet').onclick=()=>play(current==='colt'?'greet':'excited');

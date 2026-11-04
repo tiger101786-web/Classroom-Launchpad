@@ -10,7 +10,7 @@ const open=async()=>{await page.goto(origin,{waitUntil:'domcontentloaded'});awai
 await open();const studio=page.locator('.pet-studio');
 for(const width of [1920,1440,800,390]){
  await page.setViewportSize({width,height:1000});
- for(const theme of ['woodland','crimson','sky','scrapbook','tropical','autumn']){
+ for(const theme of ['woodland','crimson','sky','scrapbook','tropical','autumn','neon','diner']){
   await studio.getByLabel('Studio theme',{exact:true}).selectOption(theme);
   if(theme==='scrapbook'){
    const select=studio.locator('#pet-select');await select.hover();await select.focus();
@@ -26,6 +26,22 @@ for(const width of [1920,1440,800,390]){
   await studio.locator('[data-tab=appearance]').click();
   await studio.locator('#pet-select').selectOption('eagle');
   await page.waitForTimeout(150);
+  const layout = await studio.evaluate(dialog => {
+   const tip = dialog.querySelector('.preview-tip');
+   const talk = tip.querySelector('.pet-talk-open');
+   const layout = () => [...dialog.querySelectorAll('#pet-title, #pet-subtitle, #pet-stage, #greet, #dance, .controls-pane')].map(element => {
+    const {x,y,width,height} = element.getBoundingClientRect();
+    return [x,y,width,height];
+   });
+   const withChat = layout();
+   const talkVisible = talk?.getBoundingClientRect().height > 0;
+   tip.textContent = 'A little personality for your school day.';
+   const original = layout();
+   tip.replaceChildren(talk);
+   return {talkVisible, withChat, original};
+  });
+  assert(layout.talkVisible, theme + ' ' + width + ' chat entry is visible');
+  assert.deepEqual(layout.withChat, layout.original, theme + ' ' + width + ' preview and controls retain their original layout');
   await studio.screenshot({path:path.join(dir,theme+'-'+width+'.png')});
   if(['sky','scrapbook','tropical','autumn'].includes(theme))for(const pet of ['colt','squishy','gummy','labubu','eagle']){
    await studio.locator('#pet-select').selectOption(pet);
@@ -46,5 +62,5 @@ for(const theme of ['sky','scrapbook','tropical','autumn']){
  await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=skins]').click();
  await studio.screenshot({path:path.join(dir,theme+'-labubu.png')});
 }
-assert.deepEqual(errors,[]);console.log('PASS: stable tabs across six themes and four widths, new theme persistence, no browser errors. Screenshots: '+dir);
+assert.deepEqual(errors,[]);console.log('PASS: stable tabs and preview layout across eight themes and four widths, theme persistence, no browser errors. Screenshots: '+dir);
 }finally{await browser?.close();server.kill();}})().catch(e=>{console.error(e);process.exitCode=1});
