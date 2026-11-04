@@ -269,3 +269,131 @@
 
 .colt-radio-panel[data-radio-skin="inferno"] .colt-radio-volume-slider::-moz-range-track {background:linear-gradient(to right,#ffb83b 0 var(--radio-volume),#51392a var(--radio-volume) 100%);box-shadow:0 0 4px #ff740033;}
 .colt-radio-panel[data-radio-skin="inferno"] .colt-radio-volume-slider::-moz-range-thumb {border-color:#ffe9b1;background:#ffa42b;box-shadow:0 0 8px #ff8500;}
+
+/* Bayou Nights: approved full-scene header and close-up portraits. */
+
+.colt-radio-panel[data-radio-skin="bayou"] {border-color:#43c964!important;background:#09100a url('assets/radio-skins/illustrated/bayou-atlas.png') center 53% / 100% 300% !important;box-shadow:inset 0 0 0 2px #50ae694a,0 0 28px #00ff2a4a,0 25px 65px #000000aa!important;}
+.colt-radio-panel[data-radio-skin="bayou"]::after {box-shadow:inset 0 0 15px #00000088;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header {background:linear-gradient(90deg,transparent,#00000022 50%,#00000077),url('assets/radio-skins/illustrated/bayou-atlas.png') center top / 100% auto!important;border-bottom-color:#4cfb8a;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header::before {background:linear-gradient(0deg,#0a0c08cc,transparent 30%)!important;box-shadow:inset 0 -1px #15ff43;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark {border-color:#41f884;background:#09110a url('assets/radio-skins/illustrated/bayou-atlas.png') 62% 84% / 300% auto;box-shadow:0 0 12px #00ff3a77,inset 0 0 5px #50ffa1;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark img,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork img {visibility:hidden;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading h2 {color:#c6ffe4;-webkit-text-stroke:.25px #55f391;text-shadow:2px 2px #094a10,0 0 12px #00ff3eaa;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading .feature-kicker {background:#06180ade!important;color:#71ffbd!important;border-color:#3ac96c!important;box-shadow:0 0 8px #00ff582a;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-icon-btn {border-color:#8bbd98;background:linear-gradient(135deg,#506b51,#182419 30%,#0c100c 70%,#44694a);box-shadow:inset 0 1px #ffffff44,0 0 8px #00ff3433;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filters,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stations {background:transparent!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter {border-color:#588262;background:linear-gradient(145deg,#325039,#121712 40%,#1a2b1d);color:#ace9bd;box-shadow:inset 0 1px #a7e3b94a;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter.is-active {border-color:#6bffb1;background:linear-gradient(135deg,#1fff6933,#083b0c 40%,#19df2a33);box-shadow:inset 0 0 12px #00ff5233,0 0 8px #00ff4144;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter.is-active .colt-radio-filter-icon,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-icon {color:#6bffac;filter:drop-shadow(0 0 4px #00ff3c);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-input {border-color:#2db951;background:linear-gradient(110deg,#071a09,#111411 70%,#144619);box-shadow:inset 0 1px #67ffa944,0 0 8px #00ff3622;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-input::placeholder {color:#a5c8b0;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stations {scrollbar-color:#32d45a #0c170e;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station {--flame:#34ff63;border-color:#4e7959!important;background:linear-gradient(135deg,transparent 4%,#3dfb8466 4.5%,transparent 5.5%,transparent 92%,#16ed2666 93%,transparent 95%),linear-gradient(155deg,#2b4e34,#131813 35%,#101410 75%,#134c1b)!important;box-shadow:inset 0 1px #9debb766,inset 0 -1px #28cf4033,0 2px 4px #00000099!important;color:#d5f9e3!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-icon {border-color:#3bae53;background:radial-gradient(circle,#14722655,#0a160c);color:#5bffa5;box-shadow:inset 0 0 8px #00ff3c22;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-icon svg {filter:drop-shadow(0 0 3px #00ff4c44);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-item:nth-child(3n+2) .colt-radio-station-icon {color:#69ff73;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-item:nth-child(3n) .colt-radio-station-icon {color:#84ffc9;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station.is-active {border-color:#94ffce!important;background:linear-gradient(135deg,#169b34,#0d3211 60%,#0e5218)!important;box-shadow:inset 0 0 12px #29ff7844,0 0 8px #00ff4f77!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station.is-active .colt-radio-station-icon {border-color:#61ffab;color:#acffd9;box-shadow:0 0 8px #00ff6933;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-favorite {color:#67d287;text-shadow:none;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-favorite.is-favorite,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station.is-active + .colt-radio-favorite {color:#bbffe5;text-shadow:0 0 8px #24ff8f;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-player {border-color:#5bdb85;box-shadow:inset 0 0 0 2px #376c42,0 0 12px #00ff3e44;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-now-playing {background:linear-gradient(90deg,#08100add,#081208bd),url('assets/radio-skins/illustrated/bayou-atlas.png') center 36% / 100% auto!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-now-playing::after {background:radial-gradient(ellipse,#00ff4f55,transparent 68%);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {border-color:#6cffa4;background:#09130a url('assets/radio-skins/illustrated/bayou-atlas.png') 62% 84% / 300% auto;box-shadow:0 0 9px #00ff4244;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-label,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-mute {color:#83ffb7;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-live-badge {color:#a0ffd8;border-color:#41d882;background:#0a6422;box-shadow:0 0 7px #00ff6c33;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-equalizer i {background:linear-gradient(#a3ffd8,#0bff3a);box-shadow:0 0 4px #00ff48;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-webkit-slider-runnable-track {background:linear-gradient(to right,#3bff97 0 var(--radio-volume),#2a5133 var(--radio-volume) 100%);box-shadow:0 0 4px #00ff4933;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-webkit-slider-thumb {border-color:#b1ffdc;background:#2bff81;box-shadow:0 0 8px #00ff5b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-icon {filter:drop-shadow(0 0 4px #00ff6d55);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-play {border-color:#adffd9;background:radial-gradient(circle,#0f3c1a 35%,#0aa52f 63%,#77ffb9 70%,#0a2a11 76%);box-shadow:inset 0 0 7px #36ff9488,0 0 7px #2eff78,0 0 20px #00ff3977;color:#d3ffec;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note {color:#a5d4b1;text-shadow:0 1px 3px #000000;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note::before,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note::after {color:#6de598;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading h2,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-icon,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter.is-active .colt-radio-filter-icon {color:#ffe29b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station {border-color:#927847!important;box-shadow:inset 0 1px #d7be6a55,inset 0 -1px #88b77322!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {border-color:#d5b970;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note {background:linear-gradient(90deg,#05090dcc,#05090de8,#05090dcc);color:#e0e7e9;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {background-size:auto 300%;background-position:62% 100%;}
+.colt-radio-panel[data-radio-skin="bayou"] {isolation:isolate;background:#090d12!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop {position:absolute;inset:112px 0 0;z-index:-2;pointer-events:none;overflow:hidden;display:flex;flex-direction:column;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop span {display:block;flex:none;width:100%;aspect-ratio:1024/382;background:url('assets/radio-skins/illustrated/bayou-atlas.png') center 55.632582% / 100% auto no-repeat;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop span:nth-child(even) {transform:scaleY(-1);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header {background:linear-gradient(90deg,transparent,#0002 50%,#0007),url('assets/radio-skins/illustrated/bayou-atlas.png') center top / 100% auto!important;}
+.colt-radio-panel[data-radio-skin="bayou"] {--radio-skin-accent:#c4ee64;border-color:#a58b49!important;background:#111b0b!important;box-shadow:inset 0 0 0 1px #e8cd7744,0 0 20px #a9ec4533,0 24px 60px #000a!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header {background:linear-gradient(90deg,#07120544,#08110755 60%,transparent),url('assets/radio-skins/illustrated/bayou-atlas.png') center top / 100% auto!important;border-bottom-color:#c4d46c;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header::before {background:linear-gradient(0deg,#0c1408a0,transparent 30%)!important;box-shadow:inset 0 -1px #a9ba5b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading h2 {font-family:'Segoe Script','Brush Script MT',cursive;font-style:italic;color:#ddff97;-webkit-text-stroke:0;text-shadow:1px 2px #1a2910,0 0 8px #a1ef5c55;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading .feature-kicker {background:linear-gradient(#533c1d,#21190e)!important;border-color:#a78a44!important;color:#f8e9a1!important;box-shadow:inset 0 1px #e5c97655!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark {border-color:#bd9a53;box-shadow:0 0 8px #c1e35855;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-icon-btn,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-gear {border-color:#b3ab64;background:linear-gradient(135deg,#4f4a26,#111b0c 55%,#3f351b);color:#e9f3b1;box-shadow:inset 0 1px #fff6;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter {border-color:#9b763b;border-radius:3px;background:linear-gradient(#20170866,#1b160bd9),url('assets/radio-skins/illustrated/bayou-atlas.png') center 55.632582% / 100% auto;color:#eee2b5;box-shadow:inset 0 2px #bea35955,inset 0 -2px #050a04cc;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter.is-active {border-color:#d5ee84;background:linear-gradient(90deg,#84b9239a,#4d781782),url('assets/radio-skins/illustrated/bayou-atlas.png') center 55.632582% / 100% auto;box-shadow:inset 0 0 12px #c7ec6355,0 0 7px #9de53c44;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-filter.is-active .colt-radio-filter-icon,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-icon {color:#e3ff9a;filter:drop-shadow(0 0 3px #b4ec4455);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-input {background:linear-gradient(90deg,#12210de8,#19270cdd);border-color:#b8dc58;color:#f3f5d1;box-shadow:inset 0 0 8px #0007,0 0 7px #b5e45555;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-search-input::placeholder {color:#ccd3a9;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station {border-radius:3px;border-color:#ad8c4d!important;background:linear-gradient(90deg,#10210aaa,#101708e8 75%),url('assets/radio-skins/illustrated/bayou-atlas.png') center 10% / 100% auto!important;color:#fff1c5!important;box-shadow:inset 0 2px #d6b96c88,inset 0 -2px #4e361d,0 2px 4px #0009!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-item:nth-child(3n+2) .colt-radio-station {background-position:center,center 25%!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-item:nth-child(3n) .colt-radio-station {background-position:center,center 35%!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-icon {background:#111c0a88;border-color:#b5a65d88;border-radius:3px;box-shadow:inset 0 0 6px #a3cc3022;color:#d9f38a!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station-icon svg {filter:drop-shadow(0 0 3px #b4df4f44);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station.is-active {border-color:#d9f47a!important;background:linear-gradient(90deg,#547a12bb,#192b0bc9),url('assets/radio-skins/illustrated/bayou-atlas.png') center 20% / 100% auto!important;box-shadow:inset 0 0 10px #d7f56d33,0 0 7px #b6ec5b55!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-favorite {color:#dccd8e;text-shadow:none;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-favorite.is-favorite,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-station.is-active + .colt-radio-favorite {color:#f6ffc4;text-shadow:0 0 6px #cce86f;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-player {border:1px solid #b19151;border-radius:6px;box-shadow:inset 0 0 0 2px #594021,0 0 8px #c1d74e33;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-now-playing {background:linear-gradient(90deg,#0e170add,#101907b8),url('assets/radio-skins/illustrated/bayou-atlas.png') center 35% / 100% auto!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {border-color:#bfce6f;border-radius:4px;box-shadow:0 0 8px #a8dc4933;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-label,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-mute {color:#dce997;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-live-badge {background:#394b13;color:#efffc1;border-color:#bbcb68;box-shadow:none;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-equalizer i {background:linear-gradient(#eaff99,#9fd923);box-shadow:0 0 4px #c8f25666;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-webkit-slider-runnable-track {background:linear-gradient(to right,#bfeb52 0 var(--radio-volume),#43502b var(--radio-volume) 100%);box-shadow:none;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-webkit-slider-thumb {border-color:#f8ffd1;background:#d9ed8d;box-shadow:0 0 6px #cef66b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-play {border-color:#ddff89;background:radial-gradient(circle,#253513,#0b1805 65%,#aacd50 74%,#1e2a0c 80%);box-shadow:0 0 7px #b8e85a,0 0 16px #a9dd4155;color:#f8ffce;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note {background:#0c150bd9;color:#dce4c2;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note::before,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-note::after {color:#baaa65;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop span {aspect-ratio:1024/428;background-position:center 46.209386%;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark,
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {background-size:auto 257.718121%;background-position:55% 100%;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header {background:linear-gradient(90deg,#07120533,transparent 55%),url('assets/radio-skins/illustrated/bayou-header.png') center bottom / cover!important;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header::before {background:transparent!important;box-shadow:inset 0 -1px #a9ba5b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading {transform:translateY(-10px);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header-actions {transform:translateY(-18px);}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-header {
+  width:100%;
+  height:auto;
+  min-height:0;
+  aspect-ratio:3 / 1;
+  background-size:100% auto!important;
+  background-position:center!important;
+  background-origin:border-box;
+}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark {background-size:auto 365%;background-position:49% 89.3%;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {background-size:auto 365%;background-position:49% 89.3%;}
+@media(max-width:560px) {
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-heading-mark {background-size:auto 320%;background-position:49% 92%;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-stream-artwork {background-size:auto 340%;background-position:49% 91.5%;}
+}
+
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-moz-range-track {background:linear-gradient(to right,#3bff97 0 var(--radio-volume),#2a5133 var(--radio-volume) 100%);box-shadow:0 0 4px #00ff4933;}
+
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-moz-range-track {background:linear-gradient(to right,#bfeb52 0 var(--radio-volume),#43502b var(--radio-volume) 100%);box-shadow:none;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-moz-range-thumb {border-color:#b1ffdc;background:#2bff81;box-shadow:0 0 8px #00ff5b;}
+
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-moz-range-thumb {border-color:#f8ffd1;background:#d9ed8d;box-shadow:0 0 6px #cef66b;}
+.colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop {top:var(--radio-skin-header-height, 112px);}
+[data-radio-skin-choice=bayou] .radio-skin-swatch {background:linear-gradient(135deg,#dfe993,#83a929,#513516);}

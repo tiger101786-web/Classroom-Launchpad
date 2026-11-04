@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261103-approved-v1', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261103-bayou-v2', document.currentScript.src).href;
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
     const stylesheet = document.createElement('link');
@@ -12,7 +12,7 @@
       document.head.append(stylesheet);
     });
     panel.dataset.radioSkins = 'true';
-    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider']];
+    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights']];
     const key = 'coltRadioIllustratedSkin';
     const backdrop = document.createElement('div');
     backdrop.className = 'colt-radio-skin-backdrop';
@@ -46,10 +46,14 @@
     panel.prepend(backdrop);
     panel.querySelector('.colt-radio-filters').append(gear);
     panel.append(menu);
+    const header = panel.querySelector('.colt-radio-header');
+    const fitBackdrop = () => panel.style.setProperty('--radio-skin-header-height', header.getBoundingClientRect().height + 'px');
+    new ResizeObserver(fitBackdrop).observe(header);
     function applySkin(skin) {
       if (!skins.some(([id]) => id === skin)) skin = 'original';
       if (skin === 'original') delete panel.dataset.radioSkin;
       else panel.dataset.radioSkin = skin;
+      fitBackdrop();
       choices.forEach(button => {
         const selected = button.dataset.radioSkinChoice === skin;
         button.setAttribute('aria-checked', String(selected));
