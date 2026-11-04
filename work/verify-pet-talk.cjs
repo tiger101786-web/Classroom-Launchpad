@@ -17,10 +17,11 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await page.route('**/api/pet-talk/chat',async route=>{
    const request=route.request().postDataJSON();
    requests.push(request);
-   await route.fulfill({json:{answer:request.history.length?'A syrup moat would fit around it.':'Let’s build a waffle castle!'}});
+   await route.fulfill({json:{answer:request.history.length?'A syrup moat would fit around it.':'Let’s build a tower with a pancake roof, a biscuit door, and a waffle castle!'}});
  });
  await openStudio();
  await studio.locator('#pet-select').selectOption('nugget');
+ await studio.locator('[data-skin-choice="Spicy"]').click();
  for(const width of [1440,800,320]){
    await page.setViewportSize({width,height:850});
    assert(await studio.locator('.preview-actions button').evaluateAll(buttons=>
@@ -32,8 +33,11 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await within(chat);
  await input.fill('What should we build?');
  await input.press('Enter');
+ await bubble.and(page.locator('[aria-busy=true]')).waitFor({state:'visible'});
+ assert.doesNotMatch(await bubble.locator('span').innerText(), /waffle castle/);
  await bubble.locator('span').filter({hasText:'waffle castle'}).waitFor();
  assert.equal(requests[0].kind,'nugget');
+ assert.equal(requests[0].skin,'Spicy');
  await page.clock.fastForward(60_000);
  assert(await bubble.isVisible(),'AI bubble stays visible for slow readers');
  await input.fill('What goes around it?');
