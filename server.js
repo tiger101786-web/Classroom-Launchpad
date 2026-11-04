@@ -319,6 +319,16 @@ function coltAiContainsPrivateInformation(value) {
     || /\bmy\s+(home\s+)?address\s+is\b/i.test(text);
 }
 
+function petReplyContainsPrivateInformation(value, petName) {
+  let text = String(value || "");
+  if (petName) {
+    const escapedName = petName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const introduction = new RegExp("\\bmy\\s+name\\s+is\\s+" + escapedName + "(?=$|[\\s.,!?…])", "gi");
+    text = text.replace(introduction, "I am your pet");
+  }
+  return coltAiContainsPrivateInformation(text);
+}
+
 function guidedAiSystemPrompt(session) {
   const grade = session.role === "student" ? cleanGrade(session.grade) || "4-7" : "4-7";
   return [
@@ -340,11 +350,14 @@ function guidedAiSystemPrompt(session) {
   ].join("\n");
 }
 
-function sanitizeColtAiHistory(entries) {
+function sanitizeColtAiHistory(entries, petName) {
   return (Array.isArray(entries) ? entries : []).slice(-8).flatMap(entry => {
     const role = entry && entry.role === "assistant" ? "assistant" : entry && entry.role === "user" ? "user" : "";
     const content = cleanMultilineText(entry && entry.content, 900);
-    return role && content && !coltAiContainsPrivateInformation(content) ? [{ role, content }] : [];
+    const privateContent = role === "assistant" && petName
+      ? petReplyContainsPrivateInformation(content, petName)
+      : coltAiContainsPrivateInformation(content);
+    return role && content && !privateContent ? [{ role, content }] : [];
   });
 }
 
@@ -430,7 +443,7 @@ async function handleColtAssistantAiApi(req, res, pathname) {
         body: JSON.stringify({
           messages: [
             { role: "system", content: system },
-            ...sanitizeColtAiHistory(body.history),
+            ...sanitizeColtAiHistory(body.history, identity.name),
             { role: "user", content: prompt }
           ],
           temperature: 0.75,
@@ -444,7 +457,7 @@ async function handleColtAssistantAiApi(req, res, pathname) {
       if (!response.ok) throw new Error("Pet AI provider unavailable");
       const payload = await response.json();
       const answer = cleanMultilineText(payload?.result?.response, 420);
-      if (!answer || coltAiContainsPrivateInformation(answer)) throw new Error("No usable pet reply");
+      if (!answer || petReplyContainsPrivateInformation(answer, identity.name)) throw new Error("No usable pet reply");
       sendJson(res, 200, { answer });
     } catch {
       sendJson(res, 503, { error: "Pet AI couldn't reply. Try again in a moment." });
