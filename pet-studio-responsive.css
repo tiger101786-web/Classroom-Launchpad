@@ -20,6 +20,15 @@ dialog.pet-studio {
 }
 
 /* One shared layout for every Studio theme; artwork never sizes the controls. */
+.pet-studio[data-theme] .preview-actions {
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.pet-studio[data-theme] .preview-actions button {
+ min-width:0;
+ white-space:normal;
+ overflow-wrap:normal;
+}
 .pet-studio[data-theme] #tab-content:has(#gallery){gap:6px;padding:12px 20px}
 .pet-studio[data-theme] #tab-content:has(#gallery) .section-heading{height:32px;min-height:32px;align-items:center}
 .pet-studio[data-theme] #tab-content:has(#gallery) .section-heading>div{min-width:0;flex:1}
@@ -100,4 +109,22 @@ dialog.pet-studio {
  .pet-studio[data-theme] #gallery .skin-card{height:136px}
  .pet-studio[data-theme] #gallery .skin-card img{height:94px}
  .pet-studio[data-theme] .studio-footer{margin:10px 0 12px;min-height:48px;padding:10px 14px;gap:12px;font:13px 'Segoe UI',sans-serif}
+}
+
+/* Retain each artwork's panel boundaries instead of imposing Crimson's columns. */
+@media(min-width:701px) {
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook]) .studio-header {height:14.4cqw}
+ .pet-studio[data-theme=sky] .studio-body {grid-template-columns:44% 56%}
+ .pet-studio[data-theme=sky] .studio-body .controls-pane {padding:0 3cqw 0 1.5cqw}
+ .pet-studio[data-theme=scrapbook] .studio-body .controls-pane {padding:0 4cqw 0 3.8cqw}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header {height:14cqw}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-body {grid-template-columns:47% 53%}
+ .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-body .controls-pane {padding:0 4cqw 0 1.5cqw}
+ .pet-studio[data-theme=neon] .studio-header {height:16.3cqw}
+ .pet-studio[data-theme=neon] .studio-body {grid-template-columns:48% 52%}
+ .pet-studio[data-theme=diner] .studio-header {height:12cqw}
+ .pet-studio[data-theme] .tabs {padding:0 1.7cqw}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook],[data-theme=tropical],[data-theme=autumn]) .tabs {margin-top:1cqw}
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook],[data-theme=tropical],[data-theme=autumn]) #tab-content,
+ .pet-studio:is([data-theme=sky],[data-theme=scrapbook],[data-theme=tropical],[data-theme=autumn]) #tab-content:has(#gallery) {flex-basis:calc(max(42cqw,440px) - 1cqw);height:calc(max(42cqw,440px) - 1cqw);max-height:calc(max(42cqw,440px) - 1cqw)}
 }

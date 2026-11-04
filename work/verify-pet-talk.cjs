@@ -24,7 +24,7 @@ const server=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'.
  await studio.locator('[data-skin-choice="Spicy"]').click();
  for(const width of [1440,800,320]){
    await page.setViewportSize({width,height:850});
-   assert(await studio.locator('.preview-actions button, .preview-tip .pet-talk-open').evaluateAll(buttons=>
+   assert(await studio.locator('.preview-actions button, .preview-actions .pet-talk-open').evaluateAll(buttons=>
      buttons.length===3 && buttons.every(button=>button.scrollWidth<=button.clientWidth+1)));
  }
  await studio.locator('.pet-talk-open').click();

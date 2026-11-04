@@ -102,7 +102,7 @@ if (bridge.talk) {
  talk.type = 'button';
  talk.className = 'pet-talk-open';
  talk.textContent = 'Talk to Pet';
- dialog.querySelector('.preview-tip').replaceChildren(talk);
+ dialog.querySelector('.preview-actions').append(talk);
  talk.onclick = () => {
   dialog.addEventListener('close', () => bridge.talk(), {once:true});
   close();

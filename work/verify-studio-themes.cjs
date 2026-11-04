@@ -28,7 +28,7 @@ for(const width of [1920,1440,800,390]){
   await page.waitForTimeout(150);
   const layout = await studio.evaluate(dialog => {
    const tip = dialog.querySelector('.preview-tip');
-   const talk = tip.querySelector('.pet-talk-open');
+   const talk = dialog.querySelector('.pet-talk-open');
    const layout = () => [...dialog.querySelectorAll('#pet-title, #pet-subtitle, #pet-stage, #greet, #dance, .controls-pane')].map(element => {
     const {x,y,width,height} = element.getBoundingClientRect();
     return [x,y,width,height];
@@ -37,11 +37,20 @@ for(const width of [1920,1440,800,390]){
    const talkVisible = talk?.getBoundingClientRect().height > 0;
    tip.textContent = 'A little personality for your school day.';
    const original = layout();
-   tip.replaceChildren(talk);
+   tip.textContent = 'A little personality for your school day.';
    return {talkVisible, withChat, original};
   });
   assert(layout.talkVisible, theme + ' ' + width + ' chat entry is visible');
   assert.deepEqual(layout.withChat, layout.original, theme + ' ' + width + ' preview and controls retain their original layout');
+  if (width > 700) {
+   const frame = await studio.evaluate(dialog => {
+    const body = dialog.querySelector('.studio-body').getBoundingClientRect();
+    const controls = dialog.querySelector('.controls-pane').getBoundingClientRect();
+    return (controls.left - body.left) / body.width;
+   });
+   const panelStart = {sky:.44, tropical:.47, autumn:.47, neon:.48}[theme] || .375;
+   assert(Math.abs(frame-panelStart)<.002, theme+' uses its own artwork panel boundary');
+  }
   await studio.screenshot({path:path.join(dir,theme+'-'+width+'.png')});
   if(['sky','scrapbook','tropical','autumn'].includes(theme))for(const pet of ['colt','squishy','gummy','labubu','eagle']){
    await studio.locator('#pet-select').selectOption(pet);

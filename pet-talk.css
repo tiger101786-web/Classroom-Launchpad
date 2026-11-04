@@ -33,15 +33,3 @@
 .pet-talk-messages { max-height: min(150px, 25dvh); overflow: auto; overflow-wrap: anywhere; padding: 0 5px; }
 .pet-talk-messages p, .pet-talk-status { margin: 5px 2px; overflow-wrap: anywhere; }
 .pet-talk-status { font-size: 12px; color: #ffd8e6; }
-.pet-studio[data-theme] .preview-tip .pet-talk-open {
-  margin: 0;
-  padding: 0 .5em;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-shadow: inherit;
-  text-decoration: underline;
-  text-underline-offset: .2em;
-  cursor: pointer;
-}
