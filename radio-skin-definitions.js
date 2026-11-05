@@ -17,8 +17,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/inferno-atlas.png",
-      "assets/radio-skins/illustrated/inferno-header-v2.png"
+      "assets/radio-skins/illustrated/inferno-atlas-lossless.png",
+      "assets/radio-skins/illustrated/inferno-header-v2-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#ffb44e"
@@ -31,8 +31,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/frostfang-atlas.png",
-      "assets/radio-skins/illustrated/frostfang-header-v2.png"
+      "assets/radio-skins/illustrated/frostfang-atlas-lossless.png",
+      "assets/radio-skins/illustrated/frostfang-header-v2-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#85dcff"
@@ -45,8 +45,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/temple-atlas.png",
-      "assets/radio-skins/illustrated/temple-header-v2.png"
+      "assets/radio-skins/illustrated/temple-atlas-lossless.png",
+      "assets/radio-skins/illustrated/temple-header-v2-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#8ee6af"
@@ -59,8 +59,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/nebula-atlas.png",
-      "assets/radio-skins/illustrated/nebula-header-v2.png"
+      "assets/radio-skins/illustrated/nebula-atlas-lossless.png",
+      "assets/radio-skins/illustrated/nebula-header-v2-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#d09bff"
@@ -73,8 +73,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/bayou-atlas.png",
-      "assets/radio-skins/illustrated/bayou-header.png"
+      "assets/radio-skins/illustrated/bayou-atlas-lossless.png",
+      "assets/radio-skins/illustrated/bayou-header-lossless.png"
     ],
     "variables": {},
     "swatch": "linear-gradient(135deg,#dfe993,#83a929,#513516)"
@@ -85,8 +85,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/hiphop-atlas.png",
-      "assets/radio-skins/illustrated/hiphop-header.png"
+      "assets/radio-skins/illustrated/hiphop-atlas-lossless.png",
+      "assets/radio-skins/illustrated/hiphop-header-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#ffcf65"
@@ -99,8 +99,8 @@
     "layout": "illustrated",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/cyberpunk-atlas.png",
-      "assets/radio-skins/illustrated/cyberpunk-header.png"
+      "assets/radio-skins/illustrated/cyberpunk-atlas-lossless.png",
+      "assets/radio-skins/illustrated/cyberpunk-header-lossless.png"
     ],
     "variables": {
       "--radio-skin-accent": "#65f4ff"
@@ -113,10 +113,10 @@
     "layout": "genre",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/country-atlas.png"
+      "assets/radio-skins/illustrated/country-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/country-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/country-atlas-lossless.png')",
       "--genre-base": "#251306",
       "--genre-edge": "#c09250",
       "--genre-accent": "#f5d592",
@@ -134,10 +134,10 @@
     "layout": "genre",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/metal-atlas.png"
+      "assets/radio-skins/illustrated/metal-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/metal-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/metal-atlas-lossless.png')",
       "--genre-base": "#100e10",
       "--genre-edge": "#a9a5a2",
       "--genre-accent": "#ff7954",
@@ -155,10 +155,10 @@
     "layout": "genre",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/jazz-atlas.png"
+      "assets/radio-skins/illustrated/jazz-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/jazz-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/jazz-atlas-lossless.png')",
       "--genre-base": "#20100c",
       "--genre-edge": "#c3954c",
       "--genre-accent": "#ffe0a1",
@@ -176,10 +176,10 @@
     "layout": "genre",
     "title": "plain",
     "assets": [
-      "assets/radio-skins/illustrated/djclub-atlas.png"
+      "assets/radio-skins/illustrated/djclub-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/djclub-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/djclub-atlas-lossless.png')",
       "--genre-base": "#070f22",
       "--genre-edge": "#6d9cda",
       "--genre-accent": "#79f1ff",
@@ -197,10 +197,10 @@
     "layout": "genre",
     "title": "words",
     "assets": [
-      "assets/radio-skins/illustrated/reggae-atlas.png"
+      "assets/radio-skins/illustrated/reggae-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/reggae-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/reggae-atlas-lossless.png')",
       "--genre-base": "#0b2018",
       "--genre-edge": "#d3ae44",
       "--genre-accent": "#ffe27f",
@@ -218,10 +218,10 @@
     "layout": "genre",
     "title": "words",
     "assets": [
-      "assets/radio-skins/illustrated/disco-atlas.png"
+      "assets/radio-skins/illustrated/disco-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/disco-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/disco-atlas-lossless.png')",
       "--genre-base": "#1c1029",
       "--genre-edge": "#bfc3df",
       "--genre-accent": "#ffb4ee",
@@ -239,10 +239,10 @@
     "layout": "genre",
     "title": "letters",
     "assets": [
-      "assets/radio-skins/illustrated/punk-atlas.png"
+      "assets/radio-skins/illustrated/punk-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/punk-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/punk-atlas-lossless.png')",
       "--genre-base": "#151719",
       "--genre-edge": "#a4a5a9",
       "--genre-accent": "#d7ff74",
@@ -260,10 +260,10 @@
     "layout": "genre",
     "title": "words",
     "assets": [
-      "assets/radio-skins/illustrated/blues-atlas.png"
+      "assets/radio-skins/illustrated/blues-atlas-lossless.png"
     ],
     "variables": {
-      "--genre-art": "url('assets/radio-skins/illustrated/blues-atlas.png')",
+      "--genre-art": "url('assets/radio-skins/illustrated/blues-atlas-lossless.png')",
       "--genre-base": "#08182d",
       "--genre-edge": "#c39b56",
       "--genre-accent": "#f5d48b",

@@ -1,0 +1,273 @@
+{
+  "format": "PNG lossless",
+  "pixels": "exact",
+  "sourceBytes": 64242224,
+  "deliveryBytes": 60562666,
+  "reductionPercent": 5.73,
+  "assets": [
+    {
+      "source": "assets/radio-skins/illustrated/bayou-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/bayou-atlas-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 3042572,
+      "deliveryBytes": 2938247,
+      "sourceSha256": "538ae925f8500976623401dd02a059dbe96b00f82776d64f56a287ed3aa3533f",
+      "deliverySha256": "f9e55893c17451cf6fab77fbcc62a0c720f5fcb3c9b5fdc55d338ba0878efe24",
+      "pixelsSha256": "454633df32477b9e0387de64c82ee5f1471fcc37ef51efc6eb61203bb9c06d3b"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/bayou-header.png",
+      "delivery": "assets/radio-skins/illustrated/bayou-header-lossless.png",
+      "width": 2172,
+      "height": 724,
+      "sourceBytes": 2695398,
+      "deliveryBytes": 2634290,
+      "sourceSha256": "a622261fd0bfe4113f0530356e269dcd143324b6878b21799af6f56db153cb7b",
+      "deliverySha256": "0c84a4bb9326ab97f32cc02cb938abda13b225031d90c3e592f7670a5d82b397",
+      "pixelsSha256": "56ae82e3dc8cef40bbb518cf10d8da78f3145925a8b9094dd08c4afc51d38e83"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/blues-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/blues-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2474736,
+      "deliveryBytes": 2356243,
+      "sourceSha256": "bd8fad42372bb9761520383c6b45507254e8b48f5e869e098ef770ad175c462d",
+      "deliverySha256": "84f17b961490da867258bdf47648607d07ff27f791de29a6c1275a43b34d9836",
+      "pixelsSha256": "e0627b93a71e84ce1b31c8e21110c75fe72d5f75b6bf51d9b31b49c1343002fc"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/country-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/country-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2975549,
+      "deliveryBytes": 2834894,
+      "sourceSha256": "e35cd87be144174dbcd0ee375b59c90dfc0f99d6242d4e5f847399d1d82ec9e2",
+      "deliverySha256": "24d4362e3619b2568f13beb442de85fb6c79b61553688a418ad310ca1ff9701c",
+      "pixelsSha256": "c58304393d5d9e6155ba43692bc2f8631341fa7d2ef75403569bdbf815d2eb2c"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/cyberpunk-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/cyberpunk-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2432038,
+      "deliveryBytes": 2273657,
+      "sourceSha256": "b6aae346aa30cc9b85454845565660715b7ed15a832d7787d92e10ab28ae0a2b",
+      "deliverySha256": "4df2e68d2e367e7c3304399385b4c089440644712d764c5824b703678c4c3f1f",
+      "pixelsSha256": "efe779e66279fb5368ed3dc8e9b6ce4e2a09b756d8cae53b3e889c880c4265f2"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/cyberpunk-frame.png",
+      "delivery": "assets/radio-skins/illustrated/cyberpunk-frame-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 1793722,
+      "deliveryBytes": 1564782,
+      "sourceSha256": "e0d918cd9914be6af1774031158af0b8e1f13cdbee2e0290ba3105322847e922",
+      "deliverySha256": "1c607f804be6ad3c50923506b671b00510b0f813cbd8481a4308aa911db7292b",
+      "pixelsSha256": "9fda1862b4aa596bd56d622bfe13f0d8116064e68c0c7c880b9313d77f85760d"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/cyberpunk-header.png",
+      "delivery": "assets/radio-skins/illustrated/cyberpunk-header-lossless.png",
+      "width": 2172,
+      "height": 724,
+      "sourceBytes": 2646633,
+      "deliveryBytes": 2518997,
+      "sourceSha256": "5abd668cf4fe3c77282d682a1bc3885cf2500527fe5933548a0461f321f1e556",
+      "deliverySha256": "89352a7aba6ec2783d1c37ecdcee2a8520462e1547d3dff94fe936f16b8b7fa3",
+      "pixelsSha256": "049594a682ef3fe1fe9bc85c179293a9cdf7e503d2bef03e652766ce8188aca9"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/disco-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/disco-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2373371,
+      "deliveryBytes": 2193177,
+      "sourceSha256": "38c12b14d18e65a39f6462ab4333ab0887bc41ea96886d9a24ffe227ff5b61a1",
+      "deliverySha256": "11af25329da4533990181813a335255d00762a9c3892d7028e31f908e32f8500",
+      "pixelsSha256": "4b8c2a319d8baecbfb44dd7a4ef2aec738193fb2b37df59c36ddc2040dd22949"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/djclub-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/djclub-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2222128,
+      "deliveryBytes": 2102401,
+      "sourceSha256": "6f529e68bff5de83dc475955ad6710cd1affa84806fa684a1de77fa6f709311c",
+      "deliverySha256": "eaa8b071466113d60843127070efe7b3de98c0f6f1eef2cb500a4e78fa6c60c5",
+      "pixelsSha256": "8106c590eca23be854e1149f09bab283e9b9ac00dab26fa25ce30a28462b3345"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/frostfang-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/frostfang-atlas-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 3366102,
+      "deliveryBytes": 3107664,
+      "sourceSha256": "21c47a6418671f4e40ca1dae88564986587d53b8c8d8d3056bf0af673ce3ec20",
+      "deliverySha256": "e48e6ac506517a49dc82bfd141397da00094b81ba5214fb6eef3ff8d89c66b66",
+      "pixelsSha256": "0e9a6b21ffb695dfcb039e8cdba13238fcd528dcbdcfe5b5695912f932dcb15f"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/frostfang-header-v2.png",
+      "delivery": "assets/radio-skins/illustrated/frostfang-header-v2-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 3056458,
+      "deliveryBytes": 2872679,
+      "sourceSha256": "e1a25ae9d8c1faab45576d2dd46377352db3dd06cf07afdf5e3acbdd9194b958",
+      "deliverySha256": "2735f7edcbe2a6a73cde265cdc3b6604d5c6bdb10f18a4d41b533c7063821b38",
+      "pixelsSha256": "bf1ad6b1cc95cfb5b107b1bf0197ab0f35194eb18f288be9eef80946922a6495"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/hiphop-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/hiphop-atlas-lossless.png",
+      "width": 910,
+      "height": 1728,
+      "sourceBytes": 2927781,
+      "deliveryBytes": 2771691,
+      "sourceSha256": "c6bba667fa7677f577e5fa71ae45c7f3df0acd43a2b3a5d2d1b3529e043c156d",
+      "deliverySha256": "3e45b7022bfa14d384ee62aa87a14559389b2470c0ac2a0b5130e6bbcafa878a",
+      "pixelsSha256": "b794b63a2da95ab41961b3c36e8440de171c7c85ef662c3dad4398fa92ffb4a2"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/hiphop-crate.png",
+      "delivery": "assets/radio-skins/illustrated/hiphop-crate-lossless.png",
+      "width": 1860,
+      "height": 846,
+      "sourceBytes": 2533793,
+      "deliveryBytes": 2328180,
+      "sourceSha256": "cf81fdce2295990043fc5ed2aa8a28c888f9bac54473740e0fca39a2a92a9d21",
+      "deliverySha256": "eb4badec4e4042031883d6e5e28e4e699b9b16691e807cc1f11f18185a3d46e0",
+      "pixelsSha256": "6aeb848b9d575b2cde8f2b12cca42aa6201bf9681a42b08a861c1ded60cca2d5"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/hiphop-header.png",
+      "delivery": "assets/radio-skins/illustrated/hiphop-header-lossless.png",
+      "width": 2172,
+      "height": 724,
+      "sourceBytes": 2500387,
+      "deliveryBytes": 2455937,
+      "sourceSha256": "071e3aa0533ad02658de00d4b42c8b06415c40fd2ecb054d8817132f045fe52a",
+      "deliverySha256": "0e5189cfcb0e6ab6c673dec05b911878363c806c33314677084b4e2dda737419",
+      "pixelsSha256": "b2e3f86dcefc4bd81c47fd1178468e42bfad8775d59fd36748b83a207b54c4ab"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/inferno-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/inferno-atlas-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 2812182,
+      "deliveryBytes": 2638906,
+      "sourceSha256": "247c9043f8a313e15361cb9685318beb3c306a23078679c4e29fff9cfc233e64",
+      "deliverySha256": "75c6492d864f11add21862d09682a021dbcbe3a977961ffdbe82769264a1f714",
+      "pixelsSha256": "2847ed1d31d5e4f200bdee89854c9f93e4e474ee689b1d440df1df4e96d6b4c0"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/inferno-header-v2.png",
+      "delivery": "assets/radio-skins/illustrated/inferno-header-v2-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 2616367,
+      "deliveryBytes": 2471907,
+      "sourceSha256": "664a1960172d29d7f1302477c9ed40408f53b007e8050aecd3cd3b97e9badaa9",
+      "deliverySha256": "bb3802798a8335d0e38e3639c2a089877685dc62269f27f45d7bac4db0e8c7de",
+      "pixelsSha256": "5dbd031babfc5765a7787457243d8764981edb8db8e206d556f0d4d1551e36d1"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/jazz-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/jazz-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2194090,
+      "deliveryBytes": 2124075,
+      "sourceSha256": "7bc07517c94db5af0ee10d434b6559301ff9313451e2b03eec02f1b01e8d526d",
+      "deliverySha256": "002d9f07a1cb7972c49e8cefbd119e58c5ab7f6d31ac8ecc8aad3e7e2733b38a",
+      "pixelsSha256": "24d7a6767b8a127bab1e0c81ae8452096e80eb962c0eb3892d0a18937b40b9d3"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/metal-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/metal-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2404236,
+      "deliveryBytes": 2227471,
+      "sourceSha256": "f89b383e6260c3ab521ec10c7cf6909fc9026ace459bc6127caae4428f9e0ec0",
+      "deliverySha256": "d14bf7eb92fcc8114b263b836d4a25b42fffea94363f924eedace196597ae291",
+      "pixelsSha256": "4e70d475d6d95597f28e9582f331fdcf2d17878e84c8908a2c71a51889dd1ee2"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/nebula-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/nebula-atlas-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 3251289,
+      "deliveryBytes": 3014749,
+      "sourceSha256": "beb32fec2881f7e90fa61e81fbe719bfec6eb9897ed7c8c1e219e68d06c8692d",
+      "deliverySha256": "16261865d199d0b65011ec82580e4b412adbb1988805c8b8de56480527c5008b",
+      "pixelsSha256": "67b062d8cd458f2563f6afcaf06b854af9a59c09e40d9f30c5913e8b4d4ea72c"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/nebula-header-v2.png",
+      "delivery": "assets/radio-skins/illustrated/nebula-header-v2-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 2930707,
+      "deliveryBytes": 2771267,
+      "sourceSha256": "9640d1965a1753ed3a2b774a6aa88cd45e888ce4f6384d21251143ad9bf789b2",
+      "deliverySha256": "d1278a79c8f5e9db8041e0e22d61bcda72b1e52bb321f4d7dc714f4000e4ddfa",
+      "pixelsSha256": "ac28a7ba55ac73df8162c1b8c58c434ec3ee70ea7703a931d755e9d9432a7ab0"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/punk-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/punk-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2361732,
+      "deliveryBytes": 2216766,
+      "sourceSha256": "9a0e569fc1630bb3dde2b911e1f1519dd048c3697b146336b2003143cae7e7c9",
+      "deliverySha256": "f5d60854dc45389b1ecde10139c1072ffc0ec8fcb7c38366490eb3058ff0dffa",
+      "pixelsSha256": "164be2988d2635432274ca633e4b405f05cf4b254068c186b97829c69513d610"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/reggae-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/reggae-atlas-lossless.png",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2525566,
+      "deliveryBytes": 2405246,
+      "sourceSha256": "91a89a94b3df04195337e71aedfc5465508790463586bf10df216b99d09399e9",
+      "deliverySha256": "a52daa1ee624983484adc7f414aa48addc5fc5ef072c1a3ecd7102bcd304e893",
+      "pixelsSha256": "88681c06408eba0894d4758a8235438f40167cfd52e4c6e25acde3c0e2dbd5a0"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/temple-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/temple-atlas-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 3222980,
+      "deliveryBytes": 3004178,
+      "sourceSha256": "99402d58021caadf4a7caaa07bb196519bab42b6d0a4fec1c663c70b944e5207",
+      "deliverySha256": "71a1a1dfbac4c39683c87e31aefd3f15e0914f0af53a64023257d393993583cb",
+      "pixelsSha256": "86970537bfb9022759b74e7bd2d70ebc623a1664ae9be42856b49ed8781aa048"
+    },
+    {
+      "source": "assets/radio-skins/illustrated/temple-header-v2.png",
+      "delivery": "assets/radio-skins/illustrated/temple-header-v2-lossless.png",
+      "width": 1024,
+      "height": 1536,
+      "sourceBytes": 2882407,
+      "deliveryBytes": 2735262,
+      "sourceSha256": "2d172c468d858dfcaf4d7cf294c8d20179cbc66a89bf841bc017e7725f7a8e8d",
+      "deliverySha256": "5cd05a18e03785f287c26af0eb26014da68d23f1311dca6509705a5107555ff6",
+      "pixelsSha256": "6fe562bc83228d6eaf428d467238ae7ecb57a68fceb8b68dee93ca3d6dcce496"
+    }
+  ]
+}

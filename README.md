@@ -59,5 +59,7 @@ Favorites show loading/save errors with Retry. Account changes clear the old lis
 
 Run `npm run test:radio` with Playwright available to Node and a local Edge installation. Set `RADIO_BROWSER_PATH` for another Chromium executable and `PREVIEW_OUTPUT` for screenshots. Browser checks simulate media; the API test uses an isolated temporary database. `npm run check` covers both skin scripts.
 
+Illustrated skins serve losslessly optimized PNG copies while preserving all source artwork. Run `npm run test:radio-artwork` to check exact browser pixels and desktop/mobile appearance. Rebuild instructions and byte savings are in `work/radio-skin-maintenance.md`.
+
 Colt Radio keeps a single in-page player while offering genre-labeled stations from Lofi Cafe and selected direct-stream providers. Signed-in students and the teacher can pin stations to an account-specific Favorites category; only station IDs are stored, never listening history. Guest favorites stay in that browser. Colt Radio has no outbound navigation links, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. School filtering must allow the selected streaming domains for playback.
 
