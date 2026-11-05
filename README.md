@@ -53,7 +53,11 @@ Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
 
 ## Colt Radio
 
-Use the metallic gear beside Favorites to select Original, Inferno Forge, Frostfang Citadel, Overgrown Temple, Nebula Rider, or Bayou Nights. Clicking the gear again closes only the skin menu. The choice is saved on the current device; switching skins preserves playback, volume, search and favorites. The five illustrated skins use the reviewed artwork with one header portrait, complete bottom portraits, and proportionally repeated background texture. The old retired designs are not offered.
+Use the metallic gear beside Favorites to choose a radio skin. The shared registry in `radio-skin-definitions.js` defines each choice, artwork paths, title treatment, menu swatch, layout and shared palette/crop variables. Genre skins reuse one layout marker; exceptional illustration details remain in `radio-skins.css`. The choice stays on the current device; switching skins preserves playback, volume, search and favorites.
+
+Favorites show loading/save errors with Retry. Account changes clear the old list and disable edits until the new list loads. Saves run in order and combine changes made while a save is pending. The minimized player reports playback state.
+
+Run `npm run test:radio` with Playwright available to Node and a local Edge installation. Set `RADIO_BROWSER_PATH` for another Chromium executable and `PREVIEW_OUTPUT` for screenshots. Browser checks simulate media; the API test uses an isolated temporary database. `npm run check` covers both skin scripts.
 
 Colt Radio keeps a single in-page player while offering genre-labeled stations from Lofi Cafe and selected direct-stream providers. Signed-in students and the teacher can pin stations to an account-specific Favorites category; only station IDs are stored, never listening history. Guest favorites stay in that browser. Colt Radio has no outbound navigation links, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. School filtering must allow the selected streaming domains for playback.
 

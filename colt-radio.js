@@ -1104,7 +1104,14 @@
     playerWrap.append(placeholder, iframe, nowPlaying, audio);
 
     const note = buildElement("p", "colt-radio-note", "Free, ad-free music streamed by Lofi Cafe. No account required.");
-    panel.append(header, stationFilters, stationSearch, stationNav, playerWrap, note);
+    const favoritesStatus = buildElement("div", "colt-radio-favorites-status");
+    favoritesStatus.hidden = true;
+    favoritesStatus.setAttribute("role", "status");
+    const favoritesMessage = buildElement("span");
+    const retryFavorites = buildElement("button", "colt-radio-favorites-retry", "Retry");
+    retryFavorites.type = "button";
+    favoritesStatus.append(favoritesMessage, retryFavorites);
+    panel.append(header, stationFilters, stationSearch, favoritesStatus, stationNav, playerWrap, note);
     root.append(launcher, panel);
 
     // Load customization on first open; artwork loads only for the chosen skin.
@@ -1115,7 +1122,7 @@
         if (!globalObject.initializeColtRadioSkins) {
           await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'radio-skins.js?v=20261104-genre-lettering-v3';
+            script.src = 'radio-skins.js?v=20261105-shared-definitions-v2';
             script.onload = resolve;
             script.onerror = () => { script.remove(); reject(new Error('Radio skins unavailable')); };
             document.head.append(script);
@@ -1138,6 +1145,12 @@
     let stationSearchQuery = "";
     let favoritesAccountKey = "";
     let favoritesRequestVersion = 0;
+    let favoritesReady = false;
+    let favoritesRevision = 0;
+    let favoritesSavedRevision = 0;
+    let favoritesSaveTask = null;
+    let favoritesController = null;
+    let favoritesRetryAction = null;
     let connectionTimer = 0;
     let playbackRequestVersion = 0;
     let playbackAttempt = 0;
@@ -1209,6 +1222,7 @@
     function renderStationList() {
       const favoriteButtons = stationNav.querySelectorAll("[data-favorite-station]");
       favoriteButtons.forEach(button => {
+        button.disabled = !favoritesReady;
         const selected = favoriteStationIds.has(button.dataset.favoriteStation);
         const station = stations.find(item => item.id === button.dataset.favoriteStation);
         button.textContent = selected ? "★" : "☆";
@@ -1262,50 +1276,100 @@
       return auth.role === "student" && auth.email ? `student:${String(auth.email).toLowerCase()}` : "guest";
     }
 
-    async function syncFavorites(auth) {
+    function showFavoritesStatus(message = "", retry = null) {
+      favoritesMessage.textContent = message;
+      favoritesStatus.hidden = !message;
+      favoritesRetryAction = retry;
+      retryFavorites.hidden = !retry;
+    }
+
+    retryFavorites.addEventListener("click", () => favoritesRetryAction?.());
+
+    async function syncFavorites(auth, { force = false } = {}) {
       const nextAccountKey = accountKey(auth);
-      if (nextAccountKey === favoritesAccountKey) return;
+      if (!force && nextAccountKey === favoritesAccountKey) return;
+      favoritesController?.abort();
+      favoritesController = new AbortController();
       favoritesAccountKey = nextAccountKey;
       const requestVersion = ++favoritesRequestVersion;
-      if (nextAccountKey === "guest") {
+      favoritesRevision = 0;
+      favoritesSavedRevision = 0;
+      favoritesSaveTask = null;
+      favoriteStationIds = new Set();
+      favoritesReady = nextAccountKey === "guest";
+      if (favoritesReady) {
         favoriteStationIds = new Set(guestFavorites());
+        showFavoritesStatus();
         renderFavorites();
         return;
       }
+      showFavoritesStatus("Loading favorites…");
+      renderFavorites();
       try {
-        const response = await fetch("/api/radio-favorites", { cache: "no-store" });
+        const response = await fetch("/api/radio-favorites", {
+          cache: "no-store", signal: favoritesController.signal
+        });
         if (!response.ok) throw new Error("Favorites unavailable");
         const payload = await response.json();
         if (requestVersion !== favoritesRequestVersion) return;
         favoriteStationIds = new Set(validFavoriteIds(payload.favorites));
+        favoritesReady = true;
+        showFavoritesStatus();
       } catch (error) {
         if (requestVersion !== favoritesRequestVersion) return;
-        favoriteStationIds = new Set();
+        showFavoritesStatus("Could not load favorites.", () => syncFavorites(auth, { force: true }));
       }
       renderFavorites();
     }
 
     async function saveFavorites() {
-      const favorites = [...favoriteStationIds];
+      if (!favoritesReady) return;
       if (favoritesAccountKey === "guest") {
         try {
-          localStorage.setItem(guestFavoritesKey, JSON.stringify(favorites));
-        } catch (error) {}
+          localStorage.setItem(guestFavoritesKey, JSON.stringify([...favoriteStationIds]));
+          showFavoritesStatus();
+        } catch (error) {
+          showFavoritesStatus("Favorites could not be saved on this device.", saveFavorites);
+        }
         return;
       }
-      try {
-        await fetch("/api/radio-favorites", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ favorites })
-        });
-      } catch (error) {}
+      // Serialize writes and combine edits made while a save is pending.
+      if (favoritesSaveTask) return favoritesSaveTask;
+      const requestVersion = favoritesRequestVersion;
+      const signal = favoritesController.signal;
+      const task = (async () => {
+        showFavoritesStatus("Saving favorites…");
+        try {
+          while (requestVersion === favoritesRequestVersion && favoritesSavedRevision < favoritesRevision) {
+            const revision = favoritesRevision;
+            const response = await fetch("/api/radio-favorites", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ favorites: [...favoriteStationIds] }), signal
+            });
+            if (!response.ok) throw new Error("Favorites save failed");
+            if (requestVersion !== favoritesRequestVersion) return;
+            favoritesSavedRevision = revision;
+          }
+          if (requestVersion === favoritesRequestVersion) showFavoritesStatus();
+        } catch (error) {
+          if (requestVersion === favoritesRequestVersion) {
+            showFavoritesStatus("Favorites have not been saved. Please retry.", saveFavorites);
+          }
+        }
+      })();
+      favoritesSaveTask = task;
+      try { await task; }
+      finally {
+        if (requestVersion === favoritesRequestVersion && favoritesSaveTask === task) favoritesSaveTask = null;
+      }
     }
 
     function toggleFavorite(stationId) {
-      if (!stations.some(station => station.id === stationId)) return;
+      if (!favoritesReady || !stations.some(station => station.id === stationId)) return;
       if (favoriteStationIds.has(stationId)) favoriteStationIds.delete(stationId);
       else favoriteStationIds.add(stationId);
+      favoritesRevision += 1;
       renderFavorites();
       saveFavorites();
     }
@@ -1317,6 +1381,7 @@
 
     function setPlaybackState(state) {
       nowPlaying.dataset.playbackState = state;
+      setLauncherState();
       nowPlaying.classList.toggle("is-playing", state === "playing");
       nowPlaying.classList.toggle("is-connecting", state === "connecting" || state === "retrying" || state === "buffering");
       nowPlaying.classList.toggle("has-playback-error", state === "error");
@@ -1607,8 +1672,13 @@
     }
 
     function setLauncherState() {
-      launcherLabel.textContent = activeStation ? "Colt Radio • On" : "Colt Radio";
-      launcher.classList.toggle("is-playing", Boolean(activeStation));
+      const state = nowPlaying.dataset.playbackState;
+      const labels = {
+        playing: "Playing", connecting: "Connecting", retrying: "Retrying",
+        buffering: "Buffering", ready: "Paused", error: "Unavailable"
+      };
+      launcherLabel.textContent = activeStation && labels[state] ? `Colt Radio • ${labels[state]}` : "Colt Radio";
+      launcher.classList.toggle("is-playing", state === "playing");
     }
 
     let floatingWindow = null;

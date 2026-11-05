@@ -1,8 +1,22 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261104-genre-lettering-v3', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261105-shared-definitions-v2', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261105-v1', document.currentScript.src).href;
+  let definitionsLoad;
+  function loadDefinitions() {
+    if (window.coltRadioSkinDefinitions) return Promise.resolve();
+    if (!definitionsLoad) definitionsLoad = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = definitionsURL;
+      script.onload = resolve;
+      script.onerror = () => { script.remove(); definitionsLoad = null; reject(new Error('Radio skin definitions unavailable')); };
+      document.head.append(script);
+    });
+    return definitionsLoad;
+  }
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
+    await loadDefinitions();
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
     stylesheet.href = stylesheetURL;
@@ -12,7 +26,7 @@
       document.head.append(stylesheet);
     });
     panel.dataset.radioSkins = 'true';
-    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk'], ['country', 'Country Music'], ['metal', 'Heavy Metal'], ['jazz', 'Jazz Club'], ['djclub', 'DJ Club'], ['reggae', 'Reggae'], ['disco', 'Disco'], ['punk', 'Punk Rock']];
+    const skins = window.coltRadioSkinDefinitions;
     const key = 'coltRadioIllustratedSkin';
     const backdrop = document.createElement('div');
     backdrop.className = 'colt-radio-skin-backdrop';
@@ -33,12 +47,13 @@
     menu.setAttribute('aria-label', 'Radio skins');
     gear.setAttribute('popovertarget', menu.id);
     gear.setAttribute('aria-controls', menu.id);
-    const choices = skins.map(([value, label]) => {
+    const choices = skins.map(({ id: value, label, swatch }) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.radioSkinChoice = value;
       button.setAttribute('role', 'menuitemradio');
       button.innerHTML = '<span class="radio-skin-swatch" aria-hidden="true"></span><span></span><span class="radio-skin-check" aria-hidden="true">✓</span>';
+      button.children[0].style.background = swatch;
       button.children[1].textContent = label;
       menu.append(button);
       return button;
@@ -54,14 +69,14 @@
     function styleTitle(skin) {
       title.textContent = titleText;
       title.removeAttribute('aria-label');
-      if (!['reggae', 'disco', 'punk'].includes(skin)) return;
+      if (skin.title === 'plain') return;
       title.setAttribute('aria-label', titleText);
       title.replaceChildren();
       titleText.split(' ').forEach((word, index) => {
         if (index) title.append(title.ownerDocument.createTextNode(' '));
         const part = title.ownerDocument.createElement('span');
         part.className = 'colt-radio-title-word';
-        if (skin === 'punk') {
+        if (skin.title === 'letters') {
           for (const letter of word) {
             const cutout = title.ownerDocument.createElement('span');
             cutout.className = 'colt-radio-title-letter';
@@ -73,10 +88,14 @@
       });
     }
     function applySkin(skin) {
-      if (!skins.some(([id]) => id === skin)) skin = 'original';
+      const definition = skins.find(({ id }) => id === skin) || skins[0];
+      skin = definition.id;
+      panel.dataset.radioLayout = definition.layout;
+      skins.forEach(item => Object.keys(item.variables).forEach(name => panel.style.removeProperty(name)));
+      Object.entries(definition.variables).forEach(([name, value]) => panel.style.setProperty(name, value));
       if (skin === 'original') delete panel.dataset.radioSkin;
       else panel.dataset.radioSkin = skin;
-      styleTitle(skin);
+      styleTitle(definition);
       fitBackdrop();
       choices.forEach(button => {
         const selected = button.dataset.radioSkinChoice === skin;
@@ -84,7 +103,7 @@
         button.tabIndex = selected ? 0 : -1;
         button.autofocus = selected;
       });
-      gear.title = 'Radio skin: ' + skins.find(([id]) => id === skin)[1];
+      gear.title = 'Radio skin: ' + definition.label;
       try { localStorage.setItem(key, skin); } catch {}
     }
     let saved = 'original';

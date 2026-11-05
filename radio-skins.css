@@ -2,10 +2,10 @@
 .colt-radio-panel {--radio-skin-accent:#ed657c;}
 /* Skin layout rules must always respect the close/minimize hidden state. */
 .colt-radio-panel[hidden] {display:none!important;}
-.colt-radio-panel[data-radio-skin=inferno] {--radio-skin-accent:#ffb44e;}
-.colt-radio-panel[data-radio-skin=frostfang] {--radio-skin-accent:#85dcff;}
-.colt-radio-panel[data-radio-skin=temple] {--radio-skin-accent:#8ee6af;}
-.colt-radio-panel[data-radio-skin=nebula] {--radio-skin-accent:#d09bff;}
+
+
+
+
 .colt-radio-skin-backdrop {display:none;}
 .colt-radio-skin-gear {position:absolute;right:12px;bottom:12px;z-index:3;display:grid;place-items:center;width:26px;height:26px;padding:0;border:1px solid #becbd577;border-radius:5px;background:#0d101ae8;color:#eef5ff;font:20px/1 system-ui;cursor:pointer;}
 .colt-radio-panel[data-radio-skins] .colt-radio-filters {grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;}
@@ -16,10 +16,10 @@
 .colt-radio-skin-menu button:hover,.colt-radio-skin-menu button:focus-visible {outline:none;border-color:#b3d8f7;background:#ffffff15;}
 .colt-radio-skin-menu button[aria-checked=true] {background:#ffffff14;}
 .radio-skin-swatch {height:25px;border:1px solid #fff5;border-radius:4px;background:linear-gradient(135deg,#dc324e,#1c090e);}
-[data-radio-skin-choice=inferno] .radio-skin-swatch {background:linear-gradient(135deg,#ffcd6a,#a52f09,#150a04);}
-[data-radio-skin-choice=frostfang] .radio-skin-swatch {background:linear-gradient(135deg,#e5fbff,#287eb6,#071827);}
-[data-radio-skin-choice=temple] .radio-skin-swatch {background:linear-gradient(135deg,#e6c16c,#1eac67,#041b13);}
-[data-radio-skin-choice=nebula] .radio-skin-swatch {background:linear-gradient(135deg,#7cecff,#c054f1,#160a2d);}
+
+
+
+
 .radio-skin-check {visibility:hidden;}
 [aria-checked=true] .radio-skin-check {visibility:visible;}
 .colt-radio-panel .colt-radio-skin-gear {position:relative;width:34px;height:38px;right:auto;bottom:auto;align-self:center;border-color:var(--radio-skin-accent);background:linear-gradient(145deg,#36404c,#11161e 55%,#27313d);color:var(--radio-skin-accent);box-shadow:inset 0 1px #fff5,inset 0 -2px #0009,0 0 9px #0008;}
@@ -398,11 +398,11 @@
 
 .colt-radio-panel[data-radio-skin="bayou"] .colt-radio-volume-slider::-moz-range-thumb {border-color:#f8ffd1;background:#d9ed8d;box-shadow:0 0 6px #cef66b;}
 .colt-radio-panel[data-radio-skin="bayou"] .colt-radio-skin-backdrop {top:var(--radio-skin-header-height, 112px);}
-[data-radio-skin-choice=bayou] .radio-skin-swatch {background:linear-gradient(135deg,#dfe993,#83a929,#513516);}
+
 
 /* Hip-Hop DJ — production controls over the approved illustrated deck. */
 .colt-radio-panel[data-radio-skin=hiphop] {
- --radio-skin-accent:#ffcf65;
+
  border-color:#b78031!important;
  background:repeating-linear-gradient(90deg,#b7803166 0 2px,#171114 2px 7px,#44321a 7px 9px,#100e12 9px 100%)!important;
  box-shadow:inset 0 0 0 2px #eab84b55,0 0 24px #d6862833,0 24px 60px #000a!important;
@@ -465,7 +465,7 @@
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-note {background:#181216e8;color:#efdfb7}
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-note:before,
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-note:after {color:#d5b56b}
-[data-radio-skin-choice=hiphop] .radio-skin-swatch {background:linear-gradient(135deg,#ffe2a2,#8a5520,#171018,#8b35bd)}
+
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-filter {clip-path:none;border-radius:5px}
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-filter-icon,
 .colt-radio-panel[data-radio-skin=hiphop] .colt-radio-filter.is-active .colt-radio-filter-icon {color:#ffebad}
@@ -518,7 +518,7 @@
  font-display:swap;
 }
 .colt-radio-panel[data-radio-skin=cyberpunk] {
- --radio-skin-accent:#65f4ff;
+
  isolation:isolate;border-color:#39d9ed!important;background:#060c20!important;
  box-shadow:inset 0 0 0 1px #739aff77,0 0 24px #15d7f133,0 24px 60px #000b!important;
 }
@@ -627,7 +627,7 @@
 .colt-radio-panel[data-radio-skin=cyberpunk] .colt-radio-note {background:#081126d9;color:#d5eaff}
 .colt-radio-panel[data-radio-skin=cyberpunk] .colt-radio-note:before,
 .colt-radio-panel[data-radio-skin=cyberpunk] .colt-radio-note:after {color:#95e6ff}
-[data-radio-skin-choice=cyberpunk] .radio-skin-swatch {background:linear-gradient(135deg,#87f7ff,#15314b,#d837f3)}
+
 
 .colt-radio-panel[data-radio-skin=cyberpunk] .colt-radio-station:after {
  content:'';position:absolute;bottom:4px;right:4px;width:13px;height:8px;
@@ -656,114 +656,94 @@
  .colt-radio-panel[data-radio-skin=cyberpunk] .colt-radio-stations {flex:1 1 auto;min-height:54px}
 }
 /* Music genres share live controls; only artwork, materials and colors change. */
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) {
+.colt-radio-panel[data-radio-layout=genre] {
  --radio-skin-accent:var(--genre-accent);isolation:isolate;
  background:var(--genre-base)!important;border-color:var(--genre-edge)!important;
  box-shadow:inset 0 0 0 1px var(--genre-edge),0 0 20px color-mix(in srgb,var(--genre-accent) 22%,transparent),0 24px 60px #000b!important;
 }
-.colt-radio-panel[data-radio-skin=country] {
- --genre-art:url('assets/radio-skins/illustrated/country-atlas.png');
- --genre-base:#251306;--genre-edge:#bf8a49;--genre-accent:#ffd492;--genre-text:#ffefd2;
- --genre-material:repeating-linear-gradient(0deg,#9c61241a 0 2px,transparent 2px 6px),linear-gradient(110deg,#673714,#32190e 60%,#683a17);
- --genre-band:1254 / 260;--genre-band-position:42.2535%;--genre-portrait:226.3538%;
-}
-.colt-radio-panel[data-radio-skin=metal] {
- --genre-art:url('assets/radio-skins/illustrated/metal-atlas.png');
- --genre-base:#100e10;--genre-edge:#a9a5a2;--genre-accent:#ff7954;--genre-text:#fff0e8;
- --genre-material:repeating-linear-gradient(130deg,#b7c5ce0a 0 1px,transparent 1px 4px),linear-gradient(135deg,#36383b,#121214 60%,#373334);
- --genre-band:1254 / 215;--genre-band-position:42.7334%;--genre-portrait:213%;
-}
-.colt-radio-panel[data-radio-skin=jazz] {
- --genre-art:url('assets/radio-skins/illustrated/jazz-atlas.png');
- --genre-base:#20100c;--genre-edge:#c3954c;--genre-accent:#ffe0a1;--genre-text:#fff2d6;
- --genre-material:repeating-linear-gradient(2deg,#d2973e0d 0 1px,transparent 1px 5px),linear-gradient(120deg,#49231c,#291412 65%,#563223);
- --genre-band:1254 / 222;--genre-band-position:39.9225%;--genre-portrait:210%;
-}
-.colt-radio-panel[data-radio-skin=djclub] {
- --genre-art:url('assets/radio-skins/illustrated/djclub-atlas.png');
- --genre-base:#070f22;--genre-edge:#6d9cda;--genre-accent:#79f1ff;--genre-text:#e7faff;
- --genre-material:repeating-linear-gradient(0deg,#9ddaff0a 0 1px,transparent 1px 4px),linear-gradient(120deg,#122c4c,#0b1027 65%,#30204d);
- --genre-band:1254 / 226;--genre-band-position:39.5914%;--genre-portrait:210%;
-}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-skin-backdrop {
+
+
+
+
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-skin-backdrop {
  display:flex;flex-direction:column;position:absolute;inset:var(--radio-skin-header-height,138px) 0 0;
  z-index:-2;pointer-events:none;overflow:hidden;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-skin-backdrop span {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-skin-backdrop span {
  display:block;flex:none;width:100%;aspect-ratio:var(--genre-band);
  background:var(--genre-art) center var(--genre-band-position) / 100% auto no-repeat;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-skin-backdrop span:nth-child(even) {transform:scaleY(-1)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-header {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-skin-backdrop span:nth-child(even) {transform:scaleY(-1)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-header {
  width:100%;height:auto;min-height:0;aspect-ratio:3/1;border-bottom-color:var(--genre-edge);
  background:var(--genre-art) center top / 100% auto no-repeat!important;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-header:before {background:transparent;box-shadow:none}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading {transform:translateY(-10px)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-header-actions {transform:translateY(-18px)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading h2 {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-header:before {background:transparent;box-shadow:none}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-heading {transform:translateY(-10px)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-header-actions {transform:translateY(-18px)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-heading h2 {
  color:var(--genre-accent);-webkit-text-stroke:0;text-shadow:1px 2px #000,0 0 8px #000;letter-spacing:-.025em;
 }
 .colt-radio-panel[data-radio-skin=country] .colt-radio-heading h2 {font-family:Rockwell,Georgia,serif;font-weight:900}
 .colt-radio-panel[data-radio-skin=metal] .colt-radio-heading h2 {font-family:Impact,'Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.035em;transform:skewX(-7deg);color:#eee9e6;text-shadow:1px 2px #521e19,0 0 9px #e94c2799}
 .colt-radio-panel[data-radio-skin=jazz] .colt-radio-heading h2 {font-family:Georgia,serif;font-style:italic;font-weight:700;color:#ffe4a5}
 .colt-radio-panel[data-radio-skin=djclub] .colt-radio-heading h2 {font-family:ColtRadioCyber,'Segoe UI',sans-serif;font-weight:800;text-transform:uppercase;color:#c0ffff;text-shadow:1px 2px #513485,0 0 7px #1cd9f199}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .feature-kicker {
+.colt-radio-panel[data-radio-layout=genre] .feature-kicker {
  background:var(--genre-base)!important;border-color:var(--genre-edge)!important;color:var(--genre-accent)!important;box-shadow:inset 0 1px #ffffff33,0 2px 6px #0009;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {
  background:var(--genre-art) center bottom / auto var(--genre-portrait) no-repeat;
  border-color:var(--genre-edge);box-shadow:0 0 8px #0009,inset 0 0 0 1px #ffffff33;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) img {visibility:hidden}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-filters,.colt-radio-search,.colt-radio-stations) {background:transparent!important}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-icon-btn,.colt-radio-skin-gear,.colt-radio-filter) {
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) img {visibility:hidden}
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-filters,.colt-radio-search,.colt-radio-stations) {background:transparent!important}
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-icon-btn,.colt-radio-skin-gear,.colt-radio-filter) {
  background:var(--genre-material);border-color:var(--genre-edge);color:var(--genre-text);
  box-shadow:inset 0 1px #ffffff55,inset 0 -2px #0007,0 2px 5px #0008;clip-path:none;border-radius:4px;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-filter.is-active {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-filter.is-active {
  background:linear-gradient(120deg,color-mix(in srgb,var(--genre-accent) 30%,transparent),transparent),var(--genre-material);
  border-color:var(--genre-accent);color:var(--genre-text);box-shadow:inset 0 0 9px #ffffff22,0 0 5px #0007;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-filter-icon,.colt-radio-search-icon) {color:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-search-input {
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-filter-icon,.colt-radio-search-icon) {color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-search-input {
  background:color-mix(in srgb,var(--genre-base) 95%,transparent);border-color:var(--genre-edge);color:var(--genre-text);box-shadow:inset 0 1px #ffffff22;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-search-input::placeholder {color:var(--genre-text);opacity:.85}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-stations {scrollbar-color:var(--genre-edge) var(--genre-base)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-station {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-search-input::placeholder {color:var(--genre-text);opacity:.85}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-stations {scrollbar-color:var(--genre-edge) var(--genre-base)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-station {
  background:var(--genre-material)!important;border-color:var(--genre-edge)!important;color:var(--genre-text)!important;
  box-shadow:inset 0 1px #ffffff33,inset 0 -2px #0006,0 2px 4px #0008!important;border-radius:5px;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-station.is-active {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-station.is-active {
  background:linear-gradient(120deg,color-mix(in srgb,var(--genre-accent) 25%,transparent),#0002),var(--genre-material)!important;
  border-color:var(--genre-accent)!important;box-shadow:inset 0 0 8px #ffffff22,0 0 5px var(--genre-accent)!important;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-station-icon {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-station-icon {
  background:#0005;color:var(--genre-accent);border-color:var(--genre-edge);box-shadow:inset 0 0 6px #ffffff11;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-favorite {color:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-favorite.is-favorite {color:var(--genre-text);text-shadow:0 0 5px var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-player {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-favorite {color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-favorite.is-favorite {color:var(--genre-text);text-shadow:0 0 5px var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-player {
  border-color:var(--genre-edge);box-shadow:inset 0 0 0 2px #ffffff22,0 0 7px #0008;border-radius:5px;
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-now-playing {background:var(--genre-material)!important}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-now-playing:after {background:radial-gradient(ellipse,color-mix(in srgb,var(--genre-accent) 15%,transparent),transparent 70%)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-stream-label,.colt-radio-mute) {color:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-live-badge {background:var(--genre-base);border-color:var(--genre-edge);color:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-equalizer i {background:linear-gradient(var(--genre-text),var(--genre-accent));box-shadow:0 0 4px var(--genre-edge)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-play {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-now-playing {background:var(--genre-material)!important}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-now-playing:after {background:radial-gradient(ellipse,color-mix(in srgb,var(--genre-accent) 15%,transparent),transparent 70%)}
+.colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-stream-label,.colt-radio-mute) {color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-live-badge {background:var(--genre-base);border-color:var(--genre-edge);color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-equalizer i {background:linear-gradient(var(--genre-text),var(--genre-accent));box-shadow:0 0 4px var(--genre-edge)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-play {
  color:var(--genre-text);border-color:var(--genre-accent);
  background:radial-gradient(circle,var(--genre-base) 40%,#151215 62%,var(--genre-accent) 73%,var(--genre-base) 80%);box-shadow:0 0 7px var(--genre-edge);
 }
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-volume-slider::-webkit-slider-runnable-track {background:linear-gradient(to right,var(--genre-accent) 0 var(--radio-volume),var(--genre-base) var(--radio-volume) 100%)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-volume-slider::-webkit-slider-thumb {background:var(--genre-text);border-color:var(--genre-accent);box-shadow:0 0 5px var(--genre-edge)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-volume-slider::-moz-range-track {background:var(--genre-base)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-volume-slider::-moz-range-progress {background:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-volume-slider::-moz-range-thumb {background:var(--genre-text);border-color:var(--genre-accent)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-note {background:color-mix(in srgb,var(--genre-base) 94%,transparent);color:var(--genre-text)}
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-note:before,
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-note:after {color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-volume-slider::-webkit-slider-runnable-track {background:linear-gradient(to right,var(--genre-accent) 0 var(--radio-volume),var(--genre-base) var(--radio-volume) 100%)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-volume-slider::-webkit-slider-thumb {background:var(--genre-text);border-color:var(--genre-accent);box-shadow:0 0 5px var(--genre-edge)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-volume-slider::-moz-range-track {background:var(--genre-base)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-volume-slider::-moz-range-progress {background:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-volume-slider::-moz-range-thumb {background:var(--genre-text);border-color:var(--genre-accent)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-note {background:color-mix(in srgb,var(--genre-base) 94%,transparent);color:var(--genre-text)}
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-note:before,
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-note:after {color:var(--genre-accent)}
 /* Theme details stay decorative and never intercept the working controls. */
 .colt-radio-panel[data-radio-skin=country] .colt-radio-station:after {
  content:'';position:absolute;inset:2px;pointer-events:none;border:1px dashed #dfac6366;border-radius:3px;
@@ -776,29 +756,26 @@
 .colt-radio-panel[data-radio-skin=jazz] .colt-radio-station:after {content:'';position:absolute;inset:3px;pointer-events:none;border:1px solid #d1a25044;border-radius:3px}
 .colt-radio-panel[data-radio-skin=djclub] .colt-radio-station:before {content:'';position:absolute;top:2px;left:15%;right:15%;height:3px;pointer-events:none;background:repeating-linear-gradient(90deg,#32edff 0 3px,transparent 3px 5px,#c269ff 5px 8px,transparent 8px 10px)}
 .colt-radio-panel[data-radio-skin=djclub] .colt-radio-equalizer i:nth-child(3n) {background:linear-gradient(#f2baff,#9b3dff)}
-[data-radio-skin-choice=country] .radio-skin-swatch {background:linear-gradient(135deg,#ffdc98,#764119,#244476)}
-[data-radio-skin-choice=metal] .radio-skin-swatch {background:linear-gradient(135deg,#d0d0cf,#242327,#e13b1a)}
-[data-radio-skin-choice=jazz] .radio-skin-swatch {background:linear-gradient(135deg,#e3ba72,#4a2018,#221218)}
-[data-radio-skin-choice=djclub] .radio-skin-swatch {background:linear-gradient(135deg,#80f9ff,#142a67,#bd50ff)}
+
+
+
+
 @media(max-width:560px) {
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-header-actions {position:absolute;right:8px;top:8px;gap:4px;transform:none}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-icon-btn {width:26px;height:28px;min-width:26px;min-height:28px;font-size:18px}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading .feature-kicker {font-size:7px;letter-spacing:.08em;padding:3px 5px}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading h2 {font-size:21px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-header-actions {position:absolute;right:8px;top:8px;gap:4px;transform:none}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-icon-btn {width:26px;height:28px;min-width:26px;min-height:28px;font-size:18px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading .feature-kicker {font-size:7px;letter-spacing:.08em;padding:3px 5px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading h2 {font-size:21px}
 }
 @media(max-height:800px) {
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) {display:flex;flex-direction:column;overflow-y:auto}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) :is(.colt-radio-header,.colt-radio-filters,.colt-radio-search,.colt-radio-player,.colt-radio-note) {flex-shrink:0}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-stations {flex:1 1 auto;min-height:54px}
+ .colt-radio-panel[data-radio-layout=genre] {display:flex;flex-direction:column;overflow-y:auto}
+ .colt-radio-panel[data-radio-layout=genre] :is(.colt-radio-header,.colt-radio-filters,.colt-radio-search,.colt-radio-player,.colt-radio-note) {flex-shrink:0}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-stations {flex:1 1 auto;min-height:54px}
 }
 /* Large portrait windows match the established DJ skin instead of narrow mobile ovals. */
-.colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading-mark {
+.colt-radio-panel[data-radio-layout=genre] .colt-radio-heading-mark {
  width:80px;height:88px;flex:0 0 80px;border-width:2px;border-radius:44%;
 }
-.colt-radio-panel[data-radio-skin=country] {
- --genre-accent:#f5d592;--genre-edge:#c09250;
- --genre-material:linear-gradient(#1f0e0433,#1f0e0477),var(--genre-art) center 43% / auto 620% no-repeat;
-}
+
 .colt-radio-panel[data-radio-skin=country] .colt-radio-filter.is-active {
  color:#effff9;border-color:#72dfcc;
  background:linear-gradient(130deg,#217f7c,#123e40 70%,#725121);box-shadow:inset 0 1px #bdfff077,0 0 7px #62cdb744;
@@ -809,35 +786,20 @@
 .colt-radio-panel[data-radio-skin=country] .colt-radio-station-icon {color:#a8eee0;background:#102a2b99;border-color:#70b6a7}
 .colt-radio-panel[data-radio-skin=country] .colt-radio-station.is-active {border-color:#9de5d2!important;box-shadow:inset 0 0 12px #e8bd6833,0 0 6px #55c2b1!important}
 @media(max-width:420px) {
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading-mark {width:72px;height:80px;flex-basis:72px}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading {transform:translateY(-6px)}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading-mark {width:72px;height:80px;flex-basis:72px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading {transform:translateY(-6px)}
 }
 @media(max-width:350px) {
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading-mark {width:68px;height:76px;flex-basis:68px}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading {gap:7px}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading .feature-kicker {font-size:6px;letter-spacing:.04em}
- .colt-radio-panel:is([data-radio-skin=country],[data-radio-skin=metal],[data-radio-skin=jazz],[data-radio-skin=djclub],[data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading h2 {font-size:19px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading-mark {width:68px;height:76px;flex-basis:68px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading {gap:7px}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading .feature-kicker {font-size:6px;letter-spacing:.04em}
+ .colt-radio-panel[data-radio-layout=genre] .colt-radio-heading h2 {font-size:19px}
 }
-.colt-radio-panel[data-radio-skin=country] {--genre-band:1254 / 190;--genre-band-position:41.8233%;--genre-portrait:205%}
+
 /* Tropical sound system, mirrorball disco and DIY punk use the same live player. */
-.colt-radio-panel[data-radio-skin=reggae] {
- --genre-art:url('assets/radio-skins/illustrated/reggae-atlas.png');
- --genre-base:#0b2018;--genre-edge:#d3ae44;--genre-accent:#ffe27f;--genre-text:#fff4ce;
- --genre-material:repeating-linear-gradient(0deg,#eed5830b 0 1px,transparent 1px 6px),linear-gradient(125deg,#23583e,#112c22 65%,#244537);
- --genre-band:1254 / 225;--genre-band-position:40.8163%;--genre-portrait:205%;
-}
-.colt-radio-panel[data-radio-skin=disco] {
- --genre-art:url('assets/radio-skins/illustrated/disco-atlas.png');
- --genre-base:#1c1029;--genre-edge:#bfc3df;--genre-accent:#ffb4ee;--genre-text:#fff2fd;
- --genre-material:radial-gradient(ellipse at top left,#b755c744,transparent 60%),repeating-linear-gradient(115deg,#d0d6ff0b 0 1px,transparent 1px 5px),linear-gradient(130deg,#463c65,#241c34 65%,#493256);
- --genre-band:1254 / 225;--genre-band-position:40.8163%;--genre-portrait:205%;
-}
-.colt-radio-panel[data-radio-skin=punk] {
- --genre-art:url('assets/radio-skins/illustrated/punk-atlas.png');
- --genre-base:#151719;--genre-edge:#a4a5a9;--genre-accent:#d7ff74;--genre-text:#f5ffe6;
- --genre-material:repeating-linear-gradient(165deg,#dce3ed0c 0 1px,transparent 1px 7px),linear-gradient(125deg,#34383d,#181b20 65%,#303138);
- --genre-band:1254 / 225;--genre-band-position:40.8163%;--genre-portrait:205%;
-}
+
+
+
 .colt-radio-panel[data-radio-skin=reggae] .colt-radio-heading h2 {
  font-family:'Arial Black','Segoe UI',sans-serif;font-weight:900;color:#ffe086;letter-spacing:-.045em;
  text-shadow:1px 2px #267143,2px 3px #9e252e,0 0 9px #000;
@@ -876,12 +838,12 @@
 .colt-radio-panel[data-radio-skin=punk] .colt-radio-station-item:nth-child(2n) .colt-radio-station-icon {color:#ff91d2;border-color:#c35f9c}
 .colt-radio-panel[data-radio-skin=punk] .colt-radio-filter.is-active {background:linear-gradient(130deg,#4e6331,#22282b 60%,#5e2b4e)}
 .colt-radio-panel[data-radio-skin=punk] .colt-radio-station:after {content:'';position:absolute;right:2px;bottom:2px;width:7px;height:7px;border-right:2px solid #ef85be;border-bottom:2px solid #ef85be;pointer-events:none}
-[data-radio-skin-choice=reggae] .radio-skin-swatch {background:linear-gradient(135deg,#c83c32 0 33%,#f0cb5c 34% 65%,#338950 66%)}
-[data-radio-skin-choice=disco] .radio-skin-swatch {background:conic-gradient(#f2e5ff,#c969d6,#8de2f0,#fde0a1,#f2e5ff)}
-[data-radio-skin-choice=punk] .radio-skin-swatch {background:linear-gradient(135deg,#dcff70,#22232a 40% 65%,#f47cbd)}
 
-.colt-radio-panel[data-radio-skin=disco] {--genre-band:1254 / 200;--genre-band-position:38.8994%;--genre-portrait:200%}
-.colt-radio-panel[data-radio-skin=punk] {--genre-band:1254 / 210;--genre-band-position:36.8774%;--genre-portrait:198%}
+
+
+
+
+
 /* Live title lettering: layered sound-system paint, mirrored disco chrome, punk paper cutouts. */
 @font-face {
  font-family:ColtRadioGroove;src:url('dumpling-pet/Nunito.ttf') format('truetype');
@@ -944,3 +906,40 @@
  .colt-radio-panel[data-radio-skin=disco] .colt-radio-heading h2 {font-size:19px}
  .colt-radio-panel[data-radio-skin=punk] .colt-radio-heading h2 {font-size:21px}
 }
+/* Blues: cobalt valve-radio enamel, brass fittings and a vintage sign-painted title. */
+
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-heading h2 {
+ position:relative;isolation:isolate;white-space:nowrap;font-family:'Segoe Script','Brush Script MT',Georgia,cursive;
+ font-size:26px;font-style:italic;font-weight:700;letter-spacing:-1.2px;line-height:1.2;
+ text-shadow:none;transform:rotate(-3deg);transform-origin:left center;
+}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-title-word {
+ color:#ffe8b1;background:linear-gradient(180deg,#fff3ca 0 24%,#e0b364 42%,#95602b 49%,#ffe2a0 55% 72%,#c48b40 90%);
+ background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:.2px #f2cc87;
+ filter:drop-shadow(1px 2px 0 #172132) drop-shadow(0 0 3px #000);
+}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-heading h2:after {
+ content:'';position:absolute;left:5%;right:2%;bottom:-5px;height:4px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,#edc275 16% 84%,transparent) top / 100% 1px no-repeat,linear-gradient(90deg,transparent 15%,#b78642 35% 65%,transparent 85%) bottom / 100% 1px no-repeat;
+}
+.colt-radio-panel[data-radio-skin=blues] .feature-kicker {box-shadow:inset 0 1px #fff0bb44,inset 0 -2px #6a4c2688,0 2px 4px #0009}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-filter {border-radius:6px}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-filter.is-active {background:linear-gradient(130deg,#526b8f,#172e4a 65%,#5d512d)}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-station {
+ border-radius:5px;background:repeating-linear-gradient(0deg,#151f3300 0 3px,#7b9ebc0d 3px 4px),var(--genre-material)!important;
+ box-shadow:inset 0 1px #fce3a355,inset 0 -2px #050c1a88,0 2px 5px #0008!important;
+}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-station:after {content:'';position:absolute;inset:3px;pointer-events:none;border:1px solid #cda46144;border-radius:3px}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-station-icon {background:linear-gradient(145deg,#152b48,#10243c);box-shadow:inset 0 1px #fff1c633,0 1px 2px #0007}
+.colt-radio-panel[data-radio-skin=blues] .colt-radio-play {background:radial-gradient(circle,#1b3254 35%,#101a29 62%,#f0cd83 73%,#7b582a 80%);box-shadow:0 0 8px #d3aa5e66}
+
+@media(max-width:560px) {.colt-radio-panel[data-radio-skin=blues] .colt-radio-heading h2 {font-size:22px;letter-spacing:-1px}}
+@media(max-width:350px) {.colt-radio-panel[data-radio-skin=blues] .colt-radio-heading h2 {font-size:20px}}
+
+
+/* Persistence feedback is hidden during normal use. */
+.colt-radio-favorites-status {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#101722;color:#fff;font:600 12px/1.4 'Segoe UI',sans-serif;}
+.colt-radio-favorites-status[hidden] {display:none!important;}
+.colt-radio-favorites-retry {flex:none;padding:5px 10px;border:1px solid currentColor;border-radius:4px;background:#25334a;color:#fff;font:inherit;cursor:pointer;}
+.colt-radio-favorites-retry:focus-visible {outline:2px solid #fff;outline-offset:2px;}
+.colt-radio-favorite:disabled {opacity:.5;cursor:wait;}

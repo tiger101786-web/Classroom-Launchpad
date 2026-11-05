@@ -2,13 +2,15 @@ const fs = require('node:fs'), path = require('node:path'), os = require('node:o
 const { chromium } = require('playwright');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const root = path.resolve(__dirname, '..');
+const assetRoot = process.env.RADIO_ASSET_ROOT || root;
 const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(), 'approved-radio-'));
 const reference = process.env.RADIO_REFERENCE_DIR;
-const genres = ['country', 'metal', 'jazz', 'djclub', 'reggae', 'disco', 'punk'];
+const definitions = require('../radio-skin-definitions.js');
+const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
-const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'cyberpunk', ...genres];
+const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
 (async () => {
- const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
+ const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
   const context = await browser.newContext({ viewport: { width: 1000, height: 1000 }, deviceScaleFactor: 2 });
   await context.addInitScript(() => {
@@ -21,7 +23,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    const u = new URL(route.request().url());
    if (u.hostname !== 'radio.test') return route.abort();
    if (u.pathname === '/') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><div id="coltRadioRoot" class="colt-radio-root"></div><script src="/colt-radio.js"></script>' });
-   const file = path.join(root, decodeURIComponent(u.pathname));
+   const file = path.join(u.pathname.startsWith('/assets/') ? assetRoot : root, decodeURIComponent(u.pathname));
    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return route.fulfill({ status: 404, body: '' });
    return route.fulfill({ body: fs.readFileSync(file), contentType: file.endsWith('.html') ? 'text/html' : file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : file.endsWith('.png') ? 'image/png' : file.endsWith('.jpg') ? 'image/jpeg' : 'application/octet-stream' });
   });
@@ -35,20 +37,20 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click();
   const panel = page.locator('.colt-radio-panel'), gear = page.getByRole('button', { name: 'Change Colt Radio skin', exact: true });
   await gear.waitFor();
-  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 15, 'Fourteen illustrated skins and Original');
+  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), definitions.length, 'Every registered skin is offered');
   assert.equal(artRequests.length, 0, 'Original loads no themed artwork');
   const choose = async (skin, target = page) => {
    await target.getByRole('button', { name: 'Change Colt Radio skin', exact: true }).click();
    await target.locator('[data-radio-skin-choice=' + skin + ']').click();
-   if (skin !== 'original') await target.evaluate(async id => {
-    await Promise.race([Promise.all((['country','metal','jazz','djclub','reggae','disco','punk'].includes(id) ? ['atlas'] : ['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2']).map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
-   }, skin);
+   if (skin !== 'original') await target.evaluate(async ({id, assets}) => {
+    await Promise.race([Promise.all(assets.map(asset => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL(asset, document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
+   }, {id: skin, assets: definitions.find(item => item.id === skin).assets});
   };
   const checkTitle = async (skin, target = page) => {
    const current = target.locator('.colt-radio-panel');
    const heading = current.locator('.colt-radio-heading h2');
    assert.equal(await heading.textContent(), 'Colt Radio', 'Title text survives skin changes');
-   if (!['reggae','disco','punk'].includes(skin)) {
+   if (definitions.find(item => item.id === skin).title === 'plain') {
     assert.equal(await heading.locator('.colt-radio-title-word').count(), 0, 'Other skins restore their original title');
     return;
    }
@@ -114,7 +116,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
    const capture = await panel.screenshot({ path: path.join(output, skin + '.png') });
-   if (['reggae','disco','punk'].includes(skin)) await panel.locator('.colt-radio-header').screenshot({path:path.join(output,skin+'-header-live.png')});
+   if (['reggae','disco','punk','blues'].includes(skin)) await panel.locator('.colt-radio-header').screenshot({path:path.join(output,skin+'-header-live.png')});
    if (reference && skin !== "cyberpunk" && !genres.includes(skin)) {
     const old = await loadImage(path.join(reference, (skin === 'inferno' ? 'inferno-forge' : skin === 'bayou' ? 'bayou-nights' : skin) + '.png'));
     const current = await loadImage(capture);
@@ -191,7 +193,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'punk', 'Saved skin restored');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'blues', 'Saved skin restored');
   await gear.click(); await page.keyboard.press('Home'); await page.keyboard.press('Enter');
   assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Keyboard can return to Original');
   await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { value: undefined, configurable: true }));
@@ -205,9 +207,9 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    await floating.screenshot({path:path.join(output,'floating-'+skin+'.png')});
   }
   await floating.getByRole('button', { name: 'Return Colt Radio to Launchpad', exact: true }).click();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'punk');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'blues');
   await gear.click(); await gear.click();
   assert.deepEqual(errors, []);
-  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, fifteen choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
+  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, sixteen choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
