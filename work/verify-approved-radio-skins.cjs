@@ -44,6 +44,24 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
     await Promise.race([Promise.all((['country','metal','jazz','djclub','reggae','disco','punk'].includes(id) ? ['atlas'] : ['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2']).map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
    }, skin);
   };
+  const checkTitle = async (skin, target = page) => {
+   const current = target.locator('.colt-radio-panel');
+   const heading = current.locator('.colt-radio-heading h2');
+   assert.equal(await heading.textContent(), 'Colt Radio', 'Title text survives skin changes');
+   if (!['reggae','disco','punk'].includes(skin)) {
+    assert.equal(await heading.locator('.colt-radio-title-word').count(), 0, 'Other skins restore their original title');
+    return;
+   }
+   assert(await current.getByRole('heading', {name:'Colt Radio',exact:true}).isVisible(), 'Styled title keeps its accessible name');
+   await target.evaluate(() => document.fonts.ready);
+   const title = await heading.boundingBox();
+   const header = await current.locator('.colt-radio-header').boundingBox();
+   assert(title.x>=header.x && title.x+title.width<=header.x+header.width && title.y>=header.y && title.y+title.height<=header.y+header.height, 'Theme title stays in its header');
+   for (const selector of ['.colt-radio-header-actions','.colt-radio-heading-mark']) {
+    const other = await current.locator(selector).boundingBox();
+    assert(title.x+title.width<=other.x || title.x>=other.x+other.width || title.y+title.height<=other.y || title.y>=other.y+other.height, 'Title does not overlap portrait or header buttons');
+   }
+  };
   await panel.locator('[data-station="chill-house"]').click();
   await panel.locator('[data-favorite-station="chill-house"]').click();
   await page.evaluate(async () => { await Promise.all([...document.querySelectorAll('.colt-radio-panel img')].map(i => i.decode().catch(() => {}))); });
@@ -51,6 +69,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   const originalGeometry = await geometry();
   for (const skin of skins) {
    await choose(skin);
+   await checkTitle(skin);
    if (genres.includes(skin)) {
     const art = await panel.evaluate(panel => ({
      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
@@ -95,6 +114,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
    const capture = await panel.screenshot({ path: path.join(output, skin + '.png') });
+   if (['reggae','disco','punk'].includes(skin)) await panel.locator('.colt-radio-header').screenshot({path:path.join(output,skin+'-header-live.png')});
    if (reference && skin !== "cyberpunk" && !genres.includes(skin)) {
     const old = await loadImage(path.join(reference, (skin === 'inferno' ? 'inferno-forge' : skin === 'bayou' ? 'bayou-nights' : skin) + '.png'));
     const current = await loadImage(capture);
@@ -132,7 +152,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    console.log('Checking viewport ' + width + 'x' + height);
    await page.setViewportSize({ width, height });
    for (const skin of skins) {
-    await choose(skin); await gear.click();
+    await choose(skin); await checkTitle(skin); await gear.click();
     await page.waitForFunction(() => document.querySelector('.colt-radio-skin-menu').style.opacity === '1');
     const r = await page.locator('.colt-radio-skin-menu').boundingBox();
     assert(r.x >= 0 && r.y >= 0 && r.x + r.width <= width + 1 && r.y + r.height <= height + 1);

@@ -882,3 +882,65 @@
 
 .colt-radio-panel[data-radio-skin=disco] {--genre-band:1254 / 200;--genre-band-position:38.8994%;--genre-portrait:200%}
 .colt-radio-panel[data-radio-skin=punk] {--genre-band:1254 / 210;--genre-band-position:36.8774%;--genre-portrait:198%}
+/* Live title lettering: layered sound-system paint, mirrored disco chrome, punk paper cutouts. */
+@font-face {
+ font-family:ColtRadioGroove;src:url('dumpling-pet/Nunito.ttf') format('truetype');
+ font-style:normal;font-weight:100 1000;font-display:swap;
+}
+.colt-radio-panel:is([data-radio-skin=reggae],[data-radio-skin=disco],[data-radio-skin=punk]) .colt-radio-heading h2 {
+ position:relative;white-space:nowrap;isolation:isolate;line-height:1.15;
+}
+.colt-radio-title-word {display:inline-block;position:relative}
+.colt-radio-panel[data-radio-skin=reggae] .colt-radio-heading h2 {
+ font-family:ColtRadioGroove,'Arial Black',sans-serif;font-size:28px;font-weight:1000;font-style:normal;letter-spacing:-1.1px;
+ transform:rotate(-2deg);transform-origin:left center;text-shadow:none;color:#ffdf65;
+ filter:drop-shadow(0 2px 0 #09241b) drop-shadow(0 2px 3px #0009);
+}
+.colt-radio-panel[data-radio-skin=reggae] .colt-radio-title-word {
+ color:#ffe47b;-webkit-text-stroke:.5px #522719;
+ text-shadow:0 1px #b55b22,0 2px #e54f3f,0 3px #c73731,1px 4px #3eab5b,1px 5px #267548;
+}
+.colt-radio-panel[data-radio-skin=reggae] .colt-radio-title-word:after {
+ content:'';position:absolute;left:3%;right:1%;bottom:-7px;height:3px;border-radius:70% 25% 65% 30%;
+ background:linear-gradient(90deg,#ee5343 0 33%,#ffdc6b 33% 66%,#64bd69 66%);box-shadow:0 1px #06180e;pointer-events:none;
+}
+.colt-radio-panel[data-radio-skin=reggae] .colt-radio-title-word:nth-of-type(2) {transform:translateY(1px) rotate(1deg);color:#ffef9d}
+.colt-radio-panel[data-radio-skin=disco] .colt-radio-heading h2 {
+ font-family:'Arial Black','Trebuchet MS',sans-serif;font-size:26px;font-style:italic;font-weight:900;
+ letter-spacing:-1px;text-transform:uppercase;text-shadow:none;transform:skewX(-7deg);transform-origin:left center;
+}
+.colt-radio-panel[data-radio-skin=disco] .colt-radio-title-word {
+ color:#fff4ff;background:linear-gradient(180deg,#fffaff 0 16%,#d5d5ff 23%,#fff 34%,#8671b7 46%,#321341 48%,#ffb6ef 54%,#fff1fd 68%,#a4d8f3 82%,#f6f4ff 94%);
+ background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+ -webkit-text-stroke:.35px #f8e9ff;
+ filter:drop-shadow(1px 1px 0 #5c2f72) drop-shadow(1px 2px 0 #b96ea8) drop-shadow(0 0 4px #eb74ff77);
+}
+.colt-radio-panel[data-radio-skin=disco] .colt-radio-heading h2:after {
+ content:'';position:absolute;inset:-5px -3px -7px;pointer-events:none;z-index:1;
+ background:radial-gradient(ellipse 1px 7px at 8% 20%,#fff 55%,transparent 65%),radial-gradient(ellipse 7px 1px at 8% 20%,#fff 55%,transparent 65%),radial-gradient(ellipse 1px 6px at 77% 76%,#fff 55%,transparent 65%),radial-gradient(ellipse 6px 1px at 77% 76%,#fff 55%,transparent 65%);
+ filter:drop-shadow(0 0 2px #ffcaec);
+}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-heading h2 {
+ font-family:Impact,'Arial Black',sans-serif;font-size:27px;font-style:normal;font-weight:900;
+ letter-spacing:0;line-height:1.1;text-shadow:none;transform:rotate(-2deg);transform-origin:left center;
+}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-title-word {white-space:nowrap}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-title-letter {
+ display:inline-block;position:relative;padding:0 .035em;margin-right:.015em;
+ color:#17191c;background:#f0ecd8;text-shadow:none;
+ box-shadow:1px 2px #080b10,2px 3px #e84a9b99;transform:rotate(-4deg);
+ clip-path:polygon(3% 2%,100% 0,96% 97%,0 100%);
+}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-title-letter:nth-child(even) {transform:translateY(2px) rotate(5deg);background:#dbff7f}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-title-letter:nth-child(3n) {transform:translateY(-1px) rotate(-3deg);color:#fff6e7;background:#a82c71}
+.colt-radio-panel[data-radio-skin=punk] .colt-radio-title-word:nth-of-type(2) .colt-radio-title-letter:nth-child(odd) {background:#f28fbe;color:#17191c}
+@media(max-width:560px) {
+ .colt-radio-panel[data-radio-skin=reggae] .colt-radio-heading h2 {font-size:23px}
+ .colt-radio-panel[data-radio-skin=disco] .colt-radio-heading h2 {font-size:21px;letter-spacing:-.8px}
+ .colt-radio-panel[data-radio-skin=punk] .colt-radio-heading h2 {font-size:23px}
+}
+@media(max-width:350px) {
+ .colt-radio-panel[data-radio-skin=reggae] .colt-radio-heading h2 {font-size:21px}
+ .colt-radio-panel[data-radio-skin=disco] .colt-radio-heading h2 {font-size:19px}
+ .colt-radio-panel[data-radio-skin=punk] .colt-radio-heading h2 {font-size:21px}
+}

@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261104-music-genres-v2', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261104-genre-lettering-v3', document.currentScript.src).href;
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
     const stylesheet = document.createElement('link');
@@ -49,10 +49,34 @@
     const header = panel.querySelector('.colt-radio-header');
     const fitBackdrop = () => panel.style.setProperty('--radio-skin-header-height', header.getBoundingClientRect().height + 'px');
     new ResizeObserver(fitBackdrop).observe(header);
+    const title = panel.querySelector('.colt-radio-heading h2');
+    const titleText = title.textContent;
+    function styleTitle(skin) {
+      title.textContent = titleText;
+      title.removeAttribute('aria-label');
+      if (!['reggae', 'disco', 'punk'].includes(skin)) return;
+      title.setAttribute('aria-label', titleText);
+      title.replaceChildren();
+      titleText.split(' ').forEach((word, index) => {
+        if (index) title.append(title.ownerDocument.createTextNode(' '));
+        const part = title.ownerDocument.createElement('span');
+        part.className = 'colt-radio-title-word';
+        if (skin === 'punk') {
+          for (const letter of word) {
+            const cutout = title.ownerDocument.createElement('span');
+            cutout.className = 'colt-radio-title-letter';
+            cutout.textContent = letter;
+            part.append(cutout);
+          }
+        } else part.textContent = word;
+        title.append(part);
+      });
+    }
     function applySkin(skin) {
       if (!skins.some(([id]) => id === skin)) skin = 'original';
       if (skin === 'original') delete panel.dataset.radioSkin;
       else panel.dataset.radioSkin = skin;
+      styleTitle(skin);
       fitBackdrop();
       choices.forEach(button => {
         const selected = button.dataset.radioSkinChoice === skin;
