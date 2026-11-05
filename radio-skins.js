@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261104-music-genres-v1', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261104-music-genres-v2', document.currentScript.src).href;
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
     const stylesheet = document.createElement('link');
@@ -12,7 +12,7 @@
       document.head.append(stylesheet);
     });
     panel.dataset.radioSkins = 'true';
-    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk'], ['country', 'Country Music'], ['metal', 'Heavy Metal'], ['jazz', 'Jazz Club'], ['djclub', 'DJ Club']];
+    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk'], ['country', 'Country Music'], ['metal', 'Heavy Metal'], ['jazz', 'Jazz Club'], ['djclub', 'DJ Club'], ['reggae', 'Reggae'], ['disco', 'Disco'], ['punk', 'Punk Rock']];
     const key = 'coltRadioIllustratedSkin';
     const backdrop = document.createElement('div');
     backdrop.className = 'colt-radio-skin-backdrop';

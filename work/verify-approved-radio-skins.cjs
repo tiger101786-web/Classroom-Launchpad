@@ -4,7 +4,7 @@ const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const root = path.resolve(__dirname, '..');
 const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(), 'approved-radio-'));
 const reference = process.env.RADIO_REFERENCE_DIR;
-const genres = ['country', 'metal', 'jazz', 'djclub'];
+const genres = ['country', 'metal', 'jazz', 'djclub', 'reggae', 'disco', 'punk'];
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'cyberpunk', ...genres];
 (async () => {
@@ -35,13 +35,13 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click();
   const panel = page.locator('.colt-radio-panel'), gear = page.getByRole('button', { name: 'Change Colt Radio skin', exact: true });
   await gear.waitFor();
-  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 12, 'Eleven illustrated skins and Original');
+  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 15, 'Fourteen illustrated skins and Original');
   assert.equal(artRequests.length, 0, 'Original loads no themed artwork');
   const choose = async (skin, target = page) => {
    await target.getByRole('button', { name: 'Change Colt Radio skin', exact: true }).click();
    await target.locator('[data-radio-skin-choice=' + skin + ']').click();
    if (skin !== 'original') await target.evaluate(async id => {
-    await Promise.race([Promise.all((['country','metal','jazz','djclub'].includes(id) ? ['atlas'] : ['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2']).map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
+    await Promise.race([Promise.all((['country','metal','jazz','djclub','reggae','disco','punk'].includes(id) ? ['atlas'] : ['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2']).map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
    }, skin);
   };
   await panel.locator('[data-station="chill-house"]').click();
@@ -171,7 +171,7 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'djclub', 'Saved skin restored');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'punk', 'Saved skin restored');
   await gear.click(); await page.keyboard.press('Home'); await page.keyboard.press('Enter');
   assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Keyboard can return to Original');
   await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { value: undefined, configurable: true }));
@@ -185,9 +185,9 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
    await floating.screenshot({path:path.join(output,'floating-'+skin+'.png')});
   }
   await floating.getByRole('button', { name: 'Return Colt Radio to Launchpad', exact: true }).click();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'djclub');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'punk');
   await gear.click(); await gear.click();
   assert.deepEqual(errors, []);
-  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, twelve choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
+  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, fifteen choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
