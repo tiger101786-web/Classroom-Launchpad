@@ -71,5 +71,21 @@ for(const theme of ['sky','scrapbook','tropical','autumn']){
  await studio.locator('[data-tab=appearance]').click();await studio.locator('[data-subtab=skins]').click();
  await studio.screenshot({path:path.join(dir,theme+'-labubu.png')});
 }
-assert.deepEqual(errors,[]);console.log('PASS: stable tabs and preview layout across eight themes and four widths, theme persistence, no browser errors. Screenshots: '+dir);
+for (const [width,height] of [[1366,768],[1280,720],[1440,900]]) {
+ await page.setViewportSize({width,height});
+ for (const theme of ['crimson','woodland','sky','scrapbook','tropical','autumn','diner','neon']) {
+  await studio.getByLabel('Studio theme',{exact:true}).selectOption(theme);
+  const bounds = await studio.boundingBox();
+  assert(Math.abs(bounds.width-Math.min(1200,width-24))<2,theme+' keeps readable desktop width at '+width+'x'+height);
+  assert(bounds.height<=height-24+1,theme+' fits viewport height');
+  assert(await studio.evaluate(element=>element.scrollWidth<=element.clientWidth+1),theme+' has no sideways overflow');
+  await studio.locator('.studio-close').scrollIntoViewIfNeeded();
+  const close = await studio.locator('.studio-close').boundingBox();
+  assert(close.y>=0 && close.y+close.height<=height,theme+' close control is reachable');
+  await studio.getByLabel('Studio theme',{exact:true}).scrollIntoViewIfNeeded();
+  const footer = await studio.getByLabel('Studio theme',{exact:true}).boundingBox();
+  assert(footer.y>=0 && footer.y+footer.height<=height,theme+' footer is reachable by scrolling');
+ }
+}
+assert.deepEqual(errors,[]);console.log('PASS: stable tabs and preview layout across eight themes and four widths, readable sizing and reachable controls on short desktop screens, theme persistence, no browser errors. Screenshots: '+dir);
 }finally{await browser?.close();server.kill();}})().catch(e=>{console.error(e);process.exitCode=1});

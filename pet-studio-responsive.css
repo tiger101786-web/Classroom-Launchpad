@@ -1,6 +1,6 @@
-/* Fit the decorative shell to short displays as well as narrow ones. */
+/* Keep desktop controls readable; short displays scroll vertically. */
 dialog.pet-studio {
-  width:min(1200px,calc(100vw - 24px),max(760px,calc((100dvh - 80px) * 1.3)));
+  width:min(1200px,calc(100vw - 24px));
   max-height:calc(100dvh - 24px);
   overflow:auto;
   overscroll-behavior:contain;
