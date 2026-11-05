@@ -1,0 +1,42 @@
+# Artwork prompts and saved assets
+
+Generated using the built-in ImageGen tool, then rendered through the existing Colt Radio HTML/CSS/JavaScript. The final screenshots are browser captures, not generated interface mockups.
+
+## Shared production prompt
+
+Use case: stylized-concept. Asset type: production illustration atlas for an existing Colt Radio CSS skin, NOT a UI mockup. Input 1 is the existing country atlas and defines EXACT THREE-REGION SQUARE ATLAS LAYOUT and premium detailed painted visual style. Input 2 is a three-theme concept board for character and scene inspiration ONLY. Create ONE square artwork atlas for the specified theme. TOP 0-33%: scenic environment header without any horse or people, center must remain dark enough for live title and controls. MIDDLE 33-53%: a dark theme-material background with detailed narrow decorative side rails ONLY at the extreme left and right; keep center clear for live station cards; NO characters here. BOTTOM 53-100%: exactly ONE large friendly equine Colt head-and-shoulders portrait, facing right in a three-quarter pose, centered horizontally, full ears and any hat visible with breathing room. Character must be wholly within bottom region and NOT intrude above y=0.53 of the image. Painted horse anatomy with long equine muzzle, expressive eyes, mane, neck, no human face or hands. Same kind of polished game UI illustration quality as reference. No text, letters, numbers, UI cards, icons, buttons, title, music notes, watermarks or baked labels anywhere; real controls will be rendered in HTML. No other horses. This is NOT the comparison board and NOT a screenshot.
+
+## Mariachi Fiesta
+
+Theme: Mariachi Fiesta. Environment: dignified Mexican courtyard stage at dusk, carved dark timber, tasteful silver floral filigree, burgundy textile, warm lanterns, papel picado along top, a vihuela/guitarron at left and trumpet at right. Middle material: dark burgundy embossed leather with silver floral side rails, center dark and blank. Colt: chestnut bay horse, glossy black mane, elaborate black embroidered charro sombrero with silver trim, black charro jacket with intricate silver embroidery and a burgundy bowtie; confident kind closed-mouth smile, elegant musician. Silver embroidery distinct from cowboy theme. Full sombrero and ears visible, character occupies width between x=.20 and .80 and y=.56 to1. Palette burgundy, silver, cream, warm amber.
+
+Saved atlas: `assets/radio-skins/illustrated/mariachi-atlas.png`.
+
+## Symphony Hall
+
+Theme: Symphony Hall. Environment: ornate classical concert hall stage, red velvet theater drapes, a grand piano at right, violin at left, warm chandelier light and gold architectural ornaments. Middle material: deep mahogany wood and burgundy velvet with narrow gold carved laurel pillars at sides, dark clear center. Colt: pale dapple-gray horse with neat swept dark mane, elegant black conductor tailcoat, ivory waistcoat, white bowtie, confident welcoming smile, long horse muzzle. No hat and no sunglasses. All ears and mane fully visible, head-and-shoulders character occupies width x=.22 to.78 and y=.56 to1. Palette burgundy, dark mahogany, ivory, gold. NOT the Jazz Colt.
+
+Saved atlas: `assets/radio-skins/illustrated/symphony-atlas.png`.
+
+## Rockabilly Jukebox
+
+Theme: Rockabilly Jukebox. Environment: polished 1950s music stage, glowing chrome and amber jukebox at far right, cherry-red hollow-body electric guitar at left and a vintage microphone. Turquoise enamel, red chrome piping, restrained checkerboard trim. Middle material: deep turquoise enamel with vertical red-and-chrome ribs only along outer sides; dark clear center. Colt: dark bay horse with dramatic sculpted black pompadour mane BETWEEN clearly visible horse ears, handsome equine muzzle, friendly confident grin, turquoise-and-cream retro bowling shirt with cherry-red piping and small embroidered cherries. No hat and no sunglasses. Mane and ears fully visible, head-and-shoulders character occupies x=.22 to .78 and y=.56 to1. Palette turquoise, cherry red, chrome, cream.
+
+Saved atlas: `assets/radio-skins/illustrated/rockabilly-atlas.png`.
+
+
+## Recoloring with built-in ImageGen
+
+Mariachi and Symphony use the following edits. Rockabilly uses the later warm buckskin edit below; its earlier blue-gray variant was rejected.
+
+### Mariachi final recoloring
+
+Use case: precise-object-edit. Asset type: production square texture atlas for existing Colt Radio CSS. Input image 1 is the EDIT TARGET. Make a carefully localized COLOR-ONLY edit to the horse in the BOTTOM region. Preserve exact square canvas, exact three-region boundaries, every object and pixel layout, horse pose, expression, head/neck/body silhouette, anatomy, ears, costume, ornamentation, texture and lighting. The TOP scenic header and MIDDLE blank texture panel must remain visually identical. Bottom background, costume and all borders must remain visually identical. Keep the one horse only in its original bottom location. Change the exposed coat and mane coloring only as specified, with the original detailed painted shading. No new text, no buttons, no new markings or objects, no cropping or layout shift. Output same square atlas composition at source resolution. MARiACHI FIESTA: Recolor the existing bright orange horse coat to a rich deep MAHOGANY / warm dark burgundy-brown bay coat, with subtle garnet undertones that harmonize with the burgundy and silver charro setting. Make it clearly deeper and less orange than the input, with readable copper highlights and a dark cocoa muzzle. Keep the mane glossy BLACK and the eyes warm brown. Preserve the black-and-silver embroidered sombrero and charro jacket and burgundy neck bow exactly. Keep coat detail luminous and readable, not crushed black.
+
+### Symphony final recoloring
+
+Use case: precise-object-edit. Asset type: production square texture atlas for existing Colt Radio CSS. Input image 1 is the EDIT TARGET. Make a carefully localized COLOR-ONLY edit to the horse in the BOTTOM region. Preserve exact square canvas, exact three-region boundaries, every object and pixel layout, horse pose, expression, head/neck/body silhouette, anatomy, ears, costume, ornamentation, texture and lighting. The TOP scenic header and MIDDLE blank texture panel must remain visually identical. Bottom background, costume and all borders must remain visually identical. Keep the one horse only in its original bottom location. Change the exposed coat and mane coloring only as specified, with the original detailed painted shading. No new text, no buttons, no new markings or objects, no cropping or layout shift. Output same square atlas composition at source resolution. SYMPHONY HALL: Recolor the horse coat to a luminous cool PEARL-SILVER dapple gray with subtle ivory highlights, a soft slate-gray muzzle, and faint natural silver dapples. Mane and brows should be deep CHARCOAL with subtle silver light reflections, visually distinct from the warm mahogany and gold setting. Make the coat cooler and more silvery than the input's warm gray. Preserve eyes, white bow tie and ivory vest, black-and-gold conductor jacket exactly. Keep coat shading polished and three-dimensional.
+
+### Rockabilly final warm buckskin edit
+
+Use case: precise-object-edit. Input image 1 is the EDIT TARGET: an existing square Rockabilly Colt Radio production atlas. Recolor ONLY the horse's exposed fur in the BOTTOM region. Replace the blue/teal fur with a warm CHAMPAGNE BUCKSKIN coat: buttery pale cream on face and neck, soft caramel shading, warm honey highlights, and a slightly darker warm taupe/chocolate muzzle. The result should be a stylish natural horse with a light warm coat that contrasts beautifully with turquoise, cherry-red and chrome. Absolutely no blue, cyan, teal or green in the coat. Keep the glossy jet-BLACK pompadour and black mane, existing small white forehead star, warm brown eyes, grin, pose, equine anatomy and EXACT silhouette. Keep the turquoise-and-cream bowling shirt with red trim and embroidered cherries unchanged. Preserve the entire TOP jukebox/guitar scenic header, entire MIDDLE material band, bottom background, all chrome/red rails, all ornaments, and every region boundary and object placement. Do not move, resize, recrop, redesign, add text or add another horse. Same square texture atlas layout and source resolution. This is a small localized color edit, not a new layout.

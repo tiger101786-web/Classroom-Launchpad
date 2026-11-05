@@ -274,6 +274,69 @@
       "--genre-portrait": "195%"
     },
     "swatch": "linear-gradient(135deg,#e2bb70,#18345f 40%,#08162d 70%,#b58a44)"
+  },
+  {
+    "id": "mariachi",
+    "label": "Mariachi Fiesta",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/mariachi-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/mariachi-atlas.png')",
+      "--genre-base": "#230810",
+      "--genre-edge": "#c7b398",
+      "--genre-accent": "#ffe2a2",
+      "--genre-text": "#fff1d9",
+      "--genre-material": "repeating-linear-gradient(0deg,#ffd9a009 0 1px,transparent 1px 4px),linear-gradient(125deg,#651c2c,#2a0b16 65%,#701d32)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "41.5%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#e3d7c5,#6b233e 48%,#270b1b)"
+  },
+  {
+    "id": "symphony",
+    "label": "Symphony Hall",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/symphony-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/symphony-atlas.png')",
+      "--genre-base": "#240d0b",
+      "--genre-edge": "#c89b4f",
+      "--genre-accent": "#ffe3a0",
+      "--genre-text": "#fff0d5",
+      "--genre-material": "repeating-linear-gradient(0deg,#bd81300b 0 1px,transparent 1px 5px),linear-gradient(125deg,#61301b,#2c100e 65%,#53221a)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "41.5%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#ffe4a3,#754524 48%,#28160f)"
+  },
+  {
+    "id": "rockabilly",
+    "label": "Rockabilly Jukebox",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/rockabilly-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/rockabilly-atlas.png')",
+      "--genre-base": "#072b2d",
+      "--genre-edge": "#d2c9b6",
+      "--genre-accent": "#ffe3a2",
+      "--genre-text": "#fff6dc",
+      "--genre-material": "repeating-linear-gradient(0deg,#ffffff07 0 1px,transparent 1px 4px),linear-gradient(125deg,#125f63,#082c32 65%,#15676a)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "41.5%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#fff4da,#b51e39 48%,#172725)"
   }
 ];
   skins.forEach(skin => {

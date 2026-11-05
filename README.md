@@ -55,11 +55,13 @@ Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
 
 Use the metallic gear beside Favorites to choose a radio skin. The shared registry in `radio-skin-definitions.js` defines each choice, artwork paths, title treatment, menu swatch, layout and shared palette/crop variables. Genre skins reuse one layout marker; exceptional illustration details remain in `radio-skins.css`. The choice stays on the current device; switching skins preserves playback, volume, search and favorites.
 
+The 19-choice collection includes Mariachi Fiesta (mahogany bay Colt, burgundy leather and silver details), Symphony Hall (pearl-silver conductor Colt, mahogany and gold), and Rockabilly Jukebox (warm buckskin Colt, ivory jukebox keys, cherry accents and chrome). The selected filter and station retain their distinct highlight colors. Artwork prompts, implementation notes and validation are in `work/radio-mariachi-symphony-rockabilly.md` and `work/radio-music-genres-prompts.md`.
+
 Favorites show loading/save errors with Retry. Account changes clear the old list and disable edits until the new list loads. Saves run in order and combine changes made while a save is pending. The minimized player reports playback state.
 
 Run `npm run test:radio` with Playwright available to Node and a local Edge installation. Set `RADIO_BROWSER_PATH` for another Chromium executable and `PREVIEW_OUTPUT` for screenshots. Browser checks simulate media; the API test uses an isolated temporary database. `npm run check` covers both skin scripts.
 
-Illustrated skins serve losslessly optimized PNG copies while preserving all source artwork. Run `npm run test:radio-artwork` to check exact browser pixels and desktop/mobile appearance. Rebuild instructions and byte savings are in `work/radio-skin-maintenance.md`.
+Losslessly optimized PNG copies preserve the existing source artwork. The three new genre atlases use their approved PNGs directly. Run `npm run test:radio-artwork` to check exact browser pixels and desktop/mobile appearance. Rebuild instructions and byte savings are in `work/radio-skin-maintenance.md`.
 
 Colt Radio keeps a single in-page player while offering genre-labeled stations from Lofi Cafe and selected direct-stream providers. Signed-in students and the teacher can pin stations to an account-specific Favorites category; only station IDs are stored, never listening history. Guest favorites stay in that browser. Colt Radio has no outbound navigation links, minimizes when Colt Assistant opens, stays clear of the class timer, and stops when Colt Run begins. School filtering must allow the selected streaming domains for playback.
 

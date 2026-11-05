@@ -9,6 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -111,7 +112,13 @@ const skins = definitions.filter(skin => skin.id !== 'original').map(skin => ski
    }
    if (fullHeaders.includes(skin)) {
     const current = await geometry();
-    for (let i = 2; i < current.length; i++) assert.deepEqual(current[i].slice(2), originalGeometry[i].slice(2), skin + ': preserves control dimensions');
+    for (let i = 2; i < current.length; i++) {
+     assert.equal(current[i][2], originalGeometry[i][2], skin + ': preserves control width');
+     if (framedGenres.has(skin)) {
+      // The reviewed beveled keys and playback frames add up to eight vertical pixels.
+      assert(current[i][3] >= originalGeometry[i][3] && current[i][3] <= originalGeometry[i][3] + 8, skin + ': decorative frame stays within reviewed size allowance');
+     } else assert.equal(current[i][3], originalGeometry[i][3], skin + ': preserves control height');
+    }
     assert(Math.abs(current[1][2] / current[1][3] - 3) < .03, skin + ': full 3:1 header');
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
@@ -193,7 +200,7 @@ const skins = definitions.filter(skin => skin.id !== 'original').map(skin => ski
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'blues', 'Saved skin restored');
+  assert.equal(await panel.getAttribute('data-radio-skin'), skins.at(-1), 'Saved skin restored');
   await gear.click(); await page.keyboard.press('Home'); await page.keyboard.press('Enter');
   assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Keyboard can return to Original');
   await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { value: undefined, configurable: true }));
@@ -207,9 +214,9 @@ const skins = definitions.filter(skin => skin.id !== 'original').map(skin => ski
    await floating.screenshot({path:path.join(output,'floating-'+skin+'.png')});
   }
   await floating.getByRole('button', { name: 'Return Colt Radio to Launchpad', exact: true }).click();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'blues');
+  assert.equal(await panel.getAttribute('data-radio-skin'), genres.at(-1));
   await gear.click(); await gear.click();
   assert.deepEqual(errors, []);
-  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, sixteen choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
+  console.log('PASS: approved appearance, full illustrated headers, lazy loading, original reset, ' + definitions.length + ' choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
