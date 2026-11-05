@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261104-hidden-state-v4', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261104-music-genres-v1', document.currentScript.src).href;
   window.initializeColtRadioSkins = async function (panel) {
     if (panel.dataset.radioSkins) return;
     const stylesheet = document.createElement('link');
@@ -12,7 +12,7 @@
       document.head.append(stylesheet);
     });
     panel.dataset.radioSkins = 'true';
-    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk']];
+    const skins = [['original', 'Original'], ['inferno', 'Inferno Forge'], ['frostfang', 'Frostfang Citadel'], ['temple', 'Overgrown Temple'], ['nebula', 'Nebula Rider'], ['bayou', 'Bayou Nights'], ['hiphop', 'Hip-Hop DJ'], ['cyberpunk', 'Neon Cyberpunk'], ['country', 'Country Music'], ['metal', 'Heavy Metal'], ['jazz', 'Jazz Club'], ['djclub', 'DJ Club']];
     const key = 'coltRadioIllustratedSkin';
     const backdrop = document.createElement('div');
     backdrop.className = 'colt-radio-skin-backdrop';
@@ -76,11 +76,16 @@
       const viewport = view.visualViewport;
       const left = viewport?.offsetLeft || 0, top = viewport?.offsetTop || 0;
       const width = viewport?.width || view.innerWidth, height = viewport?.height || view.innerHeight;
-      menu.style.maxHeight = Math.max(0, height - 16) + 'px';
+      const anchor = gear.getBoundingClientRect();
+      const above = Math.max(0, anchor.top - top - 14);
+      const below = Math.max(0, top + height - anchor.bottom - 14);
+      const placeAbove = above >= below;
+      // Keep the gear exposed even when a longer skin list needs to scroll.
+      menu.style.maxHeight = Math.max(0, placeAbove ? above : below) + 'px';
       menu.style.maxWidth = Math.max(0, width - 16) + 'px';
-      const anchor = gear.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
+      const bounds = menu.getBoundingClientRect();
       menu.style.left = Math.max(left + 8, Math.min(anchor.right - bounds.width, left + width - bounds.width - 8)) + 'px';
-      menu.style.top = Math.max(top + 8, Math.min(anchor.top - bounds.height - 6, top + height - bounds.height - 8)) + 'px';
+      menu.style.top = (placeAbove ? anchor.top - bounds.height - 6 : anchor.bottom + 6) + 'px';
       menu.style.opacity = '1';
     }
     let unwatch = () => {};

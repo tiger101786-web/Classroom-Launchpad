@@ -4,7 +4,9 @@ const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const root = path.resolve(__dirname, '..');
 const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(), 'approved-radio-'));
 const reference = process.env.RADIO_REFERENCE_DIR;
-const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'cyberpunk'];
+const genres = ['country', 'metal', 'jazz', 'djclub'];
+const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
+const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'cyberpunk', ...genres];
 (async () => {
  const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -33,13 +35,13 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click();
   const panel = page.locator('.colt-radio-panel'), gear = page.getByRole('button', { name: 'Change Colt Radio skin', exact: true });
   await gear.waitFor();
-  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 8, 'Seven illustrated skins and Original');
+  assert.equal(await panel.locator('[data-radio-skin-choice]').count(), 12, 'Eleven illustrated skins and Original');
   assert.equal(artRequests.length, 0, 'Original loads no themed artwork');
   const choose = async (skin, target = page) => {
    await target.getByRole('button', { name: 'Change Colt Radio skin', exact: true }).click();
    await target.locator('[data-radio-skin-choice=' + skin + ']').click();
    if (skin !== 'original') await target.evaluate(async id => {
-    await Promise.race([Promise.all(['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2'].map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
+    await Promise.race([Promise.all((['country','metal','jazz','djclub'].includes(id) ? ['atlas'] : ['atlas', ['bayou','hiphop','cyberpunk'].includes(id) ? 'header' : 'header-v2']).map(suffix => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error('Empty artwork')); img.onerror = () => reject(new Error('Failed artwork: ' + img.src)); img.src = new URL('assets/radio-skins/illustrated/' + id + '-' + suffix + '.png', document.baseURI).href; }))), new Promise((_, reject) => setTimeout(() => reject(new Error('Artwork timeout: ' + id + ' at ' + document.baseURI)), 10000))]);
    }, skin);
   };
   await panel.locator('[data-station="chill-house"]').click();
@@ -49,6 +51,16 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   const originalGeometry = await geometry();
   for (const skin of skins) {
    await choose(skin);
+   if (genres.includes(skin)) {
+    const art = await panel.evaluate(panel => ({
+     portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
+     sides:getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage
+    }));
+    assert(art.portraits.every(url => url.includes(skin+'-atlas')), 'Both portraits use the selected genre Colt');
+    assert(art.sides.includes(skin+'-atlas'), 'Decorated side artwork uses the actual atlas');
+    const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();
+    assert(portrait.width>=80 && portrait.height>=88, 'Full size desktop header portrait');
+   }
    if (skin === 'cyberpunk') {
     await page.evaluate(() => document.fonts.load('800 24px ColtRadioCyber'));
     await panel.locator('.colt-radio-header').screenshot({path:path.join(output,'cyberpunk-header-live.png')});
@@ -76,14 +88,14 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
     assert.match(art.right,/hiphop-atlas/);
     assert.match(art.tile,/hiphop-crate/);
    }
-   if (['bayou','hiphop','cyberpunk'].includes(skin)) {
+   if (fullHeaders.includes(skin)) {
     const current = await geometry();
-    for (let i = 2; i < current.length; i++) assert.deepEqual(current[i].slice(2), originalGeometry[i].slice(2), 'Bayou preserves control dimensions');
-    assert(Math.abs(current[1][2] / current[1][3] - 3) < .03, 'Full 3:1 Bayou header');
+    for (let i = 2; i < current.length; i++) assert.deepEqual(current[i].slice(2), originalGeometry[i].slice(2), skin + ': preserves control dimensions');
+    assert(Math.abs(current[1][2] / current[1][3] - 3) < .03, skin + ': full 3:1 header');
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
    const capture = await panel.screenshot({ path: path.join(output, skin + '.png') });
-   if (reference && skin !== "cyberpunk") {
+   if (reference && skin !== "cyberpunk" && !genres.includes(skin)) {
     const old = await loadImage(path.join(reference, (skin === 'inferno' ? 'inferno-forge' : skin === 'bayou' ? 'bayou-nights' : skin) + '.png'));
     const current = await loadImage(capture);
     assert.equal(current.width, old.width); assert.equal(current.height, old.height);
@@ -124,13 +136,20 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
     await page.waitForFunction(() => document.querySelector('.colt-radio-skin-menu').style.opacity === '1');
     const r = await page.locator('.colt-radio-skin-menu').boundingBox();
     assert(r.x >= 0 && r.y >= 0 && r.x + r.width <= width + 1 && r.y + r.height <= height + 1);
+    const anchor = await gear.boundingBox();
+    assert(r.y + r.height <= anchor.y || r.y >= anchor.y + anchor.height, 'Open skin menu leaves gear clickable');
     await page.keyboard.press('Escape');
     assert(await panel.isVisible());
-    if (['bayou','hiphop','cyberpunk'].includes(skin)) {
+    if (fullHeaders.includes(skin)) {
      const header = await panel.locator('.colt-radio-header').boundingBox();
      const backdrop = await panel.locator('.colt-radio-skin-backdrop').boundingBox();
      assert(Math.abs(header.width / header.height - 3) < .03, 'Uncropped mobile header');
-     if (['bayou','cyberpunk'].includes(skin)) assert(Math.abs(backdrop.y - header.y - header.height) < 1, 'No gap below header');
+     if (genres.includes(skin)) {
+      const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();
+      assert(portrait.width>=68 && portrait.height>=76, 'Mobile portrait stays large');
+      assert(portrait.y>=header.y && portrait.y+portrait.height<=header.y+header.height, 'Header contains the full portrait window');
+     }
+     if (['bayou','cyberpunk',...genres].includes(skin)) assert(Math.abs(backdrop.y - header.y - header.height) < 1, 'No gap below header');
      if (height > 500) await panel.screenshot({path:path.join(output,skin+'-'+width+'.png')});
     }
    }
@@ -138,19 +157,21 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   console.log('Checking real close and minimize controls on short screens');
   for (const [width,height] of [[1366,768],[1000,1000],[390,700],[390,300]]) {
    await page.setViewportSize({width,height});
-   await choose('cyberpunk');
-   await panel.getByRole('button',{name:'Stop Colt Radio',exact:true}).click();
-   assert(!(await panel.isVisible()),'X hides Cyberpunk at '+width+'x'+height);
-   assert(await page.getByRole('button',{name:'Open Colt Radio',exact:true}).isVisible());
-   await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
-   await panel.getByRole('button',{name:'Minimize Colt Radio',exact:true}).click();
-   assert(!(await panel.isVisible()),'Minimize hides Cyberpunk at '+width+'x'+height);
-   await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+   for (const skin of ['cyberpunk',...genres]) {
+    await choose(skin);
+    await panel.getByRole('button',{name:'Stop Colt Radio',exact:true}).click();
+    assert(!(await panel.isVisible()),'X hides '+skin+' at '+width+'x'+height);
+    assert(await page.getByRole('button',{name:'Open Colt Radio',exact:true}).isVisible());
+    await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+    await panel.getByRole('button',{name:'Minimize Colt Radio',exact:true}).click();
+    assert(!(await panel.isVisible()),'Minimize hides '+skin+' at '+width+'x'+height);
+    await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+   }
   }
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'cyberpunk', 'Saved skin restored');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'djclub', 'Saved skin restored');
   await gear.click(); await page.keyboard.press('Home'); await page.keyboard.press('Enter');
   assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Keyboard can return to Original');
   await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { value: undefined, configurable: true }));
@@ -159,12 +180,14 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
   await panel.getByRole('button', { name: 'Pop out Colt Radio', exact: true }).click();
   const floating = await popup;
   await floating.bringToFront();
-  await choose('cyberpunk', floating);
-  await floating.screenshot({path:path.join(output,'floating-cyberpunk.png')});
+  for (const skin of ['cyberpunk',...genres]) {
+   await choose(skin, floating);
+   await floating.screenshot({path:path.join(output,'floating-'+skin+'.png')});
+  }
   await floating.getByRole('button', { name: 'Return Colt Radio to Launchpad', exact: true }).click();
-  assert.equal(await panel.getAttribute('data-radio-skin'), 'cyberpunk');
+  assert.equal(await panel.getAttribute('data-radio-skin'), 'djclub');
   await gear.click(); await gear.click();
   assert.deepEqual(errors, []);
-  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, eight choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
+  console.log('PASS: approved appearance, full illustrated headers including Cyberpunk, lazy loading, original reset, twelve choices, keyboard, gear toggle, viewport fit, persistence, audio continuity, favorites and pop-out. Screenshots: ' + output);
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
