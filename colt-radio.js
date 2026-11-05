@@ -1115,7 +1115,7 @@
         if (!globalObject.initializeColtRadioSkins) {
           await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'radio-skins.js?v=20261104-cyberpunk-v3';
+            script.src = 'radio-skins.js?v=20261104-hidden-state-v4';
             script.onload = resolve;
             script.onerror = () => { script.remove(); reject(new Error('Radio skins unavailable')); };
             document.head.append(script);

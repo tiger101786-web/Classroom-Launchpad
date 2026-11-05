@@ -1,5 +1,7 @@
 /* Approved illustrated skins; artwork and layout match the reviewed concepts. */
 .colt-radio-panel {--radio-skin-accent:#ed657c;}
+/* Skin layout rules must always respect the close/minimize hidden state. */
+.colt-radio-panel[hidden] {display:none!important;}
 .colt-radio-panel[data-radio-skin=inferno] {--radio-skin-accent:#ffb44e;}
 .colt-radio-panel[data-radio-skin=frostfang] {--radio-skin-accent:#85dcff;}
 .colt-radio-panel[data-radio-skin=temple] {--radio-skin-accent:#8ee6af;}

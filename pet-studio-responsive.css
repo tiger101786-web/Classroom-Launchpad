@@ -128,3 +128,34 @@ dialog.pet-studio {
  .pet-studio:is([data-theme=sky],[data-theme=scrapbook],[data-theme=tropical],[data-theme=autumn]) #tab-content,
  .pet-studio:is([data-theme=sky],[data-theme=scrapbook],[data-theme=tropical],[data-theme=autumn]) #tab-content:has(#gallery) {flex-basis:calc(max(42cqw,440px) - 1cqw);height:calc(max(42cqw,440px) - 1cqw);max-height:calc(max(42cqw,440px) - 1cqw)}
 }
+
+/* Fit the complete selector, including its footer, inside the painted wood. */
+@media(min-width:701px) {
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .studio {position:relative}
+ .pet-studio[data-theme=woodland] .studio-body .controls-pane {
+  position:absolute;left:43%;top:22%;width:51.2%;height:67.5%;
+ }
+ .pet-studio[data-theme=autumn] .studio-body .controls-pane {
+  position:absolute;left:52.3%;top:22%;width:44.5%;height:62.3%;
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .studio-body .controls-pane {
+  padding:10px;box-sizing:border-box;min-height:0;margin:0;
+  display:flex;flex-direction:column;
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .controls-pane .tabs {
+  flex:0 0 auto;height:auto;min-height:44px;margin:0;padding:0;gap:6px;
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .controls-pane .tabs button {
+  min-width:0;flex:1;white-space:normal;margin:0;padding:10px 4px;
+  font-size:clamp(11px,1.25cqw,16px);
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .controls-pane #tab-content,
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .controls-pane #tab-content:has(#gallery) {
+  flex:1 1 0;height:auto;min-height:0;max-height:none;margin:0;
+  padding:10px;overflow-y:auto;
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .controls-pane .studio-footer {
+  flex:0 0 auto;min-height:44px;height:auto;margin:8px 0 0;padding:8px;gap:6px;
+ }
+ .pet-studio:is([data-theme=woodland],[data-theme=autumn]) .studio-footer .studio-theme-control {gap:4px}
+}

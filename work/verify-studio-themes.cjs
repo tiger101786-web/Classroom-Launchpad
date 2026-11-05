@@ -24,7 +24,7 @@ for(const width of [1920,1440,800,390]){
    if(expected&&width>700){assert(Math.abs(size.h-expected.h)<1,theme+' '+width+' '+tab+' '+JSON.stringify({size,expected}));assert.equal(size.w,expected.w);assert.equal(size.content,expected.content)}else expected=size;
   }
   await studio.locator('[data-tab=appearance]').click();
-  await studio.locator('#pet-select').selectOption('eagle');
+  await studio.locator('#pet-select').selectOption(['woodland','autumn'].includes(theme)?'nugget':'eagle');
   await page.waitForTimeout(150);
   const layout = await studio.evaluate(dialog => {
    const tip = dialog.querySelector('.preview-tip');
@@ -48,8 +48,20 @@ for(const width of [1920,1440,800,390]){
     const controls = dialog.querySelector('.controls-pane').getBoundingClientRect();
     return (controls.left - body.left) / body.width;
    });
-   const panelStart = {sky:.44, tropical:.47, autumn:.47, neon:.48}[theme] || .375;
+   const panelStart = {woodland:.43, sky:.44, tropical:.47, autumn:.523, neon:.48}[theme] || .375;
    assert(Math.abs(frame-panelStart)<.002, theme+' uses its own artwork panel boundary');
+   if (['woodland','autumn'].includes(theme)) {
+    const contained = await studio.evaluate(dialog => {
+     const scene=dialog.querySelector('.studio').getBoundingClientRect();
+     const autumn=dialog.dataset.theme==='autumn';
+     const board={left:scene.left+scene.width*(autumn?.523:.43),right:scene.left+scene.width*(autumn?.968:.942),top:scene.top+scene.height*.22,bottom:scene.top+scene.height*(autumn?.843:.895)};
+     return [...dialog.querySelectorAll('.controls-pane>.tabs,.controls-pane>#tab-content,.controls-pane>.studio-footer')].every(element=>{
+      const box=element.getBoundingClientRect();
+      return box.left>=board.left && box.right<=board.right+1 && box.top>=board.top && box.bottom<=board.bottom+1;
+     });
+    });
+    assert(contained,theme+' tabs, gallery and footer stay inside the illustrated board');
+   }
   }
   await studio.screenshot({path:path.join(dir,theme+'-'+width+'.png')});
   if(['sky','scrapbook','tropical','autumn'].includes(theme))for(const pet of ['colt','squishy','gummy','labubu','eagle']){

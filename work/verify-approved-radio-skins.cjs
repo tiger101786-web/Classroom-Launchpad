@@ -135,6 +135,18 @@ const skins = ['inferno', 'frostfang', 'temple', 'nebula', 'bayou', 'hiphop', 'c
     }
    }
   }
+  console.log('Checking real close and minimize controls on short screens');
+  for (const [width,height] of [[1366,768],[1000,1000],[390,700],[390,300]]) {
+   await page.setViewportSize({width,height});
+   await choose('cyberpunk');
+   await panel.getByRole('button',{name:'Stop Colt Radio',exact:true}).click();
+   assert(!(await panel.isVisible()),'X hides Cyberpunk at '+width+'x'+height);
+   assert(await page.getByRole('button',{name:'Open Colt Radio',exact:true}).isVisible());
+   await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+   await panel.getByRole('button',{name:'Minimize Colt Radio',exact:true}).click();
+   assert(!(await panel.isVisible()),'Minimize hides Cyberpunk at '+width+'x'+height);
+   await page.getByRole('button',{name:'Open Colt Radio',exact:true}).click();
+  }
   console.log('Checking persistence and keyboard');
   await page.setViewportSize({ width: 1000, height: 1000 });
   await page.reload(); await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click(); await gear.waitFor();
