@@ -124,10 +124,10 @@ async function compareScreenshots(original, optimized, label) {
         }
         if (!original) assert(!requested.some(url => report.assets.some(asset => '/' + asset.source === url)), 'Skins request optimized delivery assets only');
       }
-      console.log('PASS: all 16 skins at ' + width + 'px have zero changed screenshot pixels.');
+      console.log('PASS: all ' + skins.length + ' skins at ' + width + 'px have zero changed screenshot pixels.');
     }
     assert.deepEqual(errors, []);
-    fs.writeFileSync(path.join(output, 'verification.json'), JSON.stringify({ exactBrowserImagePairs: pixelChecks.length, exactSkinScreenshots: 32, sourceBytes: report.sourceBytes, deliveryBytes: report.deliveryBytes, reductionPercent: report.reductionPercent }, null, 2));
+    fs.writeFileSync(path.join(output, 'verification.json'), JSON.stringify({ exactBrowserImagePairs: pixelChecks.length, exactSkinScreenshots: skins.length * 2, sourceBytes: report.sourceBytes, deliveryBytes: report.deliveryBytes, reductionPercent: report.reductionPercent }, null, 2));
     console.log('PASS: originals preserved; exact image decoding; exact desktop/mobile renders; lazy loading. Screenshots: ' + output);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

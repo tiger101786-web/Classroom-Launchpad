@@ -1279,3 +1279,129 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 .colt-radio-panel[data-radio-skin=gospel] .colt-radio-live-badge {background:linear-gradient(#ffedba,#cea758);color:#49235d;border-color:#fff0bd;font-weight:800;text-shadow:0 1px #fff6}
 .colt-radio-panel[data-radio-skin=gospel] .colt-radio-play {border-radius:50% 50% 12% 12%;color:#522368;border:2px solid #f5d99d;background:linear-gradient(160deg,#fffbed,#ead7a9 47%,#fff4cf 51%,#c9a75d);box-shadow:inset 0 2px #fff,inset 0 -4px #a8894d,0 0 0 1px #68422d,0 3px 6px #190a27}
 .colt-radio-panel[data-radio-skin=gospel] .colt-radio-equalizer i {border-radius:6px 6px 0 0;background:linear-gradient(90deg,#a57c32,#fff0b6 45%,#bd8d38 85%);box-shadow:0 0 3px #f2ce6855}
+
+/* Three cozy music skins: native controls stay interactive; decoration never captures input. */
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) {--control-light:#ffe9bc;--control-dark:#301320;--key-color:var(--genre-text);--key-active-color:var(--genre-text);--key-face:var(--genre-material);--key-active:var(--genre-material)}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-station {background:var(--key-face)!important;color:var(--key-color)!important;border:2px solid var(--genre-edge)!important;box-shadow:inset 0 2px #fff5,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 4px 5px #0009!important;text-shadow:0 1px #0006}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-station.is-active {background:var(--key-active)!important;color:var(--key-active-color)!important;border-color:var(--control-light)!important;box-shadow:inset 0 2px #fff7,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 0 9px color-mix(in srgb,var(--genre-accent) 35%,transparent)!important}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-station::after {content:'';position:absolute;inset:4px;border:1px solid #fff3;pointer-events:none;border-radius:inherit}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-filter {background:var(--key-face);color:var(--key-color);border:2px solid var(--genre-edge);box-shadow:inset 0 2px #fff5,inset 0 -3px var(--control-dark),0 2px 0 var(--genre-edge)}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-filter.is-active {background:var(--key-active);color:var(--key-active-color);border-color:var(--control-light)}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-filter-icon {color:currentColor}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-player {padding:3px;border:2px solid var(--genre-edge);background:linear-gradient(135deg,var(--control-light),var(--genre-edge) 25%,var(--control-light) 45%,var(--control-dark) 70%,var(--genre-edge));box-shadow:inset 0 0 0 1px #fff5,0 4px 6px #000a}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-now-playing {box-shadow:inset 0 0 0 1px var(--genre-edge),inset 0 0 0 4px #0004}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) :is(.colt-radio-stream-artwork,.colt-radio-heading-mark) {border:2px solid var(--genre-edge);box-shadow:0 0 0 1px #0009,0 3px 4px #0009}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-search-input {box-shadow:inset 0 2px 5px #000b,0 1px #fff4}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {background:linear-gradient(145deg,var(--control-light),var(--genre-edge) 44%,var(--control-light) 50%,var(--genre-edge) 70%);color:var(--control-dark);border-color:var(--control-light);box-shadow:inset 0 1px #fff9,inset 0 -3px var(--control-dark),0 2px 4px #0009}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,var(--control-dark) 0 20%,var(--genre-edge) 25% 50%,var(--control-light) 55% 70%,var(--control-dark) 75%);border-color:var(--genre-edge);box-shadow:0 1px 3px #000b}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) :is(.colt-radio-station,.colt-radio-filter,.colt-radio-play):focus-visible{outline:2px solid var(--control-light);outline-offset:2px}
+
+
+/* Rainy Day Records: walnut furniture, sage enamel and vinyl label centers. */
+.colt-radio-panel[data-radio-skin=rainyrecords] {--control-light:#f9e7be;--control-dark:#49321e;--key-color:#eee8ce;--key-active-color:#253c31;--key-face:repeating-linear-gradient(0deg,#ffffff08 0 1px,transparent 1px 4px),linear-gradient(165deg,#577566,#294638 58%,#42604f);--key-active:linear-gradient(165deg,#fff0c7,#c8b989 58%,#e6d9ac)}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-heading h2 {font-family:Georgia,serif;font-style:italic;font-weight:700;letter-spacing:-.045em;color:#ffedc8;text-shadow:1px 2px #263e32,0 0 8px #000b}
+.colt-radio-panel[data-radio-skin=rainyrecords] :is(.colt-radio-station,.colt-radio-filter) {border-radius:12px 4px 12px 4px;text-shadow:0 1px #17261a}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-station.is-active {text-shadow:0 1px #fff6}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-station::after {border-color:#d9c89555;background:radial-gradient(circle at 2px 2px,#f7deb2 0 1px,transparent 2px),radial-gradient(circle at calc(100% - 2px) calc(100% - 2px),#bd985a 0 1px,transparent 2px)}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-station-icon {border-radius:50%;border:2px solid #c49b60;color:#fff0c8;background:repeating-radial-gradient(circle,#cbbd8d 0 1px,#192a23 2px 3px,#324238 4px 5px);box-shadow:inset 0 0 0 5px #192820,inset 0 0 0 7px #82764e,0 2px 4px #0008}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-favorite {color:#e8c88c;text-shadow:0 1px #173020}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-station.is-active + .colt-radio-favorite {color:#466047;text-shadow:none}
+.colt-radio-panel[data-radio-skin=rainyrecords] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {border-radius:7px;background:linear-gradient(145deg,#f2d7a4,#aa7b44 48%,#ddba7e 53%,#7f5a32);color:#2b3927}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-player {border-radius:16px 5px 16px 5px;background:repeating-linear-gradient(0deg,#e5b77718 0 1px,transparent 1px 4px),linear-gradient(125deg,#ad7d49,#5c3b23 40%,#bd935b 52%,#4b321e 74%,#996a3f)}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-now-playing {border-radius:9px 2px 9px 2px;background:repeating-linear-gradient(0deg,#c4e2bf08 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,#0003 0 1px,transparent 1px 3px),linear-gradient(135deg,#314b3e,#12241d)!important}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-play {border:2px solid #d8b675;background:repeating-radial-gradient(circle,#2b382e 0 1px,#14211c 2px 3px);color:#f4d9a3;box-shadow:inset 0 0 0 4px #1b2720,inset 0 0 0 7px #c7a465,inset 0 0 0 10px #334f3a,0 3px 5px #0009}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-live-badge {background:#152b21;color:#eed5a4;border-color:#b48d58}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-volume-slider::-webkit-slider-thumb {background:repeating-conic-gradient(#e5c48b 0 10deg,#8d693d 10deg 15deg);border:2px solid #f4d9a3;box-shadow:inset 0 0 0 4px #b78e52,0 2px 3px #0009}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-equalizer i {background:linear-gradient(#efdba6,#94af7d);box-shadow:0 0 4px #c5cc7233}
+/* Snowfall Stereo: frosted receiver keys, wool panels and warm amber lamps. */
+.colt-radio-panel[data-radio-skin=snowfall] {--control-light:#f4fbff;--control-dark:#4a6473;--key-color:#254454;--key-active-color:#fff3d4;--key-face:linear-gradient(170deg,#f6fcff,#bdd5df 54%,#dfedf4 58%,#8baebf);--key-active:linear-gradient(160deg,#577b8b,#285061 58%,#426779)}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-heading h2 {font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:800;letter-spacing:-.05em;color:#f1fbff;text-shadow:1px 2px #244656,0 0 10px #c0e7ff44}
+.colt-radio-panel[data-radio-skin=snowfall] :is(.colt-radio-station,.colt-radio-filter) {border-radius:19px;text-shadow:0 1px #fff7}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-station.is-active {text-shadow:0 1px #173744}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-station::after {border-radius:15px;border-color:#ffffff88;box-shadow:inset 0 1px 3px #7097a733;background:radial-gradient(circle at calc(100% - 3px) 3px,#ffd096 0 1px,#b36e3944 1px 2px,transparent 3px)}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-station-icon {border:2px solid #eff9ff;border-radius:50%;color:#365b6c;background:radial-gradient(circle at 38% 28%,#fff,#c6dfe8 40%,#8eaebd 60%,#eff8fd 66%,#7596a7 76%);box-shadow:inset 0 1px #fff,0 2px 0 #698b9a,0 3px 4px #24465755}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-favorite {color:#4c6e80;text-shadow:0 1px #fff8}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-station.is-active + .colt-radio-favorite {color:#ffdcab;text-shadow:none}
+.colt-radio-panel[data-radio-skin=snowfall] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {border-radius:10px;color:#365262;background:linear-gradient(145deg,#f8fdff,#adc5d1 48%,#ecf6fa 54%,#7f9fae);border-color:#e9f5ff}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-player {border-radius:23px;background:repeating-linear-gradient(0deg,#ffffff22 0 1px,transparent 1px 3px),linear-gradient(145deg,#e7eff0,#9fb8c2 30%,#eff8f7 48%,#7b9eac 75%,#c2d7df)}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-now-playing {border-radius:17px;background:repeating-linear-gradient(45deg,#e6f3ff0b 0 1px,transparent 1px 4px),repeating-linear-gradient(-45deg,#d5efff08 0 1px,transparent 1px 4px),linear-gradient(135deg,#2a485a,#142938)!important;box-shadow:inset 0 0 0 1px #e0eff6,inset 0 0 0 4px #071c2944}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-play {border-radius:17px;border:2px solid #ffe7bb;color:#674a2a;background:linear-gradient(160deg,#fff0cd,#d8ad75 55%,#f8d59c 59%,#ab7a49);box-shadow:inset 0 2px #fff9,inset 0 -4px #94744e,0 3px 0 #4f4e42,0 0 10px #ffc37a22}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-live-badge {background:linear-gradient(#ffdfaa,#e5b77b);color:#443d35;border-color:#ffecca;box-shadow:0 0 6px #ffc37a22}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,#d8a96b 0 20%,#fff0d4 24% 45%,#a9c7d4 50% 65%,#effaff 70%);border-color:#effaff;box-shadow:0 2px 4px #071c2999}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-equalizer i {border-radius:5px;background:linear-gradient(#ffe7b6,#c58f5c);box-shadow:0 0 5px #ffd39844}
+/* Golden Hour Tapes: honey cassette keys, bronze hardware and terracotta deck. */
+.colt-radio-panel[data-radio-skin=goldentapes] {--control-light:#ffe9bf;--control-dark:#71412c;--key-color:#503021;--key-active-color:#fff1d5;--key-face:linear-gradient(170deg,#ffe4ae,#d9a85f 55%,#f6cc86 60%,#af793f);--key-active:linear-gradient(155deg,#cc7754,#8b412f 58%,#ac563b)}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-heading h2 {font-family:'Courier New',monospace;font-weight:900;letter-spacing:-.08em;color:#ffe9b8;text-shadow:1px 2px #773e24,2px 3px #362017}
+.colt-radio-panel[data-radio-skin=goldentapes] :is(.colt-radio-station,.colt-radio-filter) {border-radius:5px 5px 10px 10px;text-shadow:0 1px #fff6}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-station.is-active {text-shadow:0 1px #643021}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-station::after {border-color:#88553666;background:linear-gradient(90deg,#5e392366 0 2px,transparent 2px 4px,#5e392366 4px 6px,transparent 6px 8px,#5e392366 8px 10px) center bottom / 10px 3px no-repeat}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-station-icon {border-radius:5px;border:2px solid #f6d69a;color:#fff0c9;background:radial-gradient(circle at 26% 50%,#f9db9f 0 12%,#61402c 14% 24%,transparent 26%),radial-gradient(circle at 74% 50%,#f9db9f 0 12%,#61402c 14% 24%,transparent 26%),linear-gradient(#b2784b,#70462f);box-shadow:inset 0 1px #fff5,inset 0 -3px #593222,0 2px 3px #75482f88}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-favorite {color:#835139;text-shadow:0 1px #ffe6b2}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-station.is-active + .colt-radio-favorite {color:#ffe0a5;text-shadow:none}
+.colt-radio-panel[data-radio-skin=goldentapes] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {border-radius:5px;color:#50311f;background:linear-gradient(145deg,#ffe1a7,#b88249 45%,#ebbf7e 52%,#946034)}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-player {border-radius:12px;background:repeating-linear-gradient(0deg,#f8d4a222 0 1px,transparent 1px 4px),linear-gradient(135deg,#e4b272,#9c642e 34%,#f4d294 49%,#81502b 70%,#ce9a57)}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-now-playing {border-radius:6px;background:repeating-linear-gradient(0deg,#ffe1a60b 0 1px,transparent 1px 3px),linear-gradient(135deg,#8b4d36,#48271e 70%,#67392a)!important;box-shadow:inset 0 0 0 1px #e7be80,inset 0 0 0 4px #3f21194d}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-play {border-radius:6px 6px 12px 12px;color:#70422a;border:2px solid #ffe4b5;background:linear-gradient(170deg,#fff3d2,#dec08d 56%,#fbe0ad 60%,#aa8052);box-shadow:inset 0 2px #fff9,inset 0 -5px #997146,0 3px 0 #603923,0 4px 6px #0008}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-live-badge {color:#ffe3aa;background:#673b28;border-color:#deaf74}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-volume-slider::-webkit-slider-thumb {background:repeating-conic-gradient(#edc589 0 12deg,#9b693c 12deg 18deg);border-color:#ffe5b2;box-shadow:inset 0 0 0 3px #c18c50,0 2px 3px #0009}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-equalizer i {border-radius:1px;background:linear-gradient(#fff0bc,#e59958);box-shadow:0 0 4px #edb27144}
+
+
+/* Midnight Mixtape: native controls stay interactive; decoration never captures input. */
+.colt-radio-panel[data-radio-skin=mixtape] {--control-light:#ffe9bc;--control-dark:#301320;--key-color:var(--genre-text);--key-active-color:var(--genre-text);--key-face:var(--genre-material);--key-active:var(--genre-material)}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station {background:var(--key-face)!important;color:var(--key-color)!important;border:2px solid var(--genre-edge)!important;box-shadow:inset 0 2px #fff5,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 4px 5px #0009!important;text-shadow:0 1px #0006}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station.is-active {background:var(--key-active)!important;color:var(--key-active-color)!important;border-color:var(--control-light)!important;box-shadow:inset 0 2px #fff7,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 0 9px color-mix(in srgb,var(--genre-accent) 35%,transparent)!important}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station::after {content:'';position:absolute;inset:4px;border:1px solid #fff3;pointer-events:none;border-radius:inherit}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-filter {background:var(--key-face);color:var(--key-color);border:2px solid var(--genre-edge);box-shadow:inset 0 2px #fff5,inset 0 -3px var(--control-dark),0 2px 0 var(--genre-edge)}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-filter.is-active {background:var(--key-active);color:var(--key-active-color);border-color:var(--control-light)}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-filter-icon {color:currentColor}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-player {padding:3px;border:2px solid var(--genre-edge);background:linear-gradient(135deg,var(--control-light),var(--genre-edge) 25%,var(--control-light) 45%,var(--control-dark) 70%,var(--genre-edge));box-shadow:inset 0 0 0 1px #fff5,0 4px 6px #000a}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-now-playing {box-shadow:inset 0 0 0 1px var(--genre-edge),inset 0 0 0 4px #0004}
+.colt-radio-panel[data-radio-skin=mixtape] :is(.colt-radio-stream-artwork,.colt-radio-heading-mark) {border:2px solid var(--genre-edge);box-shadow:0 0 0 1px #0009,0 3px 4px #0009}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-search-input {box-shadow:inset 0 2px 5px #000b,0 1px #fff4}
+.colt-radio-panel[data-radio-skin=mixtape] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {background:linear-gradient(145deg,var(--control-light),var(--genre-edge) 44%,var(--control-light) 50%,var(--genre-edge) 70%);color:var(--control-dark);border-color:var(--control-light);box-shadow:inset 0 1px #fff9,inset 0 -3px var(--control-dark),0 2px 4px #0009}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,var(--control-dark) 0 20%,var(--genre-edge) 25% 50%,var(--control-light) 55% 70%,var(--control-dark) 75%);border-color:var(--genre-edge);box-shadow:0 1px 3px #000b}
+.colt-radio-panel[data-radio-skin=mixtape] :is(.colt-radio-station,.colt-radio-filter,.colt-radio-play):focus-visible{outline:2px solid var(--control-light);outline-offset:2px}
+
+/* Midnight Mixtape: cassette key caps, tape reels and soft studio lighting. */
+.colt-radio-panel[data-radio-skin=mixtape] {--control-light:#e9e1f4;--control-dark:#3d354f;--key-color:#24283f;--key-active-color:#fff0e4;--key-face:linear-gradient(175deg,#dfdcf0,#aaa6c7 58%,#cdc8e3 62%,#777895);--key-active:linear-gradient(160deg,#71658f,#403953 60%,#5f4f7d)}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-heading h2 {font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:800;color:#eee5ff;letter-spacing:-.055em;text-shadow:0 2px #27263e,0 0 12px #bba0ef66}
+.colt-radio-panel[data-radio-skin=mixtape] :is(.colt-radio-station,.colt-radio-filter) {border-radius:7px 7px 4px 4px;text-shadow:0 1px #fff5}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station.is-active {text-shadow:0 1px #241c36}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station::after {border:0;background:linear-gradient(90deg,transparent 10%,#24283f55 10% 20%,transparent 20% 30%,#24283f55 30% 40%,transparent 40% 50%,#24283f55 50% 60%,transparent 60% 70%,#24283f55 70% 80%,transparent 80%) center bottom / 34px 2px no-repeat}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station-icon {border-radius:7px;border:1px solid #6d6986;color:#e8ddff;background:radial-gradient(circle at 28% 50%,#c5bbda 0 13%,#34324d 15% 24%,transparent 26%),radial-gradient(circle at 72% 50%,#c5bbda 0 13%,#34324d 15% 24%,transparent 26%),linear-gradient(180deg,#686079,#343449);box-shadow:inset 0 1px #e6d9ff88,inset 0 -3px #222438,0 2px 3px #23233888}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-favorite {color:#62547c;text-shadow:0 1px #fff7}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-station.is-active + .colt-radio-favorite {color:#f7c6a9;text-shadow:none}
+.colt-radio-panel[data-radio-skin=mixtape] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {color:#e4dff5;border:1px solid #9d94b9;border-radius:7px;background:linear-gradient(160deg,#76728c,#3c3c55 70%);box-shadow:inset 0 1px #fff4,inset 0 -3px #24273a,0 2px 3px #0008}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-player {border-radius:17px;background:repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 3px),linear-gradient(135deg,#a49ebc,#5b5875 35%,#b1a4c5 50%,#484760);box-shadow:inset 0 1px #efe8ff99,0 0 14px #a482e321,0 4px 7px #0009}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-now-playing {border-radius:10px;background:radial-gradient(circle at 92% 15%,#f7b28c14,transparent 40%),repeating-linear-gradient(0deg,#bfb4ff08 0 1px,transparent 1px 3px),linear-gradient(130deg,#282b44,#121c2c)!important;box-shadow:inset 0 0 0 1px #827b9d,inset 0 0 0 4px #0004}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-play {border-radius:10px;color:#312b45;border:2px solid #dfc2b4;background:linear-gradient(165deg,#ffddbe,#dba58e 58%,#f5c2a4 62%,#a57068);box-shadow:inset 0 2px #fff7,inset 0 -5px #925f64,0 3px 0 #493749,0 5px 5px #0007}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-live-badge {border-color:#9c8cb4;background:#29263f;color:#f8c7a7;box-shadow:0 0 6px #d9a3b622}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,#333348 0 22%,#c4bbd7 25% 56%,#79758e 60% 70%,#d4c5df 75%);border:1px solid #b5a8ca;box-shadow:0 1px 3px #000a}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-equalizer i {border-radius:4px;background:linear-gradient(#f7c5a9,#b2a0db);box-shadow:0 0 4px #c0a0ed33}
+
+
+/* Cozy collection lettering: the accessible heading remains "Colt Radio". */
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes],[data-radio-skin=mixtape]) .colt-radio-heading h2 {font-size:27px;line-height:1.2;white-space:nowrap}
+.colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes],[data-radio-skin=mixtape]) .colt-radio-title-word {display:inline-block;white-space:nowrap}
+/* Cream shop-sign serif with a small brass-underlined record-label word. */
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-heading h2 {font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:700;letter-spacing:-.055em;color:#fff0ca;text-shadow:1px 2px #284336,0 2px 5px #000b}
+.colt-radio-panel[data-radio-skin=rainyrecords] .colt-radio-title-word:nth-of-type(2) {font-size:.72em;font-style:normal;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#efe0b9;border-bottom:2px solid #b99459;padding-bottom:1px;vertical-align:2px}
+/* Rounded, frosted receiver lettering with a softly illuminated edge. */
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-heading h2 {font-family:'Arial Rounded MT Bold','Trebuchet MS',sans-serif;font-style:normal;font-weight:800;letter-spacing:-.055em;color:#f3fcff;-webkit-text-stroke:.3px #c9e6f4;text-shadow:0 2px #749bae,0 3px #254758,0 0 7px #a4ddf855}
+.colt-radio-panel[data-radio-skin=snowfall] .colt-radio-title-word:nth-of-type(2) {color:#cfeaf5;text-shadow:0 2px #527b90,0 3px #183849,0 0 7px #bce9ff55}
+/* Warm typewriter printing, like a carefully labeled cassette spine. */
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-heading h2 {font-family:'Courier New',monospace;font-style:normal;font-weight:900;letter-spacing:-.075em;color:#fff0c7;text-shadow:1px 1px #9a5b35,2px 2px #40291e}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-title-word {border-bottom:2px solid #e6b578;padding-bottom:1px}
+.colt-radio-panel[data-radio-skin=goldentapes] .colt-radio-title-word:nth-of-type(2) {color:#efbd80;border-bottom-color:#b66e45}
+/* Handwritten mixtape name paired with a compact lavender tape label. */
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-heading h2 {font-family:'Segoe Print','Segoe Script','Comic Sans MS',cursive;font-size:25px;font-style:normal;font-weight:700;letter-spacing:-.07em;color:#f5ddcb;text-shadow:0 2px #3d3358,0 0 8px #c4a5f366}
+.colt-radio-panel[data-radio-skin=mixtape] .colt-radio-title-word:nth-of-type(2) {font-family:'Courier New',monospace;font-size:.62em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 4px 1px;border:1px solid #b5a4ce;border-radius:2px;color:#e8deff;background:#27263cc9;vertical-align:3px;text-shadow:none}
+@media(max-width:560px) {
+ .colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-heading h2 {font-size:22px}
+ .colt-radio-panel[data-radio-skin=mixtape] .colt-radio-heading h2 {font-size:21px}
+}
+@media(max-width:350px) {
+ .colt-radio-panel:is([data-radio-skin=rainyrecords],[data-radio-skin=snowfall],[data-radio-skin=goldentapes]) .colt-radio-heading h2 {font-size:20px}
+ .colt-radio-panel[data-radio-skin=mixtape] .colt-radio-heading h2 {font-size:19px}
+}

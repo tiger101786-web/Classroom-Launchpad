@@ -32,3 +32,7 @@ Browser media is simulated. Live stream availability and production deployment w
 ## November 5 expansion
 
 Funk Groove, Tropical Steel Band, Irish Folk and Gospel Sunday add eight matching rendered thumbnails. The gallery now has 23 choices, 17 Music entries and 5 Fantasy entries. The four new skins use the same dedicated scene/portrait thumbnail convention; site colors, lazy loading and existing thumbnails are preserved. See radio-funk-tropical-irish-gospel.md for the approved artwork and control designs.
+
+## November 6 cozy collection
+
+Rainy Day Records, Snowfall Stereo, Golden Hour Tapes and Midnight Mixtape add eight matching scene/portrait thumbnails. The gallery now has 27 choices including Original, with 21 Music and 5 Fantasy entries. The selector keeps the site palette and established keyboard, lazy-loading and thumbnail composition behavior. See radio-cozy-collection.md for the new artwork, controls, title lettering and validation.

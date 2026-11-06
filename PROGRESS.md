@@ -31,3 +31,11 @@ The user approved the actual-player previews and requested adding, committing an
 Details: work/radio-funk-tropical-irish-gospel.md. Exact built-in ImageGen prompts: work/radio-funk-tropical-irish-gospel-prompts.json. Recoverable previews and screenshots: C:/Users/Sinister/Documents/Email/outputs/radio-next-four-20261105/.
 
 Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 23 choices, day/night gallery, mobile/short viewports, persistence, audio continuity, favorites and pop-out controls passed. User authorized commit and push; use Git history/status for delivery confirmation.
+
+## Cozy music collection — November 6, 2026
+
+Integrated the approved Rainy Day Records, Snowfall Stereo, Golden Hour Tapes and Midnight Mixtape skins with four atlases, eight matching gallery thumbnails and themed controls. The gallery now has 27 choices including Original (21 Music, 5 Fantasy). The user requested keeping the name Colt Radio with unique lettering on each of these four skins; completed with record-shop serif, frosted rounded lettering, typewriter cassette lettering and handwritten/tape-label lettering respectively. Existing skins and the site's selector colors are preserved. Cajun Dance Hall remains a local preview and is outside this integration.
+
+Details and validation: work/radio-cozy-collection.md. Exact ImageGen prompts: work/radio-cozy-collection-prompts.json. Final production screenshots and a recovery note are under C:/Users/Sinister/Documents/Email/radio-cozy-integration/.
+
+Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 27 choices, accessible titles and heading bounds, day/night gallery, desktop/mobile/short viewports, persistence, audio continuity, favorites and pop-out controls passed. Actual production-player desktop and 320px captures were visually reviewed. User authorized commit and push; confirm delivery from Git history/status.

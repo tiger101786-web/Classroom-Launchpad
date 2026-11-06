@@ -425,6 +425,92 @@
     "swatch": "linear-gradient(135deg,#ffe8ae,#260e39)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "rainyrecords",
+    "label": "Rainy Day Records",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/rainyrecords-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/rainyrecords-atlas.png')",
+      "--genre-base": "#11211e",
+      "--genre-edge": "#ad8858",
+      "--genre-accent": "#ebcf9e",
+      "--genre-text": "#f7efdc",
+      "--genre-material": "repeating-linear-gradient(0deg,#f6dfb30a 0 1px,transparent 1px 4px),linear-gradient(135deg,#365148,#172b25 70%,#364c3d)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "38%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#ebcf9e,#11211e)"
+  },
+  {
+    "id": "snowfall",
+    "label": "Snowfall Stereo",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/snowfall-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/snowfall-atlas.png')",
+      "--genre-base": "#132332",
+      "--genre-edge": "#adc9d5",
+      "--genre-accent": "#ffd49c",
+      "--genre-text": "#edf7fc",
+      "--genre-material": "repeating-linear-gradient(45deg,#d9efff08 0 1px,transparent 1px 4px),linear-gradient(135deg,#354d60,#162936 70%,#345365)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "37%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#ffd49c,#132332)"
+  },
+  {
+    "id": "goldentapes",
+    "label": "Golden Hour Tapes",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/goldentapes-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/goldentapes-atlas.png')",
+      "--genre-base": "#2e1913",
+      "--genre-edge": "#cc9b62",
+      "--genre-accent": "#ffe0ab",
+      "--genre-text": "#fff1d5",
+      "--genre-material": "repeating-linear-gradient(0deg,#f3c7830c 0 1px,transparent 1px 3px),linear-gradient(135deg,#70422a,#301b17 70%,#633a27)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "37%",
+      "--genre-portrait": "190%"
+    },
+    "swatch": "linear-gradient(135deg,#ffe0ab,#2e1913)"
+  },
+  {
+    "id": "mixtape",
+    "label": "Midnight Mixtape",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/mixtape-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/mixtape-atlas.png')",
+      "--genre-base": "#111725",
+      "--genre-edge": "#9f9cc6",
+      "--genre-accent": "#f8c7a7",
+      "--genre-text": "#f1ecff",
+      "--genre-material": "repeating-linear-gradient(0deg,#c6c4ff08 0 1px,transparent 1px 4px),linear-gradient(140deg,#32304c,#161b2e 70%,#35304a)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "37%",
+      "--genre-portrait": "190%"
+    },
+    "swatch": "linear-gradient(135deg,#f8c7a7,#111725)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);
