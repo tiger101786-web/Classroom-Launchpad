@@ -28,3 +28,7 @@ Rebuild with `node work/build-radio-gallery-thumbnails.cjs`, with Playwright ava
 - The thumbnail builder successfully rendered all 38 scene/portrait images to a separate review directory.
 
 Browser media is simulated. Live stream availability and production deployment were not checked.
+
+## November 5 expansion
+
+Funk Groove, Tropical Steel Band, Irish Folk and Gospel Sunday add eight matching rendered thumbnails. The gallery now has 23 choices, 17 Music entries and 5 Fantasy entries. The four new skins use the same dedicated scene/portrait thumbnail convention; site colors, lazy loading and existing thumbnails are preserved. See radio-funk-tropical-irish-gospel.md for the approved artwork and control designs.

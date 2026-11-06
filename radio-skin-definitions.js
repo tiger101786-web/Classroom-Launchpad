@@ -339,6 +339,92 @@
     "swatch": "linear-gradient(135deg,#fff4da,#b51e39 48%,#172725)"
   }
 ];
+  skins.push(...[
+  {
+    "id": "funk",
+    "label": "Funk Groove",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/funk-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/funk-atlas.png')",
+      "--genre-base": "#260b21",
+      "--genre-edge": "#e59a53",
+      "--genre-accent": "#ffd194",
+      "--genre-text": "#fff0d6",
+      "--genre-material": "repeating-linear-gradient(0deg,#ffa3300c 0 1px,transparent 1px 4px),linear-gradient(135deg,#6c284a,#2b0b25 65%,#773447)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "42%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#ffd194,#260b21)"
+  },
+  {
+    "id": "tropical",
+    "label": "Tropical Steel Band",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/tropical-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/tropical-atlas.png')",
+      "--genre-base": "#063b40",
+      "--genre-edge": "#e3b46a",
+      "--genre-accent": "#ffd69a",
+      "--genre-text": "#fff5de",
+      "--genre-material": "linear-gradient(135deg,#08797d,#063c46 65%,#106e73)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#ffd69a,#063b40)"
+  },
+  {
+    "id": "irish",
+    "label": "Irish Folk",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/irish-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/irish-atlas.png')",
+      "--genre-base": "#112516",
+      "--genre-edge": "#c59b5c",
+      "--genre-accent": "#f6d293",
+      "--genre-text": "#fff1d3",
+      "--genre-material": "repeating-linear-gradient(0deg,#eec17f10 0 1px,transparent 1px 5px),linear-gradient(130deg,#6a4226,#302315 65%,#70482a)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "42%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#f6d293,#112516)"
+  },
+  {
+    "id": "gospel",
+    "label": "Gospel Sunday",
+    "layout": "genre",
+    "title": "plain",
+    "assets": [
+      "assets/radio-skins/illustrated/gospel-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/gospel-atlas.png')",
+      "--genre-base": "#260e39",
+      "--genre-edge": "#e2b653",
+      "--genre-accent": "#ffe8ae",
+      "--genre-text": "#fff5e2",
+      "--genre-material": "linear-gradient(135deg,#622775,#270e3a 65%,#552668)",
+      "--genre-band": "1254 / 205",
+      "--genre-band-position": "42%",
+      "--genre-portrait": "205%"
+    },
+    "swatch": "linear-gradient(135deg,#ffe8ae,#260e39)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

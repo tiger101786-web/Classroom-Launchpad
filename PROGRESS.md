@@ -23,3 +23,11 @@ All 19 thumbnails were checked and corrected. Dedicated scene/portrait captures 
 Syntax, gallery, all-skin browser, favorites/reliability/API and lossless-artwork checks passed. The new thumbnail builder also rendered all 38 assets to a separate review directory. The previous skin batch is already pushed as be323e1; use Git history/status to confirm delivery of this later selector change. Live deployment and external stream availability require separate observation.
 
 For future skin work, preserve the existing collection's appearance and update this note after meaningful changes so another chat can continue from project files.
+
+## Four additional music skins — November 5, 2026
+
+The user approved the actual-player previews and requested adding, committing and pushing Funk Groove, Tropical Steel Band, Irish Folk and Gospel Sunday. All four skins and their eight matching scene/portrait gallery thumbnails are integrated, bringing the gallery to 23 choices including Original (17 Music, 5 Fantasy). Distinct stompbox, steel-pan, carved-oak and organ-stop controls preserve the reviewed designs. Existing skins and the site's selector palette are preserved. Cache version URLs are refreshed.
+
+Details: work/radio-funk-tropical-irish-gospel.md. Exact built-in ImageGen prompts: work/radio-funk-tropical-irish-gospel-prompts.json. Recoverable previews and screenshots: C:/Users/Sinister/Documents/Email/outputs/radio-next-four-20261105/.
+
+Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 23 choices, day/night gallery, mobile/short viewports, persistence, audio continuity, favorites and pop-out controls passed. User authorized commit and push; use Git history/status for delivery confirmation.

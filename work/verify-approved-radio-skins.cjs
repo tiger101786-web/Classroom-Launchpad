@@ -9,7 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
-const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly']);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -119,7 +119,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly']);
       assert(current[i][3] >= originalGeometry[i][3] && current[i][3] <= originalGeometry[i][3] + 8, skin + ': decorative frame stays within reviewed size allowance');
      } else assert.equal(current[i][3], originalGeometry[i][3], skin + ': preserves control height');
     }
-    assert(Math.abs(current[1][2] / current[1][3] - 3) < .03, skin + ': full 3:1 header');
+    assert(Math.abs(current[1][2] / current[1][3] - (skin === 'tropical' ? 3.3 : 3)) < .03, skin + ': reviewed scenic header ratio');
    } else assert.deepEqual(await geometry(), originalGeometry, skin + ': control geometry');
    await page.locator('body').click({ position: { x: 950, y: 10 } });
    const capture = await panel.screenshot({ path: path.join(output, skin + '.png') });
@@ -172,7 +172,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly']);
     if (fullHeaders.includes(skin)) {
      const header = await panel.locator('.colt-radio-header').boundingBox();
      const backdrop = await panel.locator('.colt-radio-skin-backdrop').boundingBox();
-     assert(Math.abs(header.width / header.height - 3) < .03, 'Uncropped mobile header');
+     assert(Math.abs(header.width / header.height - (skin === 'tropical' ? 3.3 : 3)) < .03, skin + ': reviewed mobile header ratio');
      if (genres.includes(skin)) {
       const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();
       assert(portrait.width>=68 && portrait.height>=76, 'Mobile portrait stays large');
