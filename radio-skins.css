@@ -1174,3 +1174,44 @@
 .colt-radio-panel[data-radio-skin=symphony] .colt-radio-station.is-active + .colt-radio-favorite {color:#5c321c;text-shadow:0 1px #ffecb5}
 .colt-radio-panel[data-radio-skin=symphony] .colt-radio-filter {background:repeating-linear-gradient(0deg,#fff0 0 3px,#e8bb6b11 3px 4px),linear-gradient(140deg,#734527,#341c15 65%,#66401f);color:#fff0c7;box-shadow:inset 0 1px #ffe3a688,inset 0 -4px #21110d,0 3px 0 #a67f43}
 .colt-radio-panel[data-radio-skin=symphony] .colt-radio-filter.is-active {background:linear-gradient(165deg,#fae2a6,#bb873c 48%,#edc673 53%,#996529);color:#3e2017;border-color:#fff0ba;box-shadow:inset 0 2px #fff0c5,inset 0 -4px #78502b,0 3px 0 #c69d53}
+
+/* Gallery uses the site's existing light/dark variables, independent of the skin. */
+.colt-radio-skin-menu.radio-gallery {
+ width:380px;max-width:calc(100vw - 16px);padding:0;overflow:auto;overscroll-behavior:contain;
+ border:1px solid var(--border);border-radius:14px;background:var(--white);color:var(--ink);
+ box-shadow:var(--shadow),0 14px 36px #0003;font:14px/1.4 Arial,Helvetica,sans-serif;color-scheme:light;
+}
+body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
+.radio-gallery .radio-gallery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 17px 13px;border-bottom:1px solid var(--border);background:var(--white)}
+.radio-gallery .radio-gallery-head h2{margin:0;color:var(--ink);font:700 20px/1.2 Arial,Helvetica,sans-serif;letter-spacing:-.03em}
+.radio-gallery .radio-gallery-head p{margin:5px 0 0;color:var(--muted);font-size:12px;font-weight:400}
+.radio-gallery button.radio-gallery-close{display:grid;place-items:center;grid-template-columns:1fr;width:30px;min-height:30px;height:30px;padding:0;border:1px solid var(--border);border-radius:50%;background:var(--paper);color:var(--ink);font:20px/1 Arial;flex:none}
+.radio-gallery .radio-gallery-categories{display:flex;gap:6px;padding:12px 13px 10px;background:var(--white)}
+.radio-gallery .radio-gallery-categories button{display:block;grid-template-columns:none;min-height:30px;width:auto;padding:6px 12px;border:1px solid var(--border);border-radius:18px;background:var(--paper);color:var(--ink);font-size:11px;line-height:1.2;font-weight:700;text-align:center}
+.radio-gallery .radio-gallery-categories button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.radio-gallery .radio-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;max-height:328px;overflow:auto;scrollbar-color:var(--gold) var(--paper);overscroll-behavior:contain;padding:3px 13px 14px;scroll-padding:8px;background:var(--white)}
+.colt-radio-skin-menu.radio-gallery button.radio-gallery-choice{position:relative;display:block;grid-template-columns:none;min-width:0;width:100%;min-height:0;padding:0;text-align:left;overflow:hidden;border:1px solid var(--border);border-radius:9px;background:var(--paper);color:var(--ink);font:700 12px/1.3 Arial,Helvetica,sans-serif;box-shadow:0 1px 2px #0001}
+.colt-radio-skin-menu.radio-gallery button.radio-gallery-choice[hidden]{display:none!important}
+.colt-radio-skin-menu.radio-gallery button.radio-gallery-choice:hover{border-color:var(--blue);background:var(--blue-soft)}
+.colt-radio-skin-menu.radio-gallery button.radio-gallery-choice[aria-checked=true]{border:2px solid var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 14%,transparent)}
+.radio-gallery .radio-gallery-thumbnail{position:relative;display:block;height:82px;background-color:var(--gold-soft);background-image:var(--gallery-header);background-position:center top;background-size:100% auto;background-repeat:no-repeat;overflow:hidden}
+.radio-gallery .radio-gallery-thumbnail::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#0003,transparent 60%);pointer-events:none}
+.radio-gallery .radio-gallery-colt{position:absolute;left:7px;bottom:-1px;z-index:1;width:68px;height:77px;background-image:var(--gallery-atlas);background-position:center bottom;background-size:auto 205%;background-repeat:no-repeat;filter:drop-shadow(0 2px 2px #0007)}
+.radio-gallery .radio-gallery-colt img{display:block;width:100%;height:100%;object-fit:contain}
+.radio-gallery .radio-gallery-label{display:flex;align-items:center;min-height:39px;padding:9px 10px;color:inherit}
+.radio-gallery .radio-skin-check{position:absolute;right:7px;top:7px;z-index:2;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:var(--blue);color:#fff;font:900 12px/1 Arial;box-shadow:0 1px 4px #0005}
+.radio-gallery .radio-gallery-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--border);background:var(--paper);font-size:10px;color:var(--muted)}
+.radio-gallery .radio-gallery-footer strong{color:var(--ink);font-weight:700}
+.radio-gallery button.radio-gallery-reset{display:block;width:auto;min-height:25px;padding:3px 0;border:0;border-radius:0;background:transparent;color:var(--blue-dark);font-size:11px;font-weight:700;text-align:center;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+.radio-gallery button:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+@media(max-width:360px){.radio-gallery .radio-gallery-head{padding:14px}.radio-gallery .radio-gallery-grid{padding:3px 10px 12px;gap:8px;max-height:290px}.radio-gallery .radio-gallery-thumbnail{height:71px}.radio-gallery .radio-gallery-colt{width:60px;height:67px}.radio-gallery .radio-gallery-label{font-size:11px;padding:8px;min-height:37px}}
+
+/* Dedicated thumbnails use the actual rendered scene and correctly cropped Colt. */
+.radio-gallery .radio-gallery-thumbnail {background-image:none;background-color:var(--gold-soft)}
+.radio-gallery .radio-gallery-scene {position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;}
+.radio-gallery .radio-gallery-colt {left:7px;bottom:0;width:74px;height:78px;background-image:none;}
+.radio-gallery .radio-gallery-colt img {width:100%;height:100%;object-fit:contain;}
+@media(max-width:360px){.radio-gallery .radio-gallery-colt{width:65px;height:69px}}
+/* Original keeps one Colt over its classic maroon/speaker-cloth treatment. */
+.radio-gallery .radio-gallery-choice[data-radio-skin-choice=original] .radio-gallery-thumbnail{background:repeating-linear-gradient(0deg,#aeb2b51a 0 1px,transparent 1px 4px),linear-gradient(125deg,#3b0719,#15080e 65%,#290c17)}
+.radio-gallery .radio-gallery-choice[data-radio-skin-choice=original] .radio-gallery-scene{visibility:hidden}

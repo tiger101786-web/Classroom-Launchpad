@@ -109,7 +109,7 @@ async function compareScreenshots(original, optimized, label) {
               const image = new Image(); image.src = original ? asset.source : asset.delivery; await image.decode();
             }));
             function pathName(src) { return src.split('/').pop(); }
-            await Promise.all([...document.querySelectorAll('.colt-radio-panel img')].map(image => image.decode()));
+            await Promise.all([...document.querySelectorAll('.colt-radio-panel img')].filter(image => !image.closest('.radio-gallery')).map(image => image.decode()));
             await document.fonts.ready;
             document.activeElement?.blur();
             document.querySelector('.colt-radio-stations').scrollTop = 0;

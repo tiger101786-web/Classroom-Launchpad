@@ -53,7 +53,9 @@ Teacher settings and testing instructions are in `COLT-ASSISTANT.md`.
 
 ## Colt Radio
 
-Use the metallic gear beside Favorites to choose a radio skin. The shared registry in `radio-skin-definitions.js` defines each choice, artwork paths, title treatment, menu swatch, layout and shared palette/crop variables. Genre skins reuse one layout marker; exceptional illustration details remain in `radio-skins.css`. The choice stays on the current device; switching skins preserves playback, volume, search and favorites.
+Use the metallic gear beside Favorites to open the thumbnail gallery. Its maroon/neutral styling follows the site light or dark theme. All 19 choices have consistent scenic/Colt thumbnails, selected checkmarks and All/Music/Fantasy filters. Selecting a card applies it immediately; Original resets the look. Arrow keys move through the two-column grid, Home/End move to the first/last visible card, and Escape closes the gallery while leaving the player open. The shared registry in `radio-skin-definitions.js` defines each choice, artwork paths, title treatment, menu swatch, layout and shared palette/crop variables. Genre skins reuse one layout marker; exceptional illustration details remain in `radio-skins.css`. The choice stays on the current device; switching skins preserves playback, volume, search and favorites.
+
+Gallery maintenance, thumbnail rebuilding and validation are documented in `work/radio-skin-gallery.md`.
 
 The 19-choice collection includes Mariachi Fiesta (mahogany bay Colt, burgundy leather and silver details), Symphony Hall (pearl-silver conductor Colt, mahogany and gold), and Rockabilly Jukebox (warm buckskin Colt, ivory jukebox keys, cherry accents and chrome). The selected filter and station retain their distinct highlight colors. Artwork prompts, implementation notes and validation are in `work/radio-mariachi-symphony-rockabilly.md` and `work/radio-music-genres-prompts.md`.
 

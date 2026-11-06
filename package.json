@@ -17,7 +17,7 @@
     "test:roblox": "node work/verify-roblox-production.cjs",
     "test:gummy": "node work/verify-gummy.cjs && node work/verify-pet-studio-production.cjs",
     "test:studio": "node work/verify-pet-studio-production.cjs",
-    "test:radio": "node work/verify-radio-reliability.cjs && node work/verify-approved-radio-skins.cjs && node work/verify-radio-favorites.js",
+    "test:radio": "node work/verify-radio-reliability.cjs && node work/verify-approved-radio-skins.cjs && node work/verify-radio-gallery.cjs && node work/verify-radio-favorites.js",
     "test:radio-artwork": "node work/verify-radio-lossless.cjs"
   },
   "engines": {
