@@ -1520,3 +1520,133 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 .colt-radio-panel:is([data-radio-skin=paperback],[data-radio-skin=attic],[data-radio-skin=windowseat]) .colt-radio-title-word {display:inline-block;white-space:nowrap}
 @media(max-width:560px) {.colt-radio-panel:is([data-radio-skin=paperback],[data-radio-skin=attic],[data-radio-skin=windowseat]) .colt-radio-heading h2 {font-size:21px}}
 @media(max-width:350px) {.colt-radio-panel:is([data-radio-skin=paperback],[data-radio-skin=attic],[data-radio-skin=windowseat]) .colt-radio-heading h2 {font-size:19px}}
+
+/* Moonwalk Magic: native controls stay interactive; decoration never captures input. */
+.colt-radio-panel[data-radio-skin=moonwalk] {--control-light:#ffe9bc;--control-dark:#301320;--key-color:var(--genre-text);--key-active-color:var(--genre-text);--key-face:var(--genre-material);--key-active:var(--genre-material)}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station {background:var(--key-face)!important;color:var(--key-color)!important;border:2px solid var(--genre-edge)!important;box-shadow:inset 0 2px #fff5,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 4px 5px #0009!important;text-shadow:0 1px #0006}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station.is-active {background:var(--key-active)!important;color:var(--key-active-color)!important;border-color:var(--control-light)!important;box-shadow:inset 0 2px #fff7,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 0 9px color-mix(in srgb,var(--genre-accent) 35%,transparent)!important}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station::after {content:'';position:absolute;inset:4px;border:1px solid #fff3;pointer-events:none;border-radius:inherit}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-filter {background:var(--key-face);color:var(--key-color);border:2px solid var(--genre-edge);box-shadow:inset 0 2px #fff5,inset 0 -3px var(--control-dark),0 2px 0 var(--genre-edge)}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-filter.is-active {background:var(--key-active);color:var(--key-active-color);border-color:var(--control-light)}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-filter-icon {color:currentColor}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-player {padding:3px;border:2px solid var(--genre-edge);background:linear-gradient(135deg,var(--control-light),var(--genre-edge) 25%,var(--control-light) 45%,var(--control-dark) 70%,var(--genre-edge));box-shadow:inset 0 0 0 1px #fff5,0 4px 6px #000a}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-now-playing {box-shadow:inset 0 0 0 1px var(--genre-edge),inset 0 0 0 4px #0004}
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-stream-artwork,.colt-radio-heading-mark) {border:2px solid var(--genre-edge);box-shadow:0 0 0 1px #0009,0 3px 4px #0009}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-search-input {box-shadow:inset 0 2px 5px #000b,0 1px #fff4}
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {background:linear-gradient(145deg,var(--control-light),var(--genre-edge) 44%,var(--control-light) 50%,var(--genre-edge) 70%);color:var(--control-dark);border-color:var(--control-light);box-shadow:inset 0 1px #fff9,inset 0 -3px var(--control-dark),0 2px 4px #0009}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,var(--control-dark) 0 20%,var(--genre-edge) 25% 50%,var(--control-light) 55% 70%,var(--control-dark) 75%);border-color:var(--genre-edge);box-shadow:0 1px 3px #000b}
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-station,.colt-radio-filter,.colt-radio-play):focus-visible{outline:2px solid var(--control-light);outline-offset:2px}
+
+
+
+
+/* Moonwalk Magic: illuminated pavement keys, chrome hardware and black stage satin. */
+.colt-radio-panel[data-radio-skin=moonwalk] {--control-light:#f2f8ff;--control-dark:#23354a;--key-color:#e8f3ff;--key-active-color:#112d48;--key-face:linear-gradient(165deg,#263a50,#0a1626 58%,#152940 62%,#071120);--key-active:linear-gradient(165deg,#ffffff,#bcdff7 58%,#e4f6ff 62%,#80b5de)}
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-station,.colt-radio-filter) {border-radius:4px;text-shadow:0 1px #061423;box-shadow:inset 0 2px #ffffff44,inset 0 -4px #070e1c,0 2px 0 #7f9bb6,0 4px 5px #0009}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station.is-active {text-shadow:0 1px #fff9;box-shadow:inset 0 2px #fff,inset 0 -4px #83afce,0 2px 0 #e1f7ff,0 0 12px #9fdcff88!important}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station::after {border-color:#c4e7ff66;border-radius:1px;background:radial-gradient(circle at 2px 2px,#e4f8ff 0 1px,transparent 2px),radial-gradient(circle at calc(100% - 2px) calc(100% - 2px),#d7efff 0 1px,transparent 2px);box-shadow:inset 0 0 4px #c1e5ff1c}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station-icon {border-radius:4px;border:2px solid #c4d7ea;color:#cbeaff;background:radial-gradient(ellipse at top,#284a6c,#0c1729 70%);box-shadow:inset 0 0 0 2px #eaf7ff1a,0 0 5px #82c6ff33,0 2px 3px #0009}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station.is-active .colt-radio-station-icon {color:#f4fbff;background:linear-gradient(#385d7c,#16324d);box-shadow:inset 0 0 0 2px #eaf7ff33,0 0 6px #f1fbff88}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-favorite {color:#b7d8f4;text-shadow:0 0 3px #98caff33}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-station.is-active + .colt-radio-favorite {color:#254c6d;text-shadow:0 1px #fff9}
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {border-radius:5px;color:#243a50;background:linear-gradient(145deg,#f4faff,#9cb2c7 43%,#eef9ff 49%,#a7bdd0 70%,#dce8f5);border-color:#e4f1ff;box-shadow:inset 0 1px #fff,inset 0 -3px #4b6580,0 3px 4px #0009}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-player {border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#7696b3 25%,#edfaff 45%,#384f6a 70%,#bbdcf2);box-shadow:inset 0 0 0 1px #f4fbff99,0 0 12px #89c6ff22,0 4px 7px #000a}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-now-playing {border-radius:8px;background:repeating-linear-gradient(45deg,#eff8ff06 0 1px,transparent 1px 4px),radial-gradient(ellipse at 90% 0,#72b9ff20,transparent 60%),linear-gradient(130deg,#172b40,#080f1d 70%)!important;box-shadow:inset 0 0 0 1px #9cbcd8,inset 0 0 0 4px #020a16aa}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-play {border-radius:11px 18px 18px 8px;color:#173955;border:2px solid #f1fcff;background:radial-gradient(circle at 1px 1px,#ffffffbb 0 1px,transparent 1.5px) 0 0 / 5px 5px,linear-gradient(160deg,#fff,#a6c0d3 54%,#e5f7ff 59%,#819fb7);box-shadow:inset 0 2px #fff,inset 0 -5px #647d98,0 3px 0 #273e57,0 0 10px #d4f2ff44}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-volume-slider::-webkit-slider-thumb {background:repeating-radial-gradient(circle,#142034 0 1px,#354963 1px 2px,#101a2a 2px 3px);border:2px solid #d6edff;box-shadow:inset 0 0 0 3px #0b1726,inset 0 0 0 5px #b8ccdf,0 0 5px #acdfff66}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-live-badge {color:#c6ebff;background:#0b1c31;border-color:#94c8f2;box-shadow:0 0 6px #8bc8ff22}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-equalizer i {border-radius:1px;background:linear-gradient(#f7fdff,#a4d6ff);box-shadow:0 0 4px #b1ddff77}
+/* Angled silver stage lettering retains the real accessible Colt Radio heading. */
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-heading h2 {font-family:Impact,'Arial Black',sans-serif;font-size:29px;font-weight:800;font-style:italic;letter-spacing:.015em;line-height:1.12;white-space:nowrap;color:#eff8ff;text-shadow:1px 2px #3d6586,2px 3px #081b30,0 0 9px #9bdcff66}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-title-word {display:inline-block;white-space:nowrap}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-title-word:nth-of-type(2) {color:#c5e2f7;border-bottom:2px solid #c5ebff;transform:skewX(-4deg)}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-skin-backdrop span {position:relative;aspect-ratio:1254/205;background:none}
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-skin-backdrop span::before {content:'';position:absolute;inset:0 0 auto;height:73.1707317%;background:var(--genre-art) center var(--genre-band-position) / 100% auto no-repeat;transform:scaleY(1.366666667);transform-origin:top center;pointer-events:none}
+@media(max-width:560px) {.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-heading h2 {font-size:24px;letter-spacing:.005em}}
+@media(max-width:350px) {.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-heading h2 {font-size:21px}}
+
+
+/* Dedicated transparent portrait keeps the full mane, shoulders and glove in frame. */
+.colt-radio-panel[data-radio-skin=moonwalk] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {background-color:#081321;background-image:url("assets/radio-skins/illustrated/moonwalk-portrait-v3.png");background-size:auto 108%;background-position:center top;background-repeat:no-repeat}
+
+
+.colt-radio-panel[data-radio-skin=moonwalk] .colt-radio-heading .feature-kicker {font-size:8.5px;letter-spacing:.1em;border-color:#dbeeff!important;color:#f4faff!important;background:#0a1627e8!important;box-shadow:0 0 7px #a9dfff33}
+
+/* Purple Rain: native controls stay interactive; decoration never captures input. */
+.colt-radio-panel[data-radio-skin=purplerain] {--control-light:#ffe9bc;--control-dark:#301320;--key-color:var(--genre-text);--key-active-color:var(--genre-text);--key-face:var(--genre-material);--key-active:var(--genre-material)}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station {background:var(--key-face)!important;color:var(--key-color)!important;border:2px solid var(--genre-edge)!important;box-shadow:inset 0 2px #fff5,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 4px 5px #0009!important;text-shadow:0 1px #0006}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station.is-active {background:var(--key-active)!important;color:var(--key-active-color)!important;border-color:var(--control-light)!important;box-shadow:inset 0 2px #fff7,inset 0 -4px var(--control-dark),0 2px 0 var(--genre-edge),0 0 9px color-mix(in srgb,var(--genre-accent) 35%,transparent)!important}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station::after {content:'';position:absolute;inset:4px;border:1px solid #fff3;pointer-events:none;border-radius:inherit}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-filter {background:var(--key-face);color:var(--key-color);border:2px solid var(--genre-edge);box-shadow:inset 0 2px #fff5,inset 0 -3px var(--control-dark),0 2px 0 var(--genre-edge)}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-filter.is-active {background:var(--key-active);color:var(--key-active-color);border-color:var(--control-light)}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-filter-icon {color:currentColor}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-player {padding:3px;border:2px solid var(--genre-edge);background:linear-gradient(135deg,var(--control-light),var(--genre-edge) 25%,var(--control-light) 45%,var(--control-dark) 70%,var(--genre-edge));box-shadow:inset 0 0 0 1px #fff5,0 4px 6px #000a}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-now-playing {box-shadow:inset 0 0 0 1px var(--genre-edge),inset 0 0 0 4px #0004}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-stream-artwork,.colt-radio-heading-mark) {border:2px solid var(--genre-edge);box-shadow:0 0 0 1px #0009,0 3px 4px #0009}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-search-input {box-shadow:inset 0 2px 5px #000b,0 1px #fff4}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {background:linear-gradient(145deg,var(--control-light),var(--genre-edge) 44%,var(--control-light) 50%,var(--genre-edge) 70%);color:var(--control-dark);border-color:var(--control-light);box-shadow:inset 0 1px #fff9,inset 0 -3px var(--control-dark),0 2px 4px #0009}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-volume-slider::-webkit-slider-thumb {background:radial-gradient(circle,var(--control-dark) 0 20%,var(--genre-edge) 25% 50%,var(--control-light) 55% 70%,var(--control-dark) 75%);border-color:var(--genre-edge);box-shadow:0 1px 3px #000b}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-station,.colt-radio-filter,.colt-radio-play):focus-visible{outline:2px solid var(--control-light);outline-offset:2px}
+
+
+
+
+/* Purple Rain: amethyst enamel keys, silver filigree and velvet stage materials. */
+.colt-radio-panel[data-radio-skin=purplerain] {--control-light:#fff2e2;--control-dark:#432351;--key-color:#fff0fd;--key-active-color:#482254;--key-face:repeating-linear-gradient(45deg,#f0c9ff08 0 1px,transparent 1px 5px),linear-gradient(160deg,#9a63b8,#552b70 57%,#79428c 62%,#351945);--key-active:linear-gradient(165deg,#fff8ec,#d5bdda 57%,#f8e4ed 62%,#b596c6)}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-station,.colt-radio-filter) {border-radius:14px 4px 14px 4px}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station::after {border-color:#e4c7ef88;box-shadow:inset 0 0 0 2px #ffffff0c;background:radial-gradient(circle at 3px 3px,transparent 0 2px,#f2dfc8aa 2px 3px,transparent 4px),radial-gradient(circle at calc(100% - 3px) calc(100% - 3px),transparent 0 2px,#f2dfc8aa 2px 3px,transparent 4px)}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station.is-active {text-shadow:0 1px #fff9}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station-icon {border-radius:12px 12px 18px 18px;border:2px solid #e6d4ed;color:#54296a;background:linear-gradient(145deg,#fff8f0,#bdaccd 48%,#eee0eb 55%,#9277a8);box-shadow:inset 0 0 0 2px #fff4,0 2px 0 #643d75,0 3px 4px #1e0c2e88}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-favorite {color:#edddbd;text-shadow:0 1px #3a1d4b}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station.is-active + .colt-radio-favorite {color:#754785;text-shadow:none}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-icon-btn,.colt-radio-skin-gear) {border-radius:9px 3px 9px 3px;color:#512560;background:linear-gradient(145deg,#fff5ee,#bcabc9 43%,#f6edf4 49%,#a88fbf 70%,#e9d8ea);border-color:#eddaeb;box-shadow:inset 0 1px #fff,inset 0 -3px #69467d,0 3px 4px #0008}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-player {border-radius:19px 6px 19px 6px;background:linear-gradient(135deg,#f5e7ed,#aa8bba 25%,#fff2e3 45%,#62417a 70%,#d6bfdc);box-shadow:inset 0 0 0 1px #fff5,0 0 12px #be7de533,0 4px 7px #0009}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-now-playing {border-radius:12px 3px 12px 3px;background:repeating-linear-gradient(45deg,#f7d2ff08 0 1px,transparent 1px 5px),radial-gradient(ellipse at 100% 0,#d589ff24,transparent 65%),linear-gradient(135deg,#52246b,#231030 70%)!important;box-shadow:inset 0 0 0 1px #d7b6de,inset 0 0 0 4px #1e0a2e77}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-play {border-radius:40% 40% 48% 48%;color:#683477;border:2px solid #f9e6cf;background:linear-gradient(155deg,#fffaf0,#d4bed3 55%,#f9e5ee 60%,#af8cb8);box-shadow:inset 0 2px #fff,inset 0 -5px #99729d,0 3px 0 #60366d,0 0 9px #e6bbff33}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-volume-slider::-webkit-slider-thumb {background:repeating-conic-gradient(#e8d7e5 0 12deg,#a183b1 12deg 18deg);border:2px solid #fff1dc;box-shadow:inset 0 0 0 3px #c7adce,inset 0 0 0 6px #67327c,0 0 5px #d7adff44}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-live-badge {color:#fbe6c9;background:#4d235e;border-color:#d7b5dd}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-equalizer i {border-radius:4px;background:linear-gradient(#fff0cf,#dcb1ef);box-shadow:0 0 4px #dcb0ff66}
+/* Florid ivory stage lettering and the Prince-themed Purple Reign badge. */
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading h2 {font-family:'Segoe Script','Brush Script MT',Georgia,cursive;font-size:26px;font-style:italic;font-weight:700;letter-spacing:-.07em;line-height:1.2;white-space:nowrap;color:#fff0db;text-shadow:1px 2px #753b89,2px 3px #2b103f,0 0 8px #dba5ff55}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-title-word {display:inline-block;white-space:nowrap}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-title-word:nth-of-type(2) {color:#e9c6f3}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading .feature-kicker {font-size:9px;letter-spacing:.18em;border-color:#e3c9ed!important;color:#fff0df!important;background:#301244eb!important;box-shadow:0 0 7px #c77dff44}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-skin-backdrop span {position:relative;aspect-ratio:1254/205;background:none}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-skin-backdrop span::before {content:'';position:absolute;inset:0 0 auto;height:73.1707317%;background:var(--genre-art) center var(--genre-band-position) / 100% auto no-repeat;transform:scaleY(1.366666667);transform-origin:top center;pointer-events:none}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {background-color:#241033;background-image:url("assets/radio-skins/illustrated/purplerain-portrait.png");background-size:auto 108%;background-position:center top;background-repeat:no-repeat}
+@media(max-width:560px) {.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading h2 {font-size:22px}}
+@media(max-width:350px) {.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading h2 {font-size:20px}}
+
+
+/* User references: light lavender rain, photo-matched jacket and pink/gold Purple Rain lettering. */
+.colt-radio-panel[data-radio-skin=purplerain] {--control-light:#fff4fc;--control-dark:#9977ad;--key-color:#4b345c;--key-active-color:#fff4ff;--key-face:repeating-linear-gradient(100deg,#ffffff30 0 1px,transparent 1px 13px),linear-gradient(165deg,#fff6ff,#d5bfe5 58%,#eddcf5 62%,#bca0cf);--key-active:linear-gradient(160deg,#b185ca,#754a95 58%,#9e6fb3);color:#453251}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-station,.colt-radio-filter) {text-shadow:0 1px #fff8}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-station.is-active,.colt-radio-filter.is-active) {text-shadow:0 1px #57336c}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station::after {border-color:#fff8;box-shadow:inset 0 0 0 2px #9471ac22}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-favorite {color:#88659e;text-shadow:0 1px #fff9}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-station.is-active + .colt-radio-favorite {color:#ffe9fb;text-shadow:none}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-player {background:linear-gradient(135deg,#fff6fc,#b29bc7 25%,#f7eaf6 45%,#b596ca 70%,#eedaf1);box-shadow:inset 0 0 0 1px #fff9,0 0 9px #b489cf22,0 4px 7px #42234c55}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-now-playing {color:#42304e;background:repeating-linear-gradient(100deg,#ffffff30 0 1px,transparent 1px 13px),radial-gradient(ellipse at 100% 0,#fff1ff99,transparent 65%),linear-gradient(135deg,#edddf5,#ceb5de 70%)!important;box-shadow:inset 0 0 0 1px #b493c6,inset 0 0 0 4px #fff4}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-now-playing strong {color:#402b4d;text-shadow:0 1px #fff6}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-stream-label,.colt-radio-volume-icon,.colt-radio-mute) {color:#76518e}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-live-badge {background:#9065a8;border-color:#fff1fc;color:#fff6ff}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-equalizer i {background:linear-gradient(#a97cc0,#72518d);box-shadow:none}
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {background-color:#e4d6ee}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading h2 {color:#583067;text-shadow:0 1px #fff9,1px 2px #e8cbed,0 0 5px #ffffff66}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-title-word:nth-of-type(2) {color:#80518f}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading .feature-kicker {display:block;width:174px;height:40px;max-width:100%;padding:0;margin:0 0 1px;font-size:0!important;line-height:0;letter-spacing:0;border:0!important;border-radius:0;background:transparent url("assets/radio-skins/illustrated/purplerain-wordmark.png") left center / contain no-repeat!important;box-shadow:none}
+@media(max-width:560px) {.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading .feature-kicker {width:124px;height:28px}}
+
+
+/* Readable Purple Rain title plate; lettering itself keeps the user's reference style. */
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading .feature-kicker {position:relative;background:linear-gradient(135deg,#32113eeb,#582466e8)!important;border:1px solid #e9ccf5!important;border-radius:5px;box-shadow:inset 0 1px #ffffff44,0 2px 5px #3e215d55}
+.colt-radio-panel[data-radio-skin=purplerain] .colt-radio-heading .feature-kicker::before {content:'';position:absolute;inset:0;background:url("assets/radio-skins/illustrated/purplerain-wordmark.png") center / contain no-repeat;filter:drop-shadow(1px 0 0 #220c31) drop-shadow(-1px 0 0 #220c31) drop-shadow(0 1px 0 #220c31) drop-shadow(0 -1px 0 #220c31);pointer-events:none}
+/* Rain and spotlight depth behind the transparent Colt, instead of a flat fill. */
+.colt-radio-panel[data-radio-skin=purplerain] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {
+ background-color:#76528d;
+ background-image:url("assets/radio-skins/illustrated/purplerain-portrait.png"),radial-gradient(ellipse at 50% 27%,#fff0ff11 0 20%,#4b245d66 75%,#2d153eaa 100%),linear-gradient(180deg,#6a3e7840,#38204477),url("assets/radio-skins/illustrated/purplerain-atlas.png");
+ background-size:auto 108%,100% 100%,100% 100%,auto 315%;
+ background-position:center top,center,center,60% top;
+ background-repeat:no-repeat;
+ box-shadow:inset 0 0 0 1px #fff3,0 0 0 1px #8e68aa,0 3px 6px #45295155;
+}

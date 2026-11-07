@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261106-reading-travel-v9', document.currentScript.src).href;
-  const definitionsURL = new URL('radio-skin-definitions.js?v=20261106-reading-travel-v8', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261107-tributes-v10', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261107-tributes-v9', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
     if (window.coltRadioSkinDefinitions) return Promise.resolve();
@@ -77,6 +77,8 @@
     const header = panel.querySelector('.colt-radio-header');
     const fitBackdrop = () => panel.style.setProperty('--radio-skin-header-height', header.getBoundingClientRect().height + 'px');
     new ResizeObserver(fitBackdrop).observe(header);
+    const kicker = panel.querySelector('.colt-radio-heading .feature-kicker');
+    const defaultKicker = kicker?.textContent || 'Classroom Music';
     const title = panel.querySelector('.colt-radio-heading h2');
     const titleText = title.textContent;
     function styleTitle(skin) {
@@ -109,6 +111,7 @@
       if (skin === 'original') delete panel.dataset.radioSkin;
       else panel.dataset.radioSkin = skin;
       styleTitle(definition);
+      if (kicker) kicker.textContent = definition.kicker || defaultKicker;
       fitBackdrop();
       choices.forEach(button => {
         const selected = button.dataset.radioSkinChoice === skin;

@@ -1122,7 +1122,7 @@
         if (!globalObject.initializeColtRadioSkins) {
           await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'radio-skins.js?v=20261106-reading-travel-v9';
+            script.src = 'radio-skins.js?v=20261107-tributes-v10';
             script.onload = resolve;
             script.onerror = () => { script.remove(); reject(new Error('Radio skins unavailable')); };
             document.head.append(script);

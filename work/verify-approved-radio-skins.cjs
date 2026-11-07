@@ -9,7 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
-const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl', 'paperback', 'attic', 'windowseat']);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl', 'paperback', 'attic', 'windowseat', 'moonwalk', 'purplerain']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -50,6 +50,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
   const checkTitle = async (skin, target = page) => {
    const current = target.locator('.colt-radio-panel');
    const heading = current.locator('.colt-radio-heading h2');
+   assert.equal(await current.locator('.feature-kicker').textContent(), definitions.find(item => item.id === skin).kicker || 'Classroom Music', 'Skin badge updates and restores the original wording');
    assert.equal(await heading.textContent(), 'Colt Radio', 'Title text survives skin changes');
    if (definitions.find(item => item.id === skin).title === 'plain') {
     assert.equal(await heading.locator('.colt-radio-title-word').count(), 0, 'Other skins restore their original title');
@@ -78,7 +79,8 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
      sides:[getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage,getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span'),'::before').backgroundImage].join(' ')
     }));
-    assert(art.portraits.every(url => url.includes(skin+'-atlas')), 'Both portraits use the selected genre Colt');
+    const portraitAsset = skin === 'moonwalk' ? 'moonwalk-portrait-v3.png' : skin === 'purplerain' ? 'purplerain-portrait.png' : skin+'-atlas';
+    assert(art.portraits.every(url => url.includes(portraitAsset)), 'Both portraits use the selected genre Colt');
     assert(art.sides.includes(skin+'-atlas'), 'Decorated side artwork uses the actual atlas');
     const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();
     assert(portrait.width>=80 && portrait.height>=88, 'Full size desktop header portrait');

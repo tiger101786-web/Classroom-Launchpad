@@ -44,3 +44,7 @@ The boy and girl bedroom music skins add four matching rendered scene/portrait t
 ## Paperback, Attic and Window Seat expansion — November 6
 
 Paperback Playback, Attic Acoustics and Window Seat Sessions add six matching rendered scene/portrait thumbnails. The gallery now has 32 choices including Original, with 26 Music and 5 Fantasy entries. Site colors, lazy loading, categories and keyboard behavior are preserved. See radio-reading-travel.md for designs and verification.
+
+## Artist tribute expansion — November 7
+
+Moonwalk Magic and Purple Rain add four matching rendered gallery images. Gallery now has 34 choices including Original, 28 Music and 5 Fantasy entries. Their dedicated transparent portraits match the final reviewed compositions; Purple Rain also has a separate wordmark. The site palette, lazy image loading, categories and keyboard behavior are preserved. See radio-artist-tributes.md for design and validation details.

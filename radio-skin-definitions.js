@@ -620,6 +620,55 @@
     "swatch": "linear-gradient(135deg,#ffdfaa,#102233)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "moonwalk",
+    "label": "Moonwalk Magic",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/moonwalk-atlas.png",
+      "assets/radio-skins/illustrated/moonwalk-portrait-v3.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/moonwalk-atlas.png')",
+      "--genre-base": "#080e19",
+      "--genre-edge": "#b6c7df",
+      "--genre-accent": "#a7ddff",
+      "--genre-text": "#eef5ff",
+      "--genre-material": "repeating-linear-gradient(0deg,#d6e9ff06 0 1px,transparent 1px 4px),linear-gradient(140deg,#172434,#080e1a 70%,#172c40)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#a7ddff,#080e19)",
+    "kicker": "King of Pop Tribute"
+  },
+  {
+    "id": "purplerain",
+    "label": "Purple Rain",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/purplerain-atlas.png",
+      "assets/radio-skins/illustrated/purplerain-portrait.png",
+      "assets/radio-skins/illustrated/purplerain-wordmark.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/purplerain-atlas.png')",
+      "--genre-base": "#e4d5ef",
+      "--genre-edge": "#ad8dc5",
+      "--genre-accent": "#79548f",
+      "--genre-text": "#453251",
+      "--genre-material": "repeating-linear-gradient(45deg,#efd0ff08 0 1px,transparent 1px 4px),linear-gradient(140deg,#eadcf4,#d7c1e5 70%,#e6d4ee)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#79548f,#e4d5ef)",
+    "kicker": "Purple Rain"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

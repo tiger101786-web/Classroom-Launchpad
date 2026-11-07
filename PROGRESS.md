@@ -53,3 +53,13 @@ The user approved the actual-player previews and requested commit/push. Integrat
 
 Details: work/radio-reading-travel.md. Exact ImageGen prompts: work/radio-reading-travel-prompts.json. Six production desktop/mobile screenshots match approved preview PNGs byte-for-byte; final captures are under C:/Users/Sinister/Documents/Email/radio-reading-travel-integration/screenshots/.
 Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 32 choices, title accessibility/bounds, day/night gallery, mobile/short viewports, persistence, audio continuity, favorites and pop-out passed. All six production desktop/mobile captures match approved previews byte-for-byte. User authorized commit and push; confirm delivery from Git history/status.
+
+## MJ and Prince-inspired skins — November 7, 2026
+
+User approved adding the latest Moonwalk Magic and Purple Rain designs. Integrated both skins, five active artwork assets and four gallery thumbnails; gallery now has 34 choices including Original (28 Music, 5 Fantasy). Preserved MJ's full framed mane/shoulder, fedora and raised glove; Prince uses the final lavender Colt with photo-matched short curls/studded jacket, lively expression, lighter rain palette, pink/gold Purple Rain lettering on a contrasting nameplate, and rain/spotlight backgrounds inside both portraits. The earlier brown/brocade Prince drafts are excluded.
+
+Added optional skin badge wording with default restoration. MJ badge: King of Pop Tribute. Prince badge: Purple Rain. Existing Colt Radio headings, prior collection and site gallery colors are preserved. Cache URLs refreshed.
+
+Details: work/radio-artist-tributes.md. Exact ImageGen prompts/edits: work/radio-artist-tributes-prompts.json. Production capture folder: C:/Users/Sinister/Documents/Email/radio-artist-tributes-integration/screenshots/.
+
+Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 34 choices, title accessibility/bounds, badge wording/restoration, gallery day/night/category/keyboard behavior, mobile/short screens, playback continuity, favorites, persistence and pop-out passed. All four production desktop/mobile captures are byte-identical to the latest previews. Integration is local; no commit or push was requested for this pair.
