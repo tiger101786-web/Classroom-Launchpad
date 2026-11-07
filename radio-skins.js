@@ -72,11 +72,12 @@
       return button;
     });
     // Sort the visible cards without changing registry indexes used for images and filters.
-    [...choices].sort((a, b) =>
-      a.querySelector('.radio-gallery-label').textContent.localeCompare(
+    [...choices].sort((a, b) => {
+      const originalFirst = Number(b.dataset.radioSkinChoice === 'original') - Number(a.dataset.radioSkinChoice === 'original');
+      return originalFirst || a.querySelector('.radio-gallery-label').textContent.localeCompare(
         b.querySelector('.radio-gallery-label').textContent, 'en', { sensitivity: 'base' }
-      )
-    ).forEach(button => grid.append(button));
+      );
+    }).forEach(button => grid.append(button));
     panel.prepend(backdrop);
     panel.querySelector('.colt-radio-filters').append(gear);
     panel.append(menu);

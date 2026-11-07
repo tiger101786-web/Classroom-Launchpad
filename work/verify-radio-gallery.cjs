@@ -41,7 +41,8 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       const menu = page.getByRole('dialog', { name: 'Choose a radio skin', exact: true });
       await gear.waitFor();
       const checkAlphabetical = async () => {
-        const labels = await menu.locator('[data-radio-skin-choice]:not([hidden]) .radio-gallery-label').allTextContents();
+        assert.equal(await menu.locator('[data-radio-skin-choice]').first().getAttribute('data-radio-skin-choice'), 'original', 'Original stays first, including after filtering and reopening');
+        const labels = await menu.locator('[data-radio-skin-choice]:not([hidden]):not([data-radio-skin-choice=original]) .radio-gallery-label').allTextContents();
         for (let i = 1; i < labels.length; i++) assert(labels[i - 1].localeCompare(labels[i], 'en', { sensitivity: 'base' }) <= 0, 'Visible cards stay alphabetical: ' + labels[i - 1] + ' / ' + labels[i]);
       };
       const before = await page.evaluate(() => {
@@ -108,7 +109,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
         await page.keyboard.press('Escape'); assert(await panel.isVisible()); assert(!(await menu.isVisible()));
       }
       requests.length = 0;
-      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; alphabetical order in all categories; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
+      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; Original first; other skins alphabetical in all categories; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
     }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }

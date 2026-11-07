@@ -71,3 +71,9 @@ User requested alphabetizing Choose a skin. Gallery cards now stay in A–Z orde
 Validation: node syntax checks for radio-skins.js and colt-radio.js passed; work/verify-radio-gallery.cjs passed in day/night modes for all 34 image pairs, alphabetical order in every category and after selection/reopening, arrow/End navigation, Original reset, unchanged audio, and mobile/short viewports. Screenshots: C:/Users/Sinister/Documents/Email/radio-gallery-alphabetical/.
 
 User preference: always include a suggested commit message when reporting code changes. Suggested message: Alphabetize the Colt Radio skin chooser. Changes are local; no commit or push requested.
+
+## Original pinned first — November 7, 2026
+
+User clarified that Original must always appear first in Choose a skin. Pinned the Original card ahead of the alphabetical comparison; all other skins stay A–Z. Category filtering and selected checkmarks are preserved. Gallery checks verify Original remains the first card after filtering/reopening, with alphabetical order among the other visible choices. Player and loader cache URLs refreshed.
+
+Validation: radio-skins.js and colt-radio.js syntax checks passed; work/verify-radio-gallery.cjs passed for day/night, Original-first ordering, category filtering, arrow/End navigation, reset, unchanged audio and mobile/short screens. Changes are local; no commit or push requested. Suggested commit message: Keep Original first in the alphabetized radio skin chooser.

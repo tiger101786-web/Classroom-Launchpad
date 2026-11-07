@@ -4,7 +4,7 @@ Replaces the gear's text/swatch list with the approved two-column thumbnail gall
 
 ## Behavior
 
-- Cards are alphabetized A–Z by their displayed skin names in All, Music and Fantasy. The current skin keeps its alphabetical position and selected checkmark.
+- Original is pinned first in the chooser. All other cards are alphabetized A–Z by displayed name; Music and Fantasy keep their category filters and alphabetical order. The current skin keeps its selected checkmark without moving to the front.
 - All 34, Music 28 and Fantasy 5 filters; selected card checkmarks and an Original reset.
 - Card selection applies the existing skin and closes the popover without restarting audio.
 - Arrow keys move through the visible two-column card grid, Home/End select a focus position, and Enter/Space applies a card. Escape/close returns focus to the gear. Focus leaving the gallery closes it.
