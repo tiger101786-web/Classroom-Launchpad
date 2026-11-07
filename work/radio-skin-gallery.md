@@ -6,6 +6,7 @@ Replaces the gear's text/swatch list with the approved two-column thumbnail gall
 
 - Original is pinned first in the chooser. All other cards are alphabetized A–Z by displayed name; Music and Fantasy keep their category filters and alphabetical order. The current skin keeps its selected checkmark without moving to the front.
 - All 34, Music 28 and Fantasy 5 filters; selected card checkmarks and an Original reset.
+- Search skins filters names within the selected category, ignoring case, extra spaces and hyphen differences. Original stays first among matching cards; a helpful message appears for no results. Reopening clears the search. ArrowDown enters results, and Enter applies a unique match.
 - Card selection applies the existing skin and closes the popover without restarting audio.
 - Arrow keys move through the visible two-column card grid, Home/End select a focus position, and Enter/Space applies a card. Escape/close returns focus to the gear. Focus leaving the gallery closes it.
 - Existing popover placement keeps the gear exposed, clamps to the viewport and follows scrolling/resizing, including floating player windows.

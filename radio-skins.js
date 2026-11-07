@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261107-tributes-v10', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261107-skin-search-v11', document.currentScript.src).href;
   const definitionsURL = new URL('radio-skin-definitions.js?v=20261107-tributes-v9', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
@@ -45,8 +45,13 @@
     menu.setAttribute('popover', 'auto');
     menu.setAttribute('role', 'dialog');
     menu.setAttribute('aria-label', 'Choose a radio skin');
-    menu.innerHTML = '<div class="radio-gallery-head"><div><h2>Choose a skin</h2><p>A new look for your radio.</p></div><button type="button" class="radio-gallery-close" aria-label="Close skin selector">×</button></div><div class="radio-gallery-categories" aria-label="Skin categories"></div><div class="radio-gallery-grid" role="radiogroup" aria-label="Radio skins"></div><div class="radio-gallery-footer"><span>Current: <strong></strong></span><button type="button" class="radio-gallery-reset">Original</button></div>';
+    menu.innerHTML = '<div class="radio-gallery-head"><div><h2>Choose a skin</h2><p>A new look for your radio.</p></div><button type="button" class="radio-gallery-close" aria-label="Close skin selector">×</button></div><div class="radio-gallery-categories" aria-label="Skin categories"></div><div class="radio-gallery-search"><input type="search" class="radio-gallery-search-input" aria-label="Search radio skins" placeholder="Search skins..." autocomplete="off" spellcheck="false"></div><div class="radio-gallery-grid" role="radiogroup" aria-label="Radio skins"></div><p class="radio-gallery-empty" role="status" hidden>No skins match. Try another name or category.</p><div class="radio-gallery-footer"><span>Current: <strong></strong></span><button type="button" class="radio-gallery-reset">Original</button></div>';
     const grid = menu.querySelector('.radio-gallery-grid');
+    const search = menu.querySelector('.radio-gallery-search-input');
+    const empty = menu.querySelector('.radio-gallery-empty');
+    grid.id = menu.id + '-choices';
+    search.setAttribute('aria-controls', grid.id);
+    const searchText = value => value.toLocaleLowerCase('en').replace(/[-–—]/g, ' ').replace(/\s+/g, ' ').trim();
     const fantasyIds = new Set(['inferno', 'frostfang', 'temple', 'nebula', 'cyberpunk']);
     let category = 'all', thumbnailsLoaded = false;
     const categoryFor = skin => fantasyIds.has(skin.id) ? 'fantasy' : skin.id === 'original' ? 'classic' : 'music';
@@ -160,6 +165,8 @@
       gear.setAttribute('aria-expanded', String(event.newState === 'open'));
       if (event.newState === 'open') {
         menu.style.opacity = '0';
+        search.value = '';
+        filterChoices();
         grid.scrollTop = 0;
         if (!thumbnailsLoaded) {
           choices.forEach((button, index) => {
@@ -202,12 +209,24 @@
     }));
     function visibleChoices() { return [...grid.querySelectorAll('[data-radio-skin-choice]')].filter(button => !button.hidden); }
     function filterChoices() {
-      choices.forEach((button, index) => { button.hidden = category !== 'all' && categoryFor(skins[index]) !== category; });
+      const query = searchText(search.value);
+      choices.forEach((button, index) => {
+        const skin = skins[index];
+        button.hidden = (category !== 'all' && categoryFor(skin) !== category) || !searchText(skin.label).includes(query);
+      });
       const visible = visibleChoices();
+      grid.hidden = visible.length === 0;
+      empty.hidden = visible.length > 0;
       const current = visible.find(button => button.getAttribute('aria-checked') === 'true') || visible[0];
       choices.forEach(button => { button.tabIndex = button === current ? 0 : -1; });
       positionMenu();
     }
+    search.addEventListener('input', () => { filterChoices(); grid.scrollTop = 0; });
+    search.addEventListener('keydown', event => {
+      const visible = visibleChoices();
+      if (event.key === 'ArrowDown' && visible.length) { event.preventDefault(); visible[0].focus(); }
+      if (event.key === 'Enter' && visible.length === 1) { event.preventDefault(); visible[0].click(); }
+    });
     menu.querySelectorAll('[data-skin-category]').forEach(tab => tab.addEventListener('click', () => {
       category = tab.dataset.skinCategory;
       menu.querySelectorAll('[data-skin-category]').forEach(other => other.setAttribute('aria-pressed', String(other === tab)));

@@ -77,3 +77,13 @@ User preference: always include a suggested commit message when reporting code c
 User clarified that Original must always appear first in Choose a skin. Pinned the Original card ahead of the alphabetical comparison; all other skins stay A–Z. Category filtering and selected checkmarks are preserved. Gallery checks verify Original remains the first card after filtering/reopening, with alphabetical order among the other visible choices. Player and loader cache URLs refreshed.
 
 Validation: radio-skins.js and colt-radio.js syntax checks passed; work/verify-radio-gallery.cjs passed for day/night, Original-first ordering, category filtering, arrow/End navigation, reset, unchanged audio and mobile/short screens. Changes are local; no commit or push requested. Suggested commit message: Keep Original first in the alphabetized radio skin chooser.
+
+## Skin chooser search — November 7, 2026
+
+Added an accessible Search skins field beneath the All/Music/Fantasy tabs after opening the player gear. It filters displayed skin names case-insensitively, normalizes surrounding/repeated spaces and hyphens, and combines with the current category. Original retains first position among matching results; the other cards remain alphabetical. A helpful live-status message appears when no skins match. The Original reset stays available.
+
+Search clears whenever the chooser is reopened. ArrowDown from the input enters matching cards; Enter applies a unique result. Escape, category changes and ordinary card keyboard navigation remain supported. Search/filtering do not replace or restart audio. Search colors use the site's day/night variables; 16px input text supports phone use. CSS and script loader cache URLs refreshed.
+
+Validation: syntax checks for radio-skins.js and colt-radio.js passed. work/verify-radio-gallery.cjs passed day/night tests for case/space/hyphen matching, combined category search, empty states and recovery, ArrowDown/Enter selection, clearing on reopen, Original-first/A–Z order, unchanged audio, thumbnails and mobile/short viewport placement. The gallery test page now explicitly uses UTF-8, matching production. Reviewed search and gallery screenshots under C:/Users/Sinister/Documents/Email/radio-gallery-search/.
+
+Suggested commit message: Add search to the Colt Radio skin chooser. Changes are local; no commit or push requested. Concurrent highland-pet/accessories.js edits are unrelated and were not modified by this task.

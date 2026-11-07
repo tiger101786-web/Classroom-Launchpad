@@ -23,7 +23,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       const url = new URL(route.request().url());
       if (url.hostname !== 'radio.test') return route.abort();
       requests.push(url.pathname);
-      if (url.pathname === '/') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><div id="coltRadioRoot" class="colt-radio-root"></div><script src="/colt-radio.js"></script>' });
+      if (url.pathname === '/') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><div id="coltRadioRoot" class="colt-radio-root"></div><script src="/colt-radio.js"></script>' });
       const file = path.join(root, decodeURIComponent(url.pathname));
       if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return route.fulfill({ status: 404, body: '' });
       return route.fulfill({ body: fs.readFileSync(file), contentType: file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : file.endsWith('.png') ? 'image/png' : 'application/octet-stream' });
@@ -70,6 +70,37 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
         return { actual: getComputedStyle(element).backgroundColor, expected };
       });
       assert.equal(colors.actual, colors.expected, 'Gallery uses the site surface color');
+      const search = menu.getByRole('searchbox', { name: 'Search radio skins' });
+      const matchingCards = menu.locator('[data-radio-skin-choice]:not([hidden])');
+      await search.fill('  PURPLE rain  ');
+      assert.deepEqual(await matchingCards.evaluateAll(cards => cards.map(card => card.dataset.radioSkinChoice)), ['purplerain'], 'Search ignores case and surrounding spaces');
+      await menu.screenshot({ path: path.join(output, 'gallery-search-' + theme + '.png'), animations: 'disabled' });
+      await search.press('ArrowDown');
+      assert.equal(await page.evaluate(() => document.activeElement.dataset.radioSkinChoice), 'purplerain', 'Down enters matching results');
+      await page.keyboard.press('Enter');
+      assert.equal(await panel.getAttribute('data-radio-skin'), 'purplerain');
+      await gear.click();
+      assert.equal(await search.inputValue(), '', 'Reopening clears the search');
+      await menu.locator('[data-skin-category=all]').click();
+      assert.equal(await matchingCards.count(), definitions.length);
+      await search.fill('after school');
+      assert.deepEqual(await matchingCards.evaluateAll(cards => cards.map(card => card.dataset.radioSkinChoice)), ['afterschoolboy', 'afterschoolgirl'], 'Search handles hyphenated names');
+      await checkAlphabetical();
+      await search.fill('no matching skin xyz');
+      assert.equal(await matchingCards.count(), 0);
+      assert(await menu.getByRole('status').isVisible(), 'Empty results show a helpful message');
+      await search.fill('purple');
+      await menu.locator('[data-skin-category=fantasy]').click();
+      assert.equal(await matchingCards.count(), 0, 'Search combines with category filters');
+      await menu.locator('[data-skin-category=music]').click();
+      assert.equal(await matchingCards.count(), 1);
+      await search.press('Enter');
+      assert.equal(await panel.getAttribute('data-radio-skin'), 'purplerain', 'Enter applies a unique match');
+      await gear.click();
+      assert.equal(await search.inputValue(), '');
+      await menu.locator('[data-skin-category=all]').click();
+      await search.fill('');
+      assert(!(await menu.getByRole('status').isVisible()));
       await menu.locator('[data-skin-category=fantasy]').click();
       assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 5);
       await checkAlphabetical();
@@ -106,10 +137,17 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
         const bounds = await menu.boundingBox(), anchor = await gear.boundingBox();
         assert(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= width + 1 && bounds.y + bounds.height <= height + 1, 'Gallery fits viewport');
         assert(bounds.y + bounds.height <= anchor.y || bounds.y >= anchor.y + anchor.height, 'Gear stays exposed');
+        if (height > 500) {
+          await search.fill('purple');
+          const filteredBounds = await menu.boundingBox();
+          assert(filteredBounds.x >= 0 && filteredBounds.y >= 0 && filteredBounds.x + filteredBounds.width <= width + 1 && filteredBounds.y + filteredBounds.height <= height + 1, 'Search results fit the mobile viewport');
+          assert.equal(await matchingCards.count(), 1);
+          await menu.screenshot({ path: path.join(output, 'gallery-search-' + theme + '-' + width + '.png'), animations: 'disabled' });
+        }
         await page.keyboard.press('Escape'); assert(await panel.isVisible()); assert(!(await menu.isVisible()));
       }
       requests.length = 0;
-      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; Original first; other skins alphabetical in all categories; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
+      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; Original first; other skins alphabetical in all categories; search/empty states; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
     }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
