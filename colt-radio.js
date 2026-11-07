@@ -1122,7 +1122,7 @@
         if (!globalObject.initializeColtRadioSkins) {
           await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'radio-skins.js?v=20261106-cozy-four-v7';
+            script.src = 'radio-skins.js?v=20261106-after-school-v8';
             script.onload = resolve;
             script.onerror = () => { script.remove(); reject(new Error('Radio skins unavailable')); };
             document.head.append(script);

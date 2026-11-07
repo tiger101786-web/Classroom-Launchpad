@@ -511,6 +511,50 @@
     "swatch": "linear-gradient(135deg,#f8c7a7,#111725)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "afterschoolboy",
+    "label": "After-School Audio — Boy",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/afterschoolboy-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/afterschoolboy-atlas.png')",
+      "--genre-base": "#14232d",
+      "--genre-edge": "#a8baa8",
+      "--genre-accent": "#f3c3a4",
+      "--genre-text": "#f3f1e3",
+      "--genre-material": "repeating-linear-gradient(0deg,#e6f6e408 0 1px,transparent 1px 4px),linear-gradient(140deg,#304844,#172b32 70%,#344d46)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#f3c3a4,#14232d)"
+  },
+  {
+    "id": "afterschoolgirl",
+    "label": "After-School Audio — Girl",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/afterschoolgirl-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/afterschoolgirl-atlas.png')",
+      "--genre-base": "#241c32",
+      "--genre-edge": "#bba6c6",
+      "--genre-accent": "#f5c7b1",
+      "--genre-text": "#faf0fb",
+      "--genre-material": "repeating-linear-gradient(0deg,#ede0ff08 0 1px,transparent 1px 4px),linear-gradient(140deg,#4e3c5f,#271d36 70%,#51394f)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "38%",
+      "--genre-portrait": "190%"
+    },
+    "swatch": "linear-gradient(135deg,#f5c7b1,#241c32)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

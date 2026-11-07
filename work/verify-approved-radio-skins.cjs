@@ -9,7 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
-const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape']);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -76,7 +76,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
    if (genres.includes(skin)) {
     const art = await panel.evaluate(panel => ({
      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
-     sides:getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage
+     sides:[getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage,getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span'),'::before').backgroundImage].join(' ')
     }));
     assert(art.portraits.every(url => url.includes(skin+'-atlas')), 'Both portraits use the selected genre Colt');
     assert(art.sides.includes(skin+'-atlas'), 'Decorated side artwork uses the actual atlas');

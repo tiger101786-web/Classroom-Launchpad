@@ -1,0 +1,15 @@
+{
+  "tool": "built-in ImageGen",
+  "initial": {
+    "tool": "built-in ImageGen"
+  },
+  "finalEdits": {
+    "tool": "built-in ImageGen",
+    "revision": "three-quarter-gaze-v3",
+    "direction": "Use the familiar three-quarter head pose from the other approved Colts, with eyes toward the viewer. The symmetric front-facing draft was rejected."
+  },
+  "approvedAssets": [
+    "assets/radio-skins/illustrated/afterschoolboy-atlas.png",
+    "assets/radio-skins/illustrated/afterschoolgirl-atlas.png"
+  ]
+}

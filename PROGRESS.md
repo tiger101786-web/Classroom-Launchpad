@@ -39,3 +39,10 @@ Integrated the approved Rainy Day Records, Snowfall Stereo, Golden Hour Tapes an
 Details and validation: work/radio-cozy-collection.md. Exact ImageGen prompts: work/radio-cozy-collection-prompts.json. Final production screenshots and a recovery note are under C:/Users/Sinister/Documents/Email/radio-cozy-integration/.
 
 Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 27 choices, accessible titles and heading bounds, day/night gallery, desktop/mobile/short viewports, persistence, audio continuity, favorites and pop-out controls passed. Actual production-player desktop and 320px captures were visually reviewed. User authorized commit and push; confirm delivery from Git history/status.
+
+## After-School Audio pair — November 6, 2026
+
+The user approved adding both After-School Audio versions. Integrated the boy and girl atlases, four matching gallery thumbnails, scoped sampler-pad/audio-interface controls and handwritten/label-maker title lettering. The gallery now has 29 choices including Original (23 Music, 5 Fantasy). Both Colt portraits keep the approved three-quarter head angle and eyes toward the viewer.
+
+Details: work/radio-after-school.md. Exact built-in ImageGen prompts and final gaze edits: work/radio-after-school-prompts.json. Production captures: C:/Users/Sinister/Documents/Email/radio-after-school-integration/screenshots/. All four desktop/mobile screenshots are byte-identical to the approved previews. Registry/CSS/player cache URLs were refreshed.
+Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 29 choices, heading accessibility/bounds, day/night gallery, mobile/short viewports, playback continuity, favorites, persistence and pop-out passed. Integration is local; no commit or push was requested for this pair.

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261106-cozy-four-v7', document.currentScript.src).href;
-  const definitionsURL = new URL('radio-skin-definitions.js?v=20261106-cozy-four-v6', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261106-after-school-v8', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261106-after-school-v7', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
     if (window.coltRadioSkinDefinitions) return Promise.resolve();

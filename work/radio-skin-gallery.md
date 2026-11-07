@@ -36,3 +36,7 @@ Funk Groove, Tropical Steel Band, Irish Folk and Gospel Sunday add eight matchin
 ## November 6 cozy collection
 
 Rainy Day Records, Snowfall Stereo, Golden Hour Tapes and Midnight Mixtape add eight matching scene/portrait thumbnails. The gallery now has 27 choices including Original, with 21 Music and 5 Fantasy entries. The selector keeps the site palette and established keyboard, lazy-loading and thumbnail composition behavior. See radio-cozy-collection.md for the new artwork, controls, title lettering and validation.
+
+## After-School Audio expansion — November 6
+
+The boy and girl bedroom music skins add four matching rendered scene/portrait thumbnails. The gallery now has 29 choices including Original, with 23 Music entries and 5 Fantasy entries. Existing category, keyboard, site palette and lazy-loading behavior is preserved. See radio-after-school.md for artwork, controls and validation details.
