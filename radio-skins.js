@@ -71,6 +71,12 @@
       grid.append(button);
       return button;
     });
+    // Sort the visible cards without changing registry indexes used for images and filters.
+    [...choices].sort((a, b) =>
+      a.querySelector('.radio-gallery-label').textContent.localeCompare(
+        b.querySelector('.radio-gallery-label').textContent, 'en', { sensitivity: 'base' }
+      )
+    ).forEach(button => grid.append(button));
     panel.prepend(backdrop);
     panel.querySelector('.colt-radio-filters').append(gear);
     panel.append(menu);
@@ -153,13 +159,6 @@
       gear.setAttribute('aria-expanded', String(event.newState === 'open'));
       if (event.newState === 'open') {
         menu.style.opacity = '0';
-        const ordered = [...choices].reverse();
-        const current = ordered.find(button => button.getAttribute('aria-checked') === 'true');
-        if (current) {
-          ordered.splice(ordered.indexOf(current), 1);
-          ordered.unshift(current);
-        }
-        ordered.forEach(button => grid.append(button));
         grid.scrollTop = 0;
         if (!thumbnailsLoaded) {
           choices.forEach((button, index) => {

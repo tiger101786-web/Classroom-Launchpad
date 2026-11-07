@@ -63,3 +63,11 @@ Added optional skin badge wording with default restoration. MJ badge: King of Po
 Details: work/radio-artist-tributes.md. Exact ImageGen prompts/edits: work/radio-artist-tributes-prompts.json. Production capture folder: C:/Users/Sinister/Documents/Email/radio-artist-tributes-integration/screenshots/.
 
 Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 34 choices, title accessibility/bounds, badge wording/restoration, gallery day/night/category/keyboard behavior, mobile/short screens, playback continuity, favorites, persistence and pop-out passed. All four production desktop/mobile captures are byte-identical to the latest previews. Integration is local; no commit or push was requested for this pair.
+
+## Alphabetical skin chooser — November 7, 2026
+
+User requested alphabetizing Choose a skin. Gallery cards now stay in A–Z order by displayed label across All, Music and Fantasy. Selected skins retain their alphabetical position and checkmark. Sorting only the card DOM preserves the registry/image/category associations; the prior current-first/recent-first reorder on opening is removed. Keyboard navigation follows the displayed order, and the Original reset remains available. Player/skin script cache URLs refreshed.
+
+Validation: node syntax checks for radio-skins.js and colt-radio.js passed; work/verify-radio-gallery.cjs passed in day/night modes for all 34 image pairs, alphabetical order in every category and after selection/reopening, arrow/End navigation, Original reset, unchanged audio, and mobile/short viewports. Screenshots: C:/Users/Sinister/Documents/Email/radio-gallery-alphabetical/.
+
+User preference: always include a suggested commit message when reporting code changes. Suggested message: Alphabetize the Colt Radio skin chooser. Changes are local; no commit or push requested.

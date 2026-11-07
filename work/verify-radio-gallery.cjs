@@ -40,6 +40,10 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       const gear = page.getByRole('button', { name: 'Change Colt Radio skin', exact: true });
       const menu = page.getByRole('dialog', { name: 'Choose a radio skin', exact: true });
       await gear.waitFor();
+      const checkAlphabetical = async () => {
+        const labels = await menu.locator('[data-radio-skin-choice]:not([hidden]) .radio-gallery-label').allTextContents();
+        for (let i = 1; i < labels.length; i++) assert(labels[i - 1].localeCompare(labels[i], 'en', { sensitivity: 'base' }) <= 0, 'Visible cards stay alphabetical: ' + labels[i - 1] + ' / ' + labels[i]);
+      };
       const before = await page.evaluate(() => {
         window.savedAudio = document.querySelector('audio');
         return { src: savedAudio.src, volume: savedAudio.volume, calls: mediaCalls.length };
@@ -47,6 +51,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       await gear.click();
       await page.waitForFunction(() => document.querySelector('.radio-gallery').style.opacity === '1');
       assert.equal(await menu.locator('[data-radio-skin-choice]').count(), definitions.length);
+      await checkAlphabetical();
       const thumbnails = await menu.locator('.radio-gallery-choice').evaluateAll(async cards => Promise.all(cards.map(async card => {
         const images = [...card.querySelectorAll('img')];
         await Promise.all(images.map(image => { image.loading = 'eager'; return image.decode(); }));
@@ -66,13 +71,16 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       assert.equal(colors.actual, colors.expected, 'Gallery uses the site surface color');
       await menu.locator('[data-skin-category=fantasy]').click();
       assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 5);
+      await checkAlphabetical();
       await menu.locator('[data-skin-category=music]').click();
       assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 28);
+      await checkAlphabetical();
       await menu.locator('[data-skin-category=all]').click();
       await menu.locator('[data-radio-skin-choice=mariachi]').click();
       assert.equal(await panel.getAttribute('data-radio-skin'), 'mariachi');
       assert(!(await menu.isVisible()));
       await gear.click();
+      await checkAlphabetical();
       const order = await menu.locator('[data-radio-skin-choice]:not([hidden])').evaluateAll(cards => cards.map(card => card.dataset.radioSkinChoice));
       await menu.locator('[data-radio-skin-choice=' + order[0] + ']').focus();
       await page.keyboard.press('ArrowRight');
@@ -80,7 +88,9 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       await page.keyboard.press('ArrowDown');
       assert.equal(await page.evaluate(() => document.activeElement.dataset.radioSkinChoice), order[3]);
       await page.keyboard.press('End'); await page.keyboard.press('Enter');
-      assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Last card resets Original');
+      assert.equal(await panel.getAttribute('data-radio-skin'), order.at(-1) === 'original' ? null : order.at(-1), 'End selects the last alphabetical card');
+      await gear.click(); await menu.locator('.radio-gallery-reset').click();
+      assert.equal(await panel.getAttribute('data-radio-skin'), null, 'Reset still returns to Original');
       await gear.click(); await menu.locator('[data-radio-skin-choice=rockabilly]').click();
       const after = await page.evaluate(() => ({ src: savedAudio.src, volume: savedAudio.volume, calls: mediaCalls.length, same: savedAudio === document.querySelector('audio') }));
       assert(after.same); delete after.same; assert.deepEqual(after, before, 'Gallery does not restart audio');
@@ -98,7 +108,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
         await page.keyboard.press('Escape'); assert(await panel.isVisible()); assert(!(await menu.isVisible()));
       }
       requests.length = 0;
-      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
+      console.log('PASS ' + theme + ': all 34 corrected thumbnails; site palette; alphabetical order in all categories; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
     }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
