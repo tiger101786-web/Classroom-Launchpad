@@ -10,11 +10,25 @@ browser=await (useFirefox?firefox.launch({headless:true}):chromium.launch({execu
 const open=async()=>{await page.goto(origin,{waitUntil:'domcontentloaded'});await page.evaluate(()=>window.dispatchEvent(new CustomEvent('classroom-launchpad-rendered',{detail:{screen:'home',auth:{authenticated:true,role:'teacher'}}})));await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);await page.locator('.header-account-summary').first().click();await page.locator('.header-account-menu [data-companion-open]').first().click();};
 await open();const studio=page.locator('.pet-studio');await studio.locator('#pet-select').selectOption('highland');const pet=page.locator('.highland-companion');await page.waitForFunction(()=>document.querySelector('.highland-companion').dataset.ready);assert.equal(await pet.getAttribute('data-ready'),'true');assert(await pet.isVisible());assert.equal(await studio.locator('.skin-card').count(),1);
 await studio.locator('[data-subtab=accessories]').click();
-for(const hat of ['cap','wreath','headphones','none']){
+for(const hat of ['cap','wreath','beanie','sunflower-bow','headphones','none']){
  await studio.locator('[data-choice-key=headwear][data-choice="'+hat+'"]').click();
  assert.equal(await pet.getAttribute('data-headwear'),hat);
  assert.equal(await pet.locator('canvas').count(),useFirefox?2:1);
  assert.equal(await pet.getAttribute('data-accessory-renderer'),useFirefox?'canvas':'svg');
+}
+for(const neck of ['bandana','cowbell','scarf','none']){
+ await studio.locator('[data-choice-key=neckwear][data-choice="'+neck+'"]').click();
+ assert.equal(await pet.getAttribute('data-neckwear'),neck);
+ await page.waitForTimeout(700);
+ const stored=await (await fetch(origin+'/api/companion-preferences',{headers:{Cookie:cookie}})).json();
+ assert.equal(stored.preferences.highland.neckwear,neck);
+}
+for(const [hat,neck] of [['beanie','bandana'],['sunflower-bow','cowbell']]){
+ await studio.locator('[data-choice-key=headwear][data-choice="'+hat+'"]').click();
+ await studio.locator('[data-choice-key=neckwear][data-choice="'+neck+'"]').click();
+ await page.waitForTimeout(700);
+ const stored=await (await fetch(origin+'/api/companion-preferences',{headers:{Cookie:cookie}})).json();assert.equal(stored.preferences.highland.headwear,hat);
+ await pet.screenshot({path:path.join(dir,hat+'.png')});
 }
 await studio.locator('[data-choice-key=headwear][data-choice=wreath]').click();
 await studio.locator('[data-choice-key=neckwear][data-choice=scarf]').click();
