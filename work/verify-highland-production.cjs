@@ -23,7 +23,7 @@ for(const neck of ['bandana','cowbell','scarf','none']){
  const stored=await (await fetch(origin+'/api/companion-preferences',{headers:{Cookie:cookie}})).json();
  assert.equal(stored.preferences.highland.neckwear,neck);
 }
-for(const [hat,neck] of [['beanie','bandana'],['sunflower-bow','cowbell']]){
+for(const [hat,neck] of [['beanie','bandana'],['sunflower-bow','cowbell'],['none','scarf']]){
  await studio.locator('[data-choice-key=headwear][data-choice="'+hat+'"]').click();
  await studio.locator('[data-choice-key=neckwear][data-choice="'+neck+'"]').click();
  await page.waitForTimeout(700);
