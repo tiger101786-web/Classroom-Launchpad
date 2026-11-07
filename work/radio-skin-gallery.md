@@ -40,3 +40,7 @@ Rainy Day Records, Snowfall Stereo, Golden Hour Tapes and Midnight Mixtape add e
 ## After-School Audio expansion — November 6
 
 The boy and girl bedroom music skins add four matching rendered scene/portrait thumbnails. The gallery now has 29 choices including Original, with 23 Music entries and 5 Fantasy entries. Existing category, keyboard, site palette and lazy-loading behavior is preserved. See radio-after-school.md for artwork, controls and validation details.
+
+## Paperback, Attic and Window Seat expansion — November 6
+
+Paperback Playback, Attic Acoustics and Window Seat Sessions add six matching rendered scene/portrait thumbnails. The gallery now has 32 choices including Original, with 26 Music and 5 Fantasy entries. Site colors, lazy loading, categories and keyboard behavior are preserved. See radio-reading-travel.md for designs and verification.

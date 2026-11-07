@@ -555,6 +555,71 @@
     "swatch": "linear-gradient(135deg,#f5c7b1,#241c32)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "paperback",
+    "label": "Paperback Playback",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/paperback-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/paperback-atlas.png')",
+      "--genre-base": "#11241d",
+      "--genre-edge": "#b39159",
+      "--genre-accent": "#efdbad",
+      "--genre-text": "#faf1d8",
+      "--genre-material": "repeating-linear-gradient(0deg,#dfebcd08 0 1px,transparent 1px 3px),linear-gradient(140deg,#355442,#142b22 70%,#304b36)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#efdbad,#11241d)"
+  },
+  {
+    "id": "attic",
+    "label": "Attic Acoustics",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/attic-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/attic-atlas.png')",
+      "--genre-base": "#2a1c15",
+      "--genre-edge": "#bd915c",
+      "--genre-accent": "#ffe1ac",
+      "--genre-text": "#fff1d4",
+      "--genre-material": "repeating-linear-gradient(0deg,#e5c58b12 0 1px,transparent 1px 3px),linear-gradient(140deg,#724c2f,#312219 70%,#6b482c)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#ffe1ac,#2a1c15)"
+  },
+  {
+    "id": "windowseat",
+    "label": "Window Seat Sessions",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/windowseat-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/windowseat-atlas.png')",
+      "--genre-base": "#102233",
+      "--genre-edge": "#c4a46a",
+      "--genre-accent": "#ffdfaa",
+      "--genre-text": "#f4eedb",
+      "--genre-material": "repeating-linear-gradient(45deg,#d5e9f508 0 1px,transparent 1px 4px),linear-gradient(140deg,#2b4559,#102538 70%,#30485a)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "200%"
+    },
+    "swatch": "linear-gradient(135deg,#ffdfaa,#102233)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

@@ -46,3 +46,10 @@ The user approved adding both After-School Audio versions. Integrated the boy an
 
 Details: work/radio-after-school.md. Exact built-in ImageGen prompts and final gaze edits: work/radio-after-school-prompts.json. Production captures: C:/Users/Sinister/Documents/Email/radio-after-school-integration/screenshots/. All four desktop/mobile screenshots are byte-identical to the approved previews. Registry/CSS/player cache URLs were refreshed.
 Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 29 choices, heading accessibility/bounds, day/night gallery, mobile/short viewports, playback continuity, favorites, persistence and pop-out passed. Integration is local; no commit or push was requested for this pair.
+
+## Paperback, Attic and Window Seat collection — November 6, 2026
+
+The user approved the actual-player previews and requested commit/push. Integrated Paperback Playback, Attic Acoustics and Window Seat Sessions with three atlas images, six matching gallery thumbnails, scoped themed controls and distinct Colt Radio title lettering. The gallery now has 32 choices including Original (26 Music, 5 Fantasy). Existing skins, artwork and site selector palette are preserved. Loader cache URLs are refreshed.
+
+Details: work/radio-reading-travel.md. Exact ImageGen prompts: work/radio-reading-travel-prompts.json. Six production desktop/mobile screenshots match approved preview PNGs byte-for-byte; final captures are under C:/Users/Sinister/Documents/Email/radio-reading-travel-integration/screenshots/.
+Validation passed: npm run check, npm run test:radio and npm run test:radio-artwork. All 32 choices, title accessibility/bounds, day/night gallery, mobile/short viewports, persistence, audio continuity, favorites and pop-out passed. All six production desktop/mobile captures match approved previews byte-for-byte. User authorized commit and push; confirm delivery from Git history/status.

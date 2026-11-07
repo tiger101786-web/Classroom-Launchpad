@@ -67,7 +67,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
       await menu.locator('[data-skin-category=fantasy]').click();
       assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 5);
       await menu.locator('[data-skin-category=music]').click();
-      assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 23);
+      assert.equal(await menu.locator('[data-radio-skin-choice]:not([hidden])').count(), 26);
       await menu.locator('[data-skin-category=all]').click();
       await menu.locator('[data-radio-skin-choice=mariachi]').click();
       assert.equal(await panel.getAttribute('data-radio-skin'), 'mariachi');
@@ -98,7 +98,7 @@ const output = process.env.PREVIEW_OUTPUT || fs.mkdtempSync(path.join(os.tmpdir(
         await page.keyboard.press('Escape'); assert(await panel.isVisible()); assert(!(await menu.isVisible()));
       }
       requests.length = 0;
-      console.log('PASS ' + theme + ': all 29 corrected thumbnails; site palette; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
+      console.log('PASS ' + theme + ': all 32 corrected thumbnails; site palette; filters; keyboard; selection/reset; preserved audio; mobile/short viewports.');
     }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }

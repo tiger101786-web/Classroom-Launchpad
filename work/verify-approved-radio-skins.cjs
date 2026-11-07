@@ -9,7 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
-const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl']);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl', 'paperback', 'attic', 'windowseat']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
