@@ -5,7 +5,7 @@ const grad=(id,a,b,c)=>`<linearGradient id="ha-${id}" x2=".8" y2="1"><stop stop-
 const sprig=(x,y,r,s=1)=>`<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><path d="M0 4Q-5 -20 1 -63M-1 -12L-15 -29M-1 -26L14 -43" fill="none" stroke="#44542b" stroke-width="4" stroke-linecap="round"/>${Array.from({length:9},(_,i)=>{const yy=-12-i*5.3,xx=(i%2?1:-1)*(7-i*.45);return `<path d="M${xx} ${yy+8}q-8 -3 -3 -10q5 -5 10 1q3 7 -7 9" fill="${['#514481','#7760a4','#9880bb'][i%3]}" stroke="#403661" stroke-width="1.4"/><circle cx="${xx+1}" cy="${yy}" r="1.5" fill="#c5b4df"/>`}).join('')}</g>`;
 const thistle=`<path d="M0 24V-2M0 15L-12 5M0 9L12 -2" fill="none" stroke="#b69858" stroke-width="3"/><path d="M-12 -6L-9 -16L-4 -11L0 -21L5 -12L10 -18L13 -6Q10 5 0 5Q-10 5 -12 -6Z" fill="#c8aa69"/><path d="M-9 -5H9M-7 -10L-4 -2M1 -13V-3M7 -10L5 -2" stroke="#685032" stroke-width="1.5"/>`;
 layer.innerHTML=`<defs>${grad('brass','#fff0bc','#b6995e','#655032')}${grad('leather','#77533b','#3f2a21','#211812')}${grad('cushion','#483b30','#201a16','#100f0d')}${grad('tweed','#a5a28a','#686c57','#343b30')}<pattern id="ha-weave" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 0L6 6L0 12M6 0L12 6L6 12" fill="none" stroke="#e1d0a2" stroke-opacity=".32" stroke-width="2"/><path d="M0 3L6 9M6 3L12 9" stroke="#362c21" stroke-opacity=".45" stroke-width="1.2"/></pattern><pattern id="ha-tartan" width="76" height="76" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><rect width="76" height="76" fill="#284d40"/><path d="M18 0V76M0 18H76" stroke="#632737" stroke-width="24"/><path d="M55 0V76M0 55H76" stroke="#162c2a" stroke-width="16"/><path d="M16 0V76M21 0V76M0 16H76M0 21H76" stroke="#c5ab71" stroke-width="2"/><path d="M50 0V76M60 0V76M0 50H76M0 60H76" stroke="#ddd1a0" stroke-opacity=".55" stroke-width="1.5"/></pattern><linearGradient id="ha-cloth-light" x2="0" y2="1"><stop stop-color="#f6e7b1" stop-opacity=".2"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient></defs>
-<g data-ha="scarf" style="display:none"><g class="ha-neck"><image href="highland-pet/scarf-realistic.png" x="282" y="435" width="460" height="208.75" preserveAspectRatio="xMidYMid meet"/>
+<g data-ha="scarf" style="display:none"><g class="ha-neck"><image href="highland-pet/scarf-curved.png" x="305" y="455" width="414" height="187.87862513426424" preserveAspectRatio="xMidYMid meet"/>
 </g></g>
 <g data-ha="headphones" style="display:none"><g class="ha-head">
 <path d="M252 265C228 141 308 10 512 8C716 10 796 141 772 265" fill="none" stroke="#211913" stroke-width="29"/>
@@ -35,9 +35,9 @@ layer.insertAdjacentHTML('beforeend', `
 </g></g>
 <g data-ha="sunflower-bow" style="display:none"><g class="ha-head"><image href="highland-pet/sunflower-bow-realistic.png" x="260" y="85" width="240" height="160" preserveAspectRatio="xMidYMid meet"/>
 </g></g>
-<g data-ha="bandana" style="display:none"><g class="ha-neck"><image href="highland-pet/bandana-realistic.png" x="287" y="453" width="450" height="187.46" preserveAspectRatio="xMidYMid meet"/>
+<g data-ha="bandana" style="display:none"><g class="ha-neck"><image href="highland-pet/bandana-curved.png" x="309.5" y="465" width="405" height="168.07395993836673" preserveAspectRatio="xMidYMid meet"/>
 </g></g>
-<g data-ha="cowbell" style="display:none"><g class="ha-neck"><image href="highland-pet/cowbell-realistic.png" x="287" y="455" width="450" height="150" preserveAspectRatio="xMidYMid meet"/>
+<g data-ha="cowbell" style="display:none"><g class="ha-neck"><image href="highland-pet/cowbell-curved.png" x="309.5" y="465" width="405" height="135" preserveAspectRatio="xMidYMid meet"/>
 </g></g>
 `);
 // Match the approved preview's SVG scene graph and fractional SVG transforms.
