@@ -156,14 +156,14 @@ window.createRoboColtSkinPainter = function(pet){
   pet.querySelectorAll('.eyes-open .eye').forEach(eye=>{
    const [halo,iris,pupil]=eye.querySelectorAll('ellipse');
    const axolotl=animalEye==='axolotl',turkeyEye=animalEye==='turkey';
-   iris.setAttribute('rx',axolotl||turkeyEye?'24':'25');iris.setAttribute('ry',axolotl||turkeyEye?'24':'32');
+   iris.setAttribute('rx',axolotl?'24':'25');iris.setAttribute('ry',axolotl?'24':'32');
    halo.style.opacity=axolotl||turkeyEye?'0':'1';
    pupil.setAttribute('rx',animalEye==='snake'?'4':animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
    pupil.setAttribute('ry',animalEye==='snake'||animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
    pupil.setAttribute('fill',animalEye?'#15180f':'#23060a');
    pupil.dataset.pupil=animalEye||'original';
-   if(turkeyEye){pupil.setAttribute('cx',iris.getAttribute('cx'));pupil.setAttribute('cy',iris.getAttribute('cy'));pupil.setAttribute('rx','12');pupil.setAttribute('ry','12');pupil.setAttribute('fill','#080707');}else{const left=iris.getAttribute('cx')==='274';pupil.setAttribute('cx',left?'279':'453');pupil.setAttribute('cy','277');}
-   eye.querySelector('circle').setAttribute('r',turkeyEye?'4':'7');
+   if(turkeyEye){pupil.setAttribute('cx',iris.getAttribute('cx'));pupil.setAttribute('cy',iris.getAttribute('cy'));pupil.setAttribute('rx','13');pupil.setAttribute('ry','24');pupil.setAttribute('fill','#080707');}else{const left=iris.getAttribute('cx')==='274';pupil.setAttribute('cx',left?'279':'453');pupil.setAttribute('cy','277');}
+   eye.querySelector('circle').setAttribute('r','7');
    if(axolotl){pupil.setAttribute('rx','19');pupil.setAttribute('ry','19');pupil.setAttribute('fill','#080c14');}
   });
   if(animalEye==='snake')pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#fff4bc"/><stop offset=".42" stop-color="#e7bc62"/><stop offset=".78" stop-color="#b68432"/><stop offset="1" stop-color="#624018"/>';
