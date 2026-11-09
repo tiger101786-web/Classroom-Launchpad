@@ -585,8 +585,8 @@ h1, h2, h3, p { margin: 0; }
   height: 96px;
   margin-bottom: 12px;
   border-radius: 10px;
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.96);
+  background: #171113;
+  border: 1px solid rgba(123, 11, 49, 0.35);
   box-shadow: 0 12px 28px rgba(86, 7, 32, 0.08);
   overflow: hidden;
 }
@@ -599,18 +599,10 @@ h1, h2, h3, p { margin: 0; }
   object-position: center;
 }
 
-.school-logo-frame video {
-  filter: invert(1) hue-rotate(180deg) brightness(1.08) contrast(1.04) saturate(1.02);
-}
-
 body[data-theme="night"] .school-logo-frame {
   background: #000000;
   border-color: #000000;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
-}
-
-body[data-theme="night"] .school-logo-frame video {
-  filter: brightness(0.95) contrast(1.08) saturate(1.08);
 }
 
 .teacher-name {

@@ -2402,7 +2402,7 @@ function pageHeader(title, subtitle = "", back = false, trailing = "") {
     <div class="topbar">
       <div class="title-group">
         ${back ? `<button class="back-btn" data-action="back"> Back</button>` : ""}
-        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><video class="school-logo" autoplay muted loop playsinline aria-label="St. Cletus Catholic School animated logo"><source data-src="assets/optimized-home/st-cletus-logo.mp4?v=20260905-optimized1" type="video/mp4"></video></span>` : ""}
+        ${!back && title === "Classroom Launchpad" ? `<span class="school-logo-frame"><img class="school-logo" src="assets/st-cletus-header-static.png?v=20261109-static1" width="2172" height="724" alt="St. Cletus Catholic School" decoding="async" fetchpriority="high"></span>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<p class="teacher-name">MR. NIEVES' COMPUTER CLASS</p>` : ""}
         ${!back && title === "Classroom Launchpad" ? `<h1 class="home-title-art" aria-label="Classroom Launchpad"><picture><source type="image/webp" srcset="assets/classroom-launchpad-title-lossless.webp?v=20261108-startup-v1"><img src="assets/classroom-launchpad-title.png" width="1983" height="793" alt="" fetchpriority="high"></picture></h1>` : `<h1>${escapeHtml(title)}</h1>`}
         ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
