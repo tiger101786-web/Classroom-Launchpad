@@ -7,8 +7,12 @@ assert.equal(await studio.locator('.robo-companion #rc-platform > image').getAtt
 assert.equal(await studio.locator('.robo-companion #rc-nameplate image').getAttribute('href'),'robo-colt/nameplate-turkey-v1.png');
 assert.equal((await context.request.get(origin+'/robo-colt/platform-turkey-v1.png')).status(),200);
 assert.equal((await context.request.get(origin+'/robo-colt/nameplate-turkey-v1.png')).status(),200);
-await studio.locator('.robo-companion').screenshot({path:path.join(os.tmpdir(),'robo-turkey-final.png')});const thumbStyle=await p.addStyleTag({content:'.pet-studio::backdrop{background:transparent!important;backdrop-filter:none!important} html,body,dialog,.studio,.studio-body,.preview-pane,#pet-stage,.robo-companion,.pet-button{background:transparent!important;background-image:none!important;box-shadow:none!important} #pet-stage::before,#pet-stage::after,.preview-pane::before,.preview-pane::after{display:none!important}'});
-await studio.locator('.robo-companion .pet-button').screenshot({path:path.join(os.tmpdir(),'robo-turkey-thumbnail.png'),omitBackground:true});await thumbStyle.evaluate(e=>e.remove());
+await studio.locator('.robo-companion').screenshot({path:path.join(os.tmpdir(),'robo-turkey-final.png')});const artwork=await studio.locator('.robo-companion .pet-button').evaluate(e=>e.outerHTML);
+const thumb=await context.newPage();
+await thumb.setContent('<base href="'+origin+'/"><link rel="stylesheet" href="robo-colt/interactive.css"><style>@font-face{font-family:ColtOxanium;src:url(robo-colt/Oxanium.ttf);font-weight:400 900}html,body{margin:0;background:transparent}.robo-companion{position:relative!important;left:0!important;top:0!important;width:264px!important}</style><div class="robo-companion">'+artwork+'</div>');
+await thumb.evaluate(()=>{document.querySelector('#rc-nameplate').remove();const svg=document.querySelector('.pet-button > svg');const box=svg.viewBox.baseVal;svg.setAttribute('viewBox',[box.x,box.y,box.width,900].join(' '));});
+await thumb.evaluate(()=>document.fonts.ready);await thumb.waitForTimeout(1000);
+await thumb.locator('.pet-button').screenshot({path:path.join(os.tmpdir(),'robo-turkey-thumbnail.png'),omitBackground:true});await thumb.close();
 await studio.locator('#greet').click();await p.waitForTimeout(2500);await studio.locator('#dance').click();assert(await studio.locator('.robo-companion .pet-button').evaluate(e=>e.classList.contains('dancing')));await studio.locator('#dance').click();await studio.locator('[data-tab="play"]').click();
 await studio.locator('[data-action="tail"]').click();
 const frames=await studio.locator('.robo-companion #rc-tail').evaluate(e=>e.getAnimations().flatMap(a=>a.effect.getKeyframes()));
