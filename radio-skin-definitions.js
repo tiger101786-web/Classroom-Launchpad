@@ -717,6 +717,32 @@
     "swatch": "linear-gradient(135deg,#8a6422,#f5efdf)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "cybersamurai",
+    "label": "Cyber Samurai",
+    "kicker": "Classroom Music",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/cybersamurai-atlas.png",
+      "assets/radio-skins/illustrated/cybersamurai-portrait.png",
+      "assets/radio-skins/illustrated/cybersamurai-wordmark.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/cybersamurai-atlas.png')",
+      "--genre-base": "#080b12",
+      "--genre-edge": "#73515d",
+      "--genre-accent": "#ff2345",
+      "--genre-text": "#fff4f6",
+      "--genre-material": "linear-gradient(135deg,#15151e,#080b12)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#ff2345,#080b12)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

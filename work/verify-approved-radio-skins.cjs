@@ -9,7 +9,7 @@ const definitions = require('../radio-skin-definitions.js');
 const genres = definitions.filter(skin => skin.layout === 'genre').map(skin => skin.id);
 const fullHeaders = ['bayou', 'hiphop', 'cyberpunk', ...genres];
 const skins = definitions.filter(skin => skin.id !== 'original').map(skin => skin.id);
-const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl', 'paperback', 'attic', 'windowseat', 'moonwalk', 'purplerain', 'dolly', 'elvis']);
+const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tropical', 'irish', 'gospel', 'rainyrecords', 'snowfall', 'goldentapes', 'mixtape', 'afterschoolboy', 'afterschoolgirl', 'paperback', 'attic', 'windowseat', 'moonwalk', 'purplerain', 'dolly', 'elvis', 'cybersamurai']);
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.RADIO_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
  try {
@@ -63,7 +63,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
    assert(title.x>=header.x && title.x+title.width<=header.x+header.width && title.y>=header.y && title.y+title.height<=header.y+header.height, 'Theme title stays in its header');
    for (const selector of ['.colt-radio-header-actions','.colt-radio-heading-mark']) {
     const other = await current.locator(selector).boundingBox();
-    assert(title.x+title.width<=other.x || title.x>=other.x+other.width || title.y+title.height<=other.y || title.y>=other.y+other.height, 'Title does not overlap portrait or header buttons');
+    assert(title.x+title.width<=other.x || title.x>=other.x+other.width || title.y+title.height<=other.y || title.y>=other.y+other.height, skin + ': title does not overlap '+selector+' at '+target.viewportSize().width+'px '+JSON.stringify({title,other}));
    }
   };
   await panel.locator('[data-station="chill-house"]').click();
@@ -79,7 +79,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
      sides:[getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage,getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span'),'::before').backgroundImage].join(' ')
     }));
-    const portraitAsset = skin === 'moonwalk' ? 'moonwalk-portrait-v3.png' : ['purplerain','dolly','elvis'].includes(skin) ? skin+'-portrait.png' : skin+'-atlas';
+    const portraitAsset = skin === 'moonwalk' ? 'moonwalk-portrait-v3.png' : ['purplerain','dolly','elvis','cybersamurai'].includes(skin) ? skin+'-portrait.png' : skin+'-atlas';
     assert(art.portraits.every(url => url.includes(portraitAsset)), 'Both portraits use the selected genre Colt');
     assert(art.sides.includes(skin+'-atlas'), 'Decorated side artwork uses the actual atlas');
     const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();

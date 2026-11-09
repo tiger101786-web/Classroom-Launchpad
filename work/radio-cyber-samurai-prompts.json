@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cybersamurai-portrait",
+    "referenced_image_paths": [
+      "C:/Users/Sinister/Desktop/Cyber Samurai Colt Radio.png"
+    ],
+    "transparent_background": true,
+    "prompt": "Use case: stylized-concept. Reference: supplied Cyber Samurai Colt Radio screenshot is visual design reference, not an edit target. Generate ONLY its samurai horse character as a separate true transparent head-and-shoulders portrait. A magnificent midnight-black Colt with natural horse face, long equine muzzle, piercing ruby-red eyes glancing toward viewer, head turned right at three-quarter angle. Flowing black mane with scarlet wisps. Ornate polished gold and black lacquer samurai kabuto helmet with a tall elegant golden crescent crest, adapted around horse ears, red cords and layered gold/black shoulder armor and breastplate. Expression proud, alert and charismatic, no human face, no human body. Match glossy detailed fantasy illustration of the reference. High contrast gold highlights, scarlet edge light. Framing keep complete crescent, both ears, mane and both shoulder plates inside canvas with small margin; tight head and shoulders crop, lower chest cut only. No circle, no background, no text, no UI, no glow frame."
+  },
+  {
+    "id": "cybersamurai-atlas",
+    "referenced_image_paths": [
+      "C:/Users/Sinister/Desktop/Cyber Samurai Colt Radio.png"
+    ],
+    "transparent_background": false,
+    "prompt": "Use case: stylized-concept. Generate a square texture atlas for a cyber samurai radio skin matching the supplied reference's red moon, black night, cherry blossoms and Japanese scenery. NO user interface, NO text, NO characters. Top EXACTLY one third: detailed panoramic night illustration, intense blood-red full moon behind a black Japanese pagoda on the right, distant snowcapped Mount Fuji at center-right, coral pink cherry blossom branches framing upper corners, windblown petals and scattered red sparks over dark navy rocky landscape, calm black left-center reserved for white title overlay. Middle exactly one third: subtle near-black charcoal lacquer material, low contrast angular graphite brush streaks and faint red edge glints, no objects. Bottom exactly one third: deep navy-black traditional seigaiha wave pattern, subtle and elegant with crimson glow at bottom corners. Hard horizontal boundaries at 1/3 and 2/3. Detailed luminous illustration, electric crimson accents, near-black body. No letters or symbols."
+  },
+  {
+    "id": "cybersamurai-wordmark",
+    "referenced_image_paths": [
+      "C:/Users/Sinister/Desktop/Cyber Samurai Colt Radio.png"
+    ],
+    "transparent_background": true,
+    "prompt": "Use case: logo-brand. Create ONLY the words \"Colt Radio\" in one horizontal line, exact spelling, as a high-quality transparent typography asset. Match the supplied reference white energetic italic Japanese brush-inspired lettering for Colt Radio. Thick bold white hand-painted brush strokes, expressive dry brush edges, strongly legible at 180 pixels wide, subtle dark outer edge. A separate vivid scarlet rough swoosh underline sweeps below the full phrase. Wide horizontal composition, all letters and underline fully inside canvas with generous small margins, no other writing, no panel, no scene, no icons, no background, true transparent background. Text verbatim: Colt Radio."
+  }
+]
