@@ -1782,3 +1782,8 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 /* Keep the full station name on its intended second line inside the compact key. */
 .colt-radio-panel[data-radio-skin=cybersamurai] [data-station=datawave] .colt-radio-station-style{font-size:.55rem;letter-spacing:-.02em;white-space:nowrap;overflow-wrap:normal}
 @media(max-width:350px){.colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-heading h2{margin-top:10px}}
+
+/* Extend the footer artwork to the frame while preserving the text inset. */
+.colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note{margin-inline:0;padding-inline:38px}
+.colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note::before{left:20px}
+.colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note::after{right:20px}

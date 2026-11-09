@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261108-cyber-samurai-v14', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261108-cyber-samurai-v15', document.currentScript.src).href;
   const definitionsURL = new URL('radio-skin-definitions.js?v=20261108-cyber-samurai-v11', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {

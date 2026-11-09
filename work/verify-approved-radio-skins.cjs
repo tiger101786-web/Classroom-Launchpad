@@ -49,6 +49,11 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
   };
   const checkTitle = async (skin, target = page) => {
    const current = target.locator('.colt-radio-panel');
+   if (skin === 'cybersamurai') {
+    const frame = await current.boundingBox();
+    const footer = await current.locator('.colt-radio-note').boundingBox();
+    assert(Math.abs(footer.x-frame.x)<=1 && Math.abs(footer.x+footer.width-frame.x-frame.width)<=1, 'Cyber Samurai footer artwork reaches both frame edges');
+   }
    const heading = current.locator('.colt-radio-heading h2');
    assert.equal(await current.locator('.feature-kicker').textContent(), definitions.find(item => item.id === skin).kicker || 'Classroom Music', 'Skin badge updates and restores the original wording');
    assert.equal(await heading.textContent(), 'Colt Radio', 'Title text survives skin changes');
