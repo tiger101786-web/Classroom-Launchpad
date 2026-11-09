@@ -19,10 +19,12 @@ const frames=await studio.locator('.robo-companion #rc-tail').evaluate(e=>e.getA
 assert(frames.length>20,'Fan uses the animated tail rig');
 for(const f of frames){const angle=await p.evaluate(t=>{const m=new DOMMatrix(t);return Math.atan2(m.b,m.a)*180/Math.PI},f.transform);assert(Math.abs(angle)<=3.65,'Large fan stays within safe sway angle');}
 await p.waitForTimeout(1300);
-await studio.locator('[data-toggle="asleep"]').check();assert(await studio.locator('.robo-companion .pet-button').evaluate(e=>e.classList.contains('asleep')));await studio.locator('[data-toggle="asleep"]').uncheck();await p.reload();await p.waitForFunction(()=>document.querySelector('.robo-companion .pet-button')?.dataset.skin==='Thanksgiving Turkey');await p.locator('.header-account-summary').first().click();await p.locator('[data-companion-open]').first().click();await studio.locator('#skin-search').fill('Original');await studio.locator('[data-skin-choice="Original"]').click();
+await studio.locator('[data-toggle="asleep"]').check();assert(await studio.locator('.robo-companion .pet-button').evaluate(e=>e.classList.contains('asleep')));await studio.locator('[data-toggle="asleep"]').uncheck();await p.reload();await p.waitForFunction(()=>document.querySelector('.robo-companion .pet-button')?.dataset.skin==='Thanksgiving Turkey');const turkeyLiveWidth=await p.locator('body > .robo-companion .pet-button').evaluate(e=>e.getBoundingClientRect().width);
+await p.locator('.header-account-summary').first().click();await p.locator('[data-companion-open]').first().click();await studio.locator('#skin-search').fill('Original');await studio.locator('[data-skin-choice="Original"]').click();
 assert.equal(await studio.locator('.robo-companion #rc-tail svg').getAttribute('width'),'202');
 assert.equal(await studio.locator('.robo-companion #rc-neck-joint').evaluate(e=>e.style.display),'');
 assert.equal(await studio.locator('.robo-companion #rc-platform > image').getAttribute('href'),'robo-colt/platform-v1.png');
 assert.equal(await studio.locator('.robo-companion #rc-nameplate image').getAttribute('href'),'robo-colt/nameplate-bolts-v1.png');
 assert.equal(await studio.locator('.robo-companion .eye ellipse').nth(2).getAttribute('rx'),'13');
+await studio.locator('.studio-close').click();const originalLiveWidth=await p.locator('body > .robo-companion .pet-button').evaluate(e=>e.getBoundingClientRect().width);assert(Math.abs(turkeyLiveWidth/originalLiveWidth-1.12)<.01,'Live turkey receives the size correction');
 assert.deepEqual(errors,[]);console.log('PASS turkey skin save/reload, greet, dance, sleep, no browser errors');}finally{await browser?.close();server.kill()}})().catch(e=>{console.error(e);process.exitCode=1});
