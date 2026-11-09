@@ -669,6 +669,54 @@
     "kicker": "Purple Rain"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "dolly",
+    "label": "Backwoods Barbie",
+    "kicker": "Backwoods Barbie",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/dolly-atlas.png",
+      "assets/radio-skins/illustrated/dolly-portrait.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/dolly-atlas.png')",
+      "--genre-base": "#f6d9e5",
+      "--genre-edge": "#bd789d",
+      "--genre-accent": "#b44280",
+      "--genre-text": "#632641",
+      "--genre-material": "linear-gradient(160deg,#fff3fa,#e5a9c6 58%,#f5d2e3 63%,#c27e9f)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#b44280,#f6d9e5)"
+  },
+  {
+    "id": "elvis",
+    "label": "The King",
+    "kicker": "The King",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/elvis-atlas.png",
+      "assets/radio-skins/illustrated/elvis-portrait.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/elvis-atlas.png')",
+      "--genre-base": "#f5efdf",
+      "--genre-edge": "#b39750",
+      "--genre-accent": "#8a6422",
+      "--genre-text": "#44341c",
+      "--genre-material": "linear-gradient(160deg,#fffef4,#e5d9b6 58%,#fff4d6 63%,#bda878)",
+      "--genre-band": "1254 / 150",
+      "--genre-band-position": "40%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#8a6422,#f5efdf)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

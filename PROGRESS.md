@@ -87,3 +87,9 @@ Search clears whenever the chooser is reopened. ArrowDown from the input enters 
 Validation: syntax checks for radio-skins.js and colt-radio.js passed. work/verify-radio-gallery.cjs passed day/night tests for case/space/hyphen matching, combined category search, empty states and recovery, ArrowDown/Enter selection, clearing on reopen, Original-first/A–Z order, unchanged audio, thumbnails and mobile/short viewport placement. The gallery test page now explicitly uses UTF-8, matching production. Reviewed search and gallery screenshots under C:/Users/Sinister/Documents/Email/radio-gallery-search/.
 
 Suggested commit message: Add search to the Colt Radio skin chooser. Changes are local; no commit or push requested. Concurrent highland-pet/accessories.js edits are unrelated and were not modified by this task.
+
+## November 8, 2026: Dolly and Elvis radio skins
+
+Added the approved Backwoods Barbie and The King designs to production with dedicated portraits, themed controls and gallery thumbnails. The chooser now has 36 options (30 Music, 5 Fantasy and Original). Original stays first; others remain alphabetical and searchable. Exact prompts, preview locations and validation are recorded in work/radio-dolly-elvis.md and work/radio-dolly-elvis-prompts.json. User requested commit and push.
+
+Validation complete: npm run check, npm run test:radio, and npm run test:radio-artwork passed for all 36 choices, including Original-first alphabetical search, gallery thumbnails, audio continuity, keyboard, favorites, persistence and pop-out. Browser playback was simulated; live stream availability was not checked.

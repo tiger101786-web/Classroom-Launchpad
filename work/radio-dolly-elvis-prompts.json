@@ -1,0 +1,28 @@
+[
+  {
+    "id": "dolly-portrait",
+    "transparent_background": true,
+    "referenced_image_paths": [
+      "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/assets/radio-skins/illustrated/purplerain-portrait.png"
+    ],
+    "prompt": "Use case: stylized-concept. Asset: transparent portrait for the Colt Radio music player. Reference image is ONLY the equine anatomy, glossy detailed illustrated style, head angle and crop reference. Create a NEW artist tribute colt in this same illustration style. Natural horse face and long equine muzzle, ears, fur, expressive eyes looking directly toward viewer while head faces right in three-quarter view. Tight head and shoulders portrait with BOTH shoulders, all hair and ears fully inside canvas with 5% breathing room; crop lower chest only. No human face or hands. No lettering. True transparent background. Dolly Parton inspired golden palomino female Colt. Huge iconic Dolly teased platinum-blonde bouffant curls, sweeping curled fringe and curls around shoulders, unmistakable 1980s Dolly hairstyle. Warm cheeky welcoming personality, bright amber eyes with subtle long lashes, playful head tilt and equine half-smile. Bright blush-pink rhinestone western stage jacket with silver crystals, sparkling butterfly motifs, fringed shoulders and high open neckline adapted to a horse chest. Rich dimensional pink satin, tasteful glamorous country superstar. Avoid human bust or human lips."
+  },
+  {
+    "id": "elvis-portrait",
+    "transparent_background": true,
+    "referenced_image_paths": [
+      "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/assets/radio-skins/illustrated/purplerain-portrait.png"
+    ],
+    "prompt": "Use case: stylized-concept. Asset: transparent portrait for the Colt Radio music player. Reference image is ONLY the equine anatomy, glossy detailed illustrated style, head angle and crop reference. Create a NEW artist tribute colt in this same illustration style. Natural horse face and long equine muzzle, ears, fur, expressive eyes looking directly toward viewer while head faces right in three-quarter view. Tight head and shoulders portrait with BOTH shoulders, all hair and ears fully inside canvas with 5% breathing room; crop lower chest only. No human face or hands. No lettering. True transparent background. Elvis Presley inspired jet-black male Colt. Iconic high swept jet-black glossy pompadour with a strong rolled front quiff and thick short sideburn-like mane along cheeks. Classic Elvis white high-collared Las Vegas stage jumpsuit with large gold, ruby-red and sapphire-blue rhinestone eagle motifs and gold chains across chest. Recognizable dramatic raised white collar framing neck. Confident charming half-smile, raised brow, cocked ear, slightly swaggering head tilt. Bright readable face highlights on black fur. No human face."
+  },
+  {
+    "id": "dolly-atlas",
+    "transparent_background": false,
+    "prompt": "Use case: stylized-concept. Square texture atlas for a polished illustrated Dolly Parton tribute radio skin called Backwoods Barbie. NO text, NO characters, NO interface. Top exactly one third: panoramic glamorous country music stage, blush pink velvet curtain swags, warm golden stage spotlights, delicate sparkling rhinestone butterflies, tiny distant footlights, central area darker rose for readable overlay typography. Middle 1/3: completely clean pale blush pink pearlescent satin material, very subtle sparkling silver flecks, horizontal seamless-looking finish. Bottom 1/3: same clean pale pink satin material. Sharp horizontal division at top-third only, no other divisions. Luminous detailed illustration, elegant country glam, pink and champagne silver. No objects or lettering in middle/bottom two thirds."
+  },
+  {
+    "id": "elvis-atlas",
+    "transparent_background": false,
+    "prompt": "Use case: stylized-concept. Square texture atlas for a polished illustrated Elvis Presley tribute radio skin called The King. NO text, NO characters, NO interface. Top exactly one third: panoramic glamorous vintage Las Vegas concert stage with deep midnight navy velvet, symmetrical warm gold theatrical spotlights, ruby-red curtain edges, small starburst stage lamps, distant lit stage floor, central navy area reserved for readable overlay typography. Middle 1/3: clean pearl-white satin enamel material with very subtle champagne-gold shimmer. Bottom 1/3: same clean pearl-white material. Sharp horizontal division at top-third only, no other divisions. Rich detailed glamorous rock and roll illustration. No objects or lettering in middle/bottom two thirds."
+  }
+]

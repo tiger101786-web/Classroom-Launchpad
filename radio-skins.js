@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261107-skin-search-v11', document.currentScript.src).href;
-  const definitionsURL = new URL('radio-skin-definitions.js?v=20261107-tributes-v9', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261108-dolly-elvis-v12', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261108-dolly-elvis-v10', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
     if (window.coltRadioSkinDefinitions) return Promise.resolve();
