@@ -119,7 +119,7 @@ dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoun
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>{if(dialog.open){sync();render()}});
 return {
  async open(pet){if(!bridge.canOpen())return;const revision=++openRevision,requestedOpener=document.activeElement;loadErrorNotice?.remove();loadErrorNotice=null;
-  try{await Promise.all([loadPetStudioStyles(),loadStudioHeaderAssets()])}catch(error){
+  try{await Promise.all([bridge.preparePets?.(),loadPetStudioStyles(),loadStudioHeaderAssets()])}catch(error){
    if(revision!==openRevision||!bridge.canOpen())return;
    loadErrorNotice=document.createElement('div');loadErrorNotice.className='pet-studio-load-error';loadErrorNotice.setAttribute('role','alert');
    const text=document.createElement('span');text.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.textContent='Try again';retry.onclick=()=>this.open(pet);loadErrorNotice.append(text,retry);document.body.append(loadErrorNotice);return;

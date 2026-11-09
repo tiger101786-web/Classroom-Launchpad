@@ -1,0 +1,30 @@
+{
+  "baseline": "2e76274",
+  "measurement": "Raw file sizes and HTML startup references, not measured network time. Selected pet dependencies load separately after preferences resolve.",
+  "before": {
+    "scripts": {
+      "count": 42,
+      "bytes": 1552165
+    },
+    "stylesheets": {
+      "count": 22,
+      "bytes": 621851
+    }
+  },
+  "after": {
+    "scripts": {
+      "count": 21,
+      "bytes": 1250868
+    },
+    "stylesheets": {
+      "count": 14,
+      "bytes": 568257
+    }
+  },
+  "logo": {
+    "originalBytes": 1542239,
+    "deliveryBytes": 1137816,
+    "pixels": "identical RGBA",
+    "originalPreserved": true
+  }
+}

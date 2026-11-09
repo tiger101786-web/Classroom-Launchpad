@@ -11,8 +11,11 @@ return defs+(kind==='colt'?stars+`<g data-accessory="racing-helmet">${path('M181
 
 (()=>{const ns='http://www.w3.org/2000/svg';
 function layer(host,kind,target){const g=document.createElementNS(ns,'g');g.setAttribute('pointer-events','none');g.innerHTML=approvedAccessoryArt(kind);target.append(g);return g;}
+window.installApprovedColtAccessories=function(){
 const colt=window.createRoboColtAccessories;
 window.createRoboColtAccessories=function(pet){const base=colt(pet),g=layer(pet,'colt',pet.querySelector('#rc-head')),badge=g.querySelector('[data-accessory="chest-badge"]');pet.querySelector('#rc-puppet').insertBefore(badge,pet.querySelector('#rc-head'));return prefs=>{base(prefs);g.querySelector('[data-accessory="racing-helmet"]').style.display=prefs.headwear==='racing-helmet'&&!pet.classList.contains('wear-phones')?'':'none';g.querySelector('[data-accessory="star-glasses"]').style.display=prefs.eyewear==='star-glasses'?'':'none';g.querySelector('[data-accessory="sport-goggles"]').style.display=prefs.eyewear==='sport-goggles'?'':'none';badge.style.display=prefs.neckwear==='chest-badge'?'':'none';};};
+};
+if(window.createRoboColtAccessories)window.installApprovedColtAccessories();
 const eagle=window.mountPetAccessories;
 window.mountPetAccessories=function(host,kind){const api=eagle(host,kind);if(kind==='eagle'&&!api.approvedFifth){api.approvedFifth=true;api.layer.insertAdjacentHTML('beforeend',approvedAccessoryArt(kind));}return api;};
 const squishy=window.addDumplingAccessories;
