@@ -11,10 +11,21 @@ assert(await studio.locator('.robo-companion .eyes-open .eye').evaluateAll(eyes=
 assert.equal(await studio.locator('.robo-companion #rc-iris stop').nth(2).getAttribute('stop-color'),'#914f28');
 await studio.locator('.robo-companion').screenshot({path:path.join(os.tmpdir(),'robo-turkey-final.png')});const artwork=await studio.locator('.robo-companion .pet-button').evaluate(e=>e.outerHTML);
 const thumb=await context.newPage();
-await thumb.setContent('<base href="'+origin+'/"><link rel="stylesheet" href="robo-colt/interactive.css"><style>@font-face{font-family:ColtOxanium;src:url(robo-colt/Oxanium.ttf);font-weight:400 900}html,body{margin:0;background:transparent}.robo-companion{position:relative!important;left:0!important;top:0!important;width:264px!important}</style><div class="robo-companion">'+artwork+'</div>');
+await thumb.setContent('<base href="'+origin+'/"><link rel="stylesheet" href="robo-colt/interactive.css"><style>@font-face{font-family:ColtOxanium;src:url(robo-colt/Oxanium.ttf);font-weight:400 900}html,body{margin:0;background:transparent}.robo-companion{position:relative!important;left:0!important;top:0!important;width:311px!important}.robo-companion .pet-button{width:311px!important;height:auto!important}</style><div class="robo-companion">'+artwork+'</div>');
 await thumb.evaluate(()=>{document.querySelector('#rc-nameplate').remove();const svg=document.querySelector('.pet-button > svg');const box=svg.viewBox.baseVal;svg.setAttribute('viewBox',[box.x,box.y,box.width,900].join(' '));});
 await thumb.evaluate(()=>document.fonts.ready);await thumb.waitForTimeout(1000);
 await thumb.locator('.pet-button').screenshot({path:path.join(os.tmpdir(),'robo-turkey-thumbnail.png'),omitBackground:true});await thumb.close();
+// Match the established Colt thumbnail canvas, visible height, and baseline.
+const {createCanvas,loadImage}=require('@napi-rs/canvas');
+const thumbnailPath=path.join(os.tmpdir(),'robo-turkey-thumbnail.png'),source=await loadImage(thumbnailPath);
+const scratch=createCanvas(source.width,source.height),sc=scratch.getContext('2d');sc.drawImage(source,0,0);
+const pixels=sc.getImageData(0,0,source.width,source.height).data;let bounds=[source.width,source.height,0,0];
+for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>10)bounds=[Math.min(bounds[0],x),Math.min(bounds[1],y),Math.max(bounds[2],x),Math.max(bounds[3],y)];
+const w=bounds[2]-bounds[0]+1,h=bounds[3]-bounds[1]+1,scale=Math.min(280/w,299/h);
+const normalized=createCanvas(311,396),nc=normalized.getContext('2d');
+nc.drawImage(source,bounds[0],bounds[1],w,h,(311-w*scale)/2,345-h*scale,w*scale,h*scale);
+fs.writeFileSync(thumbnailPath,normalized.toBuffer('image/png'));
+
 await studio.locator('#greet').click();await p.waitForTimeout(2500);await studio.locator('#dance').click();assert(await studio.locator('.robo-companion .pet-button').evaluate(e=>e.classList.contains('dancing')));await studio.locator('#dance').click();await studio.locator('[data-tab="play"]').click();
 await studio.locator('[data-action="tail"]').click();
 const frames=await studio.locator('.robo-companion #rc-tail').evaluate(e=>e.getAnimations().flatMap(a=>a.effect.getKeyframes()));
