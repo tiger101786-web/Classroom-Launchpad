@@ -40,21 +40,23 @@ window.createPetTalk = function(read) {
     }
   }
 
-  function notice(message = '') {
+  function notice(message = '', keepPosition = true) {
     status.textContent = message;
     status.hidden = !message;
-    if (!panel.hidden) place();
+    if (!panel.hidden) place(keepPosition);
   }
 
-  function place() {
+  function place(keepPosition = false) {
     if (panel.hidden || !current) return;
     const viewport = window.visualViewport;
     const x = viewport?.offsetLeft || 0, y = viewport?.offsetTop || 0;
     const width = viewport?.width || innerWidth, height = viewport?.height || innerHeight;
     panel.style.width = Math.min(260, width - 16) + 'px';
     const pet = current.host.querySelector('.pet-button').getBoundingClientRect();
-    const left = position?.left ?? pet.left + (pet.width - panel.offsetWidth) / 2;
-    const top = position?.top ?? (pet.bottom + panel.offsetHeight + 20 < y + height
+    // Status text can change height; retain the current anchor instead of flipping sides.
+    const anchored = keepPosition === true && panel.style.top !== '';
+    const left = anchored ? parseFloat(panel.style.left) : position?.left ?? pet.left + (pet.width - panel.offsetWidth) / 2;
+    const top = anchored ? parseFloat(panel.style.top) : position?.top ?? (pet.bottom + panel.offsetHeight + 20 < y + height
       ? pet.bottom + 10 : pet.top - panel.offsetHeight - 120);
     panel.style.left = Math.max(x + 8, Math.min(left, x + width - panel.offsetWidth - 8)) + 'px';
     panel.style.top = Math.max(y + 8, Math.min(top, y + height - panel.offsetHeight - 8)) + 'px';
@@ -98,7 +100,7 @@ window.createPetTalk = function(read) {
     opener = document.activeElement;
     title.textContent = 'Talk to ' + current.name;
     panel.hidden = false;
-    notice();
+    notice('', false);
     input.focus({preventScroll: true});
   }
 
