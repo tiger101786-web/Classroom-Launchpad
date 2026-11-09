@@ -112,8 +112,9 @@ function tailFrames(loop=false){
  return Array.from({length:count+1},(_,i)=>{
   const t=i/count,phase=t*Math.PI*2*cycles;
   const ramp=Math.min(1,t/.12,(1-t)/.24),envelope=loop?1:ramp*ramp*(3-2*ramp);
-  const swing=Math.sin(phase)*(loop?12:18)*envelope;
-  const flex=(Math.sin(phase-.55)+Math.sin(.55))*(loop?1.1:1.6)*envelope;
+  const turkey=prefs.skin==='Thanksgiving Turkey';
+  const swing=Math.sin(phase)*(turkey?3:loop?12:18)*envelope;
+  const flex=(Math.sin(phase-.55)+Math.sin(.55))*(turkey ? 0.3 : loop ? 1.1 : 1.6)*envelope;
   return {transform:`rotate(${swing}deg) skewY(${flex}deg)`,offset:t};
  });
 }

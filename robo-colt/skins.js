@@ -1,5 +1,6 @@
 /* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
+ 'Thanksgiving Turkey':{accent:'#b99958',light:'#f6e8ca',dark:'#55442b',tint:[.5,.36,.2],armor:[.8,.8,.72],artwork:'robo-colt/parts-turkey-v4.png',platformArtwork:'robo-colt/platform-turkey-v1.png',nameplateArtwork:'robo-colt/nameplate-turkey-v1.png',bounds:[[114,7,620,677],[846,161,1056,651],[208,698,433,1190],[480,700,1238,1192]],face:{eyes:[[277,276],[464,276]],mouth:[371,399,.85]},description:'Realistic charcoal turkey plumage, cream-barred feathers, blue-and-red facial skin, and a feathered tail on the original Robo-Colt shape.'},
  Axolotl:{accent:'#ff79ad',light:'#fff0f6',dark:'#a73064',tint:[1,.32,.56],armor:[1.1,.92,1.02],artwork:'robo-colt/parts-axolotl-v1.png',bounds:[[144,18,632,672],[880,167,1094,649],[219,708,450,1193],[740,731,1196,1174]],face:{eyes:[[295,276],[484,276]],mouth:[390,400,1]},description:'Pearl-pink robot enamel, rosy freckles, and three feathery pink axolotl frills on each side.'},
  'Jack-o-Lantern':{accent:'#ffa42e',light:'#fff3a1',dark:'#a14a0f',tint:[1,.42,.035],armor:[.9,.76,1.05],artwork:'robo-colt/parts-jack-o-lantern-v4.png',bounds:[[127,15,642,677],[873,171,1084,653],[220,692,452,1195],[763,730,1187,1172]],description:'Hollow carved pumpkin armor with one warm inner glow, dimming for sleep and brightening on wake.'},
  Glitter:{accent:'#ffd65c',light:'#fffbe1',dark:'#9c681c',tint:[1,.72,.16],armor:[1.1,1.06,.92],artwork:'robo-colt/parts-glitter-v1.png',bounds:[[127,17,609,672],[851,165,1059,648],[209,699,434,1191],[761,734,1185,1170]],description:'Reflective gold-flake enamel, champagne sparkles, and polished graphite joints.'},
@@ -31,13 +32,18 @@ window.roboColtSkins = {
 };
 window.createRoboColtSkinPainter = function(pet){
  const ns='http://www.w3.org/2000/svg',defs=pet.querySelector('defs');
+ const turkeyName='Thanksgiving Turkey';
+ const tailSvg=pet.querySelector('#rc-tail svg'),tailGroup=pet.querySelector('#rc-tail');
+ const tailLayout=Object.fromEntries(['x','y','width','height','viewBox'].map(key=>[key,tailSvg.getAttribute(key)]));
+ const tailOrigin=tailGroup.style.transformOrigin;
+
  // Position wrappers stay outside the blinking/scaling groups so animation
  // transforms cannot overwrite each artwork's facial alignment.
  // Register each painted atlas component to the original component bounds.
  // Keep the crop windows, limb pivots and platform fixed while fitting the art inside them.
  const originalBounds=[[127,17,607,671],[851,167,1056,649],[210,700,433,1192],[765,737,1178,1168]];
  const paintedBounds={Porcelain:[[129,21,625,672],[863,171,1076,655],[208,706,439,1203],[769,732,1206,1184]],'Obsidian Ember':[[138,17,624,672],[861,162,1077,651],[209,696,442,1195],[756,732,1192,1173]]};
- function fit(name,part){const a=originalBounds[part],b=(window.roboColtSkins[name]?.bounds||paintedBounds[name])?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
+ function fit(name,part){if(name===turkeyName&&part===3)return {sx:1,sy:1,x:0,y:0};const a=originalBounds[part],b=(window.roboColtSkins[name]?.bounds||paintedBounds[name])?.[part];if(!b)return {sx:1,sy:1,x:0,y:0};const sx=(a[2]-a[0])/(b[2]-b[0]),sy=(a[3]-a[1])/(b[3]-b[1]);return {sx,sy,x:a[0]-b[0]*sx,y:a[1]-b[1]*sy};}
  const facePositions={Porcelain:{eyes:[[283,279],[474,278]],mouth:[378,405,.8]},'Obsidian Ember':{eyes:[[287,273],[473,275]],mouth:[381,397,.85]}};
  const eyeAnchors=[];
  // Preserve the approved painted cavities. A single shade group dims their
@@ -109,6 +115,12 @@ window.createRoboColtSkinPainter = function(pet){
  return function(name){
   const skin=window.roboColtSkins[name]||window.roboColtSkins.Original;
   if(last===skin)return skin;last=skin;
+  const turkey=name===turkeyName;
+  pet.querySelector('#rc-neck-joint').style.display=turkey?'none':'';
+  const tail=turkey?{x:-60,y:70,width:850,height:570,viewBox:'470 690 780 520'}:tailLayout;
+  Object.entries(tail).forEach(([key,value])=>tailSvg.setAttribute(key,value));
+  tailGroup.style.transformOrigin=turkey?'365px 640px':tailOrigin;
+
   const face=skin.face||facePositions[name]||(skin.bounds?{eyes:[[274,276],[458,276]],mouth:[367,400,1]}:null);
   const bodyFit=fit(name,0);
   lanternFit.setAttribute('transform','translate('+bodyFit.x+' '+bodyFit.y+') scale('+bodyFit.sx+' '+bodyFit.sy+')');
@@ -125,6 +137,10 @@ window.createRoboColtSkinPainter = function(pet){
     e.setAttribute('href',skin.artwork||'robo-colt/parts-v1.png');
     if(skin.artwork){e.removeAttribute('filter');return;}
    }
+   if(e.closest('#rc-platform')){
+    e.setAttribute('href',skin.platformArtwork||'robo-colt/platform-v1.png');
+    if(skin.platformArtwork){e.removeAttribute('filter');return;}
+   }
    let filterId=skin.filterId;
    if(name==='Frostfire'){
     if(e.closest('#rc-leg-left,#rc-rear-left,#rc-ear-left'))filterId+='-ice';
@@ -135,17 +151,19 @@ window.createRoboColtSkinPainter = function(pet){
   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="'+skin.light+'"/><stop offset=".5" stop-color="'+skin.accent+'"/><stop offset="1" stop-color="'+skin.dark+'"/>';
   // Retain the original eye groups, anchors, highlights and blink animation.
   // Only the iris finish and pupil shape change for the animal skins.
-  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':name==='Snake'?'snake':name==='Axolotl'?'axolotl':null;
+  const animalEye=name==='Tiger'?'tiger':name==='Crocodile'?'crocodile':name==='Snake'?'snake':name==='Axolotl'?'axolotl':name===turkeyName?'turkey':null;
   if(animalEye)pet.querySelector('#rc-iris').innerHTML=animalEye==='tiger'?'<stop stop-color="#fff1b1"/><stop offset=".42" stop-color="#e9b94c"/><stop offset=".76" stop-color="#bd7825"/><stop offset="1" stop-color="#513319"/>':'<stop stop-color="#faf0aa"/><stop offset=".42" stop-color="#c5c954"/><stop offset=".76" stop-color="#8f9b36"/><stop offset="1" stop-color="#385322"/>';
   pet.querySelectorAll('.eyes-open .eye').forEach(eye=>{
    const [halo,iris,pupil]=eye.querySelectorAll('ellipse');
-   const axolotl=animalEye==='axolotl';
-   iris.setAttribute('rx',axolotl?'24':'25');iris.setAttribute('ry',axolotl?'24':'32');
-   halo.style.opacity=axolotl?'0':'1';
+   const axolotl=animalEye==='axolotl',turkeyEye=animalEye==='turkey';
+   iris.setAttribute('rx',axolotl||turkeyEye?'24':'25');iris.setAttribute('ry',axolotl||turkeyEye?'24':'32');
+   halo.style.opacity=axolotl||turkeyEye?'0':'1';
    pupil.setAttribute('rx',animalEye==='snake'?'4':animalEye==='crocodile'?'5':animalEye==='tiger'?'15':'13');
    pupil.setAttribute('ry',animalEye==='snake'||animalEye==='crocodile'?'26':animalEye==='tiger'?'17':'24');
    pupil.setAttribute('fill',animalEye?'#15180f':'#23060a');
    pupil.dataset.pupil=animalEye||'original';
+   if(turkeyEye){pupil.setAttribute('cx',iris.getAttribute('cx'));pupil.setAttribute('cy',iris.getAttribute('cy'));pupil.setAttribute('rx','12');pupil.setAttribute('ry','12');pupil.setAttribute('fill','#080707');}else{const left=iris.getAttribute('cx')==='274';pupil.setAttribute('cx',left?'279':'453');pupil.setAttribute('cy','277');}
+   eye.querySelector('circle').setAttribute('r',turkeyEye?'4':'7');
    if(axolotl){pupil.setAttribute('rx','19');pupil.setAttribute('ry','19');pupil.setAttribute('fill','#080c14');}
   });
   if(animalEye==='snake')pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#fff4bc"/><stop offset=".42" stop-color="#e7bc62"/><stop offset=".78" stop-color="#b68432"/><stop offset="1" stop-color="#624018"/>';
@@ -155,6 +173,9 @@ window.createRoboColtSkinPainter = function(pet){
   if(animalEye==='axolotl'){
    pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#0b1220"/><stop offset=".72" stop-color="#172539"/><stop offset=".91" stop-color="#536c88"/><stop offset="1" stop-color="#233447"/>';
    pet.querySelectorAll('.eyes-happy path,.eyes-sleep path').forEach(e=>e.setAttribute('stroke','#35445a'));
+  }
+  if(animalEye==='turkey'){
+   pet.querySelector('#rc-iris').innerHTML='<stop stop-color="#22130d"/><stop offset=".38" stop-color="#56311d"/><stop offset=".62" stop-color="#914f28"/><stop offset=".84" stop-color="#603821"/><stop offset="1" stop-color="#251e1b"/>';
   }
   pet.dataset.skin=name;
   return skin;

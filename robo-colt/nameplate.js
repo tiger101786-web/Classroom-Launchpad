@@ -19,9 +19,13 @@ window.createColtNameplate=function(pet){
   plate.querySelector('text').textContent=clean;
   const [r,g,b]=(window.roboColtSkins[skin]||window.roboColtSkins.Original).tint||[1,0,0];
   plate.querySelector('feColorMatrix').setAttribute('values',`${r} ${1-r} 0 0 0 ${g} ${1-g} 0 0 0 ${b} ${-b} 1 0 0 0 0 0 1 0`);
+  const skinDefinition=window.roboColtSkins[skin]||window.roboColtSkins.Original;
+  const customArtwork=skinDefinition.nameplateArtwork;
+  plate.querySelector('image').setAttribute('href',customArtwork||'robo-colt/nameplate-bolts-v1.png');
   // Share the actual platform finish, including light armor and texture variants.
   const platformFilter=platform.querySelector(':scope > image').getAttribute('filter');
-  if(platformFilter)plate.querySelector('image').setAttribute('filter',platformFilter);
+  if(customArtwork)plate.querySelector('image').removeAttribute('filter');
+  else if(platformFilter)plate.querySelector('image').setAttribute('filter',platformFilter);
   else plate.querySelector('image').setAttribute('filter','url(#rc-name-enamel)');
   plate.querySelector('text').setAttribute('fill','url(#rc-letter-cut)');
   plate.querySelector('text').setAttribute('stroke','#151218');
