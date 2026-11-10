@@ -1,6 +1,6 @@
 /* Skins use fitted painted atlases or original-art filters; accessories remain independent. */
 window.roboColtSkins = {
- 'Thanksgiving Turkey':{accent:'#b99958',light:'#f6e8ca',dark:'#55442b',tint:[.5,.36,.2],armor:[.8,.8,.72],artwork:'robo-colt/parts-turkey-v4.png',platformArtwork:'robo-colt/platform-turkey-v1.png',nameplateArtwork:'robo-colt/nameplate-turkey-v1.png',bounds:[[114,7,620,677],[846,161,1056,651],[208,698,433,1190],[480,700,1238,1192]],face:{eyes:[[277,276],[464,276]],mouth:[371,399,.85]},description:'Realistic charcoal turkey plumage, cream-barred feathers, blue-and-red facial skin, and a feathered tail on the original Robo-Colt shape.'},
+ 'Thanksgiving Turkey':{accent:'#b99958',light:'#f6e8ca',dark:'#55442b',tint:[.5,.36,.2],armor:[.8,.8,.72],artwork:'robo-colt/parts-turkey-v6.png',platformArtwork:'robo-colt/platform-turkey-v2.png',nameplateArtwork:'robo-colt/nameplate-turkey-v2.png',bounds:[[112,1,610,677],[835,156,1060,655],[206,696,432,1194],[484,706,1232,1195]],face:{eyes:[[266,277],[452,277]],mouth:[358,399,.85]},description:'Blue-silver face plates, feather-textured bronze armor, crimson hooves and wattle, and a cream-tipped turkey fan on the original animated Robo-Colt model.'},
  Axolotl:{accent:'#ff79ad',light:'#fff0f6',dark:'#a73064',tint:[1,.32,.56],armor:[1.1,.92,1.02],artwork:'robo-colt/parts-axolotl-v1.png',bounds:[[144,18,632,672],[880,167,1094,649],[219,708,450,1193],[740,731,1196,1174]],face:{eyes:[[295,276],[484,276]],mouth:[390,400,1]},description:'Pearl-pink robot enamel, rosy freckles, and three feathery pink axolotl frills on each side.'},
  'Jack-o-Lantern':{accent:'#ffa42e',light:'#fff3a1',dark:'#a14a0f',tint:[1,.42,.035],armor:[.9,.76,1.05],artwork:'robo-colt/parts-jack-o-lantern-v4.png',bounds:[[127,15,642,677],[873,171,1084,653],[220,692,452,1195],[763,730,1187,1172]],description:'Hollow carved pumpkin armor with one warm inner glow, dimming for sleep and brightening on wake.'},
  Glitter:{accent:'#ffd65c',light:'#fffbe1',dark:'#9c681c',tint:[1,.72,.16],armor:[1.1,1.06,.92],artwork:'robo-colt/parts-glitter-v1.png',bounds:[[127,17,609,672],[851,165,1059,648],[209,699,434,1191],[761,734,1185,1170]],description:'Reflective gold-flake enamel, champagne sparkles, and polished graphite joints.'},
@@ -36,6 +36,8 @@ window.createRoboColtSkinPainter = function(pet){
  const tailSvg=pet.querySelector('#rc-tail svg'),tailGroup=pet.querySelector('#rc-tail');
  const tailLayout=Object.fromEntries(['x','y','width','height','viewBox'].map(key=>[key,tailSvg.getAttribute(key)]));
  const tailOrigin=tailGroup.style.transformOrigin;
+ const headClip=pet.querySelector('#rc-head-clip path'),torsoClip=pet.querySelector('#rc-torso-clip path');
+ const headOutline=headClip.getAttribute('d'),torsoOutline=torsoClip.getAttribute('d');
 
  // Position wrappers stay outside the blinking/scaling groups so animation
  // transforms cannot overwrite each artwork's facial alignment.
@@ -117,9 +119,12 @@ window.createRoboColtSkinPainter = function(pet){
   if(last===skin)return skin;last=skin;
   const turkey=name===turkeyName;
   pet.querySelector('#rc-neck-joint').style.display=turkey?'none':'';
-  const tail=turkey?{x:-60,y:70,width:850,height:570,viewBox:'470 690 780 520'}:tailLayout;
+  const tail=turkey?{x:-103,y:13,width:935,height:627,viewBox:'470 690 780 520'}:tailLayout;
   Object.entries(tail).forEach(([key,value])=>tailSvg.setAttribute(key,value));
   tailGroup.style.transformOrigin=turkey?'365px 640px':tailOrigin;
+  // The larger wattle belongs to the animated head, including its lower lobes.
+  headClip.setAttribute('d',turkey?'M0 0H700V425H470Q445 440 420 446V530H292V446Q278 438 264 425H0Z':headOutline);
+  torsoClip.setAttribute('d',turkey?'M0 425H264Q278 438 292 446V530H420V446Q445 440 470 425H650V685H0Z':torsoOutline);
 
   const face=skin.face||facePositions[name]||(skin.bounds?{eyes:[[274,276],[458,276]],mouth:[367,400,1]}:null);
   const bodyFit=fit(name,0);
