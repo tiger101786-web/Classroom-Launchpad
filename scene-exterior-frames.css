@@ -172,3 +172,22 @@
 /* Same max-opening fit as the collection audit: -min(.08, (.498/max - 1)/2).
    Align the furthest inner edge to the photo with the standard small overlap. */
 .scene-frame-exterior[data-exterior-frame="match-chicken-nugget"]{--exterior-frame-inset:-7.398%}
+
+/* Slow, low-opacity magic over the stationary circular rooftop artwork. */
+.scene-madoka-mitakihara .launch-scene-particles i {
+  width:3px; height:3px; border-radius:50%; background:#ffe4f5;
+  box-shadow:0 0 5px #f8b6eb; opacity:0;
+  animation:madoka-magic-drift 9s ease-in-out infinite;
+  animation-delay:calc(var(--n) * -1s);
+}
+@keyframes madoka-magic-drift {
+  0%,100% { opacity:0; transform:translate(0,8px) scale(.65); }
+  35%,65% { opacity:.45; }
+  90% { opacity:0; transform:translate(5px,-14px) scale(1); }
+}
+.scene-madoka-mitakihara.is-paused .launch-scene-particles i { animation-play-state:paused; opacity:0; }
+@media(prefers-reduced-motion:reduce) {
+  .scene-madoka-mitakihara .launch-scene-particles i { animation:none; opacity:0; }
+}
+
+.scene-frame-exterior[data-exterior-frame="match-madoka-mitakihara"] { --exterior-frame-inset:-6.159%; }

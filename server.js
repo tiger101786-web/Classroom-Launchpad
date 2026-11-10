@@ -48,6 +48,8 @@ homeSceneIds.add("pokemon-indoor-arena");
 homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
 homeSceneIds.add("chicken-nugget");
+homeSceneIds.add("madoka-mitakihara");
+homeSceneFrameIds.add("match-madoka-mitakihara");
 homeSceneFrameIds.add("match-chicken-nugget");
 homeSceneIds.add("squishy");
 homeSceneIds.add("jdm");
