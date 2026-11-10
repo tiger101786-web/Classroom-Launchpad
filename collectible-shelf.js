@@ -175,6 +175,7 @@
   rows.push(['Squishy Toys', ['squishy-cheese','Squishy Cheese Toy']]);
   rows.push(['Music', ['music-dolly-rhinestone','Dolly Rhinestone Guitar Statue'], ['music-dolly-classic','Dolly Classic Guitar Statue']]);
   rows.push(['Music', ['music-freya-skye','Freya Skye Guitar Statue'], ['music-katseye','Katseye Group Statue']]);
+  rows.push(['Anime', ["madoka-sayaka","Madoka Magica • Sayaka Miki Statue"], ["madoka-mami","Madoka Magica • Mami Tomoe Statue"], ["madoka-madoka","Madoka Magica • Madoka Kaname Statue"], ["madoka-homura","Madoka Magica • Homura Akemi Statue"], ["madoka-kyoko","Madoka Magica • Kyoko Sakura Statue"], ["madoka-kyubey","Madoka Magica • Kyubey Statue"]]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -195,6 +196,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'madoka-sayaka': {"source":"assets/shelf-madoka-sayaka.png","width":1126,"height":1397,"bounds":[157,28,874,1294],"displaySize":330,"displayWidth":280,"directImage":true},
+    'madoka-mami': {"source":"assets/shelf-madoka-mami.png","width":846,"height":1860,"bounds":[101,81,680,1683],"displaySize":330,"displayWidth":280,"directImage":true},
+    'madoka-madoka': {"source":"assets/shelf-madoka-madoka.png","width":1126,"height":1397,"bounds":[196,14,728,1339],"displaySize":330,"displayWidth":280,"directImage":true},
+    'madoka-homura': {"source":"assets/shelf-madoka-homura.png","width":969,"height":1624,"bounds":[138,22,782,1561],"displaySize":330,"displayWidth":280,"directImage":true},
+    'madoka-kyoko': {"source":"assets/shelf-madoka-kyoko.png","width":1024,"height":1536,"bounds":[159,44,753,1384],"displaySize":330,"displayWidth":280,"directImage":true},
+    'madoka-kyubey': {"source":"assets/shelf-madoka-kyubey.png","width":1670,"height":942,"bounds":[371,32,901,875],"displaySize":330,"displayWidth":280,"directImage":true},
     'squishy-cheese': {source:'assets/shelf-squishy-cheese-front-v2.png',width:1254,height:1254,bounds:[101,91,1059,1050],displaySize:230,displayWidth:220,directImage:true},
     'music-dolly-rhinestone': {source:'assets/shelf-music-dolly-rhinestone.png',width:1600,height:1200,bounds:[336,5,1062,1182],displaySize:330,displayWidth:280,directImage:true},
     'music-dolly-classic': {source:'assets/shelf-music-dolly-classic.png',width:1200,height:1600,bounds:[192,20,1008,1551],displaySize:330,displayWidth:280,directImage:true},

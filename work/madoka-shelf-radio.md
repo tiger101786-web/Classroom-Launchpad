@@ -1,0 +1,9 @@
+# Madoka shelf collectibles and Big B Radio
+
+Six user-supplied statues added to Anime: Sayaka Miki, Mami Tomoe, Madoka Kaname, Homura Akemi, Kyoko Sakura and Kyubey. Built-in image generation removed white backgrounds with the prompt: Background extraction only; preserve exact statue, pose, face, colors, proportions and complete pedestal; real transparent alpha including enclosed gaps; no redesign or detached floor shadow. Original desktop files remain intact. Generated PNGs copied without further resizing or recompression to assets/shelf-madoka-*.png. Source paths and measured alpha bounds are in madoka-shelf-assets.json.
+
+The five character statues use the existing 330-unit statue height and 280-unit width limit; Sayaka has the same rendered height as Mami, Madoka, Homura and Kyoko. Kyubey retains a wider natural silhouette. All use the shared bottom baseline, measured transparent bounds, original aspect ratio and direct bitmap rendering. The initial contact sheet applied a narrower width cap and incorrectly made Sayaka appear smaller; the actual shelf preview corrects this.
+
+Added Big B Radio K-pop alongside the existing LISTEN.moe K-pop station. Provider page: https://bigbradio.net/kpop . Secure stream https://antares.dribbcast.com/proxy/kpop?mp=/s returned HTTP 200, audio/mpeg and audio bytes during verification. Legacy /s URLs on kpop.bigbradio.net returned 404. Station is general K-pop, with no artist guarantee; its player description does not claim clean-only programming or ad-free playback.
+
+Validation: work/verify-madoka-shelf.cjs checks valid IDs, equal character heights, base alignment, desktop/mobile rendering, search and selection/save. Existing radio reliability checks, syntax and whitespace checks passed. Actual shelf preview: C:/Users/Sinister/AppData/Local/Temp/madoka-actual-shelves.png . Nothing committed or pushed.

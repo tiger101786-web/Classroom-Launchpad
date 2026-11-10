@@ -1,0 +1,104 @@
+[
+  {
+    "id": "madoka-sayaka",
+    "name": "sayaka",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-1d2ee9c7-6fca-41e0-a2fa-c6aa3a4212b8.png",
+    "source": "assets/shelf-madoka-sayaka.png",
+    "width": 1126,
+    "height": 1397,
+    "bounds": [
+      157,
+      28,
+      874,
+      1294
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "madoka-mami",
+    "name": "mami",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-7611072c-d05a-47e2-9eea-d8fe601ae6ca.png",
+    "source": "assets/shelf-madoka-mami.png",
+    "width": 846,
+    "height": 1860,
+    "bounds": [
+      101,
+      81,
+      680,
+      1683
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "madoka-madoka",
+    "name": "madoka",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-d3a3d1f6-9554-44fb-b7a4-5d352122181a.png",
+    "source": "assets/shelf-madoka-madoka.png",
+    "width": 1126,
+    "height": 1397,
+    "bounds": [
+      196,
+      14,
+      728,
+      1339
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "madoka-homura",
+    "name": "homura",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-97830bec-d23e-4e6c-a474-1c61fa10d7cc.png",
+    "source": "assets/shelf-madoka-homura.png",
+    "width": 969,
+    "height": 1624,
+    "bounds": [
+      138,
+      22,
+      782,
+      1561
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "madoka-kyoko",
+    "name": "kyoko",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-0bb41bcd-fd32-483b-88f6-17f6492faf85.png",
+    "source": "assets/shelf-madoka-kyoko.png",
+    "width": 1024,
+    "height": 1536,
+    "bounds": [
+      159,
+      44,
+      753,
+      1384
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "madoka-kyubey",
+    "name": "kyubey",
+    "path": "C:\\Users\\Sinister\\.codex\\generated_images\\01a19363-e9fe-7dc2-86a1-e1134a57d914\\exec-3c53290a-9116-451d-bcce-98fe9633d188.png",
+    "source": "assets/shelf-madoka-kyubey.png",
+    "width": 1670,
+    "height": 942,
+    "bounds": [
+      371,
+      32,
+      901,
+      875
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  }
+]
