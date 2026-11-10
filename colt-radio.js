@@ -401,7 +401,7 @@
     },
     {
       id: "kpop-big-b",
-      label: "K-Pop • Big B Radio",
+      label: "K-Pop • Seoul Beats",
       type: "stream",
       source: "https://antares.dribbcast.com/proxy/kpop?mp=/s",
       provider: "Big B Radio",
