@@ -1,5 +1,7 @@
 # Thanksgiving Turkey Robo-Colt skin
 
+Selector alignment: the transparent 311 × 396 thumbnail now allows a 303px-wide fan so the visible artwork reaches the standard 300px Colt preview height. The top aligns at y45 and the platform baseline at approximately y344, matching Axolotl, Jack-o-Lantern and Glitter. The live skin size is unchanged. The gallery cache version is `20261109-turkey-selector-v7`.
+
 ## Matching platform and mouth cleanup
 
 Current production assets: `parts-turkey-v6.png`, `platform-turkey-v2.png`, and `nameplate-turkey-v2.png`. All three were edited with the built-in image tool, preserving transparency and existing canvas proportions. The atlas retains the v5 registration and animation rig. The gallery thumbnail and review image were refreshed from the live renderer. Build and turkey browser checks passed, including greeting, dance, tail movement, sleep, saving/reloading, and switching back to Original.

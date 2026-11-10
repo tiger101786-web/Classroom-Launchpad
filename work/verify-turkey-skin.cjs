@@ -26,7 +26,8 @@ const thumbnailPath=path.join(os.tmpdir(),'robo-turkey-thumbnail.png'),source=aw
 const scratch=createCanvas(source.width,source.height),sc=scratch.getContext('2d');sc.drawImage(source,0,0);
 const pixels=sc.getImageData(0,0,source.width,source.height).data;let bounds=[source.width,source.height,0,0];
 for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>10)bounds=[Math.min(bounds[0],x),Math.min(bounds[1],y),Math.max(bounds[2],x),Math.max(bounds[3],y)];
-const w=bounds[2]-bounds[0]+1,h=bounds[3]-bounds[1]+1,scale=Math.min(280/w,299/h);
+// The broad turkey fan needs more width to reach the other skins' 300px height.
+const w=bounds[2]-bounds[0]+1,h=bounds[3]-bounds[1]+1,scale=Math.min(303/w,300/h);
 const normalized=createCanvas(311,396),nc=normalized.getContext('2d');
 nc.drawImage(source,bounds[0],bounds[1],w,h,(311-w*scale)/2,345-h*scale,w*scale,h*scale);
 fs.writeFileSync(thumbnailPath,normalized.toBuffer('image/png'));
