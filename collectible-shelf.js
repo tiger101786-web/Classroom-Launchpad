@@ -176,6 +176,7 @@
   rows.push(['Music', ['music-dolly-rhinestone','Dolly Rhinestone Guitar Statue'], ['music-dolly-classic','Dolly Classic Guitar Statue']]);
   rows.push(['Music', ['music-freya-skye','Freya Skye Guitar Statue'], ['music-katseye','Katseye Group Statue']]);
   rows.push(['Anime', ["madoka-sayaka","Madoka Magica • Sayaka Miki Statue"], ["madoka-mami","Madoka Magica • Mami Tomoe Statue"], ["madoka-madoka","Madoka Magica • Madoka Kaname Statue"], ["madoka-homura","Madoka Magica • Homura Akemi Statue"], ["madoka-kyoko","Madoka Magica • Kyoko Sakura Statue"], ["madoka-kyubey","Madoka Magica • Kyubey Statue"]]);
+  rows.push(['Pokémon', ["pokemon-caterpie-statue","Caterpie Statue"], ["pokemon-charmeleon-statue","Charmeleon Statue"], ["pokemon-venusaur-statue","Venusaur Statue"], ["pokemon-wartortle-statue","Wartortle Statue"], ["pokemon-ivysaur-statue","Ivysaur Statue"]]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -196,6 +197,11 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'pokemon-caterpie-statue': {"source":"assets/shelf-pokemon-caterpie-statue.png","width":1408,"height":1408,"bounds":[204,26,1033,1347],"displaySize":330,"displayWidth":280,"directImage":true},
+    'pokemon-charmeleon-statue': {"source":"assets/shelf-pokemon-charmeleon-statue.png","width":1408,"height":1408,"bounds":[200,12,1053,1369],"displaySize":330,"displayWidth":280,"directImage":true},
+    'pokemon-venusaur-statue': {"source":"assets/shelf-pokemon-venusaur-statue.png","width":1024,"height":1024,"bounds":[90,37,866,959],"displaySize":330,"displayWidth":280,"directImage":true},
+    'pokemon-wartortle-statue': {"source":"assets/shelf-pokemon-wartortle-statue.png","width":1408,"height":1408,"bounds":[159,27,1103,1333],"displaySize":330,"displayWidth":280,"directImage":true},
+    'pokemon-ivysaur-statue': {"source":"assets/shelf-pokemon-ivysaur-statue.png","width":1408,"height":1408,"bounds":[141,55,1183,1283],"displaySize":330,"displayWidth":280,"directImage":true},
     'madoka-sayaka': {"source":"assets/shelf-madoka-sayaka.png","width":1126,"height":1397,"bounds":[157,28,874,1294],"displaySize":330,"displayWidth":280,"directImage":true},
     'madoka-mami': {"source":"assets/shelf-madoka-mami.png","width":846,"height":1860,"bounds":[101,81,680,1683],"displaySize":330,"displayWidth":280,"directImage":true},
     'madoka-madoka': {"source":"assets/shelf-madoka-madoka.png","width":1126,"height":1397,"bounds":[196,14,728,1339],"displaySize":330,"displayWidth":280,"directImage":true},

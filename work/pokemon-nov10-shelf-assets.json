@@ -1,0 +1,87 @@
+[
+  {
+    "id": "pokemon-caterpie-statue",
+    "name": "Caterpie Statue",
+    "original": "C:/Users/Sinister/Desktop/grok-image-1a3bd3cd-6c76-4de9-bfac-fe5864c83eb6.png",
+    "source": "assets/shelf-pokemon-caterpie-statue.png",
+    "width": 1408,
+    "height": 1408,
+    "bounds": [
+      204,
+      26,
+      1033,
+      1347
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "pokemon-charmeleon-statue",
+    "name": "Charmeleon Statue",
+    "original": "C:/Users/Sinister/Desktop/grok-image-908bbddf-d272-4453-9d07-7575e637f866.png",
+    "source": "assets/shelf-pokemon-charmeleon-statue.png",
+    "width": 1408,
+    "height": 1408,
+    "bounds": [
+      200,
+      12,
+      1053,
+      1369
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "pokemon-venusaur-statue",
+    "name": "Venusaur Statue",
+    "original": "C:/Users/Sinister/Desktop/grok-image-d4426293-d70e-4cac-9931-b99ca68ee227.png",
+    "source": "assets/shelf-pokemon-venusaur-statue.png",
+    "width": 1024,
+    "height": 1024,
+    "bounds": [
+      90,
+      37,
+      866,
+      959
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "pokemon-wartortle-statue",
+    "name": "Wartortle Statue",
+    "original": "C:/Users/Sinister/Desktop/grok-image-e6ea149e-1368-40cd-b718-a4939e5065b0.png",
+    "source": "assets/shelf-pokemon-wartortle-statue.png",
+    "width": 1408,
+    "height": 1408,
+    "bounds": [
+      159,
+      27,
+      1103,
+      1333
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  },
+  {
+    "id": "pokemon-ivysaur-statue",
+    "name": "Ivysaur Statue",
+    "original": "C:/Users/Sinister/Desktop/grok-image-fe80dda4-72e8-4691-8635-0baf7af44998.png",
+    "source": "assets/shelf-pokemon-ivysaur-statue.png",
+    "width": 1408,
+    "height": 1408,
+    "bounds": [
+      141,
+      55,
+      1183,
+      1283
+    ],
+    "displaySize": 330,
+    "displayWidth": 280,
+    "directImage": true
+  }
+]
