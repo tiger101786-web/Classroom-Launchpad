@@ -1,0 +1,35 @@
+{
+  "music-ariana-grande-bust": {
+    "source": "assets/shelf-music-ariana-grande-bust.png",
+    "width": 1408,
+    "height": 1408,
+    "bounds": [
+      246,
+      36,
+      948,
+      1334
+    ]
+  },
+  "cat-calico-persian-bust": {
+    "source": "assets/shelf-cat-calico-persian-bust.png",
+    "width": 1168,
+    "height": 1696,
+    "bounds": [
+      162,
+      100,
+      878,
+      1500
+    ]
+  },
+  "cat-tortoiseshell-bust": {
+    "source": "assets/shelf-cat-tortoiseshell-bust.png",
+    "width": 1632,
+    "height": 1216,
+    "bounds": [
+      424,
+      4,
+      804,
+      1174
+    ]
+  }
+}

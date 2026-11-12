@@ -49,6 +49,8 @@ homeSceneIds.add("ninja-course");
 homeSceneIds.add("highland");
 homeSceneIds.add("chicken-nugget");
 homeSceneIds.add("madoka-mitakihara");
+homeSceneIds.add("disney-princess-garden");
+homeSceneFrameIds.add("match-disney-princess-garden");
 homeSceneFrameIds.add("match-madoka-mitakihara");
 homeSceneFrameIds.add("match-chicken-nugget");
 homeSceneIds.add("squishy");

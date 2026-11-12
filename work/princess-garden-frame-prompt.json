@@ -1,0 +1,9 @@
+{
+  "tool": "built-in ImageGen",
+  "prompt": "Use case: stylized-concept. Create ONE premium circular decorative frame PNG for the attached princess garden scene on a classroom website. Image 1 is THEME reference only (golden sunset, forest, pink purple yellow flowers and royal castle); do NOT reproduce its scene or people. Image 2 is GEOMETRY reference for a thin circular rim with huge transparent opening. Design an elegant continuous narrow antique gold filigree ring wrapped in delicate green ivy, tiny dimensional pink/purple/yellow wildflowers; a SMALL tasteful gold crown at 12 o'clock, a tiny bluebird perched OUTSIDE the ring at 2 o'clock, small rose at 6 o'clock. Front-on perfectly centered circular ring on SQUARE canvas. Outer ring/decorations fit entirely within radius49% of square; transparent opening radius44-45% and no ornaments intruding inside that opening. Thin, detailed, ornate but not bulky; leaves and flowers miniaturized reliefs along the perimeter, not large clusters. True TRANSPARENT CENTER AND TRANSPARENT EXTERIOR; only ring visible. No backdrop, NO castle or princesses inside, no text, no opaque disk, no black fill, no detached floating particles. Gold and warm forest floral colors complement Image1. Complete frame uncut with clear margins.",
+  "references": [
+    "C:/Users/Sinister/Desktop/grok-image-9f972efd-079f-405b-b172-2691941115a5.jpg",
+    "assets/scene-frame-match-madoka-mitakihara-thin.png"
+  ],
+  "savedAsset": "assets/scene-frame-match-disney-princess-garden-thin.png"
+}

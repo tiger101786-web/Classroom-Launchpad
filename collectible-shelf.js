@@ -178,6 +178,8 @@
   rows.push(['Anime', ["madoka-sayaka","Madoka Magica • Sayaka Miki Statue"], ["madoka-mami","Madoka Magica • Mami Tomoe Statue"], ["madoka-madoka","Madoka Magica • Madoka Kaname Statue"], ["madoka-homura","Madoka Magica • Homura Akemi Statue"], ["madoka-kyoko","Madoka Magica • Kyoko Sakura Statue"], ["madoka-kyubey","Madoka Magica • Kyubey Statue"]]);
   rows.push(['Pokémon', ["pokemon-caterpie-statue","Caterpie Statue"], ["pokemon-charmeleon-statue","Charmeleon Statue"], ["pokemon-venusaur-statue","Venusaur Statue"], ["pokemon-wartortle-statue","Wartortle Statue"], ["pokemon-ivysaur-statue","Ivysaur Statue"]]);
   rows.push(['Squishy Toys', ['squishy-aqua-waves','Aqua Waves Squishy Dumpling'], ['squishy-peach-hearts','Peach Hearts Squishy Dumpling'], ['squishy-cherry-dots','Cherry Red Polka Dots Squishy Dumpling'], ['squishy-tangerine-swirl','Tangerine Swirl Squishy Dumpling']]);
+  rows.push(['Music', ['music-ariana-grande-bust','Ariana Grande Pink Microphone Bust']]);
+  rows.push(['Cats', ['cat-calico-persian-bust','Calico Persian Cat Bust'], ['cat-tortoiseshell-bust','Tortoiseshell Cat Bust']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -198,6 +200,9 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    "music-ariana-grande-bust": {"source":"assets/shelf-music-ariana-grande-bust.png","width":1408,"height":1408,"bounds":[246,36,948,1334],"displaySize":330,"displayWidth":240,"directImage":true},
+    "cat-calico-persian-bust": {"source":"assets/shelf-cat-calico-persian-bust.png","width":1168,"height":1696,"bounds":[162,100,878,1500],"displaySize":330,"displayWidth":240,"directImage":true},
+    "cat-tortoiseshell-bust": {"source":"assets/shelf-cat-tortoiseshell-bust.png","width":1632,"height":1216,"bounds":[424,4,804,1174],"displaySize":330,"displayWidth":240,"directImage":true},
     'pokemon-caterpie-statue': {"source":"assets/shelf-pokemon-caterpie-statue.png","width":1408,"height":1408,"bounds":[204,26,1033,1347],"displaySize":330,"displayWidth":280,"directImage":true},
     'pokemon-charmeleon-statue': {"source":"assets/shelf-pokemon-charmeleon-statue.png","width":1408,"height":1408,"bounds":[200,12,1053,1369],"displaySize":330,"displayWidth":280,"directImage":true},
     'pokemon-venusaur-statue': {"source":"assets/shelf-pokemon-venusaur-statue.png","width":1024,"height":1024,"bounds":[90,37,866,959],"displaySize":330,"displayWidth":280,"directImage":true},

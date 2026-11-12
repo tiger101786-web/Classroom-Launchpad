@@ -191,3 +191,6 @@
 }
 
 .scene-frame-exterior[data-exterior-frame="match-madoka-mitakihara"] { --exterior-frame-inset:-6.159%; }
+
+/* Fit the floral crown rim around the unchanged princess garden scene. */
+.scene-frame-exterior[data-exterior-frame="match-disney-princess-garden"] { --exterior-frame-inset:-5.5598%; }
