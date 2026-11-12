@@ -52,3 +52,9 @@
 /* The golden mountain scene's original nine-second mist pass barely moved. */
 .scene-disney-sun-palace .launch-scene-particles i { width:24%; height:7%; background:radial-gradient(ellipse,#ffffff55,transparent 70%); box-shadow:none; animation:scene-palace-mist-flow 3.2s linear infinite; animation-delay:calc(var(--n) * -.355556s); }
 @keyframes scene-palace-mist-flow { 0% { translate:-18px 5px; opacity:0; } 15%,75% { opacity:.72; } 100% { translate:20px -8px; opacity:0; } }
+/* Keep the Princess Garden motes moving steadily instead of the slow default drift. */
+.scene-disney-princess-garden .launch-scene-particles i {
+  animation-duration:2.4s;
+  animation-timing-function:linear;
+  animation-delay:calc(var(--n) * -.27s);
+}
