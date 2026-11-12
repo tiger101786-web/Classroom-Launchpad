@@ -177,6 +177,7 @@
   rows.push(['Music', ['music-freya-skye','Freya Skye Guitar Statue'], ['music-katseye','Katseye Group Statue']]);
   rows.push(['Anime', ["madoka-sayaka","Madoka Magica • Sayaka Miki Statue"], ["madoka-mami","Madoka Magica • Mami Tomoe Statue"], ["madoka-madoka","Madoka Magica • Madoka Kaname Statue"], ["madoka-homura","Madoka Magica • Homura Akemi Statue"], ["madoka-kyoko","Madoka Magica • Kyoko Sakura Statue"], ["madoka-kyubey","Madoka Magica • Kyubey Statue"]]);
   rows.push(['Pokémon', ["pokemon-caterpie-statue","Caterpie Statue"], ["pokemon-charmeleon-statue","Charmeleon Statue"], ["pokemon-venusaur-statue","Venusaur Statue"], ["pokemon-wartortle-statue","Wartortle Statue"], ["pokemon-ivysaur-statue","Ivysaur Statue"]]);
+  rows.push(['Squishy Toys', ['squishy-aqua-waves','Aqua Waves Squishy Dumpling'], ['squishy-peach-hearts','Peach Hearts Squishy Dumpling'], ['squishy-cherry-dots','Cherry Red Polka Dots Squishy Dumpling'], ['squishy-tangerine-swirl','Tangerine Swirl Squishy Dumpling']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -505,6 +506,10 @@
     'peace-dove': {"source":"assets/shelf-peace-dove.png","width":1254,"height":1254,"bounds":[150,12,977,1229]},
     'holy-family': {"source":"assets/shelf-holy-family.png","width":1254,"height":1254,"bounds":[93,3,1068,1223]},
     'good-shepherd': {"source":"assets/shelf-good-shepherd.png","width":1254,"height":1254,"bounds":[142,11,974,1232]},
+    "squishy-aqua-waves": {"source":"assets/shelf-squishy-aqua-waves.png?v=20261111-patterns-v4","width":1126,"height":1397,"bounds":[30,251,1051,877],"directImage":true},
+    "squishy-peach-hearts": {"source":"assets/shelf-squishy-peach-hearts.png?v=20261111-patterns-v4","width":1287,"height":1222,"bounds":[32,103,1218,1027],"directImage":true},
+    "squishy-cherry-dots": {"source":"assets/shelf-squishy-cherry-dots.png?v=20261111-patterns-v4","width":1312,"height":1199,"bounds":[51,89,1209,1021],"directImage":true},
+    "squishy-tangerine-swirl": {"source":"assets/shelf-squishy-tangerine-swirl.png?v=20261111-patterns-v4","width":1126,"height":1397,"bounds":[31,249,1053,883],"directImage":true},
     'squishy-pink': {source:'assets/shelf-squishy-pink.png',width:1254,height:1254,bounds:[29,62,1196,1153],directImage:true},
     'squishy-blue': {source:'assets/shelf-squishy-blue.png',width:1254,height:1254,bounds:[24,37,1207,1185],directImage:true},
     'squishy-gold': {source:'assets/shelf-squishy-gold.png',width:1254,height:1254,bounds:[13,17,1229,1219],directImage:true},

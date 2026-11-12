@@ -1,0 +1,50 @@
+{
+  "squishy-aqua-waves": {
+    "source": "assets/shelf-squishy-aqua-waves.png",
+    "width": 1126,
+    "height": 1397,
+    "bounds": [
+      30,
+      251,
+      1051,
+      877
+    ],
+    "directImage": true
+  },
+  "squishy-peach-hearts": {
+    "source": "assets/shelf-squishy-peach-hearts.png",
+    "width": 1287,
+    "height": 1222,
+    "bounds": [
+      32,
+      103,
+      1218,
+      1027
+    ],
+    "directImage": true
+  },
+  "squishy-cherry-dots": {
+    "source": "assets/shelf-squishy-cherry-dots.png",
+    "width": 1312,
+    "height": 1199,
+    "bounds": [
+      51,
+      89,
+      1209,
+      1021
+    ],
+    "directImage": true
+  },
+  "squishy-tangerine-swirl": {
+    "source": "assets/shelf-squishy-tangerine-swirl.png",
+    "width": 1126,
+    "height": 1397,
+    "bounds": [
+      31,
+      249,
+      1053,
+      883
+    ],
+    "directImage": true
+  }
+}
