@@ -1,0 +1,48 @@
+{
+  "assets": [
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/radio-fantasy-concepts-20261112/jade-serpent-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/jade-serpent-atlas.png",
+      "sha256": "901aba299f7739e30f5660018b94dac9a7dbaa5f6faa8caff82210bfd6105510",
+      "bytes": 2678731
+    },
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/radio-fantasy-concepts-20261112/jade-serpent-emperor-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/jade-serpent-emperor-atlas.png",
+      "sha256": "e5df630da2a96d33eb0e68f589c55a8cc1aef556033b20c279f60c564e4a4c6f",
+      "bytes": 2493044
+    },
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/radio-fantasy-concepts-20261112/phoenix-rebirth-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/phoenix-rebirth-atlas.png",
+      "sha256": "6d182f6ee93a24940b495780b74b6b1e47dfe570f8dbbe6d2392ea3ec80ed068",
+      "bytes": 2548698
+    },
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/radio-anubis-concept-20261112/anubis-tomb-atlas.png",
+      "delivery": "assets/radio-skins/illustrated/anubis-tomb-atlas.png",
+      "sha256": "6ce57ed5e2b10720dcc8ab353461458b934701825b15998f670aee210487723d",
+      "bytes": 2929607
+    }
+  ],
+  "stableScreenshotComparison": [
+    {
+      "id": "jade-serpent",
+      "changedChannels": 0,
+      "width": 414,
+      "height": 786
+    },
+    {
+      "id": "phoenix-rebirth",
+      "changedChannels": 0,
+      "width": 414,
+      "height": 786
+    },
+    {
+      "id": "anubis-tomb",
+      "changedChannels": 0,
+      "width": 414,
+      "height": 786
+    }
+  ]
+}

@@ -28,7 +28,8 @@ const output = process.env.RADIO_THUMBNAIL_OUTPUT || path.join(root, 'assets/rad
     await page.getByRole('button', { name: 'Open Colt Radio', exact: true }).click();
     await page.getByRole('button', { name: 'Change Colt Radio skin', exact: true }).waitFor();
     await page.addStyleTag({ content: '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}' });
-    for (const skin of definitions) {
+    const selectedIds = process.env.RADIO_THUMBNAIL_SKINS?.split(',');
+    for (const skin of definitions.filter(skin => !selectedIds || selectedIds.includes(skin.id))) {
       // Applying a hidden choice reuses the real skin code without opening/loading the gallery.
       await page.evaluate(id => document.querySelector('[data-radio-skin-choice="' + id + '"]').click(), skin.id);
       await page.evaluate(async assets => {
@@ -49,6 +50,6 @@ const output = process.env.RADIO_THUMBNAIL_OUTPUT || path.join(root, 'assets/rad
       });
       console.log('Rendered ' + skin.label);
     }
-    console.log('Saved ' + definitions.length * 2 + ' scene/portrait PNGs to ' + output);
+    console.log('Saved ' + definitions.filter(skin => !selectedIds || selectedIds.includes(skin.id)).length * 2 + ' scene/portrait PNGs to ' + output);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

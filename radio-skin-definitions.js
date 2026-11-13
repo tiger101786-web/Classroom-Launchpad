@@ -743,6 +743,72 @@
     "swatch": "linear-gradient(135deg,#ff2345,#080b12)"
   }
 ]);
+  skins.push(...[
+  {
+    "id": "jade-serpent",
+    "label": "Jade Serpent Palace",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/jade-serpent-atlas.png",
+      "assets/radio-skins/illustrated/jade-serpent-emperor-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/jade-serpent-atlas.png')",
+      "--genre-base": "#031d19",
+      "--genre-edge": "#bb9852",
+      "--genre-accent": "#e0f8b5",
+      "--genre-text": "#fff2d2",
+      "--genre-material": "linear-gradient(130deg,#153c31ee,#051b17f5 65%,#16422fdd)",
+      "--genre-band": "1254 / 200",
+      "--genre-band-position": "37.9507%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#e0f8b5,#031d19)"
+  },
+  {
+    "id": "phoenix-rebirth",
+    "label": "Phoenix Rebirth",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/phoenix-rebirth-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/phoenix-rebirth-atlas.png')",
+      "--genre-base": "#1b080c",
+      "--genre-edge": "#c98243",
+      "--genre-accent": "#ffce79",
+      "--genre-text": "#fff2da",
+      "--genre-material": "linear-gradient(130deg,#4b1a17ee,#1b090bf5 65%,#4a2118dd)",
+      "--genre-band": "1254 / 200",
+      "--genre-band-position": "37.9507%",
+      "--genre-portrait": "195%"
+    },
+    "swatch": "linear-gradient(135deg,#ffce79,#1b080c)"
+  },
+  {
+    "id": "anubis-tomb",
+    "label": "Anubis's Tomb",
+    "layout": "genre",
+    "title": "words",
+    "assets": [
+      "assets/radio-skins/illustrated/anubis-tomb-atlas.png"
+    ],
+    "variables": {
+      "--genre-art": "url('assets/radio-skins/illustrated/anubis-tomb-atlas.png')",
+      "--genre-base": "#070f13",
+      "--genre-edge": "#cba65a",
+      "--genre-accent": "#a1f1e5",
+      "--genre-text": "#fff0ca",
+      "--genre-material": "linear-gradient(135deg,#1b2929f0,#070e13fa 65%,#1c3031eb)",
+      "--genre-band": "1254 / 200",
+      "--genre-band-position": "37.9507%",
+      "--genre-portrait": "190%"
+    },
+    "swatch": "linear-gradient(135deg,#d2ab54,#0c151b,#44b7b6)"
+  }
+]);
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

@@ -1787,3 +1787,44 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 .colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note{margin-inline:0;padding-inline:38px}
 .colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note::before{left:20px}
 .colt-radio-panel[data-radio-skin=cybersamurai] .colt-radio-note::after{right:20px}
+
+/* Reviewed fantasy skins: exact styling used for their actual-player previews. */
+
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-heading h2 {font-family:'Palatino Linotype',Georgia,serif;font-size:28px;font-weight:900;letter-spacing:-1px;text-shadow:0 2px #152a12,0 3px #a38634,0 0 9px #001810;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-title-word {background:linear-gradient(#fff3bf 5%,#c8a34b 37%,#fff0a7 48%,#6dddba 74%,#d4f6c7);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 1px #00140c);}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-title-word:nth-of-type(2) {font-style:italic;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-station {border-radius:8px 2px;border-color:#aa914d;box-shadow:inset 0 0 0 2px #d1b26016,0 2px 4px #0009!important;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-station:after {content:'';position:absolute;inset:3px;border:1px solid #c2a35c45;border-radius:6px 1px;pointer-events:none;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-filter.is-active {background:linear-gradient(135deg,#126047,#163e2d);box-shadow:inset 0 0 0 1px #d0b16e55,0 0 8px #4cf4b822;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-player {border-color:#d3ad54;box-shadow:inset 0 0 0 1px #eed28b44;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-play {border:2px solid #c5aa5b;box-shadow:inset 0 0 14px #4dfab922,0 0 10px #45d9a944;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-heading h2 {font-family:Georgia,serif;font-size:29px;font-style:italic;font-weight:900;letter-spacing:-1px;transform:skewX(-5deg);text-shadow:0 2px #4a0808,0 3px #be4a16,0 0 9px #ff7d1644;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-title-word {background:linear-gradient(#fff6d6 5%,#ffdf7e 32%,#ffb13f 55%,#ff6236 80%,#d22e28);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 1px 1px #320008);}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-station {border-color:#e2a15b;border-radius:3px 10px;box-shadow:inset 0 0 0 2px #f0b95512,inset 0 -3px 7px #b83b1c35!important;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-station:after {content:'';position:absolute;inset:3px;border-top:1px solid #ffd7a14d;border-bottom:1px solid #ff8b4a55;border-radius:3px 8px;pointer-events:none;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-filter.is-active {background:linear-gradient(135deg,#a54922,#631a15);box-shadow:inset 0 0 0 1px #ffc46a88,0 0 8px #ff883322;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-player {border-color:#f0b561;box-shadow:inset 0 0 0 1px #ffc87944,0 0 6px #fa5d2422;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-play {border:2px solid #ffe1a1;box-shadow:inset 0 0 15px #ff6b3344,0 0 12px #ff733977;}
+@media(max-width:560px){.colt-radio-panel:is([data-radio-skin=jade-serpent],[data-radio-skin=phoenix-rebirth]) .colt-radio-heading h2{font-size:23px}}
+@media(max-width:350px){.colt-radio-panel:is([data-radio-skin=jade-serpent],[data-radio-skin=phoenix-rebirth]) .colt-radio-heading h2{font-size:20px}}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-title-word {background:none;color:#ffe4a7;text-shadow:0 1px #062d23,0 2px #796132,0 0 5px #000;filter:none;}
+.colt-radio-panel[data-radio-skin=jade-serpent] .colt-radio-title-word:nth-of-type(2){color:#c0ffdd;text-shadow:0 1px #0a4934,0 2px #ac8b41,0 0 5px #000;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-title-word {background:none;color:#ffdf88;text-shadow:0 1px #8e1c0d,0 2px #d04e17,0 0 6px #ff6a3244,0 0 4px #000;filter:none;}
+.colt-radio-panel[data-radio-skin=phoenix-rebirth] .colt-radio-title-word:nth-of-type(2){color:#fff2cc;}
+/* Only the portraits use the emperor edit; the reviewed palace/serpent background stays original. */
+.colt-radio-panel[data-radio-skin=jade-serpent] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background-image:url('assets/radio-skins/illustrated/jade-serpent-emperor-atlas.png')!important;}
+
+
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading h2 {font-family:'Copperplate Gothic Light',Copperplate,Georgia,serif;font-size:25px;font-weight:900;text-transform:uppercase;letter-spacing:.015em;color:#f8dda0;text-shadow:0 1px #714617,0 2px #2c1803,0 3px #b78533,0 0 7px #000;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-title-word:nth-of-type(2) {font-size:.9em;color:#b1fff1;text-shadow:0 1px #0c615c,0 2px #836228,0 0 5px #000;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading .feature-kicker {color:#ffe2a0!important;border-color:#b59148!important;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-station {border:1px solid #ba9b58;border-radius:2px;box-shadow:inset 0 0 0 2px #f7d38316,inset 0 -2px #40ab9f22!important;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-station:after {content:'';position:absolute;inset:3px;border:1px solid #74cabc45;clip-path:polygon(0 0,28% 0,28% 7%,72% 7%,72% 0,100% 0,100% 100%,72% 100%,72% 93%,28% 93%,28% 100%,0 100%);pointer-events:none;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-filter.is-active {background:linear-gradient(135deg,#1d675c,#123b3c);border-color:#e4c574;box-shadow:inset 0 0 0 1px #56c9bd55,0 0 7px #7becd622;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-station-icon {background:#081b1d;color:#ebcb7c;border-color:#6cc8b7;box-shadow:0 0 4px #30bfa41a;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-search-input {border-color:#c1a15c;color:#fff0cf;background:#051518e8;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-player {border:1px solid #e6bd65;box-shadow:inset 0 0 0 2px #b9903c22;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-play {border:2px solid #e7c073;background:radial-gradient(circle,#1e6259,#06151b 75%);box-shadow:inset 0 0 10px #75e9d833,0 0 12px #64dccb66;color:#fff1c4;}
+.colt-radio-panel[data-radio-skin=anubis-tomb] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {border-color:#e3be6b;box-shadow:0 0 0 1px #153c3b,0 0 8px #44cbb933;}
+@media(max-width:560px){.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading h2{font-size:22px}}
+@media(max-width:350px){.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading h2{font-size:18px}}

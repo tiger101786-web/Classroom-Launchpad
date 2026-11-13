@@ -84,7 +84,7 @@ const framedGenres = new Set(['mariachi', 'symphony', 'rockabilly', 'funk', 'tro
      portraits:[...panel.querySelectorAll('.colt-radio-heading-mark,.colt-radio-stream-artwork')].map(e => getComputedStyle(e).backgroundImage),
      sides:[getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span')).backgroundImage,getComputedStyle(panel.querySelector('.colt-radio-skin-backdrop span'),'::before').backgroundImage].join(' ')
     }));
-    const portraitAsset = skin === 'moonwalk' ? 'moonwalk-portrait-v3.png' : ['purplerain','dolly','elvis','cybersamurai'].includes(skin) ? skin+'-portrait.png' : skin+'-atlas';
+    const portraitAsset = skin === 'jade-serpent' ? 'jade-serpent-emperor-atlas' : skin === 'moonwalk' ? 'moonwalk-portrait-v3.png' : ['purplerain','dolly','elvis','cybersamurai'].includes(skin) ? skin+'-portrait.png' : skin+'-atlas';
     assert(art.portraits.every(url => url.includes(portraitAsset)), 'Both portraits use the selected genre Colt');
     assert(art.sides.includes(skin+'-atlas'), 'Decorated side artwork uses the actual atlas');
     const portrait=await panel.locator('.colt-radio-heading-mark').boundingBox();

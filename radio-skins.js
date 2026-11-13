@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261108-cyber-samurai-v15', document.currentScript.src).href;
-  const definitionsURL = new URL('radio-skin-definitions.js?v=20261108-cyber-samurai-v11', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261112-fantasy-trio-v16', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261112-fantasy-trio-v12', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
     if (window.coltRadioSkinDefinitions) return Promise.resolve();
@@ -52,7 +52,7 @@
     grid.id = menu.id + '-choices';
     search.setAttribute('aria-controls', grid.id);
     const searchText = value => value.toLocaleLowerCase('en').replace(/[-–—]/g, ' ').replace(/\s+/g, ' ').trim();
-    const fantasyIds = new Set(['inferno', 'frostfang', 'temple', 'nebula', 'cyberpunk', 'cybersamurai']);
+    const fantasyIds = new Set(['inferno', 'frostfang', 'temple', 'nebula', 'cyberpunk', 'cybersamurai', 'jade-serpent', 'phoenix-rebirth', 'anubis-tomb']);
     let category = 'all', thumbnailsLoaded = false;
     const categoryFor = skin => fantasyIds.has(skin.id) ? 'fantasy' : skin.id === 'original' ? 'classic' : 'music';
     for (const [id, label] of [['all', 'All'], ['music', 'Music'], ['fantasy', 'Fantasy']]) {
