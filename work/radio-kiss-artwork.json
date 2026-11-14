@@ -1,0 +1,27 @@
+{
+  "name": "KISS — Starlight Arena",
+  "generation": "Built-in image generation",
+  "prompts": [
+    {
+      "prompt": "Use case: stylized-concept. Create a premium illustrated KISS-inspired rock concert skin TEXTURE ATLAS for the existing Colt Radio website, square image. NOT a mockup, NO text, NO letters, NO UI controls. Precisely three full-width horizontal regions, touching without gutters. TOP 0%-30%: elaborate black-and-chrome 1970s arena rock stage panorama with silver lightning-shaped trusses, blazing orange stage pyrotechnics at the far left and right, stacked speaker cabinets, rows of warm white marquee bulbs and red spotlights. Center-right is dark smoky stage backdrop leaving space for separately rendered website title; no horse in top region. MIDDLE 30%-47%: a full width horizontal strip of black leather and brushed black steel with narrow decorated chrome side rails occupying outer 6% at left and right, silver studs, chrome star rivets, tiny warm bulbs and red glowing details; center 88% dark unobtrusive embossed leather. BOTTOM 47%-100%: ONE spectacular anthro HORSE Colt rocker bust, three-quarter view facing right, huge wild jet black rockstar mane, complete pointed horse ears and whole head fully inside region with breathing room, confident friendly expression. Distinctive theatrical white face paint with a large sharp black star around the visible eye, black painted horse muzzle, no human nose; recognizable horse anatomy. Wearing a flamboyant KISS-style black leather stage suit with massive sculpted silver shoulder armor, chrome studs and metallic lightning accents. Portrait tightly composed like a professional band album portrait from chest up, no hands or arms, horse face near upper middle of this lower region. Dark amplifier wall backdrop with red rim lighting. Character fills lower region but no clipping ears or armor. Highly detailed polished digital illustration, dimensional reflective chrome, crisp high contrast, rich blacks, silver, white and fiery red-orange. School friendly, no blood, no horror, no tongue sticking out. No other characters, no logos, no wording. The art must reach every edge.",
+      "generation": "Built-in image generation",
+      "source": "C:/Users/Sinister/.codex/generated_images/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/exec-318b2f1c-4e3c-4cd0-ac9d-8ebf8031346e.png",
+      "preview": "Actual Colt Radio JavaScript and CSS, browser-only skin injection; desktop and 390px mobile verified; close works; no production changes."
+    },
+    {
+      "prompt": "Edit the reference into a SINGLE standalone portrait for small website portrait frames. Preserve exactly the KISS-inspired white horse rocker character in the lower part of the reference: black star face paint around visible eye, black muzzle, wild black mane with red rim light, black studded leather and sculpted silver stage shoulder armor. Remove the upper concert panorama and horizontal leather strip entirely. The entire new image is ONE portrait with a continuous dark red-and-black amplifier backdrop reaching every edge. Portrait aspect 4:5. Carefully compose for a narrow oval frame AND a small square frame: BOTH complete ear tips must sit 12% below the top of the image, mane and ears centered well inside central 65% width, entire horse face and muzzle comfortably inside central 70% width. Horse bust from mid chest upward fills frame, visible shoulder armor at bottom, no hands. Match exact original character design, pose, horse anatomy, materials and polished illustrated detail. Keep horse large and legible but with ample breathing room around ears and muzzle. No borders, no oval drawn, no labels, no text, no collage, no black bars.",
+      "method": "Built-in image generation, dedicated portrait with CSS framing; actual desktop and mobile player previews verified.",
+      "productionChanges": false
+    }
+  ],
+  "assets": [
+    {
+      "file": "assets/radio-skins/illustrated/kiss-atlas.png",
+      "sha256": "53ccf99c31f0adeae6ca19a736c3dc09ada9ff20ed8b955d4a5250ac691cb9ce"
+    },
+    {
+      "file": "assets/radio-skins/illustrated/kiss-portrait-fitted.png",
+      "sha256": "47711b068904969a1c4be1bb55ac2cd31e78174df3ca0997d4d89a5373ed4afa"
+    }
+  ]
+}

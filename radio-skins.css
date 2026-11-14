@@ -1828,3 +1828,26 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 .colt-radio-panel[data-radio-skin=anubis-tomb] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork) {border-color:#e3be6b;box-shadow:0 0 0 1px #153c3b,0 0 8px #44cbb933;}
 @media(max-width:560px){.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading h2{font-size:22px}}
 @media(max-width:350px){.colt-radio-panel[data-radio-skin=anubis-tomb] .colt-radio-heading h2{font-size:18px}}
+
+/* Approved KISS Starlight Arena artwork and fitted portraits. */
+
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-heading h2 {font-family:Impact,'Arial Black',sans-serif;font-size:29px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;transform:skewX(-8deg);color:#fff3cf;background:radial-gradient(circle,#fff9db 0 28%,#b27a24 36% 48%,transparent 55%) 0 0/5px 5px,linear-gradient(#fff2cd,#dda54d);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(1px 2px 0 #090909) drop-shadow(0 0 3px #ff8f3966);}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-title-word:nth-of-type(2){font-size:.93em}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-station{border-radius:2px;border:1px solid #bfc2c9;box-shadow:inset 0 0 0 2px #ffffff12,inset 0 -3px #000a!important;}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-station:after{content:'';position:absolute;inset:3px;border-top:2px dotted #b4b6bd88;border-bottom:2px dotted #b4b6bd88;pointer-events:none}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-station-icon{color:#fff1c9;border-color:#a5a8b0;background:linear-gradient(135deg,#37383e,#08080a);border-radius:2px}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-filter.is-active{background:linear-gradient(135deg,#922929,#280a0e);border-color:#ffbd86;}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-play{background:radial-gradient(circle,#b62528,#23080b 75%);border:2px solid #eee5d5;box-shadow:0 0 13px #ff643977,inset 0 0 7px #fa7d5844;color:#fff5da}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-player{border:1px solid #c9cbd2;box-shadow:inset 0 0 0 2px #ffffff18;}
+.colt-radio-panel[data-radio-skin=kiss] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){border-color:#e1e3e8;box-shadow:0 0 0 1px #17171b,0 0 9px #fb49343d}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-note{background:linear-gradient(135deg,#16161bea,#08080ce8);color:#e6e6ec;}
+@media(max-width:560px){.colt-radio-panel[data-radio-skin=kiss] .colt-radio-heading h2{font-size:25px}}
+@media(max-width:350px){.colt-radio-panel[data-radio-skin=kiss] .colt-radio-heading h2{font-size:21px}}
+
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-heading h2{background:none;-webkit-text-fill-color:#f6f0e3;color:#f6f0e3;-webkit-text-stroke:.5px #fff;text-shadow:0 2px 0 #75757b,0 3px 0 #131316,2px 4px 0 #000,0 0 8px #ff8b3a88;filter:none;}
+.colt-radio-panel[data-radio-skin=kiss] .colt-radio-title-word{letter-spacing:.015em;}
+
+/* Dedicated portrait keeps the full ears and muzzle inside both frames. */
+.colt-radio-panel[data-radio-skin=kiss] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background-image:url('assets/radio-skins/illustrated/kiss-portrait-fitted.png');background-size:cover;background-position:center 30%;background-repeat:no-repeat;}
+
+.colt-radio-panel[data-radio-skin=kiss] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background-size:auto 145%;background-position:60% 40%;}

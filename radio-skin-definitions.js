@@ -809,6 +809,28 @@
     "swatch": "linear-gradient(135deg,#d2ab54,#0c151b,#44b7b6)"
   }
 ]);
+  skins.push({
+  "id": "kiss",
+  "label": "KISS — Starlight Arena",
+  "layout": "genre",
+  "title": "words",
+  "assets": [
+    "assets/radio-skins/illustrated/kiss-atlas.png",
+    "assets/radio-skins/illustrated/kiss-portrait-fitted.png"
+  ],
+  "variables": {
+    "--genre-art": "url('assets/radio-skins/illustrated/kiss-atlas.png')",
+    "--genre-base": "#09090b",
+    "--genre-edge": "#b7bdc7",
+    "--genre-accent": "#fff0c8",
+    "--genre-text": "#f7f7fa",
+    "--genre-material": "linear-gradient(135deg,#303139f2,#0a0a0df5 55%,#24252df0)",
+    "--genre-band": "1254 / 168",
+    "--genre-band-position": "30.57%",
+    "--genre-portrait": "195%"
+  },
+  "swatch": "linear-gradient(135deg,#e3e7ef,#111114,#b52121)"
+});
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);
