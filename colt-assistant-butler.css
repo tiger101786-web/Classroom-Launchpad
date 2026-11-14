@@ -80,7 +80,7 @@ body .colt-assistant-panel.butler-skin {border-color:#d8d8d8;box-shadow:0 0 0 1p
 @media(max-width:350px){.butler-skin .colt-assistant-toolbar{padding-inline:45px}}
 
 /* Larger, balanced controls fill the area beneath the bow tie. */
-.butler-skin .colt-assistant-toolbar{display:grid;grid-template-columns:1fr .85fr 1.45fr;gap:8px;padding-inline:80px}
+.butler-skin .colt-assistant-toolbar{display:grid;grid-template-columns:1fr .85fr 1.45fr;gap:8px;padding-inline:80px;padding-top:17px}
 .butler-skin .colt-assistant-tool{width:100%;min-height:44px;padding:8px 9px;font-size:14px;border-radius:7px}
 .butler-skin .colt-assistant-tool.is-read{margin-left:0}
 .butler-skin .colt-assistant-toolbar:has(.is-read[hidden]){grid-template-columns:1fr 1fr}
