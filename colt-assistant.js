@@ -543,7 +543,7 @@
     launcherMark.setAttribute("aria-hidden", "true");
     launcher.append(launcherMark, buildElement("span", "", knowledge.assistantName));
 
-    const panel = buildElement("section", "colt-assistant-panel");
+    const panel = buildElement("section", "colt-assistant-panel butler-skin");
     panel.hidden = true;
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "false");
@@ -554,7 +554,7 @@
     const headingMark = buildElement("span", "colt-assistant-heading-mark");
     headingMark.setAttribute("aria-hidden", "true");
     const headingHorse = document.createElement("img");
-    headingHorse.dataset.src = "assets/colt-radio-header-portrait.png?v=20260905-guided-ai-optimized";
+    headingHorse.dataset.src = "assets/colt-assistant-butler-portrait.png?v=20261113-butler-v1";
     headingHorse.alt = "";
     headingMark.append(headingHorse);
     const titleWrap = buildElement("div");
@@ -618,7 +618,18 @@
     input.maxLength = 600;
     input.autocomplete = "off";
     input.placeholder = "What are you learning?";
-    const send = buildElement("button", "primary-btn", "Send");
+    const send = buildElement("button", "primary-btn");
+    const sendBell = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    sendBell.setAttribute("class", "butler-send-bell");
+    sendBell.setAttribute("viewBox", "0 0 24 24");
+    sendBell.setAttribute("fill", "none");
+    sendBell.setAttribute("stroke", "currentColor");
+    sendBell.setAttribute("stroke-width", "1.7");
+    sendBell.setAttribute("aria-hidden", "true");
+    const bellPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    bellPath.setAttribute("d", "M3 19h18M5 16a7 7 0 0 1 14 0ZM12 9V6M9 6h6");
+    sendBell.append(bellPath);
+    send.append(sendBell, buildElement("span", "butler-send-label", "Send"));
     send.type = "submit";
     form.append(label, input, send);
     footer.append(clear, form);
@@ -910,7 +921,7 @@
       input.placeholder = mode === "guided"
         ? "What are you learning?"
         : "Ask a classroom question…";
-      send.textContent = "Send";
+      send.querySelector(".butler-send-label").textContent = "Send";
       addWelcome();
       updateBackButton();
       input.focus();

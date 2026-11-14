@@ -1,0 +1,90 @@
+{
+  "artifacts": [
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/colt-assistant-illustrated-butler-20261113/butler-frame-launchpad.png",
+      "saved": "assets/colt-assistant-butler-frame.png",
+      "sha256": "2c5ee470c7a1c654d50088490e3519f389413a8624ee05f8ad1f44e2953f1f52"
+    },
+    {
+      "source": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/colt-assistant-illustrated-butler-20261113/butler-colt-portrait.png",
+      "saved": "assets/colt-assistant-butler-portrait.png",
+      "sha256": "532f591746033c54f689639395e6cd068ad1f99bccedb430b9b3b1926b8414d6"
+    }
+  ],
+  "productionScreenshot": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/colt-assistant-butler-production-20261113/butler-production.png",
+  "previewScreenshot": "C:/Users/Sinister/.codex/visualizations/2026/11/03/01a19f35-f5fe-7a53-be7e-17a3b74d1da1/colt-assistant-illustrated-butler-20261113/launchpad-butler-player.png",
+  "approvedStylesheet": "colt-assistant-butler.css",
+  "stylesheetMatchesPreview": true,
+  "layout": [
+    {
+      "selector": ".colt-assistant-panel",
+      "x": 908,
+      "y": 30,
+      "width": 440,
+      "height": 720
+    },
+    {
+      "selector": ".colt-assistant-header",
+      "x": 909,
+      "y": 31,
+      "width": 438,
+      "height": 184
+    },
+    {
+      "selector": ".colt-assistant-toolbar",
+      "x": 909,
+      "y": 215,
+      "width": 438,
+      "height": 40
+    },
+    {
+      "selector": ".colt-assistant-modes",
+      "x": 909,
+      "y": 255,
+      "width": 438,
+      "height": 56
+    },
+    {
+      "selector": ".colt-assistant-conversation",
+      "x": 943,
+      "y": 311,
+      "width": 370,
+      "height": 273
+    },
+    {
+      "selector": ".colt-assistant-footer",
+      "x": 909,
+      "y": 584,
+      "width": 438,
+      "height": 165
+    },
+    {
+      "selector": ".colt-assistant-form",
+      "x": 954,
+      "y": 620,
+      "width": 348,
+      "height": 45
+    },
+    {
+      "selector": ".colt-assistant-input",
+      "x": 954,
+      "y": 620,
+      "width": 263,
+      "height": 45
+    }
+  ],
+  "finalPalette": {
+    "burgundy": "#7b0b31",
+    "darkBurgundy": "#560720",
+    "black": "#000000",
+    "white": "#ffffff",
+    "silver": "#d8d8d8"
+  },
+  "provenance": {
+    "tool": "built-in ImageGen",
+    "frameCreation": "Use case: stylized-concept. Create an elaborate FUN ILLUSTRATED RECTANGULAR GAME-UI SKIN for a Colt Butler chat player, matching the richness of a highly decorated Colt Radio skin. This is NOT a minimalist app, not a text mockup. Output decorative background/frame artwork ONLY, no text, no labels, no actual controls. Portrait aspect ratio EXACTLY11:18, target1056x1728, corresponding to440x720 player. All artwork inside the RECTANGLE, no character or ornaments sticking outside. Theme: playful luxury BLACK and CRIMSON HORSE BUTLER, silver service trays, red silk bow tie, white gloves, tailored black satin lapels and red velvet. TOP HEADER zone y0-14.5%: theatrical red velvet swags, elegant black tufted leather, sculpted silver serving-tray rim; EMPTY DARK space at x20-72% for actual live branding, EMPTY dark oval medallion at x3-20% for separate horse portrait to be layered later. Small polished silver SERVICE BELL at x87%,y11%, little red tassels at far corners. A beautifully dimensional red silk bowtie ornament centered on divider at y14%, narrow enough not to obstruct branding. MAIN y15%-87%: very dark rich charcoal-black pinstriped fabric with subtle red velvet depth. Exquisite sculpted silver tray outer frame along x0-5% and95-100%; red satin piping and small silver rivets. Tuxedo lapels fold around upper outside sides. TWO SHORT BENT BLACK TUXEDO SLEEVES descend only from header corners to y25-30%; white cuff and WHITE GLOVED HAND on EACH outer edge, gently gripping frame at y27%, only within x0-7% and93-100%. NO long arms, no sleeves below y32%, no hands anywhere else. Keep center x8-92% COMPLETELY CLEAR dark material for live controls/messages. LOWER FOOTER y87-100%: silver platter edge, small white shirt pleat ornament in lower corners, narrow crimson waistcoat strip, tiny tasteful horse-shield/silver bowtie crest centered at bottom y98%, center area otherwise dark clear for actual input controls. Highly dimensional premium game illustration, rich silver reflections, polished crimson edges, tailored fabric textures, playful appealing butler service details. No full horse figure, NO horse face in this background (portrait inserted separately), no giant mascot outside the panel, no words, no buttons, no chat cards, no beige paper or generic clean app style. Make an ornate illustrated butler SKIN with strong personality. Full rectangular edge-to-edge artwork, opaque backdrop.",
+    "noArmsEdit": "Use case: precise-object-edit. Revise this illustrated rectangular Colt Butler player skin. REMOVE BOTH HANDS AND BOTH ARMS/SLEEVES ENTIRELY from the upper left and right sides. NO white gloves, no human anatomy, no wrists, no cuffs, no limbs, no sleeves hanging along sides. Replace those regions with uninterrupted elegant polished SILVER SERVING-TRAY frame rails and dark crimson velvet inset, matching the surrounding ornate frame. The small folded black tuxedo LAPEL ornament just below each top corner may remain as abstract tailoring decoration, but do not look like shoulders or arms. Preserve the rich silver/red rectangular frame, top red velvet curtains, empty dark oval portrait setting at top left, top dark center branding space, service bell at top right, silk red bowtie divider, pinstriped black main interior, lower red waistcoat/white shirt accents and small bottom shield. Keep dimensions and layout unchanged. Opaque rectangular edge-to-edge skin background, no external character silhouette. Center remains empty dark fabric for live controls. No text or UI elements. This must read as a playful premium illustrated BUTLER-THEMED PLAYER FRAME rather than a person holding a board. Absolutely NO HANDS and NO ARMS anywhere.",
+    "portrait": "Use case: identity-preserve, transparent mascot portrait asset. Use reference ONLY for identity of the BLACK horse with glossy RED/black swept mane, white forehead blaze, warm red eyes, black tuxedo with red piping and RED BOW TIE. Generate ONLY an elegant Colt BUTLER head-and-shoulders portrait, no UI frame/tablet. Friendly dignified expression, head angled slightly toward LEFT to look into a chat window, full natural equine muzzle, no human face. Immaculate black satin tuxedo lapels with fine red piping, white pleated dress shirt, red silk bow tie, white pocket square, small silver lapel pin. Include upper chest/shoulders only, no arms or hands, no props or tray. Crisp premium glossy illustrated mascot finish, detailed luxurious tailoring. Full ears and entire red mane inside image with breathing margin, shoulders taper to lower chest crop. TRUE transparent background. Portrait4:5 or square, character centered. NO giant body, no arms, no text, no buttons, no frames, no panels, no background, no glow field. This portrait will be used as a small circular header avatar and subtle illustration INSIDE an existing 440x720 chat panel; it must remain recognizable and readable at small sizes.",
+    "launchpadPalette": "Use case: precise-object-edit. Recolor this EXACT illustrated Butler player frame to match Classroom Launchpad's branding. Preserve ALL layout, ornament shapes, top-left oval, bell, bowtie, curtains, rails, dark center, bottom crest, source dimensions and geometry unchanged. Replace the bright cherry/scarlet/pink RED cloth, curtains, bowties, piping and waistcoat with DEEP RICH BURGUNDY / MAROON using dominant hex #7b0b31 and shadow #560720, highlight #a81747. Keep deep black background/black satin, and polished neutral SILVER/WHITE metal highlights (#d8d8d8/#ffffff) with charcoal shadows; avoid rosy gold, cream or gold tones. This is a BLACK, BURGUNDY, WHITE and SILVER website theme, NOT candy pink/neon red. Beautiful dimensional sheen on burgundy silk and velvet. No new objects, no hands, no arms, no text, no new controls, no character in oval. Maintain same full rectangle. Change COLORS ONLY, preserve all physical composition."
+  }
+}

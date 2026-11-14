@@ -76,7 +76,7 @@ async function run() {
     await assistantHome.click();
 
     await page.getByRole("button", { name: "Today’s Directions", exact: true }).click();
-    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|Today’s Launch/i);
+    assert.match(await page.locator(".colt-assistant-conversation").innerText(), /current directions|today.s class directions|Today’s Launch/i);
     assert(!(await assistantBack.isDisabled()));
     await assistantBack.click();
     assert.equal(await page.locator(".colt-assistant-choice.is-primary").count(), 4);

@@ -105,8 +105,8 @@ async function run() {
       footerVisible: element.querySelector(".colt-assistant-footer").getBoundingClientRect().bottom <= element.getBoundingClientRect().bottom + 1
     }));
     assert.equal(visual.width, 440, JSON.stringify(visual));
-    assert.equal(visual.background, "rgb(5, 5, 5)", JSON.stringify(visual));
-    assert.match(visual.portrait, /colt-radio-header-portrait\.png/, JSON.stringify(visual));
+    assert.equal(visual.background, "rgb(8, 5, 8)", JSON.stringify(visual));
+    assert.match(visual.portrait, /colt-assistant-butler-portrait\.png/, JSON.stringify(visual));
     assert.equal(visual.modes, 2, JSON.stringify(visual));
     assert.equal(visual.activeMode, "Guided AI", JSON.stringify(visual));
     assert.equal(visual.footerVisible, true, JSON.stringify(visual));
@@ -165,7 +165,7 @@ async function run() {
     });
     assert(mobileLayout.left >= 0 && mobileLayout.right <= mobileLayout.viewportWidth, JSON.stringify(mobileLayout));
     assert(mobileLayout.footerBottom <= mobileLayout.panelBottom + 1, JSON.stringify(mobileLayout));
-    console.log("Colt Assistant crimson UI verification passed.");
+    console.log("Colt Assistant butler UI verification passed.");
   } finally {
     await browser.close();
     child.kill();
