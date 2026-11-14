@@ -41,13 +41,13 @@ body .colt-assistant-panel.butler-skin[hidden] {display:none;}
 .butler-skin .colt-assistant-footer{padding-bottom:60px}
 /* Fit all live content inside the actual illustrated tray, below the lapels. */
 body .colt-assistant-panel.butler-skin {border-color:#d8d8d8;box-shadow:0 0 0 1px #560720,0 0 18px #7b0b3144,0 24px 65px #000b;}
-.butler-skin .colt-assistant-header {height:184px;min-height:184px;flex-basis:184px;}
+.butler-skin .colt-assistant-header {height:132px;min-height:132px;flex-basis:132px;}
 .butler-skin .colt-assistant-heading>div {left:108px;right:100px;top:35px;text-align:center;}
 .butler-skin .colt-assistant-heading .feature-kicker {margin:0 auto 7px;padding:3px 5px;background:#080708ed!important;border-color:#7b0b31;color:#fff!important;font-size:7px;letter-spacing:.9px;}
 .butler-skin .colt-assistant-heading h2 {text-align:center;color:#fff;font-size:25px;text-shadow:0 1px #560720,0 2px #000,0 0 6px #000;}
 .butler-skin .colt-assistant-header-actions {right:18px;top:9px;}
 .butler-skin .colt-assistant-close {border-color:#b6b6b6;background:linear-gradient(135deg,#333,#080808 65%);box-shadow:inset 0 1px #fff3;color:#fff;}
-.butler-skin .colt-assistant-toolbar {padding-inline:34px;}
+.butler-skin .colt-assistant-toolbar {padding-inline:78px;}
 .butler-skin .colt-assistant-tool {border-color:#929292;background:linear-gradient(135deg,#29272a,#080708 75%);box-shadow:inset 0 1px #fff3;color:#fff;}
 .butler-skin .colt-assistant-modes {padding-inline:34px;}
 .butler-skin .colt-assistant-mode {border-color:#929292;background:linear-gradient(135deg,#282629,#080708 70%);color:#fff;box-shadow:inset 0 0 0 2px #090709,inset 0 3px 4px #ffffff18;}
@@ -62,8 +62,8 @@ body .colt-assistant-panel.butler-skin {border-color:#d8d8d8;box-shadow:0 0 0 1p
 .butler-skin .colt-assistant-input {border-color:#929292;background:#121214;box-shadow:inset 0 1px 4px #000;color:#fff;}
 .butler-skin .colt-assistant-input::placeholder {color:#bebec2;}
 .butler-skin .colt-assistant-form .primary-btn {border-color:#d8d8d8;background:linear-gradient(135deg,#a81747,#7b0b31 55%,#560720);box-shadow:inset 0 0 0 2px #560720,inset 0 2px 3px #ffffff55,0 3px 9px #0007;color:#fff;}
-@media(max-width:420px){.butler-skin .colt-assistant-heading>div{left:98px;right:82px;top:36px}.butler-skin .colt-assistant-heading h2{font-size:21px}.butler-skin .colt-assistant-heading .feature-kicker{font-size:6px;letter-spacing:.6px}.butler-skin .colt-assistant-toolbar,.butler-skin .colt-assistant-modes,.butler-skin .colt-assistant-footer{padding-inline:30px}.butler-skin .colt-assistant-conversation{margin-inline:30px}.butler-skin .colt-assistant-header{height:184px;min-height:184px;flex-basis:184px}}
-@media(max-height:600px){.butler-skin .colt-assistant-header{height:140px;min-height:140px;flex-basis:140px}.butler-skin .colt-assistant-footer{padding-bottom:44px}.butler-skin .colt-assistant-heading>div{top:27px}}
+@media(max-width:420px){.butler-skin .colt-assistant-heading>div{left:98px;right:82px;top:36px}.butler-skin .colt-assistant-heading h2{font-size:21px}.butler-skin .colt-assistant-heading .feature-kicker{font-size:6px;letter-spacing:.6px}.butler-skin .colt-assistant-toolbar,.butler-skin .colt-assistant-modes,.butler-skin .colt-assistant-footer{padding-inline:30px}.butler-skin .colt-assistant-conversation{margin-inline:30px}.butler-skin .colt-assistant-header{height:132px;min-height:132px;flex-basis:132px}}
+@media(max-height:600px){.butler-skin .colt-assistant-header{height:132px;min-height:132px;flex-basis:132px}.butler-skin .colt-assistant-footer{padding-bottom:44px}.butler-skin .colt-assistant-heading>div{top:27px}}
 .butler-skin .colt-assistant-heading>div {left:104px;right:104px;}
 @media(max-width:420px){.butler-skin .colt-assistant-heading>div{left:95px;right:95px}}
 @media(max-width:350px){.butler-skin .colt-assistant-heading>div{left:80px;right:80px}.butler-skin .colt-assistant-heading h2{font-size:18px}.butler-skin .colt-assistant-heading .feature-kicker{font-size:5.5px;letter-spacing:.4px}.butler-skin .colt-assistant-heading-mark{left:13px;width:64px}}
@@ -74,3 +74,17 @@ body .colt-assistant-panel.butler-skin {border-color:#d8d8d8;box-shadow:0 0 0 1p
 @media(max-width:420px){.butler-skin .colt-assistant-footer{padding-inline:38px;padding-bottom:84px}}
 @media(max-width:350px){.butler-skin .colt-assistant-footer{padding-inline:33px}.butler-skin .colt-assistant-form{grid-template-columns:minmax(0,1fr) 66px;gap:7px}.butler-skin .colt-assistant-input{font-size:12px;padding-inline:8px}.butler-skin .colt-assistant-form .primary-btn{font-size:11px;padding:6px;gap:4px}.butler-skin .butler-send-bell{width:14px;height:14px}}
 @media(max-height:600px){.butler-skin .colt-assistant-footer{padding-bottom:calc(11.7dvh - 3px)}}
+
+/* Keep the compact navigation in the clear space between the illustrated lapels. */
+@media(max-width:420px){.butler-skin .colt-assistant-toolbar{padding-inline:68px}}
+@media(max-width:350px){.butler-skin .colt-assistant-toolbar{padding-inline:45px}}
+
+/* Larger, balanced controls fill the area beneath the bow tie. */
+.butler-skin .colt-assistant-toolbar{display:grid;grid-template-columns:1fr .85fr 1.45fr;gap:8px;padding-inline:80px}
+.butler-skin .colt-assistant-tool{width:100%;min-height:44px;padding:8px 9px;font-size:14px;border-radius:7px}
+.butler-skin .colt-assistant-tool.is-read{margin-left:0}
+.butler-skin .colt-assistant-toolbar:has(.is-read[hidden]){grid-template-columns:1fr 1fr}
+.butler-skin .colt-assistant-mode{min-height:52px;padding:11px 8px;font-size:14px}
+@media(max-width:420px){.butler-skin .colt-assistant-toolbar{padding-inline:68px}.butler-skin .colt-assistant-tool{font-size:13px}.butler-skin .colt-assistant-mode{font-size:13px}}
+@media(max-width:350px){.butler-skin .colt-assistant-toolbar{padding-inline:55px;gap:6px}.butler-skin .colt-assistant-tool{font-size:12px;padding-inline:6px}.butler-skin .colt-assistant-mode{font-size:12px;padding-inline:5px}}
+@media(max-height:600px){.butler-skin .colt-assistant-tool{min-height:38px}.butler-skin .colt-assistant-mode{min-height:44px;padding-block:8px}}

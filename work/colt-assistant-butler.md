@@ -8,7 +8,7 @@ Production assets (copied byte-for-byte from the approved preview):
 
 The approved CSS is in colt-assistant-butler.css. index.html loads it and refreshes the assistant script version. colt-assistant.js adds the skin class, uses the lazy-loaded Butler portrait, and builds the decorative Send bell with safe DOM APIs. Mode switching resets only the Send label, preserving the bell. Existing message content, AI requests, gradual text, classroom help, privacy behavior, preferences, and launcher remain unchanged. Pop-out copies the stylesheet through the existing mechanism.
 
-Artwork prompts, hashes, exact source paths, and approved layout coordinates are recorded in colt-assistant-butler-artwork.json. Built-in ImageGen created the art; the saved PNGs have no additional resizing or recompression. The stylesheet matches the approved preview with only production asset URLs and its comment changed.
+Artwork prompts, hashes, exact source paths, and approved layout coordinates are recorded in colt-assistant-butler-artwork.json. Built-in ImageGen created the art; the saved PNGs have no additional resizing or recompression. The stylesheet uses the approved artwork and corrected composer fit. The top reserved height is now 132px. Navigation uses three balanced 44px-high buttons, and the two mode tabs are 52px high, filling the space below the bow tie while preserving the composer clearance. The navigation is inset 80px on desktop (68px/55px at smaller widths) to keep Home and Read Aloud off the lapel artwork.
 
 Verification passed:
 - work/verify-colt-assistant.js
