@@ -119,3 +119,8 @@
  content:'';height:30px;flex-basis:25px;
  background:var(--talk-portrait) center/contain no-repeat;
 }
+
+/* Compact Black Cat chat matches the approved velvet bed and brass nameplate. */
+.pet-talk[data-pet=blackcat]{--talk-paper:#241b28;--talk-ink:#fff1dc;--talk-edge:#b68c58;--talk-field:#17131e;--talk-send:#7b183a;--talk-send-ink:#fff5e5;--talk-header:linear-gradient(120deg,#5b2941,#251e2c);border-radius:17px 17px 12px 12px;box-shadow:inset 0 0 0 2px #6c304866,0 5px 0 #261321,0 9px 24px #0005}
+.pet-talk[data-pet=blackcat] header{border-radius:12px 12px 0 0}
+.pet-talk[data-pet=blackcat] button[type=submit]{border-radius:11px 11px 8px 8px}

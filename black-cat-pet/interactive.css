@@ -1,0 +1,10 @@
+.blackcat-companion{position:fixed;width:165px;max-width:calc(100vw - 16px);z-index:90;user-select:none;--blackcat-ratio:1280/1680}
+.blackcat-companion[hidden]{display:none!important}.blackcat-companion[data-size=small]{width:135px}.blackcat-companion[data-size=large]{width:195px}.blackcat-companion[data-size=extra-large]{width:225px}
+.blackcat-companion .pet-button{display:block;width:100%;height:auto;aspect-ratio:var(--blackcat-ratio);padding:0;margin:0;background:none;border:0;box-shadow:none;cursor:grab;touch-action:none}
+.blackcat-companion .pet-button>svg{display:block;width:100%;height:auto;overflow:visible}.blackcat-companion .blackcat-fallback{display:block}.blackcat-companion[data-ready=true] .blackcat-fallback{display:none}
+.blackcat-companion .pet-button:focus-visible{outline:2px solid #e8c27d;outline-offset:4px;border-radius:12px}.blackcat-companion .blackcat-speech[hidden],.pet-studio .blackcat-speech{display:none!important}
+.blackcat-companion #blackcat-pet-name{paint-order:stroke;stroke:#1c1216;stroke-width:1px}
+@media(max-width:1119px){.blackcat-companion[data-size]{width:74px}}
+.pet-studio #pet-stage .blackcat-companion{position:relative!important;inset:auto!important;transform:none!important;width:auto!important;height:100%!important;max-height:100%;aspect-ratio:var(--blackcat-ratio);max-width:100%!important;margin:0!important;z-index:1!important}
+.pet-studio #pet-stage .blackcat-companion .pet-button{width:100%!important;height:100%!important;aspect-ratio:var(--blackcat-ratio)!important;pointer-events:none}
+.pet-studio #pet-stage .blackcat-companion .pet-button>svg{width:100%;height:100%;object-fit:contain}

@@ -1,0 +1,62 @@
+{
+  "generation": "Built-in image generation",
+  "artPrompt": "Use case: stylized-concept. Production-ready transparent desktop pet artwork, ONE adorable BLACK CAT full body sitting upright, facing straight forward in a balanced symmetric animation-ready pose. Premium soft realistic 3D collectible animal style, detailed silky jet-black fur with charcoal highlights so every feature remains readable, bright glossy amber-gold eyes, tiny dark pink-black triangle nose, small closed friendly cat mouth, delicate silver whiskers, triangular upright ears with muted mauve inner ears. Rounded head and cuddly natural feline proportions, short fluffy chest, two front paws hanging straight down in front and separated by a small visible gap, rounded hind paws visible to each side. A long fluffy black tail curls outward on viewer right, its tip clearly separated from body, entire tail visible. Keep eyes open and level, no head tilt. Entire character including ears, tail and paws comfortably inside image with transparent padding on every side. Cat occupies 85% of square canvas height from ear tips to paws, centered. No clothing, no collar, no accessories, no platform, no nameplate, no scenery, no shadows outside silhouette, no text, no watermark. Genuinely transparent background. This exact artwork will be animated as a website pet; clean fur silhouette and full uncropped body are essential.",
+  "underlayPrompt": "Create an animation backing layer for this exact black cat artwork. Keep exact canvas dimensions, alignment, pose, ears, nose, whiskers, tail, hind paws, lighting, black fur and transparent silhouette. Make only these localized changes: (1) remove both gold eyes and fill their eye areas naturally with matching continuous black face fur, no sockets or eyelids, (2) remove the little mouth below the nose and fill with matching muzzle fur, keep nose, (3) remove the TWO FRONT FORELEGS AND FRONT PAWS (the two central straight legs extending from chest to bottom), fill their space with the natural uninterrupted black furry belly behind them. Preserve the two rounded HIND paws at outer left and right. This is a hidden underlay only; do not add anything, do not change any other feature or resize character. Genuine transparent background preserved. Single same-size square image.",
+  "artSource": "exec-05d1418b-e2e8-455f-a0de-e11e700667d5.png",
+  "underlaySource": "exec-8162866f-959e-41aa-9aa1-4d748ccfd080.png",
+  "note": "Original character artwork unchanged. Hidden underlay is used only for eye/foreleg/tail masks. The muzzle is always the original artwork and is never erased or replaced. Complete contour-cut forelegs use the exact normalized Saber-tooth lift; happy eyes use Robo Colt-style arches.",
+  "bodyUnderlaySource": "exec-94c83439-7081-4124-8100-180b35ad0783.png",
+  "bodyUnderlayPrompt": "Precise animation underlay edit. Use the supplied transparent black cat backing image. Remove ONLY the entire curled tail on the viewer RIGHT of the cat, replacing the removed tail with true transparency. Preserve the seated cat body, both rear paws, ears, nose, whiskers, missing-eye/missing-mouth fur patches, missing front-leg backing, pose, lighting, alignment and exact square canvas size unchanged. At the tail attachment keep the natural complete rounded right haunch behind it, do not remove any right rear paw. Do not add eyes, mouth or front legs. Do not rescale, crop, shift or redesign anything. This is a hidden layer to animate the original tail separately. Transparent RGBA background.",
+  "bellyBackingSource": "exec-3df970e7-5ff1-4820-a4a8-1a13190702a0.png",
+  "bellyBackingPrompt": "Precise correction to the supplied transparent black cat ANIMATION BACKING layer, not a new cat. This image already has no eyes, no mouth, no front forelegs, and no tail. Preserve its exact alignment, canvas size, head, ears, whiskers, fur, body and the TWO OUTER rear paws. Correct ONLY the lower-center belly between the two rear paws: the current rectangular black furry stump extends down to ground level where front paws used to be. Remove that central low stump. Make the belly end in a natural shallow rounded curve ABOVE the rear paws, around 85 percent of the image height, so there is a transparent gap below the belly and BETWEEN the left and right rear paws. Preserve both rounded rear paws at ground level fully and unchanged. There must be no central front leg, no center foot, no hanging rectangular fur block. Do not shift or resize the cat. Do not add eyes, mouth, tail or any other objects. Exact same genuine transparent RGBA background.",
+  "bellyBackingFile": "black-cat-body-underlay-v4.png",
+  "forelegs": {
+    "file": "black-cat-forelegs-v5.png",
+    "source": "exec-91b8f244-da6a-44d8-a075-7a8e51c37382.png",
+    "generation": "Built-in image generation",
+    "prompt": "Create two isolated animation cutouts from the supplied black cat, with EXACT same square canvas, scale and pixel alignment. Keep ONLY the two FRONT FORELEGS and their rounded front paws in their original positions in the lower middle. Remove head, torso, hind legs/paws and tail to transparency. Left foreleg occupies approximately normalized x .335 to .475, y .555 to .98; right foreleg x .48 to .635, y .555 to .98. Preserve original leg length, paw size, toes, black fur, soft charcoal highlights and pose. Make the inner and lower sides of each foreleg clean continuous detailed BLACK FUR, replacing any flat pitch-black shadow wedge or cutout artifact around the ankles or behind the paw with natural softly lit fur. No solid black polygons, black outlines, empty black patches or sharp seams. Smooth furry cutout edges. The image must remain a full square transparent canvas with these two legs at the same original coordinates, NOT centered as a new composition, NOT enlarged or rearranged. No other objects or text. Transparent RGBA.",
+    "note": "Aligned transparent front-leg cutouts with natural charcoal fur, blended into original upper-leg art. Original whole-cat artwork remains unchanged."
+  },
+  "catFurniture": {
+    "platform": {
+      "file": "cat-platform.png",
+      "source": "exec-34d22b2e-d41e-44e4-9f29-72721a7e3861.png",
+      "prompt": "Use case: stylized-concept. Production-ready transparent PNG base/platform for a realistic fluffy BLACK CAT desktop pet. One elegant low, wide oval cat bed pedestal, front view with slight top view, landscape aspect 3:1. Dark charcoal carved walnut and warm aged brass trim, plush deep burgundy-black velvet cushion on top where a sitting cat's paws will rest, tiny embossed cat paw prints around the front curved rim, small crescent moon medallion at front center. A small tasteful burgundy ball of yarn tucked on far left edge and a short coiled sisal scratching-rope accent on far right. Premium softly lit realistic collectible prop, detailed wood grain and fabric, warm amber highlights matching gold cat eyes, rich black/charcoal color scheme. Flat low profile; upper cushion fills top half, sturdy decorative front rim in lower half. Entire platform visible with transparent margins, no cat, no animals, no nameplate, no words, no lettering, no scenery or floor, no cast shadow outside silhouette. True transparent RGBA background. This will sit behind the exact cat artwork, not be a concept mockup."
+    },
+    "nameplate": {
+      "file": "cat-nameplate.png",
+      "source": "exec-b94f964a-0cd5-4115-8523-1ae019f1b7ca.png",
+      "prompt": "Use case: stylized-concept. Production-ready transparent nameplate artwork for a black cat desktop pet. One horizontal decorative plaque, landscape aspect ratio 4:1. Dark charcoal polished wood with antique brass and fine silver trim, subtly cat-ear-shaped top corners, one small embossed gold paw print at each end. Small burgundy velvet inset detail around the outer frame. Large absolutely blank dark central inset panel occupying middle 65 percent width for a separately rendered pet name. Premium softly lit realistic collectible craftsmanship, rich detailed material, warm amber reflections, elegant friendly feline theme matching a black cat with golden eyes. Front facing, symmetrical, full complete plaque with transparent padding on all sides. No lettering, no words, no cat portrait, no character, no scenery, no floor, no shadows outside silhouette. True transparent RGBA background."
+    },
+    "generation": "Built-in image generation; full-resolution transparent assets copied unchanged."
+  },
+  "productionAssets": [
+    {
+      "file": "black-cat.png",
+      "sha256": "fbc21d08928d656a1c558ac2658dc24fa05081ea0d8492c80e7faf30004cf214",
+      "bytes": 1702132
+    },
+    {
+      "file": "black-cat-body-underlay-v4.png",
+      "sha256": "b06ec3b8208b9f7200134e6142aca333d9edae73ce54c657edf0c4dfc2d8e1eb",
+      "bytes": 1145549
+    },
+    {
+      "file": "black-cat-forelegs-v5.png",
+      "sha256": "49b7dc5b167a7ac647413527d6534fb41bc455972b97e9c248b0603e6d820598",
+      "bytes": 420194
+    },
+    {
+      "file": "cat-platform.png",
+      "sha256": "cb03284d676c8028d8e25ef85c00ea8ed4781bd8f32c11f09edce6cffa7be718",
+      "bytes": 2452231
+    },
+    {
+      "file": "cat-nameplate.png",
+      "sha256": "aece70f87f1ce0be741210e562ed574b3daf449a62334de4268cf69152e54946",
+      "bytes": 2521425
+    }
+  ],
+  "approvedPreviewVersion": 13,
+  "notes": "Production artwork copied byte-for-byte from the approved test page. SVG IDs and image URLs are namespaced; original reviewed rig geometry and facial effects are retained."
+}

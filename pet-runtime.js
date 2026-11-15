@@ -1,7 +1,7 @@
 /* Keep unselected pet renderers and styles out of the initial page load. */
 (() => {
  'use strict';
- const factories={colt:'createRoboColt',gummy:'createGummyBear',eagle:'createEaglePet',labubu:'createLabubuPet',roblox:'createRobloxPet',highland:'createHighlandPet',saber:'createSaberPet',nugget:'createNuggetPet'};
+ const factories={blackcat:'createBlackCatPet',colt:'createRoboColt',gummy:'createGummyBear',eagle:'createEaglePet',labubu:'createLabubuPet',roblox:'createRobloxPet',highland:'createHighlandPet',saber:'createSaberPet',nugget:'createNuggetPet'};
  const loads=new Map();
  function load(marker){
   const script=marker.dataset.petRuntimeScript;

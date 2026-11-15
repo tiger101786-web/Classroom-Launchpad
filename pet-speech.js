@@ -1,6 +1,7 @@
 /* One viewport-positioned speech surface; each pet retains its own speech timing. */
 (()=>{'use strict';
 const types={
+ 'blackcat-companion':['blackcat','BLACK CAT','A new cozy perch! I approve of this spot.'],
  'robo-companion':['colt','ROBO-COLT','New spot. Same Colt energy!'],
  'dumpling-companion':['squishy','SQUISHY DUMPLING','New spot, same squish! This basket feels right at home.'],
  'gummy-companion':['gummy','GUMMY BEAR','New spot! Just letting my jelly settle.'],
@@ -87,7 +88,7 @@ function show(host,text,source=null){
  }
  place();
 }
-function register(host){if(seen.has(host)||!info(host))return;const source=host.querySelector('.dumpling-speech,.gb-speech,.eagle-speech,.labubu-speech,.roblox-speech,.highland-speech,.saber-speech,.nugget-speech');if(!source)return;seen.add(host);source.classList.add('pet-native-speech');
+function register(host){if(seen.has(host)||!info(host))return;const source=host.querySelector('.dumpling-speech,.gb-speech,.eagle-speech,.labubu-speech,.roblox-speech,.highland-speech,.saber-speech,.nugget-speech,.blackcat-speech');if(!source)return;seen.add(host);source.classList.add('pet-native-speech');
  const sync=()=>{if(source.hidden){if(active?.source===source)hide();return}const text=(source.querySelector('.dumpling-speech-message,.gb-speech-message,.speech-message')||source).textContent.trim();show(host,text,source)};
  new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['hidden'],childList:true,characterData:true,subtree:true});sync();
 }
