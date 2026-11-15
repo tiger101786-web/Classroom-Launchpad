@@ -1,6 +1,7 @@
 /* Cat rig: original-art contour cutouts and the exact normalized Saber-tooth foreleg lift. */
-window.createLaunchpadBlackCatRig = function (canvas, art, clean, forelegsImage) {
+window.createLaunchpadBlackCatRig = function (canvas, art, clean, forelegsImage, skin) {
   'use strict';
+  skin=skin||{};
   const svg = canvas.closest('svg'), ns = 'http://www.w3.org/2000/svg';
   const node = (tag, attrs = {}, parent) => {
     const element = document.createElementNS(ns, tag);
@@ -27,7 +28,7 @@ window.createLaunchpadBlackCatRig = function (canvas, art, clean, forelegsImage)
   for (let i = 0; i < 2; i++) {
     const opening = node('g', {'clip-path':'url(#blackcat-eye-aperture-'+i+')'}, face);
     const original = node('g', {'clip-path':'url(#blackcat-eye-crop-'+i+')'}, opening);
-    node('image', {href:'black-cat-pet/black-cat.png',width:1280,height:1280}, original);
+    node('image', {href:skin.art||'black-cat-pet/black-cat.png',width:1280,height:1280}, original);
     lines.push(node('path', {fill:'none',stroke:'#141217','stroke-width':7,'stroke-linecap':'round'}, face));
   }
   const smileAccent=node('g',{id:'blackcat-smile',opacity:0,'data-render-mode':'original-mouth-deformation'},face);
@@ -159,7 +160,7 @@ window.createLaunchpadBlackCatRig = function (canvas, art, clean, forelegsImage)
         apertures[i].setAttribute('d',c>.99||happyEyes?'M0 0Z':`M${cx-90} ${top}Q${cx} ${top+c*10} ${cx+90} ${top}V${bottom}H${cx-90}Z`);
         // Robo Colt's happy eyes: two held, upward arches instead of squinting pupils.
         lines[i].setAttribute('d',happyEyes?`M${cx-42} 348Q${cx} 280 ${cx+42} 348`:c>.88?`M${cx-37} 338Q${cx} 354 ${cx+37} 338`:'M0 0Z');
-        lines[i].setAttribute('stroke',happyEyes?'#e1b24f':'#141217');
+        lines[i].setAttribute('stroke',happyEyes?(skin.happyInk||'#e1b24f'):(skin.lidInk||'#141217'));
         lines[i].setAttribute('stroke-width',happyEyes?11:7);
       }
       const open=v.mouth,cy=466,cx=610;
@@ -174,7 +175,7 @@ window.createLaunchpadBlackCatRig = function (canvas, art, clean, forelegsImage)
     },
     getState() {
       const v=latest;
-      return {parts:['body','left-foreleg','right-foreleg','tail'],forelegArtwork:'clean-cutouts-v5',pawMotion:'saber-exact-normalized',mouthAnchor:[610,466],muzzlePreserved:true,happy:v.smile||0,tailAngle:.22*(v.tail||0)-.04*Math.abs(v.tail||0),leftPawTip:v.paw===undefined?null:endpoint(v,true),rightPawTip:v.right===undefined?null:endpoint(v,false)};
+      return {skin:skin.label||'Black Cat',parts:['body','left-foreleg','right-foreleg','tail'],forelegArtwork:'clean-cutouts-v5',pawMotion:'saber-exact-normalized',mouthAnchor:[610,466],muzzlePreserved:true,happy:v.smile||0,tailAngle:.22*(v.tail||0)-.04*Math.abs(v.tail||0),leftPawTip:v.paw===undefined?null:endpoint(v,true),rightPawTip:v.right===undefined?null:endpoint(v,false)};
     },
     destroy(){textures.forEach(t=>gl.deleteTexture(t));gl.deleteBuffer(buffer);shaders.forEach(s=>gl.deleteShader(s));gl.deleteProgram(program);face.remove();defs.remove();}
   };

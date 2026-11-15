@@ -1,0 +1,113 @@
+{
+  "generation": "Built-in image generation",
+  "coats": [
+    {
+      "id": "ginger",
+      "label": "Ginger Tabby",
+      "prompt": "Edit the supplied production cat into a coat variant for the SAME animation rig. Change ONLY coat coloration and iris color as specified. Preserve EXACT square canvas size, transparent background, cat silhouette, straight-on sitting pose, head size, eye/nose/mouth locations, triangular ear shape, whiskers, limb lengths, four paws, curled tail to viewer right, detailed soft fur texture, lighting and original padding. Do NOT shift, enlarge, crop or redesign anything. The two front paws must remain straight down in their original positions. No collar, clothing, accessories, bed, nameplate, text or scenery. True transparent RGBA. Warm orange ginger fur, rich darker burnt-orange mackerel tabby stripes following the forehead M, cheeks, legs and ringed tail; soft creamy chin, muzzle and chest; glossy amber-gold eyes. Natural beautiful detailed cat coat."
+    },
+    {
+      "id": "silver",
+      "label": "Silver Tabby",
+      "prompt": "Edit the supplied production cat into a coat variant for the SAME animation rig. Change ONLY coat coloration and iris color as specified. Preserve EXACT square canvas size, transparent background, cat silhouette, straight-on sitting pose, head size, eye/nose/mouth locations, triangular ear shape, whiskers, limb lengths, four paws, curled tail to viewer right, detailed soft fur texture, lighting and original padding. Do NOT shift, enlarge, crop or redesign anything. The two front paws must remain straight down in their original positions. No collar, clothing, accessories, bed, nameplate, text or scenery. True transparent RGBA. Cool silver-gray fur, charcoal mackerel tabby stripes following the forehead M, cheeks, legs and ringed tail; pale silvery cream chin and muzzle; glossy green-gold eyes. Natural elegant detailed cat coat."
+    },
+    {
+      "id": "siamese",
+      "label": "Siamese",
+      "prompt": "Edit the supplied production cat into a coat variant for the SAME animation rig. Change ONLY coat coloration and iris color as specified. Preserve EXACT square canvas size, transparent background, cat silhouette, straight-on sitting pose, head size, eye/nose/mouth locations, triangular ear shape, whiskers, limb lengths, four paws, curled tail to viewer right, detailed soft fur texture, lighting and original padding. Do NOT shift, enlarge, crop or redesign anything. The two front paws must remain straight down in their original positions. No collar, clothing, accessories, bed, nameplate, text or scenery. True transparent RGBA. Warm ivory cream body with soft chocolate seal-point ears, face mask, lower forelegs, paws and tail. Soft blended natural point transitions; glossy clear sapphire-blue eyes. Keep the SAME fluffy round cat anatomy, NOT a slim Siamese body."
+    },
+    {
+      "id": "calico",
+      "label": "Calico",
+      "description": "A beautiful natural calico coat: creamy white base, large warm ginger patches on the viewer-left ear and upper cheek and viewer-left haunch, deep charcoal patches on the viewer-right ear and upper cheek and viewer-right haunch, central white nose blaze and white muzzle/chest, mixed ginger/charcoal patches along the curled tail, white front paws. Bright golden-green eyes. Keep the markings asymmetrical but balanced, with clean natural fur transitions.",
+      "prompt": "Precise coat-skin edit of the supplied production cat, for the SAME animation rig. Change ONLY fur coloration and iris color as specified. Preserve EXACT canvas dimensions and transparent padding, silhouette, front-facing upright sitting pose, head/face proportions, eye/nose/mouth positions, triangular ears, whiskers, two straight front legs, all four paws, and curled tail on viewer right. Preserve the original soft detailed fur and realistic collectible finish. Do not shift, enlarge, crop, add clothing or props, or redraw the anatomy. No words, collars, accessories, platform, nameplate or scenery. Genuine transparent RGBA background. A beautiful natural calico coat: creamy white base, large warm ginger patches on the viewer-left ear and upper cheek and viewer-left haunch, deep charcoal patches on the viewer-right ear and upper cheek and viewer-right haunch, central white nose blaze and white muzzle/chest, mixed ginger/charcoal patches along the curled tail, white front paws. Bright golden-green eyes. Keep the markings asymmetrical but balanced, with clean natural fur transitions."
+    },
+    {
+      "id": "tuxedo",
+      "label": "Tuxedo",
+      "description": "A polished classic tuxedo coat: deep jet-black crown, ears, back, outer legs and tail, bright soft white muzzle and chin with a narrow white nose blaze, a generous white chest bib, and white socks on all four paws. Golden-green eyes, soft pink-black nose. This is a black-and-white fur pattern, NOT clothing. Match the original round fluffy cat shape exactly.",
+      "prompt": "Precise coat-skin edit of the supplied production cat, for the SAME animation rig. Change ONLY fur coloration and iris color as specified. Preserve EXACT canvas dimensions and transparent padding, silhouette, front-facing upright sitting pose, head/face proportions, eye/nose/mouth positions, triangular ears, whiskers, two straight front legs, all four paws, and curled tail on viewer right. Preserve the original soft detailed fur and realistic collectible finish. Do not shift, enlarge, crop, add clothing or props, or redraw the anatomy. No words, collars, accessories, platform, nameplate or scenery. Genuine transparent RGBA background. A polished classic tuxedo coat: deep jet-black crown, ears, back, outer legs and tail, bright soft white muzzle and chin with a narrow white nose blaze, a generous white chest bib, and white socks on all four paws. Golden-green eyes, soft pink-black nose. This is a black-and-white fur pattern, NOT clothing. Match the original round fluffy cat shape exactly."
+    },
+    {
+      "id": "chocolate",
+      "label": "Chocolate",
+      "description": "A luxurious natural chocolate-brown coat: rich warm cocoa fur with deeper espresso roots and soft copper highlights, subtle lighter milk-chocolate muzzle/chin and chest, warm brown paws and curled tail. Clear glossy copper-amber eyes. Solid coat, no stripes, no white patches. Keep the original soft round fluffy cat anatomy and fur detail.",
+      "prompt": "Precise coat-skin edit of the supplied production cat, for the SAME animation rig. Change ONLY fur coloration and iris color as specified. Preserve EXACT canvas dimensions and transparent padding, silhouette, front-facing upright sitting pose, head/face proportions, eye/nose/mouth positions, triangular ears, whiskers, two straight front legs, all four paws, and curled tail on viewer right. Preserve the original soft detailed fur and realistic collectible finish. Do not shift, enlarge, crop, add clothing or props, or redraw the anatomy. No words, collars, accessories, platform, nameplate or scenery. Genuine transparent RGBA background. A luxurious natural chocolate-brown coat: rich warm cocoa fur with deeper espresso roots and soft copper highlights, subtle lighter milk-chocolate muzzle/chin and chest, warm brown paws and curled tail. Clear glossy copper-amber eyes. Solid coat, no stripes, no white patches. Keep the original soft round fluffy cat anatomy and fur detail."
+    }
+  ],
+  "layers": [
+    {
+      "id": "silver",
+      "type": "underlay",
+      "prompt": "Precise animation backing edit. IMAGE 1 is the EXACT TARGET GEOMETRY: a cat backing with no eyes, no mouth, no front legs and no tail. IMAGE 2 is COAT COLOR AND PATTERN REFERENCE only. Repaint ONLY the fur in Image 1 to match Image 2: Cool silver-gray fur, charcoal mackerel tabby stripes following the forehead M, cheeks, legs and ringed tail; pale silvery cream chin and muzzle; glossy green-gold eyes. Natural elegant detailed cat coat. Keep exact target silhouette, canvas size, ears, nose, whiskers, rounded belly end, transparent gap under belly, and both OUTER rear paws at ground level. Preserve the target's missing eyes, missing mouth, missing two front forelegs and missing tail; these areas must NOT reappear. Eye and mouth zones should be continuous matching fur. Copy the second reference's face markings, chest coloration, belly and haunch stripes faithfully and in corresponding positions. Do not move, enlarge, crop or redraw the target anatomy. No text, props, collar or scenery. True transparent RGBA background.",
+      "ref": "black-cat-body-underlay-v4.png",
+      "coatPath": "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/black-cat-preview/skins/silver.png"
+    },
+    {
+      "id": "silver",
+      "type": "forelegs",
+      "prompt": "Precise animation part edit. IMAGE 1 is the EXACT TARGET: two isolated cat front forelegs and paws in the lower middle of a full square transparent canvas. IMAGE 2 is COAT COLOR AND PATTERN REFERENCE only. Repaint ONLY Image 1's leg fur and toes to match the same front legs on Image 2: Cool silver-gray fur, charcoal mackerel tabby stripes following the forehead M, cheeks, legs and ringed tail; pale silvery cream chin and muzzle; glossy green-gold eyes. Natural elegant detailed cat coat. Keep the EXACT positions, scale, leg silhouette, length, paw shape and canvas dimensions of Image 1. Keep the top three-fifths of the square completely transparent, and all other space transparent. Do NOT add a cat body, face, rear paws, eyes, tail, ground, shadow or other pieces. Keep clean continuous detailed fur around the ankles, with no flat black polygons or cutout wedges. Same full square canvas and genuine transparent RGBA.",
+      "ref": "black-cat-forelegs-v5.png",
+      "coatPath": "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/black-cat-preview/skins/silver.png"
+    },
+    {
+      "id": "siamese",
+      "type": "underlay",
+      "prompt": "Precise animation backing edit. IMAGE 1 is the EXACT TARGET GEOMETRY: a cat backing with no eyes, no mouth, no front legs and no tail. IMAGE 2 is COAT COLOR AND PATTERN REFERENCE only. Repaint ONLY the fur in Image 1 to match Image 2: Warm ivory cream body with soft chocolate seal-point ears, face mask, lower forelegs, paws and tail. Soft blended natural point transitions; glossy clear sapphire-blue eyes. Keep the SAME fluffy round cat anatomy, NOT a slim Siamese body. Keep exact target silhouette, canvas size, ears, nose, whiskers, rounded belly end, transparent gap under belly, and both OUTER rear paws at ground level. Preserve the target's missing eyes, missing mouth, missing two front forelegs and missing tail; these areas must NOT reappear. Eye and mouth zones should be continuous matching fur. Copy the second reference's face markings, chest coloration, belly and haunch stripes faithfully and in corresponding positions. Do not move, enlarge, crop or redraw the target anatomy. No text, props, collar or scenery. True transparent RGBA background.",
+      "ref": "black-cat-body-underlay-v4.png",
+      "coatPath": "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/black-cat-preview/skins/siamese.png"
+    },
+    {
+      "id": "siamese",
+      "type": "forelegs",
+      "prompt": "Precise animation part edit. IMAGE 1 is the EXACT TARGET: two isolated cat front forelegs and paws in the lower middle of a full square transparent canvas. IMAGE 2 is COAT COLOR AND PATTERN REFERENCE only. Repaint ONLY Image 1's leg fur and toes to match the same front legs on Image 2: Warm ivory cream body with soft chocolate seal-point ears, face mask, lower forelegs, paws and tail. Soft blended natural point transitions; glossy clear sapphire-blue eyes. Keep the SAME fluffy round cat anatomy, NOT a slim Siamese body. Keep the EXACT positions, scale, leg silhouette, length, paw shape and canvas dimensions of Image 1. Keep the top three-fifths of the square completely transparent, and all other space transparent. Do NOT add a cat body, face, rear paws, eyes, tail, ground, shadow or other pieces. Keep clean continuous detailed fur around the ankles, with no flat black polygons or cutout wedges. Same full square canvas and genuine transparent RGBA.",
+      "ref": "black-cat-forelegs-v5.png",
+      "coatPath": "C:/Users/Sinister/Documents/GitHub/Classroom-Launchpad/work/black-cat-preview/skins/siamese.png"
+    },
+    {
+      "id": "ginger",
+      "type": "underlay",
+      "ref": "black-cat-body-underlay-v4.png",
+      "prompt": "Precise animation backing edit. Image 1 is the EXACT TARGET GEOMETRY: a cat backing with no eyes, no mouth, no front forelegs, and no tail. Image 2 supplies the coat coloration and stripe placement. Repaint ONLY the fur in Image 1 to match Image 2. Warm orange ginger fur with darker burnt-orange mackerel tabby stripes, cream chest and muzzle, matching the second reference precisely. Keep EXACT target silhouette, canvas size, ears, nose, whiskers, rounded belly end, transparent gap under belly, and two outer rear paws at ground level. Preserve its missing eyes, mouth, forelegs and tail. Fill former eye and mouth areas with continuous matching fur. No new features, no moved anatomy, no resize, no crop, no text, no props. Genuine transparent RGBA background."
+    },
+    {
+      "id": "ginger",
+      "type": "forelegs",
+      "ref": "black-cat-forelegs-v5.png",
+      "prompt": "Precise animation-part edit. Image 1 is the EXACT TARGET: two isolated front cat forelegs and paws in the lower middle of a full square transparent canvas. Image 2 supplies the matching fur colors and stripes. Repaint ONLY the target forelegs to match Image 2. Warm orange ginger fur with darker burnt-orange mackerel tabby stripes, cream chest and muzzle, matching the second reference precisely. Preserve EXACT leg positions, length, scale, canvas dimensions, smooth silhouette and paw/toe shapes from Image 1. Keep top three-fifths and all space outside these two forelegs completely transparent. Do not add a cat body, head, eyes, hind paws, tail, shadow, ground or other parts. Clean detailed fur around ankles, no flat black patches. No text. Genuine transparent RGBA background."
+    }
+  ],
+  "note": "New coat files are local preview assets. Each coat has its own original, no-eyes/no-legs body backing, and cleaned front-leg texture. The live website is unchanged.",
+  "additionalCoatLayers": [
+    {
+      "id": "calico",
+      "type": "underlay",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image body-underlay geometry and transparency: seated head, ears, nose, whiskers, rounded torso, haunches and two small REAR paws. NO eyes, NO mouth, NO front legs, NO tail. The lower center below rounded belly remains transparent. Do not fill that empty gap or draw any legs. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Calico: white central head blaze, muzzle, chest and belly; ginger viewer-left ear/cheek/haunch, charcoal viewer-right ear/cheek/haunch, both rear paws white, both front legs white. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    },
+    {
+      "id": "calico",
+      "type": "forelegs",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image detached front-leg geometry and transparency. ONLY two front legs with paws, in the exact same lower-center position and size. Top three-fifths of canvas stays fully transparent. No face/head/body/tail/rear legs. Maintain rounded paws and natural textured ankles with no flat wedges. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Calico: white central head blaze, muzzle, chest and belly; ginger viewer-left ear/cheek/haunch, charcoal viewer-right ear/cheek/haunch, both rear paws white, both front legs white. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    },
+    {
+      "id": "tuxedo",
+      "type": "underlay",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image body-underlay geometry and transparency: seated head, ears, nose, whiskers, rounded torso, haunches and two small REAR paws. NO eyes, NO mouth, NO front legs, NO tail. The lower center below rounded belly remains transparent. Do not fill that empty gap or draw any legs. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Tuxedo fur pattern: black ears/crown/cheeks/haunches; white narrow central nose blaze, white muzzle/chin and large white chest bib ending midbody, black belly. Rear paws white. Front legs black with white socks on bottom paws. No clothing. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    },
+    {
+      "id": "tuxedo",
+      "type": "forelegs",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image detached front-leg geometry and transparency. ONLY two front legs with paws, in the exact same lower-center position and size. Top three-fifths of canvas stays fully transparent. No face/head/body/tail/rear legs. Maintain rounded paws and natural textured ankles with no flat wedges. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Tuxedo fur pattern: black ears/crown/cheeks/haunches; white narrow central nose blaze, white muzzle/chin and large white chest bib ending midbody, black belly. Rear paws white. Front legs black with white socks on bottom paws. No clothing. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    },
+    {
+      "id": "chocolate",
+      "type": "underlay",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image body-underlay geometry and transparency: seated head, ears, nose, whiskers, rounded torso, haunches and two small REAR paws. NO eyes, NO mouth, NO front legs, NO tail. The lower center below rounded belly remains transparent. Do not fill that empty gap or draw any legs. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Chocolate: all fur warm cocoa brown with espresso roots, copper highlights and lighter milk-chocolate muzzle/chest, brown rear and front paws. No stripes, no white. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    },
+    {
+      "id": "chocolate",
+      "type": "forelegs",
+      "prompt": "Create matching animated cat sprite layer. FIRST image is the exact target layer to recolor, SECOND image supplies ONLY coat colors and fur markings. Keep precisely the FIRST image detached front-leg geometry and transparency. ONLY two front legs with paws, in the exact same lower-center position and size. Top three-fifths of canvas stays fully transparent. No face/head/body/tail/rear legs. Maintain rounded paws and natural textured ankles with no flat wedges. Preserve 1280 by 1280 canvas, exact placement, silhouette and anatomy of FIRST image, without cropping, scaling or repositioning. Recolor to match SECOND image: Chocolate: all fur warm cocoa brown with espresso roots, copper highlights and lighter milk-chocolate muzzle/chest, brown rear and front paws. No stripes, no white. High-quality soft realistic 3D cartoon fur. Clean transparent background, no text/shadows/extra objects."
+    }
+  ]
+}

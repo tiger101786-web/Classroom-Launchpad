@@ -1,13 +1,35 @@
 window.blackcatDefaults=()=>({skin:'Black',name:'Midnight',nameplate:true,platform:true,motion:true,size:'medium',asleep:false,headwear:'none'});
 window.blackcatMarkup=()=>`<svg viewBox="0 0 1280 1680" role="img" aria-label="Fluffy black cat with amber eyes"><image id="blackcat-platform" href="black-cat-pet/cat-platform.png" x="0" y="1080" width="1280" height="425"/><image class="blackcat-fallback" href="black-cat-pet/black-cat.png" width="1280" height="1280"/><foreignObject width="1280" height="1280"><canvas width="1536" height="1536" style="width:1280px;height:1280px;display:block"></canvas></foreignObject><g id="blackcat-headphones" visibility="hidden"><path d="M395 150C455 100 760 100 820 150" fill="none" stroke="#0c0b11" stroke-width="49"/><path d="M395 150C455 100 760 100 820 150" fill="none" stroke="#b18c57" stroke-width="29"/><path d="M395 150C455 100 760 100 820 150" fill="none" stroke="#f5d99b" stroke-width="3"/>${[395,820].map((x,i)=>`<g id="blackcat-earphone-${i}" transform="translate(${x} 150) rotate(${i?15:-15})"><rect x="-48" y="-80" width="96" height="160" rx="39" fill="#111015" stroke="#cfa66a" stroke-width="9"/><rect x="-31" y="-61" width="62" height="122" rx="24" fill="#412637"/><path d="M-10 -10L10 -18V20Q-6 36 -14 21Q-18 9 -3 7V-10" fill="#edcd93"/></g>`).join('')}</g><g id="blackcat-sleep-symbols" fill="#edcd93" font-family="Georgia,serif" font-weight="bold" opacity="0"><text x="890" y="230" font-size="77">z</text><text x="980" y="155" font-size="92">Z</text><text x="1090" y="80" font-size="105">Z</text></g><g id="blackcat-music-symbols" fill="#e8bb85" font-family="Georgia,serif" opacity="0"><text x="160" y="570" font-size="110">♪</text><text x="1020" y="480" font-size="100">♫</text><text x="180" y="860" font-size="95">♫</text><text x="1090" y="900" font-size="105">♪</text></g><g id="blackcat-nameplate"><image href="black-cat-pet/cat-nameplate.png" x="210" y="1385" width="860" height="285"/><text id="blackcat-pet-name" x="640" y="1545" text-anchor="middle" dominant-baseline="middle" fill="#f1d3a4" style="font:600 78px Georgia,serif;letter-spacing:1px">Midnight</text></g></svg>`;
-window.mountBlackCatRig=async function(host){
+// Keep only in-flight image loads; inactive decoded coats and GPU textures can be released.
+const blackcatImageLoads=new Map();
+function loadBlackcatSkin(skin){return Promise.all(['art','underlay','forelegs'].map(field=>{
+ const url=skin[field];if(blackcatImageLoads.has(url))return blackcatImageLoads.get(url);
+ const pending=(async()=>{const image=new Image();image.src=url;await image.decode();return image;})();
+ blackcatImageLoads.set(url,pending);pending.then(()=>blackcatImageLoads.delete(url),()=>blackcatImageLoads.delete(url));return pending;
+}));}
+window.mountBlackCatRig=async function(host,initialSkin='Black'){
  const pet=host.querySelector('.pet-button'),$=selector=>host.querySelector(selector),canvas=pet.querySelector('canvas'),headphones=$('#blackcat-headphones'),zs=$('#blackcat-sleep-symbols'),notes=$('#blackcat-music-symbols');
  const durations={hello:2.5,happy:2.4,blink:.38,talk:4,ears:1.8,paw:1.65,tail:2.5,nose:1.6,wobble:2,wake:3.5};
  const state={mode:'idle',action:null,time:0,frames:0,nextIdle:5,nextBlink:2,blinkStart:-10,motion:true,idle:true,values:{}};
  const reduce=matchMedia('(prefers-reduced-motion: reduce)'),clamp=(v,min=0,max=1)=>Math.max(min,Math.min(max,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v);};
  let options={...blackcatDefaults(),radio:false,visible:true},raf=0,last=0,disposed=false,index=0,speaking=false;
- const images=await Promise.all(["black-cat.png","black-cat-body-underlay-v4.png","black-cat-forelegs-v5.png"].map(async file=>{const i=new Image();i.src='black-cat-pet/'+file;await i.decode();return i;}));
- const renderer=createLaunchpadBlackCatRig(canvas,...images);
+ let selectedSkin=Object.hasOwn(blackcatSkins,initialSkin)?initialSkin:'Black',loadingSkin=null,skinVersion=0;
+ let renderer=createLaunchpadBlackCatRig(canvas,...await loadBlackcatSkin(blackcatSkins[selectedSkin]),blackcatSkins[selectedSkin]);
+ host.dataset.skin=selectedSkin;
+ function selectSkin(key){
+  key=Object.hasOwn(blackcatSkins,key)?key:'Black';
+  if(key===selectedSkin){if(loadingSkin){skinVersion++;loadingSkin=null;delete host.dataset.skinLoading;}return;}
+  if(key===loadingSkin)return;
+  const revision=++skinVersion;loadingSkin=key;host.dataset.skinLoading='true';delete host.dataset.skinError;
+  loadBlackcatSkin(blackcatSkins[key]).then(images=>{
+   if(disposed||revision!==skinVersion)return;
+   renderer.destroy();renderer=createLaunchpadBlackCatRig(canvas,...images,blackcatSkins[key]);
+   selectedSkin=key;host.dataset.skin=key;host.querySelector('.blackcat-fallback').setAttribute('href',blackcatSkins[key].art);
+   if(state.frames)renderer.draw(state.values);start();
+  }).catch(error=>{if(!disposed&&revision===skinVersion){host.dataset.skinError='true';console.warn('Cat skin could not load:',error.message);}})
+   .finally(()=>{if(revision===skinVersion){loadingSkin=null;delete host.dataset.skinLoading;}});
+ }
+
  function updateUI(){host.dataset.state=state.mode;pet.dataset.state=state.mode;pet.dataset.action=state.action?.name||'';}
  function start(){if(!raf&&!disposed&&!document.hidden&&!host.hidden&&options.visible)raf=requestAnimationFrame(tick);}
  function tick(now){raf=0;if(disposed||document.hidden||!options.visible||host.hidden)return;const dt=last?Math.min((now-last)/1000,.06):0;last=now;const moving=state.motion&&!reduce.matches;if(moving)state.time+=dt;const time=state.time;
@@ -28,6 +50,7 @@ if(moving)start();}
   state.nextIdle=state.time+6;updateUI();start();
  }
  function update(value){const wasSleeping=options.asleep;options={...blackcatDefaults(),...value};state.motion=options.motion;
+  if(options.visible)selectSkin(options.skin);
   if(options.asleep){state.mode='sleep';state.action=null;speaking=false;}
   else if(wasSleeping){state.mode='idle';state.action={name:'wake',start:state.time};}
   else if(!state.action||state.action.name!=='wake'){if(options.radio){state.mode='dance';state.action=null;}else if(state.mode==='dance')state.mode='idle';}
@@ -37,5 +60,5 @@ if(moving)start();}
  function visibility(){cancelAnimationFrame(raf);raf=0;last=0;if(!document.hidden)start();}
  function reduceChanged(){update(options);}
  document.addEventListener('visibilitychange',visibility);reduce.addEventListener('change',reduceChanged);
- return {play,update,setSpeaking(value){speaking=Boolean(value);start();},reset(){state.mode='idle';state.action=null;state.time=0;state.nextIdle=5;state.blinkStart=-10;state.nextBlink=2;speaking=false;},getState:()=>({...state,rig:renderer.getState()}),destroy(){disposed=true;cancelAnimationFrame(raf);document.removeEventListener('visibilitychange',visibility);reduce.removeEventListener('change',reduceChanged);renderer.destroy();}};
+ return {play,update,setSpeaking(value){speaking=Boolean(value);start();},reset(){state.mode='idle';state.action=null;state.time=0;state.nextIdle=5;state.blinkStart=-10;state.nextBlink=2;speaking=false;},getState:()=>({...state,rig:renderer.getState()}),destroy(){disposed=true;skinVersion++;cancelAnimationFrame(raf);document.removeEventListener('visibilitychange',visibility);reduce.removeEventListener('change',reduceChanged);renderer.destroy();}};
 };

@@ -31,7 +31,9 @@ window.createPetTalk = function(read) {
   function theme() {
     panel.dataset.pet = current.kind;
     panel.style.removeProperty('--talk-portrait');
-    if (portraits[current.kind]) {
+    if (current.kind === 'blackcat' && window.blackcatSkins?.[current.skin]) {
+      panel.style.setProperty('--talk-portrait', 'url("' + blackcatSkins[current.skin].art + '")');
+    } else if (portraits[current.kind]) {
       panel.style.setProperty('--talk-portrait', 'url("' + portraits[current.kind] + '")');
     } else if (current.kind === 'nugget') {
       const pet = current;
@@ -89,7 +91,9 @@ window.createPetTalk = function(read) {
       close(false);
       return;
     }
+    const changedSkin = current.skin !== next.skin;
     current = next;
+    if (changedSkin) theme();
     title.textContent = 'Talk to ' + current.name;
   }
 

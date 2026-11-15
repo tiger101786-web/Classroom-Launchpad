@@ -8,14 +8,15 @@ window.createBlackCatPet=function(onChange,onCustomize){
  const positionKey=()=> 'blackcat-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=pet.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function fitName(){const label=host.querySelector('#blackcat-pet-name');label.textContent=preferences.name;label.style.fontSize='78px';const width=label.getComputedTextLength();if(width>500)label.style.fontSize=(78*500/width)+'px';}
- function ensureRig(){if(rig||pending||host.hidden||disposed)return;pending=mountBlackCatRig(host).then(value=>{if(disposed){value.destroy();return;}rig=value;host.dataset.ready='true';refresh();rig.setSpeaking(speaking);}).catch(error=>{host.dataset.ready='error';console.warn('Black cat animation could not load:',error.message);}).finally(()=>{pending=null;});}
+ function ensureRig(){if(rig||pending||host.hidden||disposed)return;pending=mountBlackCatRig(host,preferences.skin).then(value=>{if(disposed){value.destroy();return;}rig=value;host.dataset.ready='true';refresh();rig.setSpeaking(speaking);}).catch(error=>{host.dataset.ready='error';console.warn('Black cat animation could not load:',error.message);}).finally(()=>{pending=null;});}
  function refresh(){host.hidden=!visible||hidden;host.dataset.size=preferences.size;
   const height=preferences.platform?(preferences.nameplate?1680:1530):1280;
   host.style.setProperty('--blackcat-ratio','1280 / '+height);pet.querySelector('svg').setAttribute('viewBox','0 0 1280 '+height);
   host.querySelector('#blackcat-platform').style.display=preferences.platform?'':'none';
   host.querySelector('#blackcat-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';
   pet.setAttribute('aria-label',preferences.asleep?'Wake Black Cat. Drag to move.':'Open Black Cat controls. Drag to move.');
-  if(!host.hidden){loadPetArtwork(host);fitName();ensureRig();}speech.hidden=true;
+  pet.querySelector('svg').setAttribute('aria-label',(blackcatSkins[preferences.skin]?.label||'Black Cat')+' companion');
+  if(!host.hidden){loadPetArtwork(host);if(!rig&&!pending)host.querySelector('.blackcat-fallback').setAttribute('href',(blackcatSkins[preferences.skin]||blackcatSkins.Black).art);fitName();ensureRig();}speech.hidden=true;
   rig?.update({...preferences,radio,visible:!host.hidden});place();
  }
  const announce=message=>{if(host.hidden||host.closest('.pet-studio')||preferences.asleep)return;window.PetSpeech?.say(host,message);};

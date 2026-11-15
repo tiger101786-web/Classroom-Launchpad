@@ -1,0 +1,86 @@
+[
+  {
+    "file": "skins/ginger.png",
+    "sha256": "fbd815c192c511c3a39492d632e59d80167092dd531bc92f6396ec98e8fa0701"
+  },
+  {
+    "file": "skins/ginger-underlay.png",
+    "sha256": "12f2bf8233e5b7089c9c06effc9f2bdf803a19c827031a658eb09e9ec035f997"
+  },
+  {
+    "file": "skins/ginger-forelegs.png",
+    "sha256": "63e9cc0520b48073a084ea187bcb648cfb9f4d8d590d3065738bf647ec987eb2"
+  },
+  {
+    "file": "skins/silver.png",
+    "sha256": "29e097eb1b452883fae2d8441a8ef0a2a686a4096b06f1985b5c93c0d35b94e5"
+  },
+  {
+    "file": "skins/silver-underlay.png",
+    "sha256": "3974e3af1cb305590e6a4d748c9151c48967e163efc19c27acd80548b5081f50"
+  },
+  {
+    "file": "skins/silver-forelegs.png",
+    "sha256": "6c1bc46c9abee18bc507914c27b5f294704cd41b415a5f3ffc9b59cf6b804d83"
+  },
+  {
+    "file": "skins/siamese.png",
+    "sha256": "aa48a8a39b1b1a171db559aae0fb14e9206979d208a46a08d38553666fc3e716"
+  },
+  {
+    "file": "skins/siamese-underlay.png",
+    "sha256": "c11599e095aaf6fd5de11f390141b613528bf793cadc0eb84a8bdc91c1765cb0"
+  },
+  {
+    "file": "skins/siamese-forelegs.png",
+    "sha256": "0f1b54d76c01d633745b72c69e7bed25cd029f4a6270226211b70e24cf0741be"
+  },
+  {
+    "file": "skins/calico.png",
+    "sha256": "7c5c3b253911832197619bb7cfdec4d842e832f7907c477f316c6443d6c4a033"
+  },
+  {
+    "file": "skins/calico-underlay.png",
+    "sha256": "64e23cf737ddad8e148476de0bb81aea1461c84137cb2b9d38b1da2d3d0bc1a7"
+  },
+  {
+    "file": "skins/calico-forelegs.png",
+    "sha256": "8a1fddb38980438572d8d8c4c48a282184b6f37c1574df7a31de70f2ad4afe81"
+  },
+  {
+    "file": "skins/tuxedo.png",
+    "sha256": "8abad5c2a8d0f503cb4b34d5a2fda42b74f29e907852d4739016ce0c8e3d976c"
+  },
+  {
+    "file": "skins/tuxedo-underlay.png",
+    "sha256": "83dce52f8dd676a255d2274137f60248f4c302946262a8ce4519f76bbffe760a"
+  },
+  {
+    "file": "skins/tuxedo-forelegs.png",
+    "sha256": "1001799bd82d5981a8a1a327421f86ead03786370338ed443216fc2fd9bab14f"
+  },
+  {
+    "file": "skins/chocolate.png",
+    "sha256": "81093a6a61ea47cef6996c5e93bda2ad98f2e42e6c4be8fa095535960382e344"
+  },
+  {
+    "file": "skins/chocolate-underlay.png",
+    "sha256": "006565b65bdfb321330ae20361e993afd2ae00cadd3eebe6a352656d4c275749"
+  },
+  {
+    "file": "skins/chocolate-forelegs.png",
+    "sha256": "f60ffb34959283d20ce35cd143147f235d5a2706c813bde5134ce28a5f363c18"
+  },
+  {
+    "file": "skins/sphynx.png",
+    "sha256": "500f35c09ab17ddde51147ed250105ea375bc84e71a25ee4af515c103b4045c7"
+  },
+  {
+    "file": "skins/sphynx-underlay.png",
+    "sha256": "6f85b1caad7f1d6427e16bac7f2c88d9adbbeddf934b1bffe7082ae437e89982"
+  },
+  {
+    "file": "skins/sphynx-forelegs.png",
+    "sha256": "5974e9f0bd8a5cf737f1d54de22715df8ede03d98354171d1bcbb00b7c878404"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "tool": "Built-in image generation",
+  "id": "sphynx",
+  "label": "Hairless Sphynx",
+  "prompt": "Precise skin edit for an existing animated cat model. Input is the exact geometry/pose template. Turn this cat into an adorable HAIRLESS SPHYNX cat: completely hairless smooth warm dusty rose/taupe skin, soft lavender-gray shading, delicate natural folds on forehead, neck and chest, wrinkled shoulders and paws, large pink inner ears, bright amber-gold eyes, a small muted pink nose. No fur tufts, no fuzz, no eyelashes. Keep the original rounded friendly proportions rather than a skinny adult anatomy. Preserve EXACT 1280x1280 canvas and transparent padding, head outline, ear tips and positions, eye/nose/mouth locations, seated front-facing pose, all four paws and curled tail to viewer right. Tail same original silhouette but smooth hairless skin. Subtle short fine whiskers in original placement, no long furry muzzle. Closed mouth with original small curved lip, NO teeth. This MUST fit the identical animation rig. No clothes, bed, plaque, scenery, text or shadows on background. High quality polished 3D cartoon collectible finish, soft diffuse lighting, genuinely transparent RGBA.",
+  "layers": [
+    {
+      "type": "underlay",
+      "prompt": "Precise matching animation layer edit. FIRST image is exact target geometry template. SECOND image is the hairless Sphynx skin color/texture reference. Replace ALL black fur with completely hairless warm dusty rose/taupe skin, lavender-gray shadows and natural delicate folds, matching SECOND reference exactly. No fur or fuzz. Preserve FIRST image canvas, exact head/ear outline and placement, nose and whiskers, rounded torso and haunches and two rear paws. Keep NO eyes, NO mouth, NO front legs, NO tail. The area beneath rounded belly between rear paws stays transparent, do not fill with extra limbs. Match reference face folds and chest wrinkles but omit eyes/mouth.Do not move, crop, scale or add anything. Same original transparent padding. Smooth high-quality 3D cartoon skin, genuinely transparent RGBA background. Remove stray artifacts outside the actual silhouette."
+    },
+    {
+      "type": "forelegs",
+      "prompt": "Precise matching animation layer edit. FIRST image is exact target geometry template. SECOND image is the hairless Sphynx skin color/texture reference. Replace ALL black fur with completely hairless warm dusty rose/taupe skin, lavender-gray shadows and natural delicate folds, matching SECOND reference exactly. No fur or fuzz. Preserve FIRST image exact two detached front legs/paws lower-center placement and outlines on a 1280x1280 canvas. Top three-fifths stays entirely transparent. ONLY these two full front legs with rounded paws, smooth hairless skin, fine wrist folds matching SECOND reference. No other body parts, no head, no torso, no tail, no rear legs, no shadows, no black wedges. Do not move, crop, scale or add anything. Same original transparent padding. Smooth high-quality 3D cartoon skin, genuinely transparent RGBA background. Remove stray artifacts outside the actual silhouette."
+    }
+  ],
+  "sources": {
+    "art": "exec-b4b01cc1-3b6a-4b23-b55c-272b4f301af6.png",
+    "underlay": "exec-ce9ac12c-4ec3-4de4-88b9-1a62395ac033.png",
+    "forelegs": "exec-04260d66-e1cb-42e5-93cb-281359fc67ab.png"
+  }
+}
