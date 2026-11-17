@@ -14,7 +14,7 @@
   const robo=window.createLazyLaunchpadPet('colt',value=>{preferences.robo=value;sync();save();},window.createPetStudio?()=>studio?.open('colt'):undefined);
   const gummy=window.createLazyLaunchpadPet('gummy',value=>{preferences.gummy=value;sync();save();},()=>studio?.open('gummy'));
   const blackcat=window.createLazyLaunchpadPet('blackcat',value=>{preferences.blackcat=value;sync();save();},()=>studio?.open('blackcat'));
-  picker.querySelector('select').add(new Option('Black Cat','blackcat'));
+  picker.querySelector('select').add(new Option('Cat','blackcat'));
   const nugget=window.createLazyLaunchpadPet('nugget',value=>{preferences.nugget=value;sync();save();},()=>studio?.open('nugget'));
   picker.querySelector('select').add(new Option('Chicken Nugget','nugget'));
   const saber=window.createLazyLaunchpadPet('saber',value=>{preferences.saber=value;sync();save();},()=>studio?.open('saber'));
@@ -191,8 +191,8 @@
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=false;
-    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='blackcat'?'Customize Black Cat':preferences.pet==='nugget'?'Customize Chicken Nugget':preferences.pet==='saber'?'Customize Saber-tooth Tiger':preferences.pet==='highland'?'Customize Highland Cow':preferences.pet==='roblox'?'Customize Roblox Buddy':preferences.pet==='labubu'?'Customize Labubu':preferences.pet==='eagle'?'Customize Bald Eagle':preferences.pet==='gummy'?'Customize Gummy Bear':preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
-    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='blackcat'?'Show Black Cat':preferences.pet==='nugget'?'Show Chicken Nugget':preferences.pet==='saber'?'Show Saber-tooth Tiger':preferences.pet==='highland'?'Show Highland Cow':preferences.pet==='roblox'?'Show Roblox Buddy':preferences.pet==='labubu'?'Show Labubu':preferences.pet==='eagle'?'Show Bald Eagle':preferences.pet==='gummy'?'Show Gummy Bear':preferences.pet==='colt'?'Show Colt':'Show dumpling';
+    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='blackcat'?'Customize Cat':preferences.pet==='nugget'?'Customize Chicken Nugget':preferences.pet==='saber'?'Customize Saber-tooth Tiger':preferences.pet==='highland'?'Customize Highland Cow':preferences.pet==='roblox'?'Customize Roblox Buddy':preferences.pet==='labubu'?'Customize Labubu':preferences.pet==='eagle'?'Customize Bald Eagle':preferences.pet==='gummy'?'Customize Gummy Bear':preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
+    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='blackcat'?'Show Cat':preferences.pet==='nugget'?'Show Chicken Nugget':preferences.pet==='saber'?'Show Saber-tooth Tiger':preferences.pet==='highland'?'Show Highland Cow':preferences.pet==='roblox'?'Show Roblox Buddy':preferences.pet==='labubu'?'Show Labubu':preferences.pet==='eagle'?'Show Bald Eagle':preferences.pet==='gummy'?'Show Gummy Bear':preferences.pet==='colt'?'Show Colt':'Show dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
     if(host.hidden||asleep)hideSpeech();

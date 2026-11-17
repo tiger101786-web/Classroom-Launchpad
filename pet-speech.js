@@ -1,7 +1,7 @@
 /* One viewport-positioned speech surface; each pet retains its own speech timing. */
 (()=>{'use strict';
 const types={
- 'blackcat-companion':['blackcat','BLACK CAT','A new cozy perch! I approve of this spot.'],
+ 'blackcat-companion':['blackcat','CAT','A new cozy perch! I approve of this spot.'],
  'robo-companion':['colt','ROBO-COLT','New spot. Same Colt energy!'],
  'dumpling-companion':['squishy','SQUISHY DUMPLING','New spot, same squish! This basket feels right at home.'],
  'gummy-companion':['gummy','GUMMY BEAR','New spot! Just letting my jelly settle.'],

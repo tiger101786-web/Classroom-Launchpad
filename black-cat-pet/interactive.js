@@ -1,7 +1,7 @@
 window.createBlackCatPet=function(onChange,onCustomize){
  'use strict';
  const host=document.createElement('div');host.className='blackcat-companion';host.hidden=true;
- host.innerHTML='<button type="button" class="pet-button" aria-label="Open Black Cat controls. Drag to move.">'+deferPetArtwork(blackcatMarkup())+'</button><div class="blackcat-speech" role="status" hidden></div>';
+ host.innerHTML='<button type="button" class="pet-button" aria-label="Open Cat controls. Drag to move.">'+deferPetArtwork(blackcatMarkup())+'</button><div class="blackcat-speech" role="status" hidden></div>';
  document.body.append(host);
  const pet=host.querySelector('.pet-button'),speech=host.querySelector('.blackcat-speech');
  let preferences=blackcatDefaults(),visible=false,hidden=false,radio=false,account='',position=null,drag=null,suppress=false,rig=null,pending=null,speaking=false,disposed=false;
@@ -14,8 +14,8 @@ window.createBlackCatPet=function(onChange,onCustomize){
   host.style.setProperty('--blackcat-ratio','1280 / '+height);pet.querySelector('svg').setAttribute('viewBox','0 0 1280 '+height);
   host.querySelector('#blackcat-platform').style.display=preferences.platform?'':'none';
   host.querySelector('#blackcat-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';
-  pet.setAttribute('aria-label',preferences.asleep?'Wake Black Cat. Drag to move.':'Open Black Cat controls. Drag to move.');
-  pet.querySelector('svg').setAttribute('aria-label',(blackcatSkins[preferences.skin]?.label||'Black Cat')+' companion');
+  pet.setAttribute('aria-label',preferences.asleep?'Wake Cat. Drag to move.':'Open Cat controls. Drag to move.');
+  pet.querySelector('svg').setAttribute('aria-label',(blackcatSkins[preferences.skin]?.label||'Cat')+' companion');
   if(!host.hidden){loadPetArtwork(host);if(!rig&&!pending)host.querySelector('.blackcat-fallback').setAttribute('href',(blackcatSkins[preferences.skin]||blackcatSkins.Black).art);fitName();ensureRig();}speech.hidden=true;
   rig?.update({...preferences,radio,visible:!host.hidden});place();
  }
