@@ -728,6 +728,33 @@
       note: "Commercial-free Christmas favorites streamed 24/7/365 by listener-supported Evergreen Christmas Radio. No account required."
     },
     {
+      id: "the-christmas-station",
+      label: "Christmas • Christmas Station",
+      type: "stream",
+      source: "https://stream.thechristmasstation.org/main/64.aac",
+      provider: "The Christmas Station",
+      searchTerms: "the christmas station xmas holiday festive old new modern classics mix ad free",
+      note: "Free, ad-free Christmas music from The Christmas Station: modern holiday hits, timeless classics, and lesser-known favorites, streaming year-round. No account required."
+    },
+    {
+      id: "forever-christmas",
+      label: "Christmas • Forever",
+      type: "stream",
+      source: "https://ec5.yesstreaming.net/xmas",
+      provider: "Forever Christmas Radio",
+      searchTerms: "forever christmas radio canada xmas holiday festive old new modern classics bing crosby mariah carey michael buble",
+      note: "Free holiday music from Forever Christmas Radio, blending older Christmas classics with modern favorites. Programming and any announcements are supplied by the station."
+    },
+    {
+      id: "4u-christmas",
+      label: "Christmas • 4U",
+      type: "stream",
+      source: "https://live.4uradios.com/4uchristmas.mp3?provider=web4u",
+      provider: "4U Christmas",
+      searchTerms: "4u christmas holiday xmas festive pop old new modern classic standards crooners",
+      note: "Free Christmas songs and holiday classics from 4U Christmas, from timeless standards to modern festive pop. No sign-up required; programming is supplied by the station."
+    },
+    {
       id: "youradio-greatest-hits-1920s",
       label: "Decades • 1920s",
       type: "stream",
@@ -904,6 +931,9 @@
     "youradio-positively-happy": '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01m6 0h.01M8.5 14.5c2 2 5 2 7 0M12 2v2m0 16v2M2 12h2m16 0h2"/>',
     "youradio-calm-tai-chi": '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1"/><circle cx="12" cy="16.5" r="1"/>',
     "youradio-calm-spa": '<path d="M12 21c0-5 3-8 8-9 0 5-3 8-8 9Zm0 0c0-5-3-8-8-9 0 5 3 8 8 9Z"/><path d="M12 16c-3-3-3-7 0-11 3 4 3 8 0 11Z"/>',
+    "the-christmas-station": '<path d="m12 3-5 7h3l-4 6h4v5h4v-5h4l-4-6h3l-5-7Z"/><path d="M8 21h8"/>',
+    "forever-christmas": '<path d="m12 3-5 7h3l-4 6h4v5h4v-5h4l-4-6h3l-5-7Z"/><path d="M8 21h8"/>',
+    "4u-christmas": '<path d="m12 3-5 7h3l-4 6h4v5h4v-5h4l-4-6h3l-5-7Z"/><path d="M8 21h8"/>',
     "evergreen-christmas": '<path d="m12 3-5 7h3l-4 6h4v5h4v-5h4l-4-6h3l-5-7Z"/><path d="M8 21h8"/>',
     "youradio-greatest-hits-1920s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
     "youradio-greatest-hits-1930s": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v3M4 12h3M17 12h3M12 17v3"/>',
