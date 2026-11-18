@@ -729,7 +729,7 @@
     },
     {
       id: "the-christmas-station",
-      label: "Christmas • Christmas Station",
+      label: "Christmas • Mistletoe",
       type: "stream",
       source: "https://stream.thechristmasstation.org/main/64.aac",
       provider: "The Christmas Station",
@@ -738,7 +738,7 @@
     },
     {
       id: "forever-christmas",
-      label: "Christmas • Forever",
+      label: "Christmas • Holly",
       type: "stream",
       source: "https://ec5.yesstreaming.net/xmas",
       provider: "Forever Christmas Radio",
@@ -747,7 +747,7 @@
     },
     {
       id: "4u-christmas",
-      label: "Christmas • 4U",
+      label: "Christmas • Jingle",
       type: "stream",
       source: "https://live.4uradios.com/4uchristmas.mp3?provider=web4u",
       provider: "4U Christmas",
