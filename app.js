@@ -1370,6 +1370,8 @@ function normalizeStudentSpotlights(items) {
     projectUrl: String(item && item.projectUrl || ""),
     status: item && item.status === "hidden" ? "hidden" : "published",
     expiresAt: String(item && item.expiresAt || ""),
+    likeCount: Math.max(0, Number(item && item.likeCount) || 0),
+    likedByMe: Boolean(item && item.likedByMe),
     hasMedia: Boolean(item && item.hasMedia),
     mediaKind: String(item && item.mediaKind || ""),
     mediaOriginalName: String(item && item.mediaOriginalName || ""),
@@ -2762,6 +2764,16 @@ function renderStudentSpotlightPreview() {
   `;
 }
 
+function renderSpotlightLike(item) {
+  const count = item.likeCount || 0;
+  const total = `${count} ${count === 1 ? "like" : "likes"}`;
+  const icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h4v11H3zM7 11l5-6V2c3 0 4 2 3 5l-1 3h5a2 2 0 0 1 2 2.4l-1.5 7a2 2 0 0 1-2 1.6H11l-4-2z"/></svg>`;
+  if (authSession?.role !== "student" || !sharedBackend.enabled) {
+    return `<span class="spotlight-like" aria-label="${total}" role="img">${icon} ${count}</span>`;
+  }
+  return `<button type="button" class="spotlight-like" data-action="spotlightLike" data-id="${escapeHtml(item.id)}" aria-pressed="${Boolean(item.likedByMe)}" aria-label="Like ${escapeHtml(item.title)}, ${total}" title="Like anonymously">${icon} <span>${count}</span></button>`;
+}
+
 function renderStudentSpotlightCard(item) {
   const openUrl = item.projectUrl || (item.hasMedia ? spotlightMediaUrl(item) : "");
   const searchText = `${item.displayName || ""} ${item.title || ""} ${item.description || ""} grade ${item.grade || ""}`.toLowerCase();
@@ -2775,7 +2787,10 @@ function renderStudentSpotlightCard(item) {
         <h3>${escapeHtml(item.title)}</h3>
         <p class="student-spotlight-byline">By ${escapeHtml(item.displayName)}</p>
         ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
-        ${openUrl ? `<button class="primary-btn student-spotlight-view-project" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project <span aria-hidden="true">&#8594;</span></button>` : ""}
+        <div class="spotlight-card-actions">
+          ${renderSpotlightLike(item)}
+          ${openUrl ? `<button class="primary-btn student-spotlight-view-project" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project <span aria-hidden="true">&#8594;</span></button>` : ""}
+        </div>
       </div>
     </article>
   `;
@@ -13498,6 +13513,32 @@ app.addEventListener("click", async event => {
     spotlightSearchQuery = "";
     spotlightFolderSearchQuery = "";
     render();
+  }
+  if (action === "spotlightLike") {
+    const id = target.dataset.id;
+    const session = authSession;
+    target.disabled = true;
+    try {
+      const result = await sharedBackend.request(`/api/student-spotlights/${encodeURIComponent(id)}/like`, {
+        method: target.getAttribute("aria-pressed") === "true" ? "DELETE" : "PUT"
+      });
+      if (authSession?.email !== session.email) return;
+      const item = studentSpotlights.find(entry => entry.id === id);
+      if (item) {
+        Object.assign(item, result);
+        const button = app.querySelector(`[data-action="spotlightLike"][data-id="${CSS.escape(id)}"]`);
+        if (button) {
+          button.querySelector("span").textContent = item.likeCount;
+          button.setAttribute("aria-pressed", String(item.likedByMe));
+          button.setAttribute("aria-label", `Like ${item.title}, ${item.likeCount} ${item.likeCount === 1 ? "like" : "likes"}`);
+        }
+      }
+    } catch (error) {
+      window.alert(error.message || "Could not save your like. Please try again.");
+    } finally {
+      target.disabled = false;
+    }
+    return;
   }
   if (action === "spotlightGrade") {
     spotlightGradeFilter = ["all", "3", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";

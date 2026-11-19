@@ -631,10 +631,44 @@ function spotlightDisplayName(item) {
   return `${first} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
 }
 
-function publicStudentSpotlight(item, teacher = false) {
+const spotlightLikesPath = path.join(dataDir, "spotlight-likes.json");
+let spotlightLikes;
+
+function readSpotlightLikes() {
+  if (!spotlightLikes) {
+    try {
+      spotlightLikes = JSON.parse(fs.readFileSync(spotlightLikesPath, "utf8"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      spotlightLikes = { secret: crypto.randomBytes(32).toString("hex"), projects: {} };
+    }
+  }
+  return spotlightLikes;
+}
+
+function saveSpotlightVotes(id, votes) {
+  const current = readSpotlightLikes();
+  const projects = { ...current.projects, [id]: votes };
+  if (!votes.length) delete projects[id];
+  const next = { secret: current.secret, projects };
+  const temp = spotlightLikesPath + ".tmp";
+  fs.writeFileSync(temp, JSON.stringify(next), { mode: 0o600 });
+  fs.renameSync(temp, spotlightLikesPath);
+  spotlightLikes = next;
+}
+
+function spotlightVoterKey(id, email) {
+  return crypto.createHmac("sha256", readSpotlightLikes().secret)
+    .update(JSON.stringify([id, normalizeEmail(email)])).digest("hex");
+}
+
+function publicStudentSpotlight(item, teacher = false, viewerEmail = "") {
+  const votes = readSpotlightLikes().projects[item.id] || [];
   return {
     id: item.id,
     title: item.title,
+    likeCount: votes.length,
+    likedByMe: Boolean(viewerEmail && votes.includes(spotlightVoterKey(item.id, viewerEmail))),
     collectionName: item.collectionName,
     folderPreviewPosition: item.folderPreviewPosition,
     description: item.description,
@@ -1837,7 +1871,7 @@ function publicState(db, session) {
     websiteRequests: teacher ? db.websiteRequests : [],
     assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
-    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher)),
+    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher, session?.role === "student" ? session.email : "")),
     leaderboards: db.leaderboards,
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
@@ -2838,6 +2872,29 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
     return true;
   }
 
+  const likeMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/like$/);
+  if (likeMatch && ["PUT", "DELETE"].includes(req.method)) {
+    if (!requireSameOrigin(req, res)) return true;
+    if (session.role !== "student") {
+      sendJson(res, 403, { error: "Sign in as a student to like a project." });
+      return true;
+    }
+    const id = decodeURIComponent(likeMatch[1]);
+    const item = normalizeStudentSpotlights(readDb().studentSpotlights).find(entry => entry.id === id);
+    if (!item || item.status !== "published" || (item.expiresAt && Date.parse(item.expiresAt) <= Date.now())) {
+      sendJson(res, 404, { error: "Featured work not found." });
+      return true;
+    }
+    const votes = readSpotlightLikes().projects[id] || [];
+    const key = spotlightVoterKey(id, session.email);
+    const likedByMe = req.method === "PUT";
+    if (votes.includes(key) !== likedByMe) {
+      saveSpotlightVotes(id, likedByMe ? [...votes, key] : votes.filter(vote => vote !== key));
+    }
+    sendJson(res, 200, { likeCount: (readSpotlightLikes().projects[id] || []).length, likedByMe });
+    return true;
+  }
+
   const thumbnailMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/thumbnail$/);
   if (thumbnailMatch && ["GET", "HEAD"].includes(req.method)) {
     const db = readDb();
@@ -3022,6 +3079,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Featured work not found." });
       return true;
     }
+    if (readSpotlightLikes().projects[id]) saveSpotlightVotes(id, []);
     removeStudentSpotlightFiles(existing);
     db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).filter(item => item.id !== id);
     writeDb(db);
