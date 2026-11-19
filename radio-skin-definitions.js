@@ -851,6 +851,26 @@
   },
   "swatch": "linear-gradient(135deg,#132f22,#af2031,#e2b967)"
 });
+  skins.push({
+  "id": "harvest-supper",
+  "label": "Thanksgiving • Harvest Supper",
+  "layout": "genre",
+  "title": "words",
+  "assets": [
+    "assets/radio-skins/illustrated/harvest-supper-header.png",
+    "assets/radio-skins/illustrated/harvest-supper-portrait.png",
+    "assets/radio-skins/illustrated/harvest-supper-body.png"
+  ],
+  "variables": {
+    "--genre-art": "url('assets/radio-skins/illustrated/harvest-supper-header.png')",
+    "--genre-base": "#241510",
+    "--genre-edge": "#bf8c53",
+    "--genre-accent": "#ffdc9e",
+    "--genre-text": "#fff1d8",
+    "--genre-material": "linear-gradient(130deg,#603624,#39241c 56%,#2c1b1b)"
+  },
+  "swatch": "linear-gradient(135deg,#8c372d,#683e28,#eca653)"
+});
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);

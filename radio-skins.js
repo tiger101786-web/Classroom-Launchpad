@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const stylesheetURL = new URL('radio-skins.css?v=20261118-sleigh-bell-social', document.currentScript.src).href;
-  const definitionsURL = new URL('radio-skin-definitions.js?v=20261118-sleigh-bell-social', document.currentScript.src).href;
+  const stylesheetURL = new URL('radio-skins.css?v=20261118-harvest-supper', document.currentScript.src).href;
+  const definitionsURL = new URL('radio-skin-definitions.js?v=20261118-harvest-supper', document.currentScript.src).href;
   let definitionsLoad;
   function loadDefinitions() {
     if (window.coltRadioSkinDefinitions) return Promise.resolve();
@@ -55,7 +55,7 @@
     const fantasyIds = new Set(['inferno', 'frostfang', 'temple', 'nebula', 'cyberpunk', 'cybersamurai', 'jade-serpent', 'phoenix-rebirth', 'anubis-tomb']);
     let category = 'all', thumbnailsLoaded = false;
     function categoryFor(skin) {
-      if (skin.id === 'sleigh-bell-social') return 'holidays';
+      if (skin.id === 'sleigh-bell-social' || skin.id === 'harvest-supper') return 'holidays';
       if (fantasyIds.has(skin.id)) return 'fantasy';
       return skin.id === 'original' ? 'classic' : 'music';
     }
