@@ -12,7 +12,14 @@ window.createBlackCatPet=function(onChange,onCustomize){
  function refresh(){host.hidden=!visible||hidden;host.dataset.size=preferences.size;
   const height=preferences.platform?(preferences.nameplate?1680:1530):1280;
   host.style.setProperty('--blackcat-ratio','1280 / '+height);pet.querySelector('svg').setAttribute('viewBox','0 0 1280 '+height);
-  host.querySelector('#blackcat-platform').style.display=preferences.platform?'':'none';
+  const bed=host.querySelector('#blackcat-platform');
+  bed.style.display=preferences.platform?'':'none';
+  const color=blackcatBeds[preferences.bedColor] || blackcatBeds.burgundy;
+  if(color.dye){
+   const [r,g,b]=color.dye;
+   host.querySelector('#blackcat-dye-color').setAttribute('values',r+' 0.35 0 0 0  '+g+' 0.35 0 0 0  '+b+' 0.35 0 0 0  0 0 0 1 0');
+   bed.setAttribute('filter','url(#blackcat-velvet-dye)');
+  }else bed.removeAttribute('filter');
   host.querySelector('#blackcat-nameplate').style.display=preferences.platform&&preferences.nameplate?'':'none';
   pet.setAttribute('aria-label',preferences.asleep?'Wake Cat. Drag to move.':'Open Cat controls. Drag to move.');
   pet.querySelector('svg').setAttribute('aria-label',(blackcatSkins[preferences.skin]?.label||'Cat')+' companion');
