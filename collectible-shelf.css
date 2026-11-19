@@ -299,13 +299,15 @@
 .collectible-shelf:has([aria-label="Bowser Statue"]) > .shelf-objects > :first-child { transform:translateX(24%); }
 .collectible-shelf:has([aria-label="Bowser Statue"]) > .shelf-objects > :last-child { transform:translateX(-24%); }
 
-/* Both Christmas finishes use the same holiday ledge and three supports. */
-.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="polar-express"],[data-shelf-theme="gingerbread-bakery"]) {
+/* The Christmas finishes use the same holiday ledge and three supports. */
+.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="polar-express"],[data-shelf-theme="gingerbread-bakery"],[data-shelf-theme="reindeer-stable"],[data-shelf-theme="clockwork-toyshop"]) {
   aspect-ratio:1671 / 941;
   --shelf-object-bottom:53%;
   --shelf-surface-top:.44;
   --shelf-surface-bottom:.495;
 }
-.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="polar-express"],[data-shelf-theme="gingerbread-bakery"]) > .shelf-board { background-size:contain; background-position:center; }
+.collectible-shelf[data-shelf-theme]:is([data-shelf-theme="polar-express"],[data-shelf-theme="gingerbread-bakery"],[data-shelf-theme="reindeer-stable"],[data-shelf-theme="clockwork-toyshop"]) > .shelf-board { background-size:contain; background-position:center; }
 [data-shelf-theme="polar-express"] > .shelf-board { background-image:url('assets/collectible-shelf-polar-express.png'); }
 [data-shelf-theme="gingerbread-bakery"] > .shelf-board { background-image:url('assets/collectible-shelf-gingerbread-bakery.png'); }
+[data-shelf-theme="reindeer-stable"] > .shelf-board { background-image:url('assets/collectible-shelf-reindeer-stable.png'); }
+[data-shelf-theme="clockwork-toyshop"] > .shelf-board { background-image:url('assets/collectible-shelf-clockwork-toyshop.png'); }

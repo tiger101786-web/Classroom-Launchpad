@@ -59,7 +59,7 @@
   animation-delay:calc(var(--n) * -.7777778s);
 }
 /* A flake travels one scene height in either the chooser or the homepage circle. */
-:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery) .launch-scene-particles i {
+:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery,.scene-holiday-reindeer-stable,.scene-holiday-clockwork-toyshop) .launch-scene-particles i {
   --flake-size:3px;
   --fall-time:6.8s;
   top:0;
@@ -71,7 +71,7 @@
   animation:christmas-snowfall var(--fall-time) linear infinite;
   animation-delay:calc(var(--n) * var(--fall-time) / -9);
 }
-:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery) .launch-scene-particles i:nth-child(3n) {
+:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery,.scene-holiday-reindeer-stable,.scene-holiday-clockwork-toyshop) .launch-scene-particles i:nth-child(3n) {
   --flake-size:2px;
   --fall-time:8s;
 }

@@ -59,6 +59,8 @@
     {id:'royal',name:'Royal Gold'},
     {id:'sakura-moon',name:'Sakura Moon'},
     {id:'steampunk',name:'Steampunk Brass'},
+    {id:'reindeer-stable',name:'Christmas • Reindeer Stable'},
+    {id:'clockwork-toyshop',name:'Christmas • Clockwork Toyshop'},
     {id:'polar-express',name:'Christmas • North Pole Express'},
     {id:'gingerbread-bakery',name:'Christmas • Gingerbread Bakery'},
     {id:'holiday',name:'Winter Holiday'}
@@ -183,6 +185,7 @@
   rows.push(['Music', ['music-ariana-grande-bust','Ariana Grande Pink Microphone Bust']]);
   rows.push(['Cats', ['cat-calico-persian-bust','Calico Persian Cat Bust'], ['cat-tortoiseshell-bust','Tortoiseshell Cat Bust']]);
   rows.push(['Christmas', ['christmas-nutcracker','Christmas Nutcracker'], ['christmas-toy-engine','Christmas Toy Engine'], ['christmas-cookie-cottage','Gingerbread Cookie Cottage'], ['christmas-cocoa','Gingerbread Cocoa Mug']]);
+  rows.push(['Christmas', ['christmas-reindeer-calf','Scarfed Reindeer Calf'], ['christmas-santa-sleigh','Santa’s Gift Sleigh'], ['christmas-rocking-horse','Clockwork Rocking Horse'], ['christmas-elf-box','Pop-up Christmas Elf']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -203,6 +206,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'christmas-reindeer-calf': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[162,4,349,582]},
+    'christmas-santa-sleigh': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[628,52,589,477]},
+    'christmas-rocking-horse': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[38,637,584,585]},
+    'christmas-elf-box': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[714,593,478,627]},
     'christmas-nutcracker': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[199,9,240,607]},
     'christmas-toy-engine': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[642,104,588,457]},
     'christmas-cookie-cottage': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[83,660,491,562]},
