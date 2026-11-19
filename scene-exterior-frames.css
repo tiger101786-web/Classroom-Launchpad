@@ -194,10 +194,8 @@
 
 /* Fit the floral crown rim around the unchanged princess garden scene. */
 .scene-frame-exterior[data-exterior-frame="match-disney-princess-garden"] { --exterior-frame-inset:-5.5598%; }
-.scene-frame-exterior[data-exterior-frame="match-holiday-polar-express"] { --exterior-frame-inset:-5.2%; }
-.scene-frame-exterior[data-exterior-frame="match-holiday-gingerbread-bakery"] { --exterior-frame-inset:-4.9%; }
-/* Keep the decorated trim outside the full scene aperture at every size. */
-.scene-frame-exterior:is([data-exterior-frame="match-holiday-reindeer-stable"],[data-exterior-frame="match-holiday-clockwork-toyshop"]) {
-  --exterior-frame-inset:calc(-1.5% - 3px);
-  z-index:0;
-}
+/* Christmas artwork uses the same measured opening fit as the other thin rims. */
+.scene-frame-exterior[data-exterior-frame="match-holiday-reindeer-stable"] { --exterior-frame-inset:-5.167%; }
+.scene-frame-exterior[data-exterior-frame="match-holiday-clockwork-toyshop"] { --exterior-frame-inset:-4.973%; }
+.scene-frame-exterior[data-exterior-frame="match-holiday-polar-express"] { --exterior-frame-inset:-4.209%; }
+.scene-frame-exterior[data-exterior-frame="match-holiday-gingerbread-bakery"] { --exterior-frame-inset:-5.070%; }
