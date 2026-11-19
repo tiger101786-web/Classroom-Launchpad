@@ -83,7 +83,7 @@
     ['Fantasy & Treats', ['treasure-chest','Treasure Chest'], ['phoenix','Phoenix Statue'], ['potion','Enchanted Potion'], ['beignets','Beignet Plate'], ['cupcake','Rose Cupcake']],
     ['Little Animals', ['red-panda','Red Panda Figurine'], ['penguin','Penguin Figurine'], ['axolotl','Axolotl Figurine'], ['hedgehog','Hedgehog Figurine'], ['lucky-cat','Lucky Cat']],
     ['Cozy Keepsakes', ['terrarium','Glass Terrarium'], ['mushroom-house','Mushroom Cottage'], ['lantern','Mini Lantern'], ['music-box','Ballerina Music Box'], ['teacup','Floral Teacup']],
-    ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['snowman','Snowman Figurine'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
+    ['Curios & Ornaments', ['rubber-duck','Rubber Duck'], ['origami-crane','Origami Crane'], ['ammonite','Ammonite Fossil'], ['geode','Blue Geode'], ['message-bottle','Message in a Bottle'], ['jewelry-box','Jeweled Trinket Box'], ['pumpkin-lantern','Pumpkin Lantern'], ['daisy-vase','Daisy Vase'], ['sandcastle','Sandcastle Keepsake']]
   ];
   rows.push(
     ['Disney', ['enchanted-rose','Enchanted Rose']],
@@ -186,6 +186,7 @@
   rows.push(['Cats', ['cat-calico-persian-bust','Calico Persian Cat Bust'], ['cat-tortoiseshell-bust','Tortoiseshell Cat Bust']]);
   rows.push(['Christmas', ['christmas-nutcracker','Christmas Nutcracker'], ['christmas-toy-engine','Christmas Toy Engine'], ['christmas-cookie-cottage','Gingerbread Cookie Cottage'], ['christmas-cocoa','Gingerbread Cocoa Mug']]);
   rows.push(['Christmas', ['christmas-reindeer-calf','Scarfed Reindeer Calf'], ['christmas-santa-sleigh','Santa’s Gift Sleigh'], ['christmas-rocking-horse','Clockwork Rocking Horse'], ['christmas-elf-box','Pop-up Christmas Elf']]);
+  rows.push(['Christmas', ['snowman','Snowman Figurine'], ['christmas-mini-tree','Mini Christmas Tree'], ['christmas-santa','Santa and His Toy Sack'], ['christmas-mailbox','Letters to Santa Mailbox'], ['christmas-gift-stack','Wrapped Christmas Presents'], ['christmas-candle-lantern','Christmas Candle Lantern'], ['christmas-teddy','Christmas Sweater Teddy']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -199,6 +200,7 @@
   ];
   // Preserve saved shelves when a collectible is replaced.
   const replacements = { 'charizard-flames':'pokemon-charizard-statue', 'bulbasaur-vines':'pokemon-bulbasaur-statue', 'gengar-flames':'pokemon-gengar-statue', 'dragonite-pillow':'pokemon-dragonite-statue', growlithe:'none', 'ash-pikachu':'none', 'mew-console':'pokemon-mew-statue', medal:'tanjiro', 'electric-guitar':'ceramic-fox', 'drum-kit':'succulent', violin:'hourglass', 'grand-piano':'mantel-clock', 'race-car':'none', 'superhero-falcon-bust':'none', 'superhero-hawkeye-bust':'none', elsa:'none', beast:'none', anna:'disney-anna-bust', jasmine:'disney-jasmine-bust', belle:'disney-belle-bust', ariel:'disney-ariel-bust' };
+  replacements['christmas-bells'] = 'christmas-gift-stack';
   replacements['avatar-aang-water-statue'] = 'none';
   replacements['superhero-falcon-bust'] = 'superhero-falcon-statue';
   const ids = new Set(['none', ...Object.keys(replacements), ...items.map(item => item.id)]);
@@ -206,6 +208,12 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'christmas-mini-tree': {source:'assets/shelf-christmas-mantel.png',width:1536,height:1024,bounds:[101,3,329,491],displaySize:240},
+    'christmas-santa': {source:'assets/shelf-christmas-mantel.png',width:1536,height:1024,bounds:[577,0,391,495]},
+    'christmas-mailbox': {source:'assets/shelf-christmas-mantel.png',width:1536,height:1024,bounds:[1140,0,280,493]},
+    'christmas-gift-stack': {source:'assets/shelf-christmas-gift-stack.png',width:1254,height:1254,bounds:[182,27,879,1188],displaySize:250},
+    'christmas-candle-lantern': {source:'assets/shelf-christmas-mantel.png',width:1536,height:1024,bounds:[618,515,299,502]},
+    'christmas-teddy': {source:'assets/shelf-christmas-mantel.png',width:1536,height:1024,bounds:[1098,519,393,497]},
     'christmas-reindeer-calf': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[162,4,349,582]},
     'christmas-santa-sleigh': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[628,52,589,477]},
     'christmas-rocking-horse': {source:'assets/shelf-christmas-workshop-keepsakes.png',width:1254,height:1254,bounds:[38,637,584,585]},
@@ -749,8 +757,8 @@
       dialog.querySelector('#shelfSearchLabel').textContent=tab==='objects'?'Search objects':'Search shelves';
       search.placeholder=tab==='objects'?'Search '+items.length+' collectibles…':'Search shelf styles…';
       const terms=searches[tab].toLowerCase().trim().split(/\s+/).filter(Boolean);
-      const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value).sort((a,b)=>a.name.localeCompare(b.name)):[...themes].sort((a,b)=>a.name.localeCompare(b.name));
-      const matches=pool.filter(item=>terms.every(term=>(item.name+' '+(item.category||'')).toLowerCase().includes(term)));
+      const pool=tab==='objects'?items.filter(item=>!category.value || item.category===category.value || (category.value==='Christmas' && item.id==='holy-family')).sort((a,b)=>a.name.localeCompare(b.name)):[...themes].sort((a,b)=>a.name.localeCompare(b.name));
+      const matches=pool.filter(item=>terms.every(term=>(item.name+' '+(item.category||'')+(item.id==='holy-family'?' Christmas':'')).toLowerCase().includes(term)));
       const size=pageSize(), count=Math.max(1,Math.ceil(matches.length/size));
       // A page number is not a stable browsing position when capacity changes.
       // Keep the focused object (or the original leading object) on screen.
