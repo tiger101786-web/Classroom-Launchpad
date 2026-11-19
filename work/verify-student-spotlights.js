@@ -145,7 +145,11 @@ async function waitForServer() {
     const teacherView = await request("/api/student-spotlights", { headers: { Cookie: teacherCookie } });
     assert.equal(teacherView.payload.studentSpotlights[0].likeCount, 1);
     assert.equal(teacherView.payload.studentSpotlights[0].likedByMe, false);
-    assert.equal((await vote("PUT", teacherCookie)).response.status, 403);
+    const teacherVotes = await Promise.all([vote("PUT", teacherCookie), vote("PUT", teacherCookie)]);
+    teacherVotes.forEach(result => assert.deepStrictEqual(result.payload, { likeCount: 2, likedByMe: true }));
+    const refreshed = await request("/api/state", { headers: { Cookie: teacherCookie } });
+    assert.equal(refreshed.payload.studentSpotlights[0].likedByMe, true);
+    assert.deepStrictEqual((await vote("DELETE", teacherCookie)).payload, { likeCount: 1, likedByMe: false });
     assert.deepStrictEqual((await vote("DELETE", studentCookie)).payload, { likeCount: 0, likedByMe: false });
     assert.deepStrictEqual((await vote("DELETE", studentCookie)).payload, { likeCount: 0, likedByMe: false });
 

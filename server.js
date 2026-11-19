@@ -657,18 +657,20 @@ function saveSpotlightVotes(id, votes) {
   spotlightLikes = next;
 }
 
-function spotlightVoterKey(id, email) {
+function spotlightVoterKey(id, session) {
+  // Keep the existing student key format so their saved likes carry forward.
+  const account = session.role === "teacher" ? { role: "teacher" } : normalizeEmail(session.email);
   return crypto.createHmac("sha256", readSpotlightLikes().secret)
-    .update(JSON.stringify([id, normalizeEmail(email)])).digest("hex");
+    .update(JSON.stringify([id, account])).digest("hex");
 }
 
-function publicStudentSpotlight(item, teacher = false, viewerEmail = "") {
+function publicStudentSpotlight(item, teacher = false, session = null) {
   const votes = readSpotlightLikes().projects[item.id] || [];
   return {
     id: item.id,
     title: item.title,
     likeCount: votes.length,
-    likedByMe: Boolean(viewerEmail && votes.includes(spotlightVoterKey(item.id, viewerEmail))),
+    likedByMe: Boolean(session && votes.includes(spotlightVoterKey(item.id, session))),
     collectionName: item.collectionName,
     folderPreviewPosition: item.folderPreviewPosition,
     description: item.description,
@@ -1871,7 +1873,7 @@ function publicState(db, session) {
     websiteRequests: teacher ? db.websiteRequests : [],
     assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
-    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher, session?.role === "student" ? session.email : "")),
+    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher, session)),
     leaderboards: db.leaderboards,
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
@@ -2875,10 +2877,6 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
   const likeMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/like$/);
   if (likeMatch && ["PUT", "DELETE"].includes(req.method)) {
     if (!requireSameOrigin(req, res)) return true;
-    if (session.role !== "student") {
-      sendJson(res, 403, { error: "Sign in as a student to like a project." });
-      return true;
-    }
     const id = decodeURIComponent(likeMatch[1]);
     const item = normalizeStudentSpotlights(readDb().studentSpotlights).find(entry => entry.id === id);
     if (!item || item.status !== "published" || (item.expiresAt && Date.parse(item.expiresAt) <= Date.now())) {
@@ -2886,7 +2884,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       return true;
     }
     const votes = readSpotlightLikes().projects[id] || [];
-    const key = spotlightVoterKey(id, session.email);
+    const key = spotlightVoterKey(id, session);
     const likedByMe = req.method === "PUT";
     if (votes.includes(key) !== likedByMe) {
       saveSpotlightVotes(id, likedByMe ? [...votes, key] : votes.filter(vote => vote !== key));
@@ -2958,7 +2956,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
         item
       );
       writeDb(db);
-      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -2983,7 +2981,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
         item
       );
       writeDb(db);
-      sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+      sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -3038,7 +3036,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
       writeDb(db);
       removeStudentSpotlightFiles(existing);
-      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true) });
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }

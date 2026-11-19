@@ -2768,7 +2768,7 @@ function renderSpotlightLike(item) {
   const count = item.likeCount || 0;
   const total = `${count} ${count === 1 ? "like" : "likes"}`;
   const icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h4v11H3zM7 11l5-6V2c3 0 4 2 3 5l-1 3h5a2 2 0 0 1 2 2.4l-1.5 7a2 2 0 0 1-2 1.6H11l-4-2z"/></svg>`;
-  if (authSession?.role !== "student" || !sharedBackend.enabled) {
+  if (!["student", "teacher"].includes(authSession?.role) || !sharedBackend.enabled || (item.expiresAt && Date.parse(item.expiresAt) <= Date.now())) {
     return `<span class="spotlight-like" aria-label="${total}" role="img">${icon} ${count}</span>`;
   }
   return `<button type="button" class="spotlight-like" data-action="spotlightLike" data-id="${escapeHtml(item.id)}" aria-pressed="${Boolean(item.likedByMe)}" aria-label="Like ${escapeHtml(item.title)}, ${total}" title="Like anonymously">${icon} <span>${count}</span></button>`;
@@ -13522,7 +13522,7 @@ app.addEventListener("click", async event => {
       const result = await sharedBackend.request(`/api/student-spotlights/${encodeURIComponent(id)}/like`, {
         method: target.getAttribute("aria-pressed") === "true" ? "DELETE" : "PUT"
       });
-      if (authSession?.email !== session.email) return;
+      if (authSession?.role !== session.role || authSession.email !== session.email) return;
       const item = studentSpotlights.find(entry => entry.id === id);
       if (item) {
         Object.assign(item, result);
