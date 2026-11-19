@@ -58,3 +58,25 @@
   animation:scene-firefly-flow 7s linear infinite;
   animation-delay:calc(var(--n) * -.7777778s);
 }
+/* A flake travels one scene height in either the chooser or the homepage circle. */
+:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery) .launch-scene-particles i {
+  --flake-size:3px;
+  --fall-time:6.8s;
+  top:0;
+  width:var(--flake-size);
+  height:100%;
+  border-radius:0;
+  background:radial-gradient(circle closest-side, #fff 45%, #e9f6ff99 75%, transparent) top / 100% var(--flake-size) no-repeat;
+  box-shadow:none;
+  animation:christmas-snowfall var(--fall-time) linear infinite;
+  animation-delay:calc(var(--n) * var(--fall-time) / -9);
+}
+:is(.scene-holiday-polar-express,.scene-holiday-gingerbread-bakery) .launch-scene-particles i:nth-child(3n) {
+  --flake-size:2px;
+  --fall-time:8s;
+}
+@keyframes christmas-snowfall {
+  0% { transform:translate(-4px, -2%); opacity:0; }
+  10%, 88% { opacity:.72; }
+  100% { transform:translate(6px, 102%); opacity:0; }
+}

@@ -59,6 +59,8 @@
     {id:'royal',name:'Royal Gold'},
     {id:'sakura-moon',name:'Sakura Moon'},
     {id:'steampunk',name:'Steampunk Brass'},
+    {id:'polar-express',name:'Christmas • North Pole Express'},
+    {id:'gingerbread-bakery',name:'Christmas • Gingerbread Bakery'},
     {id:'holiday',name:'Winter Holiday'}
   ];
   const themeIds = new Set(themes.map(theme => theme.id));
@@ -180,6 +182,7 @@
   rows.push(['Squishy Toys', ['squishy-aqua-waves','Aqua Waves Squishy Dumpling'], ['squishy-peach-hearts','Peach Hearts Squishy Dumpling'], ['squishy-cherry-dots','Cherry Red Polka Dots Squishy Dumpling'], ['squishy-tangerine-swirl','Tangerine Swirl Squishy Dumpling']]);
   rows.push(['Music', ['music-ariana-grande-bust','Ariana Grande Pink Microphone Bust']]);
   rows.push(['Cats', ['cat-calico-persian-bust','Calico Persian Cat Bust'], ['cat-tortoiseshell-bust','Tortoiseshell Cat Bust']]);
+  rows.push(['Christmas', ['christmas-nutcracker','Christmas Nutcracker'], ['christmas-toy-engine','Christmas Toy Engine'], ['christmas-cookie-cottage','Gingerbread Cookie Cottage'], ['christmas-cocoa','Gingerbread Cocoa Mug']]);
   const items = rows.flatMap(([category, ...entries], row) => entries.map(([id, name], column) => ({ id, name, category: catIds.has(id) ? 'Cats' : dogIds.has(id) ? 'Dogs' : ['toy-story-rex','toy-story-buzz','toy-story-woody'].includes(id) ? 'Disney' : ['pikachu','eevee'].includes(id) ? 'Pokémon' : id === 'tanjiro' ? 'Anime' : ['cross','church'].includes(id) ? 'Christian Faith' : category, row, column })));
   // Individual artwork bounds avoid neighboring sprites leaking into uneven atlas cells.
   // These are viewport crops only; the original transparent PNG is unmodified.
@@ -200,6 +203,10 @@
   const clean = value => valid(value) ? { enabled: value.enabled, slots: value.slots.map(id => replacements[id] || id), theme:value.theme || 'crimson' } : { enabled: true, slots: ['horse', 'crystal', 'planet'], theme:'crimson' };
   const name = id => items.find(item => item.id === id)?.name || 'Empty spot';
   const standalone = {
+    'christmas-nutcracker': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[199,9,240,607]},
+    'christmas-toy-engine': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[642,104,588,457]},
+    'christmas-cookie-cottage': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[83,660,491,562]},
+    'christmas-cocoa': {source:'assets/shelf-christmas-keepsakes.png',width:1254,height:1254,bounds:[659,646,567,562]},
     "music-ariana-grande-bust": {"source":"assets/shelf-music-ariana-grande-bust.png","width":1408,"height":1408,"bounds":[246,36,948,1334],"displaySize":330,"displayWidth":240,"directImage":true},
     "cat-calico-persian-bust": {"source":"assets/shelf-cat-calico-persian-bust.png","width":1168,"height":1696,"bounds":[162,100,878,1500],"displaySize":330,"displayWidth":240,"directImage":true},
     "cat-tortoiseshell-bust": {"source":"assets/shelf-cat-tortoiseshell-bust.png","width":1632,"height":1216,"bounds":[424,4,804,1174],"displaySize":330,"displayWidth":240,"directImage":true},
