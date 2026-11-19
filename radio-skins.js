@@ -54,8 +54,12 @@
     const searchText = value => value.toLocaleLowerCase('en').replace(/[-–—]/g, ' ').replace(/\s+/g, ' ').trim();
     const fantasyIds = new Set(['inferno', 'frostfang', 'temple', 'nebula', 'cyberpunk', 'cybersamurai', 'jade-serpent', 'phoenix-rebirth', 'anubis-tomb']);
     let category = 'all', thumbnailsLoaded = false;
-    const categoryFor = skin => fantasyIds.has(skin.id) ? 'fantasy' : skin.id === 'original' ? 'classic' : 'music';
-    for (const [id, label] of [['all', 'All'], ['music', 'Music'], ['fantasy', 'Fantasy']]) {
+    function categoryFor(skin) {
+      if (skin.id === 'sleigh-bell-social') return 'holidays';
+      if (fantasyIds.has(skin.id)) return 'fantasy';
+      return skin.id === 'original' ? 'classic' : 'music';
+    }
+    for (const [id, label] of [['all', 'All'], ['music', 'Music'], ['fantasy', 'Fantasy'], ['holidays', 'Holidays']]) {
       const tab = document.createElement('button');
       tab.type = 'button'; tab.dataset.skinCategory = id;
       tab.setAttribute('aria-pressed', String(id === 'all'));
