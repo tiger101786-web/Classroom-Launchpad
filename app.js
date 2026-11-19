@@ -2883,8 +2883,13 @@ function renderStudentSpotlightPage() {
           <div class="student-spotlight-filters" role="group" aria-label="Filter featured work by grade">
             ${["all", "3", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
           </div>
-          ${authSession?.role === "teacher" ? `<button type="button" class="secondary-btn" data-action="toggleSpotlightPrivacy" aria-pressed="${hideTeacherSpotlightLikes}">Hide my likes <span aria-hidden="true">(${hideTeacherSpotlightLikes ? "On" : "Off"})</span></button>` : ""}
-          <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
+          <div class="spotlight-toolbar-footer">
+            ${authSession?.role === "teacher" ? `<button type="button" class="spotlight-privacy" data-action="toggleSpotlightPrivacy" aria-pressed="${hideTeacherSpotlightLikes}">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5c0 4.4 3 7.7 7.5 10 4.5-2.3 7.5-5.6 7.5-10V6z"/>${hideTeacherSpotlightLikes ? '<path d="m8.8 11.8 2 2 4.4-4.5"/>' : ""}</svg>
+              Hide my likes <span class="spotlight-privacy-track" aria-hidden="true"></span>
+            </button>` : ""}
+            <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
+          </div>
         </div>
         <div class="student-spotlight-grid">
           ${visible.length ? visible.map(renderStudentSpotlightCard).join("") : emptyCard(spotlightGradeFilter === "all" ? "No student work is featured in this assignment yet." : `No Grade ${spotlightGradeFilter} work is featured in this assignment yet.`)}
