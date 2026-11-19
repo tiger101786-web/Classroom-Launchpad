@@ -1851,3 +1851,14 @@ body[data-theme=night] .colt-radio-skin-menu.radio-gallery{color-scheme:dark}
 .colt-radio-panel[data-radio-skin=kiss] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background-image:url('assets/radio-skins/illustrated/kiss-portrait-fitted.png');background-size:cover;background-position:center 30%;background-repeat:no-repeat;}
 
 .colt-radio-panel[data-radio-skin=kiss] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background-size:auto 145%;background-position:60% 40%;}
+
+/* Sleigh Bell Social */
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-header{background:url('assets/radio-skins/illustrated/sleigh-bell-social-header.png') center / 100% 100% no-repeat!important}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-skin-backdrop{background:url('assets/radio-skins/illustrated/sleigh-bell-social-body.png') center / 100% 100% no-repeat}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-skin-backdrop span{display:none}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] :is(.colt-radio-heading-mark,.colt-radio-stream-artwork){background:#173629 url('assets/radio-skins/illustrated/sleigh-bell-social-portrait.png') center / cover no-repeat;border:2px solid #ecc472;box-shadow:0 0 0 2px #681f28,0 0 8px #281302}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-heading h2{font:italic 900 clamp(22px,6vw,30px)/1 Georgia,serif;color:#fff0bb;letter-spacing:-.055em;text-shadow:0 2px #8c2631,1px 3px #45161f,0 0 5px #30150b}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-filter.is-active,.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-play{background:linear-gradient(#a92639,#591326);color:#fff0ca;border-color:#edc978}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-station{border-radius:6px;box-shadow:inset 0 0 0 2px #dfbe761d!important}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-note{background:#0a2118dd;color:#ffedc5}
+.colt-radio-panel[data-radio-skin=sleigh-bell-social] .colt-radio-player{background:linear-gradient(115deg,#471b25f5,#192b20ed)!important;border-color:#cb9f56}

@@ -831,6 +831,26 @@
   },
   "swatch": "linear-gradient(135deg,#e3e7ef,#111114,#b52121)"
 });
+  skins.push({
+  "id": "sleigh-bell-social",
+  "label": "Christmas • Sleigh Bell Social",
+  "layout": "genre",
+  "title": "words",
+  "assets": [
+    "assets/radio-skins/illustrated/sleigh-bell-social-header.png",
+    "assets/radio-skins/illustrated/sleigh-bell-social-portrait.png",
+    "assets/radio-skins/illustrated/sleigh-bell-social-body.png"
+  ],
+  "variables": {
+    "--genre-art": "url('assets/radio-skins/illustrated/sleigh-bell-social-header.png')",
+    "--genre-base": "#102821",
+    "--genre-edge": "#bd934a",
+    "--genre-accent": "#ffda90",
+    "--genre-text": "#fff5dd",
+    "--genre-material": "linear-gradient(140deg,#28493a,#122f25 64%,#1e3829)"
+  },
+  "swatch": "linear-gradient(135deg,#132f22,#af2031,#e2b967)"
+});
   skins.forEach(skin => {
     Object.freeze(skin.assets);
     Object.freeze(skin.variables);
