@@ -17,6 +17,7 @@ window.createPetTalk = function(read) {
   let current, request, opener, position, drag;
   const history = [];
   const portraits = {
+    nyan:'assets/pet-studio/nyan-classic.png',
     blackcat:'black-cat-pet/black-cat.png',
     colt:'assets/pet-studio/colt-original.png',
     squishy:'assets/pet-studio/squishy-gold.png',
