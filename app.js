@@ -1370,6 +1370,8 @@ function normalizeStudentSpotlights(items) {
     projectUrl: String(item && item.projectUrl || ""),
     status: item && item.status === "hidden" ? "hidden" : "published",
     expiresAt: String(item && item.expiresAt || ""),
+    likeCount: Math.max(0, Number(item && item.likeCount) || 0),
+    likedByMe: Boolean(item && item.likedByMe),
     hasMedia: Boolean(item && item.hasMedia),
     mediaKind: String(item && item.mediaKind || ""),
     mediaOriginalName: String(item && item.mediaOriginalName || ""),
@@ -1498,6 +1500,7 @@ let activationCodeResults = [];
 let assignments = [];
 let submissions = [];
 let studentSpotlights = [];
+let hideTeacherSpotlightLikes = true;
 let spotlightGradeFilter = "all";
 let spotlightCollectionFilter = "";
 let spotlightSearchQuery = "";
@@ -2054,6 +2057,7 @@ function startSharedSync(refreshImmediately = true) {
 }
 
 function setScreen(next) {
+  if (next.name === "studentSpotlights" && screen.name !== next.name) hideTeacherSpotlightLikes = true;
   screen = next;
   render();
   requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
@@ -2762,6 +2766,17 @@ function renderStudentSpotlightPreview() {
   `;
 }
 
+function renderSpotlightLike(item) {
+  const count = item.likeCount || 0;
+  const total = `${count} ${count === 1 ? "like" : "likes"}`;
+  const icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h4v11H3zM7 11l5-6V2c3 0 4 2 3 5l-1 3h5a2 2 0 0 1 2 2.4l-1.5 7a2 2 0 0 1-2 1.6H11l-4-2z"/></svg>`;
+  const hideSelection = authSession?.role === "teacher" && hideTeacherSpotlightLikes;
+  if (hideSelection || !["student", "teacher"].includes(authSession?.role) || !sharedBackend.enabled || (item.expiresAt && Date.parse(item.expiresAt) <= Date.now())) {
+    return `<span class="spotlight-like" aria-label="${total}" role="img">${icon} ${count}</span>`;
+  }
+  return `<button type="button" class="spotlight-like" data-action="spotlightLike" data-id="${escapeHtml(item.id)}" aria-pressed="${Boolean(item.likedByMe)}" aria-label="Like ${escapeHtml(item.title)}, ${total}" title="Like anonymously">${icon} <span>${count}</span></button>`;
+}
+
 function renderStudentSpotlightCard(item) {
   const openUrl = item.projectUrl || (item.hasMedia ? spotlightMediaUrl(item) : "");
   const searchText = `${item.displayName || ""} ${item.title || ""} ${item.description || ""} grade ${item.grade || ""}`.toLowerCase();
@@ -2775,7 +2790,10 @@ function renderStudentSpotlightCard(item) {
         <h3>${escapeHtml(item.title)}</h3>
         <p class="student-spotlight-byline">By ${escapeHtml(item.displayName)}</p>
         ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
-        ${openUrl ? `<button class="primary-btn student-spotlight-view-project" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project <span aria-hidden="true">&#8594;</span></button>` : ""}
+        <div class="spotlight-card-actions">
+          ${renderSpotlightLike(item)}
+          ${openUrl ? `<button class="primary-btn student-spotlight-view-project" type="button" data-action="open" data-url="${escapeHtml(openUrl)}">View Project <span aria-hidden="true">&#8594;</span></button>` : ""}
+        </div>
       </div>
     </article>
   `;
@@ -2865,7 +2883,13 @@ function renderStudentSpotlightPage() {
           <div class="student-spotlight-filters" role="group" aria-label="Filter featured work by grade">
             ${["all", "3", "4", "5", "6", "7"].map(grade => `<button type="button" class="${spotlightGradeFilter === grade ? "is-active" : ""}" data-action="spotlightGrade" data-grade="${grade}">${grade === "all" ? "All" : `Grade ${grade}`}</button>`).join("")}
           </div>
-          <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
+          <div class="spotlight-toolbar-footer">
+            ${authSession?.role === "teacher" ? `<button type="button" class="spotlight-privacy" data-action="toggleSpotlightPrivacy" aria-pressed="${hideTeacherSpotlightLikes}">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5c0 4.4 3 7.7 7.5 10 4.5-2.3 7.5-5.6 7.5-10V6z"/>${hideTeacherSpotlightLikes ? '<path d="m8.8 11.8 2 2 4.4-4.5"/>' : ""}</svg>
+              Hide my likes <span class="spotlight-privacy-track" aria-hidden="true"></span>
+            </button>` : ""}
+            <small id="studentSpotlightSearchStatus" aria-live="polite">${visible.length} featured ${visible.length === 1 ? "project" : "projects"}.</small>
+          </div>
         </div>
         <div class="student-spotlight-grid">
           ${visible.length ? visible.map(renderStudentSpotlightCard).join("") : emptyCard(spotlightGradeFilter === "all" ? "No student work is featured in this assignment yet." : `No Grade ${spotlightGradeFilter} work is featured in this assignment yet.`)}
@@ -13498,6 +13522,42 @@ app.addEventListener("click", async event => {
     spotlightSearchQuery = "";
     spotlightFolderSearchQuery = "";
     render();
+  }
+  if (action === "toggleSpotlightPrivacy" && authSession?.role === "teacher") {
+    hideTeacherSpotlightLikes = !hideTeacherSpotlightLikes;
+    render();
+    app.querySelector('[data-action="toggleSpotlightPrivacy"]')?.focus({ preventScroll: true });
+    return;
+  }
+  if (action === "spotlightLike") {
+    const id = target.dataset.id;
+    const session = authSession;
+    target.disabled = true;
+    try {
+      const result = await sharedBackend.request(`/api/student-spotlights/${encodeURIComponent(id)}/like`, {
+        method: target.getAttribute("aria-pressed") === "true" ? "DELETE" : "PUT"
+      });
+      if (authSession?.role !== session.role || authSession.email !== session.email) return;
+      const item = studentSpotlights.find(entry => entry.id === id);
+      if (item) {
+        Object.assign(item, result);
+        if (session.role === "teacher" && hideTeacherSpotlightLikes && screen.name === "studentSpotlights") {
+          render();
+          return;
+        }
+        const button = app.querySelector(`[data-action="spotlightLike"][data-id="${CSS.escape(id)}"]`);
+        if (button) {
+          button.querySelector("span").textContent = item.likeCount;
+          button.setAttribute("aria-pressed", String(item.likedByMe));
+          button.setAttribute("aria-label", `Like ${item.title}, ${item.likeCount} ${item.likeCount === 1 ? "like" : "likes"}`);
+        }
+      }
+    } catch (error) {
+      window.alert(error.message || "Could not save your like. Please try again.");
+    } finally {
+      target.disabled = false;
+    }
+    return;
   }
   if (action === "spotlightGrade") {
     spotlightGradeFilter = ["all", "3", "4", "5", "6", "7"].includes(target.dataset.grade) ? target.dataset.grade : "all";

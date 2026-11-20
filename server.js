@@ -631,10 +631,46 @@ function spotlightDisplayName(item) {
   return `${first} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
 }
 
-function publicStudentSpotlight(item, teacher = false) {
+const spotlightLikesPath = path.join(dataDir, "spotlight-likes.json");
+let spotlightLikes;
+
+function readSpotlightLikes() {
+  if (!spotlightLikes) {
+    try {
+      spotlightLikes = JSON.parse(fs.readFileSync(spotlightLikesPath, "utf8"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      spotlightLikes = { secret: crypto.randomBytes(32).toString("hex"), projects: {} };
+    }
+  }
+  return spotlightLikes;
+}
+
+function saveSpotlightVotes(id, votes) {
+  const current = readSpotlightLikes();
+  const projects = { ...current.projects, [id]: votes };
+  if (!votes.length) delete projects[id];
+  const next = { secret: current.secret, projects };
+  const temp = spotlightLikesPath + ".tmp";
+  fs.writeFileSync(temp, JSON.stringify(next), { mode: 0o600 });
+  fs.renameSync(temp, spotlightLikesPath);
+  spotlightLikes = next;
+}
+
+function spotlightVoterKey(id, session) {
+  // Keep the existing student key format so their saved likes carry forward.
+  const account = session.role === "teacher" ? { role: "teacher" } : normalizeEmail(session.email);
+  return crypto.createHmac("sha256", readSpotlightLikes().secret)
+    .update(JSON.stringify([id, account])).digest("hex");
+}
+
+function publicStudentSpotlight(item, teacher = false, session = null) {
+  const votes = readSpotlightLikes().projects[item.id] || [];
   return {
     id: item.id,
     title: item.title,
+    likeCount: votes.length,
+    likedByMe: Boolean(session && votes.includes(spotlightVoterKey(item.id, session))),
     collectionName: item.collectionName,
     folderPreviewPosition: item.folderPreviewPosition,
     description: item.description,
@@ -1838,7 +1874,7 @@ function publicState(db, session) {
     websiteRequests: teacher ? db.websiteRequests : [],
     assignments: visibleAssignments.map(publicAssignmentRecord),
     submissions: visibleSubmissions.map(submission => ({ ...submission, storedName: undefined })),
-    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher)),
+    studentSpotlights: visibleSpotlights.map(item => publicStudentSpotlight(item, teacher, session)),
     leaderboards: db.leaderboards,
     dailyLaunch: publicDailyLaunch(db.dailyLaunch, session),
     classTimer: db.classTimer,
@@ -2839,6 +2875,25 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
     return true;
   }
 
+  const likeMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/like$/);
+  if (likeMatch && ["PUT", "DELETE"].includes(req.method)) {
+    if (!requireSameOrigin(req, res)) return true;
+    const id = decodeURIComponent(likeMatch[1]);
+    const item = normalizeStudentSpotlights(readDb().studentSpotlights).find(entry => entry.id === id);
+    if (!item || item.status !== "published" || (item.expiresAt && Date.parse(item.expiresAt) <= Date.now())) {
+      sendJson(res, 404, { error: "Featured work not found." });
+      return true;
+    }
+    const votes = readSpotlightLikes().projects[id] || [];
+    const key = spotlightVoterKey(id, session);
+    const likedByMe = req.method === "PUT";
+    if (votes.includes(key) !== likedByMe) {
+      saveSpotlightVotes(id, likedByMe ? [...votes, key] : votes.filter(vote => vote !== key));
+    }
+    sendJson(res, 200, { likeCount: (readSpotlightLikes().projects[id] || []).length, likedByMe });
+    return true;
+  }
+
   const thumbnailMatch = pathname.match(/^\/api\/student-spotlights\/([^/]+)\/thumbnail$/);
   if (thumbnailMatch && ["GET", "HEAD"].includes(req.method)) {
     const db = readDb();
@@ -2902,7 +2957,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
         item
       );
       writeDb(db);
-      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -2927,7 +2982,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
         item
       );
       writeDb(db);
-      sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true) });
+      sendJson(res, 200, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(item, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -2982,7 +3037,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).map(item => item.id === id ? updated : item);
       writeDb(db);
       removeStudentSpotlightFiles(existing);
-      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true) });
+      sendJson(res, 201, { ok: true, ...studentSpotlightPayload(db, session), spotlight: publicStudentSpotlight(updated, true, session) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }
@@ -3023,6 +3078,7 @@ async function handleStudentSpotlightsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Featured work not found." });
       return true;
     }
+    if (readSpotlightLikes().projects[id]) saveSpotlightVotes(id, []);
     removeStudentSpotlightFiles(existing);
     db.studentSpotlights = normalizeStudentSpotlights(db.studentSpotlights).filter(item => item.id !== id);
     writeDb(db);
