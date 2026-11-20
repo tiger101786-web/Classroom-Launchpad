@@ -746,6 +746,7 @@ function normalizeNuggetPreference(value){const s=value&&typeof value==='object'
 function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
+    petHidden: source.petHidden === true,
     pet: ['blackcat','dumpling','gummy','eagle','labubu','roblox','highland','saber','nugget'].includes(source.pet) ? source.pet : 'colt',
     ...(source.blackcat ? {blackcat:normalizeBlackCatPreference(source.blackcat)} : {}),
     ...(source.nugget ? {nugget:normalizeNuggetPreference(source.nugget)} : {}),
@@ -4136,7 +4137,7 @@ async function handleApi(req, res, pathname) {
       if(input?.blackcat!==undefined){const p=input.blackcat;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(blackcatSkins,p.skin)||(p.bedColor!==undefined&&!Object.hasOwn(blackcatBeds,p.bedColor))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Cat settings.');}
       if(input?.saber!==undefined){const p=input.saber;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(saberSkins,p.skin)||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Saber-tooth Tiger settings.');}
       if(input?.nugget!==undefined){const p=input.nugget;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(nuggetSkins,p.skin)||(p.basketAccessory!==undefined&&!['none','french-fries','waffle-fries','tater-tots','fried-pickles','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(p.basketAccessory))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Chicken Nugget settings.');}
-      if (input && (!['blackcat', 'colt', 'dumpling', 'gummy', 'eagle', 'labubu', 'roblox', 'highland', 'saber', 'nugget'].includes(input.pet)
+      if (input && ((input.petHidden !== undefined && typeof input.petHidden !== 'boolean') || !['blackcat', 'colt', 'dumpling', 'gummy', 'eagle', 'labubu', 'roblox', 'highland', 'saber', 'nugget'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
         || (input.eyewear !== undefined && !['none', 'round', 'sunglasses', 'tea-glasses'].includes(input.eyewear))
@@ -4147,7 +4148,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference({...input,blackcat:input.blackcat??preferences[key]?.blackcat,nugget:input.nugget??preferences[key]?.nugget,saber:input.saber??preferences[key]?.saber,highland:input.highland??preferences[key]?.highland,roblox:input.roblox??preferences[key]?.roblox,eagle:input.eagle??preferences[key]?.eagle,gummy:input.gummy??preferences[key]?.gummy,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
+        preferences[key] = normalizeCompanionPreference({...input,petHidden:input.petHidden??preferences[key]?.petHidden,blackcat:input.blackcat??preferences[key]?.blackcat,nugget:input.nugget??preferences[key]?.nugget,saber:input.saber??preferences[key]?.saber,highland:input.highland??preferences[key]?.highland,roblox:input.roblox??preferences[key]?.roblox,eagle:input.eagle??preferences[key]?.eagle,gummy:input.gummy??preferences[key]?.gummy,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }

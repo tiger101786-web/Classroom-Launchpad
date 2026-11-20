@@ -97,6 +97,15 @@ assert.equal(await studio.locator('#pet-title').innerText(),'Eagle '+role);asser
 await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.querySelector('.eagle-companion .pet-button').classList.contains('still'));
 await page.emulateMedia({reducedMotion:'no-preference'});
 await studio.locator('[data-tab="settings"]').click();await studio.locator('#hide-pet').click();assert.equal(await page.locator('.eagle-companion').isVisible(),false);
+await page.reload({waitUntil:'domcontentloaded'});await home();
+await page.waitForFunction(()=>document.querySelector('.companion-picker select')?.disabled===false);
+assert.equal(await page.locator('.eagle-companion').isVisible(),false,'Hidden eagle stays hidden after reload');
+await page.locator('.header-account-summary').first().click();
+await page.locator('.header-account-menu [data-companion-open]').first().click();
+await page.locator('.companion-picker [data-pet-show]').click();
+await page.locator('.eagle-companion').waitFor({state:'visible'});
+await page.reload({waitUntil:'domcontentloaded'});await home();
+await page.locator('.eagle-companion').waitFor({state:'visible'});
 await open();assert(await studio.locator('.eagle-companion').isVisible());await studio.locator('#pet-select').selectOption('gummy');
 
 await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.querySelector('.gummy-companion .pet-button').classList.contains('still'));

@@ -1,9 +1,9 @@
 (() => {
   'use strict';
-  const defaults=()=>({pet:'colt',color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false,squishyName:'Mochi',squishyNameplate:true});
+  const defaults=()=>({pet:'colt',petHidden:false,color:'Gold',accessory:'none',eyewear:'none',motion:true,size:'medium',asleep:false,squishyName:'Mochi',squishyNameplate:true});
   const hiddenScreens=new Set(['pin','login']);
   let auth={},account='',epoch=0,enabled=true,preferences=defaults(),loaded=false,loadError=false,radioPlaying=false;
-  let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,petHidden=false,position=null,opener=null;
+  let screen=document.body.dataset.screen||'home',pending=Promise.resolve(),controller,applying=false,position=null,opener=null;
   let studio=null,studioRadio=false,petTalk=null;
   const picker=document.createElement('dialog');
   picker.className='companion-picker';picker.setAttribute('aria-labelledby','companion-picker-title');
@@ -168,16 +168,17 @@
   function closePanel(focus=false){panel.hidden=true;pet.setAttribute('aria-expanded','false');if(focus&&!host.hidden)pet.focus();}
   function openPanel(){if(host.hidden)return;if(studio){studio.open('squishy');return}optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
-    blackcat.update({account,visible:allowed()&&preferences.pet==='blackcat',radio:radioPlaying||studioRadio,preferences:preferences.blackcat});
-    nugget.update({account,visible:allowed()&&preferences.pet==='nugget',radio:radioPlaying||studioRadio,preferences:preferences.nugget});
-    saber.update({account,visible:allowed()&&preferences.pet==='saber',radio:radioPlaying||studioRadio,preferences:preferences.saber});
-    highland.update({account,visible:allowed()&&preferences.pet==='highland',radio:radioPlaying||studioRadio,preferences:preferences.highland});
-    roblox.update({account,visible:allowed()&&preferences.pet==='roblox',radio:radioPlaying||studioRadio,preferences:preferences.roblox});
-    labubu.update({account,visible:allowed()&&preferences.pet==='labubu',radio:radioPlaying||studioRadio,preferences:preferences.labubu});
-    eagle.update({account,visible:allowed()&&preferences.pet==='eagle',radio:radioPlaying||studioRadio,preferences:preferences.eagle});
-    gummy.update({account,visible:allowed()&&preferences.pet==='gummy',radio:radioPlaying||studioRadio,preferences:preferences.gummy});
-    robo.update({account,visible:allowed()&&preferences.pet==='colt',radio:radioPlaying||studioRadio,preferences:preferences.robo});
-    host.hidden=!allowed()||preferences.pet!=='dumpling'||petHidden;
+    const showSelectedPet=allowed()&&!loadError&&!preferences.petHidden;
+    blackcat.update({account,visible:showSelectedPet&&preferences.pet==='blackcat',radio:radioPlaying||studioRadio,preferences:preferences.blackcat});
+    nugget.update({account,visible:showSelectedPet&&preferences.pet==='nugget',radio:radioPlaying||studioRadio,preferences:preferences.nugget});
+    saber.update({account,visible:showSelectedPet&&preferences.pet==='saber',radio:radioPlaying||studioRadio,preferences:preferences.saber});
+    highland.update({account,visible:showSelectedPet&&preferences.pet==='highland',radio:radioPlaying||studioRadio,preferences:preferences.highland});
+    roblox.update({account,visible:showSelectedPet&&preferences.pet==='roblox',radio:radioPlaying||studioRadio,preferences:preferences.roblox});
+    labubu.update({account,visible:showSelectedPet&&preferences.pet==='labubu',radio:radioPlaying||studioRadio,preferences:preferences.labubu});
+    eagle.update({account,visible:showSelectedPet&&preferences.pet==='eagle',radio:radioPlaying||studioRadio,preferences:preferences.eagle});
+    gummy.update({account,visible:showSelectedPet&&preferences.pet==='gummy',radio:radioPlaying||studioRadio,preferences:preferences.gummy});
+    robo.update({account,visible:showSelectedPet&&preferences.pet==='colt',radio:radioPlaying||studioRadio,preferences:preferences.robo});
+    host.hidden=!showSelectedPet||preferences.pet!=='dumpling';
     loadPetArtwork(host);
     host.dataset.size=preferences.size||'medium';
     const showNameplate=preferences.squishyNameplate!==false;
@@ -224,25 +225,31 @@
     const snapshot={...preferences},generation=epoch;announce('Saving…');
     pending=pending.catch(()=>{}).then(async()=>{
       if(generation!==epoch)return;
-      const response=await fetch('/api/companion-preferences',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot),signal:controller.signal});
+      const response=await fetch('/api/companion-preferences',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot),signal:controller.signal,keepalive:true});
       if(!response.ok)throw Error('Save failed');
       if(generation===epoch&&JSON.stringify(snapshot)===JSON.stringify(preferences))announce('Saved');
     }).catch(error=>{if(generation===epoch&&error.name!=='AbortError')announce('Not saved. Please retry.',true);});
   }
   retry.onclick=pickerRetry.onclick=()=>loadError?updateAccount(auth,true):save();
-  select.onchange=()=>{preferences.pet=select.value;petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();closePanel();selectPet();resetNap();save();};
+  function setPetHidden(hidden){
+    if(!allowed()||loadError||!!preferences.petHidden===hidden)return;
+    preferences.petHidden=hidden;
+    sync();
+    save();
+  }
+  select.onchange=()=>{preferences.pet=select.value;preferences.petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();closePanel();selectPet();resetNap();save();};
   picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
   picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
-  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();sync();if(preferences.pet==='blackcat'){studio?.open('blackcat');return;}if(preferences.pet==='nugget'){nugget.show();blackcat.show();studio?.open('nugget');return;}if(preferences.pet==='saber')studio?.open('saber');else if(preferences.pet==='highland')studio?.open('highland');else if(preferences.pet==='roblox')studio?.open('roblox');else if(preferences.pet==='labubu')studio?.open('labubu');else if(preferences.pet==='eagle')studio?.open('eagle');else if(preferences.pet==='gummy')studio?.open('gummy');else if(preferences.pet==='colt')robo.customize();else openPanel();};
-  picker.querySelector('[data-pet-show]').onclick=()=>{petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();picker.close();sync();if(preferences.pet==='colt')robo.show();};
+  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();sync();if(preferences.pet==='blackcat'){studio?.open('blackcat');return;}if(preferences.pet==='nugget'){nugget.show();blackcat.show();studio?.open('nugget');return;}if(preferences.pet==='saber')studio?.open('saber');else if(preferences.pet==='highland')studio?.open('highland');else if(preferences.pet==='roblox')studio?.open('roblox');else if(preferences.pet==='labubu')studio?.open('labubu');else if(preferences.pet==='eagle')studio?.open('eagle');else if(preferences.pet==='gummy')studio?.open('gummy');else if(preferences.pet==='colt')robo.customize();else openPanel();};
+  picker.querySelector('[data-pet-show]').onclick=()=>{setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();picker.close();sync();if(preferences.pet==='colt')robo.show();};
   panel.querySelector('[data-dumpling-close]').onclick=()=>closePanel(true);
-  panel.querySelector('[data-dumpling-hide]').onclick=()=>{petHidden=true;sync();};
+  panel.querySelector('[data-dumpling-hide]').onclick=()=>setPetHidden(true);
   panel.querySelector('[data-dumpling-reset]').onclick=()=>{position=null;try{localStorage.removeItem(positionKey());}catch{}place();};
   function openPicker(event){
     if(!auth.authenticated)return;
     opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
     document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
-    closePanel();robo.close();sync();if(studio&&allowed()){petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();sync();studio.open(preferences.pet==='dumpling'?'squishy':preferences.pet);return}if(!picker.open)picker.showModal();
+    closePanel();robo.close();sync();if(studio&&allowed()&&!preferences.petHidden){robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();sync();studio.open(preferences.pet==='dumpling'?'squishy':preferences.pet);return}if(!picker.open)picker.showModal();
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
@@ -290,7 +297,7 @@
     if(next===account&&!force){sync();return;}
     studio?.close();account=next;const generation=++epoch;controller?.abort();controller=new AbortController();
     clearTimeout(napTimer);clearTimeout(moveTimer);hideSpeech();autoAsleep=false;
-    preferences=defaults();loaded=false;loadError=false;petHidden=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
+    preferences=defaults();loaded=false;loadError=false;position=null;closePanel();if(picker.open)picker.close();announce('');selectPet();
     try{const stored=JSON.parse(localStorage.getItem(positionKey())||'null');if(stored&&Number.isFinite(stored.x)&&Number.isFinite(stored.y))position=stored;}catch{}
     if(!next)return;
     try{
@@ -377,12 +384,12 @@
       prepare(){petTalk?.close(false);closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
       talk(){petTalk?.open();},
       change:setStudio,
-      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();selectPet();applyAppearance();save();},
+      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;preferences.petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();selectPet();applyAppearance();save();},
       restore(value){if(!allowed()||loadError)return;preferences={...preferences,blackcat:{...value.blackcat},nugget:{...value.nugget},saber:{...value.saber},highland:{...value.highland},roblox:{...value.roblox},labubu:{...value.labubu},eagle:{...value.eagle},gummy:{...value.gummy},robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
       play(kind,action){if(kind==='blackcat')blackcat.play(action);else if(kind==='nugget')nugget.play(action);else if(kind==='saber')saber.play(action);else if(kind==='highland')highland.play(action);else if(kind==='roblox')roblox.play(action);else if(kind==='labubu')labubu.play(action);else if(kind==='eagle')eagle.play(action);else if(kind==='gummy')gummy.play(action);else if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
       dance(on){studioRadio=on;sync();},refresh(){resetNap();},
       resetPosition(kind){if(kind==='blackcat')blackcat.reset();else if(kind==='nugget')nugget.reset();else if(kind==='saber')saber.reset();else if(kind==='highland')highland.reset();else if(kind==='roblox')roblox.reset();else if(kind==='labubu')labubu.reset();else if(kind==='eagle')eagle.reset();else if(kind==='gummy')gummy.reset();else if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
-      hide(kind){if(kind==='blackcat')blackcat.hide();else if(kind==='nugget')nugget.hide();else if(kind==='saber')saber.hide();else if(kind==='highland')highland.hide();else if(kind==='roblox')roblox.hide();else if(kind==='labubu')labubu.hide();else if(kind==='eagle')eagle.hide();else if(kind==='gummy')gummy.hide();else if(kind==='colt')document.querySelector('.robo-companion [data-hide]').click();else{petHidden=true;sync();}},
+      hide(){setPetHidden(true);},
       retry(){loadError?updateAccount(auth,true):save();}
     });
   }
