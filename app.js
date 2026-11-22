@@ -2625,11 +2625,14 @@ function coltRunTopbar() {
 }
 
 function renderHome() {
+  const today = new Date();
+  const christmasLights = today.getMonth() === 11 || (today.getMonth() === 10 && today.getDate() >= 21);
   return `
     <div class="home-layout ${homeNavigationCollapsed ? "is-nav-collapsed" : ""} ${homeNavigationMobileOpen ? "is-mobile-nav-open" : ""}">
     ${renderHomeNavigation()}
     <div class="home-page-content">
     <section id="home-top" class="hero-panel home-navigation-anchor">
+      ${christmasLights ? '<div class="home-christmas-lights" aria-hidden="true"></div>' : ""}
       <img class="hero-static-art" src="assets/hero-colt-static.jpg?v=20261031-v1" alt="" aria-hidden="true" fetchpriority="high" decoding="async" width="1536" height="1024">
       ${pageHeader(
         "Classroom Launchpad",

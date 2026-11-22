@@ -90,5 +90,18 @@ if(dance){
   });
   g.globalAlpha=1;
 }
-if(sleep){g.fillStyle='#e3d8ff';g.font='bold 8px monospace';g.fillText('z Z',50,4-p%3)}g.restore();
+if(sleep){
+  for(let i=0;i<3;i++){
+    const rise=(tm*.36+i/3)%1;
+    const x=47+Math.round(rise*14),y=3-Math.round(rise*18);
+    const width=rise<.5?4:5;
+    const color=rise<.5?'#cbbaff':'#ebe3ff';
+    g.globalAlpha=Math.min(1,rise*9,(1-rise)*9);
+    rect(color,x,y,width,1);
+    for(let step=1;step<width-1;step++)rect(color,x+width-1-step,y+step,1,1);
+    rect(color,x,y+width-1,width,1);
+  }
+  g.globalAlpha=1;
+}
+g.restore();
 };

@@ -13056,3 +13056,12 @@ body[data-theme="night"] .colt-run-volume {
 
 /* Preserve the full static mascot within wide and narrow category buttons. */
 .category-card-bg.category-static-art { object-fit:contain; object-position:right center; background:#080708; }
+
+.hero-panel > .home-christmas-lights {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 28px;
+  z-index: 2;
+  pointer-events: none;
+  background: url("assets/home-christmas-lights.svg") repeat-x center top / 224px 28px;
+}
