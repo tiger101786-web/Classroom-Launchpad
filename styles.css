@@ -13060,8 +13060,17 @@ body[data-theme="night"] .colt-run-volume {
 .hero-panel > .home-christmas-lights {
   position: absolute;
   inset: 0 0 auto;
-  height: 28px;
-  z-index: 2;
+  height: 46px;
+  z-index: 4;
   pointer-events: none;
-  background: url("assets/home-christmas-lights.svg") repeat-x center top / 224px 28px;
+  background: url("assets/home-christmas-lights.svg?v=3") repeat-x center top / 276px 46px;
+}
+
+.hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
+
+body:not([data-theme="night"]) .hero-panel > .home-christmas-lights {
+  background-image: url("assets/home-christmas-lights.svg?v=3"),
+    linear-gradient(to bottom, rgba(26, 20, 34, .76) 0%, rgba(32, 23, 38, .84) 44%, rgba(40, 30, 44, .52) 68%, transparent 100%);
+  background-size: 276px 46px, 100% 100%;
+  background-repeat: repeat-x, no-repeat;
 }
