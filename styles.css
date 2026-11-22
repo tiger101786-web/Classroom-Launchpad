@@ -13084,10 +13084,12 @@ body[data-theme="night"] .colt-run-volume {
 .hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
 .has-christmas-lights > #home-top { margin-bottom: 0; }
 .home-lights-divider { margin: 0 12px; }
+.has-christmas-lights #home-expectations { margin-bottom: 0; }
 .has-christmas-lights #home-categories::before {
   --strand-width: 204px;
   --strand-height: 34px;
   content: "";
   display: block;
+  width: calc(min(1298px, 100%) - 24px);
   margin-inline: 12px;
 }
