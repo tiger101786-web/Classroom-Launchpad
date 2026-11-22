@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="276" height="46" viewBox="0 0 276 46">
   <defs>
     <linearGradient id="glass" x2="1" y2="0" gradientUnits="objectBoundingBox">
-      <stop stop-color="#30182c" stop-opacity=".24"/><stop offset=".42" stop-color="white" stop-opacity=".13"/><stop offset="1" stop-color="#30182c" stop-opacity=".32"/>
+      <stop stop-color="#30182c" stop-opacity=".24"/><stop offset=".42" stop-color="#30182c" stop-opacity="0"/><stop offset="1" stop-color="#30182c" stop-opacity=".32"/>
     </linearGradient>
     <radialGradient id="halo"><stop stop-color="white" stop-opacity=".58"/><stop offset=".48" stop-color="white" stop-opacity=".46"/><stop offset=".79" stop-color="white" stop-opacity=".13"/><stop offset="1" stop-color="white" stop-opacity="0"/></radialGradient>
     <mask id="bloom"><ellipse cy="12" rx="13" ry="16" fill="url(#halo)"/></mask>
     <path id="glass-shape" d="M-3.6 3 C-7 6 -7.6 11 -5.5 15.5 C-4 19 -1 22 0 24 C1 22 4 19 5.5 15.5 C7.6 11 7 6 3.6 3Z"/>
     <path id="filament" d="M-2.7 10.4 L-.7 15.4 L.6 11.9 L2.4 14.2 L2 9.7" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
     <radialGradient id="hot-glass" cx="50%" cy="48%" r="58%">
-      <stop stop-color="#fff5cd" stop-opacity=".56"/>
-      <stop offset=".48" stop-color="#fff1ba" stop-opacity=".14"/>
+      <stop stop-color="#210820" stop-opacity="0"/>
+      <stop offset=".48" stop-color="#210820" stop-opacity="0"/>
       <stop offset="1" stop-color="#210820" stop-opacity=".48"/>
     </radialGradient>
-    <filter id="filament-light" x="-60%" y="-65%" width="220%" height="230%"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <filter id="filament-light" x="-60%" y="-65%" width="220%" height="230%"><feGaussianBlur stdDeviation=".8"/></filter>
     <g id="bulb">
       <ellipse cy="12" rx="13" ry="16" fill="currentColor" mask="url(#bloom)"/>
       <use href="#glass-shape" fill="currentColor" stroke="#312431" stroke-width="1.4"/>
       <use href="#glass-shape" fill="url(#glass)"/>
       <use href="#glass-shape" fill="url(#hot-glass)"/>
       <path d="M-1.6 3.8 L-2.7 10.4 M1.2 3.8 L2 9.7" fill="none" stroke="#573e38" stroke-width=".65"/>
-      <use href="#filament" stroke="#fff0b7" stroke-width="2.5" opacity=".85" filter="url(#filament-light)"/>
+      <use href="#filament" stroke="currentColor" stroke-width="2.2" opacity=".85" filter="url(#filament-light)"/>
       <use href="#filament" stroke="#fffdeb" stroke-width="1.05"/>
       <path d="M-2.5 6 Q-4.3 8.5 -4 10.5" fill="none" stroke="#fff6de" opacity=".62" stroke-width=".8" stroke-linecap="round"/>
       <rect x="-3.8" y="-2" width="7.6" height="6" rx="1" fill="#284838" stroke="#15291f"/>
@@ -27,10 +27,10 @@
     </g>
   </defs>
   <path d="M0 2 Q69 22 138 2 Q207 22 276 2" fill="none" stroke="#15291f" stroke-width="2.6"/>
-  <use href="#bulb" transform="translate(20 8) rotate(12)" color="#ff515b"/>
-  <use href="#bulb" transform="translate(64 12) rotate(3)" color="#ffc653"/>
-  <use href="#bulb" transform="translate(110 9) rotate(-13)" color="#54db87"/>
-  <use href="#bulb" transform="translate(158 8) rotate(14)" color="#6dc9ff"/>
-  <use href="#bulb" transform="translate(203 12) rotate(-3)" color="#ff6684"/>
-  <use href="#bulb" transform="translate(249 9) rotate(-12)" color="#ffd981"/>
+  <use href="#bulb" transform="translate(20 8) rotate(12)" color="#f20b26"/>
+  <use href="#bulb" transform="translate(64 12) rotate(3)" color="#ff9200"/>
+  <use href="#bulb" transform="translate(110 9) rotate(-13)" color="#00bb50"/>
+  <use href="#bulb" transform="translate(158 8) rotate(14)" color="#007cf5"/>
+  <use href="#bulb" transform="translate(203 12) rotate(-3)" color="#dc0750"/>
+  <use href="#bulb" transform="translate(249 9) rotate(-12)" color="#ffc000"/>
 </svg>
