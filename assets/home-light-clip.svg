@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 46" preserveAspectRatio="none">
+  <style>#right:target ~ g { transform: translateX(16px) scaleX(-1); }</style>
+  <g id="right"/>
+  <g>
+    <path d="M3 0 V3 Q6 8 12 4 L16 2" fill="none" stroke="#15291f" stroke-width="2.6"/>
+    <rect x="1" width="5" height="4" rx="1" fill="#425244" stroke="#1b2b20"/>
+    <path d="M2 1h3" stroke="#9ca998"/>
+  </g>
+</svg>

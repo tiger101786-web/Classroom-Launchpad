@@ -13057,29 +13057,37 @@ body[data-theme="night"] .colt-run-volume {
 /* Preserve the full static mascot within wide and narrow category buttons. */
 .category-card-bg.category-static-art { object-fit:contain; object-position:right center; background:#080708; }
 
-.hero-panel > .home-christmas-lights {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 46px;
-  z-index: 4;
-  pointer-events: none;
-  background: url("assets/home-christmas-lights.svg?v=6") repeat-x center top / 276px 46px;
-}
-
-.hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
-
 .home-christmas-lights,
 .has-christmas-lights #home-categories::before {
+  --strand-width: 250px;
+  --strand-height: 42px;
+  box-sizing: border-box;
+  height: var(--strand-height);
+  padding-inline: 16px;
   pointer-events: none;
-  background: url("assets/home-christmas-lights.svg?v=6") repeat-x center top / 250px 42px;
+  /* The two clips meet the cord at y=2/46. Only the middle repeats, in whole tiles. */
+  background-image: url("assets/home-light-clip.svg"), url("assets/home-light-clip.svg#right"), url("assets/home-christmas-lights.svg?v=7");
+  background-position: left top, right top, left top;
+  background-origin: border-box, border-box, content-box;
+  background-clip: border-box, border-box, content-box;
+  background-size: 16px var(--strand-height), 16px var(--strand-height), var(--strand-width) var(--strand-height);
+  background-repeat: no-repeat, no-repeat, round no-repeat;
 }
 
+.hero-panel > .home-christmas-lights {
+  --strand-width: 276px;
+  --strand-height: 46px;
+  position: absolute;
+  inset: 0 12px auto;
+  z-index: 4;
+}
+.hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
 .has-christmas-lights > #home-top { margin-bottom: 0; }
-.home-lights-divider { height: 42px; margin: 0 12px; }
+.home-lights-divider { margin: 0 12px; }
 .has-christmas-lights #home-categories::before {
+  --strand-width: 204px;
+  --strand-height: 34px;
   content: "";
   display: block;
-  height: 34px;
   margin-inline: 12px;
-  background-size: 204px 34px;
 }
