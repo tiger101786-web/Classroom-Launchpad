@@ -2630,7 +2630,7 @@ function renderHome() {
   return `
     <div class="home-layout ${homeNavigationCollapsed ? "is-nav-collapsed" : ""} ${homeNavigationMobileOpen ? "is-mobile-nav-open" : ""}">
     ${renderHomeNavigation()}
-    <div class="home-page-content">
+    <div class="home-page-content${christmasLights ? ' has-christmas-lights' : ''}">
     <section id="home-top" class="hero-panel home-navigation-anchor">
       ${christmasLights ? '<div class="home-christmas-lights" aria-hidden="true"></div>' : ""}
       <img class="hero-static-art" src="assets/hero-colt-static.jpg?v=20261031-v1" alt="" aria-hidden="true" fetchpriority="high" decoding="async" width="1536" height="1024">
@@ -2646,6 +2646,7 @@ function renderHome() {
         <div class="home-shelf-position" data-shelf-position="right">${homeSceneSessionReady ? window.CollectibleShelf.render(authSession, 'right') : ""}</div>
       </div>
     </section>
+    ${christmasLights ? '<div class="home-christmas-lights home-lights-divider" aria-hidden="true"></div>' : ""}
     <section id="homeBody">
       ${renderHomeDefault()}
     </section>
