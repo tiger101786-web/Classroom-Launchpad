@@ -30,6 +30,7 @@
   });
   const scenes = [
     { id:"holiday-reindeer-stable", name:"Christmas • Reindeer Stable", description:"A lantern-lit stable and a sleigh packed for Christmas Eve", image:"assets/launchpad-scene-holiday-reindeer-stable.png" },
+    { id:"holiday-snow-globe", name:"Christmas • Santa’s Snow Globe", description:"A hand-painted Santa ties a ribbon on a rocking horse as snow swirls and settles around them.", image:"assets/launchpad-scene-holiday-snow-globe.webp?v=christmas-tree" },
     { id:"holiday-clockwork-toyshop", name:"Christmas • Clockwork Toyshop", description:"A snowy clock tower above a bright window of handmade toys", image:"assets/launchpad-scene-holiday-clockwork-toyshop.png" },
     { id:"holiday-polar-express", name:"Christmas • North Pole Express", description:"A wreath-trimmed steam engine arrives under the northern lights", image:"assets/launchpad-scene-holiday-polar-express.png" },
     { id:"holiday-gingerbread-bakery", name:"Christmas • Gingerbread Bakery", description:"Cookie bakers frost Christmas treats in a glowing shop window", image:"assets/launchpad-scene-holiday-gingerbread-bakery.png" },
@@ -395,11 +396,35 @@
     return `<div class="launch-scene-stage">${artwork(scene.id, scene.motion, video, preview)}${frameArt(scene.frame)}</div>`;
   }
   const disneyExpansionIds = new Set(["disney-imperial-palace","disney-toontown","disney-insect-meadow","disney-sugar-rush","disney-zootopia","disney-highland-castle","disney-casita","disney-element-city","disney-fireworks-castle","disney-galleon-harbor","disney-walle-wasteland","disney-adventure-falls"]);
+  function globeSnow() {
+    // Stable samples keep the preview and saved scene alike. Start every flake
+    // at its own point in the water column, including on the very first frame.
+    let seed = 24012;
+    const sample = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+    const flakes = Array.from({ length: 340 }, (_, i) => {
+      const x = 7 + sample() * 86;
+      const halfHeight = Math.sqrt(44 ** 2 - (x - 50) ** 2);
+      const top = 50 - halfHeight;
+      const bed = Math.min(50 + halfHeight, 78 + sample() * 8);
+      const span = bed - top;
+      const depth = sample();
+      const drift = (sample() - .5) * 15;
+      const eddy = i % 6 === 0;
+      const duration = span / (eddy ? 15 + sample() * 6 : 5 + depth * 8);
+      const phase = sample();
+      const path = eddy
+        ? `M 0 ${span} C ${-drift*2} ${span*.72} ${drift*2} ${span*.78} ${drift} ${span*.47} S ${-drift} ${span*.18} 0 0`
+        : `M 0 0 C ${drift} ${span*.16} ${-drift} ${span*.32} 0 ${span*.5} S ${drift} ${span*.83} ${-drift*.4} ${span}`;
+      const radius = (.16 + depth ** 2 * .4).toFixed(2);
+      return `<g transform="translate(${x.toFixed(2)} ${top.toFixed(2)})"><circle r="${radius}" style="offset-path:path('${path}');--duration:${duration.toFixed(2)}s;--delay:-${(phase*duration).toFixed(2)}s;--rest:${(phase*100).toFixed(2)}%;--alpha:${(.48+depth*.48).toFixed(2)}"/></g>`;
+    });
+    return '<svg class="snow-globe-flakes" viewBox="0 0 100 100" aria-hidden="true" focusable="false">'+flakes.join('')+'</svg>';
+  }
   function artwork(id, motion, video, preview = false) {
     const scene = scenes.find(item => item.id === id) || scenes[0];
     const paused = !motion || reduced.matches;
     const content = scene.image
-      ? `<img class="launch-scene-image" src="${scene.image}" alt="${scene.name}" decoding="async"><span class="launch-scene-particles" aria-hidden="true">${Array.from({ length: 9 }, (_, index) => `<i style="--n:${index};--x:${9 + (index * 19) % 84}%;--y:${12 + (index * 23) % 72}%"></i>`).join("")}</span>${['disney-paris-rooftops','disney-halloween-town','disney-jungle-ruins','disney-haunted-mansion','disney-skull-lagoon','disney-radiator-springs','disney-river-valley'].includes(scene.id) ? '<span class="launch-scene-radiance" aria-hidden="true"></span>' : ''}`
+      ? `<img class="launch-scene-image" src="${scene.image}" alt="${scene.name}" decoding="async">${scene.id === "holiday-snow-globe" ? globeSnow() : `<span class="launch-scene-particles" aria-hidden="true">${Array.from({ length: 9 }, (_, index) => `<i style="--n:${index};--x:${9 + (index * 19) % 84}%;--y:${12 + (index * 23) % 72}%"></i>`).join("")}</span>`}${['disney-paris-rooftops','disney-halloween-town','disney-jungle-ruins','disney-haunted-mansion','disney-skull-lagoon','disney-radiator-springs','disney-river-valley'].includes(scene.id) ? '<span class="launch-scene-radiance" aria-hidden="true"></span>' : ''}`
       : `<video class="launch-scene-video" ${paused ? "" : "autoplay"} muted loop playsinline preload="metadata" aria-label="Mr. Nieves and Colt classroom video"><source ${preview ? "src" : "data-src"}="${video}?v=20260905-profile-optimized1" type="video/mp4"></video>`;
     const coins = scene.id === "pixel" ? `<span class="scene-coin-layer" aria-hidden="true">${[[56.6, 46.9, 2.3], [50.5, 53.1, 2.5], [53.3, 64.1, 3.1], [58.4, 71.9, 3.8]].map(([x, y, size], index) => `<span class="scene-pixel-coin" style="left:${x}%;top:${y}%;width:${size}%;--coin-delay:${index * -.45}s"><svg viewBox="0 0 12 16" shape-rendering="crispEdges"><path fill="#8d4000" d="M4 0h4v1h2v2h1v2h1v6h-1v2h-1v2H8v1H4v-1H2v-2H1v-2H0V5h1V3h1V1h2Z"/><path fill="#ffd12f" d="M4 1h4v1h2v3h1v6h-1v3H8v1H4v-1H2v-3H1V5h1V2h2Z"/><path fill="#ffef85" d="M4 2h3v1H4v10H3V4h1Z"/><path fill="#ed8b06" d="M8 3h1v10H7v1H5v-1h2V4h1Z"/><path fill="#ffef85" d="M5 4h1v7H5Z"/></svg></span>`).join("")}</span>` : "";
     const expansion = disneyExpansionIds.has(scene.id);

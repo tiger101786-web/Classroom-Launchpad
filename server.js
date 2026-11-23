@@ -54,6 +54,7 @@ homeSceneIds.add("madoka-mitakihara");
 homeSceneIds.add("holiday-reindeer-stable");
 homeSceneFrameIds.add("match-holiday-reindeer-stable");
 homeSceneIds.add("holiday-clockwork-toyshop");
+homeSceneIds.add("holiday-snow-globe");
 homeSceneFrameIds.add("match-holiday-clockwork-toyshop");
 homeSceneIds.add("holiday-polar-express");
 homeSceneFrameIds.add("match-holiday-polar-express");
