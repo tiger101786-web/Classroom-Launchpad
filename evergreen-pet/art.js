@@ -1,0 +1,141 @@
+const evergreenArtBase = new URL('.', document.currentScript.src);
+window.createEvergreenRenderer = function(canvas, refresh) {
+const ctx = canvas.getContext('2d');
+const tree = new Image();
+const skirtArt = new Image();
+const skirtTints = { cranberry:'none', pine:'hue-rotate(102deg)', blue:'hue-rotate(212deg)' };
+const layer = document.createElement('canvas');
+layer.width = 455;
+layer.height = 690;
+const art = layer.getContext('2d');
+const ornamentColors = { classic:['#bc1737','#e7ad4f'], ice:['#5898ca','#dce6e9'], candy:['#e57994','#f7ddd4'] };
+const bulbColors = { warm:['#ffe18b'], color:['#ff5461','#59dfa8','#6ea8ff','#ffd36a'], frost:['#90dfff','#e4faff'] };
+const baubles = [[220,105],[178,179],[273,204],[125,261],[327,270],[83,370],[350,382],[163,435],[289,460],[73,500],[375,505],[226,540]];
+
+function oval(x,y,rx,ry,color) {
+  art.fillStyle=color;
+  art.beginPath(); art.ellipse(x,y,rx,ry,0,0,Math.PI*2); art.fill();
+}
+function curve(x,y,cx,cy,ex,ey,color,width) {
+  art.beginPath(); art.moveTo(x,y); art.quadraticCurveTo(cx,cy,ex,ey);
+  art.strokeStyle=color; art.lineWidth=width; art.lineCap='round'; art.stroke();
+}
+function decorations(t,look) {
+  const palette = ornamentColors[look.ornaments];
+  if (palette) baubles.forEach(([x,y],i) => {
+    const r=9+y/100;
+    curve(x,y-r-10,x-3,y-r-5,x,y-r,'#c9a971',1.6);
+    art.fillStyle='#c6a46a'; art.fillRect(x-3,y-r-2,6,4);
+    const glaze=art.createRadialGradient(x-r*.4,y-r*.5,1,x,y,r);
+    glaze.addColorStop(0,'#fff2d1'); glaze.addColorStop(.25,palette[i%2]); glaze.addColorStop(.78,palette[i%2]); glaze.addColorStop(1,'#402c2c');
+    oval(x,y,r,r,glaze);
+  });
+  const bulbs=bulbColors[look.lights];
+  if (!bulbs) return;
+  for (let row=0;row<4;row++) {
+    const span=46+row*41, y=121+row*124, count=5+row*2;
+    curve(227-span,y,227,y+43,227+span,y-7,'#33452c',2);
+    for (let i=0;i<count;i++) {
+      const u=(i+.2)/count, x=227-span+2*span*u, by=y+86*u*(1-u)-7*u*u;
+      const color=bulbs[(row+i)%bulbs.length];
+      art.save(); art.shadowColor=color; art.shadowBlur=6+2*Math.sin(t*2+i);
+      oval(x,by+3,3.5,5,color); art.restore();
+      oval(x-.7,by+2,1,2,'#fffae5');
+    }
+  }
+}
+function expression(t,state) {
+  const sleep=state==='sleep', pleased=state==='happy'||state==='dance';
+  const blink=state==='blink'||(state==='idle' && t%4.7>4.5);
+  for (const x of [185,270]) {
+    if (sleep||pleased||blink) {
+      curve(x-14,319,x,pleased?297:329,x+14,319,'#e1c6a0',8);
+      curve(x-14,318,x,pleased?296:328,x+14,318,'#29211f',5);
+    } else {
+      const shift=state==='curious'?5*Math.sin(t*2):0;
+      oval(x,317,16,19,'#b19c71'); oval(x,317,14,17,'#302522');
+      oval(x+shift,319,9,12,'#100e0e'); oval(x-4+shift,311,4,4,'#fff9eb');
+    }
+  }
+  const wiggle=state==='twitch'?3*Math.sin(t*16):0;
+  oval(227+wiggle,335,5,3,'#30251f');
+  if (sleep||['talk','hello','wake'].includes(state)) {
+    const open=sleep?5+2*Math.sin(t*2):state==='wake'?4+13*Math.sin(Math.min(1,t/3.5)*Math.PI):5+5*Math.abs(Math.sin(t*8));
+    oval(227,349,11,open,'#3c2424'); oval(227,350+open*.48,6,open*.26,'#d88e88');
+  } else curve(214,345,227,pleased?366:357,241,345,'#2c201c',5);
+}
+
+function drawTopper(kind,x,y) {
+  if(!kind || kind==='none')return;
+  ctx.save();ctx.translate(x,y);ctx.lineWidth=2;ctx.strokeStyle='#b18c4d';
+  const gold=ctx.createLinearGradient(-18,-22,18,14);
+  gold.addColorStop(0,'#fff4bd');gold.addColorStop(.55,'#f0bf58');gold.addColorStop(1,'#ac702f');
+  ctx.fillStyle=gold;
+  if(kind==='star'){
+    ctx.beginPath();
+    for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?12:30;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
+    ctx.closePath();ctx.fill();ctx.stroke();
+  } else {
+    const angel=kind==='angel';
+    for(const side of [-1,1]){
+      ctx.save();ctx.scale(side,1);ctx.fillStyle=angel?'#fff6dd':'#b32c48';
+      ctx.beginPath();ctx.moveTo(0,2);ctx.bezierCurveTo(9,-18,28,-28,29,-15);ctx.quadraticCurveTo(32,8,0,8);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+    }
+    if(angel){
+      ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(16,17);ctx.quadraticCurveTo(0,24,-16,17);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#eac098';ctx.beginPath();ctx.arc(0,-14,8,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(0,-26,10,3,0,0,Math.PI*2);ctx.strokeStyle='#ffde82';ctx.lineWidth=3;ctx.stroke();
+    }else{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.fill();}
+  }
+  ctx.restore();
+}
+function render(state,t,look) {
+  if(!tree.naturalWidth) return;
+  art.clearRect(0,0,455,690); art.drawImage(tree,0,0,455,566);
+  decorations(t,look); expression(t,state);
+  ctx.clearRect(0,0,600,810);
+  if (look.skirt !== 'none' && skirtArt.naturalWidth) {
+    ctx.save();
+    ctx.filter=skirtTints[look.skirt];
+    ctx.drawImage(skirtArt,72,62+508,455,182);
+    ctx.restore();
+  } else {
+    const bark=ctx.createLinearGradient(285,0,315,0);
+    bark.addColorStop(0,'#503523'); bark.addColorStop(.4,'#93633e'); bark.addColorStop(1,'#4a3021');
+    ctx.fillStyle=bark;
+    ctx.beginPath(); ctx.roundRect(285,593,30,56,7); ctx.fill();
+  }
+  const swing=Math.sin(t*(state==='dance'?6:3));
+  // Move the crown and branch tiers around their attachment points. Keep the skirt anchored.
+  let tipOffset=0;
+  for (let y=0;y<690;y+=3) {
+    const height=Math.min(3,690-y), upper=Math.max(0,1-y/568);
+    let dx=(state==='sleep'?1:3)*upper*Math.sin(t*1.6);
+    if (state==='dance'||state==='wobble') dx+=swing*upper*(state==='dance'?34:21);
+    if (state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
+    if (state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
+    if(y===0)tipOffset=dx;
+    if (state==='wave'||state==='hello') {
+      const reach=Math.exp(-((y-357)**2)/3700);
+      const extension=reach*(1-Math.cos(t*6))*14;
+      ctx.drawImage(layer,0,y,180,height,72+dx-extension,62+y,180+extension,height);
+      ctx.drawImage(layer,180,y,275,height,252+dx,62+y,275,height);
+    } else ctx.drawImage(layer,0,y,455,height,72+dx,62+y,455,height);
+  }
+  drawTopper(look.topper,296+tipOffset,62);
+  if(state==='dance'||state==='sleep') {
+    ctx.textAlign='center';
+    for(let i=0;i<3;i++) {
+      const phase=(t*.45+i/3)%1;
+      ctx.font='bold '+(22+phase*13)+'px Georgia'; ctx.fillStyle=state==='sleep'?'#d9edf3':'#ffe6a1';
+      ctx.globalAlpha=Math.sin(phase*Math.PI);
+      ctx.fillText(state==='sleep'?'Z':i%2?'♫':'♪',410+phase*43,252-phase*120);
+    }
+    ctx.globalAlpha=1;
+  }
+}
+tree.onload=skirtArt.onload=refresh;
+tree.src=new URL('boughs.webp',evergreenArtBase);
+skirtArt.src=new URL('skirt.webp',evergreenArtBase);
+return render;
+};

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Evergreen • Pet preview</title>
+  <link rel="stylesheet" href="tree.css">
+</head>
+<body><main>
+  <header><h1>Evergreen</h1><p>Christmas tree pet preview</p></header>
+  <div class="layout">
+    <section class="stage" aria-label="Pet preview">
+      <button class="pet" aria-label="Greet Evergreen or wake the sleeping tree"><canvas width="600" height="810"></canvas></button>
+      <span class="name">Evergreen</span><output id="status" aria-live="polite">Idle</output>
+    </section>
+    <section class="settings" aria-label="Pet controls">
+      <fieldset><legend>Accessories</legend>
+        <label>Tree topper<select id="topper"><option value="none">None</option><option value="star">Gold star</option><option value="bow">Cranberry bow</option><option value="angel">Golden angel</option></select></label>
+        <label>Tree skirt<select id="skirt"><option value="cranberry">Cranberry velvet</option><option value="pine">Forest green velvet</option><option value="blue">Winter blue velvet</option><option value="none">No skirt</option></select></label>
+        <label>Ornaments<select id="ornaments"><option value="none">None</option><option value="classic" selected>Cranberry &amp; gold</option><option value="ice">Frosted silver &amp; blue</option><option value="candy">Peppermint pink</option></select></label>
+        <label>Tree lights<select id="lights"><option value="none">Off</option><option value="warm" selected>Warm white</option><option value="color">Multicolor</option><option value="frost">Winter blue</option></select></label>
+      </fieldset>
+      <fieldset><legend>Animations</legend><div id="actions"></div></fieldset>
+      <label class="size">Preview size<select id="size"><option value="large">Large preview</option><option value="desktop">Desktop pet</option></select></label>
+    </section>
+  </div>
+</main><script src="../../evergreen-pet/art.js"></script><script src="tree.js"></script></body></html>

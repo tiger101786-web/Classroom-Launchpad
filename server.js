@@ -1,3 +1,4 @@
+const evergreenSettings = require('./evergreen-pet/settings');
 const blackcatBeds = require('./black-cat-pet/beds.js');
 const blackcatSkins = require('./black-cat-pet/skins.js');
 const http = require("http");
@@ -778,6 +779,17 @@ const ROBLOX_HEADWEAR=['none','headphones','hard-hat','bacon-hair','knight-helme
 function normalizeRobloxPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(ROBLOX_SKINS,s.skin)?s.skin:'Classic',top:Object.hasOwn(ROBLOX_SKINS,s.top)?s.top:'skin',pants:Object.hasOwn(ROBLOX_SKINS,s.pants)?s.pants:'skin',name:Array.from((typeof s.name==='string'?s.name:'Buddy').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Buddy',headwear:ROBLOX_HEADWEAR.includes(s.headwear)?s.headwear:'none',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true};}
 function normalizeHighlandPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:'Copper',name:Array.from((typeof s.name==='string'?s.name:'Hamish').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Hamish',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','cap','wreath','headphones','beanie','sunflower-bow'].includes(s.headwear)?s.headwear:'none',neckwear:['scarf','bandana','cowbell'].includes(s.neckwear)?s.neckwear:'none'};}
 function normalizeSaberPreference(value){const s=value&&typeof value==='object'?value:{};return {skin:Object.hasOwn(saberSkins,s.skin)?s.skin:'Saber-tooth',name:Array.from((typeof s.name==='string'?s.name:'Saber').replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||'Saber',nameplate:s.nameplate!==false,platform:s.platform!==false,motion:s.motion!==false,size:['small','medium','large','extra-large'].includes(s.size)?s.size:'medium',asleep:s.asleep===true,headwear:['none','headphones'].includes(s.headwear)?s.headwear:'none'};}
+function normalizeEvergreenPreference(value) {
+  const result=evergreenSettings.defaults();
+  const source=value || {};
+  for(const [key, options] of Object.entries(evergreenSettings.accessories)){
+    if(Object.hasOwn(options,source[key]))result[key]=source[key];
+  }
+  if(typeof source.name==='string')result.name=Array.from(source.name.replace(/[\u0000-\u001f\u007f]/g,'').trim()).slice(0,16).join('')||result.name;
+  if(['small','medium','large','extra-large'].includes(source.size))result.size=source.size;
+  for(const key of ['motion','asleep','nameplate'])if(typeof source[key]==='boolean')result[key]=source[key];
+  return result;
+}
 function normalizeNyanPreference(value){
   const s=value&&typeof value==='object'?value:{};
   const name=Array.from(typeof s.name==='string'?s.name.replace(/[\u0000-\u001f\u007f]/g,'').trim():'').slice(0,16).join('')||'Nyan Cat';
@@ -790,7 +802,8 @@ function normalizeCompanionPreference(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
     petHidden: source.petHidden === true,
-    pet: ['nyan','blackcat','dumpling','gummy','eagle','labubu','roblox','highland','saber','nugget'].includes(source.pet) ? source.pet : 'colt',
+    pet: ['evergreen','nyan','blackcat','dumpling','gummy','eagle','labubu','roblox','highland','saber','nugget'].includes(source.pet) ? source.pet : 'colt',
+    ...(source.evergreen ? {evergreen:normalizeEvergreenPreference(source.evergreen)} : {}),
     ...(source.nyan ? {nyan:normalizeNyanPreference(source.nyan)} : {}),
     ...(source.blackcat ? {blackcat:normalizeBlackCatPreference(source.blackcat)} : {}),
     ...(source.nugget ? {nugget:normalizeNuggetPreference(source.nugget)} : {}),
@@ -831,9 +844,9 @@ function petChatIdentity(kind, appearance) {
     : normalizeCompanionPreference({[key]:source})[key];
   const name = kind === "squishy" ? normalized.squishyName : normalized.name;
   const accessories = Object.fromEntries(
-    ['headwear','accessory','eyewear','neckwear','outfit','basketAccessory','top','pants']
+    ['headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','skirt','topper','top','pants']
       .filter(key => normalized[key] && !['none','skin'].includes(normalized[key]))
-      .map(key => [key, normalized[key].replace(/-/g,' ')])
+      .map(key => [key, kind==='evergreen' && evergreenSettings.accessories[key] ? evergreenSettings.accessories[key][normalized[key]] : normalized[key].replace(/-/g,' ')])
   );
   if (source.headwear === "headphones") accessories.headwear = "headphones";
   return {name, accessories};
@@ -4198,11 +4211,17 @@ async function handleApi(req, res, pathname) {
       if(input?.gummy!==undefined){const g=input.gummy;if(!g||(g.headwear!==undefined&&!['none','crown','varsity','beanie','headphones'].includes(g.headwear))||(g.eyewear!==undefined&&!['none','sunglasses','star-glasses'].includes(g.eyewear))||(g.neckwear!==undefined&&!['none','bowtie','candy-chain','belt'].includes(g.neckwear))||typeof g!=='object'||Array.isArray(g)||!GUMMY_BEAR_SKINS.includes(g.skin)||typeof g.name!=='string'||Array.from(g.name).length>16||/[\u0000-\u001f\u007f]/.test(g.name)||!['small','medium','large','extra-large'].includes(g.size)||['motion','asleep','nameplate'].some(k=>typeof g[k]!=='boolean'))throw new Error('Choose valid Gummy Bear settings.');}
       if(input?.eagle!==undefined){const e=input.eagle;if(!e||(e.headwear!==undefined&&!['none','flight-cap','ranger','sheriff','earmuffs'].includes(e.headwear))||(e.eyewear!==undefined&&!['none','goggles','bronze-goggles'].includes(e.eyewear))||(e.neckwear!==undefined&&!['none','bandana','compass','medal','shoulder-scarf','flight-vest'].includes(e.neckwear))||typeof e!=='object'||Array.isArray(e)||e.skin!=='Bald Eagle'||typeof e.name!=='string'||Array.from(e.name).length>16||/[\u0000-\u001f\u007f]/.test(e.name)||!['small','medium','large','extra-large'].includes(e.size)||(e.nameplate!==undefined&&typeof e.nameplate!=='boolean')||['motion','asleep'].some(k=>typeof e[k]!=='boolean'))throw new Error('Choose valid Bald Eagle settings.');}
       if(input?.highland!==undefined){const p=input.highland;if(!p||typeof p!=='object'||Array.isArray(p)||p.skin!=='Copper'||(p.headwear!==undefined&&!['none','cap','wreath','headphones','beanie','sunflower-bow'].includes(p.headwear))||(p.neckwear!==undefined&&!['none','scarf','bandana','cowbell'].includes(p.neckwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Highland Cow settings.');}
+      if(input?.evergreen!==undefined){
+        const p=input.evergreen;
+        if(!p || typeof p!=='object' || Array.isArray(p) || p.skin!=='Classic' || typeof p.name!=='string' || Array.from(p.name).length>16 || /[\u0000-\u001f\u007f]/.test(p.name)
+          || !['small','medium','large','extra-large'].includes(p.size) || ['motion','asleep','nameplate'].some(k=>typeof p[k]!=='boolean')
+          || Object.entries(evergreenSettings.accessories).some(([k,opts])=>!Object.hasOwn(opts,p[k])))throw new Error('Choose valid Evergreen settings.');
+      }
       if(input?.nyan!==undefined){const p=input.nyan;if(!p||typeof p!=='object'||Array.isArray(p)||p.skin!=='Classic'||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Nyan Cat settings.');}
       if(input?.blackcat!==undefined){const p=input.blackcat;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(blackcatSkins,p.skin)||(p.bedColor!==undefined&&!Object.hasOwn(blackcatBeds,p.bedColor))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Cat settings.');}
       if(input?.saber!==undefined){const p=input.saber;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(saberSkins,p.skin)||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Saber-tooth Tiger settings.');}
       if(input?.nugget!==undefined){const p=input.nugget;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(nuggetSkins,p.skin)||(p.basketAccessory!==undefined&&!['none','french-fries','waffle-fries','tater-tots','fried-pickles','mcdonalds','chick-fil-a','burger-king','raising-canes'].includes(p.basketAccessory))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Chicken Nugget settings.');}
-      if (input && ((input.petHidden !== undefined && typeof input.petHidden !== 'boolean') || !['nyan', 'blackcat', 'colt', 'dumpling', 'gummy', 'eagle', 'labubu', 'roblox', 'highland', 'saber', 'nugget'].includes(input.pet)
+      if (input && ((input.petHidden !== undefined && typeof input.petHidden !== 'boolean') || !['evergreen', 'nyan', 'blackcat', 'colt', 'dumpling', 'gummy', 'eagle', 'labubu', 'roblox', 'highland', 'saber', 'nugget'].includes(input.pet)
         || !['Galaxy', 'Gold', 'Rose', 'Blue', 'Lavender', 'Matcha', 'Silver', 'Rainbow', 'USA', 'Metallic Gold', 'Metallic Blue', 'Metallic Green', 'Metallic Pink', 'Metallic Purple', 'Metallic Red'].includes(input.color)
         || !['none', 'bow', 'headphones', 'hat', 'cap', 'crown', 'sleepcap'].includes(input.accessory)
         || (input.eyewear !== undefined && !['none', 'round', 'sunglasses', 'tea-glasses'].includes(input.eyewear))
@@ -4213,7 +4232,7 @@ async function handleApi(req, res, pathname) {
       const preferences = normalizeCompanionPreferences(db.companionPreferences);
       const key = coltCustomizationAccountKey(allowed);
       if (input) {
-        preferences[key] = normalizeCompanionPreference({...input,petHidden:input.petHidden??preferences[key]?.petHidden,nyan:input.nyan??preferences[key]?.nyan,blackcat:input.blackcat??preferences[key]?.blackcat,nugget:input.nugget??preferences[key]?.nugget,saber:input.saber??preferences[key]?.saber,highland:input.highland??preferences[key]?.highland,roblox:input.roblox??preferences[key]?.roblox,eagle:input.eagle??preferences[key]?.eagle,gummy:input.gummy??preferences[key]?.gummy,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
+        preferences[key] = normalizeCompanionPreference({...input,petHidden:input.petHidden??preferences[key]?.petHidden,evergreen:input.evergreen??preferences[key]?.evergreen,nyan:input.nyan??preferences[key]?.nyan,blackcat:input.blackcat??preferences[key]?.blackcat,nugget:input.nugget??preferences[key]?.nugget,saber:input.saber??preferences[key]?.saber,highland:input.highland??preferences[key]?.highland,roblox:input.roblox??preferences[key]?.roblox,eagle:input.eagle??preferences[key]?.eagle,gummy:input.gummy??preferences[key]?.gummy,squishyName:input.squishyName??preferences[key]?.squishyName,squishyNameplate:input.squishyNameplate??preferences[key]?.squishyNameplate,robo:input.robo?{...preferences[key]?.robo,...input.robo,skin:input.robo.skin??preferences[key]?.robo?.skin}:preferences[key]?.robo});
         db.companionPreferences = preferences;
         writeDb(db);
       }

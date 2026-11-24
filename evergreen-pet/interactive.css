@@ -1,0 +1,12 @@
+.evergreen-companion {position:fixed;width:min(var(--fir-width,165px),90vw);z-index:90;pointer-events:none;user-select:none;text-align:center}
+.evergreen-companion[hidden],.evergreen-name[hidden]{display:none!important}
+.evergreen-companion[data-size=small]{--fir-width:125px}
+.evergreen-companion[data-size=large]{--fir-width:195px}
+.evergreen-companion[data-size=extra-large]{--fir-width:225px}
+.evergreen-companion canvas{width:100%;height:auto;display:block}
+.evergreen-companion .pet-button{position:absolute;inset:9% 13% 19%;width:auto;height:auto;pointer-events:auto;cursor:grab;touch-action:none;background:transparent;border:0;box-shadow:none}
+.evergreen-name{display:block;box-sizing:border-box;margin:-5% auto 0;width:90%;padding:5% 14%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:url(nameplate.webp) center/100% 100% no-repeat;color:#fff2cb;font:bold 14px/1.2 Georgia,serif;text-shadow:0 1px 2px #32190c}
+.pet-studio #pet-stage .evergreen-companion{position:relative!important;inset:auto!important;width:min(100%,200px)!important;margin:auto}
+.pet-studio .evergreen-companion .pet-button{pointer-events:none}
+.pet-chat[data-pet=evergreen]{--paper:#203b2d;--edge:#d5ae6a;--ink:#fff6dd;--label:#f1c97a}
+.pet-talk[data-pet=evergreen]{--talk-paper:#193729;--talk-ink:#fff6df;--talk-edge:#bf995c;--talk-field:#13291f;--talk-send:#8b3242;--talk-header:linear-gradient(110deg,#284534,#473324)}

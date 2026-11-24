@@ -13,6 +13,8 @@
   document.body.append(picker,host);
   const robo=window.createLazyLaunchpadPet('colt',value=>{preferences.robo=value;sync();save();},window.createPetStudio?()=>studio?.open('colt'):undefined);
   const gummy=window.createLazyLaunchpadPet('gummy',value=>{preferences.gummy=value;sync();save();},()=>studio?.open('gummy'));
+  const evergreen=window.createLazyLaunchpadPet('evergreen',value=>{preferences.evergreen=value;sync();save();},()=>studio?.open('evergreen'));
+  picker.querySelector('select').add(new Option('Evergreen','evergreen'));
   const nyan=window.createLazyLaunchpadPet('nyan',value=>{preferences.nyan=value;sync();save();},()=>studio?.open('nyan'));
   picker.querySelector('select').add(new Option('Nyan Cat','nyan'));
   const blackcat=window.createLazyLaunchpadPet('blackcat',value=>{preferences.blackcat=value;sync();save();},()=>studio?.open('blackcat'));
@@ -171,6 +173,7 @@
   function openPanel(){if(host.hidden)return;if(studio){studio.open('squishy');return}optionPages.forEach(reveal=>reveal());hideSpeech();panel.hidden=false;pet.setAttribute('aria-expanded','true');placePanel();panel.querySelector('[data-dumpling-close]').focus();}
   function sync(){
     const showSelectedPet=allowed()&&!loadError&&!preferences.petHidden;
+    evergreen.update({account,visible:showSelectedPet&&preferences.pet==='evergreen',radio:radioPlaying||studioRadio,preferences:preferences.evergreen});
     nyan.update({account,visible:showSelectedPet&&preferences.pet==='nyan',radio:radioPlaying||studioRadio,preferences:preferences.nyan});
     blackcat.update({account,visible:showSelectedPet&&preferences.pet==='blackcat',radio:radioPlaying||studioRadio,preferences:preferences.blackcat});
     nugget.update({account,visible:showSelectedPet&&preferences.pet==='nugget',radio:radioPlaying||studioRadio,preferences:preferences.nugget});
@@ -195,8 +198,8 @@
     if(!auth.authenticated||!enabled){if(picker.open)picker.close();}
     select.value=preferences.pet;select.disabled=!loaded||loadError||!enabled;
     picker.querySelector('[data-pet-customize]').hidden=picker.querySelector('[data-pet-show]').hidden=false;
-    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='blackcat'?'Customize Cat':preferences.pet==='nyan'?'Customize Nyan Cat':preferences.pet==='nugget'?'Customize Chicken Nugget':preferences.pet==='saber'?'Customize Saber-tooth Tiger':preferences.pet==='highland'?'Customize Highland Cow':preferences.pet==='roblox'?'Customize Roblox Buddy':preferences.pet==='labubu'?'Customize Labubu':preferences.pet==='eagle'?'Customize Bald Eagle':preferences.pet==='gummy'?'Customize Gummy Bear':preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
-    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='blackcat'?'Show Cat':preferences.pet==='nyan'?'Show Nyan Cat':preferences.pet==='nugget'?'Show Chicken Nugget':preferences.pet==='saber'?'Show Saber-tooth Tiger':preferences.pet==='highland'?'Show Highland Cow':preferences.pet==='roblox'?'Show Roblox Buddy':preferences.pet==='labubu'?'Show Labubu':preferences.pet==='eagle'?'Show Bald Eagle':preferences.pet==='gummy'?'Show Gummy Bear':preferences.pet==='colt'?'Show Colt':'Show dumpling';
+    picker.querySelector('[data-pet-customize]').textContent=preferences.pet==='evergreen'?'Customize Evergreen':preferences.pet==='blackcat'?'Customize Cat':preferences.pet==='nyan'?'Customize Nyan Cat':preferences.pet==='nugget'?'Customize Chicken Nugget':preferences.pet==='saber'?'Customize Saber-tooth Tiger':preferences.pet==='highland'?'Customize Highland Cow':preferences.pet==='roblox'?'Customize Roblox Buddy':preferences.pet==='labubu'?'Customize Labubu':preferences.pet==='eagle'?'Customize Bald Eagle':preferences.pet==='gummy'?'Customize Gummy Bear':preferences.pet==='colt'?'Customize Colt':'Customize dumpling';
+    picker.querySelector('[data-pet-show]').textContent=preferences.pet==='evergreen'?'Show Evergreen':preferences.pet==='blackcat'?'Show Cat':preferences.pet==='nyan'?'Show Nyan Cat':preferences.pet==='nugget'?'Show Chicken Nugget':preferences.pet==='saber'?'Show Saber-tooth Tiger':preferences.pet==='highland'?'Show Highland Cow':preferences.pet==='roblox'?'Show Roblox Buddy':preferences.pet==='labubu'?'Show Labubu':preferences.pet==='eagle'?'Show Bald Eagle':preferences.pet==='gummy'?'Show Gummy Bear':preferences.pet==='colt'?'Show Colt':'Show dumpling';
     applying=true;
     const asleep=Boolean(preferences.asleep||autoAsleep);
     if(host.hidden||asleep)hideSpeech();
@@ -240,11 +243,11 @@
     sync();
     save();
   }
-  select.onchange=()=>{preferences.pet=select.value;preferences.petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();closePanel();selectPet();resetNap();save();};
+  select.onchange=()=>{preferences.pet=select.value;preferences.petHidden=false;gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();evergreen.show();closePanel();selectPet();resetNap();save();};
   picker.querySelector('[data-pet-close]').onclick=()=>picker.close();
   picker.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();});
-  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();sync();if(preferences.pet==='nyan'){studio?.open('nyan');return;}if(preferences.pet==='blackcat'){studio?.open('blackcat');return;}if(preferences.pet==='nugget'){nugget.show();blackcat.show();nyan.show();studio?.open('nugget');return;}if(preferences.pet==='saber')studio?.open('saber');else if(preferences.pet==='highland')studio?.open('highland');else if(preferences.pet==='roblox')studio?.open('roblox');else if(preferences.pet==='labubu')studio?.open('labubu');else if(preferences.pet==='eagle')studio?.open('eagle');else if(preferences.pet==='gummy')studio?.open('gummy');else if(preferences.pet==='colt')robo.customize();else openPanel();};
-  picker.querySelector('[data-pet-show]').onclick=()=>{setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();picker.close();sync();if(preferences.pet==='colt')robo.show();};
+  picker.querySelector('[data-pet-customize]').onclick=()=>{picker.close();setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();evergreen.show();sync();if(preferences.pet==='evergreen'){studio?.open('evergreen');return;}if(preferences.pet==='nyan'){studio?.open('nyan');return;}if(preferences.pet==='blackcat'){studio?.open('blackcat');return;}if(preferences.pet==='nugget'){nugget.show();blackcat.show();nyan.show();evergreen.show();studio?.open('nugget');return;}if(preferences.pet==='saber')studio?.open('saber');else if(preferences.pet==='highland')studio?.open('highland');else if(preferences.pet==='roblox')studio?.open('roblox');else if(preferences.pet==='labubu')studio?.open('labubu');else if(preferences.pet==='eagle')studio?.open('eagle');else if(preferences.pet==='gummy')studio?.open('gummy');else if(preferences.pet==='colt')robo.customize();else openPanel();};
+  picker.querySelector('[data-pet-show]').onclick=()=>{setPetHidden(false);gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();evergreen.show();picker.close();sync();if(preferences.pet==='colt')robo.show();};
   panel.querySelector('[data-dumpling-close]').onclick=()=>closePanel(true);
   panel.querySelector('[data-dumpling-hide]').onclick=()=>setPetHidden(true);
   panel.querySelector('[data-dumpling-reset]').onclick=()=>{position=null;try{localStorage.removeItem(positionKey());}catch{}place();};
@@ -252,7 +255,7 @@
     if(!auth.authenticated)return;
     opener=event?.target?.closest('.header-account-menu')?.querySelector('summary')||document.activeElement;
     document.querySelectorAll('.header-account-menu[open]').forEach(menu=>menu.open=false);
-    closePanel();robo.close();sync();if(studio&&allowed()&&!preferences.petHidden){robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();sync();studio.open(preferences.pet==='dumpling'?'squishy':preferences.pet);return}if(!picker.open)picker.showModal();
+    closePanel();robo.close();sync();if(studio&&allowed()&&!preferences.petHidden){robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();evergreen.show();sync();studio.open(preferences.pet==='dumpling'?'squishy':preferences.pet);return}if(!picker.open)picker.showModal();
   }
   document.addEventListener('click',event=>{if(event.target.closest('[data-companion-open]')){event.preventDefault();openPicker(event);}});
   host.addEventListener('click',event=>{
@@ -324,7 +327,7 @@
   // Studio presents the existing live pets; no duplicate SVGs, animation loops,
   // storage keys or account-saving paths are introduced.
   if(window.createPetStudio){
-    const readStudio=()=>({nyan:{...(window.nyanDefaults?.()||{}),...preferences.nyan},blackcat:{...(window.blackcatDefaults?.()||{}),...preferences.blackcat},nugget:{...(window.nuggetDefaults?.()||{}),...preferences.nugget},saber:{...(window.saberDefaults?.()||{}),...preferences.saber},highland:{...(window.highlandDefaults?.()||{}),...preferences.highland},roblox:{...(window.robloxDefaults?.()||{}),...preferences.roblox},labubu:{...(window.labubuDefaults?.()||{}),...preferences.labubu},eagle:{...(window.eaglePetDefaults?.()||{}),...preferences.eagle},gummy:{...(window.gummyBearDefaults?.()||{}),...preferences.gummy},colt:{...(window.roboColtDefaults?.()||{}),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
+    const readStudio=()=>({evergreen:{...window.evergreenDefaults?.(),...preferences.evergreen},nyan:{...(window.nyanDefaults?.()||{}),...preferences.nyan},blackcat:{...(window.blackcatDefaults?.()||{}),...preferences.blackcat},nugget:{...(window.nuggetDefaults?.()||{}),...preferences.nugget},saber:{...(window.saberDefaults?.()||{}),...preferences.saber},highland:{...(window.highlandDefaults?.()||{}),...preferences.highland},roblox:{...(window.robloxDefaults?.()||{}),...preferences.roblox},labubu:{...(window.labubuDefaults?.()||{}),...preferences.labubu},eagle:{...(window.eaglePetDefaults?.()||{}),...preferences.eagle},gummy:{...(window.gummyBearDefaults?.()||{}),...preferences.gummy},colt:{...(window.roboColtDefaults?.()||{}),...preferences.robo},squishy:{color:preferences.color,name:preferences.squishyName||'Mochi',accessory:preferences.accessory,eyewear:preferences.eyewear||'none',motion:preferences.motion,nameplate:preferences.squishyNameplate!==false,size:preferences.size||'medium',asleep:preferences.asleep}});
     const talkingPets = [
       ['colt', robo, () => robo.speak(), 1350],
       ['squishy', {whenReady:listener=>listener(host)}, () => petApi.setSpeaking(true), 0],
@@ -356,21 +359,22 @@
     petTalk=window.createPetTalk?.(()=>{
       if(!allowed())return null;
       const kind=preferences.pet==='dumpling'?'squishy':preferences.pet;
-      const hosts={nyan:nyan.host,blackcat:blackcat.host,colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
+      const hosts={evergreen:evergreen.host,nyan:nyan.host,blackcat:blackcat.host,colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
       const look=readStudio()[kind];
       if (!look || !hosts[kind]) return null;
-      const appearance = Object.fromEntries(['name','headwear','accessory','eyewear','neckwear','outfit','basketAccessory','top','pants']
+      const appearance = Object.fromEntries(['name','headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','skirt','topper','top','pants']
         .filter(key => typeof look[key] === 'string').map(key => [key, look[key]]));
-      if (radioPlaying && !look.asleep && !hosts[kind].querySelector('.waking')) {
+      if (kind !== 'evergreen' && radioPlaying && !look.asleep && !hosts[kind].querySelector('.waking')) {
         appearance[kind === 'squishy' ? 'accessory' : 'headwear'] = 'headphones';
       }
       return {kind,host:hosts[kind],name:look.name||"Pet",skin:kind==='squishy'?look.color:look.skin,appearance,account};
     });
     const setStudio=(kind,key,value)=>{
       if(!allowed()||loadError)return;
-      if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='nyan'?'Nyan Cat':kind==='blackcat'?'Midnight':kind==='nugget'?'Nugget':kind==='saber'?'Saber':kind==='highland'?'Hamish':kind==='roblox'?'Buddy':kind==='labubu'?'Labubu':kind==='eagle'?'Eagle':kind==='gummy'?'Gummy':kind==='colt'?'COLT':'Mochi');
+      if(key==='name')value=Array.from(String(value).replace(/[\u0000-\u001f\u007f]/g,'')).slice(0,16).join('').trim()||(kind==='evergreen'?'Evergreen':kind==='nyan'?'Nyan Cat':kind==='blackcat'?'Midnight':kind==='nugget'?'Nugget':kind==='saber'?'Saber':kind==='highland'?'Hamish':kind==='roblox'?'Buddy':kind==='labubu'?'Labubu':kind==='eagle'?'Eagle':kind==='gummy'?'Gummy':kind==='colt'?'COLT':'Mochi');
       if(kind==='colt')preferences.robo={...(window.roboColtDefaults?.()||{}),...preferences.robo,[key]:value};
       else if(kind==='roblox'){const old={...(window.robloxDefaults?.()||{}),...preferences.roblox};preferences.roblox={...old,[key]:value};if(key==='skin'){preferences.roblox.top='skin';preferences.roblox.pants='skin';}if(key==='skin')preferences.roblox.headwear=robloxSkins[value]?.headwear||'none';}
+      else if(kind==='evergreen')preferences.evergreen={...window.evergreenDefaults(),...preferences.evergreen,[key]:value};
       else if(kind==='nyan')preferences.nyan={...window.nyanDefaults(),...preferences.nyan,[key]:value};
       else if(kind==='blackcat')preferences.blackcat={...(window.blackcatDefaults?.()||{}),...preferences.blackcat,[key]:value};
       else if(kind==='nugget')preferences.nugget={...(window.nuggetDefaults?.()||{}),...preferences.nugget,[key]:value};
@@ -383,16 +387,16 @@
       applyAppearance();save();
     };
     studio=createPetStudio({
-      preparePets:()=>Promise.all([nyan,blackcat,robo,gummy,nugget,saber,highland,roblox,labubu,eagle].map(pet=>pet.ensure())),get nyanHost(){return nyan.host},get blackcatHost(){return blackcat.host},get nuggetHost(){return nugget.host},get saberHost(){return saber.host},get highlandHost(){return highland.host},get coltHost(){return robo.host},squishyHost:host,get gummyHost(){return gummy.host},get eagleHost(){return eagle.host},get labubuHost(){return labubu.host},get robloxHost(){return roblox.host},
+      preparePets:()=>Promise.all([evergreen,nyan,blackcat,robo,gummy,nugget,saber,highland,roblox,labubu,eagle].map(pet=>pet.ensure())),get evergreenHost(){return evergreen.host},get nyanHost(){return nyan.host},get blackcatHost(){return blackcat.host},get nuggetHost(){return nugget.host},get saberHost(){return saber.host},get highlandHost(){return highland.host},get coltHost(){return robo.host},squishyHost:host,get gummyHost(){return gummy.host},get eagleHost(){return eagle.host},get labubuHost(){return labubu.host},get robloxHost(){return roblox.host},
       canOpen:()=>allowed(),canEdit:()=>allowed()&&!loadError,read:readStudio,
       prepare(){petTalk?.close(false);closePanel();robo.close();hideSpeech();clearTimeout(napTimer);if(autoAsleep){autoAsleep=false;wakeRequested=true;sync();}},
       talk(){petTalk?.open();},
       change:setStudio,
-      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;preferences.petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();selectPet();applyAppearance();save();},
-      restore(value){if(!allowed()||loadError)return;preferences={...preferences,nyan:{...value.nyan},blackcat:{...value.blackcat},nugget:{...value.nugget},saber:{...value.saber},highland:{...value.highland},roblox:{...value.roblox},labubu:{...value.labubu},eagle:{...value.eagle},gummy:{...value.gummy},robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
-      play(kind,action){if(kind==='nyan')nyan.play(action);else if(kind==='blackcat')blackcat.play(action);else if(kind==='nugget')nugget.play(action);else if(kind==='saber')saber.play(action);else if(kind==='highland')highland.play(action);else if(kind==='roblox')roblox.play(action);else if(kind==='labubu')labubu.play(action);else if(kind==='eagle')eagle.play(action);else if(kind==='gummy')gummy.play(action);else if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
+      select(kind){if(!allowed()||loadError)return;preferences.pet=kind==='squishy'?'dumpling':kind;preferences.petHidden=false;robo.show();gummy.show();eagle.show();labubu.show();roblox.show();highland.show();saber.show();nugget.show();blackcat.show();nyan.show();evergreen.show();selectPet();applyAppearance();save();},
+      restore(value){if(!allowed()||loadError)return;preferences={...preferences,evergreen:{...value.evergreen},nyan:{...value.nyan},blackcat:{...value.blackcat},nugget:{...value.nugget},saber:{...value.saber},highland:{...value.highland},roblox:{...value.roblox},labubu:{...value.labubu},eagle:{...value.eagle},gummy:{...value.gummy},robo:{...value.colt},color:value.squishy.color,accessory:value.squishy.accessory,eyewear:value.squishy.eyewear,motion:value.squishy.motion,size:value.squishy.size,asleep:value.squishy.asleep,squishyName:value.squishy.name,squishyNameplate:value.squishy.nameplate};autoAsleep=false;applyAppearance();save();},
+      play(kind,action){if(kind==='evergreen')evergreen.play(action);else if(kind==='nyan')nyan.play(action);else if(kind==='blackcat')blackcat.play(action);else if(kind==='nugget')nugget.play(action);else if(kind==='saber')saber.play(action);else if(kind==='highland')highland.play(action);else if(kind==='roblox')roblox.play(action);else if(kind==='labubu')labubu.play(action);else if(kind==='eagle')eagle.play(action);else if(kind==='gummy')gummy.play(action);else if(kind==='colt')document.querySelector('.robo-companion [data-setting="action"][data-option="'+action+'"]').click();else if(action==='excited')petApi.excite();else host.querySelector(action==='smile'||action==='blink'?'#'+action:'[data-motion="'+action+'"]').click();},
       dance(on){studioRadio=on;sync();},refresh(){resetNap();},
-      resetPosition(kind){if(kind==='nyan')nyan.reset();else if(kind==='blackcat')blackcat.reset();else if(kind==='nugget')nugget.reset();else if(kind==='saber')saber.reset();else if(kind==='highland')highland.reset();else if(kind==='roblox')roblox.reset();else if(kind==='labubu')labubu.reset();else if(kind==='eagle')eagle.reset();else if(kind==='gummy')gummy.reset();else if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
+      resetPosition(kind){if(kind==='evergreen')evergreen.reset();else if(kind==='nyan')nyan.reset();else if(kind==='blackcat')blackcat.reset();else if(kind==='nugget')nugget.reset();else if(kind==='saber')saber.reset();else if(kind==='highland')highland.reset();else if(kind==='roblox')roblox.reset();else if(kind==='labubu')labubu.reset();else if(kind==='eagle')eagle.reset();else if(kind==='gummy')gummy.reset();else if(kind==='colt')document.querySelector('.robo-companion [data-reset]').click();else{position=null;try{localStorage.removeItem(positionKey());}catch{}place();}},
       hide(){setPetHidden(true);},
       retry(){loadError?updateAccount(auth,true):save();}
     });
