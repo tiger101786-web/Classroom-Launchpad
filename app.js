@@ -2633,13 +2633,13 @@ function renderHome() {
     <div class="home-page-content${christmasLights ? ' has-christmas-lights' : ''}">
     <section id="home-top" class="hero-panel home-navigation-anchor">
       ${christmasLights ? '<div class="home-christmas-lights" aria-hidden="true"></div>' : ""}
-      <img class="hero-static-art" src="assets/hero-colt-static.jpg?v=20261031-v1" alt="" aria-hidden="true" fetchpriority="high" decoding="async" width="1536" height="1024">
       ${pageHeader(
         "Classroom Launchpad",
         "",
         false,
         renderHomeHeaderControls()
       )}
+      <img class="hero-static-art${christmasLights ? ' hero-christmas-colt' : ''}" src="${christmasLights ? 'assets/hero-colt-christmas.webp' : 'assets/hero-colt-static.jpg?v=20261031-v1'}" alt="" aria-hidden="true" fetchpriority="high" decoding="async" width="1536" height="1024">
       <div class="home-display-row">
         <div class="home-shelf-position" data-shelf-position="left">${homeSceneSessionReady ? window.CollectibleShelf.render(authSession, 'left') : ""}</div>
         ${window.LaunchpadScenes.render(authSession, homeProfileVideo, homeSceneSessionReady)}

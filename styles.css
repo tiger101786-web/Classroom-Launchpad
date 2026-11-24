@@ -13082,6 +13082,24 @@ body[data-theme="night"] .colt-run-volume {
   z-index: 4;
 }
 .hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
+.has-christmas-lights #home-top { background-color: #171316; }
+.hero-panel > .hero-christmas-colt {
+  inset: 95px 0 auto auto;
+  width: 80%;
+  height: auto;
+  mask-image: linear-gradient(to bottom, transparent, black 8%, black 84%, transparent),
+    linear-gradient(to right, transparent, black 20%);
+  mask-composite: intersect;
+}
+@media (max-width: 980px) {
+  .hero-panel > .hero-christmas-colt {
+    position: relative;
+    display: block;
+    inset: auto;
+    width: min(100%, 480px);
+    margin: 0 0 0 auto;
+  }
+}
 .has-christmas-lights > #home-top { margin-bottom: 0; }
 .home-lights-divider { margin: 0 12px; }
 .has-christmas-lights #home-expectations { margin-bottom: 0; }
