@@ -72,11 +72,21 @@ function drawTopper(kind,x,y) {
   gold.addColorStop(0,'#fff4bd');gold.addColorStop(.55,'#f0bf58');gold.addColorStop(1,'#ac702f');
   ctx.fillStyle=gold;
   if(kind==='star'){
+    // A small brass socket joins the star's lower notch to the leader.
+    ctx.fillRect(-3,-18,6,19);
+    ctx.translate(0,-25);
     ctx.beginPath();
     for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?12:30;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
     ctx.closePath();ctx.fill();ctx.stroke();
   } else {
     const angel=kind==='angel';
+    ctx.translate(0,angel?-19:-1);
+    if(!angel){
+      for(const side of [-1,1]){
+        ctx.save();ctx.scale(side,1);ctx.fillStyle='#8c2039';
+        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(16,19);ctx.lineTo(9,17);ctx.lineTo(8,23);ctx.closePath();ctx.fill();ctx.restore();
+      }
+    }
     for(const side of [-1,1]){
       ctx.save();ctx.scale(side,1);ctx.fillStyle=angel?'#fff6dd':'#b32c48';
       ctx.beginPath();ctx.moveTo(0,2);ctx.bezierCurveTo(9,-18,28,-28,29,-15);ctx.quadraticCurveTo(32,8,0,8);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
@@ -114,7 +124,7 @@ function render(state,t,look) {
     if (state==='dance'||state==='wobble') dx+=swing*upper*(state==='dance'?34:21);
     if (state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
     if (state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
-    if(y===0)tipOffset=dx;
+    if(y===6)tipOffset=dx;
     if (state==='wave'||state==='hello') {
       const reach=Math.exp(-((y-357)**2)/3700);
       const extension=reach*(1-Math.cos(t*6))*14;
@@ -122,7 +132,8 @@ function render(state,t,look) {
       ctx.drawImage(layer,180,y,275,height,252+dx,62+y,275,height);
     } else ctx.drawImage(layer,0,y,455,height,72+dx,62+y,455,height);
   }
-  drawTopper(look.topper,296+tipOffset,62);
+  // Center of the curved leader six pixels below the top of the rendered foliage.
+  drawTopper(look.topper,303+tipOffset,68);
   if(state==='dance'||state==='sleep') {
     ctx.textAlign='center';
     for(let i=0;i<3;i++) {
