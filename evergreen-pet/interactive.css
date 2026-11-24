@@ -6,9 +6,12 @@
 .evergreen-companion canvas{width:100%;height:auto;display:block}
 .evergreen-companion .pet-button{position:absolute;inset:9% 13% 19%;width:auto;height:auto;pointer-events:auto;cursor:grab;touch-action:none;background:transparent;border:0;box-shadow:none}
 .evergreen-name{display:block;box-sizing:border-box;margin:-5% auto 0;width:90%;padding:5% 14%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:url(nameplate.webp) center/100% 100% no-repeat;color:#fff2cb;font:bold 14px/1.2 Georgia,serif;text-shadow:0 1px 2px #32190c}
-.pet-studio #pet-stage .evergreen-companion{position:relative!important;inset:auto!important;display:grid;grid-template-rows:minmax(0,1fr) 12%;width:auto!important;height:100%!important;max-width:100%;aspect-ratio:3/4;margin:auto}
-.pet-studio #pet-stage .evergreen-companion canvas{width:100%;height:100%;object-fit:contain;object-view-box:inset(1% 6% 7% 6%)}
-.pet-studio #pet-stage .evergreen-name{align-self:stretch;justify-self:center;display:grid;align-items:center;width:min(90%,190px);margin:0;padding:0 12%}
+.pet-studio[data-theme] #pet-stage:has(.evergreen-companion:not([hidden])){padding-block:0}
+.pet-studio #pet-stage .evergreen-companion{position:relative!important;inset:auto!important;display:flex;flex-direction:column;align-items:center;width:100%!important;height:calc(100% + 12px)!important;max-width:100%;margin:-12px 0 0}
+.pet-studio #pet-stage .evergreen-companion canvas{flex:1;min-height:0;width:100%;height:0;object-fit:contain;object-view-box:inset(var(--fir-top,1%) 5% var(--fir-bottom,7%) 5%)}
+.pet-studio #pet-stage .evergreen-companion[data-topper=none]{--fir-top:7%}
+.pet-studio #pet-stage .evergreen-companion[data-skirt=none]{--fir-bottom:18%}
+.pet-studio #pet-stage .evergreen-name{position:relative;display:grid;place-items:center;flex:none;width:min(65%,195px);height:10%;margin:-2.5% 0 0;padding:0 12px}
 .pet-studio .evergreen-companion .pet-button{pointer-events:none}
 .pet-chat[data-pet=evergreen]{--paper:#203b2d;--edge:#d5ae6a;--ink:#fff6dd;--label:#f1c97a}
 .pet-talk[data-pet=evergreen]{--talk-paper:#193729;--talk-ink:#fff6df;--talk-edge:#bf995c;--talk-field:#13291f;--talk-send:#8b3242;--talk-header:linear-gradient(110deg,#284534,#473324)}

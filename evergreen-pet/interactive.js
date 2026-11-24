@@ -28,6 +28,8 @@ window.createEvergreenPet=function(onChange,onCustomize){
    if(animate)frameId=requestAnimationFrame(draw);
  }
  function refresh(){
+   host.dataset.topper=preferences.topper;
+   host.dataset.skirt=preferences.skirt;
    host.hidden=!visible||hidden;host.dataset.size=preferences.size;host.dataset.state=preferences.asleep?"sleep":"awake";label.textContent=preferences.name;label.hidden=!preferences.nameplate;
    pet.setAttribute('aria-label',preferences.asleep?'Wake Evergreen. Drag to move.':'Open Evergreen controls. Drag to move.');
    cancelAnimationFrame(frameId);last=-Infinity;draw(performance.now());place();
