@@ -8,7 +8,7 @@ window.createEvergreenPet=function(onChange,onCustomize){
  const durations={hello:3,blink:.55,happy:2.8,talk:4,curious:3,crown:2,wave:2.8,swish:3,twitch:1.8,wobble:2.5,wake:3.5};
  const render=createEvergreenRenderer(canvas,refresh);
  let account='',position=null,drag=null,suppress=false,preferences=evergreenDefaults(),radio=false,speaking=false;
- let visible=false,hidden=false,mode=0,start=0,frameId=0,last=-Infinity;
+ let visible=false,hidden=false,mode=0,start=0,frameId=0;
  const positionKey=()=> 'evergreen-position:'+account;
  function place(){if(host.hidden||host.closest('.pet-studio'))return;const b=host.getBoundingClientRect();host.style.left=Math.max(8,Math.min(position?.x??innerWidth-b.width-34,innerWidth-b.width-8))+'px';host.style.top=Math.max(8,Math.min(position?.y??innerHeight*.48-90,innerHeight-b.height-8))+'px';}
  function pointerDown(e){if(e.button!==0||host.closest('.pet-studio'))return;const b=host.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:b.left,top:b.top,moved:false};pet.setPointerCapture(e.pointerId);}
@@ -19,12 +19,9 @@ window.createEvergreenPet=function(onChange,onCustomize){
  function draw(now){
    frameId=0;if(host.hidden||document.hidden)return;
    const animate=preferences.motion&&!motion.matches;
-   if(now-last>=60||!animate){
-     if(mode&&now-start>=durations[mode]*1000)mode=0;
-     const state=preferences.asleep?'sleep':!animate?'idle':speaking?'talk':mode||(radio?'dance':'idle');
-     render(state,animate?(now-start)/1000:0.65,preferences);
-     last=now;
-   }
+   if(mode&&now-start>=durations[mode]*1000)mode=0;
+   const state=preferences.asleep?'sleep':!animate?'idle':speaking?'talk':mode||(radio?'dance':'idle');
+   render(state,animate?(now-start)/1000:0.65,preferences);
    if(animate)frameId=requestAnimationFrame(draw);
  }
  function refresh(){
@@ -32,7 +29,7 @@ window.createEvergreenPet=function(onChange,onCustomize){
    host.dataset.skirt=preferences.skirt;
    host.hidden=!visible||hidden;host.dataset.size=preferences.size;host.dataset.state=preferences.asleep?"sleep":"awake";label.textContent=preferences.name;label.hidden=!preferences.nameplate;
    pet.setAttribute('aria-label',preferences.asleep?'Wake Evergreen. Drag to move.':'Open Evergreen controls. Drag to move.');
-   cancelAnimationFrame(frameId);last=-Infinity;draw(performance.now());place();
+   cancelAnimationFrame(frameId);draw(performance.now());place();
  }
  function play(name){if(['excited','greet'].includes(name))name='hello';if(durations[name]){mode=name;start=performance.now();}if(['hello','excited','greet'].includes(name)&&!host.closest('.pet-studio'))window.PetSpeech?.say(host,'Season’s greetings, friend!');}
  function click(){if(suppress){suppress=false;return;}if(preferences.asleep){onChange({...preferences,asleep:false});}else onCustomize?.();}

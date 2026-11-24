@@ -13,7 +13,7 @@ const motions = {
   twitch: ['Nose twitch', 1.8], wobble: ['Body wobble', 2.5], sleep: ['Sleep', Infinity],
   wake: ['Wake & yawn', 3.5], dance: ['Dance', Infinity]
 };
-let state = 'idle', started = performance.now(), frame = 0, last = -Infinity;
+let state = 'idle', started = performance.now(), frame = 0;
 
 function activate(next) {
   state = next;
@@ -35,14 +35,12 @@ function draw(now) {
   if (document.hidden) return;
   const elapsed=(now-started)/1000;
   if (elapsed>=motions[state][1]) { activate('idle'); return; }
-  if (now-last<33) { frame=requestAnimationFrame(draw); return; }
-  last=now;
   const t=reduced.matches?0.65:elapsed;
   render(state,t,{ornaments:ornaments.value,lights:lights.value,skirt:skirt.value,topper:topper.value});
   if (!reduced.matches||Number.isFinite(motions[state][1])) frame=requestAnimationFrame(draw);
 }
 function refresh() {
-  cancelAnimationFrame(frame); last=-Infinity; draw(performance.now());
+  cancelAnimationFrame(frame); draw(performance.now());
 }
 document.querySelector('.pet').onclick=()=>activate(state==='sleep'?'wake':'hello');
 document.querySelector('#size').onchange=e=>document.querySelector('.stage').dataset.size=e.target.value;

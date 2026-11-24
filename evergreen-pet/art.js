@@ -25,7 +25,23 @@ function curve(x,y,cx,cy,ex,ey,color,width) {
   art.beginPath(); art.moveTo(x,y); art.quadraticCurveTo(cx,cy,ex,ey);
   art.strokeStyle=color; art.lineWidth=width; art.lineCap='round'; art.stroke();
 }
-function decorations(t,look) {
+const decorated=document.createElement('canvas');
+decorated.width=layer.width;
+decorated.height=566;
+const base=decorated.getContext('2d');
+const glow=document.createElement('canvas');
+glow.width=decorated.width;
+glow.height=decorated.height;
+const bulbsLayer=glow.getContext('2d');
+let lastLights, lastOrnaments;
+
+function prepareDecorations(look) {
+  if(lastLights===look.lights && lastOrnaments===look.ornaments)return;
+  lastLights=look.lights;
+  lastOrnaments=look.ornaments;
+  art.clearRect(0,0,layer.width,layer.height);
+  art.drawImage(tree,0,0,455,566);
+  bulbsLayer.clearRect(0,0,glow.width,glow.height);
   const palette = ornamentColors[look.ornaments];
   if (palette) baubles.forEach(([x,y],i) => {
     const r=9+y/100;
@@ -36,18 +52,22 @@ function decorations(t,look) {
     oval(x,y,r,r,glaze);
   });
   const bulbs=bulbColors[look.lights];
-  if (!bulbs) return;
-  for (let row=0;row<4;row++) {
+
+  for (let row=0;bulbs && row<4;row++) {
     const span=46+row*41, y=121+row*124, count=5+row*2;
     curve(227-span,y,227,y+43,227+span,y-7,'#33452c',2);
     for (let i=0;i<count;i++) {
       const u=(i+.2)/count, x=227-span+2*span*u, by=y+86*u*(1-u)-7*u*u;
       const color=bulbs[(row+i)%bulbs.length];
-      art.save(); art.shadowColor=color; art.shadowBlur=6+2*Math.sin(t*2+i);
-      oval(x,by+3,3.5,5,color); art.restore();
+      bulbsLayer.shadowColor=color; bulbsLayer.shadowBlur=8;
+      bulbsLayer.fillStyle=color; bulbsLayer.beginPath();
+      bulbsLayer.ellipse(x,by+3,3.5,5,0,0,Math.PI*2); bulbsLayer.fill();
+      oval(x,by+3,3.5,5,color);
       oval(x-.7,by+2,1,2,'#fffae5');
     }
   }
+  base.clearRect(0,0,decorated.width,decorated.height);
+  base.drawImage(layer,0,0);
 }
 function expression(t,state) {
   const sleep=state==='sleep', pleased=state==='happy'||state==='dance';
@@ -91,8 +111,15 @@ function drawTopper(kind,x,y) {
 }
 function render(state,t,look) {
   if(!tree.naturalWidth) return;
-  art.clearRect(0,0,455,690); art.drawImage(tree,0,0,455,566);
-  decorations(t,look); expression(t,state);
+  prepareDecorations(look);
+  art.clearRect(0,0,layer.width,layer.height);
+  art.drawImage(decorated,0,0);
+  if(bulbColors[look.lights]){
+    art.globalAlpha=.35+.15*Math.sin(t*2);
+    art.drawImage(glow,0,0);
+    art.globalAlpha=1;
+  }
+  expression(t,state);
   ctx.clearRect(0,0,600,810);
   ctx.save();
   if(toppers[look.topper]){
@@ -118,7 +145,8 @@ function render(state,t,look) {
   let tipOffset=sway*(1-18/568);
   if(['crown','swish','wave','hello'].includes(state)){
     branches.clearRect(0,0,foliage.width,foliage.height);
-    for(let y=0;y<566;y++){
+    for(let y=0;y<566;y+=3){
+      const height=Math.min(3,566-y);
       let dx=sway*(1-y/568);
       if(state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
       if(state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
@@ -126,9 +154,9 @@ function render(state,t,look) {
       if(state==='wave'||state==='hello'){
         const extension=Math.exp(-((y-357)**2)/3700)*(1-Math.cos(t*6))*14;
         const joint=Math.round(252+dx), left=72+dx-extension;
-        branches.drawImage(layer,0,y,180,1,left,y,joint-left,1);
-        branches.drawImage(layer,180,y,275,1,joint,y,275,1);
-      }else branches.drawImage(layer,0,y,455,1,72+dx,y,455,1);
+        branches.drawImage(layer,0,y,180,height,left,y,joint-left,height);
+        branches.drawImage(layer,180,y,275,height,joint,y,275,height);
+      }else branches.drawImage(layer,0,y,455,height,72+dx,y,455,height);
     }
     ctx.drawImage(foliage,0,62);
   }else{
