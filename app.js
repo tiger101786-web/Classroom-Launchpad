@@ -2645,6 +2645,7 @@ function renderHome() {
         ${window.LaunchpadScenes.render(authSession, homeProfileVideo, homeSceneSessionReady)}
         <div class="home-shelf-position" data-shelf-position="right">${homeSceneSessionReady ? window.CollectibleShelf.render(authSession, 'right') : ""}</div>
       </div>
+      ${christmasLights ? '<div class="home-evergreen-corners" aria-hidden="true"></div>' : ""}
     </section>
     ${christmasLights ? '<div class="home-christmas-lights home-lights-divider" aria-hidden="true"></div>' : ""}
     <section id="homeBody">

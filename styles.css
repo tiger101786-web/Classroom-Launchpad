@@ -13083,6 +13083,23 @@ body[data-theme="night"] .colt-run-volume {
 }
 .hero-panel > .home-christmas-lights ~ .topbar { margin-top: 22px; }
 .has-christmas-lights #home-top { background-color: #171316; }
+.hero-panel > .home-evergreen-corners {
+  position: absolute;
+  inset: auto 4px 3px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+.home-evergreen-corners::before,
+.home-evergreen-corners::after {
+  content: "";
+  width: min(23%, 250px);
+  aspect-ratio: 1883 / 812;
+  background: url("assets/home-evergreen-corner.webp") left bottom / contain no-repeat;
+}
+.home-evergreen-corners::after { transform: scaleX(-1); }
+.has-christmas-lights .hero-panel > .home-display-row { z-index: 3; }
 .hero-panel > .hero-christmas-colt {
   inset: 95px 0 auto auto;
   width: 80%;
