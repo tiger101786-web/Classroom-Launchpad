@@ -65,45 +65,36 @@ function expression(t,state) {
   } else curve(214,345,227,pleased?366:357,241,345,'#2c201c',5);
 }
 
+// Anchor the star and angel at their sockets, and the ribbon at its central knot.
+const toppers = {
+  star: {height:107, anchorX:.50, anchorY:.96},
+  angel: {height:116, anchorX:.50, anchorY:.95},
+  bow: {height:92, anchorX:.50, anchorY:.43}
+};
 function drawTopper(kind,x,y) {
-  if(!kind || kind==='none')return;
-  ctx.save();ctx.translate(x,y);ctx.lineWidth=2;ctx.strokeStyle='#b18c4d';
-  const gold=ctx.createLinearGradient(-18,-22,18,14);
-  gold.addColorStop(0,'#fff4bd');gold.addColorStop(.55,'#f0bf58');gold.addColorStop(1,'#ac702f');
-  ctx.fillStyle=gold;
-  if(kind==='star'){
-    // A small brass socket joins the star's lower notch to the leader.
-    ctx.fillRect(-3,-18,6,19);
-    ctx.translate(0,-25);
-    ctx.beginPath();
-    for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?12:30;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
-    ctx.closePath();ctx.fill();ctx.stroke();
-  } else {
-    const angel=kind==='angel';
-    ctx.translate(0,angel?-19:-1);
-    if(!angel){
-      for(const side of [-1,1]){
-        ctx.save();ctx.scale(side,1);ctx.fillStyle='#8c2039';
-        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(16,19);ctx.lineTo(9,17);ctx.lineTo(8,23);ctx.closePath();ctx.fill();ctx.restore();
-      }
-    }
-    for(const side of [-1,1]){
-      ctx.save();ctx.scale(side,1);ctx.fillStyle=angel?'#fff6dd':'#b32c48';
-      ctx.beginPath();ctx.moveTo(0,2);ctx.bezierCurveTo(9,-18,28,-28,29,-15);ctx.quadraticCurveTo(32,8,0,8);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
-    }
-    if(angel){
-      ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(16,17);ctx.quadraticCurveTo(0,24,-16,17);ctx.closePath();ctx.fill();ctx.stroke();
-      ctx.fillStyle='#eac098';ctx.beginPath();ctx.arc(0,-14,8,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.ellipse(0,-26,10,3,0,0,Math.PI*2);ctx.strokeStyle='#ffde82';ctx.lineWidth=3;ctx.stroke();
-    }else{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.fill();}
+  const topper=toppers[kind];
+  if(!topper)return;
+  if(!topper.image){
+    topper.image=new Image();
+    topper.image.onload=refresh;
+    topper.image.src=new URL('topper-'+kind+'.webp',evergreenArtBase);
   }
-  ctx.restore();
+  const image=topper.image;
+  if(!image.naturalWidth)return;
+  const width=topper.height*image.naturalWidth/image.naturalHeight;
+  ctx.drawImage(image,x-width*topper.anchorX,y-topper.height*topper.anchorY,width,topper.height);
 }
 function render(state,t,look) {
   if(!tree.naturalWidth) return;
   art.clearRect(0,0,455,690); art.drawImage(tree,0,0,455,566);
   decorations(t,look); expression(t,state);
   ctx.clearRect(0,0,600,810);
+  ctx.save();
+  if(toppers[look.topper]){
+    // Reserve headroom for the ornaments while keeping the skirt on its baseline.
+    ctx.translate(18,45);
+    ctx.scale(.94,.94);
+  }
   if (look.skirt !== 'none' && skirtArt.naturalWidth) {
     ctx.save();
     ctx.filter=skirtTints[look.skirt];
@@ -124,7 +115,7 @@ function render(state,t,look) {
     if (state==='dance'||state==='wobble') dx+=swing*upper*(state==='dance'?34:21);
     if (state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
     if (state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
-    if(y===6)tipOffset=dx;
+    if(y===18)tipOffset=dx;
     if (state==='wave'||state==='hello') {
       const reach=Math.exp(-((y-357)**2)/3700);
       const extension=reach*(1-Math.cos(t*6))*14;
@@ -132,8 +123,8 @@ function render(state,t,look) {
       ctx.drawImage(layer,180,y,275,height,252+dx,62+y,275,height);
     } else ctx.drawImage(layer,0,y,455,height,72+dx,62+y,455,height);
   }
-  // Center of the curved leader six pixels below the top of the rendered foliage.
-  drawTopper(look.topper,303+tipOffset,68);
+  // Seat the socket over the crown, centered on the trunk axis.
+  drawTopper(look.topper,300+tipOffset,80);
   if(state==='dance'||state==='sleep') {
     ctx.textAlign='center';
     for(let i=0;i<3;i++) {
@@ -144,6 +135,7 @@ function render(state,t,look) {
     }
     ctx.globalAlpha=1;
   }
+  ctx.restore();
 }
 tree.onload=skirtArt.onload=refresh;
 tree.src=new URL('boughs.webp',evergreenArtBase);
