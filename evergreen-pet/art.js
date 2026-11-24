@@ -170,18 +170,33 @@ function render(state,t,look) {
   // At foliage row 18 the curved leader spans source pixels 236–255.
   const crownX=72+245.5*455/tree.naturalWidth;
   drawTopper(look.topper,crownX+tipOffset,62+18);
-  if(state==='dance'||state==='sleep') {
+  if(state==='dance'){
     ctx.textAlign='center';
-    for(let i=0;i<3;i++) {
-      const phase=(t*.45+i/3)%1;
-      ctx.font='bold '+(22+phase*13)+'px Georgia'; ctx.fillStyle=state==='sleep'?'#d9edf3':'#ffe6a1';
+    ctx.font='bold 56px Arial,sans-serif';
+    ctx.fillStyle='#dba44d'; ctx.strokeStyle='#26202c'; ctx.lineWidth=2;
+    for(const [i,[symbol,x,y]] of danceNotes.entries()){
+      const phase=(t/2.4+i*.25)%1;
+      ctx.save();
       ctx.globalAlpha=Math.sin(phase*Math.PI);
-      ctx.fillText(state==='sleep'?'Z':i%2?'♫':'♪',410+phase*43,252-phase*120);
+      ctx.translate(x,y+10-54*phase); ctx.rotate((-12+26*phase)*Math.PI/180);
+      ctx.strokeText(symbol,0,0); ctx.fillText(symbol,0,0);
+      ctx.restore();
     }
-    ctx.globalAlpha=1;
+  }else if(state==='sleep'){
+    ctx.textAlign='center'; ctx.fillStyle='#9674bd'; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+    for(const [i,[symbol,x,y,size]] of sleepZs.entries()){
+      const phase=(t/3+i/3)%1;
+      const rise=1-(1-phase)**1.6;
+      ctx.font='700 '+size+'px "Segoe UI",sans-serif';
+      ctx.globalAlpha=phase<.25?1-(1-phase*4)**1.6:((1-phase)/.75)**1.6;
+      const left=x-8+18*rise, baseline=y+18-44*rise;
+      ctx.strokeText(symbol,left,baseline); ctx.fillText(symbol,left,baseline);
+    }
   }
   ctx.restore();
 }
+const danceNotes=[['♪',79,372],['♫',520,372],['♫',115,253],['♪',486,247]];
+const sleepZs=[['z',406,258,28],['Z',447,218,36],['Z',489,175,44]];
 tree.onload=skirtArt.onload=refresh;
 tree.src=new URL('boughs.webp',evergreenArtBase);
 skirtArt.src=new URL('skirt.webp',evergreenArtBase);
