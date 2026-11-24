@@ -362,7 +362,7 @@
       const hosts={evergreen:evergreen.host,nyan:nyan.host,blackcat:blackcat.host,colt:document.querySelector('.robo-companion'),squishy:host,gummy:gummy.host,eagle:eagle.host,labubu:labubu.host,roblox:roblox.host,highland:highland.host,saber:saber.host,nugget:nugget.host};
       const look=readStudio()[kind];
       if (!look || !hosts[kind]) return null;
-      const appearance = Object.fromEntries(['name','headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','skirt','topper','top','pants']
+      const appearance = Object.fromEntries(['name','headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','garland','skirt','topper','top','pants']
         .filter(key => typeof look[key] === 'string').map(key => [key, look[key]]));
       if (kind !== 'evergreen' && radioPlaying && !look.asleep && !hosts[kind].querySelector('.waking')) {
         appearance[kind === 'squishy' ? 'accessory' : 'headwear'] = 'headphones';

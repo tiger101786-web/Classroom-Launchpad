@@ -36,7 +36,7 @@ function draw(now) {
   const elapsed=(now-started)/1000;
   if (elapsed>=motions[state][1]) { activate('idle'); return; }
   const t=reduced.matches?0.65:elapsed;
-  render(state,t,{ornaments:ornaments.value,lights:lights.value,skirt:skirt.value,topper:topper.value});
+  render(state,t,{garland:garlandSelect.value,ornaments:ornaments.value,lights:lights.value,skirt:skirt.value,topper:topper.value});
   if (!reduced.matches||Number.isFinite(motions[state][1])) frame=requestAnimationFrame(draw);
 }
 function refresh() {
@@ -47,4 +47,11 @@ document.querySelector('#size').onchange=e=>document.querySelector('.stage').dat
 ornaments.onchange=lights.onchange=skirt.onchange=topper.onchange=refresh;
 document.addEventListener('visibilitychange',refresh);
 reduced.addEventListener('change',refresh);
+const garlandSelect=document.querySelector('#garland');
+garlandSelect.onchange=refresh;
+for(const [group,selected] of Object.entries({topper:4,ornaments:0,garland:0,lights:0,skirt:1})){
+  const select=document.getElementById(group);
+  select.replaceChildren(...Object.entries(evergreenAccessories[group]).map(([value,label])=>new Option(label,value)));
+  select.value=group+'-'+selected;
+}
 const render=createEvergreenRenderer(canvas,refresh);

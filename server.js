@@ -844,7 +844,7 @@ function petChatIdentity(kind, appearance) {
     : normalizeCompanionPreference({[key]:source})[key];
   const name = kind === "squishy" ? normalized.squishyName : normalized.name;
   const accessories = Object.fromEntries(
-    ['headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','skirt','topper','top','pants']
+    ['headwear','accessory','eyewear','neckwear','outfit','basketAccessory','ornaments','lights','garland','skirt','topper','top','pants']
       .filter(key => normalized[key] && !['none','skin'].includes(normalized[key]))
       .map(key => [key, kind==='evergreen' && evergreenSettings.accessories[key] ? evergreenSettings.accessories[key][normalized[key]] : normalized[key].replace(/-/g,' ')])
   );
@@ -4215,7 +4215,7 @@ async function handleApi(req, res, pathname) {
         const p=input.evergreen;
         if(!p || typeof p!=='object' || Array.isArray(p) || p.skin!=='Classic' || typeof p.name!=='string' || Array.from(p.name).length>16 || /[\u0000-\u001f\u007f]/.test(p.name)
           || !['small','medium','large','extra-large'].includes(p.size) || ['motion','asleep','nameplate'].some(k=>typeof p[k]!=='boolean')
-          || Object.entries(evergreenSettings.accessories).some(([k,opts])=>!Object.hasOwn(opts,p[k])))throw new Error('Choose valid Evergreen settings.');
+          || Object.entries(evergreenSettings.accessories).some(([k,opts])=>(k!=='garland'||p[k]!==undefined) && !Object.hasOwn(opts,p[k])))throw new Error('Choose valid Evergreen settings.');
       }
       if(input?.nyan!==undefined){const p=input.nyan;if(!p||typeof p!=='object'||Array.isArray(p)||p.skin!=='Classic'||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Nyan Cat settings.');}
       if(input?.blackcat!==undefined){const p=input.blackcat;if(!p||typeof p!=='object'||Array.isArray(p)||!Object.hasOwn(blackcatSkins,p.skin)||(p.bedColor!==undefined&&!Object.hasOwn(blackcatBeds,p.bedColor))||(p.headwear!==undefined&&!['none','headphones'].includes(p.headwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Cat settings.');}

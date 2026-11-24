@@ -1,5 +1,6 @@
 const evergreenArtBase = new URL('.', document.currentScript.src);
 window.createEvergreenRenderer = function(canvas, refresh) {
+const accessories=createEvergreenAccessories(refresh);
 const ctx = canvas.getContext('2d');
 const tree = new Image();
 const skirtArt = new Image();
@@ -119,15 +120,18 @@ function render(state,t,look) {
     art.drawImage(glow,0,0);
     art.globalAlpha=1;
   }
+  accessories.branches(art,look,t,state);
   expression(t,state);
   ctx.clearRect(0,0,600,810);
   ctx.save();
-  if(toppers[look.topper]){
+  if(toppers[look.topper] || accessories.hasTopper(look)){
     // Reserve headroom for the ornaments while keeping the skirt on its baseline.
     ctx.translate(18,45);
     ctx.scale(.94,.94);
   }
-  if (look.skirt !== 'none' && skirtArt.naturalWidth) {
+  if (accessories.hasSkirt(look)) {
+    accessories.skirt(ctx,look);
+  } else if (look.skirt !== 'none' && skirtArt.naturalWidth) {
     ctx.save();
     ctx.filter=skirtTints[look.skirt];
     ctx.drawImage(skirtArt,72,62+508,455,182);
@@ -142,7 +146,8 @@ function render(state,t,look) {
   // Move the crown and branch tiers around their attachment points. Keep the skirt anchored.
   let sway=(state==='sleep'?1:3)*Math.sin(t*1.6);
   if(state==='dance'||state==='wobble') sway+=swing*(state==='dance'?34:21);
-  let tipOffset=sway*(1-18/568);
+  const mountRow=accessories.mountRow(look);
+  let tipOffset=sway*(1-mountRow/568);
   if(['crown','swish','wave','hello'].includes(state)){
     branches.clearRect(0,0,foliage.width,foliage.height);
     for(let y=0;y<566;y+=3){
@@ -150,7 +155,7 @@ function render(state,t,look) {
       let dx=sway*(1-y/568);
       if(state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
       if(state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
-      if(y===18) tipOffset=dx;
+      if(y===mountRow) tipOffset=dx;
       if(state==='wave'||state==='hello'){
         const extension=Math.exp(-((y-357)**2)/3700)*(1-Math.cos(t*6))*14;
         const joint=Math.round(252+dx), left=72+dx-extension;
@@ -170,6 +175,7 @@ function render(state,t,look) {
   // At foliage row 18 the curved leader spans source pixels 236–255.
   const crownX=72+245.5*455/tree.naturalWidth;
   drawTopper(look.topper,crownX+tipOffset,62+18);
+  accessories.finish(ctx,look,crownX+tipOffset,62+mountRow);
   if(state==='dance'){
     ctx.textAlign='center';
     ctx.font='bold 56px Arial,sans-serif';
