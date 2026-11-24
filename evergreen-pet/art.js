@@ -40,7 +40,6 @@ function prepareDecorations(look) {
   lastLights=look.lights;
   lastOrnaments=look.ornaments;
   art.clearRect(0,0,layer.width,layer.height);
-  art.drawImage(tree,0,0,455,566);
   bulbsLayer.clearRect(0,0,glow.width,glow.height);
   const palette = ornamentColors[look.ornaments];
   if (palette) baubles.forEach(([x,y],i) => {
@@ -110,9 +109,10 @@ function drawTopper(kind,x,y) {
   ctx.drawImage(image,x-width*topper.anchorX,y-topper.height*topper.anchorY,width,topper.height);
 }
 function render(state,t,look) {
-  if(!tree.naturalWidth) return;
+  if(!tree.complete || !tree.naturalWidth) return;
   prepareDecorations(look);
   art.clearRect(0,0,layer.width,layer.height);
+  art.drawImage(tree,0,0,455,566);
   art.drawImage(decorated,0,0);
   if(bulbColors[look.lights]){
     art.globalAlpha=.35+.15*Math.sin(t*2);
