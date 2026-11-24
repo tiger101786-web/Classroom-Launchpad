@@ -65,11 +65,11 @@ function expression(t,state) {
   } else curve(214,345,227,pleased?366:357,241,345,'#2c201c',5);
 }
 
-// Anchor the star and angel at their sockets, and the ribbon at its central knot.
+// Contact points in the artwork: star notch, robe hem, and ribbon knot.
 const toppers = {
-  star: {height:107, anchorX:.50, anchorY:.96},
-  angel: {height:116, anchorX:.50, anchorY:.95},
-  bow: {height:92, anchorX:.50, anchorY:.43}
+  star: {height:107, anchorX:.50, anchorY:.71},
+  angel: {height:116, anchorX:.50, anchorY:.93},
+  bow: {height:92, anchorX:.50, anchorY:.34}
 };
 function drawTopper(kind,x,y) {
   const topper=toppers[kind];
@@ -77,7 +77,7 @@ function drawTopper(kind,x,y) {
   if(!topper.image){
     topper.image=new Image();
     topper.image.onload=refresh;
-    topper.image.src=new URL('topper-'+kind+'.webp',evergreenArtBase);
+    topper.image.src=new URL('topper-'+kind+'.webp?v=2',evergreenArtBase);
   }
   const image=topper.image;
   if(!image.naturalWidth)return;
@@ -123,8 +123,9 @@ function render(state,t,look) {
       ctx.drawImage(layer,180,y,275,height,252+dx,62+y,275,height);
     } else ctx.drawImage(layer,0,y,455,height,72+dx,62+y,455,height);
   }
-  // Seat the socket over the crown, centered on the trunk axis.
-  drawTopper(look.topper,300+tipOffset,80);
+  // At foliage row 18 the curved leader spans source pixels 236–255.
+  const crownX=72+245.5*455/tree.naturalWidth;
+  drawTopper(look.topper,crownX+tipOffset,62+18);
   if(state==='dance'||state==='sleep') {
     ctx.textAlign='center';
     for(let i=0;i<3;i++) {
