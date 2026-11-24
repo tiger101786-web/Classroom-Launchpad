@@ -8,6 +8,11 @@ const layer = document.createElement('canvas');
 layer.width = 455;
 layer.height = 690;
 const art = layer.getContext('2d');
+// Assemble the animated rows on a whole-pixel grid, then scale the completed image.
+const foliage = document.createElement('canvas');
+foliage.width = canvas.width;
+foliage.height = layer.height;
+const branches = foliage.getContext('2d');
 const ornamentColors = { classic:['#bc1737','#e7ad4f'], ice:['#5898ca','#dce6e9'], candy:['#e57994','#f7ddd4'] };
 const bulbColors = { warm:['#ffe18b'], color:['#ff5461','#59dfa8','#6ea8ff','#ffd36a'], frost:['#90dfff','#e4faff'] };
 const baubles = [[220,105],[178,179],[273,204],[125,261],[327,270],[83,370],[350,382],[163,435],[289,460],[73,500],[375,505],[226,540]];
@@ -108,20 +113,31 @@ function render(state,t,look) {
   }
   const swing=Math.sin(t*(state==='dance'?6:3));
   // Move the crown and branch tiers around their attachment points. Keep the skirt anchored.
-  let tipOffset=0;
-  for (let y=0;y<690;y+=3) {
-    const height=Math.min(3,690-y), upper=Math.max(0,1-y/568);
-    let dx=(state==='sleep'?1:3)*upper*Math.sin(t*1.6);
-    if (state==='dance'||state==='wobble') dx+=swing*upper*(state==='dance'?34:21);
-    if (state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
-    if (state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
-    if(y===18)tipOffset=dx;
-    if (state==='wave'||state==='hello') {
-      const reach=Math.exp(-((y-357)**2)/3700);
-      const extension=reach*(1-Math.cos(t*6))*14;
-      ctx.drawImage(layer,0,y,180,height,72+dx-extension,62+y,180+extension,height);
-      ctx.drawImage(layer,180,y,275,height,252+dx,62+y,275,height);
-    } else ctx.drawImage(layer,0,y,455,height,72+dx,62+y,455,height);
+  let sway=(state==='sleep'?1:3)*Math.sin(t*1.6);
+  if(state==='dance'||state==='wobble') sway+=swing*(state==='dance'?34:21);
+  let tipOffset=sway*(1-18/568);
+  if(['crown','swish','wave','hello'].includes(state)){
+    branches.clearRect(0,0,foliage.width,foliage.height);
+    for(let y=0;y<566;y++){
+      let dx=sway*(1-y/568);
+      if(state==='crown') dx+=Math.sin(t*10)*Math.max(0,1-y/155)*24;
+      if(state==='swish') dx+=Math.sin(t*5)*Math.exp(-((y-475)**2)/3400)*20;
+      if(y===18) tipOffset=dx;
+      if(state==='wave'||state==='hello'){
+        const extension=Math.exp(-((y-357)**2)/3700)*(1-Math.cos(t*6))*14;
+        const joint=Math.round(252+dx), left=72+dx-extension;
+        branches.drawImage(layer,0,y,180,1,left,y,joint-left,1);
+        branches.drawImage(layer,180,y,275,1,joint,y,275,1);
+      }else branches.drawImage(layer,0,y,455,1,72+dx,y,455,1);
+    }
+    ctx.drawImage(foliage,0,62);
+  }else{
+    // The ordinary sway is a shear anchored at the base. Draw the tree in one pass.
+    ctx.save();
+    ctx.translate(72+sway,62);
+    ctx.transform(1,0,-sway/568,1,0,0);
+    ctx.drawImage(layer,0,0);
+    ctx.restore();
   }
   // At foliage row 18 the curved leader spans source pixels 236–255.
   const crownX=72+245.5*455/tree.naturalWidth;
