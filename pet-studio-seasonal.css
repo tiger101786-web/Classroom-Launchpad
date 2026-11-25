@@ -51,3 +51,22 @@
  .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .pet-switch select{font-size:16px;padding:8px}
  .pet-studio:is([data-theme=tropical],[data-theme=autumn]) .studio-header .studio-close{width:42px;height:42px;font-size:30px}
 }
+/* Christmas Eve shares Autumn's painted board geometry. Both art layers use the same bounds. */
+.pet-studio[data-theme][data-christmas-eve] {
+ --season-frame:url('assets/pet-studio/christmas-eve.webp');
+ --mantel-motion:url('assets/pet-studio/christmas-eve-motion.svg');
+}
+@media (min-width:701px) {
+ .pet-studio[data-theme][data-christmas-eve] .studio {background-image:var(--mantel-motion),var(--season-frame)}
+}
+@media (max-width:700px) {
+ .pet-studio[data-theme][data-christmas-eve] .studio-header {background:var(--mantel-motion) left top/760px auto,var(--season-frame) left top/760px auto}
+ .pet-studio[data-theme][data-christmas-eve] .preview-pane {background:linear-gradient(#34170922,#34170955),var(--mantel-motion) left bottom/950px auto no-repeat,var(--season-frame) left bottom/950px auto no-repeat}
+}
+@media (prefers-reduced-motion:reduce) {
+ .pet-studio[data-theme][data-christmas-eve] {--mantel-motion:none}
+}
+.pet-studio[data-theme][data-christmas-eve] #tab-content {background:transparent;border-color:transparent}
+.pet-studio[data-theme][data-christmas-eve] :is(.studio-footer,.subtabs,.search) {background:#122e27e8;border-color:#97815a}
+.pet-studio[data-theme][data-christmas-eve] :is(.tabs button,.filters button,.preview-actions button,.studio-footer select,.studio-footer button,.studio-header .studio-close,#gallery .skin-card,#greet) {background:linear-gradient(#34584a,#15342d);border-color:#bb9b63;box-shadow:none}
+.pet-studio[data-theme][data-christmas-eve] :is(.tabs button[aria-selected=true],.subtabs button[aria-pressed=true],.filters button[aria-pressed=true],#gallery .check,.preview-actions #dance) {background:linear-gradient(#a53b49,#692630);border-color:#e3bd7e;box-shadow:none}

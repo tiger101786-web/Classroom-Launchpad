@@ -34,8 +34,26 @@ const themeControl=document.createElement('label');themeControl.className='studi
 themeControl.querySelector('select').add(new Option('Neon Gaming','neon'));
 const themeNames=['crimson','woodland','sky','scrapbook','tropical','autumn','diner','neon'];
 const themeSelect=themeControl.querySelector('select');let theme='crimson';try{const savedTheme=localStorage.getItem('petStudioTheme');if(themeNames.includes(savedTheme))theme=savedTheme}catch{}
-function applyStudioTheme(value){dialog.dataset.theme=themeNames.includes(value)?value:'crimson';themeSelect.value=dialog.dataset.theme;}
-applyStudioTheme(theme);themeSelect.onchange=()=>{applyStudioTheme(themeSelect.value);try{localStorage.setItem('petStudioTheme',dialog.dataset.theme)}catch{}};
+const christmasOption=new Option('Christmas Eve','christmas-eve');
+let evergreenTheme='christmas-eve';
+try{const saved=localStorage.getItem('petStudioEvergreenTheme');if(themeNames.includes(saved))evergreenTheme=saved}catch{}
+function applyStudioTheme(){
+ const evergreen=current==='evergreen';
+ if(evergreen&&!christmasOption.parentNode)themeSelect.add(christmasOption);
+ if(!evergreen)christmasOption.remove();
+ const selected=evergreen?evergreenTheme:theme;
+ // The mantel artwork uses the same board and control positions as Autumn.
+ dialog.dataset.theme=selected==='christmas-eve'?'autumn':selected;
+ dialog.toggleAttribute('data-christmas-eve',selected==='christmas-eve');
+ themeSelect.value=selected;
+}
+themeSelect.onchange=()=>{
+ const evergreen=current==='evergreen';
+ if(evergreen)evergreenTheme=themeSelect.value;
+ else theme=themeSelect.value;
+ try{localStorage.setItem(evergreen?'petStudioEvergreenTheme':'petStudioTheme',themeSelect.value)}catch{}
+ applyStudioTheme();
+};
 const stage=dialog.querySelector('#pet-stage'),content=dialog.querySelector('#tab-content');
 let headerAssetsPromise=null;
 function loadStudioHeaderAssets(){
@@ -61,6 +79,7 @@ const homes=new Map(); function robloxOutfit(p){return ['top','pants'].every(k=>
 function save(){dialog.querySelector('#undo').disabled=!previous;}
 function change(key,value){if(!bridge.canEdit())return;previous=structuredClone(bridge.read());bridge.change(current,key,value);state=bridge.read();sync();save();}
 function sync(){
+ applyStudioTheme();
  state=bridge.read();const p=state[current];
  dialog.querySelector('#pet-title').textContent=p.name||'Your pet';
  dialog.querySelector('#pet-subtitle').textContent=current==='evergreen'?'Evergreen · '+evergreenAccessories.skirt[p.skirt]:current==='nyan'?'Classic Nyan Cat · Rainbow trail':current==='blackcat'?(blackcatSkins[p.skin]?.label||'Black Cat')+' · Velvet moon bed':current==='nugget'?p.skin+' Chicken Nugget · '+(nuggetSkins[p.skin]?.dip||'Honey mustard')+' dip':current==='saber'?p.skin+' · Saber-tooth Tiger':current==='highland'?'Copper Highland Cow · Heather stone platform':current==='roblox'?robloxOutfit(p)+' · Roblox Buddy':current==='labubu'?p.skin+' Labubu · Woodland platform':current==='eagle'?'Bald Eagle · Woodland branch':current==='gummy'?p.skin+' · Gummy Bear':current==='colt'?p.skin+' · Robo-Colt':(squishyColors.find(c=>c.id===p.color)?.label||p.color)+' · Squishy Dumpling';
