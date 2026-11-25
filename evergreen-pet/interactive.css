@@ -5,7 +5,14 @@
 .evergreen-companion[data-size=extra-large]{--fir-width:225px}
 .evergreen-companion canvas{width:100%;height:auto;display:block}
 .evergreen-companion .pet-button{position:absolute;inset:9% 13% 19%;width:auto;height:auto;pointer-events:auto;cursor:grab;touch-action:none;background:transparent;border:0;box-shadow:none}
-.evergreen-name{display:block;box-sizing:border-box;margin:-5% auto 0;width:90%;padding:5% 14%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:url(nameplate.webp) center/100% 100% no-repeat;color:#fff2cb;font:bold 14px/1.2 Georgia,serif;text-shadow:0 1px 2px #32190c}
+/* Robo-Colt draws its plate in a 680-unit region of its 920-unit viewport. */
+.evergreen-companion{--colt-width:144px}
+.evergreen-companion[data-size=small]{--colt-width:124px}
+.evergreen-companion[data-size=large]{--colt-width:168px}
+.evergreen-companion[data-size=extra-large]{--colt-width:210px}
+@media(max-width:1119px){.evergreen-companion[data-size]{--colt-width:62px}}
+.evergreen-name{display:block;margin:-5% auto 0;width:calc(var(--colt-width)*680/920);max-width:100%}
+.evergreen-name svg{display:block;width:100%;height:auto}
 .pet-studio[data-theme] #pet-stage:has(.evergreen-companion:not([hidden])){height:35cqw;max-height:35cqw;padding-block:0}
 @media(max-width:700px){
  .pet-studio[data-theme] #pet-stage:has(.evergreen-companion:not([hidden])){height:340px;max-height:340px}
@@ -14,7 +21,8 @@
 .pet-studio #pet-stage .evergreen-companion canvas{flex:1;min-height:0;width:100%;height:0;object-fit:contain;object-view-box:inset(var(--fir-top,1%) 5% var(--fir-bottom,7%) 5%)}
 .pet-studio #pet-stage .evergreen-companion[data-topper=none]{--fir-top:7%}
 .pet-studio #pet-stage .evergreen-companion[data-skirt=none]{--fir-bottom:18%}
-.pet-studio #pet-stage .evergreen-name{position:relative;display:grid;place-items:center;flex:none;width:min(65%,195px);height:10%;margin:-2.5% 0 0;padding:0 12px}
+.pet-studio #pet-stage .evergreen-name{--colt-width:22cqw;flex:none;margin:-2.5% auto 0}
+@media(max-width:700px){.pet-studio #pet-stage .evergreen-name{--colt-width:190px}}
 .pet-studio .evergreen-companion .pet-button{pointer-events:none}
 .pet-chat[data-pet=evergreen]{--paper:#203b2d;--edge:#d5ae6a;--ink:#fff6dd;--label:#f1c97a}
 .pet-talk[data-pet=evergreen]{--talk-paper:#193729;--talk-ink:#fff6df;--talk-edge:#bf995c;--talk-field:#13291f;--talk-send:#8b3242;--talk-header:linear-gradient(110deg,#284534,#473324)}

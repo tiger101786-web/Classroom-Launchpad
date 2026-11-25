@@ -1,9 +1,10 @@
 window.createEvergreenPet=function(onChange,onCustomize){
  const host=document.createElement('div');
  host.className='evergreen-companion';host.hidden=true;
- host.innerHTML='<canvas width="600" height="810" aria-hidden="true"></canvas><button type="button" class="pet-button" aria-label="Open Evergreen controls. Drag to move."></button><span class="evergreen-name"></span><div class="evergreen-speech" hidden></div>';
+ host.innerHTML='<canvas width="600" height="810" aria-hidden="true"></canvas><button type="button" class="pet-button" aria-label="Open Evergreen controls. Drag to move."></button><span class="evergreen-name"><svg viewBox="0 0 680 180" aria-hidden="true"><image href="evergreen-pet/nameplate.webp" x="7" y="2" width="666" height="176" preserveAspectRatio="none"/><text x="340" text-anchor="middle" fill="#fff2cb" font-family="ColtOxanium,serif" font-weight="700" letter-spacing="3" stroke="#32190c" stroke-width="1.8" paint-order="stroke"></text></svg></span><div class="evergreen-speech" hidden></div>';
  document.body.append(host);
  const pet=host.querySelector('button'),canvas=host.querySelector('canvas'),label=host.querySelector('.evergreen-name');
+ const lettering=label.querySelector('text'),fitName=window.fitColtNameplateText(lettering,90);
  const motion=matchMedia('(prefers-reduced-motion: reduce)');
  const durations={hello:3,blink:.55,happy:2.8,talk:4,curious:3,crown:2,wave:2.8,swish:3,twitch:1.8,wobble:2.5,wake:3.5};
  const render=createEvergreenRenderer(canvas,refresh);
@@ -27,7 +28,9 @@ window.createEvergreenPet=function(onChange,onCustomize){
  function refresh(){
    host.dataset.topper=preferences.topper;
    host.dataset.skirt=preferences.skirt;
-   host.hidden=!visible||hidden;host.dataset.size=preferences.size;host.dataset.state=preferences.asleep?"sleep":"awake";label.textContent=preferences.name;label.hidden=!preferences.nameplate;
+   host.hidden=!visible||hidden;host.dataset.size=preferences.size;host.dataset.state=preferences.asleep?"sleep":"awake";label.hidden=!preferences.nameplate;
+   lettering.textContent=preferences.name;label.setAttribute("aria-label",preferences.name+" nameplate");
+   if(!host.hidden&&!label.hidden)fitName();
    pet.setAttribute('aria-label',preferences.asleep?'Wake Evergreen. Drag to move.':'Open Evergreen controls. Drag to move.');
    cancelAnimationFrame(frameId);draw(performance.now());place();
  }
