@@ -782,6 +782,8 @@ function normalizeSaberPreference(value){const s=value&&typeof value==='object'?
 function normalizeEvergreenPreference(value) {
   const result=evergreenSettings.defaults();
   const source=value || {};
+  const skin=source.skin==='Frosted Tips'?'Frosted':source.skin;
+  if(Object.hasOwn(evergreenSettings.skins,skin))result.skin=skin;
   for(const [key, options] of Object.entries(evergreenSettings.accessories)){
     if(Object.hasOwn(options,source[key]))result[key]=source[key];
   }
@@ -4213,7 +4215,7 @@ async function handleApi(req, res, pathname) {
       if(input?.highland!==undefined){const p=input.highland;if(!p||typeof p!=='object'||Array.isArray(p)||p.skin!=='Copper'||(p.headwear!==undefined&&!['none','cap','wreath','headphones','beanie','sunflower-bow'].includes(p.headwear))||(p.neckwear!==undefined&&!['none','scarf','bandana','cowbell'].includes(p.neckwear))||typeof p.name!=='string'||Array.from(p.name).length>16||/[\u0000-\u001f\u007f]/.test(p.name)||!['small','medium','large','extra-large'].includes(p.size)||['motion','asleep','nameplate','platform'].some(k=>typeof p[k]!=='boolean'))throw new Error('Choose valid Highland Cow settings.');}
       if(input?.evergreen!==undefined){
         const p=input.evergreen;
-        if(!p || typeof p!=='object' || Array.isArray(p) || p.skin!=='Classic' || typeof p.name!=='string' || Array.from(p.name).length>16 || /[\u0000-\u001f\u007f]/.test(p.name)
+        if(!p || typeof p!=='object' || Array.isArray(p) || (!Object.hasOwn(evergreenSettings.skins,p.skin) && p.skin!=='Frosted Tips') || typeof p.name!=='string' || Array.from(p.name).length>16 || /[\u0000-\u001f\u007f]/.test(p.name)
           || !['small','medium','large','extra-large'].includes(p.size) || ['motion','asleep','nameplate'].some(k=>typeof p[k]!=='boolean')
           || Object.entries(evergreenSettings.accessories).some(([k,opts])=>(k!=='garland'||p[k]!==undefined) && !Object.hasOwn(opts,p[k])))throw new Error('Choose valid Evergreen settings.');
       }

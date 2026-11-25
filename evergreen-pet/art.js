@@ -3,6 +3,7 @@ window.createEvergreenRenderer = function(canvas, refresh) {
 const accessories=createEvergreenAccessories(refresh);
 const ctx = canvas.getContext('2d');
 const tree = new Image();
+const skins=new Map([['Classic',tree]]);
 const skirtArt = new Image();
 const skirtTints = { cranberry:'none', pine:'hue-rotate(102deg)', blue:'hue-rotate(212deg)' };
 const layer = document.createElement('canvas');
@@ -69,7 +70,7 @@ function prepareDecorations(look) {
   base.clearRect(0,0,decorated.width,decorated.height);
   base.drawImage(layer,0,0);
 }
-function expression(t,state) {
+function expression(t,state,textured) {
   const sleep=state==='sleep', pleased=state==='happy'||state==='dance';
   const blink=state==='blink'||(state==='idle' && t%4.7>4.5);
   for (const x of [185,270]) {
@@ -83,11 +84,16 @@ function expression(t,state) {
     }
   }
   const wiggle=state==='twitch'?3*Math.sin(t*16):0;
+  if(textured)oval(227+wiggle,335,6.3,4.3,'#ded7bd');
   oval(227+wiggle,335,5,3,'#30251f');
   if (sleep||['talk','hello','wake'].includes(state)) {
     const open=sleep?5+2*Math.sin(t*2):state==='wake'?4+13*Math.sin(Math.min(1,t/3.5)*Math.PI):5+5*Math.abs(Math.sin(t*8));
+    if(textured)oval(227,349,12.4,open+1.4,'#ded7bd');
     oval(227,349,11,open,'#3c2424'); oval(227,350+open*.48,6,open*.26,'#d88e88');
-  } else curve(214,345,227,pleased?366:357,241,345,'#2c201c',5);
+  } else {
+    if(textured)curve(214,345,227,pleased?366:357,241,345,'#ded7bd',7.8);
+    curve(214,345,227,pleased?366:357,241,345,'#2c201c',5);
+  }
 }
 
 // Contact points in the artwork: star notch, robe hem, and ribbon knot.
@@ -109,11 +115,47 @@ function drawTopper(kind,x,y) {
   const width=topper.height*image.naturalWidth/image.naturalHeight;
   ctx.drawImage(image,x-width*topper.anchorX,y-topper.height*topper.anchorY,width,topper.height);
 }
+const texturedSkins={Frosted:'frosted-flock.webp','Vintage Aluminum':'silver-tinsel.webp'};
+function finishedBoughs(skin){
+  if(!Object.hasOwn(evergreenSkins,skin))return tree;
+  if(skins.has(skin)){
+    const cached=skins.get(skin);
+    return cached instanceof Image && !cached.naturalWidth ? tree : cached;
+  }
+  if(Object.hasOwn(texturedSkins,skin)){
+    const image=new Image();
+    skins.set(skin,image);
+    image.onload=refresh;
+    image.src=new URL(texturedSkins[skin],evergreenArtBase);
+    return tree;
+  }
+  // Snow-Covered follows the highlights already painted on the original branches.
+  const surface=document.createElement('canvas');
+  surface.width=tree.naturalWidth;surface.height=tree.naturalHeight;
+  const paint=surface.getContext('2d');
+  paint.drawImage(tree,0,0);
+  const pixels=paint.getImageData(0,0,surface.width,surface.height);
+  const data=pixels.data;
+  for(let i=0;i<data.length;i+=4){
+    const r=data[i],g=data[i+1],b=data[i+2];
+    if(!data[i+3] || g<r*.83 || g<b)continue;
+    const value=.25*r+.65*g+.10*b;
+    let coverage=Math.max(0,Math.min(1,(value-75)/45));
+    coverage*=coverage*(3-2*coverage);
+    const white=160+value*.50;
+    data[i]=r+(white-r)*coverage;
+    data[i+1]=g+(white+3-g)*coverage;
+    data[i+2]=b+(white+7-b)*coverage;
+  }
+  paint.putImageData(pixels,0,0);
+  skins.set(skin,surface);
+  return surface;
+}
 function render(state,t,look) {
   if(!tree.complete || !tree.naturalWidth) return;
   prepareDecorations(look);
   art.clearRect(0,0,layer.width,layer.height);
-  art.drawImage(tree,0,0,455,566);
+  art.drawImage(finishedBoughs(look.skin),0,0,455,566);
   art.drawImage(decorated,0,0);
   if(bulbColors[look.lights]){
     art.globalAlpha=.35+.15*Math.sin(t*2);
@@ -121,7 +163,7 @@ function render(state,t,look) {
     art.globalAlpha=1;
   }
   accessories.branches(art,look,t,state);
-  expression(t,state);
+  expression(t,state,Object.hasOwn(texturedSkins,look.skin));
   ctx.clearRect(0,0,600,810);
   ctx.save();
   if(toppers[look.topper] || accessories.hasTopper(look)){
