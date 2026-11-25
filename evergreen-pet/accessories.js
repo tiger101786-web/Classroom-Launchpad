@@ -49,12 +49,17 @@ function createEvergreenAccessories(refresh) {
       const signature=[look.ornaments,look.lights,look.garland,revision].join('/');
       if(last!==signature){
         last=signature;pen.clearRect(0,0,455,566);
-        for(const [row,left,right,y,dip] of [[0,167,282,125,23],[1,101,346,238,27],[2,49,397,410,34]]){
-          if(look.garland in indices){
-            const size=[15,20,30,24,13,16,16,22][indices[look.garland]];
+        if(look.garland in indices){
+          const size=[15,20,30,24,13,16,16,22][indices[look.garland]];
+          // Follow the narrower branch tiers between the rows of bulbs.
+          for(const [row,left,right,y,dip] of [[0,192,261,90,16],[1,129,321,207,19],[2,70,379,402,22]]){
             strand(look.garland,row,left,right,y,dip,Math.round((right-left)/size)+1,size,true);
           }
-          if(look.lights in indices)strand(look.lights,row,left+4,right-4,y+25,dip,row*2+5,20+row*2,false);
+        }
+        if(look.lights in indices){
+          for(const [row,left,right,y,dip] of [[0,171,278,150,23],[1,105,342,263,27],[2,53,393,435,34]]){
+            strand(look.lights,row,left,right,y,dip,row*2+5,20+row*2,false);
+          }
         }
         for(const [x,y] of [[219,85],[174,194],[275,186],[123,281],[320,267],[90,373],[355,366],[160,464],[283,473],[85,507],[374,495]]){
           sprite(pen,look.ornaments,x,y,34,39,0);
