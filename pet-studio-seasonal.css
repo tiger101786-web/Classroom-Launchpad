@@ -53,7 +53,7 @@
 }
 /* Christmas Eve shares Autumn's painted board geometry. Both art layers use the same bounds. */
 .pet-studio[data-theme][data-christmas-eve] {
- --season-frame:url('assets/pet-studio/christmas-eve.webp?v=20261127-hearth-dogs-v2');
+ --season-frame:url('assets/pet-studio/christmas-eve.webp?v=20261127-school-throw');
  --mantel-motion:url('assets/pet-studio/christmas-eve-motion.svg');
 }
 @media (min-width:701px) {
