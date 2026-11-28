@@ -196,21 +196,39 @@
 <animate attributeName="opacity" values=".04;.22;.08;.16;.04" dur="1.5s" repeatCount="indefinite"/>
 </ellipse>
 </g>
-<g transform="translate(19 70)">
-<ellipse rx="5" ry="7" cy="-2" fill="url(#emberGlow)">
-<animate attributeName="opacity" values=".32;.68;.45;.6;.32" dur="1.8s" repeatCount="indefinite"/>
-</ellipse>
-<path fill="#fff2ad" d="M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z">
-<animate attributeName="d" values="M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z;M-1.1 0 Q-2 -2 -1 -4 Q1.5 -1 0 .4Z;M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z" dur="1.4400000000000002s" repeatCount="indefinite"/>
-</path>
+<defs>
+<radialGradient id="candle-halo"><stop stop-color="#fff197" stop-opacity=".94"/><stop offset=".36" stop-color="#ffb638" stop-opacity=".72"/><stop offset="1" stop-color="#ff8d1f" stop-opacity="0"/></radialGradient>
+<linearGradient id="candle-flame" x2="0" y2="1"><stop stop-color="#ff9d30"/><stop offset=".48" stop-color="#ffdd65"/><stop offset=".85" stop-color="#fff5ad"/><stop offset="1" stop-color="#ffac39"/></linearGradient>
+</defs>
+<!-- Cover the painted flame only while motion is enabled, keeping the wick exposed. -->
+<image x="16.5" y="55.628865979381445" width="6.375" height="14.103092783505154" preserveAspectRatio="none" href="data:image/png;base64,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"/>
+<g transform="translate(19.6 69.9)">
+  <ellipse cy="-5" rx="10" ry="13" fill="url(#candle-halo)">
+    <animate attributeName="opacity" values=".42;.88;.57;.76;.38;.42" dur="1.29s" begin="-0.41s" repeatCount="indefinite"/>
+  </ellipse>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-7;10;2;-12;5;-7" dur="1.29s" begin="-0.41s" repeatCount="indefinite"/>
+    <g>
+      <animateTransform attributeName="transform" type="scale" values="1 .78;.88 1.18;1.12 .90;.93 1.09;1 .78" dur="1.0707s" begin="-0.41s" repeatCount="indefinite"/>
+      <path fill="url(#candle-flame)" d="M0 0 C-3.1 -1.8 -1.8 -6.6 .55 -12.8 C.15 -8.1 3.4 -3.7 1.45 -1 Q.8 -.25 0 0Z"/>
+      <path fill="#fffbdc" d="M0 -.8 C-1.5 -2.2 -.85 -5.7 .12 -8.1 C.12 -5.2 2 -2.3 0 -.8Z"/>
+    </g>
+  </g>
 </g>
-<g transform="translate(37 62)">
-<ellipse rx="5" ry="7" cy="-2" fill="url(#emberGlow)">
-<animate attributeName="opacity" values=".32;.68;.45;.6;.32" dur="2.3s" repeatCount="indefinite"/>
-</ellipse>
-<path fill="#fff2ad" d="M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z">
-<animate attributeName="d" values="M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z;M-1.1 0 Q-2 -2 -1 -4 Q1.5 -1 0 .4Z;M-1.1 0 Q-1.5 -2 .3 -5 Q2 -1 0 .4Z" dur="1.8399999999999999s" repeatCount="indefinite"/>
-</path>
+<!-- Cover the painted flame only while motion is enabled, keeping the wick exposed. -->
+<image x="34.5" y="46.22680412371134" width="6.375" height="14.103092783505154" preserveAspectRatio="none" href="data:image/png;base64,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"/>
+<g transform="translate(37.7 60.45)">
+  <ellipse cy="-5" rx="10" ry="13" fill="url(#candle-halo)">
+    <animate attributeName="opacity" values=".42;.88;.57;.76;.38;.42" dur="1.64s" begin="-0.93s" repeatCount="indefinite"/>
+  </ellipse>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-7;10;2;-12;5;-7" dur="1.64s" begin="-0.93s" repeatCount="indefinite"/>
+    <g>
+      <animateTransform attributeName="transform" type="scale" values="1 .78;.88 1.18;1.12 .90;.93 1.09;1 .78" dur="1.3611999999999997s" begin="-0.93s" repeatCount="indefinite"/>
+      <path fill="url(#candle-flame)" d="M0 0 C-3.1 -1.8 -1.8 -6.6 .55 -12.8 C.15 -8.1 3.4 -3.7 1.45 -1 Q.8 -.25 0 0Z"/>
+      <path fill="#fffbdc" d="M0 -.8 C-1.5 -2.2 -.85 -5.7 .12 -8.1 C.12 -5.2 2 -2.3 0 -.8Z"/>
+    </g>
+  </g>
 </g>
 <defs>
 <linearGradient id="movingFlame" x2="0" y2="1" gradientUnits="objectBoundingBox">
